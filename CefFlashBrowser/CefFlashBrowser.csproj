@@ -102,6 +102,7 @@
     <Compile Include="Models\FlashBrowser.cs" />
     <Compile Include="Models\LanguageManager.cs" />
     <Compile Include="Models\SearchEngine.cs" />
+    <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\UrlChecker.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
     <Compile Include="ViewModels\LanguageMenuItemViewModel.cs" />

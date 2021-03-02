@@ -40,7 +40,10 @@ namespace CefFlashBrowser.Models
             set
             {
                 if (IsSupportedLanguage(value))
+                {
                     LanguageResourceDic.Source = GetUri(value);
+                    Settings.Language = value;
+                }
             }
         }
 

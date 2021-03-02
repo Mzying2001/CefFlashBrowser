@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CefFlashBrowser.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -16,7 +17,11 @@ namespace CefFlashBrowser
         public App() : base()
         {
             InitializeComponent();
-            Models.FlashBrowser.InitCefFlash();
+
+            Settings.Init();
+            FlashBrowser.InitCefFlash();
+
+            LanguageManager.CurrentLanguage = Settings.Language;
         }
     }
 }
