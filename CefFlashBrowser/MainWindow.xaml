@@ -9,7 +9,7 @@
         
         Width="450"
         Height="450"
-        Title="{StaticResource window_title}"
+        Title="{DynamicResource window_title}"
         WindowStartupLocation="CenterScreen">
 
     <Grid>
@@ -21,13 +21,13 @@
 
         <Menu>
             <!--Favorites Menu-->
-            <MenuItem Header="{StaticResource menu_favorites}"/>
+            <MenuItem Header="{DynamicResource menu_favorites}"/>
 
             <!--Options Menu-->
-            <MenuItem Header="{StaticResource menu_options}">
+            <MenuItem Header="{DynamicResource menu_options}">
                 
                 <!--Languages Option-->
-                <MenuItem Header="{StaticResource menu_languages}"
+                <MenuItem Header="{DynamicResource menu_languages}"
                       ItemsSource="{Binding LanguageMenuItems}">
                     <MenuItem.ItemTemplate>
                         <DataTemplate>
@@ -39,7 +39,7 @@
                 </MenuItem>
                 
                 <!--Settings Option-->
-                <MenuItem Header="{StaticResource menu_settings}"
+                <MenuItem Header="{DynamicResource menu_settings}"
                           Command="{Binding OpenSettingsWindowCommand}"/>
             </MenuItem>
         </Menu>
@@ -79,7 +79,7 @@
                     </TextBox.InputBindings>
                 </TextBox>
                 <!--The Go button-->
-                <Button Content="{StaticResource button_go}"
+                <Button Content="{DynamicResource button_go}"
                         Style="{StaticResource ButtonDefault}"
                         Command="{Binding OpenUrlCommand}"/>
             </StackPanel>
