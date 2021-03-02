@@ -1,0 +1,19 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:local="clr-namespace:CefFlashBrowser.languages">
+    <sys:String x:Key="language_name">English</sys:String>
+
+    <!--MainWindow-->
+    <sys:String x:Key="window_title">FlashBrowser</sys:String>
+    <sys:String x:Key="button_go">Go</sys:String>
+    <sys:String x:Key="menu_favorites">Favorites</sys:String>
+    <sys:String x:Key="menu_languages">Languages</sys:String>
+    <sys:String x:Key="menu_options">Options</sys:String>
+    <sys:String x:Key="menu_settings">Settings</sys:String>
+    <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>
+    
+    <!--SettingsWindow-->
+    <sys:String x:Key="tabItem_main">Main</sys:String>
+    <sys:String x:Key="tabItem_browser">Browser</sys:String>
+</ResourceDictionary>

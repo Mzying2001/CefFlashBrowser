@@ -1,0 +1,80 @@
+﻿<Window x:Class="CefFlashBrowser.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CefFlashBrowser"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        mc:Ignorable="d"
+        
+        Width="450"
+        Height="450"
+        Title="{StaticResource window_title}"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Menu>
+            <MenuItem Header="{StaticResource menu_favorites}"/>
+            <MenuItem Header="{StaticResource menu_languages}"/>
+
+            <MenuItem Header="{StaticResource menu_options}">
+                <MenuItem Header="{StaticResource menu_settings}"
+                          Command="{Binding OpenSettingsWindowCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="1"
+                       Grid.Column="1"
+                       Margin="0,0,0,35"
+                       FontSize="30"
+                       Text="Flash Browser"
+                       HorizontalAlignment="Center"/>
+
+            <StackPanel Grid.Row="2"
+                        Grid.Column="1"
+                        Orientation="Horizontal">
+
+                <TextBox Margin="5,0"
+                         Width="300"
+                         Text="{Binding Url}"
+                         Style="{StaticResource TextBoxBaseStyle}"
+                         TextChanged="TextBox_TextChanged">
+
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding OpenUrlCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+
+                <Button Content="{StaticResource button_go}"
+                        Style="{StaticResource ButtonDefault}"
+                        Command="{Binding OpenUrlCommand}"/>
+            </StackPanel>
+        </Grid>
+        
+        <TextBlock Grid.Row="2"
+                   Margin="5"
+                   Foreground="Gray"
+                   HorizontalAlignment="Center"
+                   Text="{Binding AppVersion, StringFormat=version \{0\} | by Mzying2001}"/>
+    </Grid>
+</Window>
