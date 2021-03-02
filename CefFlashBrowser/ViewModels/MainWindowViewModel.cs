@@ -33,6 +33,38 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private List<LanguageMenuItemViewModel> _languageMenuItems;
+
+        public List<LanguageMenuItemViewModel> LanguageMenuItems
+        {
+            get => _languageMenuItems;
+            set
+            {
+                _languageMenuItems = value;
+                RaisePropertyChanged("LanguageMenuItems");
+            }
+        }
+
+        private void LoadLanguageMenu()
+        {
+            LanguageMenuItems = new List<LanguageMenuItemViewModel>();
+
+            foreach (var item in LanguageManager.SupportedLanguage)
+            {
+                var viewModel = new LanguageMenuItemViewModel(item);
+                viewModel.LanguageSwitched += SetLanguageMenuItemsChecked;
+                LanguageMenuItems.Add(viewModel);
+            }
+
+            SetLanguageMenuItemsChecked();
+        }
+
+        private void SetLanguageMenuItemsChecked()
+        {
+            foreach (var item in LanguageMenuItems)
+                item.IsCurrentLanguage = item.Language == LanguageManager.CurrentLanguage;
+        }
+
         private void OpenUrl()
         {
             string url = Url?.Trim();
@@ -60,6 +92,8 @@ namespace CefFlashBrowser.ViewModels
 
         public MainWindowViewModel()
         {
+            LoadLanguageMenu();
+
             OpenUrlCommand = new DelegateCommand()
             {
                 Execute = p => OpenUrl()

@@ -21,7 +21,17 @@
 
         <Menu>
             <MenuItem Header="{StaticResource menu_favorites}"/>
-            <MenuItem Header="{StaticResource menu_languages}"/>
+
+            <MenuItem Header="{StaticResource menu_languages}"
+                      ItemsSource="{Binding LanguageMenuItems}">
+                <MenuItem.ItemTemplate>
+                    <DataTemplate>
+                        <MenuItem Header="{Binding LanguageName}"
+                                  Command="{Binding SwitchLanguageCommand}"
+                                  IsChecked="{Binding IsCurrentLanguage}"/>
+                    </DataTemplate>
+                </MenuItem.ItemTemplate>
+            </MenuItem>
 
             <MenuItem Header="{StaticResource menu_options}">
                 <MenuItem Header="{StaticResource menu_settings}"
