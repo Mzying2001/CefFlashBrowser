@@ -20,20 +20,25 @@
         </Grid.RowDefinitions>
 
         <Menu>
+            <!--Favorites Menu-->
             <MenuItem Header="{StaticResource menu_favorites}"/>
 
-            <MenuItem Header="{StaticResource menu_languages}"
-                      ItemsSource="{Binding LanguageMenuItems}">
-                <MenuItem.ItemTemplate>
-                    <DataTemplate>
-                        <MenuItem Header="{Binding LanguageName}"
-                                  Command="{Binding SwitchLanguageCommand}"
-                                  IsChecked="{Binding IsCurrentLanguage}"/>
-                    </DataTemplate>
-                </MenuItem.ItemTemplate>
-            </MenuItem>
-
+            <!--Options Menu-->
             <MenuItem Header="{StaticResource menu_options}">
+                
+                <!--Languages Option-->
+                <MenuItem Header="{StaticResource menu_languages}"
+                      ItemsSource="{Binding LanguageMenuItems}">
+                    <MenuItem.ItemTemplate>
+                        <DataTemplate>
+                            <MenuItem Header="{Binding LanguageName}"
+                                      Command="{Binding SwitchLanguageCommand}"
+                                      IsChecked="{Binding IsCurrentLanguage}"/>
+                        </DataTemplate>
+                    </MenuItem.ItemTemplate>
+                </MenuItem>
+                
+                <!--Settings Option-->
                 <MenuItem Header="{StaticResource menu_settings}"
                           Command="{Binding OpenSettingsWindowCommand}"/>
             </MenuItem>
@@ -63,24 +68,24 @@
             <StackPanel Grid.Row="2"
                         Grid.Column="1"
                         Orientation="Horizontal">
-
+                <!--The url textBox-->
                 <TextBox Margin="5,0"
                          Width="300"
                          Text="{Binding Url}"
                          Style="{StaticResource TextBoxBaseStyle}"
                          TextChanged="TextBox_TextChanged">
-
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding OpenUrlCommand}"/>
                     </TextBox.InputBindings>
                 </TextBox>
-
+                <!--The Go button-->
                 <Button Content="{StaticResource button_go}"
                         Style="{StaticResource ButtonDefault}"
                         Command="{Binding OpenUrlCommand}"/>
             </StackPanel>
         </Grid>
         
+        <!--The app info shows on the bottom of the main window-->
         <TextBlock Grid.Row="2"
                    Margin="5"
                    Foreground="Gray"
