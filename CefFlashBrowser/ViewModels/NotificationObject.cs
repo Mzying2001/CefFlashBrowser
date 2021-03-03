@@ -11,9 +11,9 @@ namespace CefFlashBrowser.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public void RaisePropertyChanged(string propertyName)
+        public void RaisePropertyChanged(string propertyName, object sender = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(sender ?? this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
