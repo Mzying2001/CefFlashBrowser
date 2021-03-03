@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CefFlashBrowser.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,7 @@ namespace CefFlashBrowser.Views
         public SettingsWindow()
         {
             InitializeComponent();
+            DataContext = new SettingsWindowViewModel();
         }
     }
 }

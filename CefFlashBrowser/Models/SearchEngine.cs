@@ -3,24 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace CefFlashBrowser.Models
 {
-    class SearchEngine
+    static class SearchEngine
     {
-        public Engines Engine { get; set; }
-
         public enum Engines
         {
             Baidu,
             Bing,
             So360,
-            Sougou
-        }
-
-        public SearchEngine(Engines e)
-        {
-            Engine = e;
+            Sogou
         }
 
         public static string GetUrl(string str, Engines e = Engines.Baidu)
@@ -33,7 +27,7 @@ namespace CefFlashBrowser.Models
                 case Engines.Bing:
                     return $"bing.com/search?q={str}";
 
-                case Engines.Sougou:
+                case Engines.Sogou:
                     return $"www.sogou.com/web?query={str}";
 
                 case Engines.So360:
@@ -44,9 +38,14 @@ namespace CefFlashBrowser.Models
             }
         }
 
-        public string GetUrl(string str)
+        public static IEnumerable<(Engines engine, string name)> GetSupportedSearchEngines()
         {
-            return GetUrl(str, Engine);
+            var res = Application.Current.Resources.MergedDictionaries[0];
+
+            yield return (Engines.Baidu, res["baidu"].ToString());
+            yield return (Engines.Bing, res["bing"].ToString());
+            yield return (Engines.So360, res["so360"].ToString());
+            yield return (Engines.Sogou, res["sogou"].ToString());
         }
     }
 }

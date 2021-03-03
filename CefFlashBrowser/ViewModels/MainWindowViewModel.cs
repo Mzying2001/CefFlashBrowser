@@ -81,7 +81,7 @@ namespace CefFlashBrowser.ViewModels
             }
             else
             {
-                BrowserWindow.Popup(SearchEngine.GetUrl(url));
+                BrowserWindow.Popup(SearchEngine.GetUrl(url, Settings.SearchEngine));
             }
         }
 

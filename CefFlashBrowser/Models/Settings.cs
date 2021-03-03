@@ -37,7 +37,7 @@ namespace CefFlashBrowser.Models
 
         public static void WriteValue(string key, object value)
         {
-            _regKey.SetValue(key, value);
+            _regKey.SetValue(key, value.ToString());
         }
 
         public static string ReadValue(string key)
@@ -47,18 +47,22 @@ namespace CefFlashBrowser.Models
 
         public static T ReadValue<T>(string key)
         {
-            if (_regKey.ContainsKey(key))
-                return (T)Convert.ChangeType(ReadValue(key), typeof(T));
-            else
-                return default;
+            var value = Convert.ChangeType(ReadValue(key), typeof(T));
+            return value == null ? default : (T)value;
         }
 
         #endregion
 
         public static string Language
         {
-            get => ReadValue("language") ?? "en-us";
-            set => WriteValue("language", value);
+            get => ReadValue("Language") ?? "en-us";
+            set => WriteValue("Language", value);
+        }
+
+        public static SearchEngine.Engines SearchEngine
+        {
+            get => (SearchEngine.Engines)ReadValue<int>("SearchEngine");
+            set => WriteValue("SearchEngine", (int)value);
         }
     }
 }

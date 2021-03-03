@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="CefFlashBrowser.Views.SettingPanels.MainSettingPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:local="clr-namespace:CefFlashBrowser.Views.SettingPanels"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+
+            <!--Header-->
+            <Thickness x:Key="HeaderMargin">0,15</Thickness>
+            <FontWeight x:Key="HeaderFontWeight">Bold</FontWeight>
+            <sys:Double x:Key="HeaderFontSize">18</sys:Double>
+
+            <!--Setting Item-->
+            <Thickness x:Key="SettingItemMargin">2,5</Thickness>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Hidden">
+        <Grid Margin="15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!--Main Settings-->
+            <TextBlock Grid.Row="0"
+                       Text="{StaticResource settingHeader_mainSettings}"
+                       Margin="{StaticResource HeaderMargin}"
+                       FontSize="{StaticResource HeaderFontSize}"
+                       FontWeight="{StaticResource HeaderFontWeight}"/>
+
+            <!--Enable Search-->
+            <Grid Grid.Row="1"
+                  Margin="{StaticResource SettingItemMargin}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           Text="{StaticResource settingItem_mainpageFuncion}"
+                           VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="2"/>
+            </Grid>
+
+            <!--Search Engine-->
+            <Grid Grid.Row="2"
+                  Margin="{StaticResource SettingItemMargin}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           Text="{StaticResource settingItem_searchEngine}"
+                           VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding SearchEngineItems}"
+                          DisplayMemberPath="Value"
+                          SelectedValuePath="Key"
+                          x:Name="SearchEnginesComboBox"
+                          SelectionChanged="SearchEngines_SelectionChanged"/>
+            </Grid>
+
+        </Grid>
+    </ScrollViewer>
+
+</UserControl>
