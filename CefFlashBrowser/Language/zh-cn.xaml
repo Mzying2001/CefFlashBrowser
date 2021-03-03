@@ -5,7 +5,7 @@
     <sys:String x:Key="language_name">中文</sys:String>
     
     <!--主界面-->
-    <sys:String x:Key="window_title">Flash浏览器</sys:String>
+    <sys:String x:Key="window_title">欢迎 (๑╹ヮ╹๑)ﾉ</sys:String>
     <sys:String x:Key="button_go">跳转</sys:String>
     <sys:String x:Key="menu_favorites">收藏夹</sys:String>
     <sys:String x:Key="menu_languages">语言</sys:String>

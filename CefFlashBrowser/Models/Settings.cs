@@ -9,6 +9,8 @@ namespace CefFlashBrowser.Models
 {
     static class Settings
     {
+        #region Registry
+
         private static RegistryKey _currentUser, _regKey;
 
         public static void Init()
@@ -50,6 +52,8 @@ namespace CefFlashBrowser.Models
             else
                 return default;
         }
+
+        #endregion
 
         public static string Language
         {

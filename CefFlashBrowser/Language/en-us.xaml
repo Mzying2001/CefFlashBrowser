@@ -5,10 +5,10 @@
     <sys:String x:Key="language_name">English</sys:String>
 
     <!--MainWindow-->
-    <sys:String x:Key="window_title">FlashBrowser</sys:String>
+    <sys:String x:Key="window_title">Welcome ♪(^∇^*)</sys:String>
     <sys:String x:Key="button_go">Go</sys:String>
     <sys:String x:Key="menu_favorites">Favorites</sys:String>
-    <sys:String x:Key="menu_languages">Languages</sys:String>
+    <sys:String x:Key="menu_languages">Language</sys:String>
     <sys:String x:Key="menu_options">Options</sys:String>
     <sys:String x:Key="menu_settings">Settings</sys:String>
     <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>

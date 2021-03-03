@@ -27,7 +27,7 @@ namespace CefFlashBrowser.Models
 
         private static Uri GetUri(string language)
         {
-            return new Uri($"Languages\\{language}.xaml", UriKind.Relative);
+            return new Uri($"Language\\{language}.xaml", UriKind.Relative);
         }
 
         public static string CurrentLanguage
