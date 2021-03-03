@@ -94,15 +94,9 @@ namespace CefFlashBrowser.ViewModels
         {
             LoadLanguageMenu();
 
-            OpenUrlCommand = new DelegateCommand()
-            {
-                Execute = p => OpenUrl()
-            };
+            OpenUrlCommand = new DelegateCommand(p => OpenUrl());
 
-            OpenSettingsWindowCommand = new DelegateCommand()
-            {
-                Execute = p => OpenSettingsWindow()
-            };
+            OpenSettingsWindowCommand = new DelegateCommand(p => OpenSettingsWindow());
         }
     }
 }

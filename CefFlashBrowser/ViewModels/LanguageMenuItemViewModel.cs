@@ -55,10 +55,7 @@ namespace CefFlashBrowser.ViewModels
             Language = language;
             LanguageName = LanguageManager.GetLanguageName(language);
 
-            SwitchLanguageCommand = new DelegateCommand()
-            {
-                Execute = p => SwitchLanguage()
-            };
+            SwitchLanguageCommand = new DelegateCommand(p => SwitchLanguage());
         }
     }
 }

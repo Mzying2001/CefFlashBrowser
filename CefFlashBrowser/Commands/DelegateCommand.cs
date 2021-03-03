@@ -24,5 +24,26 @@ namespace CefFlashBrowser.Commands
         public Func<object, bool> CanExecute { get; set; }
 
         public Action<object> Execute { get; set; }
+
+        public DelegateCommand()
+        {
+            //nothing to do
+        }
+
+        public DelegateCommand(Action<object> executeDelegate)
+        {
+            Execute = executeDelegate;
+        }
+
+        public DelegateCommand(Func<object, bool> canExecuteDelegate)
+        {
+            CanExecute = canExecuteDelegate;
+        }
+
+        public DelegateCommand(Action<object> executeDelegate, Func<object, bool> canExecuteDelegate)
+        {
+            Execute = executeDelegate;
+            CanExecute = canExecuteDelegate;
+        }
     }
 }
