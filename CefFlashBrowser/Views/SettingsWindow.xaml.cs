@@ -23,7 +23,6 @@ namespace CefFlashBrowser.Views
         public SettingsWindow()
         {
             InitializeComponent();
-            DataContext = new SettingsWindowViewModel();
         }
     }
 }

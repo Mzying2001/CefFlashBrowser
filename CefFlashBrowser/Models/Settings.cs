@@ -59,9 +59,9 @@ namespace CefFlashBrowser.Models
             set => WriteValue("Language", value);
         }
 
-        public static SearchEngine.Engines SearchEngine
+        public static SearchEngine.Engine SearchEngine
         {
-            get => (SearchEngine.Engines)ReadValue<int>("SearchEngine");
+            get => (SearchEngine.Engine)ReadValue<int>("SearchEngine");
             set => WriteValue("SearchEngine", (int)value);
         }
     }

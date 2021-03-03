@@ -64,8 +64,8 @@
                            VerticalAlignment="Center"/>
                 <ComboBox Grid.Column="2"
                           ItemsSource="{Binding SearchEngineItems}"
-                          DisplayMemberPath="Value"
-                          SelectedValuePath="Key"
+                          DisplayMemberPath="DisplayMember"
+                          SelectedValuePath="Value"
                           x:Name="SearchEnginesComboBox"
                           SelectionChanged="SearchEngines_SelectionChanged"/>
             </Grid>

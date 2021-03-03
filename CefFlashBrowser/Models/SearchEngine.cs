@@ -9,7 +9,7 @@ namespace CefFlashBrowser.Models
 {
     static class SearchEngine
     {
-        public enum Engines
+        public enum Engine
         {
             Baidu,
             Bing,
@@ -17,20 +17,20 @@ namespace CefFlashBrowser.Models
             Sogou
         }
 
-        public static string GetUrl(string str, Engines e = Engines.Baidu)
+        public static string GetUrl(string str, Engine e = Engine.Baidu)
         {
             switch (e)
             {
-                case Engines.Baidu:
+                case Engine.Baidu:
                     return $"www.baidu.com/s?wd={str}";
 
-                case Engines.Bing:
+                case Engine.Bing:
                     return $"bing.com/search?q={str}";
 
-                case Engines.Sogou:
+                case Engine.Sogou:
                     return $"www.sogou.com/web?query={str}";
 
-                case Engines.So360:
+                case Engine.So360:
                     return $"www.so.com/s?&q={str}";
 
                 default:
@@ -38,14 +38,14 @@ namespace CefFlashBrowser.Models
             }
         }
 
-        public static IEnumerable<(Engines engine, string name)> GetSupportedSearchEngines()
+        public static IEnumerable<(Engine engine, string name)> GetSupportedSearchEngines()
         {
             var res = Application.Current.Resources.MergedDictionaries[0];
 
-            yield return (Engines.Baidu, res["baidu"].ToString());
-            yield return (Engines.Bing, res["bing"].ToString());
-            yield return (Engines.So360, res["so360"].ToString());
-            yield return (Engines.Sogou, res["sogou"].ToString());
+            yield return (Engine.Baidu, res["baidu"].ToString());
+            yield return (Engine.Bing, res["bing"].ToString());
+            yield return (Engine.So360, res["so360"].ToString());
+            yield return (Engine.Sogou, res["sogou"].ToString());
         }
     }
 }

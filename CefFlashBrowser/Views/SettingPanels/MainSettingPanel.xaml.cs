@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.ViewModels.SettingPanelViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,16 +22,21 @@ namespace CefFlashBrowser.Views.SettingPanels
     /// </summary>
     public partial class MainSettingPanel : UserControl
     {
+        private MainSettingPanelViewModel _viewModel;
+
         public MainSettingPanel()
         {
             InitializeComponent();
+
+            _viewModel = new MainSettingPanelViewModel();
+            DataContext = _viewModel;
 
             SearchEnginesComboBox.SelectedIndex = (int)Settings.SearchEngine;
         }
 
         private void SearchEngines_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Settings.SearchEngine = (SearchEngine.Engines)SearchEnginesComboBox.SelectedValue;
+            _viewModel.SwitchSearchEngine((SearchEngine.Engine)SearchEnginesComboBox.SelectedValue);
         }
     }
 }
