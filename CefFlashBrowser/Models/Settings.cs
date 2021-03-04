@@ -47,8 +47,8 @@ namespace CefFlashBrowser.Models
 
         public static T ReadValue<T>(string key)
         {
-            var value = Convert.ChangeType(ReadValue(key), typeof(T));
-            return value == null ? default : (T)value;
+            var value = ReadValue(key);
+            return value == null ? default : (T)Convert.ChangeType(value, typeof(T));
         }
 
         #endregion
@@ -63,6 +63,12 @@ namespace CefFlashBrowser.Models
         {
             get => (SearchEngine.Engine)ReadValue<int>("SearchEngine");
             set => WriteValue("SearchEngine", (int)value);
+        }
+
+        public static int MainPageFunction
+        {
+            get => ReadValue<int>("MainPageFunction");
+            set => WriteValue("MainPageFunction", value);
         }
     }
 }

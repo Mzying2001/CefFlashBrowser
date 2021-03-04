@@ -54,7 +54,18 @@
                 <TextBlock Grid.Column="0"
                            Text="{StaticResource settingItem_mainpageFuncion}"
                            VerticalAlignment="Center"/>
-                <ComboBox Grid.Column="2"/>
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding MainPageFunctions}"
+                          DisplayMemberPath="DisplayMember"
+                          SelectedValuePath="Value"
+                          SelectedValue="{Binding CurrentMainPageFunction}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding SwitchMainPageFunctionCommand}"
+                                                   CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ComboBox}}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ComboBox>
             </Grid>
 
             <!--Search Engine-->

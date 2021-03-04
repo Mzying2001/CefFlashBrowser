@@ -15,10 +15,15 @@
     <!--设置窗口-->
     <sys:String x:Key="tabItem_main">主界面</sys:String>
     <sys:String x:Key="tabItem_browser">浏览器</sys:String>
-    <sys:String x:Key="settingHeader_mainSettings">主要设置</sys:String>
-    <sys:String x:Key="settingItem_mainpageFuncion">将首页用于</sys:String>
+    <sys:String x:Key="settingHeader_mainSettings">主页功能</sys:String>
+    <sys:String x:Key="settingItem_mainpageFuncion">将主页用于</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜索引擎</sys:String>
-    
+
+    <!--主页功能-->
+    <sys:String x:Key="mainPageFunction_auto">自动</sys:String>
+    <sys:String x:Key="mainPageFunction_searchOnly">仅搜索</sys:String>
+    <sys:String x:Key="mainPageFunction_navigateOnly">仅导航</sys:String>
+
     <!--搜索引擎-->
     <sys:String x:Key="baidu">百度</sys:String>
     <sys:String x:Key="bing">必应</sys:String>

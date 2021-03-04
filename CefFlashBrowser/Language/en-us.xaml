@@ -15,9 +15,14 @@
     <!--SettingsWindow-->
     <sys:String x:Key="tabItem_main">Main</sys:String>
     <sys:String x:Key="tabItem_browser">Browser</sys:String>
-    <sys:String x:Key="settingHeader_mainSettings">Main Settings</sys:String>
+    <sys:String x:Key="settingHeader_mainSettings">Main Page</sys:String>
     <sys:String x:Key="settingItem_mainpageFuncion">Use main page for</sys:String>
     <sys:String x:Key="settingItem_searchEngine">Search Engine</sys:String>
+    
+    <!--Main Page Funcion-->
+    <sys:String x:Key="mainPageFunction_auto">Automatic</sys:String>
+    <sys:String x:Key="mainPageFunction_searchOnly">Search Only</sys:String>
+    <sys:String x:Key="mainPageFunction_navigateOnly">Navigate Only</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="baidu">Baidu</sys:String>

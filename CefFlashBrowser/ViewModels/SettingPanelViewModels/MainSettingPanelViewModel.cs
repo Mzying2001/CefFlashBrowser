@@ -6,11 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 {
     class MainSettingPanelViewModel : NotificationObject
     {
+        public DelegateCommand SwitchMainPageFunctionCommand { get; set; }
+
         public DelegateCommand SwitchSearchEngineCommand { get; set; }
 
         private List<SearchEngineComboBoxItemViewModel> _searchEngineItems;
@@ -25,6 +28,18 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
             }
         }
 
+        private List<MainPageFunctionComboBoxViewModel> _mainPageFunctions;
+
+        public List<MainPageFunctionComboBoxViewModel> MainPageFunctions
+        {
+            get => _mainPageFunctions;
+            set
+            {
+                _mainPageFunctions = value;
+                RaisePropertyChanged("MainPageFunctions");
+            }
+        }
+
         public int CurrentSearchEngineValue
         {
             get => (int)Settings.SearchEngine;
@@ -35,6 +50,16 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
             }
         }
 
+        public int CurrentMainPageFunction
+        {
+            get => Settings.MainPageFunction;
+            set
+            {
+                Settings.MainPageFunction = value;
+                RaisePropertyChanged("CurrentMainPageFunction");
+            }
+        }
+
         private void LoadSearchEngineItems()
         {
             SearchEngineItems = new List<SearchEngineComboBoxItemViewModel>();
@@ -42,15 +67,29 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
                 SearchEngineItems.Add(new SearchEngineComboBoxItemViewModel(name, engine));
         }
 
-        public void SwitchSearchEngine(object sender)
+        private void LoadMainPageFunctions()
         {
-            CurrentSearchEngineValue = (int)((sender as System.Windows.Controls.ComboBox)?.SelectedValue ?? 0);
+            MainPageFunctions = new List<MainPageFunctionComboBoxViewModel>();
+            for (int i = 0; i < 3; i++)
+                MainPageFunctions.Add(new MainPageFunctionComboBoxViewModel(i));
+        }
+
+        private void SwitchSearchEngine(object sender)
+        {
+            CurrentSearchEngineValue = (int)((sender as ComboBox)?.SelectedValue ?? 0);
+        }
+
+        private void SwitchMainPageFunction(object sender)
+        {
+            CurrentMainPageFunction = (int)((sender as ComboBox)?.SelectedValue ?? 0);
         }
 
         public MainSettingPanelViewModel()
         {
+            LoadMainPageFunctions();
             LoadSearchEngineItems();
 
+            SwitchMainPageFunctionCommand = new DelegateCommand(SwitchMainPageFunction);
             SwitchSearchEngineCommand = new DelegateCommand(SwitchSearchEngine);
         }
     }
