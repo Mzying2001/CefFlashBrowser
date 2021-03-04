@@ -4,8 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels.SettingPanelViewModels"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:local="clr-namespace:CefFlashBrowser.Views.SettingPanels"
              mc:Ignorable="d">
+
+    <UserControl.DataContext>
+        <vm:MainSettingPanelViewModel/>
+    </UserControl.DataContext>
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -66,8 +72,14 @@
                           ItemsSource="{Binding SearchEngineItems}"
                           DisplayMemberPath="DisplayMember"
                           SelectedValuePath="Value"
-                          x:Name="SearchEnginesComboBox"
-                          SelectionChanged="SearchEngines_SelectionChanged"/>
+                          SelectedIndex="{Binding CurrentSearchEngineValue}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding SwitchSearchEngineCommand}"
+                                                   CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ComboBox}}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ComboBox>
             </Grid>
 
         </Grid>

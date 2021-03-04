@@ -14,6 +14,8 @@ namespace CefFlashBrowser.ViewModels
     {
         public DelegateCommand OpenUrlCommand { get; set; }
 
+        public DelegateCommand UpdateUrlCommand { get; set; }
+
         public DelegateCommand OpenSettingsWindowCommand { get; set; }
 
         public string AppVersion
@@ -85,6 +87,11 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void UpdateUrl(object sender)
+        {
+            Url = (sender as System.Windows.Controls.TextBox)?.Text;
+        }
+
         private void OpenSettingsWindow()
         {
             new SettingsWindow().ShowDialog();
@@ -95,6 +102,8 @@ namespace CefFlashBrowser.ViewModels
             LoadLanguageMenu();
 
             OpenUrlCommand = new DelegateCommand(p => OpenUrl());
+
+            UpdateUrlCommand = new DelegateCommand(UpdateUrl);
 
             OpenSettingsWindowCommand = new DelegateCommand(p => OpenSettingsWindow());
         }

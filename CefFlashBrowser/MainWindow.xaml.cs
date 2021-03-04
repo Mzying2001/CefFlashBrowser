@@ -24,19 +24,9 @@ namespace CefFlashBrowser
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MainWindowViewModel _viewModel;
-
         public MainWindow()
         {
             InitializeComponent();
-
-            _viewModel = new MainWindowViewModel();
-            DataContext = _viewModel;
-        }
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            _viewModel.Url = (sender as TextBox).Text;
         }
     }
 }

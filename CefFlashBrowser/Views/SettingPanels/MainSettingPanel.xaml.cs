@@ -22,21 +22,9 @@ namespace CefFlashBrowser.Views.SettingPanels
     /// </summary>
     public partial class MainSettingPanel : UserControl
     {
-        private MainSettingPanelViewModel _viewModel;
-
         public MainSettingPanel()
         {
             InitializeComponent();
-
-            _viewModel = new MainSettingPanelViewModel();
-            DataContext = _viewModel;
-
-            SearchEnginesComboBox.SelectedIndex = (int)Settings.SearchEngine;
-        }
-
-        private void SearchEngines_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            _viewModel.SwitchSearchEngine((SearchEngine.Engine)SearchEnginesComboBox.SelectedValue);
         }
     }
 }

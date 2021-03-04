@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Models;
+﻿using CefFlashBrowser.Commands;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.ViewModels.ComboBoxItemViewModels;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,8 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 {
     class MainSettingPanelViewModel : NotificationObject
     {
+        public DelegateCommand SwitchSearchEngineCommand { get; set; }
+
         private List<SearchEngineComboBoxItemViewModel> _searchEngineItems;
 
         public List<SearchEngineComboBoxItemViewModel> SearchEngineItems
@@ -22,6 +25,16 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
             }
         }
 
+        public int CurrentSearchEngineValue
+        {
+            get => (int)Settings.SearchEngine;
+            set
+            {
+                Settings.SearchEngine = (SearchEngine.Engine)value;
+                RaisePropertyChanged("CurrentSearchEngineValue");
+            }
+        }
+
         private void LoadSearchEngineItems()
         {
             SearchEngineItems = new List<SearchEngineComboBoxItemViewModel>();
@@ -29,14 +42,16 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
                 SearchEngineItems.Add(new SearchEngineComboBoxItemViewModel(name, engine));
         }
 
-        public void SwitchSearchEngine(SearchEngine.Engine engine)
+        public void SwitchSearchEngine(object sender)
         {
-            Settings.SearchEngine = engine;
+            CurrentSearchEngineValue = (int)((sender as System.Windows.Controls.ComboBox)?.SelectedValue ?? 0);
         }
 
         public MainSettingPanelViewModel()
         {
             LoadSearchEngineItems();
+
+            SwitchSearchEngineCommand = new DelegateCommand(SwitchSearchEngine);
         }
     }
 }

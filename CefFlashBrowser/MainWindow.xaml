@@ -4,6 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         
@@ -11,6 +13,10 @@
         Height="450"
         Title="{DynamicResource window_title}"
         WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:MainWindowViewModel/>
+    </Window.DataContext>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -72,11 +78,16 @@
                 <TextBox Margin="5,0"
                          Width="300"
                          Text="{Binding Url}"
-                         Style="{StaticResource TextBoxBaseStyle}"
-                         TextChanged="TextBox_TextChanged">
+                         Style="{StaticResource TextBoxBaseStyle}">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding OpenUrlCommand}"/>
                     </TextBox.InputBindings>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{Binding UpdateUrlCommand}"
+                                                   CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
                 </TextBox>
                 <!--The Go button-->
                 <Button Content="{DynamicResource button_go}"
