@@ -15,8 +15,8 @@
     <!--SettingsWindow-->
     <sys:String x:Key="tabItem_main">Main</sys:String>
     <sys:String x:Key="tabItem_browser">Browser</sys:String>
-    <sys:String x:Key="settingHeader_mainSettings">Main Page</sys:String>
-    <sys:String x:Key="settingItem_mainpageFuncion">Use main page for</sys:String>
+    <sys:String x:Key="settingHeader_mainSettings">Address Bar and Search</sys:String>
+    <sys:String x:Key="settingItem_mainpageFuncion">Use search engines in the address bar</sys:String>
     <sys:String x:Key="settingItem_searchEngine">Search Engine</sys:String>
     
     <!--Main Page Funcion-->
@@ -26,7 +26,8 @@
 
     <!--Search Engine-->
     <sys:String x:Key="baidu">Baidu</sys:String>
+    <sys:String x:Key="google">Google</sys:String>
     <sys:String x:Key="bing">Bing</sys:String>
-    <sys:String x:Key="so360">360 Search</sys:String>
     <sys:String x:Key="sogou">Sogou</sys:String>
+    <sys:String x:Key="so360">360</sys:String>
 </ResourceDictionary>

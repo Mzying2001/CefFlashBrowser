@@ -12,9 +12,10 @@ namespace CefFlashBrowser.Models
         public enum Engine
         {
             Baidu,
+            Google,
             Bing,
+            Sogou,
             So360,
-            Sogou
         }
 
         public static string GetUrl(string str, Engine e = Engine.Baidu)
@@ -23,6 +24,9 @@ namespace CefFlashBrowser.Models
             {
                 case Engine.Baidu:
                     return $"www.baidu.com/s?wd={str}";
+
+                case Engine.Google:
+                    return $"www.google.com/search?q={str}";
 
                 case Engine.Bing:
                     return $"bing.com/search?q={str}";
@@ -41,9 +45,10 @@ namespace CefFlashBrowser.Models
         public static IEnumerable<(Engine engine, string name)> GetSupportedSearchEngines()
         {
             yield return (Engine.Baidu, LanguageManager.GetString("baidu"));
+            yield return (Engine.Google, LanguageManager.GetString("google"));
             yield return (Engine.Bing, LanguageManager.GetString("bing"));
-            yield return (Engine.So360, LanguageManager.GetString("so360"));
             yield return (Engine.Sogou, LanguageManager.GetString("sogou"));
+            yield return (Engine.So360, LanguageManager.GetString("so360"));
         }
     }
 }
