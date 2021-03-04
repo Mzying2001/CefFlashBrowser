@@ -38,7 +38,7 @@
 
             <!--Main Settings-->
             <TextBlock Grid.Row="0"
-                       Text="{StaticResource settingHeader_mainSettings}"
+                       Text="{StaticResource settingHeader_addressBar}"
                        Margin="{StaticResource HeaderMargin}"
                        FontSize="{StaticResource HeaderFontSize}"
                        FontWeight="{StaticResource HeaderFontWeight}"/>
@@ -52,16 +52,16 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
-                           Text="{StaticResource settingItem_mainpageFuncion}"
+                           Text="{StaticResource settingItem_useSearchEngine}"
                            VerticalAlignment="Center"/>
                 <ComboBox Grid.Column="2"
-                          ItemsSource="{Binding MainPageFunctions}"
+                          ItemsSource="{Binding AddressBarFunctions}"
                           DisplayMemberPath="DisplayMember"
                           SelectedValuePath="Value"
-                          SelectedValue="{Binding CurrentMainPageFunction}">
+                          SelectedValue="{Binding CurrentAddressBarFunction}">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
-                            <i:InvokeCommandAction Command="{Binding SwitchMainPageFunctionCommand}"
+                            <i:InvokeCommandAction Command="{Binding SwitchAddressBarFunctionCommand}"
                                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ComboBox}}"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>

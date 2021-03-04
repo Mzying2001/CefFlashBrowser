@@ -12,7 +12,7 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 {
     class MainSettingPanelViewModel : NotificationObject
     {
-        public DelegateCommand SwitchMainPageFunctionCommand { get; set; }
+        public DelegateCommand SwitchAddressBarFunctionCommand { get; set; }
 
         public DelegateCommand SwitchSearchEngineCommand { get; set; }
 
@@ -28,15 +28,15 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
             }
         }
 
-        private List<MainPageFunctionComboBoxViewModel> _mainPageFunctions;
+        private List<AddressBarFunctionComboBoxViewModel> _addressBarFunctions;
 
-        public List<MainPageFunctionComboBoxViewModel> MainPageFunctions
+        public List<AddressBarFunctionComboBoxViewModel> AddressBarFunctions
         {
-            get => _mainPageFunctions;
+            get => _addressBarFunctions;
             set
             {
-                _mainPageFunctions = value;
-                RaisePropertyChanged("MainPageFunctions");
+                _addressBarFunctions = value;
+                RaisePropertyChanged("AddressBarFunctions");
             }
         }
 
@@ -50,13 +50,13 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
             }
         }
 
-        public int CurrentMainPageFunction
+        public int CurrentAddressBarFunction
         {
-            get => Settings.MainPageFunction;
+            get => Settings.AddressBarFunction;
             set
             {
-                Settings.MainPageFunction = value;
-                RaisePropertyChanged("CurrentMainPageFunction");
+                Settings.AddressBarFunction = value;
+                RaisePropertyChanged("CurrentAddressBarFunction");
             }
         }
 
@@ -67,11 +67,11 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
                 SearchEngineItems.Add(new SearchEngineComboBoxItemViewModel(name, engine));
         }
 
-        private void LoadMainPageFunctions()
+        private void LoadAddressBarFunctions()
         {
-            MainPageFunctions = new List<MainPageFunctionComboBoxViewModel>();
+            AddressBarFunctions = new List<AddressBarFunctionComboBoxViewModel>();
             for (int i = 0; i < 3; i++)
-                MainPageFunctions.Add(new MainPageFunctionComboBoxViewModel(i));
+                AddressBarFunctions.Add(new AddressBarFunctionComboBoxViewModel(i));
         }
 
         private void SwitchSearchEngine(object sender)
@@ -79,17 +79,17 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
             CurrentSearchEngineValue = (int)((sender as ComboBox)?.SelectedValue ?? 0);
         }
 
-        private void SwitchMainPageFunction(object sender)
+        private void SwitchAddressBarFunction(object sender)
         {
-            CurrentMainPageFunction = (int)((sender as ComboBox)?.SelectedValue ?? 0);
+            CurrentAddressBarFunction = (int)((sender as ComboBox)?.SelectedValue ?? 0);
         }
 
         public MainSettingPanelViewModel()
         {
-            LoadMainPageFunctions();
+            LoadAddressBarFunctions();
             LoadSearchEngineItems();
 
-            SwitchMainPageFunctionCommand = new DelegateCommand(SwitchMainPageFunction);
+            SwitchAddressBarFunctionCommand = new DelegateCommand(SwitchAddressBarFunction);
             SwitchSearchEngineCommand = new DelegateCommand(SwitchSearchEngine);
         }
     }

@@ -7,23 +7,23 @@ using System.Threading.Tasks;
 
 namespace CefFlashBrowser.ViewModels.ComboBoxItemViewModels
 {
-    class MainPageFunctionComboBoxViewModel : ComboBoxItemViewModel<string, int>
+    class AddressBarFunctionComboBoxViewModel : ComboBoxItemViewModel<string, int>
     {
-        public MainPageFunctionComboBoxViewModel(int func)
+        public AddressBarFunctionComboBoxViewModel(int func)
         {
             Value = func;
             switch (func)
             {
                 case 0:
-                    DisplayMember = LanguageManager.GetString("mainPageFunction_auto");
+                    DisplayMember = LanguageManager.GetString("addressBarFunction_auto");
                     break;
 
                 case 1:
-                    DisplayMember = LanguageManager.GetString("mainPageFunction_searchOnly");
+                    DisplayMember = LanguageManager.GetString("addressBarFunction_searchOnly");
                     break;
 
                 case 2:
-                    DisplayMember = LanguageManager.GetString("mainPageFunction_navigateOnly");
+                    DisplayMember = LanguageManager.GetString("addressBarFunction_navigateOnly");
                     break;
 
                 default:

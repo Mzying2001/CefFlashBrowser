@@ -65,10 +65,10 @@ namespace CefFlashBrowser.Models
             set => WriteValue("SearchEngine", (int)value);
         }
 
-        public static int MainPageFunction
+        public static int AddressBarFunction
         {
-            get => ReadValue<int>("MainPageFunction");
-            set => WriteValue("MainPageFunction", value);
+            get => ReadValue<int>("AddressBarFunction");
+            set => WriteValue("AddressBarFunction", value);
         }
     }
 }

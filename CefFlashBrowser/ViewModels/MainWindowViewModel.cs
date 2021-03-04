@@ -84,7 +84,7 @@ namespace CefFlashBrowser.ViewModels
              * 1: Search Only
              * 2: Navigate Only
              */
-            switch (Settings.MainPageFunction)
+            switch (Settings.AddressBarFunction)
             {
                 case 0:
                     if (!UrlChecker.IsUrl(url))
