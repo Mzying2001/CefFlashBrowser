@@ -9,11 +9,16 @@ namespace CefFlashBrowser.Models
 {
     static class LanguageManager
     {
-        public static readonly string[] SupportedLanguage =
+        private static readonly string[] SupportedLanguage =
         {
             "en-us",
             "zh-cn"
         };
+
+        public static IEnumerable<string> GetSupportedLanguage()
+        {
+            return from item in SupportedLanguage orderby GetLanguageName(item) select item;
+        }
 
         public static bool IsSupportedLanguage(string language)
         {

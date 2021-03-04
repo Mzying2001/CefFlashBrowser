@@ -51,7 +51,7 @@ namespace CefFlashBrowser.ViewModels
         {
             LanguageMenuItems = new List<LanguageMenuItemViewModel>();
 
-            foreach (var item in LanguageManager.SupportedLanguage)
+            foreach (var item in LanguageManager.GetSupportedLanguage())
             {
                 var viewModel = new LanguageMenuItemViewModel(item);
                 viewModel.LanguageSwitched += SetLanguageMenuItemsChecked;
