@@ -73,7 +73,7 @@ namespace CefFlashBrowser.ViewModels
 
             if (string.IsNullOrEmpty(url))
             {
-                MessageBox.Show(Application.Current.Resources["message_emptyUrl"].ToString());
+                MessageBox.Show(LanguageManager.GetString("message_emptyUrl"));
                 return;
             }
 

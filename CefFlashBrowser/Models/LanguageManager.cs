@@ -54,5 +54,10 @@ namespace CefFlashBrowser.Models
             else
                 throw new Exception("Unsupported language.");
         }
+
+        public static string GetString(string key)
+        {
+            return Application.Current.Resources[key].ToString();
+        }
     }
 }
