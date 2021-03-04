@@ -23,18 +23,25 @@ namespace CefFlashBrowser.Views
     {
         private BrowserWindowViewModel _viewModel;
 
-        public BrowserWindow(string url)
+        public BrowserWindow()
         {
             InitializeComponent();
 
-            _viewModel = new BrowserWindowViewModel(url);
+            _viewModel = new BrowserWindowViewModel();
             DataContext = _viewModel;
-            browserBase.Children.Add(_viewModel.Browser);
         }
 
         public static void Popup(string url)
         {
-            new BrowserWindow(url).Show();
+            var window = new BrowserWindow();
+            var vModel = window.DataContext as BrowserWindowViewModel;
+            vModel.Url = url;
+            window.Show();
+        }
+
+        private void FlashBrowser_TitleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            _viewModel.Title = e.NewValue.ToString();
         }
     }
 }

@@ -4,12 +4,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
+        xmlns:m="clr-namespace:CefFlashBrowser.Models"
+        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         mc:Ignorable="d"
         
         Width="1000"
         Height="750"
-        Title="{Binding Title}"
-        WindowStartupLocation="CenterScreen">
+        Title="{Binding Title, TargetNullValue=browser}">
 
-    <Grid x:Name="browserBase"/>
+    <Window.DataContext>
+        <vm:BrowserWindowViewModel/>
+    </Window.DataContext>
+
+    <m:FlashBrowser Address="{Binding Url}"
+                    TitleChanged="FlashBrowser_TitleChanged"/>
+
 </Window>

@@ -9,18 +9,6 @@ namespace CefFlashBrowser.ViewModels
 {
     class BrowserWindowViewModel : NotificationObject
     {
-        private FlashBrowser _browser;
-
-        public FlashBrowser Browser
-        {
-            get => _browser;
-            set
-            {
-                _browser = value;
-                RaisePropertyChanged("Browser");
-            }
-        }
-
         private string _title;
 
         public string Title
@@ -33,15 +21,17 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public BrowserWindowViewModel(string url)
-        {
-            Title = url;
+        private string _url;
 
-            Browser = new FlashBrowser(url);
-            Browser.TitleChanged += (sender, e) =>
+        public string Url
+        {
+            get => _url;
+            set
             {
-                Title = e.NewValue.ToString();
-            };
+                _url = value;
+                RaisePropertyChanged("Url");
+            }
         }
+
     }
 }
