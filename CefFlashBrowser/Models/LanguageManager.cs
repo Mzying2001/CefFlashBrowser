@@ -57,7 +57,7 @@ namespace CefFlashBrowser.Models
 
         public static string GetString(string key)
         {
-            return Application.Current.Resources[key].ToString();
+            return Application.Current.Resources.MergedDictionaries[0][key].ToString();
         }
     }
 }

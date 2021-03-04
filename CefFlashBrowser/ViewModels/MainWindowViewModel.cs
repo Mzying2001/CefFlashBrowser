@@ -78,7 +78,7 @@ namespace CefFlashBrowser.ViewModels
             }
 
             /*
-             * Main Page  Function
+             * Main Page Function
              * 
              * 0: Automatic
              * 1: Search Only

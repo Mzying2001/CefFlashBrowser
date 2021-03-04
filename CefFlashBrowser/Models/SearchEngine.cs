@@ -40,12 +40,10 @@ namespace CefFlashBrowser.Models
 
         public static IEnumerable<(Engine engine, string name)> GetSupportedSearchEngines()
         {
-            var res = Application.Current.Resources.MergedDictionaries[0];
-
-            yield return (Engine.Baidu, res["baidu"].ToString());
-            yield return (Engine.Bing, res["bing"].ToString());
-            yield return (Engine.So360, res["so360"].ToString());
-            yield return (Engine.Sogou, res["sogou"].ToString());
+            yield return (Engine.Baidu, LanguageManager.GetString("baidu"));
+            yield return (Engine.Bing, LanguageManager.GetString("bing"));
+            yield return (Engine.So360, LanguageManager.GetString("so360"));
+            yield return (Engine.Sogou, LanguageManager.GetString("sogou"));
         }
     }
 }
