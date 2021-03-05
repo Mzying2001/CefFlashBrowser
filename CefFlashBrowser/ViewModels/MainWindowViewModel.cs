@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using CefFlashBrowser.Views;
 
 namespace CefFlashBrowser.ViewModels
@@ -54,17 +55,17 @@ namespace CefFlashBrowser.ViewModels
             foreach (var item in LanguageManager.GetSupportedLanguage())
             {
                 var viewModel = new LanguageMenuItemViewModel(item);
-                viewModel.LanguageSwitched += SetLanguageMenuItemsChecked;
+                viewModel.LanguageSwitched += UpdateLanguageMenuItemsChecked;
                 LanguageMenuItems.Add(viewModel);
             }
 
-            SetLanguageMenuItemsChecked();
+            UpdateLanguageMenuItemsChecked();
         }
 
-        private void SetLanguageMenuItemsChecked()
+        private void UpdateLanguageMenuItemsChecked()
         {
             foreach (var item in LanguageMenuItems)
-                item.IsCurrentLanguage = item.Language == LanguageManager.CurrentLanguage;
+                item.IsSelected = item.Language == LanguageManager.CurrentLanguage;
         }
 
         private void OpenUrl()

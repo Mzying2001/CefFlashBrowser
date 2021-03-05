@@ -114,8 +114,9 @@
     <Compile Include="ViewModels\ComboBoxItemViewModels\ComboBoxItemViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\AddressBarFunctionComboBoxViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\SearchEngineComboBoxItemViewModel.cs" />
-    <Compile Include="ViewModels\LanguageMenuItemViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\MenuItemViewModels\LanguageMenuItemViewModel.cs" />
+    <Compile Include="ViewModels\MenuItemViewModels\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\NotificationObject.cs" />
     <Compile Include="ViewModels\SettingPanelViewModels\MainSettingPanelViewModel.cs" />
     <Compile Include="Views\BrowserWindow.xaml.cs">

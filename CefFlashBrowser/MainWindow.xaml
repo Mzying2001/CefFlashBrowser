@@ -37,9 +37,9 @@
                       ItemsSource="{Binding LanguageMenuItems}">
                     <MenuItem.ItemTemplate>
                         <DataTemplate>
-                            <MenuItem Header="{Binding LanguageName}"
-                                      Command="{Binding SwitchLanguageCommand}"
-                                      IsChecked="{Binding IsCurrentLanguage}"/>
+                            <MenuItem Header="{Binding Header}"
+                                      Command="{Binding MenuItemSelectedCommand}"
+                                      IsChecked="{Binding IsSelected}"/>
                         </DataTemplate>
                     </MenuItem.ItemTemplate>
                 </MenuItem>
