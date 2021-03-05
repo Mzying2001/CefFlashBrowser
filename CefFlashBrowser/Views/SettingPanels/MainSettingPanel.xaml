@@ -36,14 +36,14 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!--Main Settings-->
+            <!--Address Bar and Search-->
             <TextBlock Grid.Row="0"
                        Text="{StaticResource settingHeader_addressBar}"
                        Margin="{StaticResource HeaderMargin}"
                        FontSize="{StaticResource HeaderFontSize}"
                        FontWeight="{StaticResource HeaderFontWeight}"/>
 
-            <!--Enable Search-->
+            <!--Address Bar Function-->
             <Grid Grid.Row="1"
                   Margin="{StaticResource SettingItemMargin}">
                 <Grid.ColumnDefinitions>

@@ -35,13 +35,14 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!--Browser Data-->
+            <!--Browser Cache-->
             <TextBlock Grid.Row="0"
                        Text="{StaticResource settingHeader_browserData}"
                        Margin="{StaticResource HeaderMargin}"
                        FontSize="{StaticResource HeaderFontSize}"
                        FontWeight="{StaticResource HeaderFontWeight}"/>
 
+            <!--Delete Caches-->
             <Grid Grid.Row="1"
                   Margin="{StaticResource SettingItemMargin}">
                 <Grid.ColumnDefinitions>
