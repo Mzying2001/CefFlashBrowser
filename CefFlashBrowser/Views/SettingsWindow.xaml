@@ -20,7 +20,7 @@
             </TabItem>
 
             <TabItem Header="{StaticResource tabItem_browser}">
-                <!--<sp:BrowserSettingPanel/>-->
+                <sp:BrowserSettingPanel/>
             </TabItem>
         </TabControl>
     </Grid>

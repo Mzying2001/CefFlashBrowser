@@ -79,7 +79,7 @@ namespace CefFlashBrowser.ViewModels
             }
 
             /*
-             * Main Page Function
+             * Address Bar Function
              * 
              * 0: Automatic
              * 1: Search Only

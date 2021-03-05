@@ -34,7 +34,7 @@
                 
                 <!--Languages Option-->
                 <MenuItem Header="{DynamicResource menu_languages}"
-                      ItemsSource="{Binding LanguageMenuItems}">
+                          ItemsSource="{Binding LanguageMenuItems}">
                     <MenuItem.ItemTemplate>
                         <DataTemplate>
                             <MenuItem Header="{Binding Header}"

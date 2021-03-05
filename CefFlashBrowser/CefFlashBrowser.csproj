@@ -118,9 +118,13 @@
     <Compile Include="ViewModels\MenuItemViewModels\LanguageMenuItemViewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\NotificationObject.cs" />
+    <Compile Include="ViewModels\SettingPanelViewModels\BrowserSettingPanelViewModel.cs" />
     <Compile Include="ViewModels\SettingPanelViewModels\MainSettingPanelViewModel.cs" />
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SettingPanels\BrowserSettingPanel.xaml.cs">
+      <DependentUpon>BrowserSettingPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingPanels\MainSettingPanel.xaml.cs">
       <DependentUpon>MainSettingPanel.xaml</DependentUpon>
@@ -150,6 +154,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\BrowserWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SettingPanels\BrowserSettingPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
