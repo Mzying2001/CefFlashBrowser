@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,9 +28,19 @@ namespace CefFlashBrowser.Models
             EnableFlash();
         }
 
+        /// <summary>
+        /// This method should be called when the program starts
+        /// </summary>
         public static void InitCefFlash()
         {
-            CefSettings settings = new CefSettings();
+            if (Cef.IsInitialized)
+                return;
+
+            CefSettings settings = new CefSettings()
+            {
+                CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"caches\")
+            };
+
             settings.CefCommandLineArgs["enable-system-flash"] = "1";
             settings.CefCommandLineArgs.Add("ppapi-flash-version", "32.34.0.0.92");
             settings.CefCommandLineArgs.Add("ppapi-flash-path", @"plugins\pepflashplayer32_34_0_0_92.dll");
