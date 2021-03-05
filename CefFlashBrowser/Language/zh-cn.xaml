@@ -16,8 +16,12 @@
     <sys:String x:Key="tabItem_main">主界面</sys:String>
     <sys:String x:Key="tabItem_browser">浏览器</sys:String>
     <sys:String x:Key="settingHeader_addressBar">地址栏和搜索</sys:String>
+    <sys:String x:Key="settingHeader_browserData">浏览器缓存</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">在地址栏中使用搜索引擎</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜索引擎</sys:String>
+    <sys:String x:Key="settingItem_deleteCache">清除所有缓存</sys:String>
+    <sys:String x:Key="button_deleteCache">清除</sys:String>
+    <sys:String x:Key="message_deleteCache">确定要重启浏览器并清除所有缓存吗？</sys:String>
 
     <!--地址栏功能-->
     <sys:String x:Key="addressBarFunction_auto">自动</sys:String>

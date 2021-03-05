@@ -16,8 +16,12 @@
     <sys:String x:Key="tabItem_main">Main</sys:String>
     <sys:String x:Key="tabItem_browser">Browser</sys:String>
     <sys:String x:Key="settingHeader_addressBar">Address Bar and Search</sys:String>
+    <sys:String x:Key="settingHeader_browserData">Browser Cache</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">Use search engines in the address bar</sys:String>
     <sys:String x:Key="settingItem_searchEngine">Search Engine</sys:String>
+    <sys:String x:Key="settingItem_deleteCache">Delete all caches</sys:String>
+    <sys:String x:Key="button_deleteCache">Delete</sys:String>
+    <sys:String x:Key="message_deleteCache">Are you sure you want to delete all caches? The browser will restart.</sys:String>
     
     <!--Address Bar Funcion-->
     <sys:String x:Key="addressBarFunction_auto">Automatic</sys:String>
