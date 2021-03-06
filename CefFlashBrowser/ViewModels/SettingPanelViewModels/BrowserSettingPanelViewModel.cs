@@ -21,11 +21,12 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 
             if (flag == System.Windows.MessageBoxResult.OK)
             {
-                string bat = $"taskkill /f /im CefFlashBrowser.exe\n" +
-                             $"timeout 1\n" +
-                             $"rd /s /q caches\\\n" +
-                             $"start CefFlashBrowser.exe\n" +
-                             $"del _.bat";
+                string bat = "taskkill /f /im CefFlashBrowser.exe\n" +
+                             "timeout 1\n" +
+                             "rd /s /q caches\\\n" +
+                             "mshta vbscript:msgbox(\"done\",64,\"\")(window.close)\n" +
+                             "start CefFlashBrowser.exe\n" +
+                             "del _.bat";
                 File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_.bat"), bat);
 
                 Process.Start(new ProcessStartInfo()
