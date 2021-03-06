@@ -32,6 +32,12 @@
             <!--Options Menu-->
             <MenuItem Header="{DynamicResource menu_options}">
                 
+                <!--Load Swf Option-->
+                <MenuItem Header="{DynamicResource menu_loadSwf}"
+                          Command="{Binding LoadSwfCommand}"/>
+
+                <Separator/>
+
                 <!--Languages Option-->
                 <MenuItem Header="{DynamicResource menu_languages}"
                           ItemsSource="{Binding LanguageMenuItems}">

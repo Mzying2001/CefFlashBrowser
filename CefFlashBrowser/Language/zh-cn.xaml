@@ -10,6 +10,8 @@
     <sys:String x:Key="menu_languages">语言</sys:String>
     <sys:String x:Key="menu_options">选项</sys:String>
     <sys:String x:Key="menu_settings">设置</sys:String>
+    <sys:String x:Key="menu_loadSwf">加载本地swf文件...</sys:String>
+    <sys:String x:Key="filter_swf">swf文件</sys:String>
     <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
 
     <!--设置窗口-->

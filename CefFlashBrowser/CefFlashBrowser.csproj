@@ -198,6 +198,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="html\FlashPlayer.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="plugins\pepflashplayer32_34_0_0_92.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

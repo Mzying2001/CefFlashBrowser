@@ -10,6 +10,8 @@
     <sys:String x:Key="menu_languages">Language</sys:String>
     <sys:String x:Key="menu_options">Options</sys:String>
     <sys:String x:Key="menu_settings">Settings</sys:String>
+    <sys:String x:Key="menu_loadSwf">Load local swf file...</sys:String>
+    <sys:String x:Key="filter_swf">swf file</sys:String>
     <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>
     
     <!--SettingsWindow-->

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand UpdateUrlCommand { get; set; }
 
         public DelegateCommand OpenSettingsWindowCommand { get; set; }
+
+        public DelegateCommand LoadSwfCommand { get; set; }
 
         public string AppVersion
         {
@@ -114,6 +117,19 @@ namespace CefFlashBrowser.ViewModels
             new SettingsWindow().ShowDialog();
         }
 
+        private void LoadSwf()
+        {
+            var ofd = new Microsoft.Win32.OpenFileDialog()
+            {
+                Filter = $"{LanguageManager.GetString("filter_swf")}|*.swf"
+            };
+            if (ofd.ShowDialog() == true)
+            {
+                BrowserWindow.Popup(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                    $"html/FlashPlayer.html?src={ofd.FileName}"));
+            }
+        }
+
         public MainWindowViewModel()
         {
             LoadLanguageMenu();
@@ -123,6 +139,8 @@ namespace CefFlashBrowser.ViewModels
             UpdateUrlCommand = new DelegateCommand(UpdateUrl);
 
             OpenSettingsWindowCommand = new DelegateCommand(p => OpenSettingsWindow());
+
+            LoadSwfCommand = new DelegateCommand(p => LoadSwf());
         }
     }
 }
