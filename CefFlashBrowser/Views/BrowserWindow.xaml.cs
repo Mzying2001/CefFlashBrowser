@@ -39,6 +39,12 @@ namespace CefFlashBrowser.Views
             window.Show();
         }
 
+        public static void PopupFlashPlayer(string fileName)
+        {
+            Popup(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                    $"html/FlashPlayer.html?src={fileName}"));
+        }
+
         private void FlashBrowser_TitleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             _viewModel.Title = e.NewValue.ToString();

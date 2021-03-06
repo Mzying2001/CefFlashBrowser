@@ -1,8 +1,7 @@
 ﻿<Application x:Class="CefFlashBrowser.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:CefFlashBrowser"
-             StartupUri="MainWindow.xaml">
+             xmlns:local="clr-namespace:CefFlashBrowser">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

@@ -64,5 +64,10 @@ namespace CefFlashBrowser.Models
         {
             return Application.Current.Resources.MergedDictionaries[0][key].ToString();
         }
+
+        public static void InitLanguage()
+        {
+            CurrentLanguage = Settings.Language;
+        }
     }
 }

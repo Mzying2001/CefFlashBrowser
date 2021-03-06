@@ -125,8 +125,7 @@ namespace CefFlashBrowser.ViewModels
             };
             if (ofd.ShowDialog() == true)
             {
-                BrowserWindow.Popup(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-                    $"html/FlashPlayer.html?src={ofd.FileName}"));
+                BrowserWindow.PopupFlashPlayer(ofd.FileName);
             }
         }
 

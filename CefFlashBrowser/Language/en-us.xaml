@@ -2,6 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="language_name">English</sys:String>
+    
+    <!--App-->
+    <sys:String x:Key="invalidStartUpParam">Invalid start-up parameter</sys:String>
 
     <!--MainWindow-->
     <sys:String x:Key="window_title">Welcome ♪(^∇^*)</sys:String>

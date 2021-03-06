@@ -1,8 +1,10 @@
 ﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Views;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,14 +16,39 @@ namespace CefFlashBrowser
     /// </summary>
     public partial class App : Application
     {
-        public App() : base()
+        private void Init()
         {
-            InitializeComponent();
-
             Settings.Init();
             FlashBrowser.InitCefFlash();
+            LanguageManager.InitLanguage();
+        }
 
-            LanguageManager.CurrentLanguage = Settings.Language;
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            Init();
+            base.OnStartup(e);
+
+            if (e.Args.Length == 0)
+            {
+                new MainWindow().Show();
+                return;
+            }
+
+            foreach (var arg in e.Args)
+            {
+                if (File.Exists(arg) && arg.ToLower().EndsWith(".swf"))
+                {
+                    BrowserWindow.PopupFlashPlayer(arg);
+                }
+                else if (UrlChecker.IsUrl(arg))
+                {
+                    BrowserWindow.Popup(arg);
+                }
+                else
+                {
+                    MessageBox.Show($"{LanguageManager.GetString("invalidStartUpParam")}: {arg}");
+                }
+            }
         }
     }
 }
