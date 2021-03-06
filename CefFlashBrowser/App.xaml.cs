@@ -47,6 +47,7 @@ namespace CefFlashBrowser
                 else
                 {
                     MessageBox.Show($"{LanguageManager.GetString("invalidStartUpParam")}: {arg}");
+                    Environment.Exit(1);
                 }
             }
         }
