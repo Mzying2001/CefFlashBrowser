@@ -1,0 +1,42 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="language_name">中文</sys:String>
+
+    <!--App-->
+    <sys:String x:Key="invalidStartUpParam">无效的启动参数</sys:String>
+
+    <!--主界面-->
+    <sys:String x:Key="window_title">欢迎 (๑╹ヮ╹๑)ﾉ</sys:String>
+    <sys:String x:Key="button_go">跳转</sys:String>
+    <sys:String x:Key="menu_favorites">收藏夹</sys:String>
+    <sys:String x:Key="menu_languages">语言</sys:String>
+    <sys:String x:Key="menu_options">选项</sys:String>
+    <sys:String x:Key="menu_settings">设置</sys:String>
+    <sys:String x:Key="menu_loadSwf">加载本地swf文件...</sys:String>
+    <sys:String x:Key="filter_swf">swf文件</sys:String>
+    <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
+
+    <!--设置窗口-->
+    <sys:String x:Key="tabItem_main">主界面</sys:String>
+    <sys:String x:Key="tabItem_browser">浏览器</sys:String>
+    <sys:String x:Key="settingHeader_addressBar">地址栏和搜索</sys:String>
+    <sys:String x:Key="settingHeader_browserData">浏览器缓存</sys:String>
+    <sys:String x:Key="settingItem_useSearchEngine">在地址栏中使用搜索引擎</sys:String>
+    <sys:String x:Key="settingItem_searchEngine">搜索引擎</sys:String>
+    <sys:String x:Key="settingItem_deleteCache">清除所有缓存</sys:String>
+    <sys:String x:Key="button_deleteCache">清除</sys:String>
+    <sys:String x:Key="message_deleteCache">确定要重启浏览器并清除所有缓存吗？</sys:String>
+
+    <!--地址栏功能-->
+    <sys:String x:Key="addressBarFunction_auto">自动</sys:String>
+    <sys:String x:Key="addressBarFunction_searchOnly">仅搜索</sys:String>
+    <sys:String x:Key="addressBarFunction_navigateOnly">仅导航</sys:String>
+
+    <!--搜索引擎-->
+    <sys:String x:Key="baidu">百度</sys:String>
+    <sys:String x:Key="google">谷歌</sys:String>
+    <sys:String x:Key="bing">必应</sys:String>
+    <sys:String x:Key="sogou">搜狗</sys:String>
+    <sys:String x:Key="so360">360</sys:String>
+</ResourceDictionary>
