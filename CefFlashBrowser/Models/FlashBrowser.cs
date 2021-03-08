@@ -41,6 +41,7 @@ namespace CefFlashBrowser.Models
                 CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"caches\")
             };
 
+            settings.Locale = Settings.Language;
             settings.CefCommandLineArgs["enable-system-flash"] = "1";
             settings.CefCommandLineArgs.Add("ppapi-flash-version", "32.34.0.0.92");
             settings.CefCommandLineArgs.Add("ppapi-flash-path", @"plugins\pepflashplayer32_34_0_0_92.dll");

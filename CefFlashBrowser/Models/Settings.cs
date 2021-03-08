@@ -55,7 +55,7 @@ namespace CefFlashBrowser.Models
 
         public static string Language
         {
-            get => ReadValue("Language") ?? "en-us";
+            get => ReadValue("Language") ?? "en-US";
             set => WriteValue("Language", value);
         }
 
