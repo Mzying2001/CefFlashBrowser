@@ -12,7 +12,8 @@ namespace CefFlashBrowser.Models
         private static readonly string[] SupportedLanguage =
         {
             "en-US",
-            "zh-CN"
+            "zh-CN",
+            "zh-TW"
         };
 
         public static IEnumerable<string> GetSupportedLanguage()
