@@ -17,7 +17,7 @@ using CefFlashBrowser.ViewModels;
 using CefSharp;
 using CefSharp.Wpf;
 
-namespace CefFlashBrowser
+namespace CefFlashBrowser.Views
 {
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
