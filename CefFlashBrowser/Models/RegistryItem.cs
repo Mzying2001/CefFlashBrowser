@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Models
 {
-    class RegistryItem : IDisposable, IEnumerable<KeyValuePair<string, object>>
+    class RegistryItem : IDisposable, IEnumerable<(string name, object value)>
     {
         private RegistryKey _registryKey;
 
@@ -43,15 +43,15 @@ namespace CefFlashBrowser.Models
             return value == null ? default : (T)Convert.ChangeType(value, typeof(T));
         }
 
-        public RegistryItem SubKey(string name)
+        public RegistryItem SubItem(string name)
         {
             return new RegistryItem(_registryKey, name);
         }
 
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        public IEnumerator<(string name, object value)> GetEnumerator()
         {
             foreach (string name in _registryKey.GetValueNames())
-                yield return new KeyValuePair<string, object>(name, this[name]);
+                yield return (name, this[name]);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
