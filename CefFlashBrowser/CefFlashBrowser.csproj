@@ -82,6 +82,9 @@
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\Microsoft.Expression.Interactions.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -111,11 +114,15 @@
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\UrlChecker.cs" />
+    <Compile Include="Models\Website.cs" />
+    <Compile Include="Services\IFavoritesDataService.cs" />
+    <Compile Include="Services\JsonDataService.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\ComboBoxItemViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\AddressBarFunctionComboBoxViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\SearchEngineComboBoxItemViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\MenuItemViewModels\FavoriteMenuItemVliewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\LanguageMenuItemViewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\NotificationObject.cs" />
@@ -222,6 +229,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

@@ -27,7 +27,15 @@
 
         <Menu>
             <!--Favorites Menu-->
-            <MenuItem Header="{DynamicResource menu_favorites}"/>
+            <MenuItem Header="{DynamicResource menu_favorites}"
+                      ItemsSource="{Binding FavoriteItems}">
+                <MenuItem.ItemTemplate>
+                    <DataTemplate>
+                        <MenuItem Header="{Binding Header}"
+                                  Command="{Binding MenuItemSelectedCommand}"/>
+                    </DataTemplate>
+                </MenuItem.ItemTemplate>
+            </MenuItem>
 
             <!--Options Menu-->
             <MenuItem Header="{DynamicResource menu_options}">

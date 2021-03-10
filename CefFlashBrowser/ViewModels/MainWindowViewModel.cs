@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using CefFlashBrowser.Views;
 
@@ -36,6 +37,18 @@ namespace CefFlashBrowser.ViewModels
             {
                 _url = value;
                 RaisePropertyChanged("Url");
+            }
+        }
+
+        private List<FavoriteMenuItemVliewModel> _favoriteItems;
+
+        public List<FavoriteMenuItemVliewModel> FavoriteItems
+        {
+            get => _favoriteItems;
+            set
+            {
+                _favoriteItems = value;
+                RaisePropertyChanged("FavoriteItems");
             }
         }
 
@@ -69,6 +82,13 @@ namespace CefFlashBrowser.ViewModels
         {
             foreach (var item in LanguageMenuItems)
                 item.IsSelected = item.Language == LanguageManager.CurrentLanguage;
+        }
+
+        private void LoadFavoriteItems()
+        {
+            FavoriteItems = new List<FavoriteMenuItemVliewModel>();
+            foreach (var item in new JsonDataService().GetFavorites())
+                FavoriteItems.Add(new FavoriteMenuItemVliewModel(item));
         }
 
         private void OpenUrl()
@@ -131,6 +151,7 @@ namespace CefFlashBrowser.ViewModels
 
         public MainWindowViewModel()
         {
+            LoadFavoriteItems();
             LoadLanguageMenu();
 
             OpenUrlCommand = new DelegateCommand(p => OpenUrl());
