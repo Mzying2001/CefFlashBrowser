@@ -21,6 +21,8 @@ namespace CefFlashBrowser.ViewModels
 
         public DelegateCommand OpenSettingsWindowCommand { get; set; }
 
+        public DelegateCommand OpenFavoritesManagerCommand { get; set; }
+
         public DelegateCommand LoadSwfCommand { get; set; }
 
         public string AppVersion
@@ -137,6 +139,11 @@ namespace CefFlashBrowser.ViewModels
             new SettingsWindow().ShowDialog();
         }
 
+        private void OpenFavoritesManager()
+        {
+            MessageBox.Show("coming soon...");
+        }
+
         private void LoadSwf()
         {
             var ofd = new Microsoft.Win32.OpenFileDialog()
@@ -159,6 +166,8 @@ namespace CefFlashBrowser.ViewModels
             UpdateUrlCommand = new DelegateCommand(UpdateUrl);
 
             OpenSettingsWindowCommand = new DelegateCommand(p => OpenSettingsWindow());
+
+            OpenFavoritesManagerCommand = new DelegateCommand(p => OpenFavoritesManager());
 
             LoadSwfCommand = new DelegateCommand(p => LoadSwf());
         }

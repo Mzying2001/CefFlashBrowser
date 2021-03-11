@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:CefFlashBrowser"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
+        xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         
@@ -26,20 +27,35 @@
         </Grid.RowDefinitions>
 
         <Menu>
+            <Menu.Resources>
+                <DataTemplate DataType="{x:Type mvm:MenuItemViewModel}">
+                    <MenuItem Header="{Binding Header}"
+                              Command="{Binding MenuItemSelectedCommand}"
+                              IsChecked="{Binding IsSelected}"/>
+                </DataTemplate>
+            </Menu.Resources>
+
             <!--Favorites Menu-->
-            <MenuItem Header="{DynamicResource menu_favorites}"
-                      ItemsSource="{Binding FavoriteItems}">
-                <MenuItem.ItemTemplate>
-                    <DataTemplate>
-                        <MenuItem Header="{Binding Header}"
-                                  Command="{Binding MenuItemSelectedCommand}"/>
-                    </DataTemplate>
-                </MenuItem.ItemTemplate>
+            <MenuItem Header="{DynamicResource menu_favorites}">
+                <MenuItem.ItemsSource>
+                    <CompositeCollection>
+                        <MenuItem Header="{DynamicResource menu_manageFavorites}"
+                                  Command="{Binding OpenFavoritesManagerCommand}"/>
+                        <Separator/>
+                        <CollectionContainer Collection="{Binding Source={x:Reference Name=favorites}, Path=ItemsSource}"/>
+                    </CompositeCollection>
+                </MenuItem.ItemsSource>
             </MenuItem>
+
+            <!--Favorites-->
+            <MenuItem Name="favorites"
+                      Width="0"
+                      Visibility="Hidden"
+                      ItemsSource="{Binding FavoriteItems}"/>
 
             <!--Options Menu-->
             <MenuItem Header="{DynamicResource menu_options}">
-                
+
                 <!--Load Swf Option-->
                 <MenuItem Header="{DynamicResource menu_loadSwf}"
                           Command="{Binding LoadSwfCommand}"/>
@@ -48,16 +64,8 @@
 
                 <!--Languages Option-->
                 <MenuItem Header="{DynamicResource menu_languages}"
-                          ItemsSource="{Binding LanguageMenuItems}">
-                    <MenuItem.ItemTemplate>
-                        <DataTemplate>
-                            <MenuItem Header="{Binding Header}"
-                                      Command="{Binding MenuItemSelectedCommand}"
-                                      IsChecked="{Binding IsSelected}"/>
-                        </DataTemplate>
-                    </MenuItem.ItemTemplate>
-                </MenuItem>
-                
+                          ItemsSource="{Binding LanguageMenuItems}"/>
+
                 <!--Settings Option-->
                 <MenuItem Header="{DynamicResource menu_settings}"
                           Command="{Binding OpenSettingsWindowCommand}"/>
@@ -109,7 +117,7 @@
                         Command="{Binding OpenUrlCommand}"/>
             </StackPanel>
         </Grid>
-        
+
         <!--The app info shows on the bottom of the main window-->
         <TextBlock Grid.Row="2"
                    Margin="5"

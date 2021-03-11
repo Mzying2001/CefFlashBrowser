@@ -10,6 +10,7 @@
     <sys:String x:Key="window_title">欢迎 (๑╹ヮ╹๑)ﾉ</sys:String>
     <sys:String x:Key="button_go">跳转</sys:String>
     <sys:String x:Key="menu_favorites">收藏夹</sys:String>
+    <sys:String x:Key="menu_manageFavorites">管理收藏夹</sys:String>
     <sys:String x:Key="menu_languages">语言</sys:String>
     <sys:String x:Key="menu_options">选项</sys:String>
     <sys:String x:Key="menu_settings">设置</sys:String>
