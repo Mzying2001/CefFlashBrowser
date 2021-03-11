@@ -30,6 +30,9 @@ namespace CefFlashBrowser.ViewModels
             {
                 _url = value;
                 RaisePropertyChanged("Url");
+
+                if (string.IsNullOrEmpty(Title))
+                    Title = value;
             }
         }
 
