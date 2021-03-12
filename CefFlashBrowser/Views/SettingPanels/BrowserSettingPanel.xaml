@@ -14,22 +14,11 @@
     </UserControl.DataContext>
 
     <UserControl.Resources>
-        <ResourceDictionary>
-
-            <!--Header-->
-            <Thickness x:Key="HeaderMargin">0,15</Thickness>
-            <FontWeight x:Key="HeaderFontWeight">Bold</FontWeight>
-            <sys:Double x:Key="HeaderFontSize">18</sys:Double>
-
-            <!--Setting Item-->
-            <Thickness x:Key="SettingItemMargin">2,5</Thickness>
-
-        </ResourceDictionary>
+        <ResourceDictionary Source="SettingPanelResources.xaml"/>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Hidden">
-        <Grid Margin="15">
+    <ScrollViewer Style="{StaticResource SettingPanelScrollViewerStyle}">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -38,13 +27,11 @@
             <!--Browser Cache-->
             <TextBlock Grid.Row="0"
                        Text="{StaticResource settingHeader_browserData}"
-                       Margin="{StaticResource HeaderMargin}"
-                       FontSize="{StaticResource HeaderFontSize}"
-                       FontWeight="{StaticResource HeaderFontWeight}"/>
+                       Style="{StaticResource SettingPanelHeaderStyle}"/>
 
             <!--Delete Caches-->
             <Grid Grid.Row="1"
-                  Margin="{StaticResource SettingItemMargin}">
+                  Style="{StaticResource SettingPanelItemGridStyle}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -52,7 +39,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
                            Text="{StaticResource settingItem_deleteCache}"
-                           VerticalAlignment="Center"/>
+                           Style="{StaticResource SettingPanelItemStyle}"/>
                 <Button Grid.Column="2"
                         Content="{StaticResource button_deleteCache}"
                         Command="{Binding DeleteCacheCommand}"/>
