@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -25,6 +26,10 @@ namespace CefFlashBrowser.ViewModels
 
         public DelegateCommand LoadSwfCommand { get; set; }
 
+        public ObservableCollection<FavoriteMenuItemVliewModel> FavoriteItems { get; set; }
+
+        public ObservableCollection<LanguageMenuItemViewModel> LanguageMenuItems { get; set; }
+
         public string AppVersion
         {
             get => Application.ResourceAssembly.GetName().Version.ToString();
@@ -42,33 +47,9 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private List<FavoriteMenuItemVliewModel> _favoriteItems;
-
-        public List<FavoriteMenuItemVliewModel> FavoriteItems
-        {
-            get => _favoriteItems;
-            set
-            {
-                _favoriteItems = value;
-                RaisePropertyChanged("FavoriteItems");
-            }
-        }
-
-        private List<LanguageMenuItemViewModel> _languageMenuItems;
-
-        public List<LanguageMenuItemViewModel> LanguageMenuItems
-        {
-            get => _languageMenuItems;
-            set
-            {
-                _languageMenuItems = value;
-                RaisePropertyChanged("LanguageMenuItems");
-            }
-        }
-
         private void LoadLanguageMenu()
         {
-            LanguageMenuItems = new List<LanguageMenuItemViewModel>();
+            LanguageMenuItems = new ObservableCollection<LanguageMenuItemViewModel>();
 
             foreach (var item in LanguageManager.GetSupportedLanguage())
             {
@@ -82,13 +63,14 @@ namespace CefFlashBrowser.ViewModels
 
         private void UpdateLanguageMenuItemsChecked()
         {
+            var current = LanguageManager.CurrentLanguage;
             foreach (var item in LanguageMenuItems)
-                item.IsSelected = item.Language == LanguageManager.CurrentLanguage;
+                item.IsSelected = item.Language == current;
         }
 
         private void LoadFavoriteItems()
         {
-            FavoriteItems = new List<FavoriteMenuItemVliewModel>();
+            FavoriteItems = new ObservableCollection<FavoriteMenuItemVliewModel>();
             foreach (var item in new JsonDataService().GetFavorites())
                 FavoriteItems.Add(new FavoriteMenuItemVliewModel(item));
         }

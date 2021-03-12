@@ -3,6 +3,7 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.ViewModels.ComboBoxItemViewModels;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,29 +17,9 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 
         public DelegateCommand SwitchSearchEngineCommand { get; set; }
 
-        private List<SearchEngineComboBoxItemViewModel> _searchEngineItems;
+        public ObservableCollection<SearchEngineComboBoxItemViewModel> SearchEngineItems { get; set; }
 
-        public List<SearchEngineComboBoxItemViewModel> SearchEngineItems
-        {
-            get => _searchEngineItems;
-            set
-            {
-                _searchEngineItems = value;
-                RaisePropertyChanged("SearchEngineItems");
-            }
-        }
-
-        private List<AddressBarFunctionComboBoxViewModel> _addressBarFunctions;
-
-        public List<AddressBarFunctionComboBoxViewModel> AddressBarFunctions
-        {
-            get => _addressBarFunctions;
-            set
-            {
-                _addressBarFunctions = value;
-                RaisePropertyChanged("AddressBarFunctions");
-            }
-        }
+        public ObservableCollection<AddressBarFunctionComboBoxViewModel> AddressBarFunctions { get; set; }
 
         public int CurrentSearchEngineValue
         {
@@ -62,14 +43,14 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 
         private void LoadSearchEngineItems()
         {
-            SearchEngineItems = new List<SearchEngineComboBoxItemViewModel>();
+            SearchEngineItems = new ObservableCollection<SearchEngineComboBoxItemViewModel>();
             foreach (var (engine, name) in SearchEngine.GetSupportedSearchEngines())
                 SearchEngineItems.Add(new SearchEngineComboBoxItemViewModel(name, engine));
         }
 
         private void LoadAddressBarFunctions()
         {
-            AddressBarFunctions = new List<AddressBarFunctionComboBoxViewModel>();
+            AddressBarFunctions = new ObservableCollection<AddressBarFunctionComboBoxViewModel>();
             for (int i = 0; i < 3; i++)
                 AddressBarFunctions.Add(new AddressBarFunctionComboBoxViewModel(i));
         }
