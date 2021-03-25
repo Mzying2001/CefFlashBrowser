@@ -2,10 +2,18 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
+        xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         mc:Ignorable="d"
         Title="FavoriteManager" Height="450" Width="700">
+
+    <Window.DataContext>
+        <vm:FavoriteManagerViewModel/>
+    </Window.DataContext>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
@@ -26,7 +34,21 @@
                 <Button Content="Remove" Margin="0,0,7,0"/>
             </StackPanel>
 
-            <ListBox Grid.Row="1"/>
+            <ListBox Grid.Row="1"
+                     SelectedIndex="{Binding SelectedIndex}"
+                     ItemsSource="{Binding FavoriteItems}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type mvm:FavoriteMenuItemVliewModel}">
+                        <TextBlock Text="{Binding Header}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}"
+                                               CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ListBox}}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
         </Grid>
 
         <GroupBox Grid.Column="1"
@@ -56,11 +78,13 @@
                         <TextBlock Text="Name"
                                    Foreground="Black"/>
                         <TextBox Margin="0,0,0,20"
-                                 Width="300"/>
+                                 Width="300"
+                                 Text="{Binding SelectedName}"/>
                         <TextBlock Text="URL"
                                    Foreground="Black"/>
                         <TextBox Margin="0,0,0,20"
-                                 Width="300"/>
+                                 Width="300"
+                                 Text="{Binding SelectedUrl}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>

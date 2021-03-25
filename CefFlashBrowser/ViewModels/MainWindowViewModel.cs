@@ -123,7 +123,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void OpenFavoritesManager()
         {
-            new FavoriteManager().ShowDialog();
+            new FavoriteManager(FavoriteItems).ShowDialog();
         }
 
         private void LoadSwf()

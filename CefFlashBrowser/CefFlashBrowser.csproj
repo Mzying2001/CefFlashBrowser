@@ -121,6 +121,7 @@
     <Compile Include="ViewModels\ComboBoxItemViewModels\ComboBoxItemViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\AddressBarFunctionComboBoxViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\SearchEngineComboBoxItemViewModel.cs" />
+    <Compile Include="ViewModels\FavoriteManagerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\FavoriteMenuItemVliewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\LanguageMenuItemViewModel.cs" />
