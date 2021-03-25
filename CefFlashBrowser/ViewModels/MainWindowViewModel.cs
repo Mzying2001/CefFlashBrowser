@@ -123,7 +123,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void OpenFavoritesManager()
         {
-            MessageBox.Show("coming soon...");
+            new FavoriteManager().ShowDialog();
         }
 
         private void LoadSwf()

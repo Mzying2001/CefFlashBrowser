@@ -29,7 +29,8 @@
         <Menu>
             <Menu.Resources>
                 <DataTemplate DataType="{x:Type mvm:MenuItemViewModel}">
-                    <MenuItem Header="{Binding Header}"
+                    <MenuItem Padding="0"
+                              Header="{Binding Header}"
                               Command="{Binding MenuItemSelectedCommand}"
                               IsChecked="{Binding IsSelected}"/>
                 </DataTemplate>
