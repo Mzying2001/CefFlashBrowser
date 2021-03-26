@@ -140,10 +140,9 @@ namespace CefFlashBrowser.ViewModels
             var website = new Website(LanguageManager.GetString("favorites_name"),
                                       LanguageManager.GetString("favorites_url"));
 
-            if (FavoriteItems[FavoriteItems.Count - 1].Website == website)
-                return;
+            if (FavoriteItems[FavoriteItems.Count - 1].Website != website)
+                FavoriteItems.Add(new FavoriteMenuItemVliewModel(website));
 
-            FavoriteItems.Add(new FavoriteMenuItemVliewModel(website));
             SelectedIndex = FavoriteItems.Count - 1;
         }
 
