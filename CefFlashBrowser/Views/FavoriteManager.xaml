@@ -30,8 +30,8 @@
             <StackPanel Grid.Column="0"
                         Margin="0,0,0,7"
                         Orientation="Horizontal">
-                <Button Content="{StaticResource favorites_add}" Margin="0,0,7,0"/>
-                <Button Content="{StaticResource favorites_remove}" Margin="0,0,7,0"/>
+                <Button Content="{StaticResource favorites_add}" Command="{Binding AddItemCommand}" Margin="0,0,7,0"/>
+                <Button Content="{StaticResource favorites_remove}" Command="{Binding RemoveItemCommand}" Margin="0,0,7,0"/>
             </StackPanel>
 
             <ListBox Grid.Row="1"
@@ -54,7 +54,7 @@
         <GroupBox Grid.Column="1"
                   Margin="0,10,10,10"
                   Header="{StaticResource favorites_edit}">
-            <Grid>
+            <Grid IsEnabled="{Binding HasItems}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>

@@ -48,4 +48,5 @@
     <sys:String x:Key="favorites_name">名称</sys:String>
     <sys:String x:Key="favorites_url">地址</sys:String>
     <sys:String x:Key="favorites_save">保存</sys:String>
+    <sys:String x:Key="message_removeItem">确定要移除“{0}”吗？</sys:String>
 </ResourceDictionary>

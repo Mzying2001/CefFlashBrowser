@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace CefFlashBrowser.ViewModels
@@ -23,11 +24,27 @@ namespace CefFlashBrowser.ViewModels
 
         public DelegateCommand SaveChangesCommand { get; set; }
 
+        public DelegateCommand AddItemCommand { get; set; }
+
+        public DelegateCommand RemoveItemCommand { get; set; }
+
         public DelegateCommand MoveUpCommand { get; set; }
 
         public DelegateCommand MoveDownCommand { get; set; }
 
         public ObservableCollection<FavoriteMenuItemVliewModel> FavoriteItems { get; set; }
+
+        private bool _hasItems;
+
+        public bool HasItems
+        {
+            get => _hasItems;
+            set
+            {
+                _hasItems = value;
+                RaisePropertyChanged("HasItems");
+            }
+        }
 
         private int _selectedIndex;
 
@@ -67,13 +84,26 @@ namespace CefFlashBrowser.ViewModels
 
         private void SelectionChanged(object sender)
         {
-            if (FavoriteItems == null || FavoriteItems.Count == 0)
+            if (FavoriteItems == null)
                 return;
 
             _switchingIndexFlag = true;
             SelectedIndex = (sender as ListBox)?.SelectedIndex ?? 0;
-            SelectedName = FavoriteItems[SelectedIndex].Website.Name;
-            SelectedUrl = FavoriteItems[SelectedIndex].Website.Url;
+            if (SelectedIndex == -1)
+            {
+                HasItems = false;
+                SelectedName = string.Empty;
+                SelectedUrl = string.Empty;
+            }
+            else
+            {
+                if (FavoriteItems.Count != 0)
+                {
+                    HasItems = true;
+                    SelectedName = FavoriteItems[SelectedIndex].Website.Name;
+                    SelectedUrl = FavoriteItems[SelectedIndex].Website.Url;
+                }
+            }
             _switchingIndexFlag = false;
         }
 
@@ -101,7 +131,27 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
-                System.Windows.MessageBox.Show(e.Message);
+                MessageBox.Show(e.Message);
+            }
+        }
+
+        private void AddItem()
+        {
+            var website = new Website(LanguageManager.GetString("favorites_name"),
+                                      LanguageManager.GetString("favorites_url"));
+            FavoriteItems.Add(new FavoriteMenuItemVliewModel(website));
+            SelectedIndex = FavoriteItems.Count - 1;
+        }
+
+        private void RemoveItem()
+        {
+            var r = MessageBox.Show(string.Format(LanguageManager.GetString("message_removeItem"), FavoriteItems[SelectedIndex].Header),
+                                    string.Empty, MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (r == MessageBoxResult.Yes)
+            {
+                FavoriteItems.RemoveAt(SelectedIndex--);
+                if (SelectedIndex == -1 && FavoriteItems.Count > 0)
+                    SelectedIndex = 0;
             }
         }
 
@@ -141,6 +191,10 @@ namespace CefFlashBrowser.ViewModels
             UpdateUrlCommand = new DelegateCommand(p => UpdateUrl(p?.ToString()));
 
             SaveChangesCommand = new DelegateCommand(p => SaveChanges());
+
+            AddItemCommand = new DelegateCommand(p => AddItem());
+
+            RemoveItemCommand = new DelegateCommand(p => RemoveItem());
 
             MoveUpCommand = new DelegateCommand(p => MoveUp());
 
