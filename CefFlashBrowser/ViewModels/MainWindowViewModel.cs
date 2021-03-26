@@ -26,7 +26,7 @@ namespace CefFlashBrowser.ViewModels
 
         public DelegateCommand LoadSwfCommand { get; set; }
 
-        public ObservableCollection<FavoriteMenuItemVliewModel> FavoriteItems { get; set; }
+        public ObservableCollection<FavoritesMenuItemVliewModel> FavoritesItems { get; set; }
 
         public ObservableCollection<LanguageMenuItemViewModel> LanguageMenuItems { get; set; }
 
@@ -70,9 +70,9 @@ namespace CefFlashBrowser.ViewModels
 
         private void LoadFavoriteItems()
         {
-            FavoriteItems = new ObservableCollection<FavoriteMenuItemVliewModel>();
+            FavoritesItems = new ObservableCollection<FavoritesMenuItemVliewModel>();
             foreach (var item in new JsonDataService().GetFavorites())
-                FavoriteItems.Add(new FavoriteMenuItemVliewModel(item));
+                FavoritesItems.Add(new FavoritesMenuItemVliewModel(item));
         }
 
         private void OpenUrl()
@@ -123,8 +123,8 @@ namespace CefFlashBrowser.ViewModels
 
         private void OpenFavoritesManager()
         {
-            new FavoriteManager(FavoriteItems).ShowDialog();
-            new JsonDataService().WriteFavorites(from item in FavoriteItems select item.Website);
+            new FavoritesManager(FavoritesItems).ShowDialog();
+            new JsonDataService().WriteFavorites(from item in FavoritesItems select item.Website);
         }
 
         private void LoadSwf()

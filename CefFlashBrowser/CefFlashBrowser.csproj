@@ -121,9 +121,9 @@
     <Compile Include="ViewModels\ComboBoxItemViewModels\ComboBoxItemViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\AddressBarFunctionComboBoxViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\SearchEngineComboBoxItemViewModel.cs" />
-    <Compile Include="ViewModels\FavoriteManagerViewModel.cs" />
+    <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
-    <Compile Include="ViewModels\MenuItemViewModels\FavoriteMenuItemVliewModel.cs" />
+    <Compile Include="ViewModels\MenuItemViewModels\FavoritesMenuItemVliewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\LanguageMenuItemViewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\NotificationObject.cs" />
@@ -132,8 +132,8 @@
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\FavoriteManager.xaml.cs">
-      <DependentUpon>FavoriteManager.xaml</DependentUpon>
+    <Compile Include="Views\FavoritesManager.xaml.cs">
+      <DependentUpon>FavoritesManager.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingPanels\BrowserSettingPanel.xaml.cs">
       <DependentUpon>BrowserSettingPanel.xaml</DependentUpon>
@@ -156,7 +156,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\FavoriteManager.xaml">
+    <Page Include="Views\FavoritesManager.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

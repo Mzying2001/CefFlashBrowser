@@ -52,7 +52,7 @@
             <MenuItem Name="favorites"
                       Width="0"
                       Visibility="Hidden"
-                      ItemsSource="{Binding FavoriteItems}"/>
+                      ItemsSource="{Binding FavoritesItems}"/>
 
             <!--Options Menu-->
             <MenuItem Header="{DynamicResource menu_options}">

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CefFlashBrowser.ViewModels.MenuItemViewModels
 {
-    class FavoriteMenuItemVliewModel : MenuItemViewModel
+    class FavoritesMenuItemVliewModel : MenuItemViewModel
     {
         private Website _website;
 
@@ -27,7 +27,7 @@ namespace CefFlashBrowser.ViewModels.MenuItemViewModels
             BrowserWindow.Popup(Website.Url);
         }
 
-        public FavoriteMenuItemVliewModel(Website website) : base()
+        public FavoritesMenuItemVliewModel(Website website) : base()
         {
             Header = website.Name;
             Website = website;

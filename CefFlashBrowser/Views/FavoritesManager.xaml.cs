@@ -20,20 +20,20 @@ namespace CefFlashBrowser.Views
     /// <summary>
     /// FavoriteManager.xaml 的交互逻辑
     /// </summary>
-    public partial class FavoriteManager : Window
+    public partial class FavoritesManager : Window
     {
-        private FavoriteManagerViewModel _viewModel;
+        private FavoritesManagerViewModel _viewModel;
 
-        public FavoriteManager()
+        public FavoritesManager()
         {
             InitializeComponent();
-            _viewModel = DataContext as FavoriteManagerViewModel;
+            _viewModel = DataContext as FavoritesManagerViewModel;
         }
 
-        internal FavoriteManager(ObservableCollection<FavoriteMenuItemVliewModel> favorites) : this()
+        internal FavoritesManager(ObservableCollection<FavoritesMenuItemVliewModel> favorites) : this()
         {
-            _viewModel.FavoriteItems = favorites;
-            _viewModel.RaisePropertyChanged("FavoriteItems");
+            _viewModel.FavoritesItems = favorites;
+            _viewModel.RaisePropertyChanged("FavoritesItems");
             _viewModel.SelectionChangedCommand.Execute.Invoke(null);
         }
     }

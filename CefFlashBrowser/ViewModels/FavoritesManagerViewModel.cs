@@ -12,7 +12,7 @@ using System.Windows.Controls;
 
 namespace CefFlashBrowser.ViewModels
 {
-    class FavoriteManagerViewModel : NotificationObject
+    class FavoritesManagerViewModel : NotificationObject
     {
         private bool _switchingIndexFlag = false;
 
@@ -32,7 +32,7 @@ namespace CefFlashBrowser.ViewModels
 
         public DelegateCommand MoveDownCommand { get; set; }
 
-        public ObservableCollection<FavoriteMenuItemVliewModel> FavoriteItems { get; set; }
+        public ObservableCollection<FavoritesMenuItemVliewModel> FavoritesItems { get; set; }
 
         private bool _hasItems;
 
@@ -84,7 +84,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void SelectionChanged(object sender)
         {
-            if (FavoriteItems == null)
+            if (FavoritesItems == null)
                 return;
 
             _switchingIndexFlag = true;
@@ -97,11 +97,11 @@ namespace CefFlashBrowser.ViewModels
             }
             else
             {
-                if (FavoriteItems.Count != 0)
+                if (FavoritesItems.Count != 0)
                 {
                     HasItems = true;
-                    SelectedName = FavoriteItems[SelectedIndex].Website.Name;
-                    SelectedUrl = FavoriteItems[SelectedIndex].Website.Url;
+                    SelectedName = FavoritesItems[SelectedIndex].Website.Name;
+                    SelectedUrl = FavoritesItems[SelectedIndex].Website.Url;
                 }
             }
             _switchingIndexFlag = false;
@@ -121,13 +121,13 @@ namespace CefFlashBrowser.ViewModels
 
         private void SaveChanges()
         {
-            if (FavoriteItems == null || FavoriteItems.Count == 0)
+            if (FavoritesItems == null || FavoritesItems.Count == 0)
                 return;
 
             try
             {
                 var website = new Website(SelectedName.Trim(), SelectedUrl.Trim());
-                FavoriteItems[SelectedIndex].Website = website;
+                FavoritesItems[SelectedIndex].Website = website;
             }
             catch (Exception e)
             {
@@ -140,29 +140,29 @@ namespace CefFlashBrowser.ViewModels
             var website = new Website(LanguageManager.GetString("favorites_name"),
                                       LanguageManager.GetString("favorites_url"));
 
-            if (FavoriteItems.Count == 0 || FavoriteItems[FavoriteItems.Count - 1].Website != website)
-                FavoriteItems.Add(new FavoriteMenuItemVliewModel(website));
+            if (FavoritesItems.Count == 0 || FavoritesItems[FavoritesItems.Count - 1].Website != website)
+                FavoritesItems.Add(new FavoritesMenuItemVliewModel(website));
 
-            SelectedIndex = FavoriteItems.Count - 1;
+            SelectedIndex = FavoritesItems.Count - 1;
         }
 
         private void RemoveItem()
         {
-            var r = MessageBox.Show(string.Format(LanguageManager.GetString("message_removeItem"), FavoriteItems[SelectedIndex].Header),
+            var r = MessageBox.Show(string.Format(LanguageManager.GetString("message_removeItem"), FavoritesItems[SelectedIndex].Header),
                                     string.Empty, MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (r == MessageBoxResult.Yes)
             {
-                FavoriteItems.RemoveAt(SelectedIndex--);
-                if (SelectedIndex == -1 && FavoriteItems.Count > 0)
+                FavoritesItems.RemoveAt(SelectedIndex--);
+                if (SelectedIndex == -1 && FavoritesItems.Count > 0)
                     SelectedIndex = 0;
             }
         }
 
         private void SwapItem(int i, int j)
         {
-            var temp = FavoriteItems[i].Website;
-            FavoriteItems[i].Website = FavoriteItems[j].Website;
-            FavoriteItems[j].Website = temp;
+            var temp = FavoritesItems[i].Website;
+            FavoritesItems[i].Website = FavoritesItems[j].Website;
+            FavoritesItems[j].Website = temp;
         }
 
         private void MoveUp()
@@ -178,14 +178,14 @@ namespace CefFlashBrowser.ViewModels
         private void MoveDown()
         {
             int index = SelectedIndex;
-            if (index < FavoriteItems.Count - 1)
+            if (index < FavoritesItems.Count - 1)
             {
                 SwapItem(index, index + 1);
                 SelectedIndex++;
             }
         }
 
-        public FavoriteManagerViewModel()
+        public FavoritesManagerViewModel()
         {
             SelectionChangedCommand = new DelegateCommand(SelectionChanged);
 
