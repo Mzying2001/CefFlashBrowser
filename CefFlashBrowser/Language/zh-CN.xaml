@@ -40,8 +40,9 @@
     <sys:String x:Key="bing">必应</sys:String>
     <sys:String x:Key="sogou">搜狗</sys:String>
     <sys:String x:Key="so360">360</sys:String>
-    
+
     <!--收藏夹管理器-->
+    <sys:String x:Key="favorites_managerTitle">收藏夹管理器</sys:String>
     <sys:String x:Key="favorites_add">添加</sys:String>
     <sys:String x:Key="favorites_remove">移除</sys:String>
     <sys:String x:Key="favorites_edit">编辑</sys:String>

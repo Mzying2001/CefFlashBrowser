@@ -8,7 +8,7 @@
         xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         mc:Ignorable="d"
-        Title="{StaticResource menu_manageFavorites}" Height="450" Width="700">
+        Title="{StaticResource favorites_managerTitle}" Height="450" Width="700">
 
     <Window.DataContext>
         <vm:FavoritesManagerViewModel/>

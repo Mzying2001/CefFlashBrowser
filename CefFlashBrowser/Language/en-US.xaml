@@ -2,11 +2,11 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="language_name">English</sys:String>
-    
+
     <!--App-->
     <sys:String x:Key="invalidStartUpParam">Invalid start-up parameter</sys:String>
 
-    <!--MainWindow-->
+    <!--Main Window-->
     <sys:String x:Key="window_title">Welcome ♪(^∇^*)</sys:String>
     <sys:String x:Key="button_go">Go</sys:String>
     <sys:String x:Key="menu_favorites">Favorites</sys:String>
@@ -17,8 +17,8 @@
     <sys:String x:Key="menu_loadSwf">Load local swf file...</sys:String>
     <sys:String x:Key="filter_swf">swf file</sys:String>
     <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>
-    
-    <!--SettingsWindow-->
+
+    <!--Settings Window-->
     <sys:String x:Key="tabItem_main">Main</sys:String>
     <sys:String x:Key="tabItem_browser">Browser</sys:String>
     <sys:String x:Key="settingHeader_addressBar">Address Bar and Search</sys:String>
@@ -28,7 +28,7 @@
     <sys:String x:Key="settingItem_deleteCache">Delete all caches</sys:String>
     <sys:String x:Key="button_deleteCache">Delete</sys:String>
     <sys:String x:Key="message_deleteCache">Are you sure to delete all caches? The browser will restart.</sys:String>
-    
+
     <!--Address Bar Funcion-->
     <sys:String x:Key="addressBarFunction_auto">Automatic</sys:String>
     <sys:String x:Key="addressBarFunction_searchOnly">Search Only</sys:String>
@@ -40,8 +40,9 @@
     <sys:String x:Key="bing">Bing</sys:String>
     <sys:String x:Key="sogou">Sogou</sys:String>
     <sys:String x:Key="so360">360</sys:String>
-    
-    <!--FavoriteManager-->
+
+    <!--Favorites Manager-->
+    <sys:String x:Key="favorites_managerTitle">Favorites Manager</sys:String>
     <sys:String x:Key="favorites_add">Add</sys:String>
     <sys:String x:Key="favorites_remove">Remove</sys:String>
     <sys:String x:Key="favorites_edit">Edit</sys:String>
