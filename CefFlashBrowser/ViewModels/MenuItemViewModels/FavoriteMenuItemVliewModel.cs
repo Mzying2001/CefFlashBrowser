@@ -10,7 +10,17 @@ namespace CefFlashBrowser.ViewModels.MenuItemViewModels
 {
     class FavoriteMenuItemVliewModel : MenuItemViewModel
     {
-        public Website Website { get; set; }
+        private Website _website;
+
+        public Website Website
+        {
+            get => _website;
+            set
+            {
+                _website = value;
+                Header = value.Name;
+            }
+        }
 
         protected override void MenuItemSelected()
         {

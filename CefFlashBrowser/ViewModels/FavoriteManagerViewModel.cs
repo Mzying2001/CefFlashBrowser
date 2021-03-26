@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Commands;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using System;
 using System.Collections.Generic;
@@ -86,7 +87,18 @@ namespace CefFlashBrowser.ViewModels
 
         private void SaveChanges()
         {
-            System.Windows.MessageBox.Show($"{SelectedName}\n{SelectedUrl}","debug");
+            if (FavoriteItems == null || FavoriteItems.Count == 0)
+                return;
+
+            try
+            {
+                var website = new Website(SelectedName.Trim(), SelectedUrl.Trim());
+                FavoriteItems[SelectedIndex].Website = website;
+            }
+            catch (Exception e)
+            {
+                System.Windows.MessageBox.Show(e.Message);
+            }
         }
 
         public FavoriteManagerViewModel()

@@ -124,6 +124,7 @@ namespace CefFlashBrowser.ViewModels
         private void OpenFavoritesManager()
         {
             new FavoriteManager(FavoriteItems).ShowDialog();
+            new JsonDataService().WriteFavorites(from item in FavoriteItems select item.Website);
         }
 
         private void LoadSwf()
