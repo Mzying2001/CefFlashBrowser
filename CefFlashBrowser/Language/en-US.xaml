@@ -40,4 +40,12 @@
     <sys:String x:Key="bing">Bing</sys:String>
     <sys:String x:Key="sogou">Sogou</sys:String>
     <sys:String x:Key="so360">360</sys:String>
+    
+    <!--FavoriteManager-->
+    <sys:String x:Key="favorites_add">Add</sys:String>
+    <sys:String x:Key="favorites_remove">Remove</sys:String>
+    <sys:String x:Key="favorites_edit">Edit</sys:String>
+    <sys:String x:Key="favorites_name">Name</sys:String>
+    <sys:String x:Key="favorites_url">Url</sys:String>
+    <sys:String x:Key="favorites_save">Save</sys:String>
 </ResourceDictionary>

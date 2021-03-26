@@ -40,4 +40,12 @@
     <sys:String x:Key="bing">Bing</sys:String>
     <sys:String x:Key="sogou">搜狗</sys:String>
     <sys:String x:Key="so360">360</sys:String>
+
+    <!--FavoriteManager-->
+    <sys:String x:Key="favorites_add">添加</sys:String>
+    <sys:String x:Key="favorites_remove">移除</sys:String>
+    <sys:String x:Key="favorites_edit">編輯</sys:String>
+    <sys:String x:Key="favorites_name">名稱</sys:String>
+    <sys:String x:Key="favorites_url">地址</sys:String>
+    <sys:String x:Key="favorites_save">保存</sys:String>
 </ResourceDictionary>

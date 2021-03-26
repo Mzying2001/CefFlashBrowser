@@ -8,12 +8,12 @@
         xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         mc:Ignorable="d"
-        Title="FavoriteManager" Height="450" Width="700">
+        Title="{StaticResource menu_manageFavorites}" Height="450" Width="700">
 
     <Window.DataContext>
         <vm:FavoriteManagerViewModel/>
     </Window.DataContext>
-    
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
@@ -30,8 +30,8 @@
             <StackPanel Grid.Column="0"
                         Margin="0,0,0,7"
                         Orientation="Horizontal">
-                <Button Content="Add" Margin="0,0,7,0"/>
-                <Button Content="Remove" Margin="0,0,7,0"/>
+                <Button Content="{StaticResource favorites_add}" Margin="0,0,7,0"/>
+                <Button Content="{StaticResource favorites_remove}" Margin="0,0,7,0"/>
             </StackPanel>
 
             <ListBox Grid.Row="1"
@@ -53,7 +53,7 @@
 
         <GroupBox Grid.Column="1"
                   Margin="0,10,10,10"
-                  Header="Edit Item">
+                  Header="{StaticResource favorites_edit}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -75,7 +75,7 @@
 
                     <StackPanel Grid.Row="1"
                                 Grid.Column="1">
-                        <TextBlock Text="Name"
+                        <TextBlock Text="{StaticResource favorites_name}"
                                    Foreground="Black"/>
                         <TextBox Margin="0,0,0,20"
                                  Width="300"
@@ -87,8 +87,8 @@
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                         </TextBox>
-                        
-                        <TextBlock Text="URL"
+
+                        <TextBlock Text="{StaticResource favorites_url}"
                                    Foreground="Black"/>
                         <TextBox Margin="0,0,0,20"
                                  Width="300"
@@ -109,11 +109,13 @@
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0" Content="↑"/>
                             <Button Grid.Column="1" Content="↓"/>
-                            <Button Grid.Column="3" Content="Change" Command="{Binding SaveChangesCommand}"/>
+                            <Button Grid.Column="3"
+                                    Content="{StaticResource favorites_save}"
+                                    Command="{Binding SaveChangesCommand}"/>
                         </Grid>
                     </StackPanel>
                 </Grid>
-                
+
             </Grid>
         </GroupBox>
     </Grid>
