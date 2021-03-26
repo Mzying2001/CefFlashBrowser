@@ -23,6 +23,10 @@ namespace CefFlashBrowser.ViewModels
 
         public DelegateCommand SaveChangesCommand { get; set; }
 
+        public DelegateCommand MoveUpCommand { get; set; }
+
+        public DelegateCommand MoveDownCommand { get; set; }
+
         public ObservableCollection<FavoriteMenuItemVliewModel> FavoriteItems { get; set; }
 
         private int _selectedIndex;
@@ -101,6 +105,33 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void SwapItem(int i, int j)
+        {
+            var temp = FavoriteItems[i].Website;
+            FavoriteItems[i].Website = FavoriteItems[j].Website;
+            FavoriteItems[j].Website = temp;
+        }
+
+        private void MoveUp()
+        {
+            int index = SelectedIndex;
+            if (index > 0)
+            {
+                SwapItem(index, index - 1);
+                SelectedIndex--;
+            }
+        }
+
+        private void MoveDown()
+        {
+            int index = SelectedIndex;
+            if (index < FavoriteItems.Count - 1)
+            {
+                SwapItem(index, index + 1);
+                SelectedIndex++;
+            }
+        }
+
         public FavoriteManagerViewModel()
         {
             SelectionChangedCommand = new DelegateCommand(SelectionChanged);
@@ -110,6 +141,10 @@ namespace CefFlashBrowser.ViewModels
             UpdateUrlCommand = new DelegateCommand(p => UpdateUrl(p?.ToString()));
 
             SaveChangesCommand = new DelegateCommand(p => SaveChanges());
+
+            MoveUpCommand = new DelegateCommand(p => MoveUp());
+
+            MoveDownCommand = new DelegateCommand(p => MoveDown());
         }
     }
 }

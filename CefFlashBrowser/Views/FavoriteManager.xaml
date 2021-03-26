@@ -107,8 +107,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="↑"/>
-                            <Button Grid.Column="1" Content="↓"/>
+                            <Button Grid.Column="0" Content="↑" Command="{Binding MoveUpCommand}"/>
+                            <Button Grid.Column="1" Content="↓" Command="{Binding MoveDownCommand}"/>
                             <Button Grid.Column="3"
                                     Content="{StaticResource favorites_save}"
                                     Command="{Binding SaveChangesCommand}"/>
