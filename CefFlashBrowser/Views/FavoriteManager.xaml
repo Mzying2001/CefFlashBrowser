@@ -30,8 +30,13 @@
             <StackPanel Grid.Column="0"
                         Margin="0,0,0,7"
                         Orientation="Horizontal">
-                <Button Content="{StaticResource favorites_add}" Command="{Binding AddItemCommand}" Margin="0,0,7,0"/>
-                <Button Content="{StaticResource favorites_remove}" Command="{Binding RemoveItemCommand}" Margin="0,0,7,0"/>
+                <Button Margin="0,0,7,0"
+                        Content="{StaticResource favorites_add}"
+                        Command="{Binding AddItemCommand}"/>
+                <Button Margin="0,0,7,0"
+                        IsEnabled="{Binding HasItems}"
+                        Content="{StaticResource favorites_remove}"
+                        Command="{Binding RemoveItemCommand}"/>
             </StackPanel>
 
             <ListBox Grid.Row="1"
