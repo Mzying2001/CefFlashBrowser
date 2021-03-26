@@ -12,7 +12,15 @@ namespace CefFlashBrowser.ViewModels
 {
     class FavoriteManagerViewModel : NotificationObject
     {
+        private bool _switchingIndexFlag = false;
+
         public DelegateCommand SelectionChangedCommand { get; set; }
+
+        public DelegateCommand UpdateNameCommand { get; set; }
+
+        public DelegateCommand UpdateUrlCommand { get; set; }
+
+        public DelegateCommand SaveChangesCommand { get; set; }
 
         public ObservableCollection<FavoriteMenuItemVliewModel> FavoriteItems { get; set; }
 
@@ -54,17 +62,42 @@ namespace CefFlashBrowser.ViewModels
 
         private void SelectionChanged(object sender)
         {
-            if (FavoriteItems.Count == 0)
+            if (FavoriteItems == null || FavoriteItems.Count == 0)
                 return;
 
+            _switchingIndexFlag = true;
             SelectedIndex = (sender as ListBox)?.SelectedIndex ?? 0;
             SelectedName = FavoriteItems[SelectedIndex].Website.Name;
             SelectedUrl = FavoriteItems[SelectedIndex].Website.Url;
+            _switchingIndexFlag = false;
+        }
+
+        private void UpdateName(string name)
+        {
+            if (!_switchingIndexFlag)
+                SelectedName = name;
+        }
+
+        private void UpdateUrl(string url)
+        {
+            if (!_switchingIndexFlag)
+                SelectedUrl = url;
+        }
+
+        private void SaveChanges()
+        {
+            System.Windows.MessageBox.Show($"{SelectedName}\n{SelectedUrl}","debug");
         }
 
         public FavoriteManagerViewModel()
         {
             SelectionChangedCommand = new DelegateCommand(SelectionChanged);
+
+            UpdateNameCommand = new DelegateCommand(p => UpdateName(p?.ToString()));
+
+            UpdateUrlCommand = new DelegateCommand(p => UpdateUrl(p?.ToString()));
+
+            SaveChangesCommand = new DelegateCommand(p => SaveChanges());
         }
     }
 }

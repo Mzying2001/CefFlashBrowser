@@ -79,12 +79,27 @@
                                    Foreground="Black"/>
                         <TextBox Margin="0,0,0,20"
                                  Width="300"
-                                 Text="{Binding SelectedName}"/>
+                                 Text="{Binding SelectedName}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="TextChanged">
+                                    <i:InvokeCommandAction Command="{Binding UpdateNameCommand}"
+                                                           CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </TextBox>
+                        
                         <TextBlock Text="URL"
                                    Foreground="Black"/>
                         <TextBox Margin="0,0,0,20"
                                  Width="300"
-                                 Text="{Binding SelectedUrl}"/>
+                                 Text="{Binding SelectedUrl}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="TextChanged">
+                                    <i:InvokeCommandAction Command="{Binding UpdateUrlCommand}"
+                                                           CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </TextBox>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -94,7 +109,7 @@
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0" Content="↑"/>
                             <Button Grid.Column="1" Content="↓"/>
-                            <Button Grid.Column="3" Content="Change"/>
+                            <Button Grid.Column="3" Content="Change" Command="{Binding SaveChangesCommand}"/>
                         </Grid>
                     </StackPanel>
                 </Grid>
