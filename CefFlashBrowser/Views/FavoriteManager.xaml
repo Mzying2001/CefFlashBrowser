@@ -86,6 +86,9 @@
                                                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
+                            </TextBox.InputBindings>
                         </TextBox>
 
                         <TextBlock Text="{StaticResource favorites_url}"
@@ -99,6 +102,9 @@
                                                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
+                            </TextBox.InputBindings>
                         </TextBox>
                         <Grid>
                             <Grid.ColumnDefinitions>
