@@ -111,9 +111,9 @@ namespace CefFlashBrowser.ViewModels
             BrowserWindow.Popup(url);
         }
 
-        private void UpdateUrl(object sender)
+        private void UpdateUrl(string url)
         {
-            Url = (sender as System.Windows.Controls.TextBox)?.Text;
+            Url = url;
         }
 
         private void OpenSettingsWindow()
@@ -146,7 +146,7 @@ namespace CefFlashBrowser.ViewModels
 
             OpenUrlCommand = new DelegateCommand(p => OpenUrl());
 
-            UpdateUrlCommand = new DelegateCommand(UpdateUrl);
+            UpdateUrlCommand = new DelegateCommand(p => UpdateUrl(p?.ToString()));
 
             OpenSettingsWindowCommand = new DelegateCommand(p => OpenSettingsWindow());
 

@@ -55,14 +55,14 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
                 AddressBarFunctions.Add(new AddressBarFunctionComboBoxViewModel(i));
         }
 
-        private void SwitchSearchEngine(object sender)
+        private void SwitchSearchEngine(int value)
         {
-            CurrentSearchEngineValue = (int)((sender as ComboBox)?.SelectedValue ?? 0);
+            CurrentSearchEngineValue = value;
         }
 
-        private void SwitchAddressBarFunction(object sender)
+        private void SwitchAddressBarFunction(int value)
         {
-            CurrentAddressBarFunction = (int)((sender as ComboBox)?.SelectedValue ?? 0);
+            CurrentAddressBarFunction = value;
         }
 
         public MainSettingPanelViewModel()
@@ -70,8 +70,8 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
             LoadAddressBarFunctions();
             LoadSearchEngineItems();
 
-            SwitchAddressBarFunctionCommand = new DelegateCommand(SwitchAddressBarFunction);
-            SwitchSearchEngineCommand = new DelegateCommand(SwitchSearchEngine);
+            SwitchAddressBarFunctionCommand = new DelegateCommand(p => SwitchAddressBarFunction(Convert.ToInt32(p)));
+            SwitchSearchEngineCommand = new DelegateCommand(p => SwitchSearchEngine(Convert.ToInt32(p)));
         }
     }
 }

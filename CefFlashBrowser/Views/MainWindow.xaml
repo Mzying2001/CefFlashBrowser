@@ -108,7 +108,7 @@
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="TextChanged">
                             <i:InvokeCommandAction Command="{Binding UpdateUrlCommand}"
-                                                   CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}}"/>
+                                                   CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </TextBox>
