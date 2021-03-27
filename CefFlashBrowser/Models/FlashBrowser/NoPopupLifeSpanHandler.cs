@@ -25,7 +25,12 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
         public bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
         {
-            (chromiumWebBrowser as ChromiumWebBrowser).Load(targetUrl);
+            var b = chromiumWebBrowser as ChromiumWebBrowser;
+
+            b?.Dispatcher.Invoke(() =>
+            {
+                b.Address = targetUrl;
+            });
 
             newBrowser = null;
             return true;
