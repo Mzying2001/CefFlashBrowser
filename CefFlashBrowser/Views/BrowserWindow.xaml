@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
-        xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
+        xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
         mc:Ignorable="d"
         
         Width="1000"
@@ -16,6 +16,6 @@
         <vm:BrowserWindowViewModel/>
     </Window.DataContext>
 
-    <m:FlashBrowser x:Name="browser" Address="{Binding Url}"/>
+    <flash:ChromiumFlashBrowser x:Name="browser" Address="{Binding Url}"/>
 
 </Window>

@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.FlashBrowser;
 using CefFlashBrowser.Views;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace CefFlashBrowser
         private void Init()
         {
             Settings.Init();
-            FlashBrowser.InitCefFlash();
+            ChromiumFlashBrowser.InitCefFlash();
             LanguageManager.InitLanguage();
         }
 

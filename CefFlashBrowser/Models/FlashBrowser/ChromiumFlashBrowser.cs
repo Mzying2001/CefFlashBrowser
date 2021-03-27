@@ -9,23 +9,23 @@ using System.Windows.Interop;
 using CefSharp;
 using CefSharp.Wpf;
 
-namespace CefFlashBrowser.Models
+namespace CefFlashBrowser.Models.FlashBrowser
 {
-    public class FlashBrowser : ChromiumWebBrowser
+    public class ChromiumFlashBrowser : ChromiumWebBrowser
     {
-        public FlashBrowser() : base()
+        public ChromiumFlashBrowser() : base()
         {
-            EnableFlash();
+            InitBrowser();
         }
 
-        public FlashBrowser(string initialAddress) : base(initialAddress)
+        public ChromiumFlashBrowser(string initialAddress) : base(initialAddress)
         {
-            EnableFlash();
+            InitBrowser();
         }
 
-        public FlashBrowser(HwndSource parentWindowHwndSource, string initialAddress, Size size) : base(parentWindowHwndSource, initialAddress, size)
+        public ChromiumFlashBrowser(HwndSource parentWindowHwndSource, string initialAddress, Size size) : base(parentWindowHwndSource, initialAddress, size)
         {
-            EnableFlash();
+            InitBrowser();
         }
 
         /// <summary>
@@ -46,6 +46,12 @@ namespace CefFlashBrowser.Models
             settings.CefCommandLineArgs.Add("ppapi-flash-version", "32.34.0.0.92");
             settings.CefCommandLineArgs.Add("ppapi-flash-path", @"plugins\pepflashplayer32_34_0_0_92.dll");
             Cef.Initialize(settings);
+        }
+
+        private void InitBrowser()
+        {
+            EnableFlash();
+            LifeSpanHandler = new NoPopupLifeSpanHandler();
         }
 
         private void EnableFlash()
