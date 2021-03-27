@@ -91,6 +91,7 @@
     </ApplicationDefinition>
     <Compile Include="Models\FlashBrowser\ChromiumFlashBrowser.cs" />
     <Compile Include="Models\FlashBrowser\NoPopupLifeSpanHandler.cs" />
+    <Compile Include="Models\FlashBrowser\IEDownloadHandler.cs" />
     <Compile Include="Models\LanguageManager.cs" />
     <Compile Include="Models\RegistryItem.cs" />
     <Compile Include="Models\SearchEngine.cs" />

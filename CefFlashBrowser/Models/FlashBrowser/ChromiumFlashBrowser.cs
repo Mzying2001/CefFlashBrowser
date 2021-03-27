@@ -52,6 +52,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
         {
             EnableFlash();
             LifeSpanHandler = new NoPopupLifeSpanHandler();
+            DownloadHandler = new IEDownloadHandler();
         }
 
         private void EnableFlash()
