@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using CefFlashBrowser.Models;
 
 namespace CefFlashBrowser.ViewModels
@@ -36,5 +37,9 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public void TitleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            Title = e.NewValue.ToString();
+        }
     }
 }

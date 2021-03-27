@@ -16,7 +16,6 @@
         <vm:BrowserWindowViewModel/>
     </Window.DataContext>
 
-    <m:FlashBrowser Address="{Binding Url}"
-                    TitleChanged="FlashBrowser_TitleChanged"/>
+    <m:FlashBrowser x:Name="browser" Address="{Binding Url}"/>
 
 </Window>

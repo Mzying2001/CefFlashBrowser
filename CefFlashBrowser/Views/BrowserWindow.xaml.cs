@@ -1,5 +1,4 @@
-﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.ViewModels;
+﻿using CefFlashBrowser.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +20,10 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserWindow : Window
     {
-        private BrowserWindowViewModel _viewModel;
-
         public BrowserWindow()
         {
             InitializeComponent();
-
-            _viewModel = new BrowserWindowViewModel();
-            DataContext = _viewModel;
+            browser.TitleChanged += (DataContext as BrowserWindowViewModel).TitleChanged;
         }
 
         public static void Popup(string url)
@@ -43,11 +38,6 @@ namespace CefFlashBrowser.Views
         {
             Popup(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
                     $"html/FlashPlayer.html?src={fileName}"));
-        }
-
-        private void FlashBrowser_TitleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            _viewModel.Title = e.NewValue.ToString();
         }
     }
 }
