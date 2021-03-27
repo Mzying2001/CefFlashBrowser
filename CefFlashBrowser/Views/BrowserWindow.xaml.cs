@@ -23,21 +23,29 @@ namespace CefFlashBrowser.Views
         public BrowserWindow()
         {
             InitializeComponent();
-            browser.TitleChanged += (DataContext as BrowserWindowViewModel).TitleChanged;
+            (DataContext as BrowserWindowViewModel).Browser = browser;
         }
 
-        public static void Popup(string url)
+        public static void Popup(string url, bool showNavigationBar = true)
         {
             var window = new BrowserWindow();
             var vModel = window.DataContext as BrowserWindowViewModel;
-            vModel.Url = url;
+
+            if (vModel == null)
+            {
+                window.Close();
+                return;
+            }
+
+            vModel.LoadUrlCommand.Execute(url);
+            vModel.ShowNavigationBar = showNavigationBar;
             window.Show();
         }
 
         public static void PopupFlashPlayer(string fileName)
         {
             Popup(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-                    $"html/FlashPlayer.html?src={fileName}"));
+                    $"html/FlashPlayer.html?src={fileName}"), false);
         }
     }
 }

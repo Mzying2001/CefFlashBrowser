@@ -10,12 +10,50 @@
         
         Width="1000"
         Height="750"
-        Title="{Binding Title, TargetNullValue=browser}">
+        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}">
 
     <Window.DataContext>
         <vm:BrowserWindowViewModel/>
     </Window.DataContext>
 
-    <flash:ChromiumFlashBrowser x:Name="browser" Address="{Binding Url}"/>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding NavigationBarHeight}"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0"
+              Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Content="&lt;"
+                    Grid.Column="0"
+                    Command="{Binding GoBackCommand}"
+                    IsEnabled="{Binding ElementName=browser, Path=CanGoBack}"/>
+            <Button Content="&gt;"
+                    Grid.Column="1"
+                    Command="{Binding GoForwardCommand}"
+                    IsEnabled="{Binding ElementName=browser, Path=CanGoForward}"/>
+
+            <TextBox Grid.Column="2"
+                     Margin="10,0"
+                     Text="{Binding ElementName=browser, Path=Address}">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Enter"
+                                Command="{Binding LoadUrlCommand}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
+                </TextBox.InputBindings>
+            </TextBox>
+
+            <Button Content="..." Grid.Column="3"/>
+        </Grid>
+
+        <flash:ChromiumFlashBrowser x:Name="browser" Grid.Row="1"/>
+    </Grid>
 
 </Window>

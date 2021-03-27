@@ -4,42 +4,62 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.FlashBrowser;
 
 namespace CefFlashBrowser.ViewModels
 {
     class BrowserWindowViewModel : NotificationObject
     {
-        private string _title;
+        public DelegateCommand LoadUrlCommand { get; set; }
 
-        public string Title
+        public DelegateCommand GoBackCommand { get; set; }
+
+        public DelegateCommand GoForwardCommand { get; set; }
+
+        public ChromiumFlashBrowser Browser { get; set; }
+
+        private double _navigationBarHeight;
+
+        public double NavigationBarHeight
         {
-            get => _title;
+            get => _navigationBarHeight;
             set
             {
-                _title = value;
-                RaisePropertyChanged("Title");
+                _navigationBarHeight = value;
+                RaisePropertyChanged("NavigationBarHeight");
             }
         }
 
-        private string _url;
-
-        public string Url
+        public bool ShowNavigationBar
         {
-            get => _url;
-            set
-            {
-                _url = value;
-                RaisePropertyChanged("Url");
-
-                if (string.IsNullOrEmpty(Title))
-                    Title = value;
-            }
+            set => NavigationBarHeight = value ? double.NaN : 0;
         }
 
-        public void TitleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void LoadUrl(string url)
         {
-            Title = e.NewValue.ToString();
+            if (!string.IsNullOrEmpty(url))
+                Browser.Address = url;
+        }
+
+        private void GoBack()
+        {
+            Browser.BackCommand.Execute(null);
+        }
+
+        private void GoForward()
+        {
+            Browser.ForwardCommand.Execute(null);
+        }
+
+        public BrowserWindowViewModel()
+        {
+            LoadUrlCommand = new DelegateCommand(p => LoadUrl(p?.ToString()));
+
+            GoBackCommand = new DelegateCommand(p => GoBack());
+
+            GoForwardCommand = new DelegateCommand(p => GoForward());
         }
     }
 }
