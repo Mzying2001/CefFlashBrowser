@@ -1,6 +1,4 @@
-﻿using CefFlashBrowser.ViewModels;
-using CefFlashBrowser.ViewModels.MenuItemViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -22,19 +20,9 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class FavoritesManager : Window
     {
-        private FavoritesManagerViewModel _viewModel;
-
         public FavoritesManager()
         {
             InitializeComponent();
-            _viewModel = DataContext as FavoritesManagerViewModel;
-        }
-
-        internal FavoritesManager(ObservableCollection<FavoritesMenuItemVliewModel> favorites) : this()
-        {
-            _viewModel.FavoritesItems = favorites;
-            _viewModel.RaisePropertyChanged("FavoritesItems");
-            _viewModel.SelectionChangedCommand.Execute.Invoke(null);
         }
     }
 }
