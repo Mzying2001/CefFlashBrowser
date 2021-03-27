@@ -137,8 +137,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void AddItem()
         {
-            var website = new Website(LanguageManager.GetString("favorites_name"),
-                                      LanguageManager.GetString("favorites_url"));
+            var website = new Website(LanguageManager.GetString("favorites_defaultName"), "about:blank");
 
             if (FavoritesItems.Count == 0 || FavoritesItems[FavoritesItems.Count - 1].Website != website)
                 FavoritesItems.Add(new FavoritesMenuItemVliewModel(website));

@@ -49,5 +49,6 @@
     <sys:String x:Key="favorites_name">Name</sys:String>
     <sys:String x:Key="favorites_url">Url</sys:String>
     <sys:String x:Key="favorites_save">Save</sys:String>
+    <sys:String x:Key="favorites_defaultName">New favorites</sys:String>
     <sys:String x:Key="message_removeItem">Are you sure to remove "{0}"?</sys:String>
 </ResourceDictionary>
