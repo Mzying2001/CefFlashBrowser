@@ -33,12 +33,10 @@
 
             <Button Content="&lt;"
                     Grid.Column="0"
-                    Command="{Binding GoBackCommand}"
-                    IsEnabled="{Binding ElementName=browser, Path=CanGoBack}"/>
+                    Command="{Binding ElementName=browser, Path=BackCommand}"/>
             <Button Content="&gt;"
                     Grid.Column="1"
-                    Command="{Binding GoForwardCommand}"
-                    IsEnabled="{Binding ElementName=browser, Path=CanGoForward}"/>
+                    Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
 
             <TextBox Grid.Column="2"
                      Margin="10,0"
@@ -55,6 +53,9 @@
                     Click="OtherButton_Clicked">
                 <Button.ContextMenu>
                     <ContextMenu x:Name="otherButtonContextMenu">
+                        <MenuItem Header="{DynamicResource menu_reload}"
+                                  Command="{Binding Source={x:Reference Name=browser}, Path=ReloadCommand}"/>
+                        <Separator/>
                         <MenuItem Header="{DynamicResource menu_openDevTool}"
                                   Command="{Binding OpenDevToolCommand}"/>
                         <MenuItem Header="{DynamicResource menu_viewSource}"

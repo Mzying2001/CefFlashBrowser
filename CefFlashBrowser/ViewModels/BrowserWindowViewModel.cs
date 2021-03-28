@@ -15,10 +15,6 @@ namespace CefFlashBrowser.ViewModels
     {
         public DelegateCommand LoadUrlCommand { get; set; }
 
-        public DelegateCommand GoBackCommand { get; set; }
-
-        public DelegateCommand GoForwardCommand { get; set; }
-
         public DelegateCommand OpenDevToolCommand { get; set; }
 
         public DelegateCommand ViewSourceCommand { get; set; }
@@ -48,37 +44,13 @@ namespace CefFlashBrowser.ViewModels
                 Browser.Address = url;
         }
 
-        private void GoBack()
-        {
-            Browser.BackCommand.Execute(null);
-        }
-
-        private void GoForward()
-        {
-            Browser.ForwardCommand.Execute(null);
-        }
-
-        private void OpenDevTool()
-        {
-            Browser.ShowDevTools();
-        }
-
-        private void ViewSource()
-        {
-            Browser.ViewSource();
-        }
-
         public BrowserWindowViewModel()
         {
             LoadUrlCommand = new DelegateCommand(p => LoadUrl(p?.ToString()));
 
-            GoBackCommand = new DelegateCommand(p => GoBack());
+            OpenDevToolCommand = new DelegateCommand(p => Browser.ShowDevTools());
 
-            GoForwardCommand = new DelegateCommand(p => GoForward());
-
-            OpenDevToolCommand = new DelegateCommand(p => OpenDevTool());
-
-            ViewSourceCommand = new DelegateCommand(p => ViewSource());
+            ViewSourceCommand = new DelegateCommand(p => Browser.ViewSource());
         }
     }
 }
