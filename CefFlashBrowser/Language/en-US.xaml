@@ -54,6 +54,6 @@
 
     <!--Browser Window-->
     <sys:String x:Key="menu_reload">Reload</sys:String>
-    <sys:String x:Key="menu_openDevTool">Open dev tool</sys:String>
+    <sys:String x:Key="menu_openDevTool">Open dev tools</sys:String>
     <sys:String x:Key="menu_viewSource">View source</sys:String>
 </ResourceDictionary>
