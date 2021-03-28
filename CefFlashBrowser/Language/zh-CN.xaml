@@ -51,4 +51,8 @@
     <sys:String x:Key="favorites_save">保存</sys:String>
     <sys:String x:Key="favorites_defaultName">新收藏夹项</sys:String>
     <sys:String x:Key="message_removeItem">确定要移除“{0}”吗？</sys:String>
+
+    <!--浏览器窗口-->
+    <sys:String x:Key="menu_openDevTool">打开开发工具</sys:String>
+    <sys:String x:Key="menu_viewSource">查看网页源码</sys:String>
 </ResourceDictionary>

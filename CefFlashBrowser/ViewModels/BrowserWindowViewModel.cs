@@ -7,6 +7,7 @@ using System.Windows;
 using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.FlashBrowser;
+using CefSharp;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -17,6 +18,10 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand GoBackCommand { get; set; }
 
         public DelegateCommand GoForwardCommand { get; set; }
+
+        public DelegateCommand OpenDevToolCommand { get; set; }
+
+        public DelegateCommand ViewSourceCommand { get; set; }
 
         public ChromiumFlashBrowser Browser { get; set; }
 
@@ -53,6 +58,16 @@ namespace CefFlashBrowser.ViewModels
             Browser.ForwardCommand.Execute(null);
         }
 
+        private void OpenDevTool()
+        {
+            Browser.ShowDevTools();
+        }
+
+        private void ViewSource()
+        {
+            Browser.ViewSource();
+        }
+
         public BrowserWindowViewModel()
         {
             LoadUrlCommand = new DelegateCommand(p => LoadUrl(p?.ToString()));
@@ -60,6 +75,10 @@ namespace CefFlashBrowser.ViewModels
             GoBackCommand = new DelegateCommand(p => GoBack());
 
             GoForwardCommand = new DelegateCommand(p => GoForward());
+
+            OpenDevToolCommand = new DelegateCommand(p => OpenDevTool());
+
+            ViewSourceCommand = new DelegateCommand(p => ViewSource());
         }
     }
 }

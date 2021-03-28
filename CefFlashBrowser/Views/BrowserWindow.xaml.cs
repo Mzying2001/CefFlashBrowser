@@ -47,5 +47,11 @@ namespace CefFlashBrowser.Views
             Popup(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
                     $"html/FlashPlayer.html?src={fileName}"), false);
         }
+
+        private void OtherButton_Clicked(object sender, RoutedEventArgs e)
+        {
+            otherButtonContextMenu.PlacementTarget = sender as UIElement;
+            otherButtonContextMenu.IsOpen = true;
+        }
     }
 }

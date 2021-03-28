@@ -51,4 +51,8 @@
     <sys:String x:Key="favorites_save">Save</sys:String>
     <sys:String x:Key="favorites_defaultName">New favorites</sys:String>
     <sys:String x:Key="message_removeItem">Are you sure to remove "{0}"?</sys:String>
+
+    <!--Browser Window-->
+    <sys:String x:Key="menu_openDevTool">Open dev tool</sys:String>
+    <sys:String x:Key="menu_viewSource">View source</sys:String>
 </ResourceDictionary>

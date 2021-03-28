@@ -50,7 +50,17 @@
                 </TextBox.InputBindings>
             </TextBox>
 
-            <Button Content="..." Grid.Column="3"/>
+            <Button Content="..."
+                    Grid.Column="3" Click="OtherButton_Clicked">
+                <Button.ContextMenu>
+                    <ContextMenu x:Name="otherButtonContextMenu">
+                        <MenuItem Header="{DynamicResource menu_openDevTool}"
+                                  Command="{Binding OpenDevToolCommand}"/>
+                        <MenuItem Header="{DynamicResource menu_viewSource}"
+                                  Command="{Binding ViewSourceCommand}"/>
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
         </Grid>
 
         <flash:ChromiumFlashBrowser x:Name="browser" Grid.Row="1"/>
