@@ -33,5 +33,17 @@ namespace CefFlashBrowser.Models
             get => _reg.GetValue<int>("AddressBarFunction");
             set => _reg["AddressBarFunction"] = value;
         }
+
+        public static double BrowserWindowWidth
+        {
+            get => _reg.GetValue<double>("BrowserWindowWidth");
+            set => _reg["BrowserWindowWidth"] = value;
+        }
+
+        public static double BrowserWindowHeight
+        {
+            get => _reg.GetValue<double>("BrowserWindowHeight");
+            set => _reg["BrowserWindowHeight"] = value;
+        }
     }
 }

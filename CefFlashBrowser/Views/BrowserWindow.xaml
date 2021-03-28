@@ -10,7 +10,7 @@
         
         Width="1000"
         Height="750"
-        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}">
+        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}" Closing="WindowClosing">
 
     <Window.DataContext>
         <vm:BrowserWindowViewModel/>
@@ -51,7 +51,8 @@
             </TextBox>
 
             <Button Content="..."
-                    Grid.Column="3" Click="OtherButton_Clicked">
+                    Grid.Column="3"
+                    Click="OtherButton_Clicked">
                 <Button.ContextMenu>
                     <ContextMenu x:Name="otherButtonContextMenu">
                         <MenuItem Header="{DynamicResource menu_openDevTool}"

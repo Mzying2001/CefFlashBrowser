@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.ViewModels;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,26 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
             (DataContext as BrowserWindowViewModel).Browser = browser;
+
+            var w = Settings.BrowserWindowWidth;
+            var h = Settings.BrowserWindowHeight;
+            if (w != default && h != default)
+            {
+                Width = w;
+                Height = h;
+            }
+        }
+
+        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Settings.BrowserWindowWidth = Width;
+            Settings.BrowserWindowHeight = Height;
+        }
+
+        private void OtherButton_Clicked(object sender, RoutedEventArgs e)
+        {
+            otherButtonContextMenu.PlacementTarget = sender as UIElement;
+            otherButtonContextMenu.IsOpen = true;
         }
 
         public static void Popup(string url, bool showNavigationBar = true)
@@ -46,12 +67,6 @@ namespace CefFlashBrowser.Views
         {
             Popup(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
                     $"html/FlashPlayer.html?src={fileName}"), false);
-        }
-
-        private void OtherButton_Clicked(object sender, RoutedEventArgs e)
-        {
-            otherButtonContextMenu.PlacementTarget = sender as UIElement;
-            otherButtonContextMenu.IsOpen = true;
         }
     }
 }
