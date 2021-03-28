@@ -10,7 +10,8 @@
         
         Width="1000"
         Height="750"
-        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}" Closing="WindowClosing">
+        Closing="WindowClosing"
+        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}">
 
     <Window.DataContext>
         <vm:BrowserWindowViewModel/>
