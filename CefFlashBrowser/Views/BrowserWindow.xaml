@@ -16,6 +16,17 @@
         <vm:BrowserWindowViewModel/>
     </Window.DataContext>
 
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Alt" Key="Left"
+                    Command="{Binding ElementName=browser, Path=BackCommand}"/>
+        <KeyBinding Modifiers="Alt" Key="Right"
+                    Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
+        <KeyBinding Key="F5"
+                    Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
+        <KeyBinding Key="F12"
+                    Command="{Binding OpenDevToolCommand}"/>
+    </Window.InputBindings>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="{Binding NavigationBarHeight}"/>
@@ -54,10 +65,12 @@
                 <Button.ContextMenu>
                     <ContextMenu x:Name="otherButtonContextMenu">
                         <MenuItem Header="{DynamicResource menu_reload}"
-                                  Command="{Binding Source={x:Reference Name=browser}, Path=ReloadCommand}"/>
+                                  Command="{Binding Source={x:Reference Name=browser}, Path=ReloadCommand}"
+                                  InputGestureText="F5"/>
                         <Separator/>
                         <MenuItem Header="{DynamicResource menu_openDevTool}"
-                                  Command="{Binding OpenDevToolCommand}"/>
+                                  Command="{Binding OpenDevToolCommand}"
+                                  InputGestureText="F12"/>
                         <MenuItem Header="{DynamicResource menu_viewSource}"
                                   Command="{Binding ViewSourceCommand}"/>
                     </ContextMenu>
