@@ -18,13 +18,19 @@
     </Window.DataContext>
 
     <Window.InputBindings>
-        <KeyBinding Modifiers="Alt" Key="Left"
+        <KeyBinding Gesture="Alt+Left"
                     Command="{Binding ElementName=browser, Path=BackCommand}"/>
-        <KeyBinding Modifiers="Alt" Key="Right"
+        <KeyBinding Gesture="Alt+Right"
                     Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
-        <KeyBinding Key="F5"
+        <KeyBinding Gesture="Ctrl+Add"
+                    Command="{Binding ElementName=browser, Path=ZoomInCommand}"/>
+        <KeyBinding Gesture="Ctrl+Subtract"
+                    Command="{Binding ElementName=browser, Path=ZoomOutCommand}"/>
+        <KeyBinding Gesture="Ctrl+0"
+                    Command="{Binding ElementName=browser, Path=ZoomResetCommand}"/>
+        <KeyBinding Gesture="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
-        <KeyBinding Key="F12"
+        <KeyBinding Gesture="F12"
                     Command="{Binding OpenDevToolCommand}"/>
     </Window.InputBindings>
 
