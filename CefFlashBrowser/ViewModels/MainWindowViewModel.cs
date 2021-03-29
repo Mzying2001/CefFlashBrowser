@@ -68,7 +68,7 @@ namespace CefFlashBrowser.ViewModels
                 item.IsSelected = item.Language == current;
         }
 
-        private void LoadFavoriteItems()
+        private void LoadFavoritesItems()
         {
             FavoritesItems = new ObservableCollection<FavoritesMenuItemVliewModel>();
             foreach (var item in new JsonDataService().GetFavorites())
@@ -154,7 +154,7 @@ namespace CefFlashBrowser.ViewModels
 
         public MainWindowViewModel()
         {
-            LoadFavoriteItems();
+            LoadFavoritesItems();
             LoadLanguageMenu();
 
             OpenUrlCommand = new DelegateCommand(p => OpenUrl());
