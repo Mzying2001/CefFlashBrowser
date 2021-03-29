@@ -81,8 +81,8 @@
                             <TextBlock Margin="0,0,10,0"
                                        VerticalAlignment="Center"
                                        Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
-                            <Button Content="+" FontFamily="SimHei" Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}"/>
                             <Button Content="-" FontFamily="SimHei" Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}"/>
+                            <Button Content="+" FontFamily="SimHei" Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}"/>
                         </StackPanel>
 
                         <Separator/>
