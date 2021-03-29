@@ -28,6 +28,8 @@
                     Command="{Binding ElementName=browser, Path=ZoomOutCommand}"/>
         <KeyBinding Gesture="Ctrl+0"
                     Command="{Binding ElementName=browser, Path=ZoomResetCommand}"/>
+        <KeyBinding Gesture="Esc"
+                    Command="{Binding ElementName=browser, Path=StopCommand}"/>
         <KeyBinding Gesture="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
         <KeyBinding Gesture="F12"
