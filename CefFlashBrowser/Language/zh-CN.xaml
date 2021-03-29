@@ -56,4 +56,5 @@
     <sys:String x:Key="menu_reload">刷新</sys:String>
     <sys:String x:Key="menu_openDevTool">打开开发工具</sys:String>
     <sys:String x:Key="menu_viewSource">查看网页源码</sys:String>
+    <sys:String x:Key="menu_zoom">缩放</sys:String>
 </ResourceDictionary>

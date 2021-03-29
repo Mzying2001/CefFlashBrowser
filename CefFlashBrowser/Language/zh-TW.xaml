@@ -56,4 +56,5 @@
     <sys:String x:Key="menu_reload">重繪</sys:String>
     <sys:String x:Key="menu_openDevTool">打開開發工具</sys:String>
     <sys:String x:Key="menu_viewSource">查看網頁源碼</sys:String>
+    <sys:String x:Key="menu_zoom">縮放</sys:String>
 </ResourceDictionary>

@@ -43,15 +43,12 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button Content="&lt;"
-                    Grid.Column="0"
+            <Button Content="&lt;" Grid.Column="0" FontFamily="SimHei"
                     Command="{Binding ElementName=browser, Path=BackCommand}"/>
-            <Button Content="&gt;"
-                    Grid.Column="1"
+            <Button Content="&gt;" Grid.Column="1" FontFamily="SimHei"
                     Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
 
-            <TextBox Grid.Column="2"
-                     Margin="10,0"
+            <TextBox Grid.Column="2" Margin="10,0"
                      Text="{Binding ElementName=browser, Path=Address}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
@@ -60,15 +57,28 @@
                 </TextBox.InputBindings>
             </TextBox>
 
-            <Button Content="..."
-                    Grid.Column="3"
-                    Click="OtherButton_Clicked">
+            <Button Content="..." Grid.Column="3" Click="OtherButton_Clicked">
                 <Button.ContextMenu>
                     <ContextMenu x:Name="otherButtonContextMenu">
                         <MenuItem Header="{DynamicResource menu_reload}"
                                   Command="{Binding Source={x:Reference Name=browser}, Path=ReloadCommand}"
                                   InputGestureText="F5"/>
+
                         <Separator/>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center"
+                                       Text="{DynamicResource menu_zoom}"/>
+                            <TextBlock VerticalAlignment="Center" Text=": "/>
+                            <TextBlock Margin="0,0,10,0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
+                            <Button Content="+" FontFamily="SimHei" Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}"/>
+                            <Button Content="-" FontFamily="SimHei" Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}"/>
+                        </StackPanel>
+
+                        <Separator/>
+
                         <MenuItem Header="{DynamicResource menu_openDevTool}"
                                   Command="{Binding OpenDevToolCommand}"
                                   InputGestureText="F12"/>
@@ -79,7 +89,7 @@
             </Button>
         </Grid>
 
-        <flash:ChromiumFlashBrowser x:Name="browser" Grid.Row="1"/>
+        <flash:ChromiumFlashBrowser x:Name="browser" Grid.Row="1" ZoomLevelIncrement="0.25"/>
     </Grid>
 
 </Window>

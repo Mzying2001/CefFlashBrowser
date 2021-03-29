@@ -56,4 +56,5 @@
     <sys:String x:Key="menu_reload">Reload</sys:String>
     <sys:String x:Key="menu_openDevTool">Open devtools</sys:String>
     <sys:String x:Key="menu_viewSource">View source</sys:String>
+    <sys:String x:Key="menu_zoom">Zoom</sys:String>
 </ResourceDictionary>
