@@ -58,6 +58,14 @@ namespace CefFlashBrowser.Views
                 return;
             }
 
+            if (!showNavigationBar)
+            {
+                window.browser.OnCreatedNewWindow += (s, e) =>
+                {
+                    e.CancelPopup = false;
+                };
+            }
+
             vModel.LoadUrlCommand.Execute(url);
             vModel.ShowNavigationBar = showNavigationBar;
             window.Show();
