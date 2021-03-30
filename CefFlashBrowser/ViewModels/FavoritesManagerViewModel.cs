@@ -82,6 +82,13 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public void SetFavoritesItems(ObservableCollection<FavoritesMenuItemVliewModel> favoritesItems)
+        {
+            FavoritesItems = favoritesItems;
+            RaisePropertyChanged("FavoritesItems");
+            SelectionChanged(null);
+        }
+
         private void SelectionChanged(object sender)
         {
             if (FavoritesItems == null)

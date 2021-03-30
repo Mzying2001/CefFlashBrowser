@@ -132,9 +132,7 @@ namespace CefFlashBrowser.ViewModels
                 return;
             }
 
-            managerViewModel.FavoritesItems = FavoritesItems;
-            managerViewModel.RaisePropertyChanged("FavoritesItems");
-            managerViewModel.SelectionChangedCommand.Execute(null);
+            managerViewModel.SetFavoritesItems(FavoritesItems);
             favoritesManager.ShowDialog();
 
             new JsonDataService().WriteFavorites(from item in FavoritesItems select item.Website);
