@@ -8,6 +8,7 @@ using System.Windows;
 using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.FlashBrowser;
+using CefFlashBrowser.Views;
 using CefSharp;
 
 namespace CefFlashBrowser.ViewModels
@@ -47,6 +48,11 @@ namespace CefFlashBrowser.ViewModels
                 Browser.Address = url;
         }
 
+        private void ViewSource()
+        {
+            BrowserWindow.Popup($"view-source:{Browser.Address}", false);
+        }
+
         private void OpenInDefaultBrowser()
         {
             Process.Start(Browser.Address);
@@ -58,7 +64,7 @@ namespace CefFlashBrowser.ViewModels
 
             OpenDevToolCommand = new DelegateCommand(p => Browser.ShowDevTools());
 
-            ViewSourceCommand = new DelegateCommand(p => Browser.ViewSource());
+            ViewSourceCommand = new DelegateCommand(p => ViewSource());
 
             OpenInDefaultBrowserCommand = new DelegateCommand(p => OpenInDefaultBrowser());
         }
