@@ -10,6 +10,13 @@ namespace CefFlashBrowser.Models.FlashBrowser
 {
     public class NoPopupLifeSpanHandler : ILifeSpanHandler
     {
+        private readonly EventHandler<NewPageEventArgs> OnOpenNewPage;
+
+        public NoPopupLifeSpanHandler(EventHandler<NewPageEventArgs> OnOpenNewPage = null)
+        {
+            this.OnOpenNewPage = OnOpenNewPage;
+        }
+
         public bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
             return !(browser.IsDisposed || browser.IsPopup);
@@ -25,12 +32,15 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
         public bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
         {
-            var b = chromiumWebBrowser as ChromiumWebBrowser;
-
-            b?.Dispatcher.Invoke(() =>
+            if (chromiumWebBrowser is ChromiumFlashBrowser fbrowser)
             {
-                b.Address = targetUrl;
-            });
+                fbrowser.Dispatcher.Invoke(() =>
+                {
+                    fbrowser.Address = targetUrl;
+                });
+
+                OnOpenNewPage?.Invoke(fbrowser, new NewPageEventArgs(targetUrl));
+            }
 
             newBrowser = null;
             return true;
