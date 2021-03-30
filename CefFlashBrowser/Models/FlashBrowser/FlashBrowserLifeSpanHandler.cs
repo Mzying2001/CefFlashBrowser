@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Models.FlashBrowser
 {
-    public class NoPopupLifeSpanHandler : ILifeSpanHandler
+    public class FlashBrowserLifeSpanHandler : ILifeSpanHandler
     {
-        private readonly EventHandler<NewPageEventArgs> OnOpenNewPage;
+        private readonly EventHandler<NewWindowEventArgs> OnCreateNewWindow;
 
-        public NoPopupLifeSpanHandler(EventHandler<NewPageEventArgs> OnOpenNewPage = null)
+        public FlashBrowserLifeSpanHandler(EventHandler<NewWindowEventArgs> OnCreateNewWindow = null)
         {
-            this.OnOpenNewPage = OnOpenNewPage;
+            this.OnCreateNewWindow = OnCreateNewWindow;
         }
 
         public bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
@@ -32,18 +32,23 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
         public bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
         {
+            newBrowser = null;
+
             if (chromiumWebBrowser is ChromiumFlashBrowser fbrowser)
             {
-                fbrowser.Dispatcher.Invoke(() =>
+                var args = new NewWindowEventArgs(targetUrl, true);
+                OnCreateNewWindow?.Invoke(fbrowser, args);
+
+                if (args.CancelPopup)
                 {
-                    fbrowser.Address = targetUrl;
-                });
-
-                OnOpenNewPage?.Invoke(fbrowser, new NewPageEventArgs(targetUrl));
+                    fbrowser.Dispatcher.Invoke(() =>
+                    {
+                        fbrowser.Address = targetUrl;
+                    });
+                    return true;
+                }
             }
-
-            newBrowser = null;
-            return true;
+            return false;
         }
     }
 }

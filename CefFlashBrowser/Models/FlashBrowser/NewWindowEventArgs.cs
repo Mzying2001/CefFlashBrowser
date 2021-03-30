@@ -6,13 +6,16 @@ using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Models.FlashBrowser
 {
-    public class NewPageEventArgs : EventArgs
+    public class NewWindowEventArgs : EventArgs
     {
         public string Url { get; set; }
 
-        public NewPageEventArgs(string url)
+        public bool CancelPopup { get; set; }
+
+        public NewWindowEventArgs(string url, bool cancelPopup)
         {
             Url = url;
+            CancelPopup = cancelPopup;
         }
     }
 }

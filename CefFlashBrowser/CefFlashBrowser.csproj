@@ -94,8 +94,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\FlashBrowser\ChromiumFlashBrowser.cs" />
-    <Compile Include="Models\FlashBrowser\NewPageEventArgs.cs" />
-    <Compile Include="Models\FlashBrowser\NoPopupLifeSpanHandler.cs" />
+    <Compile Include="Models\FlashBrowser\NewWindowEventArgs.cs" />
+    <Compile Include="Models\FlashBrowser\FlashBrowserLifeSpanHandler.cs" />
     <Compile Include="Models\FlashBrowser\IEDownloadHandler.cs" />
     <Compile Include="Models\LanguageManager.cs" />
     <Compile Include="Models\RegistryItem.cs" />

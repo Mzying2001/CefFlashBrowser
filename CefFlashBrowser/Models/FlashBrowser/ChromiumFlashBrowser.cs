@@ -13,7 +13,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
 {
     public class ChromiumFlashBrowser : ChromiumWebBrowser
     {
-        public event EventHandler<NewPageEventArgs> OnOpenNewPage;
+        public event EventHandler<NewWindowEventArgs> OnCreatedNewWindow;
 
         public ChromiumFlashBrowser() : base()
         {
@@ -54,9 +54,9 @@ namespace CefFlashBrowser.Models.FlashBrowser
         {
             EnableFlash();
             DownloadHandler = new IEDownloadHandler();
-            LifeSpanHandler = new NoPopupLifeSpanHandler((s, e) =>
+            LifeSpanHandler = new FlashBrowserLifeSpanHandler((s, e) =>
             {
-                OnOpenNewPage?.Invoke(s, e);
+                OnCreatedNewWindow?.Invoke(s, e);
             });
         }
 
