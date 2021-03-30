@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenDevToolCommand { get; set; }
 
         public DelegateCommand ViewSourceCommand { get; set; }
+
+        public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
 
         public ChromiumFlashBrowser Browser { get; set; }
 
@@ -44,6 +47,11 @@ namespace CefFlashBrowser.ViewModels
                 Browser.Address = url;
         }
 
+        private void OpenInDefaultBrowser()
+        {
+            Process.Start(Browser.Address);
+        }
+
         public BrowserWindowViewModel()
         {
             LoadUrlCommand = new DelegateCommand(p => LoadUrl(p?.ToString()));
@@ -51,6 +59,8 @@ namespace CefFlashBrowser.ViewModels
             OpenDevToolCommand = new DelegateCommand(p => Browser.ShowDevTools());
 
             ViewSourceCommand = new DelegateCommand(p => Browser.ViewSource());
+
+            OpenInDefaultBrowserCommand = new DelegateCommand(p => OpenInDefaultBrowser());
         }
     }
 }

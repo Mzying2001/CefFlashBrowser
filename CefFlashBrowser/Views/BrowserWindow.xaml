@@ -87,6 +87,11 @@
 
                         <Separator/>
 
+                        <MenuItem Header="{DynamicResource menu_openInDefaultBrowser}"
+                                  Command="{Binding OpenInDefaultBrowserCommand}"/>
+
+                        <Separator/>
+
                         <MenuItem Header="{DynamicResource menu_openDevTool}"
                                   Command="{Binding OpenDevToolCommand}"
                                   InputGestureText="F12"/>
