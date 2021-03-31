@@ -28,6 +28,8 @@
                     Command="{Binding ElementName=browser, Path=ZoomOutCommand}"/>
         <KeyBinding Gesture="Ctrl+0"
                     Command="{Binding ElementName=browser, Path=ZoomResetCommand}"/>
+        <KeyBinding Gesture="Ctrl+O"
+                    Command="{Binding OpenInDefaultBrowserCommand}"/>
         <KeyBinding Gesture="Ctrl+U"
                     Command="{Binding ViewSourceCommand}"/>
         <KeyBinding Gesture="Esc"
@@ -90,7 +92,8 @@
                         <Separator/>
 
                         <MenuItem Header="{DynamicResource menu_openInDefaultBrowser}"
-                                  Command="{Binding OpenInDefaultBrowserCommand}"/>
+                                  Command="{Binding OpenInDefaultBrowserCommand}"
+                                  InputGestureText="Ctrl+O"/>
 
                         <Separator/>
 
