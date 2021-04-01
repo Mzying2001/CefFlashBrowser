@@ -103,7 +103,8 @@
     <Compile Include="Models\StaticData\Settings.cs" />
     <Compile Include="Models\UrlChecker.cs" />
     <Compile Include="Models\Website.cs" />
-    <Compile Include="Services\IFavoritesDataService.cs" />
+    <Compile Include="Services\FavoritesDataService.cs" />
+    <Compile Include="Services\Interfaces\IFavoritesDataService.cs" />
     <Compile Include="Services\JsonDataService.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\ComboBoxItemViewModel.cs" />

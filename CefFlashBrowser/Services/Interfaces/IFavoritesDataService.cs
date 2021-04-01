@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CefFlashBrowser.Services
+namespace CefFlashBrowser.Services.Interfaces
 {
     interface IFavoritesDataService
     {
