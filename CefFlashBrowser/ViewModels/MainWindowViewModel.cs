@@ -86,6 +86,12 @@ namespace CefFlashBrowser.ViewModels
                 return;
             }
 
+            if (UrlChecker.IsLocalSwfFile(url))
+            {
+                BrowserWindow.PopupFlashPlayer(url);
+                return;
+            }
+
             /*
              * Address Bar Function
              * 

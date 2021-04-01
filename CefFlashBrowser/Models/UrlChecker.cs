@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -20,10 +21,19 @@ namespace CefFlashBrowser.Models
 
         public static bool IsUrl(string url)
         {
-            foreach(var item in regs)
+            foreach (var item in regs)
             {
                 if (Regex.IsMatch(url, item))
                     return true;
+            }
+            return false;
+        }
+
+        public static bool IsLocalSwfFile(string url)
+        {
+            if(url.ToLower().EndsWith(".swf"))
+            {
+                return File.Exists(url);
             }
             return false;
         }
