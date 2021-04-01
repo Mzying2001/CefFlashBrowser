@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using System;
 using System.Collections.Generic;

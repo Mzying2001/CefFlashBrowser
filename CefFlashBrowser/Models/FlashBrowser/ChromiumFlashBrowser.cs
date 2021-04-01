@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using CefFlashBrowser.Models.StaticData;
 using CefSharp;
 using CefSharp.Wpf;
 

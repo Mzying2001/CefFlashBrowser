@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.ViewModels;
 using System;
 using System.Collections.Generic;

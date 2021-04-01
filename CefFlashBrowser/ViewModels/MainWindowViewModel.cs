@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using CefFlashBrowser.Views;
