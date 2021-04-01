@@ -21,8 +21,8 @@ namespace CefFlashBrowser
         private void Init()
         {
             Settings.Init();
-            ChromiumFlashBrowser.InitCefFlash();
             LanguageManager.InitLanguage();
+            ChromiumFlashBrowser.InitCefFlash();
         }
 
         protected override void OnStartup(StartupEventArgs e)
@@ -38,7 +38,7 @@ namespace CefFlashBrowser
 
             foreach (var arg in e.Args)
             {
-                if (File.Exists(arg) && arg.ToLower().EndsWith(".swf"))
+                if (UrlChecker.IsLocalSwfFile(arg))
                 {
                     BrowserWindow.PopupFlashPlayer(arg);
                 }
@@ -49,7 +49,7 @@ namespace CefFlashBrowser
                 else
                 {
                     MessageBox.Show($"{LanguageManager.GetString("invalidStartUpParam")}: {arg}");
-                    Environment.Exit(1);
+                    Environment.Exit(0);
                 }
             }
         }
