@@ -25,7 +25,9 @@ namespace CefFlashBrowser.Views
         public BrowserWindow()
         {
             InitializeComponent();
-            (DataContext as BrowserWindowViewModel).Browser = browser;
+
+            var vModel = DataContext as BrowserWindowViewModel;
+            vModel.SetBrowser(browser);
 
             var w = Settings.BrowserWindowWidth;
             var h = Settings.BrowserWindowHeight;
@@ -67,8 +69,8 @@ namespace CefFlashBrowser.Views
                 };
             }
 
-            vModel.LoadUrlCommand.Execute(url);
             vModel.ShowNavigationBar = showNavigationBar;
+            vModel.LoadUrl(url);
             window.Show();
         }
 

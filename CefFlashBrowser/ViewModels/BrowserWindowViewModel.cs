@@ -42,7 +42,12 @@ namespace CefFlashBrowser.ViewModels
             set => NavigationBarHeight = value ? double.NaN : 0;
         }
 
-        private void LoadUrl(string url)
+        public void SetBrowser(ChromiumFlashBrowser browser)
+        {
+            Browser = browser;
+        }
+
+        public void LoadUrl(string url)
         {
             if (!string.IsNullOrEmpty(url))
                 Browser.Address = url;
