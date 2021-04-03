@@ -45,5 +45,11 @@ namespace CefFlashBrowser.Models.StaticData
             get => _reg.GetValue<double>("BrowserWindowHeight");
             set => _reg["BrowserWindowHeight"] = value;
         }
+
+        public static bool NotFirstStart
+        {
+            get => _reg.GetValue<bool>("NotFirstStart");
+            set => _reg["NotFirstStart"] = value;
+        }
     }
 }

@@ -12,6 +12,7 @@ using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using CefFlashBrowser.Views;
+using CefFlashBrowser.Views.Dialogs;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -157,9 +158,19 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void SelectLanguageOnFirstStart()
+        {
+            if (Settings.NotFirstStart)
+                return;
+
+            new SelectLanguageDialog().ShowDialog();
+            Settings.NotFirstStart = true;
+        }
+
         public MainWindowViewModel()
         {
             LoadFavoritesItems();
+            SelectLanguageOnFirstStart();
             LoadLanguageMenu();
 
             OpenUrlCommand = new DelegateCommand(p => OpenUrl());
