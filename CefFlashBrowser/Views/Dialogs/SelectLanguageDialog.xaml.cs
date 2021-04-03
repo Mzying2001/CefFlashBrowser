@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CefFlashBrowser.ViewModels.DialogViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,9 @@ namespace CefFlashBrowser.Views.Dialogs
         public SelectLanguageDialog()
         {
             InitializeComponent();
+
+            var vModel = DataContext as SelectLanguageDialogViewModel;
+            vModel.CloseWindow = () => Close();
         }
     }
 }

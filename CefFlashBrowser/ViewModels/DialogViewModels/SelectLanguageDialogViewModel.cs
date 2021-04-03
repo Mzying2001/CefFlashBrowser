@@ -12,14 +12,50 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
     {
         public DelegateCommand SelectLanguageCommand { get; set; }
 
+        public DelegateCommand SetHeaderCommand { get; set; }
+
+        public Action CloseWindow { get; set; }
+
+        private int _dialogResult;
+
+        public int DialogResult
+        {
+            get => _dialogResult;
+            set
+            {
+                _dialogResult = value;
+                RaisePropertyChanged("DialogResult");
+            }
+        }
+
+        private string _header;
+
+        public string Header
+        {
+            get => _header;
+            set
+            {
+                _header = value;
+                RaisePropertyChanged("Header");
+            }
+        }
+
         private void SelectLanguage(string language)
         {
             LanguageManager.CurrentLanguage = language;
+            CloseWindow?.Invoke();
+        }
+
+        private void SetHeader(string text)
+        {
+            Header = text;
         }
 
         public SelectLanguageDialogViewModel()
         {
             SelectLanguageCommand = new DelegateCommand(p => SelectLanguage(p?.ToString()));
+
+            SetHeaderCommand = new DelegateCommand(p => SetHeader(p?.ToString()));
         }
     }
 }
