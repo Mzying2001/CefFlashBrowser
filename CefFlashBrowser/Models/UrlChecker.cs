@@ -21,6 +21,9 @@ namespace CefFlashBrowser.Models
 
         public static bool IsUrl(string url)
         {
+            if (url.EndsWith("/") || url.EndsWith("\\"))
+                url = url.Substring(0, url.Length - 1);
+
             foreach (var item in regs)
             {
                 if (Regex.IsMatch(url, item))
@@ -31,7 +34,7 @@ namespace CefFlashBrowser.Models
 
         public static bool IsLocalSwfFile(string url)
         {
-            if(url.ToLower().EndsWith(".swf"))
+            if (url.ToLower().EndsWith(".swf"))
             {
                 return File.Exists(url);
             }
