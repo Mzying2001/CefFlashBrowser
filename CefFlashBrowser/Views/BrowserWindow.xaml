@@ -32,6 +32,8 @@
                     Command="{Binding OpenInDefaultBrowserCommand}"/>
         <KeyBinding Gesture="Ctrl+U"
                     Command="{Binding ViewSourceCommand}"/>
+        <KeyBinding Gesture="Ctrl+S"
+                    Command="{Binding CreateShortcutCommand}"/>
         <KeyBinding Gesture="Esc"
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>
         <KeyBinding Gesture="F5"
@@ -90,6 +92,10 @@
                         </StackPanel>
 
                         <Separator/>
+
+                        <MenuItem Header="{DynamicResource menu_createShortcut}"
+                                  Command="{Binding CreateShortcutCommand}"
+                                  InputGestureText="Ctrl+S"/>
 
                         <MenuItem Header="{DynamicResource menu_openInDefaultBrowser}"
                                   Command="{Binding OpenInDefaultBrowserCommand}"

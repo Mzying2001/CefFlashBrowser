@@ -58,4 +58,6 @@
     <sys:String x:Key="menu_viewSource">查看網頁源碼</sys:String>
     <sys:String x:Key="menu_zoom">縮放</sys:String>
     <sys:String x:Key="menu_openInDefaultBrowser">在默認瀏覽器中打開</sys:String>
+    <sys:String x:Key="menu_createShortcut">創建網頁快捷方式</sys:String>
+    <sys:String x:Key="filter_shortcut">快捷方式</sys:String>
 </ResourceDictionary>

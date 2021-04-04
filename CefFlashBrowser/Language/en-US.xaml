@@ -58,4 +58,6 @@
     <sys:String x:Key="menu_viewSource">View source</sys:String>
     <sys:String x:Key="menu_zoom">Zoom</sys:String>
     <sys:String x:Key="menu_openInDefaultBrowser">Open in default browser</sys:String>
+    <sys:String x:Key="menu_createShortcut">Create shortcut</sys:String>
+    <sys:String x:Key="filter_shortcut">shortcut</sys:String>
 </ResourceDictionary>
