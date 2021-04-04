@@ -71,19 +71,27 @@ namespace CefFlashBrowser.ViewModels
         {
             var sfd = new Microsoft.Win32.SaveFileDialog()
             {
-                FileName = Browser.Title,
+                FileName = Browser.Title.Replace('.', '_'),
                 Filter = $"{LanguageManager.GetString("filter_shortcut")}|*.lnk",
             };
+
             if (sfd.ShowDialog() == true)
             {
                 var path = GetType().Assembly.Location;
                 var arg = Browser.Address;
                 var fileName = sfd.FileName;
 
-                WshShortcut shortcut = new WshShell().CreateShortcut(fileName);
-                shortcut.TargetPath = path;
-                shortcut.Arguments = arg;
-                shortcut.Save();
+                try
+                {
+                    WshShortcut shortcut = new WshShell().CreateShortcut(fileName);
+                    shortcut.TargetPath = path;
+                    shortcut.Arguments = arg;
+                    shortcut.Save();
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
             }
         }
 
