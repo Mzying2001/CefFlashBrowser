@@ -10,7 +10,7 @@
 
     <Style x:Key="SettingPanelHeaderStyle"
            TargetType="TextBlock">
-        <Setter Property="Margin" Value="0,15"/>
+        <Setter Property="Margin" Value="0,15,0,12"/>
         <Setter Property="FontSize" Value="18"/>
         <Setter Property="FontWeight" Value="Bold"/>
     </Style>
