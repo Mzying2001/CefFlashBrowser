@@ -2,7 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style x:Key="SettingPanelScrollViewerStyle"
-           TargetType="ScrollViewer">
+           TargetType="ScrollViewer"
+           BasedOn="{StaticResource ScrollViewerNativeBaseStyle}">
         <Setter Property="Padding" Value="15"/>
         <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
         <Setter Property="HorizontalScrollBarVisibility" Value="Hidden"/>
