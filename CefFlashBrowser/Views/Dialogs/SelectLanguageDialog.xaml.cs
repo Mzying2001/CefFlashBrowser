@@ -25,7 +25,7 @@ namespace CefFlashBrowser.Views.Dialogs
             InitializeComponent();
 
             var vModel = DataContext as SelectLanguageDialogViewModel;
-            vModel.CloseWindow = () => Close();
+            vModel.CloseWindow = Close;
         }
     }
 }

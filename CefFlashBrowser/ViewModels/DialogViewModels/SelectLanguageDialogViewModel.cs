@@ -16,18 +16,6 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
 
         public Action CloseWindow { get; set; }
 
-        private int _dialogResult;
-
-        public int DialogResult
-        {
-            get => _dialogResult;
-            set
-            {
-                _dialogResult = value;
-                RaisePropertyChanged("DialogResult");
-            }
-        }
-
         private string _header;
 
         public string Header
