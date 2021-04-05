@@ -1,6 +1,7 @@
 ﻿using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
+using CefFlashBrowser.Views;
 using HandyControl.Controls;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
     class BrowserSettingPanelViewModel : NotificationObject
     {
         public DelegateCommand DeleteCacheCommand { get; set; }
+
+        public DelegateCommand PopupAboutCefCommand { get; set; }
 
         private void DeleteCache()
         {
@@ -38,9 +41,16 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
             }
         }
 
+        private void PopupAboutCef()
+        {
+            BrowserWindow.Popup("chrome://version/", false);
+        }
+
         public BrowserSettingPanelViewModel()
         {
             DeleteCacheCommand = new DelegateCommand(p => DeleteCache());
+
+            PopupAboutCefCommand = new DelegateCommand(p => PopupAboutCef());
         }
     }
 }

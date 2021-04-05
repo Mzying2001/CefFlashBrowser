@@ -23,10 +23,13 @@
     <sys:String x:Key="tabItem_browser">瀏覽器</sys:String>
     <sys:String x:Key="settingHeader_addressBar">地址欄和蒐索</sys:String>
     <sys:String x:Key="settingHeader_browserData">瀏覽器緩存</sys:String>
+    <sys:String x:Key="settingHeader_aboutCef">關於 CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">在地址欄中使用搜尋引擎</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜尋引擎</sys:String>
     <sys:String x:Key="settingItem_deleteCache">清除所有緩存</sys:String>
+    <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
     <sys:String x:Key="button_deleteCache">清除</sys:String>
+    <sys:String x:Key="button_viewDetails">詳情</sys:String>
     <sys:String x:Key="message_deleteCache">確定要重啓瀏覽器並清除所有緩存嗎？</sys:String>
 
     <!--地址欄功能-->

@@ -8,7 +8,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:CefFlashBrowser.Views.SettingPanels"
              mc:Ignorable="d" >
-    
+
     <UserControl.DataContext>
         <vm:BrowserSettingPanelViewModel/>
     </UserControl.DataContext>
@@ -20,6 +20,8 @@
     <ScrollViewer Style="{StaticResource SettingPanelScrollViewerStyle}">
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
@@ -44,7 +46,28 @@
                         Content="{StaticResource button_deleteCache}"
                         Command="{Binding DeleteCacheCommand}"/>
             </Grid>
-        
+
+            <!--CefSharp-->
+            <TextBlock Grid.Row="2"
+                       Text="{StaticResource settingHeader_aboutCef}"
+                       Style="{StaticResource SettingPanelHeaderStyle}"/>
+
+            <!--About-->
+            <Grid Grid.Row="3"
+                  Style="{StaticResource SettingPanelItemGridStyle}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                           Text="{Binding Source={StaticResource settingItem_cefVersion}, StringFormat=\{0\}: 79.1.360}"
+                           Style="{StaticResource SettingPanelItemStyle}"/>
+                <Button Grid.Column="2"
+                        Content="{StaticResource button_viewDetails}"
+                        Command="{Binding PopupAboutCefCommand}"/>
+            </Grid>
+
         </Grid>
     </ScrollViewer>
 </UserControl>
