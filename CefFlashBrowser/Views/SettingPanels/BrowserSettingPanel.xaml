@@ -18,22 +18,14 @@
     </UserControl.Resources>
 
     <ScrollViewer Style="{StaticResource SettingPanelScrollViewerStyle}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+        <StackPanel>
 
             <!--Browser Cache-->
-            <TextBlock Grid.Row="0"
-                       Text="{StaticResource settingHeader_browserData}"
+            <TextBlock Text="{StaticResource settingHeader_browserData}"
                        Style="{StaticResource SettingPanelHeaderStyle}"/>
 
             <!--Delete Caches-->
-            <Grid Grid.Row="1"
-                  Style="{StaticResource SettingPanelItemGridStyle}">
+            <Grid Style="{StaticResource SettingPanelItemGridStyle}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -48,13 +40,11 @@
             </Grid>
 
             <!--CefSharp-->
-            <TextBlock Grid.Row="2"
-                       Text="{StaticResource settingHeader_aboutCef}"
+            <TextBlock Text="{StaticResource settingHeader_aboutCef}"
                        Style="{StaticResource SettingPanelHeaderStyle}"/>
 
             <!--About-->
-            <Grid Grid.Row="3"
-                  Style="{StaticResource SettingPanelItemGridStyle}">
+            <Grid Style="{StaticResource SettingPanelItemGridStyle}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -68,6 +58,6 @@
                         Command="{Binding PopupAboutCefCommand}"/>
             </Grid>
 
-        </Grid>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>

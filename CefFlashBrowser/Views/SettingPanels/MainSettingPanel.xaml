@@ -18,21 +18,14 @@
     </UserControl.Resources>
 
     <ScrollViewer Style="{StaticResource SettingPanelScrollViewerStyle}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+        <StackPanel>
 
             <!--Address Bar and Search-->
-            <TextBlock Grid.Row="0"
-                       Text="{StaticResource settingHeader_addressBar}"
+            <TextBlock Text="{StaticResource settingHeader_addressBar}"
                        Style="{StaticResource SettingPanelHeaderStyle}"/>
 
             <!--Address Bar Function-->
-            <Grid Grid.Row="1"
-                  Style="{StaticResource SettingPanelItemGridStyle}">
+            <Grid Style="{StaticResource SettingPanelItemGridStyle}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -56,8 +49,7 @@
             </Grid>
 
             <!--Search Engine-->
-            <Grid Grid.Row="2"
-                  Style="{StaticResource SettingPanelItemGridStyle}">
+            <Grid Style="{StaticResource SettingPanelItemGridStyle}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -80,7 +72,7 @@
                 </ComboBox>
             </Grid>
 
-        </Grid>
+        </StackPanel>
     </ScrollViewer>
 
 </UserControl>
