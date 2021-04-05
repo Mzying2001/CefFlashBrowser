@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,6 +28,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenFavoritesManagerCommand { get; set; }
 
         public DelegateCommand LoadSwfCommand { get; set; }
+
+        public DelegateCommand ViewGithubCommand { get; set; }
 
         public ObservableCollection<FavoritesMenuItemVliewModel> FavoritesItems { get; set; }
 
@@ -167,6 +170,11 @@ namespace CefFlashBrowser.ViewModels
             Settings.NotFirstStart = true;
         }
 
+        private void ViewGithub()
+        {
+            Process.Start("https://github.com/Mzying2001/CefFlashBrowser");
+        }
+
         public MainWindowViewModel()
         {
             LoadFavoritesItems();
@@ -182,6 +190,8 @@ namespace CefFlashBrowser.ViewModels
             OpenFavoritesManagerCommand = new DelegateCommand(p => OpenFavoritesManager());
 
             LoadSwfCommand = new DelegateCommand(p => LoadSwf());
+
+            ViewGithubCommand = new DelegateCommand(p => ViewGithub());
         }
     }
 }

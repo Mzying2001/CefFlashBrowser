@@ -10,7 +10,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         
-        Width="450"
+        Width="600"
         Height="450"
         Title="{DynamicResource window_title}"
         WindowStartupLocation="CenterScreen">
@@ -91,8 +91,15 @@
                        Grid.Column="1"
                        Margin="0,0,0,35"
                        FontSize="30"
+                       Cursor="Hand"
                        Text="Flash Browser"
-                       HorizontalAlignment="Center"/>
+                       HorizontalAlignment="Center">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDown">
+                        <i:InvokeCommandAction Command="{Binding ViewGithubCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </TextBlock>
 
             <StackPanel Grid.Row="2"
                         Grid.Column="1"
