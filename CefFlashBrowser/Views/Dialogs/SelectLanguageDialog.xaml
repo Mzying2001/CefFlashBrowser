@@ -7,11 +7,19 @@
         xmlns:mv="clr-namespace:CefFlashBrowser.ViewModels.DialogViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
         mc:Ignorable="d"
-        Height="250" Width="400" WindowStartupLocation="CenterScreen">
+        Height="250" Width="400" WindowStartupLocation="CenterScreen" Topmost="True">
 
     <Window.DataContext>
         <mv:SelectLanguageDialogViewModel/>
     </Window.DataContext>
+
+    <Window.Resources>
+        <Style x:Key="LanguageButton" TargetType="Button"
+               BasedOn="{StaticResource ButtonDefault}">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Width" Value="100"/>
+        </Style>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -37,7 +45,7 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                <Button Margin="5" Width="100" Content="English"
+                <Button Style="{StaticResource LanguageButton}" Content="English"
                         Command="{Binding SelectLanguageCommand}" CommandParameter="en-US">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">
@@ -47,7 +55,7 @@
                     </i:Interaction.Triggers>
                 </Button>
 
-                <Button Margin="5" Width="100" Content="中文"
+                <Button Style="{StaticResource LanguageButton}" Content="中文"
                         Command="{Binding SelectLanguageCommand}" CommandParameter="zh-CN">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">
@@ -57,7 +65,7 @@
                     </i:Interaction.Triggers>
                 </Button>
 
-                <Button Margin="5" Width="100" Content="中文（繁體）"
+                <Button Style="{StaticResource LanguageButton}" Content="中文（繁體）"
                         Command="{Binding SelectLanguageCommand}" CommandParameter="zh-TW">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">
