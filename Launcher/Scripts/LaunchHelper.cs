@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace Launcher.Scripts
 {
-    class LaunchHelper
+    static class LaunchHelper
     {
         const string FolderName = "browser";
 
