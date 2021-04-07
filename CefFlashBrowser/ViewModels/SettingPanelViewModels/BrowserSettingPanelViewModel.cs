@@ -19,25 +19,43 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 
         public DelegateCommand PopupAboutCefCommand { get; set; }
 
+        private void DeleteCacheViaBat()
+        {
+            string bat = "taskkill /f /im CefFlashBrowser.exe\n" +
+                         "timeout 1\n" +
+                         "rd /s /q caches\\\n" +
+                         "mshta vbscript:msgbox(\"done\",64,\"\")(window.close)\n" +
+                         "start CefFlashBrowser.exe\n" +
+                         "del _.bat";
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_.bat"), bat);
+
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = "_.bat",
+                WindowStyle = ProcessWindowStyle.Hidden
+            });
+        }
+
+        private void DeleteCacheViaLauncher(string path)
+        {
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = path,
+                Arguments = "-delcaches"
+            });
+        }
+
         private void DeleteCache()
         {
             var flag = MessageBox.Ask(LanguageManager.GetString("message_deleteCache"));
 
             if (flag == System.Windows.MessageBoxResult.OK)
             {
-                string bat = "taskkill /f /im CefFlashBrowser.exe\n" +
-                             "timeout 1\n" +
-                             "rd /s /q caches\\\n" +
-                             "mshta vbscript:msgbox(\"done\",64,\"\")(window.close)\n" +
-                             "start CefFlashBrowser.exe\n" +
-                             "del _.bat";
-                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_.bat"), bat);
-
-                Process.Start(new ProcessStartInfo()
-                {
-                    FileName = "_.bat",
-                    WindowStyle = ProcessWindowStyle.Hidden
-                });
+                var launcher = @"..\Launcher.exe";
+                if (File.Exists(launcher))
+                    DeleteCacheViaLauncher(launcher);
+                else
+                    DeleteCacheViaBat();
             }
         }
 
