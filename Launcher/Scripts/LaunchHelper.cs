@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Launcher.Scripts
 {
@@ -20,7 +22,9 @@ namespace Launcher.Scripts
 
         static readonly string TargetPath = Path.Combine(CurrentPath, FolderName);
 
-        static readonly string TargetExe = Path.Combine(TargetPath, ExeName);
+        static readonly string TargetExePath = Path.Combine(TargetPath, ExeName);
+
+        static readonly string CachesPath = Path.Combine(TargetPath, "caches");
 
         public static void KillProcs()
         {
@@ -30,10 +34,24 @@ namespace Launcher.Scripts
 
         public static void DelCaches()
         {
-            KillProcs();
+            bool flag;
+            do
+            {
+                KillProcs();
+                Thread.Sleep(1000);
 
-            //delcaches...
+                if (FolderRemover.TryRemove(CachesPath))
+                {
+                    flag = false;
+                }
+                else
+                {
+                    var dr = MessageBox.Show("An error occured, retry?", null, MessageBoxButton.YesNo);
+                    flag = dr == MessageBoxResult.Yes;
+                }
+            } while (flag);
 
+            //MessageBox.Show("done");
             Launch();
         }
 
@@ -41,7 +59,7 @@ namespace Launcher.Scripts
         {
             var info = new ProcessStartInfo()
             {
-                FileName = TargetExe,
+                FileName = TargetExePath,
                 WorkingDirectory = FolderName
             };
             try
@@ -50,7 +68,7 @@ namespace Launcher.Scripts
             }
             catch
             {
-                System.Windows.MessageBox.Show("ERROR");
+                MessageBox.Show("ERROR");
             }
         }
     }

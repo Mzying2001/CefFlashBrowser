@@ -65,6 +65,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Scripts\FolderRemover.cs" />
     <Compile Include="Scripts\LaunchHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
