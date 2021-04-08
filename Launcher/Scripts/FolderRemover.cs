@@ -10,7 +10,7 @@ namespace Launcher.Scripts
     struct PathInfo
     {
         public const bool FILE = true;
-        public const bool PATH = false;
+        public const bool FOLDER = false;
 
         public bool type;
         public string path;
@@ -32,7 +32,7 @@ namespace Launcher.Scripts
             foreach (var item in Directory.GetFiles(path))
                 list.Add(new PathInfo(PathInfo.FILE, item));
 
-            list.Add(new PathInfo(PathInfo.PATH, path));
+            list.Add(new PathInfo(PathInfo.FOLDER, path));
         }
 
         public static List<PathInfo> GetDelList(string path)
@@ -42,19 +42,18 @@ namespace Launcher.Scripts
             return ret;
         }
 
+        public static void Remove(PathInfo pathInfo)
+        {
+            if (pathInfo.type == PathInfo.FILE)
+                File.Delete(pathInfo.path);
+            else
+                Directory.Delete(pathInfo.path);
+        }
+
         public static void Remove(string path)
         {
             foreach (var item in GetDelList(path))
-            {
-                if (item.type == PathInfo.FILE)
-                {
-                    File.Delete(item.path);
-                }
-                else
-                {
-                    Directory.Delete(item.path);
-                }
-            }
+                Remove(item);
         }
 
         public static bool TryRemove(string path)
