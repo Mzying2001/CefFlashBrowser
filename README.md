@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="https://img.wenhairu.com/images/2021/03/28/amgyh.png" />
+    <img src="https://gitee.com/Mzying2001/images/raw/master/CefFlashBrowser/Icon128px.png" />
     <br />
     CefFlashBrowser
     <br />
@@ -8,6 +8,6 @@
 
 Run Flash in 2021!
 
-![main](https://img.wenhairu.com/images/2021/04/06/aDpuK.png)
+![main](https://gitee.com/Mzying2001/images/raw/master/CefFlashBrowser/MainWindow.png)
 
-![browser](https://img.wenhairu.com/images/2021/04/08/aaXyH.png)
+![browser](https://gitee.com/Mzying2001/images/raw/master/CefFlashBrowser/Browser.png)
