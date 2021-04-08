@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -18,12 +19,25 @@ namespace Launcher
         {
             base.OnStartup(e);
 
-            if (e.Args.Contains("-delcaches"))
-                LaunchHelper.DelCaches();
-            else
-                LaunchHelper.Launch();
+            var args = new List<string>();
+            foreach (var item in e.Args)
+            {
+                if (item == "-delcaches")
+                    LaunchHelper.DelCaches();
+                else
+                    args.Add(item);
+            }
 
+            LaunchHelper.Launch(GetArgsStr(args));
             Environment.Exit(0);
+        }
+
+        private string GetArgsStr(IEnumerable<string> args)
+        {
+            var sb = new StringBuilder();
+            foreach (var item in args)
+                sb.Append(item).Append(" ");
+            return sb.ToString();
         }
     }
 }

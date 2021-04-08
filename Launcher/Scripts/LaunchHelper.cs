@@ -75,15 +75,15 @@ namespace Launcher.Scripts
             } while (loop);
 
             //MessageBox.Show("done");
-            Launch();
         }
 
-        public static void Launch()
+        public static void Launch(string args)
         {
             var info = new ProcessStartInfo()
             {
                 FileName = TargetExePath,
-                WorkingDirectory = FolderName
+                WorkingDirectory = FolderName,
+                Arguments = args
             };
             try
             {
