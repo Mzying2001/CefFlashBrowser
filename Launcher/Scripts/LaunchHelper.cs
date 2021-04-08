@@ -32,24 +32,47 @@ namespace Launcher.Scripts
                 proc.Kill();
         }
 
+        public static bool WaitKillProcs(double timeout = 5000)
+        {
+            var startTime = DateTime.Now;
+            while (Process.GetProcessesByName(ProcName).Length != 0)
+            {
+                if ((DateTime.Now - startTime).TotalMilliseconds > timeout)
+                    return false;
+                Thread.Sleep(500);
+            }
+            return true;
+        }
+
         public static void DelCaches()
         {
-            bool flag;
+            bool loop = false;
             do
             {
                 KillProcs();
-                Thread.Sleep(1000);
+
+                if (!WaitKillProcs())
+                {
+                    var mbr = MessageBox.Show("Kill process timed out, do you want to try again?",
+                                              null, MessageBoxButton.YesNo);
+                    if (mbr == MessageBoxResult.Yes)
+                        continue;
+                    else
+                        break;
+                }
 
                 if (FolderRemover.TryRemove(CachesPath))
                 {
-                    flag = false;
+                    loop = false;
                 }
                 else
                 {
-                    var dr = MessageBox.Show("An error occured, retry?", null, MessageBoxButton.YesNo);
-                    flag = dr == MessageBoxResult.Yes;
+                    var mbr = MessageBox.Show("An error occurred. Do you want to try again?",
+                                              null, MessageBoxButton.YesNo);
+                    loop = mbr == MessageBoxResult.Yes;
                 }
-            } while (flag);
+
+            } while (loop);
 
             //MessageBox.Show("done");
             Launch();
