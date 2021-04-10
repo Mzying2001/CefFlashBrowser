@@ -54,7 +54,7 @@ namespace Launcher.Scripts
                 if (!WaitKillProcs())
                 {
                     var mbr = MessageBox.Show("Kill process timed out, do you want to try again?",
-                                              null, MessageBoxButton.YesNo);
+                                              null, MessageBoxButton.YesNo, MessageBoxImage.Error);
                     if (mbr == MessageBoxResult.Yes)
                         continue;
                     else
@@ -68,7 +68,7 @@ namespace Launcher.Scripts
                 else
                 {
                     var mbr = MessageBox.Show("An error occurred. Do you want to try again?",
-                                              null, MessageBoxButton.YesNo);
+                                              null, MessageBoxButton.YesNo, MessageBoxImage.Error);
                     loop = mbr == MessageBoxResult.Yes;
                 }
 
@@ -91,7 +91,8 @@ namespace Launcher.Scripts
             }
             catch
             {
-                MessageBox.Show("ERROR");
+                MessageBox.Show("Necessary files are missing.",
+                                null, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
