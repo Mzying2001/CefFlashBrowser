@@ -130,7 +130,8 @@
         <TextBlock Grid.Row="2"
                    Margin="5"
                    Foreground="Gray"
-                   HorizontalAlignment="Center"
-                   Text="{Binding AppVersion, StringFormat=version \{0\} | by Mzying2001}"/>
+                   HorizontalAlignment="Center">
+            version <Run Text="{Binding AppVersion, Mode=OneTime}"/> | by Mzying2001
+        </TextBlock>
     </Grid>
 </Window>
