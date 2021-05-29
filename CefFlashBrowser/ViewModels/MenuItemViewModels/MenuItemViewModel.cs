@@ -35,11 +35,11 @@ namespace CefFlashBrowser.ViewModels.MenuItemViewModels
             }
         }
 
-        protected abstract void MenuItemSelected();
+        protected abstract void MenuItemSelected(object sender);
 
         public MenuItemViewModel()
         {
-            MenuItemSelectedCommand = new DelegateCommand(p => MenuItemSelected());
+            MenuItemSelectedCommand = new DelegateCommand(MenuItemSelected);
         }
     }
 }
