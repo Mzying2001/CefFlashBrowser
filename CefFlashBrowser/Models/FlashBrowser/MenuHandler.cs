@@ -100,6 +100,14 @@ namespace CefFlashBrowser.Models.FlashBrowser
                     Command = targetBrowser.SelectAllCommand
                 });
 
+                menu.Items.Add(new Separator());
+
+                menu.Items.Add(new MenuItem
+                {
+                    Header = "print",
+                    Command = targetBrowser.PrintCommand
+                });
+
                 targetBrowser.ContextMenu = menu;
             });
 
