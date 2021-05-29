@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Commands;
+using CefFlashBrowser.Models.StaticData;
 using CefSharp;
 using System;
 using System.Collections.Generic;
@@ -47,14 +48,14 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
                 menu.Items.Add(new MenuItem
                 {
-                    Header = "back",
+                    Header = LanguageManager.GetString("menu_back"),
                     InputGestureText = "Alt+Z",
                     Command = targetBrowser.BackCommand
                 });
 
                 menu.Items.Add(new MenuItem
                 {
-                    Header = "forward",
+                    Header = LanguageManager.GetString("menu_forward"),
                     InputGestureText = "Alt+X",
                     Command = targetBrowser.ForwardCommand
                 });
@@ -63,7 +64,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
                 {
                     menu.Items.Add(new MenuItem
                     {
-                        Header = "reload",
+                        Header = LanguageManager.GetString("menu_reload"),
                         InputGestureText = "F5",
                         Command = targetBrowser.ReloadCommand
                     });
@@ -72,7 +73,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
                 {
                     menu.Items.Add(new MenuItem
                     {
-                        Header = "stop",
+                        Header = LanguageManager.GetString("menu_stop"),
                         InputGestureText = "Esc",
                         Command = targetBrowser.StopCommand
                     });
@@ -82,28 +83,28 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
                 menu.Items.Add(new MenuItem
                 {
-                    Header = "cut",
+                    Header = LanguageManager.GetString("menu_cut"),
                     InputGestureText = "Ctrl+X",
                     Command = targetBrowser.CutCommand
                 });
 
                 menu.Items.Add(new MenuItem
                 {
-                    Header = "copy",
+                    Header = LanguageManager.GetString("menu_copy"),
                     InputGestureText = "Ctrl+C",
                     Command = targetBrowser.CopyCommand
                 });
 
                 menu.Items.Add(new MenuItem
                 {
-                    Header = "paste",
+                    Header = LanguageManager.GetString("menu_paste"),
                     InputGestureText = "Ctrl+V",
                     Command = targetBrowser.PasteCommand
                 });
 
                 menu.Items.Add(new MenuItem
                 {
-                    Header = "select all",
+                    Header = LanguageManager.GetString("menu_selectAll"),
                     InputGestureText = "Ctrl+A",
                     Command = targetBrowser.SelectAllCommand
                 });
@@ -112,7 +113,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
                 menu.Items.Add(new MenuItem
                 {
-                    Header = "print",
+                    Header = LanguageManager.GetString("menu_print"),
                     InputGestureText = "Ctrl+P",
                     Command = targetBrowser.PrintCommand
                 });

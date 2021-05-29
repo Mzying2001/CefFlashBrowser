@@ -56,7 +56,15 @@
     <sys:String x:Key="message_removeItem">确定要移除“{0}”吗？</sys:String>
 
     <!--浏览器窗口-->
+    <sys:String x:Key="menu_back">返回</sys:String>
+    <sys:String x:Key="menu_forward">前进</sys:String>
     <sys:String x:Key="menu_reload">刷新</sys:String>
+    <sys:String x:Key="menu_stop">停止</sys:String>
+    <sys:String x:Key="menu_cut">剪切</sys:String>
+    <sys:String x:Key="menu_copy">复制</sys:String>
+    <sys:String x:Key="menu_paste">粘贴</sys:String>
+    <sys:String x:Key="menu_selectAll">全选</sys:String>
+    <sys:String x:Key="menu_print">打印</sys:String>
     <sys:String x:Key="menu_openDevTool">打开开发工具</sys:String>
     <sys:String x:Key="menu_viewSource">查看网页源码</sys:String>
     <sys:String x:Key="menu_zoom">缩放</sys:String>
