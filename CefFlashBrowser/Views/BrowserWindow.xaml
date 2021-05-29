@@ -18,9 +18,9 @@
     </Window.DataContext>
 
     <Window.InputBindings>
-        <KeyBinding Gesture="Alt+Left"
+        <KeyBinding Gesture="Alt+Z"
                     Command="{Binding ElementName=browser, Path=BackCommand}"/>
-        <KeyBinding Gesture="Alt+Right"
+        <KeyBinding Gesture="Alt+X"
                     Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
         <KeyBinding Gesture="Ctrl+Add"
                     Command="{Binding ElementName=browser, Path=ZoomInCommand}"/>
@@ -30,6 +30,8 @@
                     Command="{Binding ElementName=browser, Path=ZoomResetCommand}"/>
         <KeyBinding Gesture="Ctrl+O"
                     Command="{Binding OpenInDefaultBrowserCommand}"/>
+        <KeyBinding Gesture="Ctrl+P"
+                    Command="{Binding ElementName=browser, Path=PrintCommand}"/>
         <KeyBinding Gesture="Ctrl+U"
                     Command="{Binding ViewSourceCommand}"/>
         <KeyBinding Gesture="Ctrl+S"

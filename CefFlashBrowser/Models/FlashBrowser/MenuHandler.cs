@@ -48,12 +48,14 @@ namespace CefFlashBrowser.Models.FlashBrowser
                 menu.Items.Add(new MenuItem
                 {
                     Header = "back",
+                    InputGestureText = "Alt+Z",
                     Command = targetBrowser.BackCommand
                 });
 
                 menu.Items.Add(new MenuItem
                 {
                     Header = "forward",
+                    InputGestureText = "Alt+X",
                     Command = targetBrowser.ForwardCommand
                 });
 
@@ -62,6 +64,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
                     menu.Items.Add(new MenuItem
                     {
                         Header = "reload",
+                        InputGestureText = "F5",
                         Command = targetBrowser.ReloadCommand
                     });
                 }
@@ -70,6 +73,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
                     menu.Items.Add(new MenuItem
                     {
                         Header = "stop",
+                        InputGestureText = "Esc",
                         Command = targetBrowser.StopCommand
                     });
                 }
@@ -79,24 +83,28 @@ namespace CefFlashBrowser.Models.FlashBrowser
                 menu.Items.Add(new MenuItem
                 {
                     Header = "cut",
+                    InputGestureText = "Ctrl+X",
                     Command = targetBrowser.CutCommand
                 });
 
                 menu.Items.Add(new MenuItem
                 {
                     Header = "copy",
+                    InputGestureText = "Ctrl+C",
                     Command = targetBrowser.CopyCommand
                 });
 
                 menu.Items.Add(new MenuItem
                 {
                     Header = "paste",
+                    InputGestureText = "Ctrl+V",
                     Command = targetBrowser.PasteCommand
                 });
 
                 menu.Items.Add(new MenuItem
                 {
                     Header = "select all",
+                    InputGestureText = "Ctrl+A",
                     Command = targetBrowser.SelectAllCommand
                 });
 
@@ -105,6 +113,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
                 menu.Items.Add(new MenuItem
                 {
                     Header = "print",
+                    InputGestureText = "Ctrl+P",
                     Command = targetBrowser.PrintCommand
                 });
 
