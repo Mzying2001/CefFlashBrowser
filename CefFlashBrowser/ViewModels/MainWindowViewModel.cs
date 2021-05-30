@@ -76,8 +76,12 @@ namespace CefFlashBrowser.ViewModels
 
         private void LoadFavoritesItems()
         {
-            FavoritesItems = new ObservableCollection<FavoritesMenuItemVliewModel>();
-            foreach (var item in new FavoritesDataService().GetFavorites())
+            if (FavoritesItems == null)
+                FavoritesItems = new ObservableCollection<FavoritesMenuItemVliewModel>();
+            else
+                FavoritesItems.Clear();
+
+            foreach (var item in Favorites.Items)
                 FavoritesItems.Add(new FavoritesMenuItemVliewModel(item));
         }
 
@@ -137,6 +141,7 @@ namespace CefFlashBrowser.ViewModels
         {
             new FavoritesManager().ShowDialog();
             new FavoritesDataService().WriteFavorites(Favorites.Items);
+            LoadFavoritesItems();
         }
 
         private void LoadSwf()
