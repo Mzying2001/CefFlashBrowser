@@ -4,10 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
+        xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
+        xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
         mc:Ignorable="d"
         
+        x:Name="browserWindow"
         Width="1000"
         Height="750"
         Closing="WindowClosing"
@@ -93,6 +96,20 @@
                             <Button Content="+" FontFamily="SimHei" Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}"/>
                         </StackPanel>
 
+                        <Separator/>
+
+                        <MenuItem Header="{DynamicResource menu_favorites}"
+                                  ItemsSource="{Binding Source={x:Static sd:Favorites.Items}}">
+                            <MenuItem.ItemTemplate>
+                                <DataTemplate DataType="{x:Type m:Website}">
+                                    <MenuItem Header="{Binding Name}"
+                                              Command="{Binding Source={x:Reference Name=browserWindow}, Path=DataContext.LoadUrlCommand}"
+                                              CommandParameter="{Binding Url}"
+                                              Padding="0"/>
+                                </DataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
+                        
                         <Separator/>
 
                         <MenuItem Header="{DynamicResource menu_createShortcut}"
