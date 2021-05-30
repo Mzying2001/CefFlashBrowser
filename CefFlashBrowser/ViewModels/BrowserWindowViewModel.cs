@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.FlashBrowser;
@@ -17,15 +18,15 @@ namespace CefFlashBrowser.ViewModels
 {
     class BrowserWindowViewModel : NotificationObject
     {
-        public DelegateCommand LoadUrlCommand { get; set; }
+        public ICommand LoadUrlCommand { get; set; }
 
-        public DelegateCommand OpenDevToolCommand { get; set; }
+        public ICommand OpenDevToolCommand { get; set; }
 
-        public DelegateCommand ViewSourceCommand { get; set; }
+        public ICommand ViewSourceCommand { get; set; }
 
-        public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
+        public ICommand OpenInDefaultBrowserCommand { get; set; }
 
-        public DelegateCommand CreateShortcutCommand { get; set; }
+        public ICommand CreateShortcutCommand { get; set; }
 
         public ChromiumFlashBrowser Browser { get; set; }
 
@@ -97,15 +98,15 @@ namespace CefFlashBrowser.ViewModels
 
         public BrowserWindowViewModel()
         {
-            LoadUrlCommand = new DelegateCommand(p => LoadUrl(p?.ToString()));
+            LoadUrlCommand = new DelegateCommand(url => LoadUrl(url?.ToString()));
 
             OpenDevToolCommand = new DelegateCommand(p => Browser.ShowDevTools());
 
-            ViewSourceCommand = new DelegateCommand(p => ViewSource());
+            ViewSourceCommand = new DelegateCommand(ViewSource);
 
-            OpenInDefaultBrowserCommand = new DelegateCommand(p => OpenInDefaultBrowser());
+            OpenInDefaultBrowserCommand = new DelegateCommand(OpenInDefaultBrowser);
 
-            CreateShortcutCommand = new DelegateCommand(p => CreateShortcut());
+            CreateShortcutCommand = new DelegateCommand(CreateShortcut);
         }
     }
 }

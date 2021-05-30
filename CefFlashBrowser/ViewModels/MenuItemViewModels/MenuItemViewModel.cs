@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels.MenuItemViewModels
 {
     abstract class MenuItemViewModel : NotificationObject
     {
-        public DelegateCommand MenuItemSelectedCommand { get; set; }
+        public ICommand MenuItemSelectedCommand { get; set; }
 
         private string _header;
 

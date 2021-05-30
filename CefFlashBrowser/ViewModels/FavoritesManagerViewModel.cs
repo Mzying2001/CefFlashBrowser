@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -17,21 +18,21 @@ namespace CefFlashBrowser.ViewModels
     {
         private bool _switchingIndexFlag = false;
 
-        public DelegateCommand SelectionChangedCommand { get; set; }
+        public ICommand SelectionChangedCommand { get; set; }
 
-        public DelegateCommand UpdateNameCommand { get; set; }
+        public ICommand UpdateNameCommand { get; set; }
 
-        public DelegateCommand UpdateUrlCommand { get; set; }
+        public ICommand UpdateUrlCommand { get; set; }
 
-        public DelegateCommand SaveChangesCommand { get; set; }
+        public ICommand SaveChangesCommand { get; set; }
 
-        public DelegateCommand AddItemCommand { get; set; }
+        public ICommand AddItemCommand { get; set; }
 
-        public DelegateCommand RemoveItemCommand { get; set; }
+        public ICommand RemoveItemCommand { get; set; }
 
-        public DelegateCommand MoveUpCommand { get; set; }
+        public ICommand MoveUpCommand { get; set; }
 
-        public DelegateCommand MoveDownCommand { get; set; }
+        public ICommand MoveDownCommand { get; set; }
 
         public ObservableCollection<FavoritesMenuItemVliewModel> FavoritesItems { get; set; }
 
@@ -196,19 +197,19 @@ namespace CefFlashBrowser.ViewModels
         {
             SelectionChangedCommand = new DelegateCommand(SelectionChanged);
 
-            UpdateNameCommand = new DelegateCommand(p => UpdateName(p?.ToString()));
+            UpdateNameCommand = new DelegateCommand(name => UpdateName(name?.ToString()));
 
-            UpdateUrlCommand = new DelegateCommand(p => UpdateUrl(p?.ToString()));
+            UpdateUrlCommand = new DelegateCommand(url => UpdateUrl(url?.ToString()));
 
-            SaveChangesCommand = new DelegateCommand(p => SaveChanges());
+            SaveChangesCommand = new DelegateCommand(SaveChanges);
 
-            AddItemCommand = new DelegateCommand(p => AddItem());
+            AddItemCommand = new DelegateCommand(AddItem);
 
-            RemoveItemCommand = new DelegateCommand(p => RemoveItem());
+            RemoveItemCommand = new DelegateCommand(RemoveItem);
 
-            MoveUpCommand = new DelegateCommand(p => MoveUp());
+            MoveUpCommand = new DelegateCommand(MoveUp);
 
-            MoveDownCommand = new DelegateCommand(p => MoveDown());
+            MoveDownCommand = new DelegateCommand(MoveDown);
         }
     }
 }

@@ -10,14 +10,15 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 {
     class BrowserSettingPanelViewModel : NotificationObject
     {
-        public DelegateCommand DeleteCacheCommand { get; set; }
+        public ICommand DeleteCacheCommand { get; set; }
 
-        public DelegateCommand PopupAboutCefCommand { get; set; }
+        public ICommand PopupAboutCefCommand { get; set; }
 
         private void DeleteCacheViaBat()
         {
@@ -66,9 +67,9 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 
         public BrowserSettingPanelViewModel()
         {
-            DeleteCacheCommand = new DelegateCommand(p => DeleteCache());
+            DeleteCacheCommand = new DelegateCommand(DeleteCache);
 
-            PopupAboutCefCommand = new DelegateCommand(p => PopupAboutCef());
+            PopupAboutCefCommand = new DelegateCommand(PopupAboutCef);
         }
     }
 }

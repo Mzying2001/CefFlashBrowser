@@ -9,14 +9,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 {
     class MainSettingPanelViewModel : NotificationObject
     {
-        public DelegateCommand SwitchAddressBarFunctionCommand { get; set; }
+        public ICommand SwitchAddressBarFunctionCommand { get; set; }
 
-        public DelegateCommand SwitchSearchEngineCommand { get; set; }
+        public ICommand SwitchSearchEngineCommand { get; set; }
 
         public ObservableCollection<SearchEngineComboBoxItemViewModel> SearchEngineItems { get; set; }
 

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
@@ -19,17 +20,17 @@ namespace CefFlashBrowser.ViewModels
 {
     class MainWindowViewModel : NotificationObject
     {
-        public DelegateCommand OpenUrlCommand { get; set; }
+        public ICommand OpenUrlCommand { get; set; }
 
-        public DelegateCommand UpdateUrlCommand { get; set; }
+        public ICommand UpdateUrlCommand { get; set; }
 
-        public DelegateCommand OpenSettingsWindowCommand { get; set; }
+        public ICommand OpenSettingsWindowCommand { get; set; }
 
-        public DelegateCommand OpenFavoritesManagerCommand { get; set; }
+        public ICommand OpenFavoritesManagerCommand { get; set; }
 
-        public DelegateCommand LoadSwfCommand { get; set; }
+        public ICommand LoadSwfCommand { get; set; }
 
-        public DelegateCommand ViewGithubCommand { get; set; }
+        public ICommand ViewGithubCommand { get; set; }
 
         public ObservableCollection<FavoritesMenuItemVliewModel> FavoritesItems { get; set; }
 
@@ -181,17 +182,17 @@ namespace CefFlashBrowser.ViewModels
             SelectLanguageOnFirstStart();
             LoadLanguageMenu();
 
-            OpenUrlCommand = new DelegateCommand(p => OpenUrl());
+            OpenUrlCommand = new DelegateCommand(OpenUrl);
 
-            UpdateUrlCommand = new DelegateCommand(p => UpdateUrl(p?.ToString()));
+            UpdateUrlCommand = new DelegateCommand(url => UpdateUrl(url?.ToString()));
 
-            OpenSettingsWindowCommand = new DelegateCommand(p => OpenSettingsWindow());
+            OpenSettingsWindowCommand = new DelegateCommand(OpenSettingsWindow);
 
-            OpenFavoritesManagerCommand = new DelegateCommand(p => OpenFavoritesManager());
+            OpenFavoritesManagerCommand = new DelegateCommand(OpenFavoritesManager);
 
-            LoadSwfCommand = new DelegateCommand(p => LoadSwf());
+            LoadSwfCommand = new DelegateCommand(LoadSwf);
 
-            ViewGithubCommand = new DelegateCommand(p => ViewGithub());
+            ViewGithubCommand = new DelegateCommand(ViewGithub);
         }
     }
 }
