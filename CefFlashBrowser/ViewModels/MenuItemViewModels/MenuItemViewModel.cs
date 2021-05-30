@@ -36,7 +36,7 @@ namespace CefFlashBrowser.ViewModels.MenuItemViewModels
             }
         }
 
-        protected abstract void MenuItemSelected(object sender);
+        protected abstract void MenuItemSelected();
 
         public MenuItemViewModel()
         {

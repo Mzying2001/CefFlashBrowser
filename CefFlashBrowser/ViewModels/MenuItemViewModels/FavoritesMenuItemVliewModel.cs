@@ -22,12 +22,9 @@ namespace CefFlashBrowser.ViewModels.MenuItemViewModels
             }
         }
 
-        protected override void MenuItemSelected(object sender)
+        protected override void MenuItemSelected()
         {
-            if (sender is BrowserWindow bw)
-                bw.browser.Address = Website.Url;
-            else
-                BrowserWindow.Popup(Website.Url);
+            BrowserWindow.Popup(Website.Url);
         }
 
         public FavoritesMenuItemVliewModel(Website website) : base()

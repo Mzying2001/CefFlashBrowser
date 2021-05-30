@@ -14,7 +14,7 @@ namespace CefFlashBrowser.ViewModels.MenuItemViewModels
 
         public string Language { get; private set; }
 
-        protected override void MenuItemSelected(object sender)
+        protected override void MenuItemSelected()
         {
             if (LanguageManager.CurrentLanguage == Language)
                 return;
