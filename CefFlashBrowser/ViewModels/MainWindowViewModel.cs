@@ -135,19 +135,8 @@ namespace CefFlashBrowser.ViewModels
 
         private void OpenFavoritesManager()
         {
-            var favoritesManager = new FavoritesManager();
-            var managerViewModel = favoritesManager.DataContext as FavoritesManagerViewModel;
-
-            if (managerViewModel == null)
-            {
-                favoritesManager.Close();
-                return;
-            }
-
-            managerViewModel.SetFavoritesItems(FavoritesItems);
-            favoritesManager.ShowDialog();
-
-            new FavoritesDataService().WriteFavorites(from item in FavoritesItems select item.Website);
+            new FavoritesManager().ShowDialog();
+            new FavoritesDataService().WriteFavorites(Favorites.Items);
         }
 
         private void LoadSwf()

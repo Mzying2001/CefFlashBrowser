@@ -3,6 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:m="clr-namespace:CefFlashBrowser.Models"
+        xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
@@ -41,10 +43,10 @@
 
             <ListBox Grid.Row="1"
                      SelectedIndex="{Binding SelectedIndex}"
-                     ItemsSource="{Binding FavoritesItems}">
+                     ItemsSource="{Binding Source={x:Static sd:Favorites.Items}}">
                 <ListBox.ItemTemplate>
-                    <DataTemplate DataType="{x:Type mvm:FavoritesMenuItemVliewModel}">
-                        <TextBlock Text="{Binding Header}"/>
+                    <DataTemplate DataType="{x:Type m:Website}">
+                        <TextBlock Text="{Binding Name}"/>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
                 <i:Interaction.Triggers>

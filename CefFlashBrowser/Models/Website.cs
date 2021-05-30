@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CefFlashBrowser.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Models
 {
-    class Website
+    class Website : NotificationObject
     {
         private string _name;
 
@@ -19,6 +20,7 @@ namespace CefFlashBrowser.Models
                     throw new ArgumentNullException();
                 else
                     _name = value;
+                RaisePropertyChanged("Name");
             }
         }
 
@@ -33,6 +35,7 @@ namespace CefFlashBrowser.Models
                     throw new ArgumentNullException();
                 else
                     _url = value;
+                RaisePropertyChanged("Url");
             }
         }
 

@@ -34,8 +34,6 @@ namespace CefFlashBrowser.ViewModels
 
         public ICommand MoveDownCommand { get; set; }
 
-        public ObservableCollection<FavoritesMenuItemVliewModel> FavoritesItems { get; set; }
-
         private bool _hasItems;
 
         public bool HasItems
@@ -84,16 +82,9 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void SetFavoritesItems(ObservableCollection<FavoritesMenuItemVliewModel> favoritesItems)
-        {
-            FavoritesItems = favoritesItems;
-            RaisePropertyChanged("FavoritesItems");
-            SelectionChanged(null);
-        }
-
         private void SelectionChanged(object sender)
         {
-            if (FavoritesItems == null)
+            if (Favorites.Items == null)
                 return;
 
             _switchingIndexFlag = true;
@@ -106,11 +97,11 @@ namespace CefFlashBrowser.ViewModels
             }
             else
             {
-                if (FavoritesItems.Count != 0)
+                if (Favorites.Items.Count != 0)
                 {
                     HasItems = true;
-                    SelectedName = FavoritesItems[SelectedIndex].Website.Name;
-                    SelectedUrl = FavoritesItems[SelectedIndex].Website.Url;
+                    SelectedName = Favorites.Items[SelectedIndex].Name;
+                    SelectedUrl = Favorites.Items[SelectedIndex].Url;
                 }
             }
             _switchingIndexFlag = false;
@@ -130,13 +121,13 @@ namespace CefFlashBrowser.ViewModels
 
         private void SaveChanges()
         {
-            if (FavoritesItems == null || FavoritesItems.Count == 0)
+            if (Favorites.Items == null || Favorites.Items.Count == 0)
                 return;
 
             try
             {
                 var website = new Website(SelectedName.Trim(), SelectedUrl.Trim());
-                FavoritesItems[SelectedIndex].Website = website;
+                Favorites.Items[SelectedIndex] = website;
             }
             catch (Exception e)
             {
@@ -148,29 +139,31 @@ namespace CefFlashBrowser.ViewModels
         {
             var website = new Website(LanguageManager.GetString("favorites_defaultName"), "about:blank");
 
-            if (FavoritesItems.Count == 0 || FavoritesItems[FavoritesItems.Count - 1].Website != website)
-                FavoritesItems.Add(new FavoritesMenuItemVliewModel(website));
+            if (Favorites.Items.Count == 0 || Favorites.Items[Favorites.Items.Count - 1] != website)
+                Favorites.Items.Add(website);
 
-            SelectedIndex = FavoritesItems.Count - 1;
+            SelectedIndex = Favorites.Items.Count - 1;
         }
 
         private void RemoveItem()
         {
-            var r = MessageBox.Show(string.Format(LanguageManager.GetString("message_removeItem"), FavoritesItems[SelectedIndex].Header),
+            var r = MessageBox.Show(string.Format(LanguageManager.GetString("message_removeItem"), Favorites.Items[SelectedIndex].Name),
                                     string.Empty, MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (r == MessageBoxResult.Yes)
             {
-                FavoritesItems.RemoveAt(SelectedIndex--);
-                if (SelectedIndex == -1 && FavoritesItems.Count > 0)
+                Favorites.Items.RemoveAt(SelectedIndex--);
+                if (SelectedIndex == -1 && Favorites.Items.Count > 0)
                     SelectedIndex = 0;
             }
         }
 
         private void SwapItem(int i, int j)
         {
-            var temp = FavoritesItems[i].Website;
-            FavoritesItems[i].Website = FavoritesItems[j].Website;
-            FavoritesItems[j].Website = temp;
+            var temp = new Website(Favorites.Items[i].Name, Favorites.Items[i].Url);
+            Favorites.Items[i].Name = Favorites.Items[j].Name;
+            Favorites.Items[i].Url = Favorites.Items[j].Url;
+            Favorites.Items[j].Name = temp.Name;
+            Favorites.Items[j].Url = temp.Url;
         }
 
         private void MoveUp()
@@ -186,7 +179,7 @@ namespace CefFlashBrowser.ViewModels
         private void MoveDown()
         {
             int index = SelectedIndex;
-            if (index < FavoritesItems.Count - 1)
+            if (index < Favorites.Items.Count - 1)
             {
                 SwapItem(index, index + 1);
                 SelectedIndex++;
@@ -210,6 +203,8 @@ namespace CefFlashBrowser.ViewModels
             MoveUpCommand = new DelegateCommand(MoveUp);
 
             MoveDownCommand = new DelegateCommand(MoveDown);
+
+            SelectionChanged(null);
         }
     }
 }

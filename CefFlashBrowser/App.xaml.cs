@@ -21,6 +21,7 @@ namespace CefFlashBrowser
         private void Init()
         {
             Settings.Init();
+            Favorites.InitFavorites();
             LanguageManager.InitLanguage();
             ChromiumFlashBrowser.InitCefFlash();
         }
