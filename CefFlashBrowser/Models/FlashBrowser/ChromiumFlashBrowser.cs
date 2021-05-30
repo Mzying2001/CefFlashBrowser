@@ -54,6 +54,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
         private void InitBrowser()
         {
             EnableFlash();
+            MenuHandler = new ContextMenuHandler();
             DownloadHandler = new IEDownloadHandler();
             LifeSpanHandler = new FlashBrowserLifeSpanHandler((s, e) =>
             {

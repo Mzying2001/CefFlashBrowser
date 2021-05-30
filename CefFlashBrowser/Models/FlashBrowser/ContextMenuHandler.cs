@@ -11,7 +11,7 @@ using System.Windows.Controls;
 
 namespace CefFlashBrowser.Models.FlashBrowser
 {
-    class MenuHandler : IContextMenuHandler
+    class ContextMenuHandler : IContextMenuHandler
     {
         public void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {

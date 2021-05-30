@@ -135,11 +135,7 @@
 
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
-                                    ZoomLevelIncrement="0.25">
-            <flash:ChromiumFlashBrowser.MenuHandler>
-                <flash:MenuHandler/>
-            </flash:ChromiumFlashBrowser.MenuHandler>
-        </flash:ChromiumFlashBrowser>
+                                    ZoomLevelIncrement="0.25"/>
     </Grid>
 
 </Window>
