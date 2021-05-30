@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace CefFlashBrowser.Commands
@@ -25,15 +21,14 @@ namespace CefFlashBrowser.Commands
 
         public Action<object> Execute { get; set; }
 
-        public DelegateCommand()
-        {
-            //nothing to do
-        }
+        public DelegateCommand() { }
 
         public DelegateCommand(Action<object> executeDelegate)
         {
             Execute = executeDelegate;
         }
+
+        public DelegateCommand(Action executeDelegate) : this(p => executeDelegate()) { }
 
         public DelegateCommand(Func<object, bool> canExecuteDelegate)
         {
