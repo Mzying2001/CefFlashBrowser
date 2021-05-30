@@ -127,7 +127,8 @@ namespace CefFlashBrowser.ViewModels
             try
             {
                 var website = new Website(SelectedName.Trim(), SelectedUrl.Trim());
-                Favorites.Items[SelectedIndex] = website;
+                Favorites.Items[SelectedIndex].Name = website.Name;
+                Favorites.Items[SelectedIndex].Url = website.Url;
             }
             catch (Exception e)
             {
