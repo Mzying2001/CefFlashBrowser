@@ -78,7 +78,7 @@
 
             <Button Content="..." Grid.Column="3" Click="OtherButton_Clicked">
                 <Button.ContextMenu>
-                    <ContextMenu x:Name="otherButtonContextMenu">
+                    <ContextMenu x:Name="menuButtonContextMenu">
                         <MenuItem Header="{DynamicResource menu_reload}"
                                   Command="{Binding Source={x:Reference Name=browser}, Path=ReloadCommand}"
                                   InputGestureText="F5"/>
@@ -109,7 +109,7 @@
                                 </DataTemplate>
                             </MenuItem.ItemTemplate>
                         </MenuItem>
-                        
+
                         <Separator/>
 
                         <MenuItem Header="{DynamicResource menu_createShortcut}"

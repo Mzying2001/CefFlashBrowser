@@ -46,8 +46,8 @@ namespace CefFlashBrowser.Views
 
         private void OtherButton_Clicked(object sender, RoutedEventArgs e)
         {
-            otherButtonContextMenu.PlacementTarget = sender as UIElement;
-            otherButtonContextMenu.IsOpen = true;
+            menuButtonContextMenu.PlacementTarget = sender as UIElement;
+            menuButtonContextMenu.IsOpen = true;
         }
 
         public static void Popup(string url, bool showNavigationBar = true)
