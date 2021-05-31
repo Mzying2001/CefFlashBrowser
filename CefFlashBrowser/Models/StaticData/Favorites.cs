@@ -12,9 +12,13 @@ namespace CefFlashBrowser.Models.StaticData
     {
         public static ObservableCollection<Website> Items { get; private set; }
 
+        public static event Action ItemsChanged;
+
         public static void InitFavorites()
         {
             Items = new ObservableCollection<Website>();
+            Items.CollectionChanged += (s, e) => ItemsChanged?.Invoke();
+
             foreach (var website in new FavoritesDataService().GetFavorites())
                 Items.Add(website);
         }

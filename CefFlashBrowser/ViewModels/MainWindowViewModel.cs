@@ -76,11 +76,14 @@ namespace CefFlashBrowser.ViewModels
 
         private void LoadFavoritesItems()
         {
-            if (FavoritesItems == null)
-                FavoritesItems = new ObservableCollection<FavoritesMenuItemVliewModel>();
-            else
-                FavoritesItems.Clear();
+            FavoritesItems = new ObservableCollection<FavoritesMenuItemVliewModel>();
+            Favorites.ItemsChanged += UpdateFavoritesItems;
+            UpdateFavoritesItems();
+        }
 
+        private void UpdateFavoritesItems()
+        {
+            FavoritesItems.Clear();
             foreach (var item in Favorites.Items)
                 FavoritesItems.Add(new FavoritesMenuItemVliewModel(item));
         }
@@ -141,7 +144,6 @@ namespace CefFlashBrowser.ViewModels
         {
             new FavoritesManager().ShowDialog();
             new FavoritesDataService().WriteFavorites(Favorites.Items);
-            LoadFavoritesItems();
         }
 
         private void LoadSwf()
@@ -187,6 +189,11 @@ namespace CefFlashBrowser.ViewModels
             LoadSwfCommand = new DelegateCommand(LoadSwf);
 
             ViewGithubCommand = new DelegateCommand(ViewGithub);
+        }
+
+        ~MainWindowViewModel()
+        {
+            Favorites.ItemsChanged -= UpdateFavoritesItems;
         }
     }
 }
