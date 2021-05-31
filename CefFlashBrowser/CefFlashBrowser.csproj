@@ -115,7 +115,6 @@
     <Compile Include="ViewModels\DialogViewModels\SelectLanguageDialogViewModel.cs" />
     <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
-    <Compile Include="ViewModels\MenuItemViewModels\FavoritesMenuItemVliewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\LanguageMenuItemViewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\NotificationObject.cs" />
