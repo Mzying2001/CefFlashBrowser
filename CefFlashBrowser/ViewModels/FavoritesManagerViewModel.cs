@@ -19,19 +19,12 @@ namespace CefFlashBrowser.ViewModels
         private bool _switchingIndexFlag = false;
 
         public ICommand SelectionChangedCommand { get; set; }
-
         public ICommand UpdateNameCommand { get; set; }
-
         public ICommand UpdateUrlCommand { get; set; }
-
         public ICommand SaveChangesCommand { get; set; }
-
         public ICommand AddItemCommand { get; set; }
-
         public ICommand RemoveItemCommand { get; set; }
-
         public ICommand MoveUpCommand { get; set; }
-
         public ICommand MoveDownCommand { get; set; }
 
         private bool _hasItems;
@@ -190,19 +183,12 @@ namespace CefFlashBrowser.ViewModels
         public FavoritesManagerViewModel()
         {
             SelectionChangedCommand = new DelegateCommand(SelectionChanged);
-
             UpdateNameCommand = new DelegateCommand(name => UpdateName(name?.ToString()));
-
             UpdateUrlCommand = new DelegateCommand(url => UpdateUrl(url?.ToString()));
-
             SaveChangesCommand = new DelegateCommand(SaveChanges);
-
             AddItemCommand = new DelegateCommand(AddItem);
-
             RemoveItemCommand = new DelegateCommand(RemoveItem);
-
             MoveUpCommand = new DelegateCommand(MoveUp);
-
             MoveDownCommand = new DelegateCommand(MoveDown);
 
             SelectionChanged(null);

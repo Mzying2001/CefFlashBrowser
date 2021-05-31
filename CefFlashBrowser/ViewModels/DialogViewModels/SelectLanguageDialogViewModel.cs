@@ -12,7 +12,6 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
     class SelectLanguageDialogViewModel : NotificationObject
     {
         public ICommand SelectLanguageCommand { get; set; }
-
         public ICommand SetHeaderCommand { get; set; }
 
         public Action CloseWindow { get; set; }
@@ -43,7 +42,6 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
         public SelectLanguageDialogViewModel()
         {
             SelectLanguageCommand = new DelegateCommand(p => SelectLanguage(p?.ToString()));
-
             SetHeaderCommand = new DelegateCommand(p => SetHeader(p?.ToString()));
         }
     }

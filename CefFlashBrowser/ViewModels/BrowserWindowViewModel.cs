@@ -19,13 +19,9 @@ namespace CefFlashBrowser.ViewModels
     class BrowserWindowViewModel : NotificationObject
     {
         public ICommand LoadUrlCommand { get; set; }
-
         public ICommand OpenDevToolCommand { get; set; }
-
         public ICommand ViewSourceCommand { get; set; }
-
         public ICommand OpenInDefaultBrowserCommand { get; set; }
-
         public ICommand CreateShortcutCommand { get; set; }
 
         public ChromiumFlashBrowser Browser { get; set; }
@@ -99,13 +95,9 @@ namespace CefFlashBrowser.ViewModels
         public BrowserWindowViewModel()
         {
             LoadUrlCommand = new DelegateCommand(url => LoadUrl(url?.ToString()));
-
             OpenDevToolCommand = new DelegateCommand(p => Browser.ShowDevTools());
-
             ViewSourceCommand = new DelegateCommand(ViewSource);
-
             OpenInDefaultBrowserCommand = new DelegateCommand(OpenInDefaultBrowser);
-
             CreateShortcutCommand = new DelegateCommand(CreateShortcut);
         }
     }

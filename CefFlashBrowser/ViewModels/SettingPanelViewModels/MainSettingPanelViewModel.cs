@@ -16,11 +16,9 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
     class MainSettingPanelViewModel : NotificationObject
     {
         public ICommand SwitchAddressBarFunctionCommand { get; set; }
-
         public ICommand SwitchSearchEngineCommand { get; set; }
 
         public ObservableCollection<SearchEngineComboBoxItemViewModel> SearchEngineItems { get; set; }
-
         public ObservableCollection<AddressBarFunctionComboBoxViewModel> AddressBarFunctions { get; set; }
 
         public int CurrentSearchEngineValue

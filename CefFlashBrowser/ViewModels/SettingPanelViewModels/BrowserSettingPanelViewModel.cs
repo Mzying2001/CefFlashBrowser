@@ -17,7 +17,6 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
     class BrowserSettingPanelViewModel : NotificationObject
     {
         public ICommand DeleteCacheCommand { get; set; }
-
         public ICommand PopupAboutCefCommand { get; set; }
 
         private void DeleteCacheViaBat()
@@ -68,7 +67,6 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
         public BrowserSettingPanelViewModel()
         {
             DeleteCacheCommand = new DelegateCommand(DeleteCache);
-
             PopupAboutCefCommand = new DelegateCommand(PopupAboutCef);
         }
     }
