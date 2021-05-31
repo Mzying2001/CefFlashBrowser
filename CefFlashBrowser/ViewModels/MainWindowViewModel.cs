@@ -21,18 +21,12 @@ namespace CefFlashBrowser.ViewModels
     class MainWindowViewModel : NotificationObject
     {
         public ICommand OpenUrlCommand { get; set; }
-
         public ICommand UpdateUrlCommand { get; set; }
-
         public ICommand OpenSettingsWindowCommand { get; set; }
-
         public ICommand OpenFavoritesManagerCommand { get; set; }
-
         public ICommand LoadSwfCommand { get; set; }
-
         public ICommand ViewGithubCommand { get; set; }
-
-        public ObservableCollection<FavoritesMenuItemVliewModel> FavoritesItems { get; set; }
+        public ICommand OpenFavoritesItemCommand { get; set; }
 
         public ObservableCollection<LanguageMenuItemViewModel> LanguageMenuItems { get; set; }
 
@@ -72,17 +66,6 @@ namespace CefFlashBrowser.ViewModels
             var current = LanguageManager.CurrentLanguage;
             foreach (var item in LanguageMenuItems)
                 item.IsSelected = item.Language == current;
-        }
-
-        private void LoadFavoritesItems()
-        {
-            if (FavoritesItems == null)
-                FavoritesItems = new ObservableCollection<FavoritesMenuItemVliewModel>();
-            else
-                FavoritesItems.Clear();
-
-            foreach (var item in Favorites.Items)
-                FavoritesItems.Add(new FavoritesMenuItemVliewModel(item));
         }
 
         private void OpenUrl()
@@ -141,7 +124,6 @@ namespace CefFlashBrowser.ViewModels
         {
             new FavoritesManager().ShowDialog();
             new FavoritesDataService().WriteFavorites(Favorites.Items);
-            LoadFavoritesItems();
         }
 
         private void LoadSwf()
@@ -170,23 +152,24 @@ namespace CefFlashBrowser.ViewModels
             Process.Start("https://github.com/Mzying2001/CefFlashBrowser");
         }
 
+        private void OpenFavoritesItem(object website)
+        {
+            if (website is Website ws)
+                BrowserWindow.Popup(ws.Url);
+        }
+
         public MainWindowViewModel()
         {
-            LoadFavoritesItems();
             SelectLanguageOnFirstStart();
             LoadLanguageMenu();
 
             OpenUrlCommand = new DelegateCommand(OpenUrl);
-
             UpdateUrlCommand = new DelegateCommand(url => UpdateUrl(url?.ToString()));
-
             OpenSettingsWindowCommand = new DelegateCommand(OpenSettingsWindow);
-
             OpenFavoritesManagerCommand = new DelegateCommand(OpenFavoritesManager);
-
             LoadSwfCommand = new DelegateCommand(LoadSwf);
-
             ViewGithubCommand = new DelegateCommand(ViewGithub);
+            OpenFavoritesItemCommand = new DelegateCommand(OpenFavoritesItem);
         }
     }
 }

@@ -5,11 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:m="clr-namespace:CefFlashBrowser.Models"
+        xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         
+        Name="mainWindow"
         Width="600"
         Height="450"
         Title="{DynamicResource window_title}"
@@ -34,6 +37,12 @@
                               Command="{Binding MenuItemSelectedCommand}"
                               IsChecked="{Binding IsSelected}"/>
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type m:Website}">
+                    <MenuItem Padding="0"
+                              Header="{Binding Name}"
+                              Command="{Binding Source={x:Reference Name=mainWindow}, Path=DataContext.OpenFavoritesItemCommand}"
+                              CommandParameter="{Binding}"/>
+                </DataTemplate>
             </Menu.Resources>
 
             <!--Favorites Menu-->
@@ -43,16 +52,10 @@
                         <MenuItem Header="{DynamicResource menu_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
                         <Separator/>
-                        <CollectionContainer Collection="{Binding Source={x:Reference Name=favorites}, Path=ItemsSource}"/>
+                        <CollectionContainer Collection="{Binding Source={x:Static sd:Favorites.Items}}"/>
                     </CompositeCollection>
                 </MenuItem.ItemsSource>
             </MenuItem>
-
-            <!--Favorites-->
-            <MenuItem Name="favorites"
-                      Width="0"
-                      Visibility="Hidden"
-                      ItemsSource="{Binding FavoritesItems}"/>
 
             <!--Options Menu-->
             <MenuItem Header="{DynamicResource menu_options}">
