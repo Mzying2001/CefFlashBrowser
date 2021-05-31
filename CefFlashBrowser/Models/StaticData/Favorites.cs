@@ -18,5 +18,10 @@ namespace CefFlashBrowser.Models.StaticData
             foreach (var website in new FavoritesDataService().GetFavorites())
                 Items.Add(website);
         }
+
+        public static void SaveFavorites()
+        {
+            new FavoritesDataService().WriteFavorites(Items);
+        }
     }
 }
