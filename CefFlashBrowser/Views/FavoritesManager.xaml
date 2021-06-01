@@ -22,12 +22,15 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="7*"/>
+            <ColumnDefinition Width="200"
+                              MinWidth="150"
+                              MaxWidth="400"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0"
-              Margin="10">
+              Margin="10,10,0,10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -79,7 +82,13 @@
             </ListBox>
         </Grid>
 
-        <GroupBox Grid.Column="1"
+        <GridSplitter Grid.Column="1"
+                      Width="10"
+                      Background="Transparent"
+                      VerticalAlignment="Stretch"
+                      HorizontalAlignment="Center"/>
+
+        <GroupBox Grid.Column="2"
                   Margin="0,10,10,10"
                   Header="{StaticResource favorites_edit}">
             <Grid IsEnabled="{Binding HasItems}">
