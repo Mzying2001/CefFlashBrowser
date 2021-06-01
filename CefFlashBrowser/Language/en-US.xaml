@@ -48,6 +48,8 @@
     <sys:String x:Key="favorites_managerTitle">Favorites Manager</sys:String>
     <sys:String x:Key="favorites_add">Add</sys:String>
     <sys:String x:Key="favorites_remove">Remove</sys:String>
+    <sys:String x:Key="favorites_toTop">Move to top</sys:String>
+    <sys:String x:Key="favorites_toBottom">Move to Bottom</sys:String>
     <sys:String x:Key="favorites_edit">Edit</sys:String>
     <sys:String x:Key="favorites_name">Name</sys:String>
     <sys:String x:Key="favorites_url">Url</sys:String>

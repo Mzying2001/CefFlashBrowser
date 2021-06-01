@@ -48,6 +48,8 @@
     <sys:String x:Key="favorites_managerTitle">收藏夹管理器</sys:String>
     <sys:String x:Key="favorites_add">添加</sys:String>
     <sys:String x:Key="favorites_remove">移除</sys:String>
+    <sys:String x:Key="favorites_toTop">移到顶部</sys:String>
+    <sys:String x:Key="favorites_toBottom">移到底部</sys:String>
     <sys:String x:Key="favorites_edit">编辑</sys:String>
     <sys:String x:Key="favorites_name">名称</sys:String>
     <sys:String x:Key="favorites_url">地址</sys:String>

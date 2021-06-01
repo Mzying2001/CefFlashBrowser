@@ -58,14 +58,14 @@
                         <TextBlock Text="{Binding Name}">
                             <TextBlock.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Move to top"
+                                    <MenuItem Header="{StaticResource favorites_toTop}"
                                               Command="{Binding Source={x:Reference Name=fmWindow},
                                                                 Path=DataContext.MoveToTopCommand}"/>
-                                    <MenuItem Header="Move to bottom"
+                                    <MenuItem Header="{StaticResource favorites_toBottom}"
                                               Command="{Binding Source={x:Reference Name=fmWindow},
                                                                 Path=DataContext.MoveToBottomCommand}"/>
                                     <Separator/>
-                                    <MenuItem Header="Remove"
+                                    <MenuItem Header="{StaticResource favorites_remove}"
                                               Command="{Binding Source={x:Reference Name=fmWindow},
                                                                 Path=DataContext.RemoveItemCommand}"/>
                                 </ContextMenu>
