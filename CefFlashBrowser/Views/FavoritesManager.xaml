@@ -10,7 +10,11 @@
         xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         mc:Ignorable="d"
-        Title="{StaticResource favorites_managerTitle}" Height="450" Width="700">
+        
+        x:Name="fmWindow"
+        Height="450"
+        Width="700"
+        Title="{StaticResource favorites_managerTitle}">
 
     <Window.DataContext>
         <vm:FavoritesManagerViewModel/>
@@ -42,11 +46,28 @@
             </StackPanel>
 
             <ListBox Grid.Row="1"
+                     VerticalContentAlignment="Stretch"
+                     HorizontalContentAlignment="Stretch"
                      SelectedIndex="{Binding SelectedIndex}"
                      ItemsSource="{Binding Source={x:Static sd:Favorites.Items}}">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
-                        <TextBlock Text="{Binding Name}"/>
+                        <TextBlock Text="{Binding Name}">
+                            <TextBlock.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Move to top"
+                                              Command="{Binding Source={x:Reference Name=fmWindow},
+                                                                Path=DataContext.MoveToTopCommand}"/>
+                                    <MenuItem Header="Move to bottom"
+                                              Command="{Binding Source={x:Reference Name=fmWindow},
+                                                                Path=DataContext.MoveToBottomCommand}"/>
+                                    <Separator/>
+                                    <MenuItem Header="Remove"
+                                              Command="{Binding Source={x:Reference Name=fmWindow},
+                                                                Path=DataContext.RemoveItemCommand}"/>
+                                </ContextMenu>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
                 <i:Interaction.Triggers>

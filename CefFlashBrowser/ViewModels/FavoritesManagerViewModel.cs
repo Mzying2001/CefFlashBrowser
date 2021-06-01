@@ -26,6 +26,8 @@ namespace CefFlashBrowser.ViewModels
         public ICommand RemoveItemCommand { get; set; }
         public ICommand MoveUpCommand { get; set; }
         public ICommand MoveDownCommand { get; set; }
+        public ICommand MoveToTopCommand { get; set; }
+        public ICommand MoveToBottomCommand { get; set; }
 
         private bool _hasItems;
 
@@ -180,6 +182,22 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void MoveToTop()
+        {
+            var item = Favorites.Items[SelectedIndex];
+            Favorites.Items.RemoveAt(SelectedIndex);
+            Favorites.Items.Insert(0, item);
+            SelectedIndex = 0;
+        }
+
+        private void MoveToBottom()
+        {
+            var item = Favorites.Items[SelectedIndex];
+            Favorites.Items.RemoveAt(SelectedIndex);
+            Favorites.Items.Add(item);
+            SelectedIndex = Favorites.Items.Count - 1;
+        }
+
         public FavoritesManagerViewModel()
         {
             SelectionChangedCommand = new DelegateCommand(SelectionChanged);
@@ -190,6 +208,8 @@ namespace CefFlashBrowser.ViewModels
             RemoveItemCommand = new DelegateCommand(RemoveItem);
             MoveUpCommand = new DelegateCommand(MoveUp);
             MoveDownCommand = new DelegateCommand(MoveDown);
+            MoveToTopCommand = new DelegateCommand(MoveToTop);
+            MoveToBottomCommand = new DelegateCommand(MoveToBottom);
 
             SelectionChanged(null);
         }
