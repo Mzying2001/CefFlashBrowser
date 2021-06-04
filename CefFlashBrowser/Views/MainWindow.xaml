@@ -15,6 +15,8 @@
         Name="mainWindow"
         Width="600"
         Height="450"
+        MinWidth="400"
+        MinHeight="300"
         Title="{DynamicResource window_title}"
         WindowStartupLocation="CenterScreen">
 

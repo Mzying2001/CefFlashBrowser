@@ -9,6 +9,8 @@
         
         Width="500"
         Height="450"
+        MinWidth="400"
+        MinHeight="300"
         Title="{StaticResource menu_settings}">
     
     <Grid>
