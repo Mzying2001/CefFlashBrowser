@@ -149,7 +149,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void ViewGithub()
         {
-            Process.Start("https://github.com/Mzying2001/CefFlashBrowser");
+            BrowserWindow.Popup("https://github.com/Mzying2001/CefFlashBrowser");
         }
 
         private void OpenFavoritesItem(object website)
