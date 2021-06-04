@@ -27,6 +27,13 @@
                 Value="No"/>
     </Style>
 
+    <Style x:Key="JsDialogOkButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource ButtonDefault}">
+        <Setter Property="Content"
+                Value="Ok"/>
+    </Style>
+
     <Style x:Key="JsDialogTextStyle"
            TargetType="TextBlock">
         <Setter Property="HorizontalAlignment"
