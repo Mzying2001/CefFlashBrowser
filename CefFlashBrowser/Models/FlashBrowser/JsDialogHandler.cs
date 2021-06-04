@@ -1,4 +1,5 @@
-﻿using CefSharp;
+﻿using CefFlashBrowser.Views.Dialogs.JsDialogs;
+using CefSharp;
 using CefSharp.Wpf;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            System.Windows.MessageBox.Show(messageText);
+                            JsAlertDialog.ShowJsDialog(messageText, originUrl);
                         });
                         suppressMessage = true;
                         return false;
