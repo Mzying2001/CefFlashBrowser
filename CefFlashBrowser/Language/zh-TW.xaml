@@ -21,7 +21,7 @@
     <!--設定視窗-->
     <sys:String x:Key="tabItem_main">主介面</sys:String>
     <sys:String x:Key="tabItem_browser">瀏覽器</sys:String>
-    <sys:String x:Key="settingHeader_addressBar">地址欄和蒐索</sys:String>
+    <sys:String x:Key="settingHeader_addressBar">地址欄和搜尋</sys:String>
     <sys:String x:Key="settingHeader_browserData">瀏覽器緩存</sys:String>
     <sys:String x:Key="settingHeader_aboutCef">關於 CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">在地址欄中使用搜尋引擎</sys:String>
@@ -34,13 +34,13 @@
 
     <!--地址欄功能-->
     <sys:String x:Key="addressBarFunction_auto">自動</sys:String>
-    <sys:String x:Key="addressBarFunction_searchOnly">僅蒐索</sys:String>
+    <sys:String x:Key="addressBarFunction_searchOnly">僅搜尋</sys:String>
     <sys:String x:Key="addressBarFunction_navigateOnly">僅導航</sys:String>
 
     <!--搜尋引擎-->
     <sys:String x:Key="baidu">百度</sys:String>
-    <sys:String x:Key="google">Google</sys:String>
-    <sys:String x:Key="bing">Bing</sys:String>
+    <sys:String x:Key="google">穀歌</sys:String>
+    <sys:String x:Key="bing">必應</sys:String>
     <sys:String x:Key="sogou">搜狗</sys:String>
     <sys:String x:Key="so360">360</sys:String>
 
@@ -57,7 +57,7 @@
     <sys:String x:Key="favorites_defaultName">新我的最愛項</sys:String>
     <sys:String x:Key="message_removeItem">確定要移除“{0}”嗎？</sys:String>
 
-    <!--流覽器窗口-->
+    <!--瀏覽器視窗-->
     <sys:String x:Key="menu_back">返回</sys:String>
     <sys:String x:Key="menu_forward">前進</sys:String>
     <sys:String x:Key="menu_reload">重繪</sys:String>
