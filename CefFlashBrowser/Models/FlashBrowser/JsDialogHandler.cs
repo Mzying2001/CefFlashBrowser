@@ -31,7 +31,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsAlertDialog.ShowJsDialog(messageText, originUrl);
+                            JsAlertDialog.Show(messageText, originUrl);
                         });
                         suppressMessage = true;
                         return false;
