@@ -21,7 +21,6 @@ namespace CefFlashBrowser.ViewModels
     class MainWindowViewModel : NotificationObject
     {
         public ICommand OpenUrlCommand { get; set; }
-        public ICommand UpdateUrlCommand { get; set; }
         public ICommand OpenSettingsWindowCommand { get; set; }
         public ICommand OpenFavoritesManagerCommand { get; set; }
         public ICommand LoadSwfCommand { get; set; }
@@ -110,11 +109,6 @@ namespace CefFlashBrowser.ViewModels
             BrowserWindow.Popup(url);
         }
 
-        private void UpdateUrl(string url)
-        {
-            Url = url;
-        }
-
         private void OpenSettingsWindow()
         {
             new SettingsWindow().ShowDialog();
@@ -164,7 +158,6 @@ namespace CefFlashBrowser.ViewModels
             LoadLanguageMenu();
 
             OpenUrlCommand = new DelegateCommand(OpenUrl);
-            UpdateUrlCommand = new DelegateCommand(url => UpdateUrl(url?.ToString()));
             OpenSettingsWindowCommand = new DelegateCommand(OpenSettingsWindow);
             OpenFavoritesManagerCommand = new DelegateCommand(OpenFavoritesManager);
             LoadSwfCommand = new DelegateCommand(LoadSwf);

@@ -112,17 +112,11 @@
                 <!--The url textBox-->
                 <TextBox Margin="5,0"
                          Width="300"
-                         Text="{Binding Url}"
+                         Text="{Binding Url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Style="{StaticResource TextBoxBaseStyle}">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding OpenUrlCommand}"/>
                     </TextBox.InputBindings>
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="TextChanged">
-                            <i:InvokeCommandAction Command="{Binding UpdateUrlCommand}"
-                                                   CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
                 </TextBox>
                 <!--The Go button-->
                 <Button Content="{DynamicResource button_go}"
