@@ -41,14 +41,8 @@ namespace CefFlashBrowser.Models.FlashBrowser
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            var dr = System.Windows.MessageBox.Show(messageText,
-                                                                    string.Empty,
-                                                                    System.Windows.MessageBoxButton.YesNo);
-
-                            if (dr == System.Windows.MessageBoxResult.Yes)
-                                callback.Continue(true);
-                            else
-                                callback.Continue(false);
+                            var dr = JsConfirmDialog.Show(messageText, originUrl);
+                            callback.Continue(dr);
                         });
                         suppressMessage = false;
                         return true;
