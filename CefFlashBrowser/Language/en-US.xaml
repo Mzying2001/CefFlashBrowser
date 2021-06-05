@@ -73,4 +73,10 @@
     <sys:String x:Key="menu_openInDefaultBrowser">Open in default browser</sys:String>
     <sys:String x:Key="menu_createShortcut">Create shortcut</sys:String>
     <sys:String x:Key="filter_shortcut">shortcut</sys:String>
+
+    <!--Dialogs-->
+    <sys:String x:Key="button_ok">Ok</sys:String>
+    <sys:String x:Key="button_cancel">Cancel</sys:String>
+    <sys:String x:Key="button_yes">Yes</sys:String>
+    <sys:String x:Key="button_No">No</sys:String>
 </ResourceDictionary>

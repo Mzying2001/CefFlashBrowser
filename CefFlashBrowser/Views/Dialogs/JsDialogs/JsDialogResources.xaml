@@ -5,7 +5,7 @@
            TargetType="Button"
            BasedOn="{StaticResource ButtonPrimary}">
         <Setter Property="Content"
-                Value="Yes"/>
+                Value="{StaticResource button_yes}"/>
         <Setter Property="MinWidth"
                 Value="80"/>
         <Setter Property="Margin"
@@ -16,7 +16,7 @@
            TargetType="Button"
            BasedOn="{StaticResource ButtonDefault}">
         <Setter Property="Content"
-                Value="No"/>
+                Value="{StaticResource button_No}"/>
         <Setter Property="MinWidth"
                 Value="80"/>
         <Setter Property="Margin"
@@ -27,7 +27,7 @@
            TargetType="Button"
            BasedOn="{StaticResource ButtonPrimary}">
         <Setter Property="Content"
-                Value="Ok"/>
+                Value="{StaticResource button_ok}"/>
         <Setter Property="MinWidth"
                 Value="80"/>
         <Setter Property="Margin"
@@ -38,7 +38,7 @@
            TargetType="Button"
            BasedOn="{StaticResource ButtonDefault}">
         <Setter Property="Content"
-                Value="Cancel"/>
+                Value="{StaticResource button_cancel}"/>
         <Setter Property="MinWidth"
                 Value="80"/>
         <Setter Property="Margin"
@@ -49,7 +49,7 @@
            TargetType="Button"
            BasedOn="{StaticResource ButtonDefault}">
         <Setter Property="Content"
-                Value="Ok"/>
+                Value="{StaticResource button_ok}"/>
         <Setter Property="MinWidth"
                 Value="80"/>
         <Setter Property="Margin"
