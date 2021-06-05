@@ -16,11 +16,7 @@ namespace CefFlashBrowser.ViewModels
 {
     class FavoritesManagerViewModel : NotificationObject
     {
-        private bool _switchingIndexFlag = false;
-
         public ICommand SelectionChangedCommand { get; set; }
-        public ICommand UpdateNameCommand { get; set; }
-        public ICommand UpdateUrlCommand { get; set; }
         public ICommand SaveChangesCommand { get; set; }
         public ICommand AddItemCommand { get; set; }
         public ICommand RemoveItemCommand { get; set; }
@@ -82,8 +78,8 @@ namespace CefFlashBrowser.ViewModels
             if (Favorites.Items == null)
                 return;
 
-            _switchingIndexFlag = true;
-            SelectedIndex = (sender as ListBox)?.SelectedIndex ?? 0;
+            SelectedIndex = ((ListBox)sender).SelectedIndex;
+
             if (SelectedIndex == -1)
             {
                 HasItems = false;
@@ -99,19 +95,6 @@ namespace CefFlashBrowser.ViewModels
                     SelectedUrl = Favorites.Items[SelectedIndex].Url;
                 }
             }
-            _switchingIndexFlag = false;
-        }
-
-        private void UpdateName(string name)
-        {
-            if (!_switchingIndexFlag)
-                SelectedName = name;
-        }
-
-        private void UpdateUrl(string url)
-        {
-            if (!_switchingIndexFlag)
-                SelectedUrl = url;
         }
 
         private void SaveChanges()
@@ -198,11 +181,22 @@ namespace CefFlashBrowser.ViewModels
             SelectedIndex = Favorites.Items.Count - 1;
         }
 
+        private void Init()
+        {
+            HasItems = Favorites.Items.Count != 0;
+            if (HasItems)
+            {
+                SelectedIndex = 0;
+                SelectedName = Favorites.Items[SelectedIndex].Name;
+                SelectedUrl = Favorites.Items[SelectedIndex].Url;
+            }
+        }
+
         public FavoritesManagerViewModel()
         {
+            Init();
+
             SelectionChangedCommand = new DelegateCommand(SelectionChanged);
-            UpdateNameCommand = new DelegateCommand(name => UpdateName(name?.ToString()));
-            UpdateUrlCommand = new DelegateCommand(url => UpdateUrl(url?.ToString()));
             SaveChangesCommand = new DelegateCommand(SaveChanges);
             AddItemCommand = new DelegateCommand(AddItem);
             RemoveItemCommand = new DelegateCommand(RemoveItem);
@@ -210,8 +204,6 @@ namespace CefFlashBrowser.ViewModels
             MoveDownCommand = new DelegateCommand(MoveDown);
             MoveToTopCommand = new DelegateCommand(MoveToTop);
             MoveToBottomCommand = new DelegateCommand(MoveToBottom);
-
-            SelectionChanged(null);
         }
     }
 }

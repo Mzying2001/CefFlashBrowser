@@ -118,13 +118,7 @@
                                    Foreground="Black"/>
                         <TextBox Margin="0,0,0,20"
                                  Width="300"
-                                 Text="{Binding SelectedName}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="TextChanged">
-                                    <i:InvokeCommandAction Command="{Binding UpdateNameCommand}"
-                                                           CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
+                                 Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <TextBox.InputBindings>
                                 <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
                             </TextBox.InputBindings>
@@ -134,13 +128,7 @@
                                    Foreground="Black"/>
                         <TextBox Margin="0,0,0,20"
                                  Width="300"
-                                 Text="{Binding SelectedUrl}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="TextChanged">
-                                    <i:InvokeCommandAction Command="{Binding UpdateUrlCommand}"
-                                                           CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
+                                 Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <TextBox.InputBindings>
                                 <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
                             </TextBox.InputBindings>
