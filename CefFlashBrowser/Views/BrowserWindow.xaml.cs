@@ -29,10 +29,17 @@ namespace CefFlashBrowser.Views
             var vModel = DataContext as BrowserWindowViewModel;
             vModel.SetBrowser(browser);
 
+            var x = Settings.BrowserWindowX;
+            var y = Settings.BrowserWindowY;
             var w = Settings.BrowserWindowWidth;
             var h = Settings.BrowserWindowHeight;
-            if (w != default && h != default)
+            if (x != default &&
+                y != default &&
+                w != default &&
+                h != default)
             {
+                Left = x;
+                Top = y;
                 Width = w;
                 Height = h;
             }
@@ -40,11 +47,13 @@ namespace CefFlashBrowser.Views
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Settings.BrowserWindowX = Left;
+            Settings.BrowserWindowY = Top;
             Settings.BrowserWindowWidth = Width;
             Settings.BrowserWindowHeight = Height;
         }
 
-        private void OtherButton_Clicked(object sender, RoutedEventArgs e)
+        private void MenuButton_Clicked(object sender, RoutedEventArgs e)
         {
             menuButtonContextMenu.PlacementTarget = sender as UIElement;
             menuButtonContextMenu.IsOpen = true;

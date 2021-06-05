@@ -78,7 +78,7 @@
                 </TextBox.InputBindings>
             </TextBox>
 
-            <Button Content="..." Grid.Column="3" Click="OtherButton_Clicked">
+            <Button Content="..." Grid.Column="3" Click="MenuButton_Clicked">
                 <Button.ContextMenu>
                     <ContextMenu x:Name="menuButtonContextMenu">
                         <MenuItem Header="{DynamicResource menu_reload}"
