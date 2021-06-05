@@ -22,12 +22,12 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserWindow : Window
     {
+        BrowserWindowViewModel VModel => (BrowserWindowViewModel)DataContext;
+
         public BrowserWindow()
         {
             InitializeComponent();
-
-            var vModel = DataContext as BrowserWindowViewModel;
-            vModel.SetBrowser(browser);
+            VModel.SetBrowser(browser);
 
             var x = Settings.BrowserWindowX;
             var y = Settings.BrowserWindowY;
@@ -62,7 +62,7 @@ namespace CefFlashBrowser.Views
         public static void Popup(string url, bool showNavigationBar = true)
         {
             var window = new BrowserWindow();
-            var vModel = window.DataContext as BrowserWindowViewModel;
+            var vModel = window.VModel;
 
             if (vModel == null)
             {
