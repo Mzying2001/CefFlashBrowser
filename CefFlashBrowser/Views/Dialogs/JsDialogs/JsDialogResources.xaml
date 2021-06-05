@@ -23,6 +23,28 @@
                 Value="5"/>
     </Style>
 
+    <Style x:Key="JsDialogOkPromptButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource ButtonPrimary}">
+        <Setter Property="Content"
+                Value="Ok"/>
+        <Setter Property="MinWidth"
+                Value="80"/>
+        <Setter Property="Margin"
+                Value="5"/>
+    </Style>
+
+    <Style x:Key="JsDialogCancelButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource ButtonDefault}">
+        <Setter Property="Content"
+                Value="Cancel"/>
+        <Setter Property="MinWidth"
+                Value="80"/>
+        <Setter Property="Margin"
+                Value="5"/>
+    </Style>
+
     <Style x:Key="JsDialogOkButtonStyle"
            TargetType="Button"
            BasedOn="{StaticResource ButtonDefault}">
@@ -44,6 +66,25 @@
                 Value="350"/>
         <Setter Property="MinHeight"
                 Value="80"/>
+        <Setter Property="Margin"
+                Value="5"/>
+    </Style>
+
+    <Style x:Key="JsPromptDialogTextStyle"
+           TargetType="TextBlock">
+        <Setter Property="HorizontalAlignment"
+                Value="Center"/>
+        <Setter Property="VerticalAlignment"
+                Value="Top"/>
+        <Setter Property="MinWidth"
+                Value="350"/>
+        <Setter Property="Margin"
+                Value="5"/>
+    </Style>
+
+    <Style x:Key="JsDialogPromptTextBoxStyle"
+           TargetType="TextBox"
+           BasedOn="{StaticResource TextBoxBaseStyle}">
         <Setter Property="Margin"
                 Value="5"/>
     </Style>

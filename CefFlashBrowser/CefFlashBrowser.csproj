@@ -116,6 +116,7 @@
     <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsAlertDialogViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsConfirmDialogViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsDialogViewModel.cs" />
+    <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsPromptDialogViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\SelectLanguageDialogViewModel.cs" />
     <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
@@ -132,6 +133,9 @@
     </Compile>
     <Compile Include="Views\Dialogs\JsDialogs\JsConfirmDialog.xaml.cs">
       <DependentUpon>JsConfirmDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dialogs\JsDialogs\JsPromptDialog.xaml.cs">
+      <DependentUpon>JsPromptDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SelectLanguageDialog.xaml.cs">
       <DependentUpon>SelectLanguageDialog.xaml</DependentUpon>
@@ -169,6 +173,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Dialogs\JsDialogs\JsDialogResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\JsDialogs\JsPromptDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

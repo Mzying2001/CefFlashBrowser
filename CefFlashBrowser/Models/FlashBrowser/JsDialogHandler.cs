@@ -52,8 +52,8 @@ namespace CefFlashBrowser.Models.FlashBrowser
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            System.Windows.MessageBox.Show("Comming...");
-                            callback.Continue(true, defaultPromptText);
+                            var dr = JsPromptDialog.Show(messageText, originUrl, defaultPromptText);
+                            callback.Continue(dr.Item1, dr.Item2);
                         });
                         suppressMessage = false;
                         return true;
