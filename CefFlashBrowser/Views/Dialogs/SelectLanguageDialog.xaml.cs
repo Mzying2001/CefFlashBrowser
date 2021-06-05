@@ -20,12 +20,13 @@ namespace CefFlashBrowser.Views.Dialogs
     /// </summary>
     public partial class SelectLanguageDialog : Window
     {
+        SelectLanguageDialogViewModel VModel =>
+            (SelectLanguageDialogViewModel)DataContext;
+
         public SelectLanguageDialog()
         {
             InitializeComponent();
-
-            var vModel = DataContext as SelectLanguageDialogViewModel;
-            vModel.CloseWindow = Close;
+            VModel.CloseWindow = Close;
         }
     }
 }
