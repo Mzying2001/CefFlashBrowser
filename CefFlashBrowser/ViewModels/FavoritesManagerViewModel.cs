@@ -2,6 +2,7 @@
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.ViewModels.MenuItemViewModels;
+using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -110,7 +111,7 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message);
+                JsAlertDialog.Show(e.Message);
             }
         }
 
@@ -126,9 +127,9 @@ namespace CefFlashBrowser.ViewModels
 
         private void RemoveItem()
         {
-            var r = MessageBox.Show(string.Format(LanguageManager.GetString("message_removeItem"), Favorites.Items[SelectedIndex].Name),
-                                    string.Empty, MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (r == MessageBoxResult.Yes)
+            var dr = JsConfirmDialog.Show(string.Format(LanguageManager.GetString("message_removeItem"),
+                                                        Favorites.Items[SelectedIndex].Name));
+            if (dr)
             {
                 Favorites.Items.RemoveAt(SelectedIndex--);
                 if (SelectedIndex == -1 && Favorites.Items.Count > 0)

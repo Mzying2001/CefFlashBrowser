@@ -15,6 +15,7 @@ using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
+using CefFlashBrowser.Views.Dialogs.JsDialogs;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -73,7 +74,7 @@ namespace CefFlashBrowser.ViewModels
 
             if (string.IsNullOrEmpty(url))
             {
-                MessageBox.Show(LanguageManager.GetString("message_emptyUrl"));
+                JsAlertDialog.Show(LanguageManager.GetString("message_emptyUrl"));
                 return;
             }
 

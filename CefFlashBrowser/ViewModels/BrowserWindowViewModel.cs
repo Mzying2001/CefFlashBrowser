@@ -11,6 +11,7 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.FlashBrowser;
 using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views;
+using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using IWshRuntimeLibrary;
 
@@ -87,7 +88,7 @@ namespace CefFlashBrowser.ViewModels
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show(e.Message);
+                    JsAlertDialog.Show(e.Message);
                 }
             }
         }

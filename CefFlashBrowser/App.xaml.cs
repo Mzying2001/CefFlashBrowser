@@ -2,6 +2,7 @@
 using CefFlashBrowser.Models.FlashBrowser;
 using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views;
+using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -49,7 +50,7 @@ namespace CefFlashBrowser
                 }
                 else
                 {
-                    MessageBox.Show($"{LanguageManager.GetString("invalidStartUpParam")}: {arg}");
+                    JsAlertDialog.Show($"{LanguageManager.GetString("invalidStartUpParam")}: {arg}");
                     Environment.Exit(0);
                 }
             }

@@ -2,6 +2,7 @@
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views;
+using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using HandyControl.Controls;
 using System;
 using System.Collections.Generic;
@@ -47,9 +48,7 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 
         private void DeleteCache()
         {
-            var flag = MessageBox.Ask(LanguageManager.GetString("message_deleteCache"));
-
-            if (flag == System.Windows.MessageBoxResult.OK)
+            if (JsConfirmDialog.Show(LanguageManager.GetString("message_deleteCache")))
             {
                 var launcher = @"..\Launcher.exe";
                 if (File.Exists(launcher))
