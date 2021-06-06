@@ -41,6 +41,8 @@
                     Command="{Binding ViewSourceCommand}"/>
         <KeyBinding Gesture="Ctrl+S"
                     Command="{Binding CreateShortcutCommand}"/>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding CloseWindowCommand}"/>
         <KeyBinding Gesture="Esc"
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>
         <KeyBinding Gesture="F5"

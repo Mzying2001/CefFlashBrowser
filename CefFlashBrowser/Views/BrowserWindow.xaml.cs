@@ -28,6 +28,7 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
             VModel.SetBrowser(browser);
+            VModel.CloseWindow = Close;
 
             var x = Settings.BrowserWindowX;
             var y = Settings.BrowserWindowY;
