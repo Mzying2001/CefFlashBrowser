@@ -28,7 +28,7 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
             VModel.CloseWindow = Close;
         }
 
-        public static (bool, string) Show(string message, string title, string defaulePromptText)
+        public static (bool, string) Show(string message, string title = null, string defaulePromptText = null)
         {
             var dialog = new JsPromptDialog();
             var vmodel = dialog.VModel;

@@ -28,7 +28,7 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
             VModel.CloseWindow = Close;
         }
 
-        public static bool Show(string message, string title)
+        public static bool Show(string message, string title = null)
         {
             var dialog = new JsConfirmDialog();
             var vmodel = dialog.VModel;
