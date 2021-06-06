@@ -28,6 +28,12 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
             VModel.CloseWindow = Close;
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            inputBox.Focus();
+            inputBox.SelectAll();
+        }
+
         public static (bool, string) Show(string message, string title = "", string defaulePromptText = "")
         {
             var dialog = new JsPromptDialog();

@@ -12,7 +12,8 @@
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
-        Title="{Binding Title}">
+        Title="{Binding Title}"
+        Loaded="Window_Loaded">
 
     <Window.Resources>
         <ResourceDictionary Source="JsDialogResources.xaml"/>
@@ -21,7 +22,14 @@
     <Window.DataContext>
         <jdvm:JsPromptDialogViewModel/>
     </Window.DataContext>
-    
+
+    <Window.InputBindings>
+        <!--<KeyBinding Key="Enter"
+                    Command="{Binding OkCommand}"/>-->
+        <KeyBinding Key="Esc"
+                    Command="{Binding CalcelCommand}"/>
+    </Window.InputBindings>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
@@ -41,7 +49,8 @@
                    Text="{Binding Message}"
                    Style="{StaticResource JsPromptDialogTextStyle}"/>
 
-        <TextBox Grid.Row="2"
+        <TextBox x:Name="inputBox"
+                 Grid.Row="2"
                  Grid.Column="1"
                  Style="{StaticResource JsDialogPromptTextBoxStyle}"
                  Text="{Binding PromptText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">

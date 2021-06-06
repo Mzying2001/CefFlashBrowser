@@ -22,6 +22,13 @@
         <jdvm:JsAlertDialogViewModel/>
     </Window.DataContext>
 
+    <Window.InputBindings>
+        <KeyBinding Key="Enter"
+                    Command="{Binding OkCommand}"/>
+        <KeyBinding Key="Esc"
+                    Command="{Binding OkCommand}"/>
+    </Window.InputBindings>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>

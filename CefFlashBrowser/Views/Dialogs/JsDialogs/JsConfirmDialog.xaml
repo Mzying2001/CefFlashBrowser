@@ -21,7 +21,14 @@
     <Window.DataContext>
         <jdvm:JsConfirmDialogViewModel/>
     </Window.DataContext>
-    
+
+    <Window.InputBindings>
+        <KeyBinding Key="Enter"
+                    Command="{Binding YesCommand}"/>
+        <KeyBinding Key="Esc"
+                    Command="{Binding NoCommand}"/>
+    </Window.InputBindings>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
