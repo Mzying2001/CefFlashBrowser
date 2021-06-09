@@ -67,8 +67,10 @@
             </Grid.ColumnDefinitions>
 
             <Button Content="&lt;" Grid.Column="0" FontFamily="SimHei"
+                    ToolTip="{DynamicResource toolTip_back}"
                     Command="{Binding ElementName=browser, Path=BackCommand}"/>
             <Button Content="&gt;" Grid.Column="1" FontFamily="SimHei"
+                    ToolTip="{DynamicResource toolTip_forward}"
                     Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
 
             <TextBox Grid.Column="2" Margin="10,0"

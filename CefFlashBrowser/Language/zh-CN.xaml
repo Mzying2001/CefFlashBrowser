@@ -72,6 +72,8 @@
     <sys:String x:Key="menu_zoom">缩放</sys:String>
     <sys:String x:Key="menu_openInDefaultBrowser">在默认浏览器中打开</sys:String>
     <sys:String x:Key="menu_createShortcut">创建网页快捷方式</sys:String>
+    <sys:String x:Key="toolTip_back">返回（Alt+Z）</sys:String>
+    <sys:String x:Key="toolTip_forward">前进（Alt+X）</sys:String>
     <sys:String x:Key="filter_shortcut">快捷方式</sys:String>
 
     <!--对话框-->
