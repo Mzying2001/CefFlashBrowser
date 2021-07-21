@@ -24,7 +24,7 @@ namespace CefFlashBrowser.Views
         public string Address
         {
             get { return (string)GetValue(AddressProperty); }
-            set { SetValue(AddressProperty, $"view-source:{value}"); }
+            set { SetValue(AddressProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for Address.  This enables animation, styling, binding, etc...

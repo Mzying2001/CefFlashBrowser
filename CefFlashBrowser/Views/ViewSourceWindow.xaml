@@ -11,7 +11,7 @@
         Title="{Binding ElementName=browser, Path=Title, TargetNullValue=view-source}"
         Height="Auto"
         Width="Auto">
-    
+
     <cefSharp:ChromiumWebBrowser x:Name="browser"
-                                 Address="{Binding ElementName=window, Path=Address}"/>
+                                 Address="{Binding ElementName=window, Path=Address, StringFormat=view-source:\{0\}}"/>
 </Window>
