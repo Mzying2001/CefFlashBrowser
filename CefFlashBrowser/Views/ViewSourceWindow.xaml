@@ -1,0 +1,17 @@
+﻿<Window x:Class="CefFlashBrowser.Views.ViewSourceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
+        xmlns:local="clr-namespace:CefFlashBrowser.Views"
+        mc:Ignorable="d"
+        
+        x:Name="window"
+        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=view-source}"
+        Height="Auto"
+        Width="Auto">
+    
+    <cefSharp:ChromiumWebBrowser x:Name="browser"
+                                 Address="{Binding ElementName=window, Path=Address}"/>
+</Window>

@@ -60,7 +60,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void ViewSource()
         {
-            BrowserWindow.Popup($"view-source:{Browser.Address}", false);
+            ViewSourceWindow.Show(Browser.Address);
         }
 
         private void OpenInDefaultBrowser()
