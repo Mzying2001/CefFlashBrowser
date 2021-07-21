@@ -80,7 +80,7 @@ namespace CefFlashBrowser.ViewModels
 
             if (UrlChecker.IsLocalSwfFile(url))
             {
-                BrowserWindow.PopupFlashPlayer(url);
+                SwfPlayerWindow.Show(url);
                 return;
             }
 
@@ -129,7 +129,7 @@ namespace CefFlashBrowser.ViewModels
             };
             if (ofd.ShowDialog() == true)
             {
-                BrowserWindow.PopupFlashPlayer(ofd.FileName);
+                SwfPlayerWindow.Show(ofd.FileName);
             }
         }
 

@@ -83,11 +83,5 @@ namespace CefFlashBrowser.Views
             vModel.LoadUrl(url);
             window.Show();
         }
-
-        public static void PopupFlashPlayer(string fileName)
-        {
-            Popup(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-                    $"html/FlashPlayer.html?src={fileName}"), false);
-        }
     }
 }

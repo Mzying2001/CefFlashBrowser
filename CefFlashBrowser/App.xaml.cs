@@ -42,7 +42,7 @@ namespace CefFlashBrowser
             {
                 if (UrlChecker.IsLocalSwfFile(arg))
                 {
-                    BrowserWindow.PopupFlashPlayer(arg);
+                    SwfPlayerWindow.Show(arg);
                 }
                 else if (UrlChecker.IsUrl(arg))
                 {
