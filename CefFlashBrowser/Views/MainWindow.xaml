@@ -80,10 +80,10 @@
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="0.45*"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="0.55*"/>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -106,23 +106,16 @@
                 </i:Interaction.Triggers>
             </TextBlock>
 
-            <StackPanel Grid.Row="2"
-                        Grid.Column="1"
-                        Orientation="Horizontal">
-                <!--The url textBox-->
-                <TextBox Margin="5,0"
-                         Width="300"
-                         Text="{Binding Url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Style="{StaticResource TextBoxBaseStyle}">
-                    <TextBox.InputBindings>
-                        <KeyBinding Key="Enter" Command="{Binding OpenUrlCommand}"/>
-                    </TextBox.InputBindings>
-                </TextBox>
-                <!--The Go button-->
-                <Button Content="{DynamicResource button_go}"
-                        Style="{StaticResource ButtonDefault}"
-                        Command="{Binding OpenUrlCommand}"/>
-            </StackPanel>
+            <TextBox Grid.Row="2"
+                     Grid.Column="1"
+                     Width="300"
+                     Text="{Binding Url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource TextBoxBaseStyle}">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Enter"
+                                Command="{Binding OpenUrlCommand}"/>
+                </TextBox.InputBindings>
+            </TextBox>
         </Grid>
 
         <!--The app info shows on the bottom of the main window-->
