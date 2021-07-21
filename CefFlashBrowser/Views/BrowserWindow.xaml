@@ -53,7 +53,7 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="{Binding NavigationBarHeight}"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 

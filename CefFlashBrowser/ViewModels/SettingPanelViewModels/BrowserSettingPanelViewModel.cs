@@ -60,7 +60,7 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 
         private void PopupAboutCef()
         {
-            BrowserWindow.Popup("chrome://version/", false);
+            BrowserWindow.Show("chrome://version/");
         }
 
         public BrowserSettingPanelViewModel()

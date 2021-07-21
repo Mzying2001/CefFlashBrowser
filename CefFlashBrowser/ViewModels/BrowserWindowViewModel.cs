@@ -30,23 +30,6 @@ namespace CefFlashBrowser.ViewModels
 
         public ChromiumFlashBrowser Browser { get; set; }
 
-        private double _navigationBarHeight;
-
-        public double NavigationBarHeight
-        {
-            get => _navigationBarHeight;
-            set
-            {
-                _navigationBarHeight = value;
-                RaisePropertyChanged("NavigationBarHeight");
-            }
-        }
-
-        public bool ShowNavigationBar
-        {
-            set => NavigationBarHeight = value ? double.NaN : 0;
-        }
-
         public void SetBrowser(ChromiumFlashBrowser browser)
         {
             Browser = browser;
@@ -103,7 +86,7 @@ namespace CefFlashBrowser.ViewModels
             ViewSourceCommand = new DelegateCommand(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand(CreateShortcut);
-            CloseWindowCommand = new DelegateCommand(() => CloseWindow?.Invoke());
+            CloseWindowCommand = new DelegateCommand(CloseWindow);
         }
     }
 }

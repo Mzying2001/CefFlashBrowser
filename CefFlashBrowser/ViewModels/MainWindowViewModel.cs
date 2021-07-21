@@ -107,7 +107,7 @@ namespace CefFlashBrowser.ViewModels
                     break;
             }
 
-            BrowserWindow.Popup(url);
+            BrowserWindow.Show(url);
         }
 
         private void OpenSettingsWindow()
@@ -144,13 +144,13 @@ namespace CefFlashBrowser.ViewModels
 
         private void ViewGithub()
         {
-            BrowserWindow.Popup("https://github.com/Mzying2001/CefFlashBrowser");
+            BrowserWindow.Show("https://github.com/Mzying2001/CefFlashBrowser");
         }
 
         private void OpenFavoritesItem(object website)
         {
             if (website is Website ws)
-                BrowserWindow.Popup(ws.Url);
+                BrowserWindow.Show(ws.Url);
         }
 
         public MainWindowViewModel()

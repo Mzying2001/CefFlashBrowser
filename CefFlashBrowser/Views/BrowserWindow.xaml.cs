@@ -60,7 +60,7 @@ namespace CefFlashBrowser.Views
             menuButtonContextMenu.IsOpen = true;
         }
 
-        public static void Popup(string url, bool showNavigationBar = true)
+        public static void Show(string url)
         {
             var window = new BrowserWindow();
             var vModel = window.VModel;
@@ -71,15 +71,6 @@ namespace CefFlashBrowser.Views
                 return;
             }
 
-            if (!showNavigationBar)
-            {
-                window.browser.OnCreatedNewWindow += (s, e) =>
-                {
-                    e.CancelPopup = false;
-                };
-            }
-
-            vModel.ShowNavigationBar = showNavigationBar;
             vModel.LoadUrl(url);
             window.Show();
         }

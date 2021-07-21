@@ -46,7 +46,7 @@ namespace CefFlashBrowser
                 }
                 else if (UrlChecker.IsUrl(arg))
                 {
-                    BrowserWindow.Popup(arg);
+                    BrowserWindow.Show(arg);
                 }
                 else
                 {
