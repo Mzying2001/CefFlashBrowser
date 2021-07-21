@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CefFlashBrowser.Models.StaticData;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,11 +36,34 @@ namespace CefFlashBrowser.Views
         public SwfPlayerWindow()
         {
             InitializeComponent();
+
+            var x = Settings.SwfPlayerWindowX;
+            var y = Settings.SwfPlayerWindowY;
+            var w = Settings.SwfPlayerWindowWidth;
+            var h = Settings.SwfPlayerWindowHeight;
+            if (x != default &&
+                y != default &&
+                w != default &&
+                h != default)
+            {
+                Left = x;
+                Top = y;
+                Width = w;
+                Height = h;
+            }
         }
 
         public SwfPlayerWindow(string fileName) : this()
         {
             FileName = fileName;
+        }
+
+        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Settings.SwfPlayerWindowX = Left;
+            Settings.SwfPlayerWindowY = Top;
+            Settings.SwfPlayerWindowWidth = Width;
+            Settings.SwfPlayerWindowHeight = Height;
         }
 
         public static void Show(string fileName)

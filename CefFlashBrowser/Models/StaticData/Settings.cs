@@ -58,6 +58,30 @@ namespace CefFlashBrowser.Models.StaticData
             set => _reg["BrowserWindowHeight"] = value;
         }
 
+        public static double SwfPlayerWindowX
+        {
+            get => _reg.GetValue<double>("SwfPlayerWindowX");
+            set => _reg["SwfPlayerWindowX"] = value;
+        }
+
+        public static double SwfPlayerWindowY
+        {
+            get => _reg.GetValue<double>("SwfPlayerWindowY");
+            set => _reg["SwfPlayerWindowY"] = value;
+        }
+
+        public static double SwfPlayerWindowWidth
+        {
+            get => _reg.GetValue<double>("SwfPlayerWindowWidth");
+            set => _reg["SwfPlayerWindowWidth"] = value;
+        }
+
+        public static double SwfPlayerWindowHeight
+        {
+            get => _reg.GetValue<double>("SwfPlayerWindowHeight");
+            set => _reg["SwfPlayerWindowHeight"] = value;
+        }
+
         public static bool NotFirstStart
         {
             get => _reg.GetValue<bool>("NotFirstStart");
