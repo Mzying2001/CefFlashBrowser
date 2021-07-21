@@ -95,6 +95,7 @@
     </ApplicationDefinition>
     <Compile Include="Models\FlashBrowser\ChromiumFlashBrowser.cs" />
     <Compile Include="Models\FlashBrowser\ContextMenuHandler.cs" />
+    <Compile Include="Models\FlashBrowser\FlashBrowserBase.cs" />
     <Compile Include="Models\FlashBrowser\JsDialogHandler.cs" />
     <Compile Include="Models\FlashBrowser\NewWindowEventArgs.cs" />
     <Compile Include="Models\FlashBrowser\FlashBrowserLifeSpanHandler.cs" />

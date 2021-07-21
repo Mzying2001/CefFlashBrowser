@@ -24,7 +24,7 @@ namespace CefFlashBrowser
             Settings.Init();
             Favorites.InitFavorites();
             LanguageManager.InitLanguage();
-            ChromiumFlashBrowser.InitCefFlash();
+            FlashBrowserBase.InitCefFlash();
         }
 
         protected override void OnStartup(StartupEventArgs e)
