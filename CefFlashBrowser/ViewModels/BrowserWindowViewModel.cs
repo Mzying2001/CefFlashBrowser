@@ -86,7 +86,7 @@ namespace CefFlashBrowser.ViewModels
             ViewSourceCommand = new DelegateCommand(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand(CreateShortcut);
-            CloseWindowCommand = new DelegateCommand(CloseWindow);
+            CloseWindowCommand = new DelegateCommand(() => CloseWindow?.Invoke());
         }
     }
 }
