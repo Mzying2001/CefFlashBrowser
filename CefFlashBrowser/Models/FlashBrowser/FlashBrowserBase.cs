@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Models.StaticData;
+﻿using CefFlashBrowser.Commands;
+using CefFlashBrowser.Models.StaticData;
 using CefSharp;
 using CefSharp.Wpf;
 using System;
@@ -7,14 +8,23 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Models.FlashBrowser
 {
     public class FlashBrowserBase : ChromiumWebBrowser
     {
+        public ICommand LoadUrlCommand { get; private set; }
+
         public override void BeginInit()
         {
             base.BeginInit();
+
+            LoadUrlCommand = new DelegateCommand((obj) =>
+            {
+                if (obj is string url)
+                    Address = url;
+            });
 
             EnableFlash();
             DownloadHandler = new IEDownloadHandler();

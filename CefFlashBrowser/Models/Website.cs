@@ -1,14 +1,18 @@
-﻿using CefFlashBrowser.ViewModels;
+﻿using CefFlashBrowser.Commands;
+using CefFlashBrowser.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Models
 {
     class Website : NotificationObject
     {
+        public ICommand OpenWebsiteCommand { get; private set; }
+
         private string _name;
 
         public string Name
@@ -43,6 +47,11 @@ namespace CefFlashBrowser.Models
         {
             Name = name;
             Url = url;
+
+            OpenWebsiteCommand = new DelegateCommand(() =>
+            {
+                Views.BrowserWindow.Show(url);
+            });
         }
 
         public static bool operator ==(Website left, Website right)

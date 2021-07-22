@@ -32,31 +32,26 @@
         </Grid.RowDefinitions>
 
         <Menu>
-            <Menu.Resources>
-                <DataTemplate DataType="{x:Type mvm:MenuItemViewModel}">
-                    <MenuItem Padding="0"
-                              Header="{Binding Header}"
-                              Command="{Binding MenuItemSelectedCommand}"
-                              IsChecked="{Binding IsSelected}"/>
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type m:Website}">
-                    <MenuItem Padding="0"
-                              Header="{Binding Name}"
-                              Command="{Binding Source={x:Reference Name=mainWindow}, Path=DataContext.OpenFavoritesItemCommand}"
-                              CommandParameter="{Binding}"/>
-                </DataTemplate>
-            </Menu.Resources>
-
             <!--Favorites Menu-->
             <MenuItem Header="{DynamicResource menu_favorites}">
                 <MenuItem.ItemsSource>
                     <CompositeCollection>
-                        <MenuItem Header="{DynamicResource menu_manageFavorites}"
+                        <MenuItem Style="{StaticResource MenuItemBaseStyle}"
+                                  Header="{DynamicResource menu_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
                         <Separator/>
                         <CollectionContainer Collection="{Binding Source={x:Static sd:Favorites.Items}}"/>
                     </CompositeCollection>
                 </MenuItem.ItemsSource>
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource MenuItemBaseStyle}">
+                        <Setter Property="Header"
+                                Value="{Binding Name}"/>
+                        <Setter Property="Command"
+                                Value="{Binding OpenWebsiteCommand}"/>
+                    </Style>
+                </MenuItem.ItemContainerStyle>
             </MenuItem>
 
             <!--Options Menu-->
@@ -70,7 +65,19 @@
 
                 <!--Languages Option-->
                 <MenuItem Header="{DynamicResource menu_languages}"
-                          ItemsSource="{Binding LanguageMenuItems}"/>
+                          ItemsSource="{Binding LanguageMenuItems}">
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="MenuItem"
+                               BasedOn="{StaticResource MenuItemBaseStyle}">
+                            <Setter Property="Header"
+                                    Value="{Binding Header}"/>
+                            <Setter Property="Command"
+                                    Value="{Binding MenuItemSelectedCommand}"/>
+                            <Setter Property="IsChecked"
+                                    Value="{Binding IsSelected}"/>
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+                </MenuItem>
 
                 <!--Settings Option-->
                 <MenuItem Header="{DynamicResource menu_settings}"
@@ -106,6 +113,7 @@
                 </i:Interaction.Triggers>
             </TextBlock>
 
+            <!--The url textBox-->
             <TextBox Grid.Row="2"
                      Grid.Column="1"
                      Width="300"

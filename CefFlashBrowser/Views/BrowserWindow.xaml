@@ -106,14 +106,17 @@
 
                         <MenuItem Header="{DynamicResource menu_favorites}"
                                   ItemsSource="{Binding Source={x:Static sd:Favorites.Items}}">
-                            <MenuItem.ItemTemplate>
-                                <DataTemplate DataType="{x:Type m:Website}">
-                                    <MenuItem Header="{Binding Name}"
-                                              Command="{Binding Source={x:Reference Name=browserWindow}, Path=DataContext.LoadUrlCommand}"
-                                              CommandParameter="{Binding Url}"
-                                              Padding="0"/>
-                                </DataTemplate>
-                            </MenuItem.ItemTemplate>
+                            <MenuItem.ItemContainerStyle>
+                                <Style TargetType="MenuItem"
+                                       BasedOn="{StaticResource MenuItemBaseStyle}">
+                                    <Setter Property="Header"
+                                            Value="{Binding Name}"/>
+                                    <Setter Property="Command"
+                                            Value="{Binding Source={x:Reference Name=browser}, Path=LoadUrlCommand}"/>
+                                    <Setter Property="CommandParameter"
+                                            Value="{Binding Url}"/>
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
                         </MenuItem>
 
                         <Separator/>
