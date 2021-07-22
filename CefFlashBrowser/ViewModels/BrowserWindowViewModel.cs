@@ -21,7 +21,6 @@ namespace CefFlashBrowser.ViewModels
     {
         public Action CloseWindow { get; set; }
 
-        public ICommand LoadUrlCommand { get; set; }
         public ICommand OpenDevToolCommand { get; set; }
         public ICommand ViewSourceCommand { get; set; }
         public ICommand OpenInDefaultBrowserCommand { get; set; }
@@ -33,12 +32,6 @@ namespace CefFlashBrowser.ViewModels
         public void SetBrowser(ChromiumFlashBrowser browser)
         {
             Browser = browser;
-        }
-
-        public void LoadUrl(string url)
-        {
-            if (!string.IsNullOrEmpty(url))
-                Browser.Address = url;
         }
 
         private void ViewSource()
@@ -81,8 +74,7 @@ namespace CefFlashBrowser.ViewModels
 
         public BrowserWindowViewModel()
         {
-            LoadUrlCommand = new DelegateCommand(url => LoadUrl(url?.ToString()));
-            OpenDevToolCommand = new DelegateCommand(p => Browser.ShowDevTools());
+            OpenDevToolCommand = new DelegateCommand(() => Browser.ShowDevTools());
             ViewSourceCommand = new DelegateCommand(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand(CreateShortcut);

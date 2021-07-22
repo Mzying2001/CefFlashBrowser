@@ -77,7 +77,7 @@
                      Text="{Binding ElementName=browser, Path=Address}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
-                                Command="{Binding LoadUrlCommand}"
+                                Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
                 </TextBox.InputBindings>
             </TextBox>

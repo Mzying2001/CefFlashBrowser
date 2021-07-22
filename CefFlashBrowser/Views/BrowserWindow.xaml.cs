@@ -60,18 +60,10 @@ namespace CefFlashBrowser.Views
             menuButtonContextMenu.IsOpen = true;
         }
 
-        public static void Show(string url)
+        public static void Show(string address)
         {
             var window = new BrowserWindow();
-            var vModel = window.VModel;
-
-            if (vModel == null)
-            {
-                window.Close();
-                return;
-            }
-
-            vModel.LoadUrl(url);
+            window.browser.Address = address;
             window.Show();
         }
     }
