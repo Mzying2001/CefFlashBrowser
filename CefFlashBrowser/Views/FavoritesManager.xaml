@@ -22,6 +22,11 @@
         <vm:FavoritesManagerViewModel/>
     </Window.DataContext>
 
+    <Window.Resources>
+        <!--Assign BindingProxy data in background code-->
+        <local:BindingProxy x:Key="bp"/>
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"
@@ -55,26 +60,26 @@
                      HorizontalContentAlignment="Stretch"
                      SelectedIndex="{Binding SelectedIndex}"
                      ItemsSource="{Binding Source={x:Static sd:Favorites.Items}}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate DataType="{x:Type m:Website}">
-                        <TextBlock Text="{Binding Name}">
-                            <TextBlock.ContextMenu>
-                                <ContextMenu>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem"
+                           BasedOn="{StaticResource ListBoxItemBaseStyle}">
+                        <Setter Property="Content"
+                                Value="{Binding Name}"/>
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu DataContext="{Binding Source={StaticResource bp}, Path=Data}">
                                     <MenuItem Header="{StaticResource favorites_toTop}"
-                                              Command="{Binding Source={x:Reference Name=fmWindow},
-                                                                Path=DataContext.MoveToTopCommand}"/>
+                                              Command="{Binding MoveToTopCommand}"/>
                                     <MenuItem Header="{StaticResource favorites_toBottom}"
-                                              Command="{Binding Source={x:Reference Name=fmWindow},
-                                                                Path=DataContext.MoveToBottomCommand}"/>
+                                              Command="{Binding MoveToBottomCommand}"/>
                                     <Separator/>
                                     <MenuItem Header="{StaticResource favorites_remove}"
-                                              Command="{Binding Source={x:Reference Name=fmWindow},
-                                                                Path=DataContext.RemoveItemCommand}"/>
+                                              Command="{Binding RemoveItemCommand}"/>
                                 </ContextMenu>
-                            </TextBlock.ContextMenu>
-                        </TextBlock>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}"
