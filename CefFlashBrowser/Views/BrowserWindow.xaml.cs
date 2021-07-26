@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -57,8 +58,10 @@ namespace CefFlashBrowser.Views
 
         private void MenuButton_Clicked(object sender, RoutedEventArgs e)
         {
-            menuButtonContextMenu.PlacementTarget = sender as UIElement;
-            menuButtonContextMenu.IsOpen = true;
+            var contextMenu = (ContextMenu)Resources["more"];
+            contextMenu.PlacementTarget = sender as UIElement;
+            contextMenu.Placement = PlacementMode.Bottom;
+            contextMenu.IsOpen = true;
         }
 
         public static void Show(string address)

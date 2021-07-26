@@ -24,6 +24,75 @@
         <vm:BrowserWindowViewModel/>
     </Window.DataContext>
 
+    <Window.Resources>
+        <ContextMenu x:Key="more">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock VerticalAlignment="Center"
+                           Text="{DynamicResource menu_zoom}"/>
+                <TextBlock VerticalAlignment="Center" Text=": "/>
+                <TextBlock Margin="0,0,10,0"
+                           VerticalAlignment="Center"
+                           Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
+                <Button Width="30"
+                        Height="30"
+                        Padding="0"
+                        Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
+                    <Button.Content>
+                        <svgc:SvgViewbox Width="8"
+                                         Height="8"
+                                         Source="svg/sub.svg"/>
+                    </Button.Content>
+                </Button>
+                <Button Width="30"
+                        Height="30"
+                        Padding="0"
+                        Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
+                    <Button.Content>
+                        <svgc:SvgViewbox Width="8"
+                                         Height="8"
+                                         Source="svg/add.svg"/>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
+
+            <Separator/>
+
+            <MenuItem Header="{DynamicResource menu_favorites}"
+                      ItemsSource="{Binding Source={x:Static sd:Favorites.Items}}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource MenuItemBaseStyle}">
+                        <Setter Property="Header"
+                                Value="{Binding Name}"/>
+                        <Setter Property="Command"
+                                Value="{Binding Source={x:Reference Name=browser}, Path=LoadUrlCommand}"/>
+                        <Setter Property="CommandParameter"
+                                Value="{Binding Url}"/>
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
+
+            <Separator/>
+
+            <MenuItem Header="{DynamicResource menu_createShortcut}"
+                      Command="{Binding CreateShortcutCommand}"
+                      InputGestureText="Ctrl+S"/>
+
+            <MenuItem Header="{DynamicResource menu_openInDefaultBrowser}"
+                      Command="{Binding OpenInDefaultBrowserCommand}"
+                      InputGestureText="Ctrl+O"/>
+
+            <Separator/>
+
+            <MenuItem Header="{DynamicResource menu_openDevTool}"
+                      Command="{Binding OpenDevToolCommand}"
+                      InputGestureText="F12"/>
+            <MenuItem Header="{DynamicResource menu_viewSource}"
+                      Command="{Binding ViewSourceCommand}"
+                      InputGestureText="Ctrl+U"/>
+        </ContextMenu>
+    </Window.Resources>
+
     <Window.InputBindings>
         <KeyBinding Gesture="Alt+Z"
                     Command="{Binding ElementName=browser, Path=BackCommand}"/>
@@ -94,7 +163,7 @@
                                      Source="svg/forward.svg"/>
                 </Button.Content>
             </Button>
-            
+
             <Button Grid.Column="2"
                     Width="30"
                     Height="30"
@@ -131,74 +200,6 @@
                                      Height="10"
                                      Source="svg/more.svg"/>
                 </Button.Content>
-                <Button.ContextMenu>
-                    <ContextMenu x:Name="menuButtonContextMenu">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center"
-                                       Text="{DynamicResource menu_zoom}"/>
-                            <TextBlock VerticalAlignment="Center" Text=": "/>
-                            <TextBlock Margin="0,0,10,0"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
-                            <Button Width="30"
-                                    Height="30"
-                                    Padding="0"
-                                    Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
-                                <Button.Content>
-                                    <svgc:SvgViewbox Width="8"
-                                                     Height="8"
-                                                     Source="svg/sub.svg"/>
-                                </Button.Content>
-                            </Button>
-                            <Button Width="30"
-                                    Height="30"
-                                    Padding="0"
-                                    Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
-                                <Button.Content>
-                                    <svgc:SvgViewbox Width="8"
-                                                     Height="8"
-                                                     Source="svg/add.svg"/>
-                                </Button.Content>
-                            </Button>
-                        </StackPanel>
-
-                        <Separator/>
-
-                        <MenuItem Header="{DynamicResource menu_favorites}"
-                                  ItemsSource="{Binding Source={x:Static sd:Favorites.Items}}">
-                            <MenuItem.ItemContainerStyle>
-                                <Style TargetType="MenuItem"
-                                       BasedOn="{StaticResource MenuItemBaseStyle}">
-                                    <Setter Property="Header"
-                                            Value="{Binding Name}"/>
-                                    <Setter Property="Command"
-                                            Value="{Binding Source={x:Reference Name=browser}, Path=LoadUrlCommand}"/>
-                                    <Setter Property="CommandParameter"
-                                            Value="{Binding Url}"/>
-                                </Style>
-                            </MenuItem.ItemContainerStyle>
-                        </MenuItem>
-
-                        <Separator/>
-
-                        <MenuItem Header="{DynamicResource menu_createShortcut}"
-                                  Command="{Binding CreateShortcutCommand}"
-                                  InputGestureText="Ctrl+S"/>
-
-                        <MenuItem Header="{DynamicResource menu_openInDefaultBrowser}"
-                                  Command="{Binding OpenInDefaultBrowserCommand}"
-                                  InputGestureText="Ctrl+O"/>
-
-                        <Separator/>
-
-                        <MenuItem Header="{DynamicResource menu_openDevTool}"
-                                  Command="{Binding OpenDevToolCommand}"
-                                  InputGestureText="F12"/>
-                        <MenuItem Header="{DynamicResource menu_viewSource}"
-                                  Command="{Binding ViewSourceCommand}"
-                                  InputGestureText="Ctrl+U"/>
-                    </ContextMenu>
-                </Button.ContextMenu>
             </Button>
         </Grid>
 
