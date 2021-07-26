@@ -44,6 +44,7 @@
 
         <TextBlock Grid.Row="1"
                    Grid.Column="1"
+                   TextWrapping="Wrap"
                    Text="{Binding Message}"
                    Style="{StaticResource JsDialogTextStyle}"/>
 
