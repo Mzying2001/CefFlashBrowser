@@ -100,6 +100,7 @@
                     Height="30"
                     Padding="0"
                     Margin="5,0,0,0"
+                    ToolTip="{DynamicResource toolTip_reload}"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}">
                 <Button.Content>
                     <svgc:SvgViewbox Width="14"

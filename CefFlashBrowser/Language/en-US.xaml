@@ -74,6 +74,7 @@
     <sys:String x:Key="menu_createShortcut">Create shortcut</sys:String>
     <sys:String x:Key="toolTip_back">Back (Alt+Z)</sys:String>
     <sys:String x:Key="toolTip_forward">Forward (Alt+X)</sys:String>
+    <sys:String x:Key="toolTip_reload">Reload (F5)</sys:String>
     <sys:String x:Key="filter_shortcut">shortcut</sys:String>
 
     <!--Dialogs-->

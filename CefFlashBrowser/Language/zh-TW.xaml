@@ -74,6 +74,7 @@
     <sys:String x:Key="menu_createShortcut">創建網頁快捷方式</sys:String>
     <sys:String x:Key="toolTip_back">返回（Alt+Z）</sys:String>
     <sys:String x:Key="toolTip_forward">前進（Alt+X）</sys:String>
+    <sys:String x:Key="toolTip_reload">重繪（F5）</sys:String>
     <sys:String x:Key="filter_shortcut">快捷方式</sys:String>
 
     <!--對話方塊-->
