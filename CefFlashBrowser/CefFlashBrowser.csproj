@@ -131,6 +131,7 @@
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\CustomControls\AutoSelectAllTextBox.cs" />
     <Compile Include="Views\Dialogs\JsDialogs\JsAlertDialog.xaml.cs">
       <DependentUpon>JsAlertDialog.xaml</DependentUpon>
     </Compile>
