@@ -140,8 +140,26 @@
                             <TextBlock Margin="0,0,10,0"
                                        VerticalAlignment="Center"
                                        Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
-                            <Button Content="-" FontFamily="SimHei" Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}"/>
-                            <Button Content="+" FontFamily="SimHei" Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}"/>
+                            <Button Width="30"
+                                    Height="30"
+                                    Padding="0"
+                                    Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
+                                <Button.Content>
+                                    <svgc:SvgViewbox Width="8"
+                                                     Height="8"
+                                                     Source="svg/sub.svg"/>
+                                </Button.Content>
+                            </Button>
+                            <Button Width="30"
+                                    Height="30"
+                                    Padding="0"
+                                    Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
+                                <Button.Content>
+                                    <svgc:SvgViewbox Width="8"
+                                                     Height="8"
+                                                     Source="svg/add.svg"/>
+                                </Button.Content>
+                            </Button>
                         </StackPanel>
 
                         <Separator/>
