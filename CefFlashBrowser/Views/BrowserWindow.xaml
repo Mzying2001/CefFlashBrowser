@@ -9,6 +9,7 @@
         xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
         xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         mc:Ignorable="d"
         
         x:Name="browserWindow"
@@ -63,18 +64,53 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button Content="&lt;" Grid.Column="0" FontFamily="SimHei"
+            <Button Grid.Column="0"
+                    Width="30"
+                    Height="30"
+                    Padding="0"
                     ToolTip="{DynamicResource toolTip_back}"
-                    Command="{Binding ElementName=browser, Path=BackCommand}"/>
-            <Button Content="&gt;" Grid.Column="1" FontFamily="SimHei"
-                    ToolTip="{DynamicResource toolTip_forward}"
-                    Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
+                    Command="{Binding ElementName=browser, Path=BackCommand}">
+                <Button.Content>
+                    <svgc:SvgViewbox Width="12"
+                                     Height="12"
+                                     Source="svg/back.svg"/>
+                </Button.Content>
+            </Button>
 
-            <cc:AutoSelectAllTextBox Grid.Column="2" Margin="10,0"
+            <Button Grid.Column="1"
+                    Width="30"
+                    Height="30"
+                    Padding="0"
+                    ToolTip="{DynamicResource toolTip_forward}"
+                    Command="{Binding ElementName=browser, Path=ForwardCommand}">
+                <Button.Content>
+                    <svgc:SvgViewbox Width="12"
+                                     Height="12"
+                                     Source="svg/forward.svg"/>
+                </Button.Content>
+            </Button>
+            
+            <Button Grid.Column="2"
+                    Width="30"
+                    Height="30"
+                    Padding="0"
+                    Margin="5,0,0,0"
+                    Command="{Binding ElementName=browser, Path=ReloadCommand}">
+                <Button.Content>
+                    <svgc:SvgViewbox Width="14"
+                                     Height="14"
+                                     Source="svg/reload.svg"/>
+                </Button.Content>
+            </Button>
+
+            <cc:AutoSelectAllTextBox Grid.Column="3"
+                                     Margin="5,0"
+                                     Height="30"
                                      Style="{StaticResource TextBoxBaseStyle}"
                                      Text="{Binding ElementName=browser, Path=Address}">
                 <TextBox.InputBindings>
@@ -84,15 +120,18 @@
                 </TextBox.InputBindings>
             </cc:AutoSelectAllTextBox>
 
-            <Button Content="..." Grid.Column="3" Click="MenuButton_Clicked">
+            <Button Grid.Column="4"
+                    Width="30"
+                    Height="30"
+                    Padding="0"
+                    Click="MenuButton_Clicked">
+                <Button.Content>
+                    <svgc:SvgViewbox Width="10"
+                                     Height="10"
+                                     Source="svg/more.svg"/>
+                </Button.Content>
                 <Button.ContextMenu>
                     <ContextMenu x:Name="menuButtonContextMenu">
-                        <MenuItem Header="{DynamicResource menu_reload}"
-                                  Command="{Binding Source={x:Reference Name=browser}, Path=ReloadCommand}"
-                                  InputGestureText="F5"/>
-
-                        <Separator/>
-
                         <StackPanel Orientation="Horizontal">
                             <TextBlock VerticalAlignment="Center"
                                        Text="{DynamicResource menu_zoom}"/>
