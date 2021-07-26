@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
         xmlns:jdvm="clr-namespace:CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs.JsDialogs"
         mc:Ignorable="d"
@@ -50,16 +51,16 @@
                    Text="{Binding Message}"
                    Style="{StaticResource JsPromptDialogTextStyle}"/>
 
-        <TextBox x:Name="inputBox"
-                 Grid.Row="2"
-                 Grid.Column="1"
-                 Style="{StaticResource JsDialogPromptTextBoxStyle}"
-                 Text="{Binding PromptText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        <cc:AutoSelectAllTextBox x:Name="inputBox"
+                                 Grid.Row="2"
+                                 Grid.Column="1"
+                                 Style="{StaticResource JsDialogPromptTextBoxStyle}"
+                                 Text="{Binding PromptText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
                             Command="{Binding OkCommand}"/>
             </TextBox.InputBindings>
-        </TextBox>
+        </cc:AutoSelectAllTextBox>
 
         <StackPanel Grid.Row="3"
                     Grid.Column="1"
