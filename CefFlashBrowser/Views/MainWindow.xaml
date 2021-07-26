@@ -10,6 +10,7 @@
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
         mc:Ignorable="d"
         
         Name="mainWindow"
@@ -114,16 +115,16 @@
             </TextBlock>
 
             <!--The url textBox-->
-            <TextBox Grid.Row="2"
-                     Grid.Column="1"
-                     Width="300"
-                     Text="{Binding Url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{StaticResource TextBoxBaseStyle}">
+            <cc:AutoSelectAllTextBox Grid.Row="2"
+                                     Grid.Column="1"
+                                     Width="300"
+                                     Text="{Binding Url, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource TextBoxBaseStyle}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding OpenUrlCommand}"/>
                 </TextBox.InputBindings>
-            </TextBox>
+            </cc:AutoSelectAllTextBox>
         </Grid>
 
         <!--The app info shows on the bottom of the main window-->

@@ -6,6 +6,7 @@
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
@@ -121,23 +122,25 @@
                                 Grid.Column="1">
                         <TextBlock Text="{StaticResource favorites_name}"
                                    Foreground="Black"/>
-                        <TextBox Margin="0,0,0,20"
-                                 Width="300"
-                                 Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <cc:AutoSelectAllTextBox Margin="0,0,0,20"
+                                                 Width="300"
+                                                 Style="{StaticResource TextBoxBaseStyle}"
+                                                 Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <TextBox.InputBindings>
                                 <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
                             </TextBox.InputBindings>
-                        </TextBox>
+                        </cc:AutoSelectAllTextBox>
 
                         <TextBlock Text="{StaticResource favorites_url}"
                                    Foreground="Black"/>
-                        <TextBox Margin="0,0,0,20"
-                                 Width="300"
-                                 Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <cc:AutoSelectAllTextBox Margin="0,0,0,20"
+                                                 Width="300"
+                                                 Style="{StaticResource TextBoxBaseStyle}"
+                                                 Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <TextBox.InputBindings>
                                 <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
                             </TextBox.InputBindings>
-                        </TextBox>
+                        </cc:AutoSelectAllTextBox>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>

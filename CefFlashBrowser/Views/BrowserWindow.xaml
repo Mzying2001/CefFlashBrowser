@@ -7,6 +7,7 @@
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
+        xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
         xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
         mc:Ignorable="d"
         
@@ -73,14 +74,15 @@
                     ToolTip="{DynamicResource toolTip_forward}"
                     Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
 
-            <TextBox Grid.Column="2" Margin="10,0"
-                     Text="{Binding ElementName=browser, Path=Address}">
+            <cc:AutoSelectAllTextBox Grid.Column="2" Margin="10,0"
+                                     Style="{StaticResource TextBoxBaseStyle}"
+                                     Text="{Binding ElementName=browser, Path=Address}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
                 </TextBox.InputBindings>
-            </TextBox>
+            </cc:AutoSelectAllTextBox>
 
             <Button Content="..." Grid.Column="3" Click="MenuButton_Clicked">
                 <Button.ContextMenu>
