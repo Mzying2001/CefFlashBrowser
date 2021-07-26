@@ -52,6 +52,7 @@ namespace CefFlashBrowser.Views
             Settings.BrowserWindowY = Top;
             Settings.BrowserWindowWidth = Width;
             Settings.BrowserWindowHeight = Height;
+            browser.Dispose();
         }
 
         private void MenuButton_Clicked(object sender, RoutedEventArgs e)
