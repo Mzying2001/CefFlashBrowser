@@ -194,7 +194,8 @@
                     Width="30"
                     Height="30"
                     Padding="0"
-                    Click="MenuButton_Clicked">
+                    Click="MenuButton_Clicked"
+                    ToolTip="{DynamicResource toolTip_more}">
                 <Button.Content>
                     <svgc:SvgViewbox Width="10"
                                      Height="10"

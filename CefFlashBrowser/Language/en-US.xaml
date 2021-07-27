@@ -17,6 +17,7 @@
     <sys:String x:Key="menu_loadSwf">Load local swf file...</sys:String>
     <sys:String x:Key="filter_swf">swf file</sys:String>
     <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>
+    <sys:String x:Key="toolTip_viewGithub">View in GitHub</sys:String>
 
     <!--Settings Window-->
     <sys:String x:Key="tabItem_main">Main</sys:String>
@@ -75,10 +76,11 @@
     <sys:String x:Key="toolTip_back">Back (Alt+Z)</sys:String>
     <sys:String x:Key="toolTip_forward">Forward (Alt+X)</sys:String>
     <sys:String x:Key="toolTip_reload">Reload (F5)</sys:String>
+    <sys:String x:Key="toolTip_more">More</sys:String>
     <sys:String x:Key="filter_shortcut">shortcut</sys:String>
 
     <!--Dialogs-->
-    <sys:String x:Key="button_ok">Ok</sys:String>
+    <sys:String x:Key="button_ok">OK</sys:String>
     <sys:String x:Key="button_cancel">Cancel</sys:String>
     <sys:String x:Key="button_yes">Yes</sys:String>
     <sys:String x:Key="button_No">No</sys:String>

@@ -106,7 +106,8 @@
                        FontSize="30"
                        Cursor="Hand"
                        Text="Flash Browser"
-                       HorizontalAlignment="Center">
+                       HorizontalAlignment="Center"
+                       ToolTip="{DynamicResource toolTip_viewGithub}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseDown">
                         <i:InvokeCommandAction Command="{Binding ViewGithubCommand}"/>

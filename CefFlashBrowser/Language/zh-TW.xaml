@@ -17,6 +17,7 @@
     <sys:String x:Key="menu_loadSwf">加載本地swf檔案...</sys:String>
     <sys:String x:Key="filter_swf">swf檔案</sys:String>
     <sys:String x:Key="message_emptyUrl">請輸入網址。</sys:String>
+    <sys:String x:Key="toolTip_viewGithub">在GitHub中查看</sys:String>
 
     <!--設定視窗-->
     <sys:String x:Key="tabItem_main">主介面</sys:String>
@@ -75,6 +76,7 @@
     <sys:String x:Key="toolTip_back">返回（Alt+Z）</sys:String>
     <sys:String x:Key="toolTip_forward">前進（Alt+X）</sys:String>
     <sys:String x:Key="toolTip_reload">重繪（F5）</sys:String>
+    <sys:String x:Key="toolTip_more">更多</sys:String>
     <sys:String x:Key="filter_shortcut">快捷方式</sys:String>
 
     <!--對話方塊-->
