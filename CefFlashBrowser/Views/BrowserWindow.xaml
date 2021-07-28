@@ -10,6 +10,7 @@
         xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
         xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+        xmlns:converter="clr-namespace:CefFlashBrowser.Views.Converters"
         mc:Ignorable="d"
         
         x:Name="browserWindow"
@@ -25,6 +26,10 @@
     </Window.DataContext>
 
     <Window.Resources>
+        <!--Converters-->
+        <converter:BrowserIsLoadingToSvgViewBox x:Key="IsLoading2Svg"/>
+
+        <!--ConetxtMenu-->
         <ContextMenu x:Key="more">
             <StackPanel Orientation="Horizontal">
                 <TextBlock VerticalAlignment="Center"
@@ -170,11 +175,11 @@
                     Padding="0"
                     Margin="5,0,0,0"
                     ToolTip="{DynamicResource toolTip_reload}"
-                    Command="{Binding ElementName=browser, Path=ReloadCommand}">
+                    Command="{Binding ElementName=browser, Path=ChangeLoadingStateCommand}">
                 <Button.Content>
-                    <svgc:SvgViewbox Width="14"
-                                     Height="14"
-                                     Source="svg/reload.svg"/>
+                    <Binding ElementName="browser"
+                             Path="IsLoading"
+                             Converter="{StaticResource IsLoading2Svg}"/>
                 </Button.Content>
             </Button>
 
