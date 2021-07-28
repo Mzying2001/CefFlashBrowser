@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Commands;
 using CefFlashBrowser.Models.StaticData;
+using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using CefSharp.Wpf;
 using System;
@@ -20,30 +21,34 @@ namespace CefFlashBrowser.Models.FlashBrowser
         {
             base.BeginInit();
 
-            LoadUrlCommand = new DelegateCommand((obj) =>
+            LoadUrlCommand = new DelegateCommand(obj =>
             {
                 if (obj is string url)
                     Address = url;
             });
 
-            EnableFlash();
             DownloadHandler = new IEDownloadHandler();
             JsDialogHandler = new JsDialogHandler();
         }
 
-        private void EnableFlash()
+        protected override void OnIsBrowserInitializedChanged(bool oldValue, bool newValue)
         {
-            IsBrowserInitializedChanged += (s, e) =>
-            {
-                if (!IsBrowserInitialized)
-                    return;
+            base.OnIsBrowserInitializedChanged(oldValue, newValue);
 
+            if (newValue)
+            {
                 Cef.UIThreadTaskFactory.StartNew(() =>
                 {
                     var requestContext = GetBrowser().GetHost().RequestContext;
-                    requestContext.SetPreference("profile.default_content_setting_values.plugins", 1, out string error);
+                    var flag = requestContext.SetPreference("profile.default_content_setting_values.plugins", 1, out string err);
+
+                    if (!flag)
+                    {
+                        var title = LanguageManager.GetString("title_error");
+                        Dispatcher.Invoke(() => JsAlertDialog.Show(err, title));
+                    }
                 });
-            };
+            }
         }
 
         /// <summary>

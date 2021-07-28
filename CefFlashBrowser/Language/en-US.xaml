@@ -84,4 +84,5 @@
     <sys:String x:Key="button_cancel">Cancel</sys:String>
     <sys:String x:Key="button_yes">Yes</sys:String>
     <sys:String x:Key="button_No">No</sys:String>
+    <sys:String x:Key="title_error">Error</sys:String>
 </ResourceDictionary>
