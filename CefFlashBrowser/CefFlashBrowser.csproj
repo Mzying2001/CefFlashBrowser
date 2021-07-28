@@ -155,6 +155,7 @@
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Converters\BrowserIsLoadingToToolTip.cs" />
     <Compile Include="Views\Converters\BrowserIsLoadingToSvgViewBox.cs" />
     <Compile Include="Views\Converters\ValueConverterBase.cs" />
     <Compile Include="Views\CustomControls\AutoSelectAllTextBox.cs" />

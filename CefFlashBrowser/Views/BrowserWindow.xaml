@@ -28,6 +28,7 @@
     <Window.Resources>
         <!--Converters-->
         <converter:BrowserIsLoadingToSvgViewBox x:Key="IsLoading2Svg"/>
+        <converter:BrowserIsLoadingToToolTip x:Key="IsLoading2ToolTip"/>
 
         <!--ConetxtMenu-->
         <ContextMenu x:Key="more">
@@ -174,7 +175,7 @@
                     Height="30"
                     Padding="0"
                     Margin="5,0,0,0"
-                    ToolTip="{DynamicResource toolTip_reload}"
+                    ToolTip="{Binding ElementName=browser, Path=IsLoading, Converter={StaticResource IsLoading2ToolTip}}"
                     Command="{Binding ElementName=browser, Path=ChangeLoadingStateCommand}">
                 <Button.Content>
                     <Binding ElementName="browser"
