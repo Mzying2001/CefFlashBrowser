@@ -139,6 +139,7 @@
     <Compile Include="ViewModels\ComboBoxItemViewModels\ComboBoxItemViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\AddressBarFunctionComboBoxViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\SearchEngineComboBoxItemViewModel.cs" />
+    <Compile Include="ViewModels\DialogViewModels\AddFavoriteDialogViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsAlertDialogViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsConfirmDialogViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsDialogViewModel.cs" />

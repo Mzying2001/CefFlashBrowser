@@ -2,6 +2,7 @@
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.ViewModels.MenuItemViewModels;
+using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using System;
 using System.Collections.Generic;
@@ -117,12 +118,9 @@ namespace CefFlashBrowser.ViewModels
 
         private void AddItem()
         {
-            var website = new Website(LanguageManager.GetString("favorites_defaultName"), "about:blank");
-
-            if (Favorites.Items.Count == 0 || Favorites.Items[Favorites.Items.Count - 1] != website)
-                Favorites.Add(website);
-
-            SelectedIndex = Favorites.Items.Count - 1;
+            var flag = AddFavoriteDialog.Show(LanguageManager.GetString("favorites_defaultName"), "about:blank");
+            if (flag)
+                SelectedIndex = Favorites.Items.Count - 1;
         }
 
         private void RemoveItem()

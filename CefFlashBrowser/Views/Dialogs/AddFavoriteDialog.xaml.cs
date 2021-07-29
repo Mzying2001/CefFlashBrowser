@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CefFlashBrowser.Models.StaticData;
+using CefFlashBrowser.ViewModels.DialogViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,9 +21,30 @@ namespace CefFlashBrowser.Views.Dialogs
     /// </summary>
     public partial class AddFavoriteDialog : Window
     {
+        AddFavoriteDialogViewModel VModel => (AddFavoriteDialogViewModel)DataContext;
+
         public AddFavoriteDialog()
         {
             InitializeComponent();
+            VModel.CloseWindow = Close;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            NameTextBox.Focus();
+            NameTextBox.SelectAll();
+        }
+
+        public static bool Show(string name, string url)
+        {
+            var dialog = new AddFavoriteDialog();
+            var vmodel = dialog.VModel;
+
+            vmodel.Name = name;
+            vmodel.Url = url;
+
+            dialog.ShowDialog();
+            return vmodel.Result;
         }
     }
 }

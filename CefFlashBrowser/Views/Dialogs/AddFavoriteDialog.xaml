@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
+        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels.DialogViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
         mc:Ignorable="d"
         
@@ -11,7 +12,12 @@
         Topmost="True"
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded">
+
+    <Window.DataContext>
+        <vm:AddFavoriteDialogViewModel/>
+    </Window.DataContext>
 
     <Window.Resources>
         <Style x:Key="AddFavoritesDialogTextBoxStyle"
@@ -26,10 +32,14 @@
 
     <StackPanel Margin="15">
         <TextBlock Text="{DynamicResource favorites_name}"/>
-        <cc:AutoSelectAllTextBox Style="{StaticResource AddFavoritesDialogTextBoxStyle}"/>
+        <cc:AutoSelectAllTextBox x:Name="NameTextBox"
+                                 Style="{StaticResource AddFavoritesDialogTextBoxStyle}"
+                                 Text="{Binding Name}"/>
 
         <TextBlock Text="{DynamicResource favorites_url}"/>
-        <cc:AutoSelectAllTextBox Style="{StaticResource AddFavoritesDialogTextBoxStyle}"/>
+        <cc:AutoSelectAllTextBox x:Name="UrlTextBox"
+                                 Style="{StaticResource AddFavoritesDialogTextBoxStyle}"
+                                 Text="{Binding Url}"/>
 
         <Grid>
             <Grid.ColumnDefinitions>
@@ -40,13 +50,15 @@
 
             <Button Grid.Column="1"
                     MinWidth="70"
-                    Content="{DynamicResource button_cancel}"/>
+                    Content="{DynamicResource button_cancel}"
+                    Command="{Binding CancelCommand}"/>
 
             <Button Grid.Column="2"
                     MinWidth="70"
                     Margin="10,0,0,0"
                     Content="{DynamicResource button_ok}"
-                    Style="{StaticResource ButtonPrimary}"/>
+                    Style="{StaticResource ButtonPrimary}"
+                    Command="{Binding OkCommand}"/>
         </Grid>
     </StackPanel>
 </Window>
