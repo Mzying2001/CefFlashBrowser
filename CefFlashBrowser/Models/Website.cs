@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Commands;
+using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace CefFlashBrowser.Models
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentNullException();
+                    throw new Exception(LanguageManager.GetString("error_webSiteEmptyName"));
                 else
                     _name = value;
                 RaisePropertyChanged("Name");
@@ -36,7 +37,7 @@ namespace CefFlashBrowser.Models
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentNullException();
+                    throw new Exception(LanguageManager.GetString("error_webSiteEmptyUrl"));
                 else
                     _url = value;
                 RaisePropertyChanged("Url");
