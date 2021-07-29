@@ -30,16 +30,31 @@
         </Style>
     </Window.Resources>
 
+    <Window.InputBindings>
+        <KeyBinding Key="Esc"
+                    Command="{Binding CancelCommand}"/>
+    </Window.InputBindings>
+
     <StackPanel Margin="15">
         <TextBlock Text="{DynamicResource favorites_name}"/>
         <cc:AutoSelectAllTextBox x:Name="NameTextBox"
                                  Style="{StaticResource AddFavoritesDialogTextBoxStyle}"
-                                 Text="{Binding Name}"/>
+                                 Text="{Binding Name}">
+            <TextBox.InputBindings>
+                <KeyBinding Key="Enter"
+                            Command="{Binding OkCommand}"/>
+            </TextBox.InputBindings>
+        </cc:AutoSelectAllTextBox>
 
         <TextBlock Text="{DynamicResource favorites_url}"/>
         <cc:AutoSelectAllTextBox x:Name="UrlTextBox"
                                  Style="{StaticResource AddFavoritesDialogTextBoxStyle}"
-                                 Text="{Binding Url}"/>
+                                 Text="{Binding Url}">
+            <TextBox.InputBindings>
+                <KeyBinding Key="Enter"
+                            Command="{Binding OkCommand}"/>
+            </TextBox.InputBindings>
+        </cc:AutoSelectAllTextBox>
 
         <Grid>
             <Grid.ColumnDefinitions>
