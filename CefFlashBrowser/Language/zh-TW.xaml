@@ -86,6 +86,7 @@
     <sys:String x:Key="button_yes">是</sys:String>
     <sys:String x:Key="button_No">否</sys:String>
     <sys:String x:Key="title_error">錯誤</sys:String>
+    <sys:String x:Key="title_addFavorite">添加我的最愛</sys:String>
 
     <!--提示資訊-->
     <sys:String x:Key="error_webSiteEmptyName">名稱不能為空。</sys:String>

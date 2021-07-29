@@ -159,6 +159,9 @@
     <Compile Include="Views\Converters\BrowserIsLoadingToSvgViewBox.cs" />
     <Compile Include="Views\Converters\ValueConverterBase.cs" />
     <Compile Include="Views\CustomControls\AutoSelectAllTextBox.cs" />
+    <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">
+      <DependentUpon>AddFavoriteDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dialogs\JsDialogs\JsAlertDialog.xaml.cs">
       <DependentUpon>JsAlertDialog.xaml</DependentUpon>
     </Compile>
@@ -198,6 +201,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Language\zh-TW.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Dialogs\AddFavoriteDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
