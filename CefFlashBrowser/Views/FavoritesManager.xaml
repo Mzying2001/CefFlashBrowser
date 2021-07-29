@@ -18,6 +18,7 @@
         Height="450"
         MinWidth="500"
         MinHeight="300"
+        WindowStartupLocation="CenterScreen"
         Title="{StaticResource favorites_managerTitle}">
 
     <Window.DataContext>
