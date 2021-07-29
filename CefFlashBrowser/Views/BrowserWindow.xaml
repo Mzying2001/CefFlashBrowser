@@ -188,7 +188,7 @@
                                      Margin="5,0"
                                      Height="30"
                                      Style="{StaticResource TextBoxBaseStyle}"
-                                     Text="{Binding ElementName=browser, Path=Address}">
+                                     Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
