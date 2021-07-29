@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace CefFlashBrowser.Models
 {
-    class Website : NotificationObject
+    public class Website : NotificationObject
     {
         public ICommand OpenWebsiteCommand { get; private set; }
 
