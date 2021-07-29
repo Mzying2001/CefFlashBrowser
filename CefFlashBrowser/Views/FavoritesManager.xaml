@@ -10,6 +10,7 @@
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         mc:Ignorable="d"
         
         x:Name="fmWindow"
@@ -148,9 +149,27 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" Content="↑" Command="{Binding MoveUpCommand}"/>
-                            <Button Grid.Column="1" Content="↓" Command="{Binding MoveDownCommand}"/>
+                            <Button Grid.Column="0"
+                                    Width="30"
+                                    Height="30"
+                                    Padding="0"
+                                    Command="{Binding MoveUpCommand}">
+                                <svgc:SvgViewbox Width="12"
+                                                 Height="12"
+                                                 Source="svg/up.svg"/>
+                            </Button>
+                            <Button Grid.Column="1"
+                                    Width="30"
+                                    Height="30"
+                                    Padding="0"
+                                    Command="{Binding MoveDownCommand}">
+                                <svgc:SvgViewbox Width="12"
+                                                 Height="12"
+                                                 Source="svg/down.svg"/>
+                            </Button>
                             <Button Grid.Column="3"
+                                    Height="30"
+                                    MinWidth="60"
                                     Content="{StaticResource favorites_save}"
                                     Command="{Binding SaveChangesCommand}"/>
                         </Grid>

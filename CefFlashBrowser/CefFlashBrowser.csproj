@@ -311,6 +311,9 @@
     <Content Include="svg\back.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="svg\down.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="svg\forward.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -324,6 +327,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="svg\sub.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="svg\up.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Resources\icon.ico" />
