@@ -23,5 +23,15 @@ namespace CefFlashBrowser.Models.StaticData
         {
             new FavoritesDataService().WriteFavorites(Items);
         }
+
+        public static void Add(Website website)
+        {
+            Items.Add(website);
+        }
+
+        public static void Add(string name, string url)
+        {
+            Items.Add(new Website(name, url));
+        }
     }
 }

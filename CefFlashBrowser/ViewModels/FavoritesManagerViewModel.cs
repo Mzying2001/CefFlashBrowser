@@ -120,7 +120,7 @@ namespace CefFlashBrowser.ViewModels
             var website = new Website(LanguageManager.GetString("favorites_defaultName"), "about:blank");
 
             if (Favorites.Items.Count == 0 || Favorites.Items[Favorites.Items.Count - 1] != website)
-                Favorites.Items.Add(website);
+                Favorites.Add(website);
 
             SelectedIndex = Favorites.Items.Count - 1;
         }
