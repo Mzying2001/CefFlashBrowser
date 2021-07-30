@@ -78,6 +78,10 @@
                 </MenuItem.ItemContainerStyle>
             </MenuItem>
 
+            <MenuItem Header="{DynamicResource menu_addFavorite}"
+                      Command="{Binding AddFavoriteCommand}"
+                      InputGestureText="Ctrl+D"/>
+
             <Separator/>
 
             <MenuItem Header="{DynamicResource menu_createShortcut}"
@@ -110,6 +114,8 @@
                     Command="{Binding ElementName=browser, Path=ZoomOutCommand}"/>
         <KeyBinding Gesture="Ctrl+0"
                     Command="{Binding ElementName=browser, Path=ZoomResetCommand}"/>
+        <KeyBinding Gesture="Ctrl+D"
+                    Command="{Binding AddFavoriteCommand}"/>
         <KeyBinding Gesture="Ctrl+O"
                     Command="{Binding OpenInDefaultBrowserCommand}"/>
         <KeyBinding Gesture="Ctrl+P"

@@ -11,6 +11,7 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.FlashBrowser;
 using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views;
+using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using IWshRuntimeLibrary;
@@ -26,6 +27,7 @@ namespace CefFlashBrowser.ViewModels
         public ICommand OpenInDefaultBrowserCommand { get; set; }
         public ICommand CreateShortcutCommand { get; set; }
         public ICommand CloseWindowCommand { get; set; }
+        public ICommand AddFavoriteCommand { get; set; }
 
         public ChromiumFlashBrowser Browser { get; set; }
 
@@ -72,6 +74,11 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void AddFavorite()
+        {
+            AddFavoriteDialog.Show(Browser.Title, Browser.Address);
+        }
+
         public BrowserWindowViewModel()
         {
             OpenDevToolCommand = new DelegateCommand(() => Browser.ShowDevTools());
@@ -79,6 +86,7 @@ namespace CefFlashBrowser.ViewModels
             OpenInDefaultBrowserCommand = new DelegateCommand(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand(CreateShortcut);
             CloseWindowCommand = new DelegateCommand(() => CloseWindow?.Invoke());
+            AddFavoriteCommand = new DelegateCommand(AddFavorite);
         }
     }
 }

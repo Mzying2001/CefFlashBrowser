@@ -73,6 +73,7 @@
     <sys:String x:Key="menu_zoom">Zoom</sys:String>
     <sys:String x:Key="menu_openInDefaultBrowser">Open in default browser</sys:String>
     <sys:String x:Key="menu_createShortcut">Create shortcut</sys:String>
+    <sys:String x:Key="menu_addFavorite">Add this site to Favorites</sys:String>
     <sys:String x:Key="toolTip_back">Back (Alt+Z)</sys:String>
     <sys:String x:Key="toolTip_forward">Forward (Alt+X)</sys:String>
     <sys:String x:Key="toolTip_reload">Reload (F5)</sys:String>
