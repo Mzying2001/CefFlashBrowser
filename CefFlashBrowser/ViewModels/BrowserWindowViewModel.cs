@@ -48,9 +48,13 @@ namespace CefFlashBrowser.ViewModels
 
         private void CreateShortcut()
         {
+            var title = Browser.Title;
+            foreach (var item in "\\/:*?\"<>|.")
+                title = title.Replace(item, '_');
+
             var sfd = new Microsoft.Win32.SaveFileDialog()
             {
-                FileName = Browser.Title.Replace('.', '_'),
+                FileName = title,
                 Filter = $"{LanguageManager.GetString("filter_shortcut")}|*.lnk",
             };
 
