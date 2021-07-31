@@ -6,6 +6,7 @@
              xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels.SettingPanelViewModels"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:cef="clr-namespace:CefSharp;assembly=CefSharp.Core"
              xmlns:local="clr-namespace:CefFlashBrowser.Views.SettingPanels"
              mc:Ignorable="d" >
 
@@ -51,8 +52,9 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
-                           Text="{Binding Source={StaticResource settingItem_cefVersion}, StringFormat=\{0\}: 79.1.360}"
-                           Style="{StaticResource SettingPanelItemStyle}"/>
+                           Style="{StaticResource SettingPanelItemStyle}">
+                    <Run Text="{StaticResource settingItem_cefVersion}"/>: <Run Text="{x:Static cef:Cef.CefSharpVersion}"/>
+                </TextBlock>
                 <Button Grid.Column="2"
                         Content="{StaticResource button_viewDetails}"
                         Command="{Binding PopupAboutCefCommand}"/>
