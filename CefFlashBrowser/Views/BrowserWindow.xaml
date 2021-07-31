@@ -223,6 +223,7 @@
 
         <Label Grid.Row="1"
                Margin="5"
+               Opacity="0.8"
                VerticalAlignment="Bottom"
                HorizontalAlignment="Left"
                Content="{DynamicResource label_loading}"
