@@ -80,6 +80,7 @@
     <sys:String x:Key="toolTip_stop">停止（Esc）</sys:String>
     <sys:String x:Key="toolTip_more">更多</sys:String>
     <sys:String x:Key="filter_shortcut">快捷方式</sys:String>
+    <sys:String x:Key="label_loading">加载中...</sys:String>
 
     <!--对话框-->
     <sys:String x:Key="button_ok">确定</sys:String>

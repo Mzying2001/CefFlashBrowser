@@ -29,6 +29,7 @@
         <!--Converters-->
         <converter:BrowserIsLoadingToSvgViewBox x:Key="IsLoading2Svg"/>
         <converter:BrowserIsLoadingToToolTip x:Key="IsLoading2ToolTip"/>
+        <converter:BoolToVisibility x:Key="Bool2Visibility"/>
 
         <!--ConetxtMenu-->
         <ContextMenu x:Key="more">
@@ -219,6 +220,13 @@
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
                                     ZoomLevelIncrement="0.25"/>
+
+        <Label Grid.Row="1"
+               Margin="5"
+               VerticalAlignment="Bottom"
+               HorizontalAlignment="Left"
+               Content="{DynamicResource label_loading}"
+               Visibility="{Binding ElementName=browser, Path=IsLoading, Converter={StaticResource Bool2Visibility}}"/>
     </Grid>
 
 </Window>
