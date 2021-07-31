@@ -46,40 +46,40 @@ namespace CefFlashBrowser.Models.FlashBrowser
                         callback.Cancel();
                 };
 
-                menu.Items.Add(new MenuItem
-                {
-                    Header = LanguageManager.GetString("menu_back"),
-                    InputGestureText = "Alt+Z",
-                    Command = targetBrowser.BackCommand
-                });
+                //menu.Items.Add(new MenuItem
+                //{
+                //    Header = LanguageManager.GetString("menu_back"),
+                //    InputGestureText = "Alt+Z",
+                //    Command = targetBrowser.BackCommand
+                //});
 
-                menu.Items.Add(new MenuItem
-                {
-                    Header = LanguageManager.GetString("menu_forward"),
-                    InputGestureText = "Alt+X",
-                    Command = targetBrowser.ForwardCommand
-                });
+                //menu.Items.Add(new MenuItem
+                //{
+                //    Header = LanguageManager.GetString("menu_forward"),
+                //    InputGestureText = "Alt+X",
+                //    Command = targetBrowser.ForwardCommand
+                //});
 
-                if (targetBrowser.ReloadCommand.CanExecute(null))
-                {
-                    menu.Items.Add(new MenuItem
-                    {
-                        Header = LanguageManager.GetString("menu_reload"),
-                        InputGestureText = "F5",
-                        Command = targetBrowser.ReloadCommand
-                    });
-                }
-                else if (targetBrowser.StopCommand.CanExecute(null))
-                {
-                    menu.Items.Add(new MenuItem
-                    {
-                        Header = LanguageManager.GetString("menu_stop"),
-                        InputGestureText = "Esc",
-                        Command = targetBrowser.StopCommand
-                    });
-                }
+                //if (targetBrowser.ReloadCommand.CanExecute(null))
+                //{
+                //    menu.Items.Add(new MenuItem
+                //    {
+                //        Header = LanguageManager.GetString("menu_reload"),
+                //        InputGestureText = "F5",
+                //        Command = targetBrowser.ReloadCommand
+                //    });
+                //}
+                //else if (targetBrowser.StopCommand.CanExecute(null))
+                //{
+                //    menu.Items.Add(new MenuItem
+                //    {
+                //        Header = LanguageManager.GetString("menu_stop"),
+                //        InputGestureText = "Esc",
+                //        Command = targetBrowser.StopCommand
+                //    });
+                //}
 
-                menu.Items.Add(new Separator());
+                //menu.Items.Add(new Separator());
 
                 menu.Items.Add(new MenuItem
                 {
