@@ -161,6 +161,7 @@
     <Compile Include="Views\Converters\BrowserIsLoadingToSvgViewBox.cs" />
     <Compile Include="Views\Converters\ValueConverterBase.cs" />
     <Compile Include="Views\CustomControls\AutoSelectAllTextBox.cs" />
+    <Compile Include="Views\CustomControls\DropableWindow.cs" />
     <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">
       <DependentUpon>AddFavoriteDialog.xaml</DependentUpon>
     </Compile>
