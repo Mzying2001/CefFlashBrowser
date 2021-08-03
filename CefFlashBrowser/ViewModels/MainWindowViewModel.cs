@@ -27,6 +27,7 @@ namespace CefFlashBrowser.ViewModels
         public ICommand LoadSwfCommand { get; set; }
         public ICommand ViewGithubCommand { get; set; }
         public ICommand OpenFavoritesItemCommand { get; set; }
+        public ICommand OnDropCommand { get; set; }
 
         public ObservableCollection<LanguageMenuItemViewModel> LanguageMenuItems { get; set; }
 
@@ -153,6 +154,24 @@ namespace CefFlashBrowser.ViewModels
                 BrowserWindow.Show(ws.Url);
         }
 
+        private void OnDrop(object obj)
+        {
+            if (obj is DragEventArgs args)
+            {
+                var data = args.Data.GetData(DataFormats.FileDrop) as string[];
+                if (data == null)
+                    return;
+
+                foreach (var item in data)
+                {
+                    if (UrlChecker.IsLocalSwfFile(item))
+                        SwfPlayerWindow.Show(item);
+                    else
+                        BrowserWindow.Show(item);
+                }
+            }
+        }
+
         public MainWindowViewModel()
         {
             SelectLanguageOnFirstStart();
@@ -164,6 +183,7 @@ namespace CefFlashBrowser.ViewModels
             LoadSwfCommand = new DelegateCommand(LoadSwf);
             ViewGithubCommand = new DelegateCommand(ViewGithub);
             OpenFavoritesItemCommand = new DelegateCommand(OpenFavoritesItem);
+            OnDropCommand = new DelegateCommand(OnDrop);
         }
     }
 }

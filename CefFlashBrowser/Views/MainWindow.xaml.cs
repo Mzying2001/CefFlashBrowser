@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.ViewModels;
+using CefFlashBrowser.Views.CustomControls;
 using CefSharp;
 using CefSharp.Wpf;
 
@@ -22,7 +23,7 @@ namespace CefFlashBrowser.Views
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : DropableWindow
     {
         public MainWindow()
         {
