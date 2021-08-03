@@ -23,6 +23,12 @@ namespace CefFlashBrowser.Views.CustomControls
             DependencyProperty.Register("OnDropCommand", typeof(ICommand), typeof(DropableWindow), new PropertyMetadata(null));
 
 
+        public override void BeginInit()
+        {
+            base.BeginInit();
+            AllowDrop = true;
+        }
+
         protected override void OnDrop(DragEventArgs e)
         {
             base.OnDrop(e);
