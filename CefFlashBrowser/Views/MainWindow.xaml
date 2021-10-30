@@ -112,9 +112,9 @@
 
             <!--The url textBox-->
             <c:AutoSelectAllTextBox Grid.Row="2"
-                                     Grid.Column="1"
-                                     Width="300"
-                                     Style="{StaticResource TextBoxBaseStyle}">
+                                    Grid.Column="1"
+                                    Width="300"
+                                    Style="{StaticResource TextBoxBaseStyle}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding OpenUrlCommand}"

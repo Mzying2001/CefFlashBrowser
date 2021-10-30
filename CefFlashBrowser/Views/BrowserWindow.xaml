@@ -4,10 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
-        xmlns:m="clr-namespace:CefFlashBrowser.Models"
-        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
-        xmlns:cc="clr-namespace:CefFlashBrowser.Views.Custom"
+        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:converter="clr-namespace:CefFlashBrowser.Models.Converters"
@@ -48,12 +46,12 @@
         <!--ConetxtMenu-->
         <ContextMenu x:Key="more">
             <StackPanel Orientation="Horizontal">
-                <TextBlock VerticalAlignment="Center"
-                           Text="{DynamicResource menu_zoom}"/>
-                <TextBlock VerticalAlignment="Center" Text=": "/>
-                <TextBlock Margin="0,0,10,0"
-                           VerticalAlignment="Center"
-                           Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
+                <TextBlock VerticalAlignment="Center">
+                    <Run Text="{DynamicResource menu_zoom}"/>
+                    <Run Text=": "/>
+                    <Run Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
+                    <Run Text=" "/>
+                </TextBlock>
                 <Button Width="30"
                         Height="30"
                         Padding="0"
@@ -95,25 +93,30 @@
 
             <MenuItem Header="{DynamicResource menu_addFavorite}"
                       Command="{Binding AddFavoriteCommand}"
+                      CommandParameter="{x:Reference Name=browser}"
                       InputGestureText="Ctrl+D"/>
 
             <Separator/>
 
             <MenuItem Header="{DynamicResource menu_createShortcut}"
                       Command="{Binding CreateShortcutCommand}"
+                      CommandParameter="{x:Reference Name=browser}"
                       InputGestureText="Ctrl+S"/>
 
             <MenuItem Header="{DynamicResource menu_openInDefaultBrowser}"
                       Command="{Binding OpenInDefaultBrowserCommand}"
+                      CommandParameter="{Binding Source={x:Reference Name=browser}, Path=Address}"
                       InputGestureText="Ctrl+O"/>
 
             <Separator/>
 
             <MenuItem Header="{DynamicResource menu_openDevTool}"
                       Command="{Binding OpenDevToolCommand}"
+                      CommandParameter="{x:Reference Name=browser}"
                       InputGestureText="F12"/>
             <MenuItem Header="{DynamicResource menu_viewSource}"
                       Command="{Binding ViewSourceCommand}"
+                      CommandParameter="{Binding Source={x:Reference Name=browser}, Path=Address}"
                       InputGestureText="Ctrl+U"/>
         </ContextMenu>
     </Window.Resources>
@@ -130,23 +133,28 @@
         <KeyBinding Gesture="Ctrl+0"
                     Command="{Binding ElementName=browser, Path=ZoomResetCommand}"/>
         <KeyBinding Gesture="Ctrl+D"
-                    Command="{Binding AddFavoriteCommand}"/>
+                    Command="{Binding AddFavoriteCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+O"
-                    Command="{Binding OpenInDefaultBrowserCommand}"/>
+                    Command="{Binding OpenInDefaultBrowserCommand}"
+                    CommandParameter="{Binding ElementName=browser, Path=Address}"/>
         <KeyBinding Gesture="Ctrl+P"
                     Command="{Binding ElementName=browser, Path=PrintCommand}"/>
         <KeyBinding Gesture="Ctrl+U"
-                    Command="{Binding ViewSourceCommand}"/>
+                    Command="{Binding ViewSourceCommand}"
+                    CommandParameter="{Binding ElementName=browser, Path=Address}"/>
         <KeyBinding Gesture="Ctrl+S"
-                    Command="{Binding CreateShortcutCommand}"/>
+                    Command="{Binding CreateShortcutCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+W"
-                    Command="{Binding CloseWindowCommand}"/>
+                    Command="{Binding ExitBrowserCommand}"/>
         <KeyBinding Gesture="Esc"
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>
         <KeyBinding Gesture="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
         <KeyBinding Gesture="F12"
-                    Command="{Binding OpenDevToolCommand}"/>
+                    Command="{Binding OpenDevToolCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -205,17 +213,17 @@
                 </Button.Content>
             </Button>
 
-            <cc:AutoSelectAllTextBox Grid.Column="3"
-                                     Margin="5,0"
-                                     Height="30"
-                                     Style="{StaticResource TextBoxBaseStyle}"
-                                     Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
+            <c:AutoSelectAllTextBox Grid.Column="3"
+                                    Margin="5,0"
+                                    Height="30"
+                                    Style="{StaticResource TextBoxBaseStyle}"
+                                    Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
                 </TextBox.InputBindings>
-            </cc:AutoSelectAllTextBox>
+            </c:AutoSelectAllTextBox>
 
             <Button Grid.Column="4"
                     Width="30"

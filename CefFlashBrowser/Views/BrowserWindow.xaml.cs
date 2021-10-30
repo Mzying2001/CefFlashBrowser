@@ -1,20 +1,9 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
-using CefFlashBrowser.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SimpleMvvm.Messaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CefFlashBrowser.Views
 {
@@ -23,13 +12,11 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserWindow : Window
     {
-        BrowserWindowViewModel VModel => (BrowserWindowViewModel)DataContext;
-
         public BrowserWindow()
         {
             InitializeComponent();
-            VModel.SetBrowser(browser);
-            VModel.CloseWindow = Close;
+
+            Messenger.Global.Register(MessageTokens.EXIT_BROWSER, CloseWindow);
 
             var x = Settings.BrowserWindowX;
             var y = Settings.BrowserWindowY;
@@ -47,6 +34,11 @@ namespace CefFlashBrowser.Views
             }
         }
 
+        private void CloseWindow(object obj)
+        {
+            Close();
+        }
+
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Settings.BrowserWindowX = Left;
@@ -54,6 +46,8 @@ namespace CefFlashBrowser.Views
             Settings.BrowserWindowWidth = Width;
             Settings.BrowserWindowHeight = Height;
             browser.Dispose();
+
+            Messenger.Global.Unregister(MessageTokens.EXIT_BROWSER, CloseWindow);
         }
 
         private void MenuButton_Clicked(object sender, RoutedEventArgs e)

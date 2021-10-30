@@ -132,6 +132,7 @@
     <Compile Include="Models\StaticData\LanguageManager.cs" />
     <Compile Include="Models\RegistryItem.cs" />
     <Compile Include="Models\SearchEngine.cs" />
+    <Compile Include="Models\MessageTokens.cs" />
     <Compile Include="Models\StaticData\Settings.cs" />
     <Compile Include="Models\UrlChecker.cs" />
     <Compile Include="Models\Website.cs" />
