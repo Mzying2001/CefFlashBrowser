@@ -10,7 +10,7 @@
         xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
         xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
-        xmlns:converter="clr-namespace:CefFlashBrowser.Views.Converters"
+        xmlns:converter="clr-namespace:CefFlashBrowser.Models.Converters"
         mc:Ignorable="d"
         
         x:Name="browserWindow"
@@ -27,8 +27,6 @@
 
     <Window.Resources>
         <!--Converters-->
-        <converter:BrowserIsLoadingToToolTip x:Key="IsLoading2ToolTip"/>
-        <converter:BoolToVisibility x:Key="Bool2Visibility"/>
         <converter:BoolToObject x:Key="IsLoading2Svg">
             <converter:BoolToObject.TrueObject>
                 <svgc:SvgViewbox Width="12"
@@ -39,6 +37,14 @@
                 <svgc:SvgViewbox Width="14"
                                  Height="14"
                                  Source="/Assets/Svgs/reload.svg"/>
+            </converter:BoolToObject.FalseObject>
+        </converter:BoolToObject>
+        <converter:BoolToObject x:Key="IsLoading2ToolTip">
+            <converter:BoolToObject.TrueObject>
+                <TextBlock Text="{DynamicResource toolTip_stop}"/>
+            </converter:BoolToObject.TrueObject>
+            <converter:BoolToObject.FalseObject>
+                <TextBlock Text="{DynamicResource toolTip_reload}"/>
             </converter:BoolToObject.FalseObject>
         </converter:BoolToObject>
 
@@ -238,7 +244,7 @@
                VerticalAlignment="Bottom"
                HorizontalAlignment="Left"
                Content="{DynamicResource label_loading}"
-               Visibility="{Binding ElementName=browser, Path=IsLoading, Converter={StaticResource Bool2Visibility}}"/>
+               Visibility="{Binding ElementName=browser, Path=IsLoading, Converter={StaticResource Boolean2VisibilityConverter}}"/>
     </Grid>
 
 </Window>

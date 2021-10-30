@@ -156,10 +156,8 @@
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Converters\BoolToObject.cs" />
-    <Compile Include="Views\Converters\BoolToVisibility.cs" />
-    <Compile Include="Views\Converters\BrowserIsLoadingToToolTip.cs" />
-    <Compile Include="Views\Converters\ValueConverterBase.cs" />
+    <Compile Include="Models\Converters\BoolToObject.cs" />
+    <Compile Include="Models\Converters\ValueConverterBase.cs" />
     <Compile Include="Views\CustomControls\AutoSelectAllTextBox.cs" />
     <Compile Include="Views\CustomControls\DropableWindow.cs" />
     <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">
