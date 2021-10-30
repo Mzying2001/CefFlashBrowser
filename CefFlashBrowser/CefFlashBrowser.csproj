@@ -309,10 +309,10 @@
     <Content Include="Assets\Html\FlashPlayer.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="libcef.dll">
+    <Content Include="Assets\Plugins\pepflashplayer.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Plugins\flash.dll">
+    <Content Include="libcef.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Resource Include="Assets\Svgs\add.svg" />
