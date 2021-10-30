@@ -76,11 +76,11 @@ namespace CefFlashBrowser.Models.FlashBrowser
             settings.LogSeverity = LogSeverity.Disable;
 #endif
 
-            const string FLASH_DLL_PATH = @"Assets\Plugins\flash.dll";
+            var flashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\Plugins\flash.dll");
 
             settings.CefCommandLineArgs["enable-system-flash"] = "1";
-            settings.CefCommandLineArgs.Add("ppapi-flash-version", FileVersionInfo.GetVersionInfo(FLASH_DLL_PATH).FileVersion.Replace(',', '.'));
-            settings.CefCommandLineArgs.Add("ppapi-flash-path", FLASH_DLL_PATH);
+            settings.CefCommandLineArgs.Add("ppapi-flash-version", FileVersionInfo.GetVersionInfo(flashPath).FileVersion.Replace(',', '.'));
+            settings.CefCommandLineArgs.Add("ppapi-flash-path", flashPath);
             Cef.Initialize(settings);
         }
     }
