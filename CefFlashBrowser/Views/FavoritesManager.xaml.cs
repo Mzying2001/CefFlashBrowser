@@ -23,9 +23,6 @@ namespace CefFlashBrowser.Views
         public FavoritesManager()
         {
             InitializeComponent();
-
-            var proxy = (BindingProxy)Resources["bp"];
-            proxy.Data = DataContext;
         }
     }
 }

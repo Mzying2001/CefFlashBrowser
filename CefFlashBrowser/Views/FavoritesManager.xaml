@@ -19,15 +19,11 @@
         MinWidth="500"
         MinHeight="300"
         WindowStartupLocation="CenterScreen"
+        DataContext="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel}"
         Title="{StaticResource favorites_managerTitle}">
 
-    <Window.DataContext>
-        <vm:FavoritesManagerViewModel/>
-    </Window.DataContext>
-
     <Window.Resources>
-        <!--Assign BindingProxy data in background code-->
-        <local:BindingProxy x:Key="bp"/>
+        
     </Window.Resources>
 
     <Grid>
@@ -70,7 +66,7 @@
                                 Value="{Binding Name}"/>
                         <Setter Property="ContextMenu">
                             <Setter.Value>
-                                <ContextMenu DataContext="{Binding Source={StaticResource bp}, Path=Data}">
+                                <ContextMenu DataContext="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel}">
                                     <MenuItem Header="{StaticResource favorites_toTop}"
                                               Command="{Binding MoveToTopCommand}"/>
                                     <MenuItem Header="{StaticResource favorites_toBottom}"

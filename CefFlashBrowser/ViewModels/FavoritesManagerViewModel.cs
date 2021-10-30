@@ -6,11 +6,10 @@ using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels
 {
-    class FavoritesManagerViewModel : ViewModelBase
+    public class FavoritesManagerViewModel : ViewModelBase
     {
         public DelegateCommand SelectionChangedCommand { get; set; }
         public DelegateCommand SaveChangesCommand { get; set; }
