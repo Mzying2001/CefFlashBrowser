@@ -28,18 +28,6 @@ namespace CefFlashBrowser.ViewModels
             get => Application.ResourceAssembly.GetName().Version.ToString();
         }
 
-        private string _url;
-
-        public string Url
-        {
-            get => _url;
-            set
-            {
-                _url = value;
-                RaisePropertyChanged("Url");
-            }
-        }
-
         private void LoadLanguageMenu()
         {
             LanguageMenuItems = new ObservableCollection<LanguageMenuItemViewModel>();
@@ -61,10 +49,8 @@ namespace CefFlashBrowser.ViewModels
                 item.IsSelected = item.Language == current;
         }
 
-        private void OpenUrl()
+        private void OpenUrl(string url)
         {
-            string url = Url?.Trim();
-
             if (string.IsNullOrEmpty(url))
             {
                 JsAlertDialog.Show(LanguageManager.GetString("message_emptyUrl"));
@@ -140,20 +126,16 @@ namespace CefFlashBrowser.ViewModels
             BrowserWindow.Show("https://github.com/Mzying2001/CefFlashBrowser");
         }
 
-        private void OpenFavoritesItem(object website)
+        private void OpenFavoritesItem(Website website)
         {
-            if (website is Website ws)
-                BrowserWindow.Show(ws.Url);
+            BrowserWindow.Show(website.Url);
         }
 
-        private void OnDrop(object obj)
+        private void OnDrop(DragEventArgs args)
         {
-            if (obj is DragEventArgs args)
+            var data = args.Data.GetData(DataFormats.FileDrop) as string[];
+            if (data != null)
             {
-                var data = args.Data.GetData(DataFormats.FileDrop) as string[];
-                if (data == null)
-                    return;
-
                 foreach (var item in data)
                 {
                     if (UrlChecker.IsLocalSwfFile(item))
@@ -169,13 +151,13 @@ namespace CefFlashBrowser.ViewModels
             SelectLanguageOnFirstStart();
             LoadLanguageMenu();
 
-            OpenUrlCommand = new DelegateCommand(OpenUrl);
+            OpenUrlCommand = new DelegateCommand<string>(OpenUrl);
             OpenSettingsWindowCommand = new DelegateCommand(OpenSettingsWindow);
             OpenFavoritesManagerCommand = new DelegateCommand(OpenFavoritesManager);
             LoadSwfCommand = new DelegateCommand(LoadSwf);
             ViewGithubCommand = new DelegateCommand(ViewGithub);
-            OpenFavoritesItemCommand = new DelegateCommand(OpenFavoritesItem);
-            OnDropCommand = new DelegateCommand(OnDrop);
+            OpenFavoritesItemCommand = new DelegateCommand<Website>(OpenFavoritesItem);
+            OnDropCommand = new DelegateCommand<DragEventArgs>(OnDrop);
         }
     }
 }
