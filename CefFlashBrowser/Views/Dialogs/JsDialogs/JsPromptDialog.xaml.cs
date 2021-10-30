@@ -1,17 +1,8 @@
-﻿using CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels;
+using SimpleMvvm.Messaging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CefFlashBrowser.Views.Dialogs.JsDialogs
 {
@@ -20,12 +11,26 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
     /// </summary>
     public partial class JsPromptDialog : Window
     {
-        JsPromptDialogViewModel VModel => (JsPromptDialogViewModel)DataContext;
+        private string result = null;
+        private Action<string> callback;
 
         public JsPromptDialog()
         {
             InitializeComponent();
-            VModel.CloseWindow = Close;
+
+            string token = MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, typeof(JsPromptDialogViewModel));
+            Messenger.Global.Register(token, CloseWindow);
+            Closing += (s, e) =>
+            {
+                callback?.Invoke(result);
+                Messenger.Global.Unregister(token, CloseWindow);
+            };
+        }
+
+        private void CloseWindow(object obj)
+        {
+            result = (string)obj;
+            Close();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -34,17 +39,15 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
             inputBox.SelectAll();
         }
 
-        public static (bool, string) Show(string message, string title = "", string defaulePromptText = "")
+        public static void Show(string message, string title = "", string defaulePromptText = "", Action<string> callback = null)
         {
-            var dialog = new JsPromptDialog();
-            var vmodel = dialog.VModel;
+            var dialog = new JsPromptDialog { callback = callback };
+            var vmodel = (JsPromptDialogViewModel)dialog.DataContext;
 
             vmodel.Message = message;
             vmodel.Title = title;
             vmodel.PromptText = defaulePromptText;
             dialog.ShowDialog();
-
-            return vmodel.DialogResult;
         }
     }
 }

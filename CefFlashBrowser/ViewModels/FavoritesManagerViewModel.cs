@@ -100,14 +100,15 @@ namespace CefFlashBrowser.ViewModels
 
         private void RemoveItem()
         {
-            var dr = JsConfirmDialog.Show(string.Format(LanguageManager.GetString("message_removeItem"),
-                                                        Favorites.Items[SelectedIndex].Name));
-            if (dr)
+            JsConfirmDialog.Show(string.Format(LanguageManager.GetString("message_removeItem"), Favorites.Items[SelectedIndex].Name), "", result =>
             {
-                Favorites.Items.RemoveAt(SelectedIndex--);
-                if (SelectedIndex == -1 && Favorites.Items.Count > 0)
-                    SelectedIndex = 0;
-            }
+                if (result == true)
+                {
+                    Favorites.Items.RemoveAt(SelectedIndex--);
+                    if (SelectedIndex == -1 && Favorites.Items.Count > 0)
+                        SelectedIndex = 0;
+                }
+            });
         }
 
         private void SwapItem(int i, int j)

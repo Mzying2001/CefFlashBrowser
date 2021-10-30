@@ -42,14 +42,17 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 
         private void DeleteCache()
         {
-            if (JsConfirmDialog.Show(LanguageManager.GetString("message_deleteCache")))
+            JsConfirmDialog.Show(LanguageManager.GetString("message_deleteCache"), "", result =>
             {
-                var launcher = @"..\Launcher.exe";
-                if (File.Exists(launcher))
-                    DeleteCacheViaLauncher(launcher);
-                else
-                    DeleteCacheViaBat();
-            }
+                if (result == true)
+                {
+                    var launcher = @"..\Launcher.exe";
+                    if (File.Exists(launcher))
+                        DeleteCacheViaLauncher(launcher);
+                    else
+                        DeleteCacheViaBat();
+                }
+            });
         }
 
         private void PopupAboutCef()

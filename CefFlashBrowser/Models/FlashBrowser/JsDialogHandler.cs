@@ -41,8 +41,10 @@ namespace CefFlashBrowser.Models.FlashBrowser
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            var dr = JsConfirmDialog.Show(messageText, originUrl);
-                            callback.Continue(dr);
+                            JsConfirmDialog.Show(messageText, originUrl, result =>
+                            {
+                                callback.Continue(result == true);
+                            });
                         });
                         suppressMessage = false;
                         return true;
@@ -52,8 +54,10 @@ namespace CefFlashBrowser.Models.FlashBrowser
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            var dr = JsPromptDialog.Show(messageText, originUrl, defaultPromptText);
-                            callback.Continue(dr.Item1, dr.Item2);
+                            JsPromptDialog.Show(messageText, originUrl, defaultPromptText, result =>
+                            {
+                                callback.Continue(result != null, result);
+                            });
                         });
                         suppressMessage = false;
                         return true;

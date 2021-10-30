@@ -1,17 +1,8 @@
-﻿using CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels;
+using SimpleMvvm.Messaging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CefFlashBrowser.Views.Dialogs.JsDialogs
 {
@@ -20,24 +11,36 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
     /// </summary>
     public partial class JsConfirmDialog : Window
     {
-        JsConfirmDialogViewModel VModel => (JsConfirmDialogViewModel)DataContext;
+        private bool? result = null;
+        private Action<bool?> callback;
 
         public JsConfirmDialog()
         {
             InitializeComponent();
-            VModel.CloseWindow = Close;
+
+            string token = MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, typeof(JsConfirmDialogViewModel));
+            Messenger.Global.Register(token, CloseWindow);
+            Closing += (s, e) =>
+            {
+                callback?.Invoke(result);
+                Messenger.Global.Unregister(token, CloseWindow);
+            };
         }
 
-        public static bool Show(string message, string title = "")
+        private void CloseWindow(object obj)
         {
-            var dialog = new JsConfirmDialog();
-            var vmodel = dialog.VModel;
+            result = (bool?)obj;
+            Close();
+        }
+
+        public static void Show(string message, string title = "", Action<bool?> callback = null)
+        {
+            var dialog = new JsConfirmDialog { callback = callback };
+            var vmodel = (JsConfirmDialogViewModel)dialog.DataContext;
 
             vmodel.Message = message;
             vmodel.Title = title;
             dialog.ShowDialog();
-
-            return vmodel.DialogResult;
         }
     }
 }

@@ -1,34 +1,29 @@
-﻿using SimpleMvvm.Command;
+﻿using CefFlashBrowser.Models;
+using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels
 {
-    class JsPromptDialogViewModel : JsDialogViewModel<(bool, string)>
+    public class JsPromptDialogViewModel : JsDialogViewModelBase
     {
         public DelegateCommand OkCommand { get; set; }
         public DelegateCommand CalcelCommand { get; set; }
 
         private string _promptText;
-
         public string PromptText
         {
             get => _promptText;
-            set
-            {
-                _promptText = value;
-                RaisePropertyChanged("PromptText");
-            }
+            set => UpdateValue(ref _promptText, value);
         }
 
         private void Ok()
         {
-            DialogResult = (true, PromptText);
-            CloseWindow?.Invoke();
+            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), PromptText);
         }
 
         private void Calcel()
         {
-            DialogResult = (false, null);
-            CloseWindow?.Invoke();
+            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), null);
         }
 
         public JsPromptDialogViewModel()

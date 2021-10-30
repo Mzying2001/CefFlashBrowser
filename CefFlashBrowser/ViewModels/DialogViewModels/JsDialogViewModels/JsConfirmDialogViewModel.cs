@@ -1,22 +1,22 @@
-﻿using SimpleMvvm.Command;
+﻿using CefFlashBrowser.Models;
+using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels
 {
-    class JsConfirmDialogViewModel : JsDialogViewModel<bool>
+    public class JsConfirmDialogViewModel : JsDialogViewModelBase
     {
         public DelegateCommand YesCommand { get; set; }
         public DelegateCommand NoCommand { get; set; }
 
         private void Yes()
         {
-            DialogResult = true;
-            CloseWindow?.Invoke();
+            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), true);
         }
 
         private void No()
         {
-            DialogResult = false;
-            CloseWindow?.Invoke();
+            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), false);
         }
 
         public JsConfirmDialogViewModel()

@@ -1,15 +1,16 @@
-﻿using SimpleMvvm.Command;
+﻿using CefFlashBrowser.Models;
+using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels
 {
-    class JsAlertDialogViewModel : JsDialogViewModel<bool>
+    public class JsAlertDialogViewModel : JsDialogViewModelBase
     {
         public DelegateCommand OkCommand { get; set; }
 
         private void Ok()
         {
-            DialogResult = true;
-            CloseWindow?.Invoke();
+            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), null);
         }
 
         public JsAlertDialogViewModel()
