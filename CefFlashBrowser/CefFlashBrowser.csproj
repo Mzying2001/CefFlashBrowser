@@ -154,6 +154,7 @@
     <Compile Include="ViewModels\MenuItemViewModels\MenuItemViewModel.cs" />
     <Compile Include="ViewModels\SettingPanelViewModels\BrowserSettingPanelViewModel.cs" />
     <Compile Include="ViewModels\SettingPanelViewModels\MainSettingPanelViewModel.cs" />
+    <Compile Include="ViewModels\ViewModelLocator.cs" />
     <Compile Include="Views\BindingProxy.cs" />
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>

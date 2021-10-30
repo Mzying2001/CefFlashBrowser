@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 namespace CefFlashBrowser.ViewModels
 {
-    class BrowserWindowViewModel : ViewModelBase
+    public class BrowserWindowViewModel : ViewModelBase
     {
         public Action CloseWindow { get; set; }
 

@@ -19,11 +19,8 @@
         MinWidth="400"
         MinHeight="300"
         Closing="WindowClosing"
-        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}">
-
-    <Window.DataContext>
-        <vm:BrowserWindowViewModel/>
-    </Window.DataContext>
+        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
+        DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
         <!--Converters-->

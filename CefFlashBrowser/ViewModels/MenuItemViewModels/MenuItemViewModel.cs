@@ -3,7 +3,7 @@ using SimpleMvvm.Command;
 
 namespace CefFlashBrowser.ViewModels.MenuItemViewModels
 {
-    abstract class MenuItemViewModel : ViewModelBase
+    public abstract class MenuItemViewModel : ViewModelBase
     {
         public DelegateCommand MenuItemSelectedCommand { get; set; }
 

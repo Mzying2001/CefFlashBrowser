@@ -20,11 +20,8 @@
     MinHeight="300"
     Title="{DynamicResource window_title}"
     WindowStartupLocation="CenterScreen"
-    OnDropCommand="{Binding OnDropCommand}">
-
-    <Window.DataContext>
-        <vm:MainWindowViewModel/>
-    </Window.DataContext>
+    OnDropCommand="{Binding OnDropCommand}"
+    DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}">
 
     <Grid>
         <Grid.RowDefinitions>

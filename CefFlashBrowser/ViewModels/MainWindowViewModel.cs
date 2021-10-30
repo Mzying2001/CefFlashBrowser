@@ -11,7 +11,7 @@ using System.Windows;
 
 namespace CefFlashBrowser.ViewModels
 {
-    class MainWindowViewModel : ViewModelBase
+    public class MainWindowViewModel : ViewModelBase
     {
         public DelegateCommand OpenUrlCommand { get; set; }
         public DelegateCommand OpenSettingsWindowCommand { get; set; }

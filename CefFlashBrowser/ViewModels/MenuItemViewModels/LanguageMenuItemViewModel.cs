@@ -3,7 +3,7 @@ using System;
 
 namespace CefFlashBrowser.ViewModels.MenuItemViewModels
 {
-    class LanguageMenuItemViewModel : MenuItemViewModel
+    public class LanguageMenuItemViewModel : MenuItemViewModel
     {
         public event Action LanguageSwitched;
 
