@@ -1,16 +1,11 @@
-﻿using CefFlashBrowser.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using SimpleMvvm;
+using SimpleMvvm.Command;
 
 namespace CefFlashBrowser.ViewModels.MenuItemViewModels
 {
-    abstract class MenuItemViewModel : NotificationObject
+    abstract class MenuItemViewModel : ViewModelBase
     {
-        public ICommand MenuItemSelectedCommand { get; set; }
+        public DelegateCommand MenuItemSelectedCommand { get; set; }
 
         private string _header;
 

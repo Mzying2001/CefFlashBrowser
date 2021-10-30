@@ -1,17 +1,11 @@
-﻿using CefFlashBrowser.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using SimpleMvvm.Command;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels
 {
     class JsPromptDialogViewModel : JsDialogViewModel<(bool, string)>
     {
-        public ICommand OkCommand { get; set; }
-        public ICommand CalcelCommand { get; set; }
+        public DelegateCommand OkCommand { get; set; }
+        public DelegateCommand CalcelCommand { get; set; }
 
         private string _promptText;
 

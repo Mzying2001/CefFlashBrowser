@@ -1,18 +1,14 @@
-﻿using CefFlashBrowser.Commands;
-using CefFlashBrowser.Models.StaticData;
+﻿using CefFlashBrowser.Models.StaticData;
+using SimpleMvvm;
+using SimpleMvvm.Command;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels
 {
-    class SelectLanguageDialogViewModel : NotificationObject
+    class SelectLanguageDialogViewModel : ViewModelBase
     {
-        public ICommand SelectLanguageCommand { get; set; }
-        public ICommand SetHeaderCommand { get; set; }
+        public DelegateCommand SelectLanguageCommand { get; set; }
+        public DelegateCommand SetHeaderCommand { get; set; }
 
         public Action CloseWindow { get; set; }
 

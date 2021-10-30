@@ -1,24 +1,18 @@
-﻿using CefFlashBrowser.Commands;
-using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.StaticData;
+﻿using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
-using HandyControl.Controls;
+using SimpleMvvm;
+using SimpleMvvm.Command;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 {
-    class BrowserSettingPanelViewModel : NotificationObject
+    class BrowserSettingPanelViewModel : ViewModelBase
     {
-        public ICommand DeleteCacheCommand { get; set; }
-        public ICommand PopupAboutCefCommand { get; set; }
+        public DelegateCommand DeleteCacheCommand { get; set; }
+        public DelegateCommand PopupAboutCefCommand { get; set; }
 
         private void DeleteCacheViaBat()
         {

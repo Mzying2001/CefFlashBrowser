@@ -1,31 +1,25 @@
-﻿using CefFlashBrowser.Commands;
-using CefFlashBrowser.Models;
+﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
-using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
+using SimpleMvvm;
+using SimpleMvvm.Command;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels
 {
-    class FavoritesManagerViewModel : NotificationObject
+    class FavoritesManagerViewModel : ViewModelBase
     {
-        public ICommand SelectionChangedCommand { get; set; }
-        public ICommand SaveChangesCommand { get; set; }
-        public ICommand AddItemCommand { get; set; }
-        public ICommand RemoveItemCommand { get; set; }
-        public ICommand MoveUpCommand { get; set; }
-        public ICommand MoveDownCommand { get; set; }
-        public ICommand MoveToTopCommand { get; set; }
-        public ICommand MoveToBottomCommand { get; set; }
+        public DelegateCommand SelectionChangedCommand { get; set; }
+        public DelegateCommand SaveChangesCommand { get; set; }
+        public DelegateCommand AddItemCommand { get; set; }
+        public DelegateCommand RemoveItemCommand { get; set; }
+        public DelegateCommand MoveUpCommand { get; set; }
+        public DelegateCommand MoveDownCommand { get; set; }
+        public DelegateCommand MoveToTopCommand { get; set; }
+        public DelegateCommand MoveToBottomCommand { get; set; }
 
         private bool _hasItems;
 

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SimpleMvvm;
 
 namespace CefFlashBrowser.ViewModels.ComboBoxItemViewModels
 {
-    class ComboBoxItemViewModel<K, V> : NotificationObject
+    class ComboBoxItemViewModel<K, V> : ViewModelBase
     {
         private K _displayMember;
 

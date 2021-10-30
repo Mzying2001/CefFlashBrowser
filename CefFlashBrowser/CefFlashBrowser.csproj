@@ -93,6 +93,9 @@
     <Reference Include="SharpVectors.Runtime.Wpf, Version=1.7.5.0, Culture=neutral, PublicKeyToken=d16e717f0a981fb9, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpVectors.1.7.5\lib\net47\SharpVectors.Runtime.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="SimpleMvvm, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mzying2001.SimpleMvvm.1.0.5\lib\net45\SimpleMvvm.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -149,7 +152,6 @@
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\LanguageMenuItemViewModel.cs" />
     <Compile Include="ViewModels\MenuItemViewModels\MenuItemViewModel.cs" />
-    <Compile Include="ViewModels\NotificationObject.cs" />
     <Compile Include="ViewModels\SettingPanelViewModels\BrowserSettingPanelViewModel.cs" />
     <Compile Include="ViewModels\SettingPanelViewModels\MainSettingPanelViewModel.cs" />
     <Compile Include="Views\BindingProxy.cs" />
@@ -241,7 +243,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Commands\DelegateCommand.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

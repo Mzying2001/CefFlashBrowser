@@ -1,33 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using CefFlashBrowser.Commands;
-using CefFlashBrowser.Models;
+﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
-using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
+using SimpleMvvm;
+using SimpleMvvm.Command;
+using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace CefFlashBrowser.ViewModels
 {
-    class MainWindowViewModel : NotificationObject
+    class MainWindowViewModel : ViewModelBase
     {
-        public ICommand OpenUrlCommand { get; set; }
-        public ICommand OpenSettingsWindowCommand { get; set; }
-        public ICommand OpenFavoritesManagerCommand { get; set; }
-        public ICommand LoadSwfCommand { get; set; }
-        public ICommand ViewGithubCommand { get; set; }
-        public ICommand OpenFavoritesItemCommand { get; set; }
-        public ICommand OnDropCommand { get; set; }
+        public DelegateCommand OpenUrlCommand { get; set; }
+        public DelegateCommand OpenSettingsWindowCommand { get; set; }
+        public DelegateCommand OpenFavoritesManagerCommand { get; set; }
+        public DelegateCommand LoadSwfCommand { get; set; }
+        public DelegateCommand ViewGithubCommand { get; set; }
+        public DelegateCommand OpenFavoritesItemCommand { get; set; }
+        public DelegateCommand OnDropCommand { get; set; }
 
         public ObservableCollection<LanguageMenuItemViewModel> LanguageMenuItems { get; set; }
 

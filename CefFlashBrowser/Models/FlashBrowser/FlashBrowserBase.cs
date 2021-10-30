@@ -1,15 +1,11 @@
-﻿using CefFlashBrowser.Commands;
-using CefFlashBrowser.Models.StaticData;
+﻿using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using CefSharp.Wpf;
+using SimpleMvvm.Command;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace CefFlashBrowser.Models.FlashBrowser

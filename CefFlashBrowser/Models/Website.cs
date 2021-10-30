@@ -1,18 +1,13 @@
-﻿using CefFlashBrowser.Commands;
-using CefFlashBrowser.Models.StaticData;
-using CefFlashBrowser.ViewModels;
+﻿using CefFlashBrowser.Models.StaticData;
+using SimpleMvvm;
+using SimpleMvvm.Command;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace CefFlashBrowser.Models
 {
     public class Website : NotificationObject
     {
-        public ICommand OpenWebsiteCommand { get; private set; }
+        public DelegateCommand OpenWebsiteCommand { get; private set; }
 
         private string _name;
 

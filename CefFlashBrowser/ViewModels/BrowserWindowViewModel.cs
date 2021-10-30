@@ -1,33 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
-using CefFlashBrowser.Commands;
-using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.FlashBrowser;
+﻿using CefFlashBrowser.Models.FlashBrowser;
 using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using IWshRuntimeLibrary;
+using SimpleMvvm;
+using SimpleMvvm.Command;
+using System;
+using System.Diagnostics;
 
 namespace CefFlashBrowser.ViewModels
 {
-    class BrowserWindowViewModel : NotificationObject
+    class BrowserWindowViewModel : ViewModelBase
     {
         public Action CloseWindow { get; set; }
 
-        public ICommand OpenDevToolCommand { get; set; }
-        public ICommand ViewSourceCommand { get; set; }
-        public ICommand OpenInDefaultBrowserCommand { get; set; }
-        public ICommand CreateShortcutCommand { get; set; }
-        public ICommand CloseWindowCommand { get; set; }
-        public ICommand AddFavoriteCommand { get; set; }
+        public DelegateCommand OpenDevToolCommand { get; set; }
+        public DelegateCommand ViewSourceCommand { get; set; }
+        public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
+        public DelegateCommand CreateShortcutCommand { get; set; }
+        public DelegateCommand CloseWindowCommand { get; set; }
+        public DelegateCommand AddFavoriteCommand { get; set; }
 
         public ChromiumFlashBrowser Browser { get; set; }
 

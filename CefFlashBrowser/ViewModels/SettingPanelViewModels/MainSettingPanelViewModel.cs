@@ -1,22 +1,17 @@
-﻿using CefFlashBrowser.Commands;
-using CefFlashBrowser.Models;
+﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.ViewModels.ComboBoxItemViewModels;
+using SimpleMvvm;
+using SimpleMvvm.Command;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 {
-    class MainSettingPanelViewModel : NotificationObject
+    class MainSettingPanelViewModel : ViewModelBase
     {
-        public ICommand SwitchAddressBarFunctionCommand { get; set; }
-        public ICommand SwitchSearchEngineCommand { get; set; }
+        public DelegateCommand SwitchAddressBarFunctionCommand { get; set; }
+        public DelegateCommand SwitchSearchEngineCommand { get; set; }
 
         public ObservableCollection<SearchEngineComboBoxItemViewModel> SearchEngineItems { get; set; }
         public ObservableCollection<AddressBarFunctionComboBoxViewModel> AddressBarFunctions { get; set; }

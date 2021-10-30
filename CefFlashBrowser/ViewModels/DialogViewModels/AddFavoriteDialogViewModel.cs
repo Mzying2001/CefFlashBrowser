@@ -1,20 +1,16 @@
-﻿using CefFlashBrowser.Commands;
-using CefFlashBrowser.Models;
+﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
+using SimpleMvvm;
+using SimpleMvvm.Command;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels
 {
-    class AddFavoriteDialogViewModel : NotificationObject
+    class AddFavoriteDialogViewModel : ViewModelBase
     {
-        public ICommand OkCommand { get; set; }
-        public ICommand CancelCommand { get; set; }
+        public DelegateCommand OkCommand { get; set; }
+        public DelegateCommand CancelCommand { get; set; }
 
         public Action CloseWindow { get; set; }
 

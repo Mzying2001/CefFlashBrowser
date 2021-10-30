@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using SimpleMvvm;
+using System;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels
 {
-    class JsDialogViewModel<ResultType> : NotificationObject
+    class JsDialogViewModel<ResultType> : ViewModelBase
     {
         public Action CloseWindow { get; set; }
 
