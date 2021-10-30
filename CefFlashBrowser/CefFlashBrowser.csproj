@@ -129,7 +129,7 @@
     <Compile Include="Models\FlashBrowser\FlashBrowserLifeSpanHandler.cs" />
     <Compile Include="Models\FlashBrowser\IEDownloadHandler.cs" />
     <Compile Include="Models\StaticData\Favorites.cs" />
-    <Compile Include="Models\StaticData\LanguageManager.cs" />
+    <Compile Include="Models\LanguageManager.cs" />
     <Compile Include="Models\RegistryItem.cs" />
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\MessageTokens.cs" />

@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models.StaticData;
+﻿using CefFlashBrowser.Models;
 using System;
 
 namespace CefFlashBrowser.ViewModels.MenuItemViewModels

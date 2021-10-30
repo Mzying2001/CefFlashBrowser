@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models.StaticData;
+﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
