@@ -91,8 +91,11 @@ namespace CefFlashBrowser.ViewModels
 
         private void AddItem()
         {
-            if (AddFavoriteDialog.Show(LanguageManager.GetString("favorites_defaultName"), "about:blank"))
-                SelectedIndex = Favorites.Items.Count - 1;
+            AddFavoriteDialog.Show(LanguageManager.GetString("favorites_defaultName"), "about:blank", result =>
+            {
+                if (result)
+                    SelectedIndex = Favorites.Items.Count - 1;
+            });
         }
 
         private void RemoveItem()

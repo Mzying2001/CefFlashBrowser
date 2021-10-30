@@ -1,18 +1,8 @@
-﻿using CefFlashBrowser.Models.StaticData;
+﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.ViewModels.DialogViewModels;
+using SimpleMvvm.Messaging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CefFlashBrowser.Views.Dialogs
 {
@@ -21,12 +11,21 @@ namespace CefFlashBrowser.Views.Dialogs
     /// </summary>
     public partial class AddFavoriteDialog : Window
     {
-        AddFavoriteDialogViewModel VModel => (AddFavoriteDialogViewModel)DataContext;
+        private Action<bool> callback;
 
         public AddFavoriteDialog()
         {
             InitializeComponent();
-            VModel.CloseWindow = Close;
+
+            string token = MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, typeof(AddFavoriteDialogViewModel));
+            Messenger.Global.Register(token, CloseWindow);
+            Closing += (s, e) => Messenger.Global.Unregister(token, CloseWindow);
+        }
+
+        private void CloseWindow(object obj)
+        {
+            callback?.Invoke((bool)obj);
+            Close();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -35,16 +34,14 @@ namespace CefFlashBrowser.Views.Dialogs
             NameTextBox.SelectAll();
         }
 
-        public static bool Show(string name, string url)
+        public static void Show(string name, string url, Action<bool> callback = null)
         {
-            var dialog = new AddFavoriteDialog();
-            var vmodel = dialog.VModel;
+            var dialog = new AddFavoriteDialog { callback = callback };
+            var vmodel = (AddFavoriteDialogViewModel)dialog.DataContext;
 
             vmodel.Name = name;
             vmodel.Url = url;
-
             dialog.ShowDialog();
-            return vmodel.Result;
         }
     }
 }

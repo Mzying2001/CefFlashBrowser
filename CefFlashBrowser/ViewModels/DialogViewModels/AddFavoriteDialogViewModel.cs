@@ -3,41 +3,28 @@ using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 using System;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels
 {
-    class AddFavoriteDialogViewModel : ViewModelBase
+    public class AddFavoriteDialogViewModel : ViewModelBase
     {
         public DelegateCommand OkCommand { get; set; }
         public DelegateCommand CancelCommand { get; set; }
 
-        public Action CloseWindow { get; set; }
-
-        public bool Result { get; private set; }
-
         private string _name;
-
         public string Name
         {
             get => _name;
-            set
-            {
-                _name = value;
-                RaisePropertyChanged("Name");
-            }
+            set => UpdateValue(ref _name, value);
         }
 
         private string _url;
-
         public string Url
         {
             get => _url;
-            set
-            {
-                _url = value;
-                RaisePropertyChanged("Url");
-            }
+            set => UpdateValue(ref _url, value);
         }
 
         private void Ok()
@@ -46,8 +33,7 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
             {
                 var website = new Website(Name, Url);
                 Favorites.Add(website);
-                Result = true;
-                CloseWindow?.Invoke();
+                Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), true);
             }
             catch (Exception e)
             {
@@ -57,8 +43,7 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
 
         private void Cancel()
         {
-            Result = false;
-            CloseWindow?.Invoke();
+            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), false);
         }
 
         public AddFavoriteDialogViewModel()
