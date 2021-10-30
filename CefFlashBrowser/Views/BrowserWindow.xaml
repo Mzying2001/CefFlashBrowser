@@ -27,9 +27,20 @@
 
     <Window.Resources>
         <!--Converters-->
-        <converter:BrowserIsLoadingToSvgViewBox x:Key="IsLoading2Svg"/>
         <converter:BrowserIsLoadingToToolTip x:Key="IsLoading2ToolTip"/>
         <converter:BoolToVisibility x:Key="Bool2Visibility"/>
+        <converter:BoolToObject x:Key="IsLoading2Svg">
+            <converter:BoolToObject.TrueObject>
+                <svgc:SvgViewbox Width="12"
+                                 Height="12"
+                                 Source="/Assets/Svgs/stop.svg"/>
+            </converter:BoolToObject.TrueObject>
+            <converter:BoolToObject.FalseObject>
+                <svgc:SvgViewbox Width="14"
+                                 Height="14"
+                                 Source="/Assets/Svgs/reload.svg"/>
+            </converter:BoolToObject.FalseObject>
+        </converter:BoolToObject>
 
         <!--ConetxtMenu-->
         <ContextMenu x:Key="more">
@@ -47,7 +58,7 @@
                     <Button.Content>
                         <svgc:SvgViewbox Width="10"
                                          Height="10"
-                                         Source="svg/sub.svg"/>
+                                         Source="/Assets/Svgs/sub.svg"/>
                     </Button.Content>
                 </Button>
                 <Button Width="30"
@@ -57,7 +68,7 @@
                     <Button.Content>
                         <svgc:SvgViewbox Width="10"
                                          Height="10"
-                                         Source="svg/add.svg"/>
+                                         Source="/Assets/Svgs/add.svg"/>
                     </Button.Content>
                 </Button>
             </StackPanel>
@@ -160,7 +171,7 @@
                 <Button.Content>
                     <svgc:SvgViewbox Width="12"
                                      Height="12"
-                                     Source="svg/back.svg"/>
+                                     Source="/Assets/Svgs/back.svg"/>
                 </Button.Content>
             </Button>
 
@@ -173,7 +184,7 @@
                 <Button.Content>
                     <svgc:SvgViewbox Width="12"
                                      Height="12"
-                                     Source="svg/forward.svg"/>
+                                     Source="/Assets/Svgs/forward.svg"/>
                 </Button.Content>
             </Button>
 
@@ -212,7 +223,7 @@
                 <Button.Content>
                     <svgc:SvgViewbox Width="10"
                                      Height="10"
-                                     Source="svg/more.svg"/>
+                                     Source="/Assets/Svgs/more.svg"/>
                 </Button.Content>
             </Button>
         </Grid>
