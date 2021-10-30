@@ -310,7 +310,7 @@
     <Content Include="libcef.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="plugins\pepflashplayer32_34_0_0_92.dll">
+    <Content Include="Assets\Plugins\flash.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Resource Include="Assets\Svgs\add.svg" />

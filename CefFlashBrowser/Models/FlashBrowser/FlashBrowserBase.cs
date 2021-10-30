@@ -5,6 +5,7 @@ using CefSharp;
 using CefSharp.Wpf;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -79,9 +80,11 @@ namespace CefFlashBrowser.Models.FlashBrowser
             settings.LogSeverity = LogSeverity.Disable;
 #endif
 
+            const string FLASH_DLL_PATH = @"Assets\Plugins\flash.dll";
+
             settings.CefCommandLineArgs["enable-system-flash"] = "1";
-            settings.CefCommandLineArgs.Add("ppapi-flash-version", "32.34.0.0.92");
-            settings.CefCommandLineArgs.Add("ppapi-flash-path", @"plugins\pepflashplayer32_34_0_0_92.dll");
+            settings.CefCommandLineArgs.Add("ppapi-flash-version", FileVersionInfo.GetVersionInfo(FLASH_DLL_PATH).FileVersion.Replace(',', '.'));
+            settings.CefCommandLineArgs.Add("ppapi-flash-path", FLASH_DLL_PATH);
             Cef.Initialize(settings);
         }
     }
