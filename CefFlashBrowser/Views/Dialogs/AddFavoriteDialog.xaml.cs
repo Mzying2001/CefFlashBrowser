@@ -17,9 +17,8 @@ namespace CefFlashBrowser.Views.Dialogs
         {
             InitializeComponent();
 
-            string token = MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, typeof(AddFavoriteDialogViewModel));
-            Messenger.Global.Register(token, CloseWindow);
-            Closing += (s, e) => Messenger.Global.Unregister(token, CloseWindow);
+            Messenger.Global.Register(MessageTokens.EXIT_ADDFAVORITES, CloseWindow);
+            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.EXIT_ADDFAVORITES, CloseWindow);
         }
 
         private void CloseWindow(object obj)

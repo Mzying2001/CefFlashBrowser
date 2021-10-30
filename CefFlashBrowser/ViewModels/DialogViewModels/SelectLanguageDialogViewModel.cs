@@ -26,7 +26,7 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
         private void SelectLanguage(string language)
         {
             LanguageManager.CurrentLanguage = language;
-            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), null);
+            Messenger.Global.Send(MessageTokens.EXIT_SELECTLANGUAGE, null);
         }
 
         public SelectLanguageDialogViewModel()

@@ -2,12 +2,11 @@
 {
     public static class MessageTokens
     {
-        public const string CLOSE_WINDOW = "CLOSE_WINDOW";
         public const string EXIT_BROWSER = "EXIT_BROWSER";
-
-        public static string CreateToken(string tokenBase, object obj)
-        {
-            return $"{tokenBase}-{obj.GetHashCode()}";
-        }
+        public const string EXIT_JSALERT = "EXIT_JSALERT";
+        public const string EXIT_JSCONFIRM = "EXIT_JSCONFIRM";
+        public const string EXIT_JSPROMPT = "EXIT_JSPROMPT";
+        public const string EXIT_ADDFAVORITES = "EXIT_ADDFAVORITES";
+        public const string EXIT_SELECTLANGUAGE = "EXIT_SELECTLANGUAGE";
     }
 }

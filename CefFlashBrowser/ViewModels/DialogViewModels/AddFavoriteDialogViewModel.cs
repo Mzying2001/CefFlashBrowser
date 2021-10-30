@@ -33,7 +33,7 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
             {
                 var website = new Website(Name, Url);
                 Favorites.Add(website);
-                Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), true);
+                Messenger.Global.Send(MessageTokens.EXIT_ADDFAVORITES, true);
             }
             catch (Exception e)
             {
@@ -43,7 +43,7 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
 
         private void Cancel()
         {
-            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), false);
+            Messenger.Global.Send(MessageTokens.EXIT_ADDFAVORITES, false);
         }
 
         public AddFavoriteDialogViewModel()

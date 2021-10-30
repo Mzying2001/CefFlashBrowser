@@ -26,9 +26,8 @@ namespace CefFlashBrowser.Views.Dialogs
         {
             InitializeComponent();
 
-            string token = MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, typeof(SelectLanguageDialogViewModel));
-            Messenger.Global.Register(token, CloseWindow);
-            Closing += (s, e) => Messenger.Global.Unregister(token, CloseWindow);
+            Messenger.Global.Register(MessageTokens.EXIT_SELECTLANGUAGE, CloseWindow);
+            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.EXIT_SELECTLANGUAGE, CloseWindow);
         }
 
         private void CloseWindow(object obj)

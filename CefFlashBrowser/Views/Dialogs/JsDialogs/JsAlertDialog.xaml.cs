@@ -14,9 +14,8 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
         {
             InitializeComponent();
 
-            string token = MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, typeof(JsAlertDialogViewModel));
-            Messenger.Global.Register(token, CloseWindow);
-            Closing += (s, e) => Messenger.Global.Unregister(token, CloseWindow);
+            Messenger.Global.Register(MessageTokens.EXIT_JSALERT, CloseWindow);
+            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.EXIT_JSALERT, CloseWindow);
         }
 
         private void CloseWindow(object obj)

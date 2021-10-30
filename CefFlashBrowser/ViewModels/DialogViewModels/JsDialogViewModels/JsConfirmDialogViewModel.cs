@@ -11,12 +11,12 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels
 
         private void Yes()
         {
-            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), true);
+            Messenger.Global.Send(MessageTokens.EXIT_JSCONFIRM, true);
         }
 
         private void No()
         {
-            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), false);
+            Messenger.Global.Send(MessageTokens.EXIT_JSCONFIRM, false);
         }
 
         public JsConfirmDialogViewModel()

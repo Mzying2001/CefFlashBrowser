@@ -10,7 +10,7 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels
 
         private void Ok()
         {
-            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), null);
+            Messenger.Global.Send(MessageTokens.EXIT_JSALERT, null);
         }
 
         public JsAlertDialogViewModel()

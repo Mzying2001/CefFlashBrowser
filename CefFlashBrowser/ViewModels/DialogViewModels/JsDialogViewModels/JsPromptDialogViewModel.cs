@@ -18,12 +18,12 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels
 
         private void Ok()
         {
-            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), PromptText);
+            Messenger.Global.Send(MessageTokens.EXIT_JSPROMPT, PromptText);
         }
 
         private void Calcel()
         {
-            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), null);
+            Messenger.Global.Send(MessageTokens.EXIT_JSPROMPT, null);
         }
 
         public JsPromptDialogViewModel()

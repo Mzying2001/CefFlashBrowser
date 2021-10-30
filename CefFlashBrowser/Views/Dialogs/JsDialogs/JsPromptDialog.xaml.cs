@@ -18,13 +18,14 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
         {
             InitializeComponent();
 
-            string token = MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, typeof(JsPromptDialogViewModel));
-            Messenger.Global.Register(token, CloseWindow);
-            Closing += (s, e) =>
-            {
-                callback?.Invoke(result);
-                Messenger.Global.Unregister(token, CloseWindow);
-            };
+            Messenger.Global.Register(MessageTokens.EXIT_JSPROMPT, CloseWindow);
+            Closing += JsPromptDialog_Closing;
+        }
+
+        private void JsPromptDialog_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            callback?.Invoke(result);
+            Messenger.Global.Unregister(MessageTokens.EXIT_JSPROMPT, CloseWindow);
         }
 
         private void CloseWindow(object obj)
