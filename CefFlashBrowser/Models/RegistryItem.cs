@@ -3,12 +3,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Models
 {
-    class RegistryItem : IDisposable, IEnumerable<(string name, object value)>
+    public class RegistryItem : IDisposable, IEnumerable<(string name, object value)>
     {
         private RegistryKey _registryKey;
 

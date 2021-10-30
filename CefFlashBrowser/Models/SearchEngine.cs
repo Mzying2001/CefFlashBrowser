@@ -1,14 +1,10 @@
 ﻿using CefFlashBrowser.Models.StaticData;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace CefFlashBrowser.Models
 {
-    static class SearchEngine
+    public static class SearchEngine
     {
         public enum Engine
         {

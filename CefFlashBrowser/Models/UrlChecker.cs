@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Models
 {
-    static class UrlChecker
+    public static class UrlChecker
     {
         private static readonly string[] regs =
         {

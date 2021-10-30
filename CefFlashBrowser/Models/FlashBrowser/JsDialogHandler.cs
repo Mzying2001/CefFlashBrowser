@@ -1,15 +1,10 @@
 ﻿using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using CefSharp.Wpf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Models.FlashBrowser
 {
-    class JsDialogHandler : IJsDialogHandler
+    public class JsDialogHandler : IJsDialogHandler
     {
         public bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
         {
