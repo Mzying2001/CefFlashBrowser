@@ -7,13 +7,10 @@
         xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cc="clr-namespace:CefFlashBrowser.Views.Custom"
-        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
-        xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         mc:Ignorable="d"
         
-        x:Name="fmWindow"
         Width="700"
         Height="450"
         MinWidth="500"
@@ -23,7 +20,7 @@
         Title="{StaticResource favorites_managerTitle}">
 
     <Window.Resources>
-        
+
     </Window.Resources>
 
     <Grid>
@@ -82,7 +79,7 @@
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}"
-                                               CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=ListBox}}"/>
+                                               CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>

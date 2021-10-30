@@ -21,59 +21,39 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand MoveToBottomCommand { get; set; }
 
         private bool _hasItems;
-
         public bool HasItems
         {
             get => _hasItems;
-            set
-            {
-                _hasItems = value;
-                RaisePropertyChanged("HasItems");
-            }
+            set => UpdateValue(ref _hasItems, value);
         }
 
         private int _selectedIndex;
-
         public int SelectedIndex
         {
             get => _selectedIndex;
-            set
-            {
-                _selectedIndex = value;
-                RaisePropertyChanged("SelectedIndex");
-            }
+            set => UpdateValue(ref _selectedIndex, value);
         }
 
         private string _selectedName;
-
         public string SelectedName
         {
             get => _selectedName;
-            set
-            {
-                _selectedName = value;
-                RaisePropertyChanged("SelectedName");
-            }
+            set => UpdateValue(ref _selectedName, value);
         }
 
         private string _selectedUrl;
-
         public string SelectedUrl
         {
             get => _selectedUrl;
-            set
-            {
-                _selectedUrl = value;
-                RaisePropertyChanged("SelectedUrl");
-            }
+            set => UpdateValue(ref _selectedUrl, value);
         }
 
-        private void SelectionChanged(object sender)
+        private void SelectionChanged(ListBox lb)
         {
             if (Favorites.Items == null)
                 return;
 
-            SelectedIndex = ((ListBox)sender).SelectedIndex;
+            SelectedIndex = lb.SelectedIndex;
 
             if (SelectedIndex == -1)
             {
@@ -111,8 +91,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void AddItem()
         {
-            var flag = AddFavoriteDialog.Show(LanguageManager.GetString("favorites_defaultName"), "about:blank");
-            if (flag)
+            if (AddFavoriteDialog.Show(LanguageManager.GetString("favorites_defaultName"), "about:blank"))
                 SelectedIndex = Favorites.Items.Count - 1;
         }
 
@@ -173,8 +152,10 @@ namespace CefFlashBrowser.ViewModels
             SelectedIndex = Favorites.Items.Count - 1;
         }
 
-        private void Init()
+        protected override void Init()
         {
+            base.Init();
+
             HasItems = Favorites.Items.Count != 0;
             if (HasItems)
             {
@@ -186,9 +167,7 @@ namespace CefFlashBrowser.ViewModels
 
         public FavoritesManagerViewModel()
         {
-            Init();
-
-            SelectionChangedCommand = new DelegateCommand(SelectionChanged);
+            SelectionChangedCommand = new DelegateCommand<ListBox>(SelectionChanged);
             SaveChangesCommand = new DelegateCommand(SaveChanges);
             AddItemCommand = new DelegateCommand(AddItem);
             RemoveItemCommand = new DelegateCommand(RemoveItem);
