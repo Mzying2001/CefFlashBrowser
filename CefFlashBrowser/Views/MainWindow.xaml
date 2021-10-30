@@ -11,7 +11,7 @@
     xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
     xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
     xmlns:hc="https://handyorg.github.io/handycontrol"
-    xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
+    xmlns:cc="clr-namespace:CefFlashBrowser.Views.Custom"
     mc:Ignorable="d"
     
     Width="600"

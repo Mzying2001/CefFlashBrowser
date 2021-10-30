@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace CefFlashBrowser.Views.CustomControls
+namespace CefFlashBrowser.Views.Custom
 {
     public class DropableWindow : Window
     {

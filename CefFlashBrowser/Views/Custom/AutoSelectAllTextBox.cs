@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace CefFlashBrowser.Views.CustomControls
+namespace CefFlashBrowser.Views.Custom
 {
     public class AutoSelectAllTextBox : TextBox
     {

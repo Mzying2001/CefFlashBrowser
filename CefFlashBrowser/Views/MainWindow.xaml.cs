@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.ViewModels;
-using CefFlashBrowser.Views.CustomControls;
+using CefFlashBrowser.Views.Custom;
 using CefSharp;
 using CefSharp.Wpf;
 

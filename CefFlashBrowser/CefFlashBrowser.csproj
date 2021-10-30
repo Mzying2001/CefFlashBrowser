@@ -158,8 +158,8 @@
     </Compile>
     <Compile Include="Models\Converters\BoolToObject.cs" />
     <Compile Include="Models\Converters\ValueConverterBase.cs" />
-    <Compile Include="Views\CustomControls\AutoSelectAllTextBox.cs" />
-    <Compile Include="Views\CustomControls\DropableWindow.cs" />
+    <Compile Include="Views\Custom\AutoSelectAllTextBox.cs" />
+    <Compile Include="Views\Custom\DropableWindow.cs" />
     <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">
       <DependentUpon>AddFavoriteDialog.xaml</DependentUpon>
     </Compile>

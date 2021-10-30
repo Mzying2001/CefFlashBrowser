@@ -6,7 +6,7 @@
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
+        xmlns:cc="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:mvm="clr-namespace:CefFlashBrowser.ViewModels.MenuItemViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"

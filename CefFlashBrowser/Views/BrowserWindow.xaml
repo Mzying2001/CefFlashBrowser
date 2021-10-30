@@ -7,7 +7,7 @@
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
-        xmlns:cc="clr-namespace:CefFlashBrowser.Views.CustomControls"
+        xmlns:cc="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:converter="clr-namespace:CefFlashBrowser.Models.Converters"
