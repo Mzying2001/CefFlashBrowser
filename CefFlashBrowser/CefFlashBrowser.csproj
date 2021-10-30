@@ -306,7 +306,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="html\FlashPlayer.html">
+    <Content Include="Assets\Html\FlashPlayer.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="libcef.dll">

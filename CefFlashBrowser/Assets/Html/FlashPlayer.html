@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>FlashPlayer</title>
+    <style>
+        #flash-player {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+    <Script>
+        function getQueryVariable(variable) {
+            let query = window.location.search.substring(1);
+            let vars = query.split("&");
+            for (let i = 0; i < vars.length; i++) {
+                let pair = vars[i].split("=");
+                if (pair[0] == variable) {
+                    return pair[1];
+                }
+            }
+            return undefined;
+        }
+
+        window.onload = function () {
+            var src = getQueryVariable("src");
+            var flash = document.createElement("embed");
+            flash.id = "flash-player";
+            flash.setAttribute("src", src);
+            document.querySelector("body").appendChild(flash);
+            document.title = src;
+        }
+    </Script>
+</head>
+
+<body>
+</body>
+
+</html>

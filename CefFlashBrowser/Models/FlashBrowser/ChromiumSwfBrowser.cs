@@ -26,7 +26,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
                 if (d is ChromiumWebBrowser browser)
                 {
                     browser.Address = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-                        $"html/FlashPlayer.html?src={e.NewValue}");
+                        $"Assets/Html/FlashPlayer.html?src={e.NewValue}");
                 }
             }));
 
