@@ -1,4 +1,6 @@
-﻿using CefFlashBrowser.ViewModels.DialogViewModels;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.ViewModels.DialogViewModels;
+using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,13 +22,18 @@ namespace CefFlashBrowser.Views.Dialogs
     /// </summary>
     public partial class SelectLanguageDialog : Window
     {
-        SelectLanguageDialogViewModel VModel =>
-            (SelectLanguageDialogViewModel)DataContext;
-
         public SelectLanguageDialog()
         {
             InitializeComponent();
-            VModel.CloseWindow = Close;
+
+            string token = MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, typeof(SelectLanguageDialogViewModel));
+            Messenger.Global.Register(token, CloseWindow);
+            Closing += (s, e) => Messenger.Global.Unregister(token, CloseWindow);
+        }
+
+        private void CloseWindow(object obj)
+        {
+            Close();
         }
     }
 }

@@ -1,33 +1,21 @@
-﻿using CefFlashBrowser.Models.StaticData;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.StaticData;
 using SimpleMvvm;
 using SimpleMvvm.Command;
-using System;
+using SimpleMvvm.Messaging;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels
 {
-    class SelectLanguageDialogViewModel : ViewModelBase
+    public class SelectLanguageDialogViewModel : ViewModelBase
     {
         public DelegateCommand SelectLanguageCommand { get; set; }
         public DelegateCommand SetHeaderCommand { get; set; }
 
-        public Action CloseWindow { get; set; }
-
         private string _header;
-
         public string Header
         {
             get => _header;
-            set
-            {
-                _header = value;
-                RaisePropertyChanged("Header");
-            }
-        }
-
-        private void SelectLanguage(string language)
-        {
-            LanguageManager.CurrentLanguage = language;
-            CloseWindow?.Invoke();
+            set => UpdateValue(ref _header, value);
         }
 
         private void SetHeader(string text)
@@ -35,10 +23,16 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
             Header = text;
         }
 
+        private void SelectLanguage(string language)
+        {
+            LanguageManager.CurrentLanguage = language;
+            Messenger.Global.Send(MessageTokens.CreateToken(MessageTokens.CLOSE_WINDOW, GetType()), null);
+        }
+
         public SelectLanguageDialogViewModel()
         {
-            SelectLanguageCommand = new DelegateCommand(p => SelectLanguage(p?.ToString()));
-            SetHeaderCommand = new DelegateCommand(p => SetHeader(p?.ToString()));
+            SelectLanguageCommand = new DelegateCommand<string>(SelectLanguage);
+            SetHeaderCommand = new DelegateCommand<string>(SetHeader);
         }
     }
 }
