@@ -138,7 +138,7 @@
                    Margin="5"
                    Foreground="Gray"
                    HorizontalAlignment="Center">
-            version <Run Text="{Binding AppVersion, Mode=OneTime}"/> | by Mzying2001
+            version <Run Text="{Binding Source={StaticResource AppInfo}, Mode=OneTime, Path=Version}"/> | by Mzying2001
         </TextBlock>
     </Grid>
 </c:DropableWindow>

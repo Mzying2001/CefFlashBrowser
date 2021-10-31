@@ -120,6 +120,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\AppInfo.cs" />
     <Compile Include="Models\Converters\IsCurrentLanguage.cs" />
     <Compile Include="Models\Converters\LanguageCodeToName.cs" />
     <Compile Include="Models\FlashBrowser\ChromiumFlashBrowser.cs" />

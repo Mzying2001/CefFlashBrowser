@@ -24,11 +24,6 @@ namespace CefFlashBrowser.ViewModels
 
         public ObservableCollection<string> Language { get; set; }
 
-        public string AppVersion
-        {
-            get => Application.ResourceAssembly.GetName().Version.ToString();
-        }
-
         private void OpenUrl(string url)
         {
             if (string.IsNullOrEmpty(url))
