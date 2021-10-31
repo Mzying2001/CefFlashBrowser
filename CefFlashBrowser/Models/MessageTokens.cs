@@ -8,5 +8,6 @@
         public const string EXIT_JSPROMPT = "EXIT_JSPROMPT";
         public const string EXIT_ADDFAVORITES = "EXIT_ADDFAVORITES";
         public const string EXIT_SELECTLANGUAGE = "EXIT_SELECTLANGUAGE";
+        public const string LANGUAGE_CHANGED = "LANGUAGE_CHANGED";
     }
 }

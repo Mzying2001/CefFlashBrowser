@@ -1,22 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using CefFlashBrowser.Models;
-using CefFlashBrowser.ViewModels;
+﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Views.Custom;
-using CefSharp;
-using CefSharp.Wpf;
+using SimpleMvvm.Messaging;
+using System.Windows.Controls;
 
 namespace CefFlashBrowser.Views
 {
@@ -28,6 +13,23 @@ namespace CefFlashBrowser.Views
         public MainWindow()
         {
             InitializeComponent();
+
+            Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
+            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
         }
+
+        private void UpdateLanguageMenuChecked(object obj)
+        {
+            if (obj is string current)
+            {
+                foreach (var item in languageMenu.Items)
+                {
+                    MenuItem menuItem = (MenuItem)languageMenu.ItemContainerGenerator.ContainerFromItem(item);
+                    menuItem.IsChecked = (string)item == current;
+                }
+            }
+        }
+
+
     }
 }

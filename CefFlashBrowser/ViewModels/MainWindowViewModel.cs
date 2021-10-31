@@ -1,11 +1,11 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
-using CefFlashBrowser.ViewModels.MenuItemViewModels;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.Windows;
 
@@ -20,33 +20,13 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ViewGithubCommand { get; set; }
         public DelegateCommand OpenFavoritesItemCommand { get; set; }
         public DelegateCommand OnDropCommand { get; set; }
+        public DelegateCommand SwitchLanguageCommand { get; set; }
 
-        public ObservableCollection<LanguageMenuItemViewModel> LanguageMenuItems { get; set; }
+        public ObservableCollection<string> Language { get; set; }
 
         public string AppVersion
         {
             get => Application.ResourceAssembly.GetName().Version.ToString();
-        }
-
-        private void LoadLanguageMenu()
-        {
-            LanguageMenuItems = new ObservableCollection<LanguageMenuItemViewModel>();
-
-            foreach (var item in LanguageManager.GetSupportedLanguage())
-            {
-                var viewModel = new LanguageMenuItemViewModel(item);
-                viewModel.LanguageSwitched += UpdateLanguageMenuItemsChecked;
-                LanguageMenuItems.Add(viewModel);
-            }
-
-            UpdateLanguageMenuItemsChecked();
-        }
-
-        private void UpdateLanguageMenuItemsChecked()
-        {
-            var current = LanguageManager.CurrentLanguage;
-            foreach (var item in LanguageMenuItems)
-                item.IsSelected = item.Language == current;
         }
 
         private void OpenUrl(string url)
@@ -112,15 +92,6 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void SelectLanguageOnFirstStart()
-        {
-            if (Settings.NotFirstStart)
-                return;
-
-            new SelectLanguageDialog().ShowDialog();
-            Settings.NotFirstStart = true;
-        }
-
         private void ViewGithub()
         {
             BrowserWindow.Show("https://github.com/Mzying2001/CefFlashBrowser");
@@ -146,10 +117,28 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void SelectLanguageOnFirstStart()
+        {
+            if (Settings.NotFirstStart)
+                return;
+
+            new SelectLanguageDialog().ShowDialog();
+            Settings.NotFirstStart = true;
+        }
+
+        private void SwitchLanguage(string language)
+        {
+            LanguageManager.CurrentLanguage = language;
+            Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, language);
+        }
+
         public MainWindowViewModel()
         {
             SelectLanguageOnFirstStart();
-            LoadLanguageMenu();
+
+            Language = new ObservableCollection<string>();
+            foreach (var item in LanguageManager.GetSupportedLanguage())
+                Language.Add(item);
 
             OpenUrlCommand = new DelegateCommand<string>(OpenUrl);
             OpenSettingsWindowCommand = new DelegateCommand(OpenSettingsWindow);
@@ -158,6 +147,7 @@ namespace CefFlashBrowser.ViewModels
             ViewGithubCommand = new DelegateCommand(ViewGithub);
             OpenFavoritesItemCommand = new DelegateCommand<Website>(OpenFavoritesItem);
             OnDropCommand = new DelegateCommand<DragEventArgs>(OnDrop);
+            SwitchLanguageCommand = new DelegateCommand<string>(SwitchLanguage);
         }
     }
 }

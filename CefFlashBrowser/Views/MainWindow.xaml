@@ -7,8 +7,10 @@
     xmlns:local="clr-namespace:CefFlashBrowser"
     xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
     xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
+    xmlns:m="clr-namespace:CefFlashBrowser.Models"
     xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
     xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:converter="clr-namespace:CefFlashBrowser.Models.Converters"
     mc:Ignorable="d"
     
     Width="600"
@@ -19,6 +21,11 @@
     DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}"
     OnDropCommand="{Binding OnDropCommand}"
     WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <converter:LanguageCodeToName x:Key="LanguageCode2Name"/>
+        <converter:IsCurrentLanguage x:Key="IsCurrentLanguage"/>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -60,17 +67,20 @@
                 <Separator/>
 
                 <!--Languages Option-->
-                <MenuItem Header="{DynamicResource menu_languages}"
-                          ItemsSource="{Binding LanguageMenuItems}">
+                <MenuItem x:Name="languageMenu"
+                          Header="{DynamicResource menu_languages}"
+                          ItemsSource="{Binding Language}">
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem"
                                BasedOn="{StaticResource MenuItemBaseStyle}">
                             <Setter Property="Header"
-                                    Value="{Binding Header}"/>
+                                    Value="{Binding Converter={StaticResource LanguageCode2Name}}"/>
                             <Setter Property="Command"
-                                    Value="{Binding MenuItemSelectedCommand}"/>
+                                    Value="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel.SwitchLanguageCommand}"/>
+                            <Setter Property="CommandParameter"
+                                    Value="{Binding}"/>
                             <Setter Property="IsChecked"
-                                    Value="{Binding IsSelected}"/>
+                                    Value="{Binding Mode=OneTime, Converter={StaticResource IsCurrentLanguage}}"/>
                         </Style>
                     </MenuItem.ItemContainerStyle>
                 </MenuItem>
