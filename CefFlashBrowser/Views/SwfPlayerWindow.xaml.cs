@@ -1,17 +1,6 @@
-﻿using CefFlashBrowser.Models.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CefFlashBrowser.Views
 {
@@ -37,20 +26,8 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
 
-            var x = Settings.SwfPlayerWindowX;
-            var y = Settings.SwfPlayerWindowY;
-            var w = Settings.SwfPlayerWindowWidth;
-            var h = Settings.SwfPlayerWindowHeight;
-            if (x != default &&
-                y != default &&
-                w != default &&
-                h != default)
-            {
-                Left = x;
-                Top = y;
-                Width = w;
-                Height = h;
-            }
+            if (GlobalData.Settings.SwfWindowSizeInfo != null)
+                GlobalData.Settings.SwfWindowSizeInfo.Apply(this);
         }
 
         public SwfPlayerWindow(string fileName) : this()
@@ -60,10 +37,7 @@ namespace CefFlashBrowser.Views
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Settings.SwfPlayerWindowX = Left;
-            Settings.SwfPlayerWindowY = Top;
-            Settings.SwfPlayerWindowWidth = Width;
-            Settings.SwfPlayerWindowHeight = Height;
+            GlobalData.Settings.SwfWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
         }
 
         public static void Show(string fileName)

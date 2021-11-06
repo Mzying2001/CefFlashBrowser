@@ -45,15 +45,15 @@ namespace CefFlashBrowser.ViewModels
              * 1: Search Only
              * 2: Navigate Only
              */
-            switch (Settings.AddressBarFunction)
+            switch (GlobalData.Settings.AddressBarFunction)
             {
                 case 0:
                     if (!UrlChecker.IsUrl(url))
-                        url = SearchEngine.GetUrl(url, Settings.SearchEngine);
+                        url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
                     break;
 
                 case 1:
-                    url = SearchEngine.GetUrl(url, Settings.SearchEngine);
+                    url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
                     break;
 
                 case 2:
@@ -113,11 +113,11 @@ namespace CefFlashBrowser.ViewModels
 
         private void SelectLanguageOnFirstStart()
         {
-            if (Settings.NotFirstStart)
-                return;
-
-            new SelectLanguageDialog().ShowDialog();
-            Settings.NotFirstStart = true;
+            if (GlobalData.Settings.FirstStart)
+            {
+                new SelectLanguageDialog().ShowDialog();
+                GlobalData.Settings.FirstStart = false;
+            }
         }
 
         private void SwitchLanguage(string language)

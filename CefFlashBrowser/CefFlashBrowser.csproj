@@ -137,10 +137,9 @@
     <Compile Include="Models\FlashBrowser\IEDownloadHandler.cs" />
     <Compile Include="Models\Data\GlobalData.cs" />
     <Compile Include="Models\LanguageManager.cs" />
-    <Compile Include="Models\RegistryItem.cs" />
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\MessageTokens.cs" />
-    <Compile Include="Models\Data\Settings.cs" />
+    <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\UrlChecker.cs" />
     <Compile Include="Models\Website.cs" />
     <Compile Include="Models\WindowSizeInfo.cs" />

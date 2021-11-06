@@ -12,11 +12,13 @@ namespace CefFlashBrowser.Models.Data
         public static string DocumentPath => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         public static string DataPath { get; }
         public static string FavoritesPath { get; }
+        public static string SettingsPath { get; }
 
         static GlobalData()
         {
             DataPath = Path.Combine(DocumentPath, "CefFlashBrowser");
             FavoritesPath = Path.Combine(DataPath, "Favorites.json");
+            SettingsPath = Path.Combine(DataPath, "Settings.json");
         }
 
         public static void InitData()
@@ -25,11 +27,13 @@ namespace CefFlashBrowser.Models.Data
                 Directory.CreateDirectory(DataPath);
 
             InitFavorites();
+            InitSettings();
         }
 
         public static void SaveData()
         {
             SaveFavorites();
+            SaveSettings();
         }
 
 
@@ -61,6 +65,34 @@ namespace CefFlashBrowser.Models.Data
         }
 
         #endregion
+
+
+
+        #region Settings
+
+        public static Settings Settings { get; private set; }
+
+        public static void InitSettings()
+        {
+            try
+            {
+                var file = File.ReadAllText(SettingsPath);
+                Settings = JsonConvert.DeserializeObject<Settings>(file);
+            }
+            catch
+            {
+                Settings = Settings.Default;
+            }
+        }
+
+        public static void SaveSettings()
+        {
+            File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+        }
+
+        #endregion
+
+
 
     }
 }

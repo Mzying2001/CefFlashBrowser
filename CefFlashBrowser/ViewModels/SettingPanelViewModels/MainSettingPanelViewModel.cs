@@ -18,20 +18,20 @@ namespace CefFlashBrowser.ViewModels.SettingPanelViewModels
 
         public int CurrentSearchEngineValue
         {
-            get => (int)Settings.SearchEngine;
+            get => (int)GlobalData.Settings.SearchEngine;
             set
             {
-                Settings.SearchEngine = (SearchEngine.Engine)value;
+                GlobalData.Settings.SearchEngine = (SearchEngine.Engine)value;
                 RaisePropertyChanged("CurrentSearchEngineValue");
             }
         }
 
         public int CurrentAddressBarFunction
         {
-            get => Settings.AddressBarFunction;
+            get => GlobalData.Settings.AddressBarFunction;
             set
             {
-                Settings.AddressBarFunction = value;
+                GlobalData.Settings.AddressBarFunction = value;
                 RaisePropertyChanged("CurrentAddressBarFunction");
             }
         }

@@ -18,20 +18,8 @@ namespace CefFlashBrowser.Views
 
             Messenger.Global.Register(MessageTokens.EXIT_BROWSER, CloseWindow);
 
-            var x = Settings.BrowserWindowX;
-            var y = Settings.BrowserWindowY;
-            var w = Settings.BrowserWindowWidth;
-            var h = Settings.BrowserWindowHeight;
-            if (x != default &&
-                y != default &&
-                w != default &&
-                h != default)
-            {
-                Left = x;
-                Top = y;
-                Width = w;
-                Height = h;
-            }
+            if (GlobalData.Settings.BrowserWindowSizeInfo != null)
+                GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
         }
 
         private void CloseWindow(object obj)
@@ -41,10 +29,7 @@ namespace CefFlashBrowser.Views
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Settings.BrowserWindowX = Left;
-            Settings.BrowserWindowY = Top;
-            Settings.BrowserWindowWidth = Width;
-            Settings.BrowserWindowHeight = Height;
+            GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
             browser.Dispose();
 
             Messenger.Global.Unregister(MessageTokens.EXIT_BROWSER, CloseWindow);

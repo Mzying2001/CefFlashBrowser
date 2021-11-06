@@ -15,7 +15,6 @@ namespace CefFlashBrowser
     {
         private void Init()
         {
-            Settings.Init();
             GlobalData.InitData();
             LanguageManager.InitLanguage();
             FlashBrowserBase.InitCefFlash();

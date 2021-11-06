@@ -47,7 +47,7 @@ namespace CefFlashBrowser.Models
                 if (IsSupportedLanguage(value))
                 {
                     LanguageResourceDic.Source = GetUri(value);
-                    Settings.Language = value;
+                    GlobalData.Settings.Language = value;
                 }
             }
         }
@@ -67,7 +67,7 @@ namespace CefFlashBrowser.Models
 
         public static void InitLanguage()
         {
-            CurrentLanguage = Settings.Language;
+            CurrentLanguage = GlobalData.Settings.Language;
         }
     }
 }
