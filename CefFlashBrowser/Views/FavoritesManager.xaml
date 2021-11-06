@@ -43,12 +43,17 @@
                         Margin="0,0,0,7"
                         Orientation="Horizontal">
                 <Button Margin="0,0,7,0"
-                        Content="{StaticResource favorites_add}"
-                        Command="{Binding AddItemCommand}"/>
-                <Button Margin="0,0,7,0"
-                        Content="{StaticResource favorites_remove}"
-                        Command="{Binding RemoveItemCommand}"
-                        CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}"/>
+                        Command="{Binding AddItemCommand}">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <svgc:SvgViewbox Width="12"
+                                             Height="12"
+                                             Source="/Assets/Svgs/add.svg"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       Text="{StaticResource favorites_add}"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
             </StackPanel>
 
             <ListBox x:Name="favoritesListBox"
@@ -99,70 +104,73 @@
                   Header="{StaticResource favorites_edit}">
             <Grid IsEnabled="{Binding ElementName=favoritesListBox, Path=SelectedItem, Converter={StaticResource NotNull}}">
 
-                <StackPanel Grid.Row="1"
-                            Grid.Column="1"
+                <StackPanel Width="300"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center">
                     <TextBlock Text="{StaticResource favorites_name}"
-                                   Foreground="Black"/>
+                               Foreground="Black"/>
                     <c:AutoSelectAllTextBox Margin="0,0,0,20"
-                                            Width="300"
                                             Style="{StaticResource TextBoxBaseStyle}"
                                             Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <TextBox.InputBindings>
-                            <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
+                            <KeyBinding Key="Enter"
+                                        Command="{Binding SaveChangesCommand}"/>
                         </TextBox.InputBindings>
                     </c:AutoSelectAllTextBox>
 
                     <TextBlock Text="{StaticResource favorites_url}"
                                Foreground="Black"/>
                     <c:AutoSelectAllTextBox Margin="0,0,0,20"
-                                            Width="300"
                                             Style="{StaticResource TextBoxBaseStyle}"
                                             Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <TextBox.InputBindings>
-                            <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
+                            <KeyBinding Key="Enter"
+                                        Command="{Binding SaveChangesCommand}"/>
                         </TextBox.InputBindings>
                     </c:AutoSelectAllTextBox>
+
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0"
-                                Width="30"
-                                Height="30"
-                                Padding="0"
-                                Command="{Binding MoveUpCommand}"
-                                CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
-                            <svgc:SvgViewbox Width="12"
-                                             Height="12"
-                                             Source="/Assets/Svgs/up.svg"/>
-                        </Button>
-                        <Button Grid.Column="1"
-                                Width="30"
-                                Height="30"
-                                Padding="0"
-                                Command="{Binding MoveDownCommand}"
-                                CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
-                            <svgc:SvgViewbox Width="12"
-                                             Height="12"
-                                             Source="/Assets/Svgs/down.svg"/>
-                        </Button>
-                        <Button Grid.Column="3"
-                                Height="30"
-                                MinWidth="60"
-                                Content="{StaticResource favorites_save}"
-                                Command="{Binding SaveChangesCommand}">
-                            <Button.IsEnabled>
-                                <MultiBinding Converter="{StaticResource StringArrNotAllEmpty}">
-                                    <Binding Path="SelectedName"/>
-                                    <Binding Path="SelectedUrl"/>
-                                </MultiBinding>
-                            </Button.IsEnabled>
-                        </Button>
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Left">
+                            <Button Width="30"
+                                    Height="30"
+                                    Padding="0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding MoveUpCommand}"
+                                    CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
+                                <svgc:SvgViewbox Width="12"
+                                                 Height="12"
+                                                 Source="/Assets/Svgs/up.svg"/>
+                            </Button>
+                            <Button Width="30"
+                                    Height="30"
+                                    Padding="0"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding MoveDownCommand}"
+                                    CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
+                                <svgc:SvgViewbox Width="12"
+                                                 Height="12"
+                                                 Source="/Assets/Svgs/down.svg"/>
+                            </Button>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right">
+                            <Button MinWidth="75"
+                                    Content="{StaticResource favorites_remove}"
+                                    Command="{Binding RemoveItemCommand}"
+                                    CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}"/>
+                            <Button MinWidth="75"
+                                    Margin="5,0,0,0"
+                                    Content="{StaticResource favorites_save}"
+                                    Command="{Binding SaveChangesCommand}">
+                                <Button.IsEnabled>
+                                    <MultiBinding Converter="{StaticResource StringArrNotAllEmpty}">
+                                        <Binding Path="SelectedName"/>
+                                        <Binding Path="SelectedUrl"/>
+                                    </MultiBinding>
+                                </Button.IsEnabled>
+                            </Button>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
 
