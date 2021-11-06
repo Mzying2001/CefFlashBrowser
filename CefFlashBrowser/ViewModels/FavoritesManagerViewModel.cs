@@ -1,5 +1,5 @@
 ﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.StaticData;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
@@ -41,17 +41,17 @@ namespace CefFlashBrowser.ViewModels
 
         private void SelectionChanged()
         {
-            if (Favorites.Items == null)
+            if (GlobalData.Favorites == null)
                 return;
 
-            if (SelectedIndex == -1 || Favorites.Items.Count == 0)
+            if (SelectedIndex == -1 || GlobalData.Favorites.Count == 0)
             {
                 SelectedName = string.Empty;
                 SelectedUrl = string.Empty;
             }
             else
             {
-                Website item = Favorites.Items[SelectedIndex];
+                Website item = GlobalData.Favorites[SelectedIndex];
                 SelectedName = item.Name;
                 SelectedUrl = item.Url;
             }
@@ -64,8 +64,8 @@ namespace CefFlashBrowser.ViewModels
 
             int index = SelectedIndex;
             var website = new Website(SelectedName.Trim(), SelectedUrl.Trim());
-            Favorites.Items.RemoveAt(index);
-            Favorites.Items.Insert(index, website);
+            GlobalData.Favorites.RemoveAt(index);
+            GlobalData.Favorites.Insert(index, website);
             SelectedIndex = index;
         }
 
@@ -74,19 +74,19 @@ namespace CefFlashBrowser.ViewModels
             AddFavoriteDialog.Show(LanguageManager.GetString("favorites_defaultName"), "about:blank", result =>
             {
                 if (result)
-                    SelectedIndex = Favorites.Items.Count - 1;
+                    SelectedIndex = GlobalData.Favorites.Count - 1;
             });
         }
 
         private void RemoveItem(Website item)
         {
-            JsConfirmDialog.Show(string.Format(LanguageManager.GetString("message_removeItem"), Favorites.Items[SelectedIndex].Name), "", result =>
+            JsConfirmDialog.Show(string.Format(LanguageManager.GetString("message_removeItem"), GlobalData.Favorites[SelectedIndex].Name), "", result =>
             {
                 if (result == true)
                 {
                     int index = SelectedIndex;
-                    Favorites.Items.Remove(item);
-                    SelectedIndex = (--index == -1 && Favorites.Items.Count > 0) ? 0 : index;
+                    GlobalData.Favorites.Remove(item);
+                    SelectedIndex = (--index == -1 && GlobalData.Favorites.Count > 0) ? 0 : index;
                 }
             });
         }
@@ -99,17 +99,17 @@ namespace CefFlashBrowser.ViewModels
                 i = j;
                 j = tmp;
             }
-            Website item1 = Favorites.Items[i];
-            Website item2 = Favorites.Items[j];
-            Favorites.Items.Remove(item2);
-            Favorites.Items.Remove(item1);
-            Favorites.Items.Insert(i, item2);
-            Favorites.Items.Insert(j, item1);
+            Website item1 = GlobalData.Favorites[i];
+            Website item2 = GlobalData.Favorites[j];
+            GlobalData.Favorites.Remove(item2);
+            GlobalData.Favorites.Remove(item1);
+            GlobalData.Favorites.Insert(i, item2);
+            GlobalData.Favorites.Insert(j, item1);
         }
 
         private void MoveUp(Website item)
         {
-            int index = Favorites.Items.IndexOf(item);
+            int index = GlobalData.Favorites.IndexOf(item);
             if (index > 0)
             {
                 SwapItem(index, index - 1);
@@ -119,8 +119,8 @@ namespace CefFlashBrowser.ViewModels
 
         private void MoveDown(Website item)
         {
-            int index = Favorites.Items.IndexOf(item);
-            if (index < Favorites.Items.Count - 1)
+            int index = GlobalData.Favorites.IndexOf(item);
+            if (index < GlobalData.Favorites.Count - 1)
             {
                 SwapItem(index, index + 1);
                 SelectedIndex = index + 1;
@@ -129,27 +129,27 @@ namespace CefFlashBrowser.ViewModels
 
         private void MoveToTop(Website item)
         {
-            Favorites.Items.Remove(item);
-            Favorites.Items.Insert(0, item);
+            GlobalData.Favorites.Remove(item);
+            GlobalData.Favorites.Insert(0, item);
             SelectedIndex = 0;
         }
 
         private void MoveToBottom(Website item)
         {
-            Favorites.Items.Remove(item);
-            Favorites.Items.Add(item);
-            SelectedIndex = Favorites.Items.Count - 1;
+            GlobalData.Favorites.Remove(item);
+            GlobalData.Favorites.Add(item);
+            SelectedIndex = GlobalData.Favorites.Count - 1;
         }
 
         protected override void Init()
         {
             base.Init();
 
-            if (Favorites.Items.Count != 0)
+            if (GlobalData.Favorites.Count != 0)
             {
                 SelectedIndex = 0;
-                SelectedName = Favorites.Items[SelectedIndex].Name;
-                SelectedUrl = Favorites.Items[SelectedIndex].Url;
+                SelectedName = GlobalData.Favorites[SelectedIndex].Name;
+                SelectedUrl = GlobalData.Favorites[SelectedIndex].Url;
             }
         }
 

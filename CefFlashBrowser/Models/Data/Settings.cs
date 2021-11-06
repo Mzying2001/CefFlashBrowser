@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CefFlashBrowser.Models.StaticData
+namespace CefFlashBrowser.Models.Data
 {
     static class Settings
     {

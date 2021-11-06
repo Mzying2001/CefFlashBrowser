@@ -4,9 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
-        xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
+        xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         mc:Ignorable="d"
@@ -61,7 +61,7 @@
                      VerticalContentAlignment="Stretch"
                      HorizontalContentAlignment="Stretch"
                      SelectedIndex="{Binding SelectedIndex}"
-                     ItemsSource="{Binding Source={x:Static sd:Favorites.Items}}">
+                     ItemsSource="{Binding Source={x:Static data:GlobalData.Favorites}}">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem"
                            BasedOn="{StaticResource ListBoxItemBaseStyle}">

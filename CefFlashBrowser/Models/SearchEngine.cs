@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models.StaticData;
+﻿using CefFlashBrowser.Models.Data;
 using System;
 using System.Collections.Generic;
 

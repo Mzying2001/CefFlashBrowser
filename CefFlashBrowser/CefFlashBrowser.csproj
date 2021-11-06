@@ -126,6 +126,7 @@
     <Compile Include="Models\Converters\MultiValueConverterBase.cs" />
     <Compile Include="Models\Converters\ObjectNotNull.cs" />
     <Compile Include="Models\Converters\StringArrNotAllEmpty.cs" />
+    <Compile Include="Models\FavoritesFile.cs" />
     <Compile Include="Models\FlashBrowser\ChromiumFlashBrowser.cs" />
     <Compile Include="Models\FlashBrowser\ChromiumSwfBrowser.cs" />
     <Compile Include="Models\FlashBrowser\ContextMenuHandler.cs" />
@@ -134,17 +135,14 @@
     <Compile Include="Models\FlashBrowser\NewWindowEventArgs.cs" />
     <Compile Include="Models\FlashBrowser\FlashBrowserLifeSpanHandler.cs" />
     <Compile Include="Models\FlashBrowser\IEDownloadHandler.cs" />
-    <Compile Include="Models\StaticData\Favorites.cs" />
+    <Compile Include="Models\Data\GlobalData.cs" />
     <Compile Include="Models\LanguageManager.cs" />
     <Compile Include="Models\RegistryItem.cs" />
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\MessageTokens.cs" />
-    <Compile Include="Models\StaticData\Settings.cs" />
+    <Compile Include="Models\Data\Settings.cs" />
     <Compile Include="Models\UrlChecker.cs" />
     <Compile Include="Models\Website.cs" />
-    <Compile Include="Services\FavoritesDataService.cs" />
-    <Compile Include="Services\Interfaces\IFavoritesDataService.cs" />
-    <Compile Include="Services\JsonDataService.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\ComboBoxItemViewModel.cs" />
     <Compile Include="ViewModels\ComboBoxItemViewModels\AddressBarFunctionComboBoxViewModel.cs" />

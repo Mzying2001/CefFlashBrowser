@@ -1,5 +1,5 @@
 ﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.StaticData;
+using CefFlashBrowser.Models.Data;
 using SimpleMvvm.Messaging;
 using System.Windows;
 using System.Windows.Controls;

@@ -1,5 +1,5 @@
 ﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.StaticData;
+using CefFlashBrowser.Models.Data;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using SimpleMvvm.Messaging;
@@ -31,7 +31,7 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
                 return;
 
             var website = new Website(Name.Trim(), Url.Trim());
-            Favorites.Add(website);
+            GlobalData.Favorites.Add(website);
             Messenger.Global.Send(MessageTokens.EXIT_ADDFAVORITES, true);
         }
 

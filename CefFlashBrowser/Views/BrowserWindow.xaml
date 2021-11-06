@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
-        xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
+        xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
         xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:converter="clr-namespace:CefFlashBrowser.Models.Converters"
@@ -77,7 +77,7 @@
             <Separator/>
 
             <MenuItem Header="{DynamicResource menu_favorites}"
-                      ItemsSource="{Binding Source={x:Static sd:Favorites.Items}}">
+                      ItemsSource="{Binding Source={x:Static data:GlobalData.Favorites}}">
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource MenuItemBaseStyle}">

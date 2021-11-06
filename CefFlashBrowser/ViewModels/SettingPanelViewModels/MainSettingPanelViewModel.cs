@@ -1,5 +1,5 @@
 ﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.StaticData;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.ViewModels.ComboBoxItemViewModels;
 using SimpleMvvm;
 using SimpleMvvm.Command;

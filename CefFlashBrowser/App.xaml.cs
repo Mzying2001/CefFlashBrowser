@@ -1,15 +1,9 @@
 ﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Models.FlashBrowser;
-using CefFlashBrowser.Models.StaticData;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace CefFlashBrowser
@@ -22,7 +16,7 @@ namespace CefFlashBrowser
         private void Init()
         {
             Settings.Init();
-            Favorites.InitFavorites();
+            GlobalData.InitData();
             LanguageManager.InitLanguage();
             FlashBrowserBase.InitCefFlash();
         }
@@ -54,6 +48,12 @@ namespace CefFlashBrowser
                     Environment.Exit(0);
                 }
             }
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            GlobalData.SaveData();
+            base.OnExit(e);
         }
     }
 }

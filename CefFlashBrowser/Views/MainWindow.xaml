@@ -8,7 +8,7 @@
     xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
     xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
     xmlns:m="clr-namespace:CefFlashBrowser.Models"
-    xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
+    xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
     xmlns:hc="https://handyorg.github.io/handycontrol"
     mc:Ignorable="d"
     
@@ -41,7 +41,7 @@
                                   Header="{DynamicResource menu_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
                         <Separator/>
-                        <CollectionContainer Collection="{Binding Source={x:Static sd:Favorites.Items}}"/>
+                        <CollectionContainer Collection="{Binding Source={x:Static data:GlobalData.Favorites}}"/>
                     </CompositeCollection>
                 </MenuItem.ItemsSource>
                 <MenuItem.ItemContainerStyle>

@@ -1,5 +1,5 @@
 ﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.StaticData;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
@@ -72,7 +72,6 @@ namespace CefFlashBrowser.ViewModels
         private void OpenFavoritesManager()
         {
             new FavoritesManager().ShowDialog();
-            Favorites.SaveFavorites();
         }
 
         private void LoadSwf()
