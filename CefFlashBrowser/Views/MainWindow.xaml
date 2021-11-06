@@ -10,7 +10,6 @@
     xmlns:m="clr-namespace:CefFlashBrowser.Models"
     xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
     xmlns:hc="https://handyorg.github.io/handycontrol"
-    xmlns:converter="clr-namespace:CefFlashBrowser.Models.Converters"
     mc:Ignorable="d"
     
     Width="600"
@@ -23,8 +22,7 @@
     WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        <converter:LanguageCodeToName x:Key="LanguageCode2Name"/>
-        <converter:IsCurrentLanguage x:Key="IsCurrentLanguage"/>
+
     </Window.Resources>
 
     <Grid>
@@ -76,7 +74,7 @@
                         <Style TargetType="MenuItem"
                                BasedOn="{StaticResource MenuItemBaseStyle}">
                             <Setter Property="Header"
-                                    Value="{Binding Converter={StaticResource LanguageCode2Name}}"/>
+                                    Value="{Binding Converter={StaticResource LanguageCodeToName}}"/>
                             <Setter Property="Command"
                                     Value="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel.SwitchLanguageCommand}"/>
                             <Setter Property="CommandParameter"

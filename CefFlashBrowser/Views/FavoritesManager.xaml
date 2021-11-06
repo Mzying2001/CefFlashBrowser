@@ -9,7 +9,6 @@
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
-        xmlns:converters="clr-namespace:CefFlashBrowser.Models.Converters"
         mc:Ignorable="d"
         
         Width="700"
@@ -21,7 +20,7 @@
         Title="{StaticResource favorites_managerTitle}">
 
     <Window.Resources>
-        <converters:ObjectNotNull x:Key="ObjectNotNull"/>
+        
     </Window.Resources>
 
     <Grid>
@@ -98,7 +97,7 @@
         <GroupBox Grid.Column="2"
                   Margin="0,10,10,10"
                   Header="{StaticResource favorites_edit}">
-            <Grid IsEnabled="{Binding ElementName=favoritesListBox, Path=SelectedItem, Converter={StaticResource ObjectNotNull}}">
+            <Grid IsEnabled="{Binding ElementName=favoritesListBox, Path=SelectedItem, Converter={StaticResource NotNull}}">
 
                 <StackPanel Grid.Row="1"
                             Grid.Column="1"
