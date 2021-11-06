@@ -30,7 +30,7 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
             if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Url))
                 return;
 
-            var website = new Website(Name, Url);
+            var website = new Website(Name.Trim(), Url.Trim());
             Favorites.Add(website);
             Messenger.Global.Send(MessageTokens.EXIT_ADDFAVORITES, true);
         }
