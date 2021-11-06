@@ -45,34 +45,61 @@
 
         <!--ConetxtMenu-->
         <ContextMenu x:Key="more">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock VerticalAlignment="Center">
-                    <Run Text="{DynamicResource menu_zoom}"/>
-                    <Run Text=": "/>
-                    <Run Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
-                    <Run Text=" "/>
-                </TextBlock>
-                <Button Width="30"
-                        Height="30"
-                        Padding="0"
-                        Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
-                    <Button.Content>
-                        <svgc:SvgViewbox Width="10"
-                                         Height="10"
-                                         Source="/Assets/Svgs/sub.svg"/>
-                    </Button.Content>
-                </Button>
-                <Button Width="30"
-                        Height="30"
-                        Padding="0"
-                        Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
-                    <Button.Content>
-                        <svgc:SvgViewbox Width="10"
-                                         Height="10"
-                                         Source="/Assets/Svgs/add.svg"/>
-                    </Button.Content>
-                </Button>
-            </StackPanel>
+            <MenuItem>
+                <MenuItem.Template>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Grid Margin="{TemplateBinding Padding}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="26"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter Grid.Column="0"
+                                              Content="{TemplateBinding Icon}"/>
+                            <ContentPresenter Grid.Column="1"
+                                              Content="{TemplateBinding Header}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </MenuItem.Template>
+                <MenuItem.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center">
+                            <Run Text="{DynamicResource menu_zoom}"/>
+                            <Run Text=": "/>
+                            <Run Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
+                        </TextBlock>
+                        <StackPanel Grid.Column="1"
+                                    Margin="0,0,26,0"
+                                    Orientation="Horizontal">
+                            <Button Width="30"
+                                    Height="30"
+                                    Padding="0"
+                                    Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
+                                <Button.Content>
+                                    <svgc:SvgViewbox Width="10"
+                                                     Height="10"
+                                                     Source="/Assets/Svgs/sub.svg"/>
+                                </Button.Content>
+                            </Button>
+                            <Button Width="30"
+                                    Height="30"
+                                    Padding="0"
+                                    Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
+                                <Button.Content>
+                                    <svgc:SvgViewbox Width="10"
+                                                     Height="10"
+                                                     Source="/Assets/Svgs/add.svg"/>
+                                </Button.Content>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </MenuItem.Header>
+            </MenuItem>
+
 
             <Separator/>
 
