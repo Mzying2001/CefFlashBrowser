@@ -17,7 +17,7 @@
 
             <ResourceDictionary.MergedDictionaries>
                 <!--Language-->
-                <ResourceDictionary Source="Language/en-US.xaml"/>
+                <ResourceDictionary Source="Assets/Language/zh-CN.xaml"/>
                 
                 <!--HandyControl-->
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>

@@ -191,15 +191,15 @@
     <Compile Include="Views\ViewSourceWindow.xaml.cs">
       <DependentUpon>ViewSourceWindow.xaml</DependentUpon>
     </Compile>
-    <Page Include="Language\en-US.xaml">
+    <Page Include="Assets\Language\en-US.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Language\zh-CN.xaml">
+    <Page Include="Assets\Language\zh-CN.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Language\zh-TW.xaml">
+    <Page Include="Assets\Language\zh-TW.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
