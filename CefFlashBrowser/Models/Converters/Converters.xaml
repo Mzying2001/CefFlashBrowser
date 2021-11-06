@@ -8,4 +8,6 @@
 
     <local:LanguageCodeToName x:Key="LanguageCodeToName"/>
 
+    <local:StringArrNotAllEmpty x:Key="StringArrNotAllEmpty"/>
+
 </ResourceDictionary>
