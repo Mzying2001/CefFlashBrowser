@@ -39,7 +39,7 @@
         <TextBlock Text="{DynamicResource favorites_name}"/>
         <cc:AutoSelectAllTextBox x:Name="NameTextBox"
                                  Style="{StaticResource AddFavoritesDialogTextBoxStyle}"
-                                 Text="{Binding Name}">
+                                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
                             Command="{Binding OkCommand}"/>
@@ -49,7 +49,7 @@
         <TextBlock Text="{DynamicResource favorites_url}"/>
         <cc:AutoSelectAllTextBox x:Name="UrlTextBox"
                                  Style="{StaticResource AddFavoritesDialogTextBoxStyle}"
-                                 Text="{Binding Url}">
+                                 Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
                             Command="{Binding OkCommand}"/>
@@ -73,7 +73,14 @@
                     Margin="10,0,0,0"
                     Content="{DynamicResource button_ok}"
                     Style="{StaticResource ButtonPrimary}"
-                    Command="{Binding OkCommand}"/>
+                    Command="{Binding OkCommand}">
+                <Button.IsEnabled>
+                    <MultiBinding Converter="{StaticResource StringArrNotAllEmpty}">
+                        <Binding Path="Name"/>
+                        <Binding Path="Url"/>
+                    </MultiBinding>
+                </Button.IsEnabled>
+            </Button>
         </Grid>
     </StackPanel>
 </Window>

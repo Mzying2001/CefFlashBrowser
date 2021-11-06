@@ -20,7 +20,7 @@
         Title="{StaticResource favorites_managerTitle}">
 
     <Window.Resources>
-        
+
     </Window.Resources>
 
     <Grid>
@@ -155,7 +155,14 @@
                                 Height="30"
                                 MinWidth="60"
                                 Content="{StaticResource favorites_save}"
-                                Command="{Binding SaveChangesCommand}"/>
+                                Command="{Binding SaveChangesCommand}">
+                            <Button.IsEnabled>
+                                <MultiBinding Converter="{StaticResource StringArrNotAllEmpty}">
+                                    <Binding Path="SelectedName"/>
+                                    <Binding Path="SelectedUrl"/>
+                                </MultiBinding>
+                            </Button.IsEnabled>
+                        </Button>
                     </Grid>
                 </StackPanel>
 

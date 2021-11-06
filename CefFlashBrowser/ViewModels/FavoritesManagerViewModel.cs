@@ -4,7 +4,6 @@ using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
-using System;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -60,21 +59,14 @@ namespace CefFlashBrowser.ViewModels
 
         private void SaveChanges()
         {
-            if (Favorites.Items == null || Favorites.Items.Count == 0)
+            if (string.IsNullOrWhiteSpace(SelectedName) || string.IsNullOrWhiteSpace(SelectedUrl))
                 return;
 
-            try
-            {
-                int index = SelectedIndex;
-                var website = new Website(SelectedName.Trim(), SelectedUrl.Trim());
-                Favorites.Items.RemoveAt(index);
-                Favorites.Items.Insert(index, website);
-                SelectedIndex = index;
-            }
-            catch (Exception e)
-            {
-                JsAlertDialog.Show(e.Message);
-            }
+            int index = SelectedIndex;
+            var website = new Website(SelectedName.Trim(), SelectedUrl.Trim());
+            Favorites.Items.RemoveAt(index);
+            Favorites.Items.Insert(index, website);
+            SelectedIndex = index;
         }
 
         private void AddItem()

@@ -1,10 +1,8 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.StaticData;
-using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using SimpleMvvm.Messaging;
-using System;
 
 namespace CefFlashBrowser.ViewModels.DialogViewModels
 {
@@ -29,16 +27,12 @@ namespace CefFlashBrowser.ViewModels.DialogViewModels
 
         private void Ok()
         {
-            try
-            {
-                var website = new Website(Name, Url);
-                Favorites.Add(website);
-                Messenger.Global.Send(MessageTokens.EXIT_ADDFAVORITES, true);
-            }
-            catch (Exception e)
-            {
-                JsAlertDialog.Show(e.Message, LanguageManager.GetString("title_error"));
-            }
+            if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Url))
+                return;
+
+            var website = new Website(Name, Url);
+            Favorites.Add(website);
+            Messenger.Global.Send(MessageTokens.EXIT_ADDFAVORITES, true);
         }
 
         private void Cancel()
