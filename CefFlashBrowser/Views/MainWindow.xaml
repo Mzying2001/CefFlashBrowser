@@ -91,47 +91,33 @@
             </MenuItem>
         </Menu>
 
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="0.45*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="0.55*"/>
-            </Grid.RowDefinitions>
+        <StackPanel Grid.Row="1"
+                    Width="300"
+                    Margin="0,0,0,20"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Row="1"
-                       Grid.Column="1"
-                       Margin="0,0,0,35"
-                       FontSize="30"
-                       Cursor="Hand"
-                       Text="Flash Browser"
-                       HorizontalAlignment="Center"
-                       ToolTip="{DynamicResource toolTip_viewGithub}">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDown">
-                        <i:InvokeCommandAction Command="{Binding ViewGithubCommand}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
+            <TextBlock Margin="0,0,0,35"
+                       HorizontalAlignment="Center">
+                <Hyperlink Foreground="Black"
+                           FontSize="30"
+                           TextDecorations="None"
+                           ToolTip="{StaticResource toolTip_viewGithub}"
+                           Command="{Binding ViewGithubCommand}">
+                    <TextBlock Text="Flash Browser"/>
+                </Hyperlink>
             </TextBlock>
 
             <!--The url textBox-->
-            <c:AutoSelectAllTextBox Grid.Row="2"
-                                    Grid.Column="1"
-                                    Width="300"
-                                    Style="{StaticResource TextBoxBaseStyle}">
+            <c:AutoSelectAllTextBox Style="{StaticResource TextBoxBaseStyle}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding OpenUrlCommand}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TextBox}, Path=Text}"/>
                 </TextBox.InputBindings>
             </c:AutoSelectAllTextBox>
-        </Grid>
+
+        </StackPanel>
 
         <!--The app info shows on the bottom of the main window-->
         <TextBlock Grid.Row="2"
