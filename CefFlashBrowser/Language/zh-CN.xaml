@@ -33,10 +33,10 @@
     <sys:String x:Key="button_viewDetails">详情</sys:String>
     <sys:String x:Key="message_deleteCache">确定要重启浏览器并清除所有缓存吗？</sys:String>
 
-    <!--地址栏功能-->
-    <sys:String x:Key="addressBarFunction_auto">自动</sys:String>
-    <sys:String x:Key="addressBarFunction_searchOnly">仅搜索</sys:String>
-    <sys:String x:Key="addressBarFunction_navigateOnly">仅导航</sys:String>
+    <!--主界面导航栏-->
+    <sys:String x:Key="navigationType_auto">自动</sys:String>
+    <sys:String x:Key="navigationType_searchOnly">仅搜索</sys:String>
+    <sys:String x:Key="navigationType_navigateOnly">仅导航</sys:String>
 
     <!--搜索引擎-->
     <sys:String x:Key="baidu">百度</sys:String>

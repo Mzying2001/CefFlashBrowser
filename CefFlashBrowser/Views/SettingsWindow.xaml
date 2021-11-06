@@ -3,8 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:sp="clr-namespace:CefFlashBrowser.Views.SettingPanels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
+        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         mc:Ignorable="d"
         
         Width="500"
@@ -12,17 +14,98 @@
         MinWidth="400"
         MinHeight="300"
         Title="{StaticResource menu_settings}">
-    
+
+    <Window.DataContext>
+        <vm:SettingsWindowViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+
+        <Style x:Key="SettingHeaderStyle"
+           TargetType="TextBlock">
+            <Setter Property="Margin"
+                Value="5,15,5,10"/>
+            <Setter Property="FontSize"
+                Value="18"/>
+            <Setter Property="FontWeight"
+                Value="Bold"/>
+        </Style>
+
+    </Window.Resources>
+
     <Grid>
         <TabControl Margin="10"
                     SelectedIndex="0"
                     Style="{StaticResource TabControlCapsuleSolid}">
             <TabItem Header="{StaticResource tabItem_main}">
-                <sp:MainSettingPanel/>
+                <ScrollViewer Padding="10">
+                    <StackPanel>
+                        <TextBlock Text="{StaticResource settingHeader_addressBar}"
+                                   Style="{StaticResource SettingHeaderStyle}"/>
+
+                        <c:SettingItem Text="{StaticResource settingItem_useSearchEngine}">
+                            <c:SettingItem.Content>
+                                <ComboBox MinWidth="80"
+                                          ItemsSource="{Binding NavigationTypes}"
+                                          DisplayMemberPath="Description"
+                                          SelectedValuePath="Value"
+                                          SelectedIndex="{Binding CurrentNavigationTypeIndex, Mode=OneTime}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectionChanged">
+                                            <i:InvokeCommandAction Command="{Binding SetNavigationTypeCommand}"
+                                                                   CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
+                            </c:SettingItem.Content>
+                        </c:SettingItem>
+
+                        <c:SettingItem Text="{StaticResource settingItem_searchEngine}">
+                            <c:SettingItem.Content>
+                                <ComboBox MinWidth="80"
+                                          ItemsSource="{Binding SearchEngines}"
+                                          DisplayMemberPath="Description"
+                                          SelectedValuePath="Value"
+                                          SelectedIndex="{Binding CurrentSearchEngineIndex, Mode=OneTime}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectionChanged">
+                                            <i:InvokeCommandAction Command="{Binding SetSearchEngineCommand}"
+                                                                   CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
+                            </c:SettingItem.Content>
+                        </c:SettingItem>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem Header="{StaticResource tabItem_browser}">
-                <sp:BrowserSettingPanel/>
+                <ScrollViewer Padding="10">
+                    <StackPanel>
+                        <TextBlock Text="{StaticResource settingHeader_browserData}"
+                                   Style="{StaticResource SettingHeaderStyle}"/>
+
+                        <c:SettingItem Text="{StaticResource settingItem_deleteCache}">
+                            <c:SettingItem.Content>
+                                <Button MinWidth="80"
+                                        Content="{StaticResource button_deleteCache}"
+                                        Command="{Binding DeleteCacheCommand}"/>
+                            </c:SettingItem.Content>
+                        </c:SettingItem>
+
+                        <TextBlock Text="{StaticResource settingHeader_aboutCef}"
+                                   Style="{StaticResource SettingHeaderStyle}"/>
+
+                        <c:SettingItem Text="{StaticResource settingItem_cefVersion}">
+                            <c:SettingItem.Content>
+                                <Button MinWidth="80"
+                                        Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource button_viewDetails}}"
+                                        Command="{Binding PopupAboutCefCommand}"/>
+                            </c:SettingItem.Content>
+                        </c:SettingItem>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
     </Grid>

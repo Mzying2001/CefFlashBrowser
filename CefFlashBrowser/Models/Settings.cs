@@ -4,7 +4,7 @@
     {
         public string Language { get; set; }
         public SearchEngine.Engine SearchEngine { get; set; }
-        public int AddressBarFunction { get; set; }
+        public NavigationType.Type NavigationType { get; set; }
         public bool FirstStart { get; set; }
         public WindowSizeInfo MainWindowSizeInfo { get; set; }
         public WindowSizeInfo BrowserWindowSizeInfo { get; set; }
@@ -16,7 +16,7 @@
         {
             Language = "zh-CN",
             SearchEngine = Models.SearchEngine.Engine.Baidu,
-            AddressBarFunction = 0,
+            NavigationType = Models.NavigationType.Type.Automatic,
             FirstStart = true,
             MainWindowSizeInfo = null,
             BrowserWindowSizeInfo = null,

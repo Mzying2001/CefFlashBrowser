@@ -33,10 +33,10 @@
     <sys:String x:Key="button_viewDetails">詳情</sys:String>
     <sys:String x:Key="message_deleteCache">確定要重啓瀏覽器並清除所有緩存嗎？</sys:String>
 
-    <!--地址欄功能-->
-    <sys:String x:Key="addressBarFunction_auto">自動</sys:String>
-    <sys:String x:Key="addressBarFunction_searchOnly">僅搜尋</sys:String>
-    <sys:String x:Key="addressBarFunction_navigateOnly">僅導航</sys:String>
+    <!--主介面的巡覽列-->
+    <sys:String x:Key="navigationType_auto">自動</sys:String>
+    <sys:String x:Key="navigationType_searchOnly">僅搜尋</sys:String>
+    <sys:String x:Key="navigationType_navigateOnly">僅導航</sys:String>
 
     <!--搜尋引擎-->
     <sys:String x:Key="baidu">百度</sys:String>

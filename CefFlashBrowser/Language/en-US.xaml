@@ -33,10 +33,10 @@
     <sys:String x:Key="button_viewDetails">Details</sys:String>
     <sys:String x:Key="message_deleteCache">Are you sure to delete all caches? The browser will restart.</sys:String>
 
-    <!--Address Bar Funcion-->
-    <sys:String x:Key="addressBarFunction_auto">Automatic</sys:String>
-    <sys:String x:Key="addressBarFunction_searchOnly">Search Only</sys:String>
-    <sys:String x:Key="addressBarFunction_navigateOnly">Navigate Only</sys:String>
+    <!--Navigation bar of main interface-->
+    <sys:String x:Key="navigationType_auto">Automatic</sys:String>
+    <sys:String x:Key="navigationType_searchOnly">Search Only</sys:String>
+    <sys:String x:Key="navigationType_navigateOnly">Navigate Only</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="baidu">Baidu</sys:String>

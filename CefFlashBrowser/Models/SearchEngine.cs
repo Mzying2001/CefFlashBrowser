@@ -1,5 +1,4 @@
-﻿using CefFlashBrowser.Models.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace CefFlashBrowser.Models
@@ -39,13 +38,13 @@ namespace CefFlashBrowser.Models
             }
         }
 
-        public static IEnumerable<(Engine engine, string name)> GetSupportedSearchEngines()
+        public static IEnumerable<EnumDescription<Engine>> GetSupportedSearchEngines()
         {
-            yield return (Engine.Baidu, LanguageManager.GetString("baidu"));
-            yield return (Engine.Google, LanguageManager.GetString("google"));
-            yield return (Engine.Bing, LanguageManager.GetString("bing"));
-            yield return (Engine.Sogou, LanguageManager.GetString("sogou"));
-            yield return (Engine.So360, LanguageManager.GetString("so360"));
+            yield return new EnumDescription<Engine>(Engine.Baidu, LanguageManager.GetString("baidu"));
+            yield return new EnumDescription<Engine>(Engine.Google, LanguageManager.GetString("google"));
+            yield return new EnumDescription<Engine>(Engine.Bing, LanguageManager.GetString("bing"));
+            yield return new EnumDescription<Engine>(Engine.Sogou, LanguageManager.GetString("sogou"));
+            yield return new EnumDescription<Engine>(Engine.So360, LanguageManager.GetString("so360"));
         }
     }
 }

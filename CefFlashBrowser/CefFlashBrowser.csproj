@@ -126,6 +126,7 @@
     <Compile Include="Models\Converters\MultiValueConverterBase.cs" />
     <Compile Include="Models\Converters\ObjectNotNull.cs" />
     <Compile Include="Models\Converters\StringArrNotAllEmpty.cs" />
+    <Compile Include="Models\EnumDescription.cs" />
     <Compile Include="Models\FavoritesFile.cs" />
     <Compile Include="Models\FlashBrowser\ChromiumFlashBrowser.cs" />
     <Compile Include="Models\FlashBrowser\ChromiumSwfBrowser.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Models\FlashBrowser\IEDownloadHandler.cs" />
     <Compile Include="Models\Data\GlobalData.cs" />
     <Compile Include="Models\LanguageManager.cs" />
+    <Compile Include="Models\NavigationType.cs" />
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\MessageTokens.cs" />
     <Compile Include="Models\Settings.cs" />
@@ -144,9 +146,6 @@
     <Compile Include="Models\Website.cs" />
     <Compile Include="Models\WindowSizeInfo.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
-    <Compile Include="ViewModels\ComboBoxItemViewModels\ComboBoxItemViewModel.cs" />
-    <Compile Include="ViewModels\ComboBoxItemViewModels\AddressBarFunctionComboBoxViewModel.cs" />
-    <Compile Include="ViewModels\ComboBoxItemViewModels\SearchEngineComboBoxItemViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\AddFavoriteDialogViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsAlertDialogViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsConfirmDialogViewModel.cs" />
@@ -155,8 +154,7 @@
     <Compile Include="ViewModels\DialogViewModels\SelectLanguageDialogViewModel.cs" />
     <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
-    <Compile Include="ViewModels\SettingPanelViewModels\BrowserSettingPanelViewModel.cs" />
-    <Compile Include="ViewModels\SettingPanelViewModels\MainSettingPanelViewModel.cs" />
+    <Compile Include="ViewModels\SettingsWindowViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
@@ -165,6 +163,7 @@
     <Compile Include="Models\Converters\ValueConverterBase.cs" />
     <Compile Include="Views\Custom\AutoSelectAllTextBox.cs" />
     <Compile Include="Views\Custom\DropableWindow.cs" />
+    <Compile Include="Views\Custom\SettingItem.cs" />
     <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">
       <DependentUpon>AddFavoriteDialog.xaml</DependentUpon>
     </Compile>
@@ -182,12 +181,6 @@
     </Compile>
     <Compile Include="Views\FavoritesManager.xaml.cs">
       <DependentUpon>FavoritesManager.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\SettingPanels\BrowserSettingPanel.xaml.cs">
-      <DependentUpon>BrowserSettingPanel.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\SettingPanels\MainSettingPanel.xaml.cs">
-      <DependentUpon>MainSettingPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
@@ -213,6 +206,10 @@
     <Page Include="Models\Converters\Converters.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Dialogs\AddFavoriteDialog.xaml">
       <SubType>Designer</SubType>
@@ -255,18 +252,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\BrowserWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\SettingPanels\BrowserSettingPanel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\SettingPanels\MainSettingPanel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\SettingPanels\SettingPanelResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

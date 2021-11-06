@@ -38,26 +38,25 @@ namespace CefFlashBrowser.ViewModels
                 return;
             }
 
-            /*
-             * Address Bar Function
-             * 
-             * 0: Automatic
-             * 1: Search Only
-             * 2: Navigate Only
-             */
-            switch (GlobalData.Settings.AddressBarFunction)
+            switch (GlobalData.Settings.NavigationType)
             {
-                case 0:
-                    if (!UrlChecker.IsUrl(url))
+                case NavigationType.Type.Automatic:
+                    {
+                        if (!UrlChecker.IsUrl(url))
+                            url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
+                    }
+                    break;
+
+                case NavigationType.Type.SearchOnly:
+                    {
                         url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
+                    }
                     break;
 
-                case 1:
-                    url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
-                    break;
-
-                case 2:
-                    //nothing to do
+                case NavigationType.Type.NavigateOnly:
+                    {
+                        //nothing to do
+                    }
                     break;
             }
 
