@@ -52,7 +52,9 @@
                         <Setter Property="Header"
                                 Value="{Binding Name}"/>
                         <Setter Property="Command"
-                                Value="{Binding OpenWebsiteCommand}"/>
+                                Value="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel.OpenWebsiteCommand}"/>
+                        <Setter Property="CommandParameter"
+                                Value="{Binding}"/>
                     </Style>
                 </MenuItem.ItemContainerStyle>
             </MenuItem>

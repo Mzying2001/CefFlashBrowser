@@ -6,9 +6,10 @@
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:sd="clr-namespace:CefFlashBrowser.Models.StaticData"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:cc="clr-namespace:CefFlashBrowser.Views.Custom"
+        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+        xmlns:converters="clr-namespace:CefFlashBrowser.Models.Converters"
         mc:Ignorable="d"
         
         Width="700"
@@ -20,7 +21,7 @@
         Title="{StaticResource favorites_managerTitle}">
 
     <Window.Resources>
-
+        <converters:ObjectNotNull x:Key="ObjectNotNull"/>
     </Window.Resources>
 
     <Grid>
@@ -46,12 +47,13 @@
                         Content="{StaticResource favorites_add}"
                         Command="{Binding AddItemCommand}"/>
                 <Button Margin="0,0,7,0"
-                        IsEnabled="{Binding HasItems}"
                         Content="{StaticResource favorites_remove}"
-                        Command="{Binding RemoveItemCommand}"/>
+                        Command="{Binding RemoveItemCommand}"
+                        CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}"/>
             </StackPanel>
 
-            <ListBox Grid.Row="1"
+            <ListBox x:Name="favoritesListBox"
+                     Grid.Row="1"
                      VerticalContentAlignment="Stretch"
                      HorizontalContentAlignment="Stretch"
                      SelectedIndex="{Binding SelectedIndex}"
@@ -63,14 +65,17 @@
                                 Value="{Binding Name}"/>
                         <Setter Property="ContextMenu">
                             <Setter.Value>
-                                <ContextMenu DataContext="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel}">
+                                <ContextMenu>
                                     <MenuItem Header="{StaticResource favorites_toTop}"
-                                              Command="{Binding MoveToTopCommand}"/>
+                                              Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.MoveToTopCommand}"
+                                              CommandParameter="{Binding}"/>
                                     <MenuItem Header="{StaticResource favorites_toBottom}"
-                                              Command="{Binding MoveToBottomCommand}"/>
+                                              Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.MoveToBottomCommand}"
+                                              CommandParameter="{Binding}"/>
                                     <Separator/>
                                     <MenuItem Header="{StaticResource favorites_remove}"
-                                              Command="{Binding RemoveItemCommand}"/>
+                                              Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.RemoveItemCommand}"
+                                              CommandParameter="{Binding}"/>
                                 </ContextMenu>
                             </Setter.Value>
                         </Setter>
@@ -78,8 +83,7 @@
                 </ListBox.ItemContainerStyle>
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
-                        <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}"
-                                               CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}"/>
+                        <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>
@@ -94,81 +98,67 @@
         <GroupBox Grid.Column="2"
                   Margin="0,10,10,10"
                   Header="{StaticResource favorites_edit}">
-            <Grid IsEnabled="{Binding HasItems}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <Grid IsEnabled="{Binding ElementName=favoritesListBox, Path=SelectedItem, Converter={StaticResource ObjectNotNull}}">
 
-                <Grid Grid.Row="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Row="1"
-                                Grid.Column="1">
-                        <TextBlock Text="{StaticResource favorites_name}"
+                <StackPanel Grid.Row="1"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                    <TextBlock Text="{StaticResource favorites_name}"
                                    Foreground="Black"/>
-                        <cc:AutoSelectAllTextBox Margin="0,0,0,20"
-                                                 Width="300"
-                                                 Style="{StaticResource TextBoxBaseStyle}"
-                                                 Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
-                            </TextBox.InputBindings>
-                        </cc:AutoSelectAllTextBox>
+                    <c:AutoSelectAllTextBox Margin="0,0,0,20"
+                                            Width="300"
+                                            Style="{StaticResource TextBoxBaseStyle}"
+                                            Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
+                        </TextBox.InputBindings>
+                    </c:AutoSelectAllTextBox>
 
-                        <TextBlock Text="{StaticResource favorites_url}"
-                                   Foreground="Black"/>
-                        <cc:AutoSelectAllTextBox Margin="0,0,0,20"
-                                                 Width="300"
-                                                 Style="{StaticResource TextBoxBaseStyle}"
-                                                 Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
-                            </TextBox.InputBindings>
-                        </cc:AutoSelectAllTextBox>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0"
-                                    Width="30"
-                                    Height="30"
-                                    Padding="0"
-                                    Command="{Binding MoveUpCommand}">
-                                <svgc:SvgViewbox Width="12"
-                                                 Height="12"
-                                                 Source="/Assets/Svgs/up.svg"/>
-                            </Button>
-                            <Button Grid.Column="1"
-                                    Width="30"
-                                    Height="30"
-                                    Padding="0"
-                                    Command="{Binding MoveDownCommand}">
-                                <svgc:SvgViewbox Width="12"
-                                                 Height="12"
-                                                 Source="/Assets/Svgs/down.svg"/>
-                            </Button>
-                            <Button Grid.Column="3"
-                                    Height="30"
-                                    MinWidth="60"
-                                    Content="{StaticResource favorites_save}"
-                                    Command="{Binding SaveChangesCommand}"/>
-                        </Grid>
-                    </StackPanel>
-                </Grid>
+                    <TextBlock Text="{StaticResource favorites_url}"
+                               Foreground="Black"/>
+                    <c:AutoSelectAllTextBox Margin="0,0,0,20"
+                                            Width="300"
+                                            Style="{StaticResource TextBoxBaseStyle}"
+                                            Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SaveChangesCommand}"/>
+                        </TextBox.InputBindings>
+                    </c:AutoSelectAllTextBox>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                                Width="30"
+                                Height="30"
+                                Padding="0"
+                                Command="{Binding MoveUpCommand}"
+                                CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
+                            <svgc:SvgViewbox Width="12"
+                                             Height="12"
+                                             Source="/Assets/Svgs/up.svg"/>
+                        </Button>
+                        <Button Grid.Column="1"
+                                Width="30"
+                                Height="30"
+                                Padding="0"
+                                Command="{Binding MoveDownCommand}"
+                                CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
+                            <svgc:SvgViewbox Width="12"
+                                             Height="12"
+                                             Source="/Assets/Svgs/down.svg"/>
+                        </Button>
+                        <Button Grid.Column="3"
+                                Height="30"
+                                MinWidth="60"
+                                Content="{StaticResource favorites_save}"
+                                Command="{Binding SaveChangesCommand}"/>
+                    </Grid>
+                </StackPanel>
 
             </Grid>
         </GroupBox>

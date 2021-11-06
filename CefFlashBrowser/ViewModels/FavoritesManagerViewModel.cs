@@ -5,7 +5,6 @@ using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
-using System.Windows.Controls;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -19,13 +18,6 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand MoveDownCommand { get; set; }
         public DelegateCommand MoveToTopCommand { get; set; }
         public DelegateCommand MoveToBottomCommand { get; set; }
-
-        private bool _hasItems;
-        public bool HasItems
-        {
-            get => _hasItems;
-            set => UpdateValue(ref _hasItems, value);
-        }
 
         private int _selectedIndex;
         public int SelectedIndex
@@ -48,27 +40,21 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _selectedUrl, value);
         }
 
-        private void SelectionChanged(ListBox lb)
+        private void SelectionChanged()
         {
             if (Favorites.Items == null)
                 return;
 
-            SelectedIndex = lb.SelectedIndex;
-
-            if (SelectedIndex == -1)
+            if (SelectedIndex == -1 || Favorites.Items.Count == 0)
             {
-                HasItems = false;
                 SelectedName = string.Empty;
                 SelectedUrl = string.Empty;
             }
             else
             {
-                if (Favorites.Items.Count != 0)
-                {
-                    HasItems = true;
-                    SelectedName = Favorites.Items[SelectedIndex].Name;
-                    SelectedUrl = Favorites.Items[SelectedIndex].Url;
-                }
+                Website item = Favorites.Items[SelectedIndex];
+                SelectedName = item.Name;
+                SelectedUrl = item.Url;
             }
         }
 
@@ -79,9 +65,11 @@ namespace CefFlashBrowser.ViewModels
 
             try
             {
+                int index = SelectedIndex;
                 var website = new Website(SelectedName.Trim(), SelectedUrl.Trim());
-                Favorites.Items[SelectedIndex].Name = website.Name;
-                Favorites.Items[SelectedIndex].Url = website.Url;
+                Favorites.Items.RemoveAt(index);
+                Favorites.Items.Insert(index, website);
+                SelectedIndex = index;
             }
             catch (Exception e)
             {
@@ -98,60 +86,65 @@ namespace CefFlashBrowser.ViewModels
             });
         }
 
-        private void RemoveItem()
+        private void RemoveItem(Website item)
         {
             JsConfirmDialog.Show(string.Format(LanguageManager.GetString("message_removeItem"), Favorites.Items[SelectedIndex].Name), "", result =>
             {
                 if (result == true)
                 {
-                    Favorites.Items.RemoveAt(SelectedIndex--);
-                    if (SelectedIndex == -1 && Favorites.Items.Count > 0)
-                        SelectedIndex = 0;
+                    int index = SelectedIndex;
+                    Favorites.Items.Remove(item);
+                    SelectedIndex = (--index == -1 && Favorites.Items.Count > 0) ? 0 : index;
                 }
             });
         }
 
         private void SwapItem(int i, int j)
         {
-            var temp = new Website(Favorites.Items[i].Name, Favorites.Items[i].Url);
-            Favorites.Items[i].Name = Favorites.Items[j].Name;
-            Favorites.Items[i].Url = Favorites.Items[j].Url;
-            Favorites.Items[j].Name = temp.Name;
-            Favorites.Items[j].Url = temp.Url;
+            if (i > j)
+            {
+                int tmp = i;
+                i = j;
+                j = tmp;
+            }
+            Website item1 = Favorites.Items[i];
+            Website item2 = Favorites.Items[j];
+            Favorites.Items.Remove(item2);
+            Favorites.Items.Remove(item1);
+            Favorites.Items.Insert(i, item2);
+            Favorites.Items.Insert(j, item1);
         }
 
-        private void MoveUp()
+        private void MoveUp(Website item)
         {
-            int index = SelectedIndex;
+            int index = Favorites.Items.IndexOf(item);
             if (index > 0)
             {
                 SwapItem(index, index - 1);
-                SelectedIndex--;
+                SelectedIndex = index - 1;
             }
         }
 
-        private void MoveDown()
+        private void MoveDown(Website item)
         {
-            int index = SelectedIndex;
+            int index = Favorites.Items.IndexOf(item);
             if (index < Favorites.Items.Count - 1)
             {
                 SwapItem(index, index + 1);
-                SelectedIndex++;
+                SelectedIndex = index + 1;
             }
         }
 
-        private void MoveToTop()
+        private void MoveToTop(Website item)
         {
-            var item = Favorites.Items[SelectedIndex];
-            Favorites.Items.RemoveAt(SelectedIndex);
+            Favorites.Items.Remove(item);
             Favorites.Items.Insert(0, item);
             SelectedIndex = 0;
         }
 
-        private void MoveToBottom()
+        private void MoveToBottom(Website item)
         {
-            var item = Favorites.Items[SelectedIndex];
-            Favorites.Items.RemoveAt(SelectedIndex);
+            Favorites.Items.Remove(item);
             Favorites.Items.Add(item);
             SelectedIndex = Favorites.Items.Count - 1;
         }
@@ -160,8 +153,7 @@ namespace CefFlashBrowser.ViewModels
         {
             base.Init();
 
-            HasItems = Favorites.Items.Count != 0;
-            if (HasItems)
+            if (Favorites.Items.Count != 0)
             {
                 SelectedIndex = 0;
                 SelectedName = Favorites.Items[SelectedIndex].Name;
@@ -171,14 +163,14 @@ namespace CefFlashBrowser.ViewModels
 
         public FavoritesManagerViewModel()
         {
-            SelectionChangedCommand = new DelegateCommand<ListBox>(SelectionChanged);
+            SelectionChangedCommand = new DelegateCommand(SelectionChanged);
             SaveChangesCommand = new DelegateCommand(SaveChanges);
             AddItemCommand = new DelegateCommand(AddItem);
-            RemoveItemCommand = new DelegateCommand(RemoveItem);
-            MoveUpCommand = new DelegateCommand(MoveUp);
-            MoveDownCommand = new DelegateCommand(MoveDown);
-            MoveToTopCommand = new DelegateCommand(MoveToTop);
-            MoveToBottomCommand = new DelegateCommand(MoveToBottom);
+            RemoveItemCommand = new DelegateCommand<Website>(RemoveItem);
+            MoveUpCommand = new DelegateCommand<Website>(MoveUp);
+            MoveDownCommand = new DelegateCommand<Website>(MoveDown);
+            MoveToTopCommand = new DelegateCommand<Website>(MoveToTop);
+            MoveToBottomCommand = new DelegateCommand<Website>(MoveToBottom);
         }
     }
 }

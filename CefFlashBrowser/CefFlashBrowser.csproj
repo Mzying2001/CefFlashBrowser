@@ -123,6 +123,7 @@
     <Compile Include="Models\AppInfo.cs" />
     <Compile Include="Models\Converters\IsCurrentLanguage.cs" />
     <Compile Include="Models\Converters\LanguageCodeToName.cs" />
+    <Compile Include="Models\Converters\ObjectNotNull.cs" />
     <Compile Include="Models\FlashBrowser\ChromiumFlashBrowser.cs" />
     <Compile Include="Models\FlashBrowser\ChromiumSwfBrowser.cs" />
     <Compile Include="Models\FlashBrowser\ContextMenuHandler.cs" />

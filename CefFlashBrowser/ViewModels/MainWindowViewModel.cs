@@ -18,7 +18,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenFavoritesManagerCommand { get; set; }
         public DelegateCommand LoadSwfCommand { get; set; }
         public DelegateCommand ViewGithubCommand { get; set; }
-        public DelegateCommand OpenFavoritesItemCommand { get; set; }
+        public DelegateCommand OpenWebsiteCommand { get; set; }
         public DelegateCommand OnDropCommand { get; set; }
         public DelegateCommand SwitchLanguageCommand { get; set; }
 
@@ -92,7 +92,7 @@ namespace CefFlashBrowser.ViewModels
             BrowserWindow.Show("https://github.com/Mzying2001/CefFlashBrowser");
         }
 
-        private void OpenFavoritesItem(Website website)
+        private void OpenWebsite(Website website)
         {
             BrowserWindow.Show(website.Url);
         }
@@ -140,7 +140,7 @@ namespace CefFlashBrowser.ViewModels
             OpenFavoritesManagerCommand = new DelegateCommand(OpenFavoritesManager);
             LoadSwfCommand = new DelegateCommand(LoadSwf);
             ViewGithubCommand = new DelegateCommand(ViewGithub);
-            OpenFavoritesItemCommand = new DelegateCommand<Website>(OpenFavoritesItem);
+            OpenWebsiteCommand = new DelegateCommand<Website>(OpenWebsite);
             OnDropCommand = new DelegateCommand<DragEventArgs>(OnDrop);
             SwitchLanguageCommand = new DelegateCommand<string>(SwitchLanguage);
         }
