@@ -134,7 +134,7 @@
     <Compile Include="Models\FlashBrowser\FlashBrowserBase.cs" />
     <Compile Include="Models\FlashBrowser\JsDialogHandler.cs" />
     <Compile Include="Models\FlashBrowser\NewWindowEventArgs.cs" />
-    <Compile Include="Models\FlashBrowser\FlashBrowserLifeSpanHandler.cs" />
+    <Compile Include="Models\FlashBrowser\LifeSpanHandler.cs" />
     <Compile Include="Models\FlashBrowser\IEDownloadHandler.cs" />
     <Compile Include="Models\Data\GlobalData.cs" />
     <Compile Include="Models\LanguageManager.cs" />

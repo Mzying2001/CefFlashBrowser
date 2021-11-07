@@ -12,6 +12,8 @@ namespace CefFlashBrowser.Models.FlashBrowser
 {
     public class FlashBrowserBase : ChromiumWebBrowser
     {
+        public event EventHandler<NewWindowEventArgs> OnCreateNewWindow;
+
         public ICommand LoadUrlCommand { get; private set; }
 
         public ICommand ChangeLoadingStateCommand { get; private set; }
@@ -36,6 +38,10 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
             DownloadHandler = new IEDownloadHandler();
             JsDialogHandler = new JsDialogHandler();
+            LifeSpanHandler = new LifeSpanHandler((s, e) =>
+            {
+                OnCreateNewWindow?.Invoke(this, e);
+            });
         }
 
         protected override void OnIsBrowserInitializedChanged(bool oldValue, bool newValue)

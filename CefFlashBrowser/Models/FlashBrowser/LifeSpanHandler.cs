@@ -3,13 +3,15 @@ using System;
 
 namespace CefFlashBrowser.Models.FlashBrowser
 {
-    public class FlashBrowserLifeSpanHandler : ILifeSpanHandler
+    public class LifeSpanHandler : ILifeSpanHandler
     {
-        private readonly EventHandler<NewWindowEventArgs> OnCreateNewWindow;
+        public event EventHandler<NewWindowEventArgs> OnCreateNewWindow;
 
-        public FlashBrowserLifeSpanHandler(EventHandler<NewWindowEventArgs> OnCreateNewWindow = null)
+        public LifeSpanHandler() { }
+
+        public LifeSpanHandler(EventHandler<NewWindowEventArgs> onCreateNewWindow)
         {
-            this.OnCreateNewWindow = OnCreateNewWindow;
+            OnCreateNewWindow += onCreateNewWindow;
         }
 
         public bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
@@ -29,21 +31,9 @@ namespace CefFlashBrowser.Models.FlashBrowser
         {
             newBrowser = null;
 
-            if (chromiumWebBrowser is ChromiumFlashBrowser fbrowser)
-            {
-                var args = new NewWindowEventArgs(targetUrl, true);
-                OnCreateNewWindow?.Invoke(fbrowser, args);
-
-                if (args.CancelPopup)
-                {
-                    fbrowser.Dispatcher.Invoke(() =>
-                    {
-                        fbrowser.Address = targetUrl;
-                    });
-                    return true;
-                }
-            }
-            return false;
+            NewWindowEventArgs args = new NewWindowEventArgs(chromiumWebBrowser, targetUrl, false);
+            OnCreateNewWindow?.Invoke(this, args);
+            return args.CancelPopup;
         }
     }
 }

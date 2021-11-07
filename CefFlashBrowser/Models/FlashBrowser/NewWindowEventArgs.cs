@@ -1,16 +1,20 @@
-﻿using System;
+﻿using CefSharp;
+using System;
 
 namespace CefFlashBrowser.Models.FlashBrowser
 {
     public class NewWindowEventArgs : EventArgs
     {
-        public string Url { get; set; }
-
+        public IWebBrowser Browser { get; set; }
+        public string TargetUrl { get; set; }
         public bool CancelPopup { get; set; }
 
-        public NewWindowEventArgs(string url, bool cancelPopup)
+        public NewWindowEventArgs() { }
+
+        public NewWindowEventArgs(IWebBrowser browser, string targetUrl, bool cancelPopup)
         {
-            Url = url;
+            Browser = browser;
+            TargetUrl = targetUrl;
             CancelPopup = cancelPopup;
         }
     }

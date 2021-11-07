@@ -1,20 +1,19 @@
-﻿using System;
-
-namespace CefFlashBrowser.Models.FlashBrowser
+﻿namespace CefFlashBrowser.Models.FlashBrowser
 {
     public class ChromiumFlashBrowser : FlashBrowserBase
     {
-        public event EventHandler<NewWindowEventArgs> OnCreatedNewWindow;
-
         public override void BeginInit()
         {
             base.BeginInit();
 
             MenuHandler = new ContextMenuHandler();
-            LifeSpanHandler = new FlashBrowserLifeSpanHandler((s, e) =>
-            {
-                OnCreatedNewWindow?.Invoke(s, e);
-            });
+            OnCreateNewWindow += ChromiumFlashBrowser_OnCreateNewWindow;
+        }
+
+        private void ChromiumFlashBrowser_OnCreateNewWindow(object sender, NewWindowEventArgs e)
+        {
+            e.CancelPopup = true;
+            Dispatcher.Invoke(() => Address = e.TargetUrl);
         }
     }
 }
