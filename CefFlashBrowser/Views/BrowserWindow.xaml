@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
+        xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
         xmlns:flash="clr-namespace:CefFlashBrowser.Models.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
@@ -108,14 +109,21 @@
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource MenuItemBaseStyle}">
-                        <Setter Property="Header"
-                                Value="{Binding Name}"/>
+                        <!--<Setter Property="Header"
+                                Value="{Binding Name}"/>-->
                         <Setter Property="Command"
                                 Value="{Binding Source={x:Reference Name=browser}, Path=LoadUrlCommand}"/>
                         <Setter Property="CommandParameter"
                                 Value="{Binding Url}"/>
                     </Style>
                 </MenuItem.ItemContainerStyle>
+                <MenuItem.ItemTemplate>
+                    <DataTemplate DataType="{x:Type m:Website}">
+                        <TextBlock MaxWidth="200"
+                                   TextTrimming="CharacterEllipsis"
+                                   Text="{Binding Name}"/>
+                    </DataTemplate>
+                </MenuItem.ItemTemplate>
             </MenuItem>
 
             <MenuItem Header="{DynamicResource menu_addFavorite}"
