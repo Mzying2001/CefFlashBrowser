@@ -47,14 +47,23 @@
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource MenuItemBaseStyle}">
-                        <Setter Property="Header"
-                                Value="{Binding Name}"/>
                         <Setter Property="Command"
                                 Value="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel.OpenWebsiteCommand}"/>
                         <Setter Property="CommandParameter"
                                 Value="{Binding}"/>
                     </Style>
                 </MenuItem.ItemContainerStyle>
+                <MenuItem.ItemTemplate>
+                    <DataTemplate DataType="{x:Type m:Website}">
+                        <TextBlock MaxWidth="225"
+                                   TextTrimming="CharacterEllipsis">
+                            <Run Text="{Binding Name}"/><LineBreak/>
+                            <Run FontSize="10"
+                                 Foreground="Gray"
+                                 Text="{Binding Url}"/>
+                        </TextBlock>
+                    </DataTemplate>
+                </MenuItem.ItemTemplate>
             </MenuItem>
 
             <!--Options Menu-->
