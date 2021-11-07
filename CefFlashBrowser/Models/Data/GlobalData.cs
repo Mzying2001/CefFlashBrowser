@@ -1,5 +1,4 @@
-﻿using CefFlashBrowser.Views.Dialogs.JsDialogs;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -45,16 +44,14 @@ namespace CefFlashBrowser.Models.Data
 
         public static void InitFavorites()
         {
-            Favorites = new ObservableCollection<Website>();
             try
             {
                 var file = JsonConvert.DeserializeObject<FavoritesFile>(File.ReadAllText(FavoritesPath));
-                foreach (var item in file.Favorites)
-                    Favorites.Add(item);
+                Favorites = new ObservableCollection<Website>(file.Favorites);
             }
-            catch (Exception e)
+            catch
             {
-                JsAlertDialog.Show(e.Message, LanguageManager.GetString("title_error"));
+                Favorites = new ObservableCollection<Website>();
             }
         }
 
