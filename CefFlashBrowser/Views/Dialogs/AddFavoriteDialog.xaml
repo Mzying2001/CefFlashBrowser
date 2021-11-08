@@ -75,7 +75,7 @@
                     Style="{StaticResource ButtonPrimary}"
                     Command="{Binding OkCommand}">
                 <Button.IsEnabled>
-                    <MultiBinding Converter="{StaticResource StringArrNotAllEmpty}">
+                    <MultiBinding Converter="{StaticResource StringArrNotAnyEmpty}">
                         <Binding Path="Name"/>
                         <Binding Path="Url"/>
                     </MultiBinding>

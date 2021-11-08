@@ -164,7 +164,7 @@
                                     Content="{StaticResource favorites_save}"
                                     Command="{Binding SaveChangesCommand}">
                                 <Button.IsEnabled>
-                                    <MultiBinding Converter="{StaticResource StringArrNotAllEmpty}">
+                                    <MultiBinding Converter="{StaticResource StringArrNotAnyEmpty}">
                                         <Binding Path="SelectedName"/>
                                         <Binding Path="SelectedUrl"/>
                                     </MultiBinding>

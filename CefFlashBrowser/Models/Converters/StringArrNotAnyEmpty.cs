@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace CefFlashBrowser.Models.Converters
 {
-    public class StringArrNotAllEmpty : MultiValueConverterBase<string, bool>
+    public class StringArrNotAnyEmpty : MultiValueConverterBase<string, bool>
     {
         public override bool Convert(string[] values, object parameter, CultureInfo culture)
         {
