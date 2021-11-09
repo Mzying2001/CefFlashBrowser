@@ -10,6 +10,7 @@
     xmlns:m="clr-namespace:CefFlashBrowser.Models"
     xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
     xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     mc:Ignorable="d"
     
     Width="600"
@@ -35,35 +36,48 @@
         <Menu>
             <!--Favorites Menu-->
             <MenuItem Header="{DynamicResource menu_favorites}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="MenuItem">
+                                    <ContentPresenter Content="{TemplateBinding Header}"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </MenuItem.ItemContainerStyle>
                 <MenuItem.ItemsSource>
-                    <CompositeCollection>
+                    <x:Array Type="{x:Type sys:Object}">
                         <MenuItem Style="{StaticResource MenuItemBaseStyle}"
                                   Header="{DynamicResource menu_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
                         <Separator/>
-                        <CollectionContainer Collection="{Binding Source={x:Static data:GlobalData.Favorites}}"/>
-                    </CompositeCollection>
+                        <ItemsControl ItemsSource="{x:Static data:GlobalData.Favorites}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type m:Website}">
+                                    <MenuItem Command="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel.OpenWebsiteCommand}"
+                                              CommandParameter="{Binding}">
+                                        <MenuItem.Header>
+                                            <TextBlock MaxWidth="225"
+                                                       TextTrimming="CharacterEllipsis">
+                                                <Run Text="{Binding Name}"/><LineBreak/>
+                                                <Run FontSize="10"
+                                                     Foreground="Gray"
+                                                     Text="{Binding Url}"/>
+                                            </TextBlock>
+                                        </MenuItem.Header>
+                                    </MenuItem>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </x:Array>
                 </MenuItem.ItemsSource>
-                <MenuItem.ItemContainerStyle>
-                    <Style TargetType="MenuItem"
-                           BasedOn="{StaticResource MenuItemBaseStyle}">
-                        <Setter Property="Command"
-                                Value="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel.OpenWebsiteCommand}"/>
-                        <Setter Property="CommandParameter"
-                                Value="{Binding}"/>
-                    </Style>
-                </MenuItem.ItemContainerStyle>
-                <MenuItem.ItemTemplate>
-                    <DataTemplate DataType="{x:Type m:Website}">
-                        <TextBlock MaxWidth="225"
-                                   TextTrimming="CharacterEllipsis">
-                            <Run Text="{Binding Name}"/><LineBreak/>
-                            <Run FontSize="10"
-                                 Foreground="Gray"
-                                 Text="{Binding Url}"/>
-                        </TextBlock>
-                    </DataTemplate>
-                </MenuItem.ItemTemplate>
             </MenuItem>
 
             <!--Options Menu-->
