@@ -12,6 +12,9 @@ namespace CefFlashBrowser.Models.FlashBrowser
 {
     public class FlashBrowserBase : ChromiumWebBrowser
     {
+        public static readonly string CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Caches\");
+        public static readonly string FlashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
+
         public event EventHandler<NewWindowEventArgs> OnCreateNewWindow;
 
         public ICommand LoadUrlCommand { get; private set; }
@@ -75,18 +78,16 @@ namespace CefFlashBrowser.Models.FlashBrowser
             CefSettings settings = new CefSettings()
             {
                 Locale = GlobalData.Settings.Language,
-                CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Caches\")
+                CachePath = CachePath
             };
 
 #if !DEBUG
             settings.LogSeverity = LogSeverity.Disable;
 #endif
 
-            var flashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
-
             settings.CefCommandLineArgs["enable-system-flash"] = "1";
-            settings.CefCommandLineArgs.Add("ppapi-flash-version", FileVersionInfo.GetVersionInfo(flashPath).FileVersion.Replace(',', '.'));
-            settings.CefCommandLineArgs.Add("ppapi-flash-path", flashPath);
+            settings.CefCommandLineArgs.Add("ppapi-flash-version", FileVersionInfo.GetVersionInfo(FlashPath).FileVersion.Replace(',', '.'));
+            settings.CefCommandLineArgs.Add("ppapi-flash-path", FlashPath);
             Cef.Initialize(settings);
         }
     }
