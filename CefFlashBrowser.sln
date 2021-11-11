@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CefFlashBrowser", "CefFlashBrowser\CefFlashBrowser.csproj", "{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Launcher", "Launcher\Launcher.csproj", "{7224AF71-4A51-4DA2-9AE4-E5243422C81B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,14 +21,6 @@ Global
 		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Release|x86.ActiveCfg = Release|x86
 		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Release|x86.Build.0 = Release|x86
-		{7224AF71-4A51-4DA2-9AE4-E5243422C81B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7224AF71-4A51-4DA2-9AE4-E5243422C81B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7224AF71-4A51-4DA2-9AE4-E5243422C81B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7224AF71-4A51-4DA2-9AE4-E5243422C81B}.Debug|x86.Build.0 = Debug|Any CPU
-		{7224AF71-4A51-4DA2-9AE4-E5243422C81B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7224AF71-4A51-4DA2-9AE4-E5243422C81B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7224AF71-4A51-4DA2-9AE4-E5243422C81B}.Release|x86.ActiveCfg = Release|Any CPU
-		{7224AF71-4A51-4DA2-9AE4-E5243422C81B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
