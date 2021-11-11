@@ -24,11 +24,21 @@
         <Style x:Key="SettingHeaderStyle"
            TargetType="TextBlock">
             <Setter Property="Margin"
-                Value="5,15,5,10"/>
+                    Value="5,15,5,10"/>
             <Setter Property="FontSize"
-                Value="18"/>
+                    Value="18"/>
             <Setter Property="FontWeight"
-                Value="Bold"/>
+                    Value="Bold"/>
+        </Style>
+
+        <Style x:Key="SettingItemDescriptionStyle"
+               TargetType="TextBlock">
+            <Setter Property="VerticalAlignment"
+                    Value="Center"/>
+            <Setter Property="HorizontalAlignment"
+                    Value="Left"/>
+            <Setter Property="TextTrimming"
+                    Value="CharacterEllipsis"/>
         </Style>
 
     </Window.Resources>
@@ -43,7 +53,11 @@
                         <TextBlock Text="{StaticResource settingHeader_addressBar}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
-                        <c:SettingItem Description="{StaticResource settingItem_useSearchEngine}">
+                        <c:SettingItem>
+                            <c:SettingItem.Description>
+                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
+                                           Text="{StaticResource settingItem_useSearchEngine}"/>
+                            </c:SettingItem.Description>
                             <c:SettingItem.Content>
                                 <ComboBox MinWidth="80"
                                           ItemsSource="{Binding NavigationTypes}"
@@ -60,7 +74,11 @@
                             </c:SettingItem.Content>
                         </c:SettingItem>
 
-                        <c:SettingItem Description="{StaticResource settingItem_searchEngine}">
+                        <c:SettingItem>
+                            <c:SettingItem.Description>
+                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
+                                           Text="{StaticResource settingItem_searchEngine}"/>
+                            </c:SettingItem.Description>
                             <c:SettingItem.Content>
                                 <ComboBox MinWidth="80"
                                           ItemsSource="{Binding SearchEngines}"
@@ -86,7 +104,11 @@
                         <TextBlock Text="{StaticResource settingHeader_browserData}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
-                        <c:SettingItem Description="{StaticResource settingItem_deleteCache}">
+                        <c:SettingItem>
+                            <c:SettingItem.Description>
+                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
+                                           Text="{StaticResource settingItem_deleteCache}"/>
+                            </c:SettingItem.Description>
                             <c:SettingItem.Content>
                                 <Button MinWidth="80"
                                         Content="{StaticResource button_deleteCache}"
@@ -97,7 +119,11 @@
                         <TextBlock Text="{StaticResource settingHeader_aboutCef}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
-                        <c:SettingItem Description="{StaticResource settingItem_cefVersion}">
+                        <c:SettingItem>
+                            <c:SettingItem.Description>
+                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
+                                           Text="{StaticResource settingItem_cefVersion}"/>
+                            </c:SettingItem.Description>
                             <c:SettingItem.Content>
                                 <Button MinWidth="80"
                                         Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource button_viewDetails}}"
