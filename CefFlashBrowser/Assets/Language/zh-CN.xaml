@@ -31,7 +31,7 @@
     <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
     <sys:String x:Key="button_deleteCache">清除</sys:String>
     <sys:String x:Key="button_viewDetails">详情</sys:String>
-    <sys:String x:Key="message_deleteCache">确定要重启浏览器并清除所有缓存吗？</sys:String>
+    <sys:String x:Key="message_deleteCache">确定要清除所有缓存吗？浏览器将会重启。</sys:String>
 
     <!--主界面导航栏-->
     <sys:String x:Key="navigationType_auto">自动</sys:String>
@@ -91,6 +91,8 @@
     <sys:String x:Key="title_addFavorite">添加收藏夹</sys:String>
 
     <!--提示信息-->
+    <sys:String x:Key="error_message">错误信息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名称不能为空。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">网址不能为空。</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">清除缓存时发生错误，是否重试？</sys:String>
 </ResourceDictionary>

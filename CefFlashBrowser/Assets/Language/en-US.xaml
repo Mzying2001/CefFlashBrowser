@@ -91,6 +91,8 @@
     <sys:String x:Key="title_addFavorite">Add Favorite</sys:String>
 
     <!--Message-->
+    <sys:String x:Key="error_message">Error Message</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Name cannot be empty.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">The URL cannot be empty.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">An error occurred while clearing the cache. Do you want to try again?</sys:String>
 </ResourceDictionary>

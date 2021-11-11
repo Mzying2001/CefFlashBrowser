@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Models.FlashBrowser;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
@@ -7,7 +8,6 @@ using SimpleMvvm.Command;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
@@ -50,30 +50,9 @@ namespace CefFlashBrowser.ViewModels
             GlobalData.Settings.SearchEngine = engine;
         }
 
-        private void DeleteCacheViaBat()
+        private void DeleteDirectory(string path)
         {
-            string bat = "taskkill /f /im CefFlashBrowser.exe\n" +
-                         "timeout 1\n" +
-                         "rd /s /q caches\\\n" +
-                         "mshta vbscript:msgbox(\"done\",64,\"\")(window.close)\n" +
-                         "start CefFlashBrowser.exe\n" +
-                         "del _.bat";
-            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "_.bat"), bat);
-
-            Process.Start(new ProcessStartInfo()
-            {
-                FileName = "_.bat",
-                WindowStyle = ProcessWindowStyle.Hidden
-            });
-        }
-
-        private void DeleteCacheViaLauncher(string path)
-        {
-            Process.Start(new ProcessStartInfo()
-            {
-                FileName = path,
-                Arguments = "-delcaches"
-            });
+            new PathInfo(PathInfo.PathType.Directory, path).Delete();
         }
 
         private void DeleteCache()
@@ -82,11 +61,29 @@ namespace CefFlashBrowser.ViewModels
             {
                 if (result == true)
                 {
-                    var launcher = @"..\Launcher.exe";
-                    if (File.Exists(launcher))
-                        DeleteCacheViaLauncher(launcher);
-                    else
-                        DeleteCacheViaBat();
+                    while (true)
+                    {
+                        try
+                        {
+                            CefSharp.Cef.Shutdown();
+                            DeleteDirectory(FlashBrowserBase.CachePath);
+                            break;
+                        }
+                        catch (Exception e)
+                        {
+                            var tmp = System.Windows.MessageBox.Show(
+                                string.Format("{0}\n\n{1}:\n{2}", LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message),
+                                LanguageManager.GetString("title_error"), System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Error);
+
+                            if (tmp == System.Windows.MessageBoxResult.No)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+                    System.Windows.Application.Current.Shutdown();
                 }
             });
         }

@@ -139,6 +139,7 @@
     <Compile Include="Models\Data\GlobalData.cs" />
     <Compile Include="Models\LanguageManager.cs" />
     <Compile Include="Models\NavigationType.cs" />
+    <Compile Include="Models\PathInfo.cs" />
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\Data\MessageTokens.cs" />
     <Compile Include="Models\Settings.cs" />
