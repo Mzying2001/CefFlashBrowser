@@ -75,7 +75,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
             CefSettings settings = new CefSettings()
             {
                 Locale = GlobalData.Settings.Language,
-                CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"caches\")
+                CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Caches\")
             };
 
 #if !DEBUG
