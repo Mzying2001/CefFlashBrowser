@@ -48,16 +48,15 @@ namespace CefFlashBrowser.Views.Custom
     {
 
 
-        public string Text
+        public object Description
         {
-            get { return (string)GetValue(TextProperty); }
-            set { SetValue(TextProperty, value); }
+            get { return (object)GetValue(DescriptionProperty); }
+            set { SetValue(DescriptionProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for Text.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty TextProperty =
-            DependencyProperty.Register("Text", typeof(string), typeof(SettingItem), new PropertyMetadata(string.Empty));
-
+        // Using a DependencyProperty as the backing store for Description.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty DescriptionProperty =
+            DependencyProperty.Register("Description", typeof(object), typeof(SettingItem), new PropertyMetadata(null));
 
 
         public object Content

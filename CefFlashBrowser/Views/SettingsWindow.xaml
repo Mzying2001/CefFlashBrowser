@@ -43,7 +43,7 @@
                         <TextBlock Text="{StaticResource settingHeader_addressBar}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
-                        <c:SettingItem Text="{StaticResource settingItem_useSearchEngine}">
+                        <c:SettingItem Description="{StaticResource settingItem_useSearchEngine}">
                             <c:SettingItem.Content>
                                 <ComboBox MinWidth="80"
                                           ItemsSource="{Binding NavigationTypes}"
@@ -60,7 +60,7 @@
                             </c:SettingItem.Content>
                         </c:SettingItem>
 
-                        <c:SettingItem Text="{StaticResource settingItem_searchEngine}">
+                        <c:SettingItem Description="{StaticResource settingItem_searchEngine}">
                             <c:SettingItem.Content>
                                 <ComboBox MinWidth="80"
                                           ItemsSource="{Binding SearchEngines}"
@@ -86,7 +86,7 @@
                         <TextBlock Text="{StaticResource settingHeader_browserData}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
-                        <c:SettingItem Text="{StaticResource settingItem_deleteCache}">
+                        <c:SettingItem Description="{StaticResource settingItem_deleteCache}">
                             <c:SettingItem.Content>
                                 <Button MinWidth="80"
                                         Content="{StaticResource button_deleteCache}"
@@ -97,7 +97,7 @@
                         <TextBlock Text="{StaticResource settingHeader_aboutCef}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
-                        <c:SettingItem Text="{StaticResource settingItem_cefVersion}">
+                        <c:SettingItem Description="{StaticResource settingItem_cefVersion}">
                             <c:SettingItem.Content>
                                 <Button MinWidth="80"
                                         Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource button_viewDetails}}"
