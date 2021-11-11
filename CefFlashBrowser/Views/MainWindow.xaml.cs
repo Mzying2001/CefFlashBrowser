@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Views.Custom;
+using CefFlashBrowser.Views.Dialogs;
 using SimpleMvvm.Messaging;
 using System.Windows.Controls;
 
@@ -16,6 +17,12 @@ namespace CefFlashBrowser.Views
 
             Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
             Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
+
+            if (GlobalData.Settings.FirstStart)
+            {
+                new SelectLanguageDialog().ShowDialog();
+                GlobalData.Settings.FirstStart = false;
+            }
         }
 
         private void UpdateLanguageMenuChecked(object obj)

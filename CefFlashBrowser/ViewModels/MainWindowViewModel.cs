@@ -1,7 +1,6 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Views;
-using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
@@ -110,15 +109,6 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void SelectLanguageOnFirstStart()
-        {
-            if (GlobalData.Settings.FirstStart)
-            {
-                new SelectLanguageDialog().ShowDialog();
-                GlobalData.Settings.FirstStart = false;
-            }
-        }
-
         private void SwitchLanguage(string language)
         {
             LanguageManager.CurrentLanguage = language;
@@ -127,8 +117,6 @@ namespace CefFlashBrowser.ViewModels
 
         public MainWindowViewModel()
         {
-            SelectLanguageOnFirstStart();
-
             Language = new ObservableCollection<string>();
             foreach (var item in LanguageManager.GetSupportedLanguage())
                 Language.Add(item);
