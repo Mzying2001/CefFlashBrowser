@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace CefFlashBrowser.Models
 {
@@ -16,6 +17,8 @@ namespace CefFlashBrowser.Models
 
         public static string GetUrl(string str, Engine e = Engine.Baidu)
         {
+            str = WebUtility.UrlEncode(str);
+
             switch (e)
             {
                 case Engine.Baidu:
