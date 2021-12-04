@@ -260,6 +260,7 @@
     <Compile Include="Models\Converters\MultiValueConverterBase.cs" />
     <Compile Include="Models\Converters\ObjectNotNull.cs" />
     <Compile Include="Models\Converters\StringArrNotAnyEmpty.cs" />
+    <Compile Include="Models\Converters\UrlDecoder.cs" />
     <Compile Include="Models\EnumDescription.cs" />
     <Compile Include="Models\FavoritesFile.cs" />
     <Compile Include="Models\FlashBrowser\ChromiumFlashBrowser.cs" />

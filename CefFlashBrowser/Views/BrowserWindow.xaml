@@ -252,11 +252,11 @@
                                     Margin="5,0"
                                     Height="30"
                                     Style="{StaticResource TextBoxBaseStyle}"
-                                    Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
+                                    Text="{Binding ElementName=browser, Path=Address, Mode=OneWay, Converter={StaticResource UrlDecoder}}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
-                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorLevel=1, AncestorType=TextBox}, Path=Text}"/>
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TextBox}, Path=Text}"/>
                 </TextBox.InputBindings>
             </c:AutoSelectAllTextBox>
 
