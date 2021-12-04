@@ -37,7 +37,7 @@ namespace CefFlashBrowser
                 {
                     SwfPlayerWindow.Show(arg);
                 }
-                else if (UrlChecker.IsUrl(arg))
+                else if (UrlChecker.IsHttpUrl(arg))
                 {
                     BrowserWindow.Show(arg);
                 }

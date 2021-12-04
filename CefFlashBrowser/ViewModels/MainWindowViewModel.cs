@@ -25,11 +25,13 @@ namespace CefFlashBrowser.ViewModels
 
         private void OpenUrl(string url)
         {
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrWhiteSpace(url))
             {
                 JsAlertDialog.Show(LanguageManager.GetString("message_emptyUrl"));
                 return;
             }
+
+            url = url.Trim();
 
             if (UrlChecker.IsLocalSwfFile(url))
             {
@@ -41,7 +43,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 case NavigationType.Type.Automatic:
                     {
-                        if (!UrlChecker.IsUrl(url))
+                        if (!UrlChecker.IsHttpUrl(url))
                             url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
                     }
                     break;
