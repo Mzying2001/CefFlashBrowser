@@ -6,7 +6,7 @@ namespace CefFlashBrowser.Models
     public static class UrlChecker
     {
         private static readonly Regex _httpUrlRegex
-            = new Regex(@"^(https?://)?(\w|\d|)+(\.(\w|\d)+)+(:\d+)?(/(\w|\d|\.)+)*/?(\?[^?&=]+=[^?&=]+(&[^?&=]+=[^?&=]+)*)?$");
+            = new Regex(@"^(https?://)?(\w|\d|-)+(\.(\w|\d|-)+)+(:\d+)?(/(\w|\d|-)+)*(/((\w|\d|-)+\.(\w|\d|-)+)?)?(\?[^?&=]+=[^?&=]+(&[^?&=]+=[^?&=]+)*)?$");
 
         public static bool IsHttpUrl(string url)
         {
