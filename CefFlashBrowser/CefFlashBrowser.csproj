@@ -439,6 +439,9 @@
     <Content Include="Assets\Plugins\pepflashplayer.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\EmptyExe.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="libcef.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

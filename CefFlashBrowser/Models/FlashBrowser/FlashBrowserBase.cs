@@ -15,6 +15,8 @@ namespace CefFlashBrowser.Models.FlashBrowser
         public static readonly string CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Caches\");
         public static readonly string FlashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
 
+        private static readonly string EmptyExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\EmptyExe.exe");
+
         public event EventHandler<NewWindowEventArgs> OnCreateNewWindow;
 
         public ICommand LoadUrlCommand { get; private set; }
@@ -74,6 +76,8 @@ namespace CefFlashBrowser.Models.FlashBrowser
         {
             if (Cef.IsInitialized)
                 return;
+
+            Environment.SetEnvironmentVariable("ComSpec", EmptyExePath); //Remove black popup window
 
             CefSettings settings = new CefSettings()
             {
