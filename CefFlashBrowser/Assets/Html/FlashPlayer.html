@@ -27,8 +27,8 @@
         }
 
         window.onload = function () {
-            var src = getQueryVariable("src");
-            var flash = document.createElement("embed");
+            let src = decodeURIComponent(getQueryVariable("src"));
+            let flash = document.createElement("embed");
             flash.id = "flash-player";
             flash.setAttribute("src", src);
             document.querySelector("body").appendChild(flash);
