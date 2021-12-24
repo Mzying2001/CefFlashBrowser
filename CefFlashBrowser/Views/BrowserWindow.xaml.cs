@@ -29,10 +29,9 @@ namespace CefFlashBrowser.Views
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            browser.GetBrowser().CloseBrowser(true);
             browserWindow.WindowState = WindowState.Normal;
             GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
-
-            browser.Dispose();
 
             Messenger.Global.Unregister(MessageTokens.EXIT_BROWSER, CloseWindow);
         }
