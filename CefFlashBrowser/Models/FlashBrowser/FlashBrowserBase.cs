@@ -19,6 +19,8 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
         public event EventHandler<NewWindowEventArgs> OnCreateNewWindow;
 
+        public event EventHandler<EventArgs> OnClose;
+
         public ICommand LoadUrlCommand { get; private set; }
 
         public ICommand ChangeLoadingStateCommand { get; private set; }
@@ -43,10 +45,16 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
             DownloadHandler = new IEDownloadHandler();
             JsDialogHandler = new JsDialogHandler();
-            LifeSpanHandler = new LifeSpanHandler((s, e) =>
-            {
-                OnCreateNewWindow?.Invoke(this, e);
-            });
+            LifeSpanHandler = new LifeSpanHandler(
+                onCreateNewWindow: (s, e) =>
+                {
+                    OnCreateNewWindow?.Invoke(this, e);
+                },
+                onClose: (s, e) =>
+                {
+                    OnClose?.Invoke(this, e);
+                }
+            );
         }
 
         protected override void OnIsBrowserInitializedChanged(bool oldValue, bool newValue)

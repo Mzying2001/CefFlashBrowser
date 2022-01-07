@@ -7,15 +7,19 @@ namespace CefFlashBrowser.Models.FlashBrowser
     {
         public event EventHandler<NewWindowEventArgs> OnCreateNewWindow;
 
+        public event EventHandler<EventArgs> OnClose;
+
         public LifeSpanHandler() { }
 
-        public LifeSpanHandler(EventHandler<NewWindowEventArgs> onCreateNewWindow)
+        public LifeSpanHandler(EventHandler<NewWindowEventArgs> onCreateNewWindow = null, EventHandler<EventArgs> onClose = null)
         {
             OnCreateNewWindow += onCreateNewWindow;
+            OnClose += onClose;
         }
 
         public bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
+            OnClose?.Invoke(this, new EventArgs());
             return false;
         }
 

@@ -12,6 +12,8 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserWindow : Window
     {
+        private bool _doClose = false;
+
         public BrowserWindow()
         {
             InitializeComponent();
@@ -20,6 +22,15 @@ namespace CefFlashBrowser.Views
 
             if (GlobalData.Settings.BrowserWindowSizeInfo != null)
                 GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
+
+            browser.OnClose += (s, e) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    _doClose = true;
+                    Close();
+                });
+            };
         }
 
         private void CloseWindow(object obj)
@@ -29,11 +40,17 @@ namespace CefFlashBrowser.Views
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            browser.GetBrowser().CloseBrowser(true);
-            browserWindow.WindowState = WindowState.Normal;
-            GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
-
-            Messenger.Global.Unregister(MessageTokens.EXIT_BROWSER, CloseWindow);
+            if (_doClose)
+            {
+                browserWindow.WindowState = WindowState.Normal;
+                GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+                Messenger.Global.Unregister(MessageTokens.EXIT_BROWSER, CloseWindow);
+            }
+            else
+            {
+                browser.GetBrowser().CloseBrowser(false);
+                e.Cancel = true;
+            }
         }
 
         private void MenuButton_Clicked(object sender, RoutedEventArgs e)

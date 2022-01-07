@@ -95,6 +95,8 @@
     <sys:String x:Key="button_No">否</sys:String>
     <sys:String x:Key="title_error">错误</sys:String>
     <sys:String x:Key="title_addFavorite">添加收藏夹</sys:String>
+    <sys:String x:Key="title_askWhetherToClose">要关闭此页面吗？</sys:String>
+    <sys:String x:Key="title_askWhetherToReload">要重新加载此页面吗？</sys:String>
 
     <!--提示信息-->
     <sys:String x:Key="error_message">错误信息</sys:String>

@@ -8,6 +8,14 @@ namespace CefFlashBrowser.Models.FlashBrowser
     {
         public bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
         {
+            ((ChromiumWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
+            {
+                var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToClose");
+                JsConfirmDialog.Show(messageText, title, result =>
+                {
+                    callback.Continue(result == true);
+                });
+            });
             return true;
         }
 
