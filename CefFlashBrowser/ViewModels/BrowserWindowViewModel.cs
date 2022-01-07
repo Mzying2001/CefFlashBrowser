@@ -70,9 +70,9 @@ namespace CefFlashBrowser.ViewModels
             AddFavoriteDialog.Show(browser.Title, browser.Address);
         }
 
-        private void ExitBrowser()
+        private void ExitBrowser(ChromiumWebBrowser browser)
         {
-            Messenger.Global.Send(MessageTokens.EXIT_BROWSER, null);
+            Messenger.Global.Send(MessageTokens.EXIT_BROWSER, browser);
         }
 
         public BrowserWindowViewModel()
@@ -82,7 +82,7 @@ namespace CefFlashBrowser.ViewModels
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<ChromiumWebBrowser>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<ChromiumWebBrowser>(AddFavorite);
-            ExitBrowserCommand = new DelegateCommand(ExitBrowser);
+            ExitBrowserCommand = new DelegateCommand<ChromiumWebBrowser>(ExitBrowser);
         }
     }
 }
