@@ -16,7 +16,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
 
         public bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
-            return !(browser.IsDisposed || browser.IsPopup);
+            return false;
         }
 
         public void OnAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
