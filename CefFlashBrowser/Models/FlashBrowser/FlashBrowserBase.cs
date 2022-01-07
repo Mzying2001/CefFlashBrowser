@@ -15,7 +15,7 @@ namespace CefFlashBrowser.Models.FlashBrowser
         public static readonly string CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Caches\");
         public static readonly string FlashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
 
-        private static readonly string EmptyExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\EmptyExe.exe");
+        private static readonly string EmptyExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\CefFlashBrowser.EmptyExe.exe");
 
         public event EventHandler<NewWindowEventArgs> OnCreateNewWindow;
 
