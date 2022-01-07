@@ -68,6 +68,12 @@
     <sys:String x:Key="menu_paste">粘貼</sys:String>
     <sys:String x:Key="menu_selectAll">全選</sys:String>
     <sys:String x:Key="menu_print">列印</sys:String>
+    <sys:String x:Key="menu_redo">重做</sys:String>
+    <sys:String x:Key="menu_undo">撤銷</sys:String>
+    <sys:String x:Key="menu_find">查找</sys:String>
+    <sys:String x:Key="menu_openInNewWindow">在新窗口中打開</sys:String>
+    <sys:String x:Key="menu_addToDictionary">添加到字典</sys:String>
+    <sys:String x:Key="menu_reloadNoCache">重繪（忽略緩存）</sys:String>
     <sys:String x:Key="menu_openDevTool">打開開發工具</sys:String>
     <sys:String x:Key="menu_viewSource">查看網頁源碼</sys:String>
     <sys:String x:Key="menu_zoom">縮放</sys:String>

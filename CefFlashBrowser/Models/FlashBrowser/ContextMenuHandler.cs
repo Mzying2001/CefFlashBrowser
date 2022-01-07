@@ -1,37 +1,213 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Views;
 using CefSharp;
+using CefSharp.Wpf;
+using SimpleMvvm.Command;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace CefFlashBrowser.Models.FlashBrowser
 {
     public class ContextMenuHandler : IContextMenuHandler
     {
-        public void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
-        {
-            //throw new NotImplementedException();
-        }
+        public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
 
-        public bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
+        void IContextMenuHandler.OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
-            return true;
-        }
-
-        public void OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
-        {
-            var targetBrowser = (ChromiumFlashBrowser)chromiumWebBrowser;
-            targetBrowser.Dispatcher.Invoke(() =>
+            if (!string.IsNullOrWhiteSpace(parameters.LinkUrl))
             {
-                targetBrowser.ContextMenu = null;
+                model.InsertCheckItemAt(0, OpenInNewWindow, "menu_openInNewWindow");
+                model.InsertSeparatorAt(1);
+            }
+        }
+
+        bool IContextMenuHandler.OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
+        {
+            return false;
+        }
+
+        void IContextMenuHandler.OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
+        {
+            var webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
+            webBrowser.Dispatcher.Invoke(() =>
+            {
+                webBrowser.ContextMenu = null;
             });
         }
 
-        public bool RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
+        bool IContextMenuHandler.RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
         {
-            var targetBrowser = (ChromiumFlashBrowser)chromiumWebBrowser;
+            var webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
+            var menuItems = GetMenuItems(model).ToList();
 
-            targetBrowser.Dispatcher.Invoke(() =>
+            var linkUrl = parameters.LinkUrl;
+
+            webBrowser.Dispatcher.Invoke(() =>
             {
                 var menu = new ContextMenu { IsOpen = true };
+
+                RoutedEventHandler handler = null;
+                handler = (s, e) =>
+                {
+                    menu.Closed -= handler;
+                    if (!callback.IsDisposed)
+                        callback.Cancel();
+                };
+                menu.Closed += handler;
+
+                foreach (var item in menuItems)
+                {
+                    var header = item.header;
+                    var commandId = item.commandId;
+                    var isEnable = item.isEnable;
+
+                    if (commandId == CefMenuCommand.NotFound)
+                    {
+                        menu.Items.Add(new Separator());
+                        continue;
+                    }
+
+                    var menuItem = new MenuItem();
+
+                    switch (commandId)
+                    {
+                        case CefMenuCommand.Back:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_back");
+                                menuItem.Command = webBrowser.BackCommand;
+                                menuItem.InputGestureText = "Alt+Z";
+                                break;
+                            }
+                        case CefMenuCommand.Forward:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_forward");
+                                menuItem.Command = webBrowser.ForwardCommand;
+                                menuItem.InputGestureText = "Alt+X";
+                                break;
+                            }
+                        case CefMenuCommand.Cut:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_cut");
+                                menuItem.Command = webBrowser.CutCommand;
+                                menuItem.InputGestureText = "Ctrl+X";
+                                break;
+                            }
+                        case CefMenuCommand.Copy:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_copy");
+                                menuItem.Command = webBrowser.CopyCommand;
+                                menuItem.InputGestureText = "Ctrl+C";
+                                break;
+                            }
+                        case CefMenuCommand.Paste:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_paste");
+                                menuItem.Command = webBrowser.PasteCommand;
+                                menuItem.InputGestureText = "Ctrl+V";
+                                break;
+                            }
+                        case CefMenuCommand.Print:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_print");
+                                menuItem.Command = webBrowser.PrintCommand;
+                                menuItem.InputGestureText = "Ctrl+P";
+                                break;
+                            }
+                        case CefMenuCommand.ViewSource:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_viewSource");
+                                //menuItem.Command = webBrowser.ViewSourceCommand;
+                                menuItem.Command = new DelegateCommand(() =>
+                                {
+                                    ViewSourceWindow.Show(webBrowser.Address);
+                                });
+                                menuItem.InputGestureText = "Ctrl+U";
+                                break;
+                            }
+                        case CefMenuCommand.Undo:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_undo");
+                                menuItem.Command = webBrowser.UndoCommand;
+                                break;
+                            }
+                        case CefMenuCommand.StopLoad:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_stop");
+                                menuItem.Command = webBrowser.StopCommand;
+                                menuItem.InputGestureText = "Esc";
+                                break;
+                            }
+                        case CefMenuCommand.SelectAll:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_selectAll");
+                                menuItem.Command = webBrowser.SelectAllCommand;
+                                menuItem.InputGestureText = "Ctrl+A";
+                                break;
+                            }
+                        case CefMenuCommand.Redo:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_redo");
+                                menuItem.Command = webBrowser.RedoCommand;
+                                break;
+                            }
+                        //case CefMenuCommand.Find:
+                        //    {
+                        //        menuItem.Header = LanguageManager.GetString("menu_find");
+                        //        menuItem.Command = new DelegateCommand(() =>
+                        //        {
+                        //            browser.GetHost().Find(0, parameters.SelectionText, true, false, false);
+                        //        });
+                        //        break;
+                        //    }
+                        //case CefMenuCommand.AddToDictionary:
+                        //    {
+                        //        menuItem.Header = LanguageManager.GetString("menu_addToDictionary");
+                        //        menuItem.Command = new DelegateCommand(() =>
+                        //        {
+                        //            browser.GetHost().AddWordToDictionary(parameters.MisspelledWord);
+                        //        });
+                        //        break;
+                        //    }
+                        case CefMenuCommand.Reload:
+                            {
+                                menuItem.Header = LanguageManager.GetString("menu_reload");
+                                menuItem.Command = webBrowser.ReloadCommand;
+                                menuItem.InputGestureText = "F5";
+                                break;
+                            }
+                        //case CefMenuCommand.ReloadNoCache:
+                        //    {
+                        //        menuItem.Header = LanguageManager.GetString("menu_reloadNoCache");
+                        //        menuItem.Command = new DelegateCommand(() =>
+                        //        {
+                        //            browser.Reload(ignoreCache: true);
+                        //        });
+                        //        break;
+                        //    }
+                        case OpenInNewWindow:
+                            {
+                                menuItem.Header = LanguageManager.GetString(header);
+                                menuItem.Command = new DelegateCommand(() =>
+                                {
+                                    BrowserWindow.Show(linkUrl);
+                                });
+                                break;
+                            }
+                        default:
+                            {
+                                menuItem.Header = header;
+                                menuItem.Command = new DelegateCommand(() =>
+                                {
+                                    callback.Continue(commandId, CefEventFlags.None);
+                                });
+                                break;
+                            }
+                    }
+
+                    menuItem.IsEnabled = isEnable;
+                    menu.Items.Add(menuItem);
+                }
 
                 menu.Closed += (s, e) =>
                 {
@@ -39,82 +215,21 @@ namespace CefFlashBrowser.Models.FlashBrowser
                         callback.Cancel();
                 };
 
-                //menu.Items.Add(new MenuItem
-                //{
-                //    Header = LanguageManager.GetString("menu_back"),
-                //    InputGestureText = "Alt+Z",
-                //    Command = targetBrowser.BackCommand
-                //});
-
-                //menu.Items.Add(new MenuItem
-                //{
-                //    Header = LanguageManager.GetString("menu_forward"),
-                //    InputGestureText = "Alt+X",
-                //    Command = targetBrowser.ForwardCommand
-                //});
-
-                //if (targetBrowser.ReloadCommand.CanExecute(null))
-                //{
-                //    menu.Items.Add(new MenuItem
-                //    {
-                //        Header = LanguageManager.GetString("menu_reload"),
-                //        InputGestureText = "F5",
-                //        Command = targetBrowser.ReloadCommand
-                //    });
-                //}
-                //else if (targetBrowser.StopCommand.CanExecute(null))
-                //{
-                //    menu.Items.Add(new MenuItem
-                //    {
-                //        Header = LanguageManager.GetString("menu_stop"),
-                //        InputGestureText = "Esc",
-                //        Command = targetBrowser.StopCommand
-                //    });
-                //}
-
-                //menu.Items.Add(new Separator());
-
-                menu.Items.Add(new MenuItem
-                {
-                    Header = LanguageManager.GetString("menu_cut"),
-                    InputGestureText = "Ctrl+X",
-                    Command = targetBrowser.CutCommand
-                });
-
-                menu.Items.Add(new MenuItem
-                {
-                    Header = LanguageManager.GetString("menu_copy"),
-                    InputGestureText = "Ctrl+C",
-                    Command = targetBrowser.CopyCommand
-                });
-
-                menu.Items.Add(new MenuItem
-                {
-                    Header = LanguageManager.GetString("menu_paste"),
-                    InputGestureText = "Ctrl+V",
-                    Command = targetBrowser.PasteCommand
-                });
-
-                menu.Items.Add(new MenuItem
-                {
-                    Header = LanguageManager.GetString("menu_selectAll"),
-                    InputGestureText = "Ctrl+A",
-                    Command = targetBrowser.SelectAllCommand
-                });
-
-                menu.Items.Add(new Separator());
-
-                menu.Items.Add(new MenuItem
-                {
-                    Header = LanguageManager.GetString("menu_print"),
-                    InputGestureText = "Ctrl+P",
-                    Command = targetBrowser.PrintCommand
-                });
-
-                targetBrowser.ContextMenu = menu;
+                webBrowser.ContextMenu = menu;
             });
 
             return true;
+        }
+
+        private static IEnumerable<(string header, CefMenuCommand commandId, bool isEnable)> GetMenuItems(IMenuModel model)
+        {
+            for (var i = 0; i < model.Count; i++)
+            {
+                var header = model.GetLabelAt(i);
+                var commandId = model.GetCommandIdAt(i);
+                var isEnabled = model.IsEnabledAt(i);
+                yield return (header, commandId, isEnabled);
+            }
         }
     }
 }

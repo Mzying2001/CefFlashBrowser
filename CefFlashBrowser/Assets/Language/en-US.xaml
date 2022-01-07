@@ -68,6 +68,12 @@
     <sys:String x:Key="menu_paste">Paste</sys:String>
     <sys:String x:Key="menu_selectAll">Select all</sys:String>
     <sys:String x:Key="menu_print">Print</sys:String>
+    <sys:String x:Key="menu_redo">Redo</sys:String>
+    <sys:String x:Key="menu_undo">Undo</sys:String>
+    <sys:String x:Key="menu_find">Find</sys:String>
+    <sys:String x:Key="menu_openInNewWindow">Open in new window</sys:String>
+    <sys:String x:Key="menu_addToDictionary">Add to dictionary</sys:String>
+    <sys:String x:Key="menu_reloadNoCache">Reload ignore cache</sys:String>
     <sys:String x:Key="menu_openDevTool">Open devtools</sys:String>
     <sys:String x:Key="menu_viewSource">View source</sys:String>
     <sys:String x:Key="menu_zoom">Zoom</sys:String>
