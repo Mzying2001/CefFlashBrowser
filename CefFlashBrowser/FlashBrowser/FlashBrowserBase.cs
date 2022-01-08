@@ -19,7 +19,7 @@ namespace CefFlashBrowser.FlashBrowser
 
         private static readonly string EmptyExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\CefFlashBrowser.EmptyExe.exe");
 
-        public event EventHandler<NewWindowEventArgs> OnCreateNewWindow;
+        public event EventHandler<LifeSpanHandler.NewWindowEventArgs> OnCreateNewWindow;
 
         public event EventHandler<EventArgs> OnClose;
 

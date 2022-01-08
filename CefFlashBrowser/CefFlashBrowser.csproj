@@ -270,7 +270,6 @@
     <Compile Include="FlashBrowser\Handler\BrowserWindowMenuHandler.cs" />
     <Compile Include="FlashBrowser\FlashBrowserBase.cs" />
     <Compile Include="FlashBrowser\Handler\JsDialogHandler.cs" />
-    <Compile Include="FlashBrowser\Handler\NewWindowEventArgs.cs" />
     <Compile Include="FlashBrowser\Handler\LifeSpanHandler.cs" />
     <Compile Include="FlashBrowser\Handler\IEDownloadHandler.cs" />
     <Compile Include="Models\Data\GlobalData.cs" />

@@ -10,7 +10,7 @@ namespace CefFlashBrowser.FlashBrowser
             OnCreateNewWindow += ChromiumFlashBrowser_OnCreateNewWindow;
         }
 
-        private void ChromiumFlashBrowser_OnCreateNewWindow(object sender, NewWindowEventArgs e)
+        private void ChromiumFlashBrowser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
         {
             e.CancelPopup = true;
             Dispatcher.Invoke(() => Address = e.TargetUrl);
