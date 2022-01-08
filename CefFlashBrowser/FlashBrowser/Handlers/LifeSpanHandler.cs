@@ -1,7 +1,7 @@
 ﻿using CefSharp;
 using System;
 
-namespace CefFlashBrowser.FlashBrowser.Handler
+namespace CefFlashBrowser.FlashBrowser.Handlers
 {
     public class LifeSpanHandler : ILifeSpanHandler
     {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CefFlashBrowser.FlashBrowser.Handler
+namespace CefFlashBrowser.FlashBrowser.Handlers
 {
     public class BrowserWindowMenuHandler : ContextMenuHandlerBase
     {

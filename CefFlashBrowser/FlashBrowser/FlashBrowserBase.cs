@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.FlashBrowser.Handler;
+﻿using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
