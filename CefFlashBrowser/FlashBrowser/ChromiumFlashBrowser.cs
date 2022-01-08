@@ -1,4 +1,6 @@
-﻿namespace CefFlashBrowser.FlashBrowser
+﻿using CefFlashBrowser.FlashBrowser.Handler;
+
+namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumFlashBrowser : FlashBrowserBase
     {

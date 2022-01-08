@@ -3,7 +3,7 @@ using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using CefSharp.Wpf;
 
-namespace CefFlashBrowser.FlashBrowser
+namespace CefFlashBrowser.FlashBrowser.Handler
 {
     public class JsDialogHandler : IJsDialogHandler
     {

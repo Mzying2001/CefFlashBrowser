@@ -1,7 +1,7 @@
 ﻿using CefSharp;
 using System.Collections.Generic;
 
-namespace CefFlashBrowser.FlashBrowser
+namespace CefFlashBrowser.FlashBrowser.Handler
 {
     public abstract class ContextMenuHandlerBase : IContextMenuHandler
     {

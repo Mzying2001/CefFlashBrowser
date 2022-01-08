@@ -1,7 +1,7 @@
 ﻿using CefSharp;
 using System.Windows.Controls;
 
-namespace CefFlashBrowser.FlashBrowser
+namespace CefFlashBrowser.FlashBrowser.Handler
 {
     public class IEDownloadHandler : IDownloadHandler
     {
