@@ -207,7 +207,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                             }
                         case Search:
                             {
-                                var tmp = selectionText.Length > 20 ? selectionText.Substring(0, 32) + "..." : selectionText;
+                                var tmp = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
                                 menuItem.Header = string.Format(LanguageManager.GetString(header), tmp.Replace('\n', ' '));
                                 menuItem.Command = new DelegateCommand(() =>
                                 {
