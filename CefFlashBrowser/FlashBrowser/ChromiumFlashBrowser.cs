@@ -5,8 +5,6 @@
         public override void BeginInit()
         {
             base.BeginInit();
-
-            MenuHandler = new ContextMenuHandler();
             OnCreateNewWindow += ChromiumFlashBrowser_OnCreateNewWindow;
         }
 

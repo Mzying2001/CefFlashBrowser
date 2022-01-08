@@ -255,6 +255,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FlashBrowser\ContextMenuHandlerBase.cs" />
     <Compile Include="Models\AppInfo.cs" />
     <Compile Include="Models\Converters\IsCurrentLanguage.cs" />
     <Compile Include="Models\Converters\LanguageCodeToName.cs" />
@@ -266,7 +267,7 @@
     <Compile Include="Models\FavoritesFile.cs" />
     <Compile Include="FlashBrowser\ChromiumFlashBrowser.cs" />
     <Compile Include="FlashBrowser\ChromiumSwfBrowser.cs" />
-    <Compile Include="FlashBrowser\ContextMenuHandler.cs" />
+    <Compile Include="FlashBrowser\BrowserWindowMenuHandler.cs" />
     <Compile Include="FlashBrowser\FlashBrowserBase.cs" />
     <Compile Include="FlashBrowser\JsDialogHandler.cs" />
     <Compile Include="FlashBrowser\NewWindowEventArgs.cs" />

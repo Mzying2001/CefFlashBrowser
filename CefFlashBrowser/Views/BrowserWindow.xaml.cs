@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Models;
+﻿using CefFlashBrowser.FlashBrowser;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using SimpleMvvm.Messaging;
 using System.Windows;
@@ -23,6 +24,7 @@ namespace CefFlashBrowser.Views
             if (GlobalData.Settings.BrowserWindowSizeInfo != null)
                 GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
 
+            browser.MenuHandler = new BrowserWindowMenuHandler();
             browser.OnClose += (s, e) =>
             {
                 Dispatcher.Invoke(() =>

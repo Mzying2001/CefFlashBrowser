@@ -3,18 +3,17 @@ using CefFlashBrowser.Views;
 using CefSharp;
 using CefSharp.Wpf;
 using SimpleMvvm.Command;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace CefFlashBrowser.FlashBrowser
 {
-    public class ContextMenuHandler : IContextMenuHandler
+    public class BrowserWindowMenuHandler : ContextMenuHandlerBase
     {
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
 
-        void IContextMenuHandler.OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
+        public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
             if (!string.IsNullOrWhiteSpace(parameters.LinkUrl))
             {
@@ -23,12 +22,12 @@ namespace CefFlashBrowser.FlashBrowser
             }
         }
 
-        bool IContextMenuHandler.OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
-        {
-            return false;
-        }
+        //public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
+        //{
+        //    return false;
+        //}
 
-        void IContextMenuHandler.OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
+        public override void OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
         {
             var webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
             webBrowser.Dispatcher.Invoke(() =>
@@ -37,7 +36,7 @@ namespace CefFlashBrowser.FlashBrowser
             });
         }
 
-        bool IContextMenuHandler.RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
+        public override bool RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
         {
             var webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
             var menuItems = GetMenuItems(model).ToList();
@@ -220,17 +219,6 @@ namespace CefFlashBrowser.FlashBrowser
             });
 
             return true;
-        }
-
-        private static IEnumerable<(string header, CefMenuCommand commandId, bool isEnable)> GetMenuItems(IMenuModel model)
-        {
-            for (var i = 0; i < model.Count; i++)
-            {
-                var header = model.GetLabelAt(i);
-                var commandId = model.GetCommandIdAt(i);
-                var isEnabled = model.IsEnabledAt(i);
-                yield return (header, commandId, isEnabled);
-            }
         }
     }
 }
