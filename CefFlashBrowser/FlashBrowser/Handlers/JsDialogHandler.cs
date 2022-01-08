@@ -11,7 +11,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
         {
             ((ChromiumWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
             {
-                var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToClose");
+                var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
                 JsConfirmDialog.Show(messageText, title, result =>
                 {
                     callback.Continue(result == true);
