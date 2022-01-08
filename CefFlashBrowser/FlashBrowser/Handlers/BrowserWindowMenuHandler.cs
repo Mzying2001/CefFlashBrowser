@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Views;
 using CefSharp;
 using CefSharp.Wpf;
@@ -12,13 +13,26 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
     public class BrowserWindowMenuHandler : ContextMenuHandlerBase
     {
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
+        public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
+            int count = 0;
+
+            if (!string.IsNullOrWhiteSpace(parameters.SelectionText))
+            {
+                model.InsertItemAt(0, Search, "menu_search");
+                count++;
+            }
             if (!string.IsNullOrWhiteSpace(parameters.LinkUrl))
             {
                 model.InsertCheckItemAt(0, OpenInNewWindow, "menu_openInNewWindow");
-                model.InsertSeparatorAt(1);
+                count++;
+            }
+
+            if (count > 0)
+            {
+                model.InsertSeparatorAt(count);
             }
         }
 
@@ -42,6 +56,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             var menuItems = GetMenuItems(model).ToList();
 
             var linkUrl = parameters.LinkUrl;
+            var selectionText = parameters.SelectionText;
 
             webBrowser.Dispatcher.Invoke(() =>
             {
@@ -187,6 +202,16 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                                 menuItem.Command = new DelegateCommand(() =>
                                 {
                                     BrowserWindow.Show(linkUrl);
+                                });
+                                break;
+                            }
+                        case Search:
+                            {
+                                var tmp = selectionText.Length > 20 ? selectionText.Substring(0, 32) + "..." : selectionText;
+                                menuItem.Header = string.Format(LanguageManager.GetString(header), tmp.Replace('\n', ' '));
+                                menuItem.Command = new DelegateCommand(() =>
+                                {
+                                    BrowserWindow.Show(SearchEngine.GetUrl(selectionText, GlobalData.Settings.SearchEngine));
                                 });
                                 break;
                             }

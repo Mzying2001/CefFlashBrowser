@@ -71,6 +71,7 @@
     <sys:String x:Key="menu_redo">重做</sys:String>
     <sys:String x:Key="menu_undo">撤销</sys:String>
     <sys:String x:Key="menu_find">查找</sys:String>
+    <sys:String x:Key="menu_search">搜索“{0}”</sys:String>
     <sys:String x:Key="menu_openInNewWindow">在新窗口中打开</sys:String>
     <sys:String x:Key="menu_addToDictionary">添加到字典</sys:String>
     <sys:String x:Key="menu_reloadNoCache">刷新（忽略缓存）</sys:String>

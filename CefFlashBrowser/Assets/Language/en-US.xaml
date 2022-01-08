@@ -71,6 +71,7 @@
     <sys:String x:Key="menu_redo">Redo</sys:String>
     <sys:String x:Key="menu_undo">Undo</sys:String>
     <sys:String x:Key="menu_find">Find</sys:String>
+    <sys:String x:Key="menu_search">Search "{0}"</sys:String>
     <sys:String x:Key="menu_openInNewWindow">Open in new window</sys:String>
     <sys:String x:Key="menu_addToDictionary">Add to dictionary</sys:String>
     <sys:String x:Key="menu_reloadNoCache">Reload ignore cache</sys:String>
