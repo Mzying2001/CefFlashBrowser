@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CefFlashBrowser.FlashBrowser.Handlers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,6 +37,7 @@ namespace CefFlashBrowser.Views
         public ViewSourceWindow()
         {
             InitializeComponent();
+            browser.MenuHandler = new DefaultWpfMenuHandler();
         }
 
         public ViewSourceWindow(string address) : this()

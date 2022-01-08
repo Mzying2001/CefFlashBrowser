@@ -256,6 +256,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="FlashBrowser\Handlers\ContextMenuHandlerBase.cs" />
+    <Compile Include="FlashBrowser\Handlers\DefaultWpfMenuHandler.cs" />
     <Compile Include="Models\AppInfo.cs" />
     <Compile Include="Models\Converters\IsCurrentLanguage.cs" />
     <Compile Include="Models\Converters\LanguageCodeToName.cs" />
