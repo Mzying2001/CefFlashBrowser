@@ -132,7 +132,7 @@
             </TextBlock>
 
             <!--The url textBox-->
-            <c:AutoSelectAllTextBox Style="{StaticResource TextBoxBaseStyle}">
+            <c:AutoSelectAllTextBox>
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding OpenUrlCommand}"
