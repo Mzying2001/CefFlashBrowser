@@ -90,21 +90,18 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                             {
                                 menuItem.Header = LanguageManager.GetString("menu_cut");
                                 menuItem.Command = webBrowser.CutCommand;
-                                menuItem.InputGestureText = "Ctrl+X";
                                 break;
                             }
                         case CefMenuCommand.Copy:
                             {
                                 menuItem.Header = LanguageManager.GetString("menu_copy");
                                 menuItem.Command = webBrowser.CopyCommand;
-                                menuItem.InputGestureText = "Ctrl+C";
                                 break;
                             }
                         case CefMenuCommand.Paste:
                             {
                                 menuItem.Header = LanguageManager.GetString("menu_paste");
                                 menuItem.Command = webBrowser.PasteCommand;
-                                menuItem.InputGestureText = "Ctrl+V";
                                 break;
                             }
                         case CefMenuCommand.Print:
@@ -142,7 +139,6 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                             {
                                 menuItem.Header = LanguageManager.GetString("menu_selectAll");
                                 menuItem.Command = webBrowser.SelectAllCommand;
-                                menuItem.InputGestureText = "Ctrl+A";
                                 break;
                             }
                         case CefMenuCommand.Redo:
