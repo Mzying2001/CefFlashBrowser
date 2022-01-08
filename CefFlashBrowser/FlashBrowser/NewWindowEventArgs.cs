@@ -1,7 +1,7 @@
 ﻿using CefSharp;
 using System;
 
-namespace CefFlashBrowser.Models.FlashBrowser
+namespace CefFlashBrowser.FlashBrowser
 {
     public class NewWindowEventArgs : EventArgs
     {

@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Views;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Views;
 using CefSharp;
 using CefSharp.Wpf;
 using SimpleMvvm.Command;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CefFlashBrowser.Models.FlashBrowser
+namespace CefFlashBrowser.FlashBrowser
 {
     public class ContextMenuHandler : IContextMenuHandler
     {

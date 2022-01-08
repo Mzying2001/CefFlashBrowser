@@ -3,7 +3,7 @@ using System;
 using System.Net;
 using System.Windows;
 
-namespace CefFlashBrowser.Models.FlashBrowser
+namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumSwfBrowser : FlashBrowserBase
     {

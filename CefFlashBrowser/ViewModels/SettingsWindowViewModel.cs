@@ -1,6 +1,6 @@
-﻿using CefFlashBrowser.Models;
+﻿using CefFlashBrowser.FlashBrowser;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Models.FlashBrowser;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;

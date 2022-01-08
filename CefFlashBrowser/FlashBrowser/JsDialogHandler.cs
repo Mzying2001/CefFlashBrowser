@@ -1,8 +1,9 @@
-﻿using CefFlashBrowser.Views.Dialogs.JsDialogs;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using CefSharp.Wpf;
 
-namespace CefFlashBrowser.Models.FlashBrowser
+namespace CefFlashBrowser.FlashBrowser
 {
     public class JsDialogHandler : IJsDialogHandler
     {

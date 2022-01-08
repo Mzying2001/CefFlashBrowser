@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using CefSharp.Wpf;
@@ -8,7 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
 
-namespace CefFlashBrowser.Models.FlashBrowser
+namespace CefFlashBrowser.FlashBrowser
 {
     public class FlashBrowserBase : ChromiumWebBrowser
     {
