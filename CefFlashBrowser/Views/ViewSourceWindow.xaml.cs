@@ -37,7 +37,13 @@ namespace CefFlashBrowser.Views
         public ViewSourceWindow()
         {
             InitializeComponent();
+
             browser.MenuHandler = new DefaultWpfMenuHandler();
+            browser.LifeSpanHandler = new LifeSpanHandler(onCreateNewWindow: (s, e) =>
+            {
+                e.CancelPopup = true;
+                Dispatcher.Invoke(() => BrowserWindow.Show(e.TargetUrl));
+            });
         }
 
         public ViewSourceWindow(string address) : this()
