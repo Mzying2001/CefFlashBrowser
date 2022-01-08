@@ -38,7 +38,8 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
         public bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
-            OnClose?.Invoke(this, new EventArgs());
+            if (!browser.IsPopup)
+                OnClose?.Invoke(this, new EventArgs());
             return false;
         }
 
