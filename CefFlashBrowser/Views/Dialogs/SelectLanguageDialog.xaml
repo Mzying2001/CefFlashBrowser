@@ -4,14 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:mv="clr-namespace:CefFlashBrowser.ViewModels.DialogViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
         mc:Ignorable="d"
-        Height="250" Width="400" WindowStartupLocation="CenterScreen" Topmost="True">
-
-    <Window.DataContext>
-        <mv:SelectLanguageDialogViewModel/>
-    </Window.DataContext>
+        
+        x:Name="dialog"
+        Height="250"
+        Width="400"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True">
 
     <Window.Resources>
         <Style x:Key="LanguageButton" TargetType="Button"
@@ -29,7 +29,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="1" Margin="0,0,0,50" FontSize="25" Text="{Binding Header, TargetNullValue=Hello}"
+        <TextBlock Grid.Row="1" Margin="0,0,0,50" FontSize="25"
+                   Text="{Binding ElementName=dialog, Path=Header, TargetNullValue=Hello}"
                    HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"/>
 
         <Grid Grid.Row="2">
@@ -46,30 +47,30 @@
 
             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                 <Button Style="{StaticResource LanguageButton}" Content="English"
-                        Command="{Binding SelectLanguageCommand}" CommandParameter="en-US">
+                        Command="{Binding SelectLanguageCommand, ElementName=dialog}" CommandParameter="en-US">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">
-                            <i:InvokeCommandAction Command="{Binding SetHeaderCommand}"
+                            <i:InvokeCommandAction Command="{Binding SetHeaderCommand, ElementName=dialog}"
                                                    CommandParameter="Select language"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </Button>
 
                 <Button Style="{StaticResource LanguageButton}" Content="中文"
-                        Command="{Binding SelectLanguageCommand}" CommandParameter="zh-CN">
+                        Command="{Binding SelectLanguageCommand, ElementName=dialog}" CommandParameter="zh-CN">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">
-                            <i:InvokeCommandAction Command="{Binding SetHeaderCommand}"
+                            <i:InvokeCommandAction Command="{Binding SetHeaderCommand, ElementName=dialog}"
                                                    CommandParameter="请选择语言"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </Button>
 
                 <Button Style="{StaticResource LanguageButton}" Content="中文（繁體）"
-                        Command="{Binding SelectLanguageCommand}" CommandParameter="zh-TW">
+                        Command="{Binding SelectLanguageCommand, ElementName=dialog}" CommandParameter="zh-TW">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">
-                            <i:InvokeCommandAction Command="{Binding SetHeaderCommand}"
+                            <i:InvokeCommandAction Command="{Binding SetHeaderCommand, ElementName=dialog}"
                                                    CommandParameter="請選擇語言"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>

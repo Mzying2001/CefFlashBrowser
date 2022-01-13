@@ -1,6 +1,7 @@
-﻿using CefFlashBrowser.Models.Data;
-using SimpleMvvm.Messaging;
+﻿using CefFlashBrowser.Models;
+using SimpleMvvm.Command;
 using System.Windows;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views.Dialogs
 {
@@ -9,17 +10,34 @@ namespace CefFlashBrowser.Views.Dialogs
     /// </summary>
     public partial class SelectLanguageDialog : Window
     {
-        public SelectLanguageDialog()
-        {
-            InitializeComponent();
 
-            Messenger.Global.Register(MessageTokens.EXIT_SELECTLANGUAGE, CloseWindow);
-            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.EXIT_SELECTLANGUAGE, CloseWindow);
+
+        public string Header
+        {
+            get { return (string)GetValue(HeaderProperty); }
+            set { SetValue(HeaderProperty, value); }
         }
 
-        private void CloseWindow(object obj)
+        // Using a DependencyProperty as the backing store for Header.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty HeaderProperty =
+            DependencyProperty.Register("Header", typeof(string), typeof(SelectLanguageDialog), new PropertyMetadata(null));
+
+
+        public ICommand SetHeaderCommand { get; }
+        public ICommand SelectLanguageCommand { get; }
+
+
+        public SelectLanguageDialog()
         {
-            Close();
+            SetHeaderCommand = new DelegateCommand<string>(header => Header = header);
+
+            SelectLanguageCommand = new DelegateCommand<string>(language =>
+            {
+                LanguageManager.CurrentLanguage = language;
+                Close();
+            });
+
+            InitializeComponent();
         }
     }
 }

@@ -297,7 +297,6 @@
     <Compile Include="Models\WindowSizeInfo.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\AddFavoriteDialogViewModel.cs" />
-    <Compile Include="ViewModels\DialogViewModels\SelectLanguageDialogViewModel.cs" />
     <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\SettingsWindowViewModel.cs" />
