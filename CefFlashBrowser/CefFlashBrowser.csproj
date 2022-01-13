@@ -297,10 +297,6 @@
     <Compile Include="Models\WindowSizeInfo.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\AddFavoriteDialogViewModel.cs" />
-    <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsAlertDialogViewModel.cs" />
-    <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsConfirmDialogViewModel.cs" />
-    <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsDialogViewModelBase.cs" />
-    <Compile Include="ViewModels\DialogViewModels\JsDialogViewModels\JsPromptDialogViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModels\SelectLanguageDialogViewModel.cs" />
     <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />

@@ -1,8 +1,7 @@
-﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels;
-using SimpleMvvm.Messaging;
+﻿using SimpleMvvm.Command;
 using System;
 using System.Windows;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views.Dialogs.JsDialogs
 {
@@ -11,27 +10,56 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
     /// </summary>
     public partial class JsPromptDialog : Window
     {
-        private string result = null;
-        private Action<string> callback;
+
+
+        public string Message
+        {
+            get { return (string)GetValue(MessageProperty); }
+            set { SetValue(MessageProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for Message.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty MessageProperty =
+            DependencyProperty.Register("Message", typeof(string), typeof(JsPromptDialog), new PropertyMetadata(string.Empty));
+
+
+        public string Input
+        {
+            get { return (string)GetValue(InputProperty); }
+            set { SetValue(InputProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for Input.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty InputProperty =
+            DependencyProperty.Register("Input", typeof(string), typeof(JsPromptDialog), new PropertyMetadata(string.Empty));
+
+
+        private string _result = null;
+        private Action<string> _callback;
+
+        public ICommand OkCommand { get; }
+        public ICommand CancelCommand { get; }
 
         public JsPromptDialog()
         {
-            InitializeComponent();
+            OkCommand = new DelegateCommand(() =>
+            {
+                _result = Input;
+                Close();
+            });
 
-            Messenger.Global.Register(MessageTokens.EXIT_JSPROMPT, CloseWindow);
-            Closing += JsPromptDialog_Closing;
+            CancelCommand = new DelegateCommand(() =>
+            {
+                _result = null;
+                Close();
+            });
+
+            InitializeComponent();
         }
 
         private void JsPromptDialog_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            callback?.Invoke(result);
-            Messenger.Global.Unregister(MessageTokens.EXIT_JSPROMPT, CloseWindow);
-        }
-
-        private void CloseWindow(object obj)
-        {
-            result = (string)obj;
-            Close();
+            _callback?.Invoke(_result);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -42,13 +70,13 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
 
         public static void Show(string message, string title = "", string defaulePromptText = "", Action<string> callback = null)
         {
-            var dialog = new JsPromptDialog { callback = callback };
-            var vmodel = (JsPromptDialogViewModel)dialog.DataContext;
-
-            vmodel.Message = message;
-            vmodel.Title = title;
-            vmodel.PromptText = defaulePromptText;
-            dialog.ShowDialog();
+            new JsPromptDialog
+            {
+                Title = title,
+                Message = message,
+                Input = defaulePromptText,
+                _callback = callback
+            }.ShowDialog();
         }
     }
 }

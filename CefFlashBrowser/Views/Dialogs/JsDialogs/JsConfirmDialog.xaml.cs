@@ -1,8 +1,8 @@
-﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels;
-using SimpleMvvm.Messaging;
+﻿using SimpleMvvm.Command;
 using System;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views.Dialogs.JsDialogs
 {
@@ -11,37 +11,55 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
     /// </summary>
     public partial class JsConfirmDialog : Window
     {
-        private bool? result = null;
-        private Action<bool?> callback;
+
+
+        public string Message
+        {
+            get { return (string)GetValue(MessageProperty); }
+            set { SetValue(MessageProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for Message.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty MessageProperty =
+            DependencyProperty.Register("Message", typeof(string), typeof(JsConfirmDialog), new PropertyMetadata(string.Empty));
+
+
+        private bool? _result = null;
+        private Action<bool?> _callback;
+
+        public ICommand YesCommand { get; }
+        public ICommand NoCommand { get; }
 
         public JsConfirmDialog()
         {
+            YesCommand = new DelegateCommand(() =>
+            {
+                _result = true;
+                Close();
+            });
+
+            NoCommand = new DelegateCommand(() =>
+            {
+                _result = false;
+                Close();
+            });
+
             InitializeComponent();
-
-            Messenger.Global.Register(MessageTokens.EXIT_JSCONFIRM, CloseWindow);
-            Closing += JsConfirmDialog_Closing;
         }
 
-        private void JsConfirmDialog_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void JsConfirmDialog_Closing(object sender, CancelEventArgs e)
         {
-            callback?.Invoke(result);
-            Messenger.Global.Unregister(MessageTokens.EXIT_JSCONFIRM, CloseWindow);
-        }
-
-        private void CloseWindow(object obj)
-        {
-            result = (bool?)obj;
-            Close();
+            _callback?.Invoke(_result);
         }
 
         public static void Show(string message, string title = "", Action<bool?> callback = null)
         {
-            var dialog = new JsConfirmDialog { callback = callback };
-            var vmodel = (JsConfirmDialogViewModel)dialog.DataContext;
-
-            vmodel.Message = message;
-            vmodel.Title = title;
-            dialog.ShowDialog();
+            new JsConfirmDialog
+            {
+                Title = title,
+                Message = message,
+                _callback = callback
+            }.ShowDialog();
         }
     }
 }

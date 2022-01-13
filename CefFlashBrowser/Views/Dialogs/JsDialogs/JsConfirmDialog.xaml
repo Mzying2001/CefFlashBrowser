@@ -3,30 +3,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:jdvm="clr-namespace:CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs.JsDialogs"
         mc:Ignorable="d"
         
+        x:Name="dialog"
         Topmost="True"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
-        Title="{Binding Title}">
+        Closing="JsConfirmDialog_Closing">
 
     <Window.Resources>
         <ResourceDictionary Source="JsDialogResources.xaml"/>
     </Window.Resources>
 
-    <Window.DataContext>
-        <jdvm:JsConfirmDialogViewModel/>
-    </Window.DataContext>
-
     <Window.InputBindings>
         <KeyBinding Key="Enter"
-                    Command="{Binding YesCommand}"/>
+                    Command="{Binding ElementName=dialog, Path=YesCommand}"/>
         <KeyBinding Key="Esc"
-                    Command="{Binding NoCommand}"/>
+                    Command="{Binding ElementName=dialog, Path=NoCommand}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -45,7 +41,7 @@
         <TextBlock Grid.Row="1"
                    Grid.Column="1"
                    TextWrapping="Wrap"
-                   Text="{Binding Message}"
+                   Text="{Binding ElementName=dialog, Path=Message}"
                    Style="{StaticResource JsDialogTextStyle}"/>
 
         <StackPanel Grid.Row="2"
@@ -53,9 +49,9 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button Style="{StaticResource JsDialogYesButtonStyle}"
-                    Command="{Binding YesCommand}"/>
+                    Command="{Binding ElementName=dialog, Path=YesCommand}"/>
             <Button Style="{StaticResource JsDialogNoButtonStyle}"
-                    Command="{Binding NoCommand}"/>
+                    Command="{Binding ElementName=dialog, Path=NoCommand}"/>
         </StackPanel>
     </Grid>
 </Window>
