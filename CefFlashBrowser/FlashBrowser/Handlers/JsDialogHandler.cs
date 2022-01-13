@@ -35,7 +35,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsAlertDialog.Show(messageText, originUrl);
+                            JsAlertDialog.Show(messageText, targetBrowser.Title);
                         });
                         suppressMessage = true;
                         return false;
@@ -45,7 +45,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsConfirmDialog.Show(messageText, originUrl, result =>
+                            JsConfirmDialog.Show(messageText, targetBrowser.Title, result =>
                             {
                                 callback.Continue(result == true);
                             });
@@ -58,7 +58,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsPromptDialog.Show(messageText, originUrl, defaultPromptText, result =>
+                            JsPromptDialog.Show(messageText, targetBrowser.Title, defaultPromptText, result =>
                             {
                                 callback.Continue(result != null, result);
                             });
