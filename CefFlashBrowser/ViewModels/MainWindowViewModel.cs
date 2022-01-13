@@ -4,7 +4,6 @@ using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
-using SimpleMvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.Windows;
 
@@ -114,14 +113,11 @@ namespace CefFlashBrowser.ViewModels
         private void SwitchLanguage(string language)
         {
             LanguageManager.CurrentLanguage = language;
-            Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, language);
         }
 
         public MainWindowViewModel()
         {
-            Language = new ObservableCollection<string>();
-            foreach (var item in LanguageManager.GetSupportedLanguage())
-                Language.Add(item);
+            Language = new ObservableCollection<string>(LanguageManager.GetSupportedLanguage());
 
             OpenUrlCommand = new DelegateCommand<string>(OpenUrl);
             OpenSettingsWindowCommand = new DelegateCommand(OpenSettingsWindow);

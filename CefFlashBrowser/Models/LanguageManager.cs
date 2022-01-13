@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Models.Data;
+using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +49,7 @@ namespace CefFlashBrowser.Models
                 {
                     LanguageResourceDic.Source = GetUri(value);
                     GlobalData.Settings.Language = value;
+                    Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, value);
                 }
             }
         }
