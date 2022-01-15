@@ -24,10 +24,13 @@
     <sys:String x:Key="tabItem_browser">Browser</sys:String>
     <sys:String x:Key="settingHeader_addressBar">Address Bar and Search</sys:String>
     <sys:String x:Key="settingHeader_browserData">Browser Cache</sys:String>
+    <sys:String x:Key="settingHeader_websiteBehavior">Website Behavior</sys:String>
     <sys:String x:Key="settingHeader_aboutCef">About CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">Use search engines in the address bar</sys:String>
     <sys:String x:Key="settingItem_searchEngine">Search Engine</sys:String>
     <sys:String x:Key="settingItem_deleteCache">Delete all caches</sys:String>
+    <sys:String x:Key="settingItem_openNewPage">Open new page in ...</sys:String>
+    <sys:String x:Key="settingItem_disablePopup">Disable pop ups on page refresh/close</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp version</sys:String>
     <sys:String x:Key="button_deleteCache">Delete</sys:String>
     <sys:String x:Key="button_viewDetails">Details</sys:String>
@@ -37,6 +40,10 @@
     <sys:String x:Key="navigationType_auto">Automatic</sys:String>
     <sys:String x:Key="navigationType_searchOnly">Search Only</sys:String>
     <sys:String x:Key="navigationType_navigateOnly">Navigate Only</sys:String>
+
+    <!--New web page behaviors-->
+    <sys:String x:Key="newPageBehavior_newWindow">New window</sys:String>
+    <sys:String x:Key="newPageBehavior_originWindow">Origin window</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="baidu">Baidu</sys:String>

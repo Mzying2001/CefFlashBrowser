@@ -277,6 +277,7 @@
     <Compile Include="Models\Converters\StringArrNotAnyEmpty.cs" />
     <Compile Include="Models\Converters\UrlDecoder.cs" />
     <Compile Include="Models\EnumDescription.cs" />
+    <Compile Include="Models\EnumDescriptions.cs" />
     <Compile Include="Models\FavoritesFile.cs" />
     <Compile Include="FlashBrowser\ChromiumFlashBrowser.cs" />
     <Compile Include="FlashBrowser\ChromiumSwfBrowser.cs" />
@@ -288,6 +289,7 @@
     <Compile Include="Models\Data\GlobalData.cs" />
     <Compile Include="Models\LanguageManager.cs" />
     <Compile Include="Models\NavigationType.cs" />
+    <Compile Include="Models\NewPageBehavior.cs" />
     <Compile Include="Models\PathInfo.cs" />
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\Data\MessageTokens.cs" />

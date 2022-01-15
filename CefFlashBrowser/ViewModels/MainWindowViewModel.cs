@@ -40,20 +40,20 @@ namespace CefFlashBrowser.ViewModels
 
             switch (GlobalData.Settings.NavigationType)
             {
-                case NavigationType.Type.Automatic:
+                case NavigationType.Automatic:
                     {
                         if (!UrlChecker.IsHttpUrl(url))
                             url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
                     }
                     break;
 
-                case NavigationType.Type.SearchOnly:
+                case NavigationType.SearchOnly:
                     {
                         url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
                     }
                     break;
 
-                case NavigationType.Type.NavigateOnly:
+                case NavigationType.NavigateOnly:
                     {
                         //nothing to do
                     }
