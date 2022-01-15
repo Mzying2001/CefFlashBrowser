@@ -182,7 +182,7 @@
                     Command="{Binding CreateShortcutCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+W"
-                    Command="{Binding ExitBrowserCommand}"
+                    Command="{Binding CloseBrowserCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Esc"
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>

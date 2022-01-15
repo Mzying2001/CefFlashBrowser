@@ -21,7 +21,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
         public DelegateCommand CreateShortcutCommand { get; set; }
         public DelegateCommand AddFavoriteCommand { get; set; }
-        public DelegateCommand ExitBrowserCommand { get; set; }
+        public DelegateCommand CloseBrowserCommand { get; set; }
 
         private void ViewSource(string url)
         {
@@ -70,9 +70,9 @@ namespace CefFlashBrowser.ViewModels
             AddFavoriteDialog.Show(browser.Title, browser.Address);
         }
 
-        private void ExitBrowser(ChromiumWebBrowser browser)
+        private void CloseBrowser(ChromiumWebBrowser browser)
         {
-            Messenger.Global.Send(MessageTokens.EXIT_BROWSER, browser);
+            Messenger.Global.Send(MessageTokens.CLOSE_BROWSER, browser);
         }
 
         public BrowserWindowViewModel()
@@ -82,7 +82,7 @@ namespace CefFlashBrowser.ViewModels
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<ChromiumWebBrowser>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<ChromiumWebBrowser>(AddFavorite);
-            ExitBrowserCommand = new DelegateCommand<ChromiumWebBrowser>(ExitBrowser);
+            CloseBrowserCommand = new DelegateCommand<ChromiumWebBrowser>(CloseBrowser);
         }
     }
 }

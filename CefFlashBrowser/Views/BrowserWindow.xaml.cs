@@ -19,7 +19,7 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
 
-            Messenger.Global.Register(MessageTokens.EXIT_BROWSER, ExitBrowser);
+            Messenger.Global.Register(MessageTokens.CLOSE_BROWSER, CloseBrowser);
 
             if (GlobalData.Settings.BrowserWindowSizeInfo != null)
                 GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
@@ -27,7 +27,7 @@ namespace CefFlashBrowser.Views
             browser.MenuHandler = new BrowserWindowMenuHandler();
         }
 
-        private void ExitBrowser(object browser)
+        private void CloseBrowser(object browser)
         {
             if (ReferenceEquals(browser, this.browser)) Close();
         }
@@ -53,7 +53,7 @@ namespace CefFlashBrowser.Views
             {
                 browserWindow.WindowState = WindowState.Normal;
                 GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
-                Messenger.Global.Unregister(MessageTokens.EXIT_BROWSER, ExitBrowser);
+                Messenger.Global.Unregister(MessageTokens.CLOSE_BROWSER, CloseBrowser);
             }
             else
             {
