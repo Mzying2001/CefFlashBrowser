@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using CefSharp.Wpf;
@@ -9,6 +10,12 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
     {
         public bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
         {
+            if (GlobalData.Settings.DisablePopup)
+            {
+                callback.Continue(true);
+                return true;
+            }
+
             ((ChromiumWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
             {
                 var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
