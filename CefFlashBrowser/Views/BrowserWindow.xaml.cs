@@ -25,19 +25,26 @@ namespace CefFlashBrowser.Views
                 GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
 
             browser.MenuHandler = new BrowserWindowMenuHandler();
-            browser.OnClose += (s, e) =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    _doClose = true;
-                    Close();
-                });
-            };
         }
 
         private void ExitBrowser(object browser)
         {
             if (ReferenceEquals(browser, this.browser)) Close();
+        }
+
+        private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
+        {
+            e.CancelPopup = true;
+            Dispatcher.Invoke(() => browser.Load(e.TargetUrl));
+        }
+
+        private void Browser_OnClose(object sender, System.EventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                _doClose = true;
+                Close();
+            });
         }
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)

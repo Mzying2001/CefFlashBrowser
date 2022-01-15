@@ -277,7 +277,9 @@
 
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
-                                    ZoomLevelIncrement="0.25"/>
+                                    ZoomLevelIncrement="0.25"
+                                    OnCreateNewWindow="Browser_OnCreateNewWindow"
+                                    OnClose="Browser_OnClose"/>
 
         <Label Grid.Row="1"
                Margin="5"
