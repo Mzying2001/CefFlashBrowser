@@ -42,8 +42,8 @@
     <sys:String x:Key="navigationType_navigateOnly">Navigate Only</sys:String>
 
     <!--New web page behaviors-->
+    <sys:String x:Key="newPageBehavior_originalWindow">Original window</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">New window</sys:String>
-    <sys:String x:Key="newPageBehavior_originWindow">Origin window</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="baidu">Baidu</sys:String>

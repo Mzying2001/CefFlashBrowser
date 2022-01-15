@@ -42,8 +42,8 @@
     <sys:String x:Key="navigationType_navigateOnly">仅导航</sys:String>
 
     <!--打开新网页时的行为-->
+    <sys:String x:Key="newPageBehavior_originalWindow">原窗口</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新窗口</sys:String>
-    <sys:String x:Key="newPageBehavior_originWindow">原窗口</sys:String>
 
     <!--搜索引擎-->
     <sys:String x:Key="baidu">百度</sys:String>

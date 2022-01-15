@@ -44,7 +44,7 @@ namespace CefFlashBrowser.Views
                             Show(e.TargetUrl);
                             break;
                         }
-                    case NewPageBehavior.OriginWindow:
+                    case NewPageBehavior.OriginalWindow:
                         {
                             browser.Load(e.TargetUrl);
                             break;

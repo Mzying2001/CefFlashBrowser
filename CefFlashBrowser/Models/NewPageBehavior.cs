@@ -2,7 +2,7 @@
 {
     public enum NewPageBehavior
     {
-        OriginWindow,
+        OriginalWindow,
         NewWindow
     }
 }

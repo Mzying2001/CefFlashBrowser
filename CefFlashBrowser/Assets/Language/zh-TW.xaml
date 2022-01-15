@@ -42,7 +42,7 @@
     <sys:String x:Key="navigationType_navigateOnly">僅導航</sys:String>
 
     <!--打開新網頁時的行為-->
-    <sys:String x:Key="newPageBehavior_originWindow">原視窗</sys:String>
+    <sys:String x:Key="newPageBehavior_originalWindow">原視窗</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新視窗</sys:String>
 
     <!--搜尋引擎-->

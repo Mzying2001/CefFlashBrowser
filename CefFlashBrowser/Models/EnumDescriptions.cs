@@ -22,7 +22,7 @@ namespace CefFlashBrowser.Models
 
         public static IEnumerable<EnumDescription<NewPageBehavior>> GetNewPageBehaviors()
         {
-            yield return new EnumDescription<NewPageBehavior>(NewPageBehavior.OriginWindow, LanguageManager.GetString("newPageBehavior_originWindow"));
+            yield return new EnumDescription<NewPageBehavior>(NewPageBehavior.OriginalWindow, LanguageManager.GetString("newPageBehavior_originalWindow"));
             yield return new EnumDescription<NewPageBehavior>(NewPageBehavior.NewWindow, LanguageManager.GetString("newPageBehavior_newWindow"));
         }
     }

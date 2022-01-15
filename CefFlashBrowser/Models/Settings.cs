@@ -19,7 +19,7 @@
             Language = "zh-CN",
             SearchEngine = Models.SearchEngine.Engine.Baidu,
             NavigationType = NavigationType.Automatic,
-            NewPageBehavior = NewPageBehavior.OriginWindow,
+            NewPageBehavior = NewPageBehavior.OriginalWindow,
             DisableOnBeforeUnloadDialog = false,
             BrowserWindowSizeInfo = null,
             SwfWindowSizeInfo = null
