@@ -35,7 +35,22 @@ namespace CefFlashBrowser.Views
         private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
         {
             e.CancelPopup = true;
-            Dispatcher.Invoke(() => browser.Load(e.TargetUrl));
+            Dispatcher.Invoke(() =>
+            {
+                switch (GlobalData.Settings.NewPageBehavior)
+                {
+                    case NewPageBehavior.NewWindow:
+                        {
+                            Show(e.TargetUrl);
+                            break;
+                        }
+                    case NewPageBehavior.OriginWindow:
+                        {
+                            browser.Load(e.TargetUrl);
+                            break;
+                        }
+                }
+            });
         }
 
         private void Browser_OnClose(object sender, System.EventArgs e)
