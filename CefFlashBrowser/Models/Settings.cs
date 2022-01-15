@@ -7,7 +7,7 @@
         public SearchEngine.Engine SearchEngine { get; set; }
         public NavigationType NavigationType { get; set; }
         public NewPageBehavior NewPageBehavior { get; set; }
-        public bool DisablePopup { get; set; }
+        public bool DisableOnBeforeUnloadDialog { get; set; }
         public WindowSizeInfo BrowserWindowSizeInfo { get; set; }
         public WindowSizeInfo SwfWindowSizeInfo { get; set; }
 
@@ -20,7 +20,7 @@
             SearchEngine = Models.SearchEngine.Engine.Baidu,
             NavigationType = NavigationType.Automatic,
             NewPageBehavior = NewPageBehavior.OriginWindow,
-            DisablePopup = false,
+            DisableOnBeforeUnloadDialog = false,
             BrowserWindowSizeInfo = null,
             SwfWindowSizeInfo = null
         };

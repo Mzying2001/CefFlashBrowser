@@ -57,7 +57,7 @@ namespace CefFlashBrowser.Views
             }
             else
             {
-                bool forceClose = GlobalData.Settings.DisablePopup;
+                bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }

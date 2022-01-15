@@ -51,12 +51,12 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public bool DisablePopup
+        public bool DisableOnBeforeUnloadDialog
         {
-            get => GlobalData.Settings.DisablePopup;
+            get => GlobalData.Settings.DisableOnBeforeUnloadDialog;
             set
             {
-                GlobalData.Settings.DisablePopup = value;
+                GlobalData.Settings.DisableOnBeforeUnloadDialog = value;
                 RaisePropertyChanged();
             }
         }

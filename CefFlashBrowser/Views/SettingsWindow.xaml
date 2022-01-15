@@ -143,11 +143,11 @@
                         <c:SettingItem>
                             <c:SettingItem.Description>
                                 <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{StaticResource settingItem_disablePopup}"/>
+                                           Text="{StaticResource settingItem_disableOnBeforeUnloadDialog}"/>
                             </c:SettingItem.Description>
                             <c:SettingItem.Content>
                                 <CheckBox Margin="5,0"
-                                          IsChecked="{Binding DisablePopup}"
+                                          IsChecked="{Binding DisableOnBeforeUnloadDialog}"
                                           Style="{StaticResource ToggleButtonSwitch}"/>
                             </c:SettingItem.Content>
                         </c:SettingItem>

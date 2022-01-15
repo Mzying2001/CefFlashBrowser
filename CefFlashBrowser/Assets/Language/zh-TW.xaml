@@ -30,7 +30,7 @@
     <sys:String x:Key="settingItem_searchEngine">搜尋引擎</sys:String>
     <sys:String x:Key="settingItem_deleteCache">清除所有緩存</sys:String>
     <sys:String x:Key="settingItem_openNewPage">打開新頁面管道</sys:String>
-    <sys:String x:Key="settingItem_disablePopup">禁用網頁重繪/關閉時的彈窗</sys:String>
+    <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">禁用網頁重繪/關閉時的彈窗</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
     <sys:String x:Key="button_deleteCache">清除</sys:String>
     <sys:String x:Key="button_viewDetails">詳情</sys:String>

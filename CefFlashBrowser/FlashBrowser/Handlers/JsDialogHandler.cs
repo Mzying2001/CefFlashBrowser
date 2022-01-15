@@ -10,7 +10,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
     {
         public bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
         {
-            if (GlobalData.Settings.DisablePopup)
+            if (GlobalData.Settings.DisableOnBeforeUnloadDialog)
             {
                 callback.Continue(true);
                 return true;
