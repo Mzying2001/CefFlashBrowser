@@ -9,5 +9,3 @@
 FLASH BROWSER!
 
 ![main](https://mzying2001.gitee.io/images/CefFlashBrowser/MainWindow2.png)
-
-![browser](https://mzying2001.gitee.io/images/CefFlashBrowser/Browser2.png)
