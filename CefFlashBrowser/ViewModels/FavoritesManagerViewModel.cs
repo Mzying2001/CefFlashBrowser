@@ -73,7 +73,7 @@ namespace CefFlashBrowser.ViewModels
         {
             AddFavoriteDialog.Show(LanguageManager.GetString("favorites_defaultName"), "about:blank", result =>
             {
-                if (result)
+                if (result == true)
                     SelectedIndex = GlobalData.Favorites.Count - 1;
             });
         }

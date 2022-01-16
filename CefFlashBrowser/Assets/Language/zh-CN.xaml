@@ -24,10 +24,13 @@
     <sys:String x:Key="tabItem_browser">浏览器</sys:String>
     <sys:String x:Key="settingHeader_addressBar">地址栏和搜索</sys:String>
     <sys:String x:Key="settingHeader_browserData">浏览器缓存</sys:String>
+    <sys:String x:Key="settingHeader_websiteBehavior">网站行为</sys:String>
     <sys:String x:Key="settingHeader_aboutCef">关于 CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">在地址栏中使用搜索引擎</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜索引擎</sys:String>
     <sys:String x:Key="settingItem_deleteCache">清除所有缓存</sys:String>
+    <sys:String x:Key="settingItem_openNewPage">打开新页面方式</sys:String>
+    <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">阻止网页刷新/关闭时的弹窗</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
     <sys:String x:Key="button_deleteCache">清除</sys:String>
     <sys:String x:Key="button_viewDetails">详情</sys:String>
@@ -37,6 +40,10 @@
     <sys:String x:Key="navigationType_auto">自动</sys:String>
     <sys:String x:Key="navigationType_searchOnly">仅搜索</sys:String>
     <sys:String x:Key="navigationType_navigateOnly">仅导航</sys:String>
+
+    <!--打开新网页时的行为-->
+    <sys:String x:Key="newPageBehavior_originalWindow">原窗口</sys:String>
+    <sys:String x:Key="newPageBehavior_newWindow">新窗口</sys:String>
 
     <!--搜索引擎-->
     <sys:String x:Key="baidu">百度</sys:String>

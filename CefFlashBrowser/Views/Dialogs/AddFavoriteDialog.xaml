@@ -4,20 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cc="clr-namespace:CefFlashBrowser.Views.Custom"
-        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels.DialogViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
         mc:Ignorable="d"
         
+        x:Name="dialog"
         Title="{DynamicResource title_addFavorite}"
         Topmost="True"
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Loaded="Window_Loaded">
-
-    <Window.DataContext>
-        <vm:AddFavoriteDialogViewModel/>
-    </Window.DataContext>
+        Loaded="Window_Loaded"
+        Closing="Window_Closing">
 
     <Window.Resources>
         <Style x:Key="AddFavoritesDialogTextBoxStyle"
@@ -32,27 +29,27 @@
 
     <Window.InputBindings>
         <KeyBinding Key="Esc"
-                    Command="{Binding CancelCommand}"/>
+                    Command="{Binding CancelCommand, ElementName=dialog}"/>
     </Window.InputBindings>
 
     <StackPanel Margin="15">
         <TextBlock Text="{DynamicResource favorites_name}"/>
         <cc:AutoSelectAllTextBox x:Name="NameTextBox"
                                  Style="{StaticResource AddFavoritesDialogTextBoxStyle}"
-                                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}">
+                                 Text="{Binding ItemName, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
-                            Command="{Binding OkCommand}"/>
+                            Command="{Binding OkCommand, ElementName=dialog}"/>
             </TextBox.InputBindings>
         </cc:AutoSelectAllTextBox>
 
         <TextBlock Text="{DynamicResource favorites_url}"/>
         <cc:AutoSelectAllTextBox x:Name="UrlTextBox"
                                  Style="{StaticResource AddFavoritesDialogTextBoxStyle}"
-                                 Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}">
+                                 Text="{Binding ItemUrl, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
-                            Command="{Binding OkCommand}"/>
+                            Command="{Binding OkCommand, ElementName=dialog}"/>
             </TextBox.InputBindings>
         </cc:AutoSelectAllTextBox>
 
@@ -66,18 +63,18 @@
             <Button Grid.Column="1"
                     MinWidth="70"
                     Content="{DynamicResource button_cancel}"
-                    Command="{Binding CancelCommand}"/>
+                    Command="{Binding CancelCommand, ElementName=dialog}"/>
 
             <Button Grid.Column="2"
                     MinWidth="70"
                     Margin="10,0,0,0"
                     Content="{DynamicResource button_ok}"
                     Style="{StaticResource ButtonPrimary}"
-                    Command="{Binding OkCommand}">
+                    Command="{Binding OkCommand, ElementName=dialog}">
                 <Button.IsEnabled>
                     <MultiBinding Converter="{StaticResource StringArrNotAnyEmpty}">
-                        <Binding Path="Name"/>
-                        <Binding Path="Url"/>
+                        <Binding ElementName="dialog" Path="ItemName"/>
+                        <Binding ElementName="dialog" Path="ItemUrl"/>
                     </MultiBinding>
                 </Button.IsEnabled>
             </Button>

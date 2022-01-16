@@ -116,6 +116,42 @@
                             </c:SettingItem.Content>
                         </c:SettingItem>
 
+                        <TextBlock Text="{StaticResource settingHeader_websiteBehavior}"
+                                   Style="{StaticResource SettingHeaderStyle}"/>
+
+                        <c:SettingItem>
+                            <c:SettingItem.Description>
+                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
+                                           Text="{StaticResource settingItem_openNewPage}"/>
+                            </c:SettingItem.Description>
+                            <c:SettingItem.Content>
+                                <ComboBox MinWidth="80"
+                                          ItemsSource="{Binding NewPageBehaviors}"
+                                          DisplayMemberPath="Description"
+                                          SelectedValuePath="Value"
+                                          SelectedIndex="{Binding CurrentNewPageBehaviorIndex, Mode=OneTime}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectionChanged">
+                                            <i:InvokeCommandAction Command="{Binding SetNewPageBehaviorCommand}"
+                                                                   CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
+                            </c:SettingItem.Content>
+                        </c:SettingItem>
+
+                        <c:SettingItem>
+                            <c:SettingItem.Description>
+                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
+                                           Text="{StaticResource settingItem_disableOnBeforeUnloadDialog}"/>
+                            </c:SettingItem.Description>
+                            <c:SettingItem.Content>
+                                <CheckBox Margin="5,0"
+                                          IsChecked="{Binding DisableOnBeforeUnloadDialog}"
+                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                            </c:SettingItem.Content>
+                        </c:SettingItem>
+
                         <TextBlock Text="{StaticResource settingHeader_aboutCef}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 

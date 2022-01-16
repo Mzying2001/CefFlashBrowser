@@ -1,7 +1,6 @@
-﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels;
-using SimpleMvvm.Messaging;
+﻿using SimpleMvvm.Command;
 using System.Windows;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views.Dialogs.JsDialogs
 {
@@ -10,27 +9,34 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
     /// </summary>
     public partial class JsAlertDialog : Window
     {
-        public JsAlertDialog()
-        {
-            InitializeComponent();
 
-            Messenger.Global.Register(MessageTokens.EXIT_JSALERT, CloseWindow);
-            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.EXIT_JSALERT, CloseWindow);
+
+        public string Message
+        {
+            get { return (string)GetValue(MessageProperty); }
+            set { SetValue(MessageProperty, value); }
         }
 
-        private void CloseWindow(object obj)
+        // Using a DependencyProperty as the backing store for Message.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty MessageProperty =
+            DependencyProperty.Register("Message", typeof(string), typeof(JsAlertDialog), new PropertyMetadata(string.Empty));
+
+
+        public ICommand CloseCommand { get; }
+
+        public JsAlertDialog()
         {
-            Close();
+            CloseCommand = new DelegateCommand(Close);
+            InitializeComponent();
         }
 
         public static void Show(string message, string title = "")
         {
-            var dialog = new JsAlertDialog();
-            var vmodel = (JsAlertDialogViewModel)dialog.DataContext;
-
-            vmodel.Message = message;
-            vmodel.Title = title;
-            dialog.ShowDialog();
+            new JsAlertDialog
+            {
+                Title = title,
+                Message = message
+            }.ShowDialog();
         }
     }
 }

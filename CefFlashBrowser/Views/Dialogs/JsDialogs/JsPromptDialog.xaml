@@ -4,31 +4,27 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cc="clr-namespace:CefFlashBrowser.Views.Custom"
-        xmlns:jdvm="clr-namespace:CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs.JsDialogs"
         mc:Ignorable="d"
         
+        x:Name="dialog"
         Topmost="True"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen"
-        Title="{Binding Title}"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        Closing="JsPromptDialog_Closing">
 
     <Window.Resources>
         <ResourceDictionary Source="JsDialogResources.xaml"/>
     </Window.Resources>
 
-    <Window.DataContext>
-        <jdvm:JsPromptDialogViewModel/>
-    </Window.DataContext>
-
     <Window.InputBindings>
         <!--<KeyBinding Key="Enter"
                     Command="{Binding OkCommand}"/>-->
         <KeyBinding Key="Esc"
-                    Command="{Binding CalcelCommand}"/>
+                    Command="{Binding ElementName=dialog, Path=CancelCommand}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -48,17 +44,17 @@
         <TextBlock Grid.Row="1"
                    Grid.Column="1"
                    TextWrapping="Wrap"
-                   Text="{Binding Message}"
+                   Text="{Binding ElementName=dialog, Path=Message}"
                    Style="{StaticResource JsPromptDialogTextStyle}"/>
 
         <cc:AutoSelectAllTextBox x:Name="inputBox"
                                  Grid.Row="2"
                                  Grid.Column="1"
                                  Style="{StaticResource JsDialogPromptTextBoxStyle}"
-                                 Text="{Binding PromptText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                 Text="{Binding ElementName=dialog, Path=Input, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
-                            Command="{Binding OkCommand}"/>
+                            Command="{Binding ElementName=dialog, Path=OkCommand}"/>
             </TextBox.InputBindings>
         </cc:AutoSelectAllTextBox>
 
@@ -67,9 +63,9 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button Style="{StaticResource JsDialogOkPromptButtonStyle}"
-                    Command="{Binding OkCommand}"/>
+                    Command="{Binding ElementName=dialog, Path=OkCommand}"/>
             <Button Style="{StaticResource JsDialogCancelButtonStyle}"
-                    Command="{Binding CalcelCommand}"/>
+                    Command="{Binding ElementName=dialog, Path=CancelCommand}"/>
         </StackPanel>
     </Grid>
 </Window>

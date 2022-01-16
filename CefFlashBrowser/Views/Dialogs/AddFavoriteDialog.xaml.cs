@@ -1,8 +1,9 @@
-﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.ViewModels.DialogViewModels;
-using SimpleMvvm.Messaging;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
+using SimpleMvvm.Command;
 using System;
 using System.Windows;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views.Dialogs
 {
@@ -11,20 +12,56 @@ namespace CefFlashBrowser.Views.Dialogs
     /// </summary>
     public partial class AddFavoriteDialog : Window
     {
-        private Action<bool> callback;
+
+
+        public string ItemName
+        {
+            get { return (string)GetValue(ItemNameProperty); }
+            set { SetValue(ItemNameProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ItemName.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ItemNameProperty =
+            DependencyProperty.Register("ItemName", typeof(string), typeof(AddFavoriteDialog), new PropertyMetadata(string.Empty));
+
+
+        public string ItemUrl
+        {
+            get { return (string)GetValue(ItemUrlProperty); }
+            set { SetValue(ItemUrlProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ItemUrl.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ItemUrlProperty =
+            DependencyProperty.Register("ItemUrl", typeof(string), typeof(AddFavoriteDialog), new PropertyMetadata(string.Empty));
+
+
+        private bool? _result = null;
+        private Action<bool?> _callback;
+
+        public ICommand OkCommand { get; }
+        public ICommand CancelCommand { get; }
 
         public AddFavoriteDialog()
         {
+            OkCommand = new DelegateCommand(() =>
+            {
+                if (string.IsNullOrWhiteSpace(ItemName) || string.IsNullOrWhiteSpace(ItemUrl))
+                    return;
+
+                var website = new Website(ItemName.Trim(), ItemUrl.Trim());
+                GlobalData.Favorites.Add(website);
+                _result = true;
+                Close();
+            });
+
+            CancelCommand = new DelegateCommand(() =>
+            {
+                _result = false;
+                Close();
+            });
+
             InitializeComponent();
-
-            Messenger.Global.Register(MessageTokens.EXIT_ADDFAVORITES, CloseWindow);
-            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.EXIT_ADDFAVORITES, CloseWindow);
-        }
-
-        private void CloseWindow(object obj)
-        {
-            callback?.Invoke((bool)obj);
-            Close();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -33,14 +70,19 @@ namespace CefFlashBrowser.Views.Dialogs
             NameTextBox.SelectAll();
         }
 
-        public static void Show(string name, string url, Action<bool> callback = null)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            var dialog = new AddFavoriteDialog { callback = callback };
-            var vmodel = (AddFavoriteDialogViewModel)dialog.DataContext;
+            _callback?.Invoke(_result);
+        }
 
-            vmodel.Name = name;
-            vmodel.Url = url;
-            dialog.ShowDialog();
+        public static void Show(string name, string url, Action<bool?> callback = null)
+        {
+            new AddFavoriteDialog
+            {
+                ItemName = name,
+                ItemUrl = url,
+                _callback = callback
+            }.ShowDialog();
         }
     }
 }

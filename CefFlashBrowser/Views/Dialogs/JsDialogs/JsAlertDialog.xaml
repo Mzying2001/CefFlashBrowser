@@ -3,30 +3,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:jdvm="clr-namespace:CefFlashBrowser.ViewModels.DialogViewModels.JsDialogViewModels"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs.JsDialogs"
         mc:Ignorable="d"
         
+        x:Name="dialog"
         Topmost="True"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
-        WindowStartupLocation="CenterScreen"
-        Title="{Binding Title}">
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <ResourceDictionary Source="JsDialogResources.xaml"/>
     </Window.Resources>
 
-    <Window.DataContext>
-        <jdvm:JsAlertDialogViewModel/>
-    </Window.DataContext>
-
     <Window.InputBindings>
         <KeyBinding Key="Enter"
-                    Command="{Binding OkCommand}"/>
+                    Command="{Binding ElementName=dialog, Path=CloseCommand}"/>
         <KeyBinding Key="Esc"
-                    Command="{Binding OkCommand}"/>
+                    Command="{Binding ElementName=dialog, Path=CloseCommand}"/>
     </Window.InputBindings>
 
     <Grid>
@@ -45,13 +40,13 @@
         <TextBlock Grid.Row="1"
                    Grid.Column="1"
                    TextWrapping="Wrap"
-                   Text="{Binding Message}"
+                   Text="{Binding ElementName=dialog, Path=Message}"
                    Style="{StaticResource JsDialogTextStyle}"/>
 
         <Button Grid.Row="2"
                 Grid.Column="1"
                 HorizontalAlignment="Right"
-                Command="{Binding OkCommand}"
+                Command="{Binding ElementName=dialog, Path=CloseCommand}"
                 Style="{StaticResource JsDialogOkButtonStyle}"/>
     </Grid>
 </Window>

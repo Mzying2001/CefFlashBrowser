@@ -13,16 +13,16 @@ namespace CefFlashBrowser.Views
     {
         public MainWindow()
         {
-            InitializeComponent();
-
-            Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
-            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
-
             if (GlobalData.Settings.FirstStart)
             {
                 new SelectLanguageDialog().ShowDialog();
                 GlobalData.Settings.FirstStart = false;
             }
+
+            InitializeComponent();
+
+            Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
+            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
         }
 
         private void UpdateLanguageMenuChecked(object obj)

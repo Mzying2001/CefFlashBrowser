@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace CefFlashBrowser.FlashBrowser
 {
-    public class FlashBrowserBase : ChromiumWebBrowser
+    public abstract class FlashBrowserBase : ChromiumWebBrowser
     {
         public static readonly string CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Caches\");
         public static readonly string FlashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");

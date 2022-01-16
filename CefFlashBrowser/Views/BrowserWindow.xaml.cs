@@ -19,25 +19,47 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
 
-            Messenger.Global.Register(MessageTokens.EXIT_BROWSER, ExitBrowser);
+            Messenger.Global.Register(MessageTokens.CLOSE_BROWSER, CloseBrowser);
 
             if (GlobalData.Settings.BrowserWindowSizeInfo != null)
                 GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
 
             browser.MenuHandler = new BrowserWindowMenuHandler();
-            browser.OnClose += (s, e) =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    _doClose = true;
-                    Close();
-                });
-            };
         }
 
-        private void ExitBrowser(object browser)
+        private void CloseBrowser(object browser)
         {
             if (ReferenceEquals(browser, this.browser)) Close();
+        }
+
+        private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
+        {
+            e.CancelPopup = true;
+            Dispatcher.Invoke(() =>
+            {
+                switch (GlobalData.Settings.NewPageBehavior)
+                {
+                    case NewPageBehavior.NewWindow:
+                        {
+                            Show(e.TargetUrl);
+                            break;
+                        }
+                    case NewPageBehavior.OriginalWindow:
+                        {
+                            browser.Load(e.TargetUrl);
+                            break;
+                        }
+                }
+            });
+        }
+
+        private void Browser_OnClose(object sender, System.EventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                _doClose = true;
+                Close();
+            });
         }
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -46,11 +68,12 @@ namespace CefFlashBrowser.Views
             {
                 browserWindow.WindowState = WindowState.Normal;
                 GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
-                Messenger.Global.Unregister(MessageTokens.EXIT_BROWSER, ExitBrowser);
+                Messenger.Global.Unregister(MessageTokens.CLOSE_BROWSER, CloseBrowser);
             }
             else
             {
-                browser.GetBrowser().CloseBrowser(false);
+                bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
+                browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
         }

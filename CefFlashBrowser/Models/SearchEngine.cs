@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 
 namespace CefFlashBrowser.Models
@@ -39,15 +38,6 @@ namespace CefFlashBrowser.Models
                 default:
                     throw new Exception("Unknown search engine.");
             }
-        }
-
-        public static IEnumerable<EnumDescription<Engine>> GetSupportedSearchEngines()
-        {
-            yield return new EnumDescription<Engine>(Engine.Baidu, LanguageManager.GetString("baidu"));
-            yield return new EnumDescription<Engine>(Engine.Google, LanguageManager.GetString("google"));
-            yield return new EnumDescription<Engine>(Engine.Bing, LanguageManager.GetString("bing"));
-            yield return new EnumDescription<Engine>(Engine.Sogou, LanguageManager.GetString("sogou"));
-            yield return new EnumDescription<Engine>(Engine.So360, LanguageManager.GetString("so360"));
         }
     }
 }

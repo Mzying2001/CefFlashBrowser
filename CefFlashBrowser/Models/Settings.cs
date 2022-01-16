@@ -5,7 +5,9 @@
         public bool FirstStart { get; set; }
         public string Language { get; set; }
         public SearchEngine.Engine SearchEngine { get; set; }
-        public NavigationType.Type NavigationType { get; set; }
+        public NavigationType NavigationType { get; set; }
+        public NewPageBehavior NewPageBehavior { get; set; }
+        public bool DisableOnBeforeUnloadDialog { get; set; }
         public WindowSizeInfo BrowserWindowSizeInfo { get; set; }
         public WindowSizeInfo SwfWindowSizeInfo { get; set; }
 
@@ -16,7 +18,9 @@
             FirstStart = true,
             Language = "zh-CN",
             SearchEngine = Models.SearchEngine.Engine.Baidu,
-            NavigationType = Models.NavigationType.Type.Automatic,
+            NavigationType = NavigationType.Automatic,
+            NewPageBehavior = NewPageBehavior.OriginalWindow,
+            DisableOnBeforeUnloadDialog = false,
             BrowserWindowSizeInfo = null,
             SwfWindowSizeInfo = null
         };

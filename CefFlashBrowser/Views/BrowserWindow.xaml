@@ -182,7 +182,7 @@
                     Command="{Binding CreateShortcutCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+W"
-                    Command="{Binding ExitBrowserCommand}"
+                    Command="{Binding CloseBrowserCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Esc"
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>
@@ -277,7 +277,9 @@
 
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
-                                    ZoomLevelIncrement="0.25"/>
+                                    ZoomLevelIncrement="0.25"
+                                    OnCreateNewWindow="Browser_OnCreateNewWindow"
+                                    OnClose="Browser_OnClose"/>
 
         <Label Grid.Row="1"
                Margin="5"
