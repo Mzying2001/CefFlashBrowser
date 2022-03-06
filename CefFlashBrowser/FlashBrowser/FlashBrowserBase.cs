@@ -73,7 +73,7 @@ namespace CefFlashBrowser.FlashBrowser
                     if (!flag)
                     {
                         var title = LanguageManager.GetString("title_error");
-                        Dispatcher.Invoke(() => JsAlertDialog.Show(err, title));
+                        Dispatcher.Invoke(() => JsAlertDialog.ShowDialog(err, title));
                     }
                 });
             }

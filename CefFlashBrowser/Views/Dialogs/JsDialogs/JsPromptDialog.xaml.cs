@@ -68,7 +68,7 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
             inputBox.SelectAll();
         }
 
-        public static void Show(string message, string title = "", string defaulePromptText = "", Action<string> callback = null)
+        public static void ShowDialog(string message, string title = "", string defaulePromptText = "", Action<string> callback = null)
         {
             new JsPromptDialog
             {

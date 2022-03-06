@@ -19,7 +19,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             ((ChromiumWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
             {
                 var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
-                JsConfirmDialog.Show(messageText, title, result =>
+                JsConfirmDialog.ShowDialog(messageText, title, result =>
                 {
                     callback.Continue(result == true);
                 });
@@ -42,7 +42,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsAlertDialog.Show(messageText, targetBrowser.Title);
+                            JsAlertDialog.ShowDialog(messageText, targetBrowser.Title);
                         });
                         suppressMessage = true;
                         return false;
@@ -52,7 +52,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsConfirmDialog.Show(messageText, targetBrowser.Title, result =>
+                            JsConfirmDialog.ShowDialog(messageText, targetBrowser.Title, result =>
                             {
                                 callback.Continue(result == true);
                             });
@@ -65,7 +65,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                     {
                         targetBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsPromptDialog.Show(messageText, targetBrowser.Title, defaultPromptText, result =>
+                            JsPromptDialog.ShowDialog(messageText, targetBrowser.Title, defaultPromptText, result =>
                             {
                                 callback.Continue(result != null, result);
                             });

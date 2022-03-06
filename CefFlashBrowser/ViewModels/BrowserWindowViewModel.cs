@@ -60,14 +60,14 @@ namespace CefFlashBrowser.ViewModels
                 }
                 catch (Exception e)
                 {
-                    JsAlertDialog.Show(e.Message);
+                    JsAlertDialog.ShowDialog(e.Message);
                 }
             }
         }
 
         private void AddFavorite(ChromiumWebBrowser browser)
         {
-            AddFavoriteDialog.Show(browser.Title, browser.Address);
+            AddFavoriteDialog.ShowDialog(browser.Title, browser.Address);
         }
 
         private void CloseBrowser(ChromiumWebBrowser browser)

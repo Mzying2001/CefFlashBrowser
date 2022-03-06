@@ -72,7 +72,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void AddItem()
         {
-            AddFavoriteDialog.Show(LanguageManager.GetString("favorites_defaultName"), "about:blank", result =>
+            AddFavoriteDialog.ShowDialog(LanguageManager.GetString("favorites_defaultName"), "about:blank", result =>
             {
                 if (result == true)
                     SelectedIndex = GlobalData.Favorites.Count - 1;
@@ -81,7 +81,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void RemoveItem(Website item)
         {
-            JsConfirmDialog.Show(string.Format(LanguageManager.GetString("message_removeItem"), GlobalData.Favorites[SelectedIndex].Name), "", result =>
+            JsConfirmDialog.ShowDialog(string.Format(LanguageManager.GetString("message_removeItem"), GlobalData.Favorites[SelectedIndex].Name), "", result =>
             {
                 if (result == true)
                 {

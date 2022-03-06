@@ -75,7 +75,7 @@ namespace CefFlashBrowser.Views.Dialogs
             _callback?.Invoke(_result);
         }
 
-        public static void Show(string name, string url, Action<bool?> callback = null)
+        public static void ShowDialog(string name, string url, Action<bool?> callback = null)
         {
             new AddFavoriteDialog
             {

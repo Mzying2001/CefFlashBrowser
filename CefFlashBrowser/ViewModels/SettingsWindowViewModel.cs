@@ -46,7 +46,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void DeleteCache()
         {
-            JsConfirmDialog.Show(LanguageManager.GetString("message_deleteCache"), "", result =>
+            JsConfirmDialog.ShowDialog(LanguageManager.GetString("message_deleteCache"), "", result =>
             {
                 if (result == true)
                 {

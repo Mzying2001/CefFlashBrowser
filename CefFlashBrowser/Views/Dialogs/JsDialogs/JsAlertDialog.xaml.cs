@@ -30,7 +30,7 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
             InitializeComponent();
         }
 
-        public static void Show(string message, string title = "")
+        public static void ShowDialog(string message, string title = "")
         {
             new JsAlertDialog
             {

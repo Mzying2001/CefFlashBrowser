@@ -43,7 +43,7 @@ namespace CefFlashBrowser
                 }
                 else
                 {
-                    JsAlertDialog.Show($"{LanguageManager.GetString("invalidStartUpParam")}: {arg}");
+                    JsAlertDialog.ShowDialog($"{LanguageManager.GetString("invalidStartUpParam")}: {arg}");
                     Environment.Exit(0);
                 }
             }

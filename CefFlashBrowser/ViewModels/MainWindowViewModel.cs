@@ -27,7 +27,7 @@ namespace CefFlashBrowser.ViewModels
         {
             if (string.IsNullOrWhiteSpace(url))
             {
-                JsAlertDialog.Show(LanguageManager.GetString("message_emptyUrl"));
+                JsAlertDialog.ShowDialog(LanguageManager.GetString("message_emptyUrl"));
                 return;
             }
 
