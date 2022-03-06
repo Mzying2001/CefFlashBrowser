@@ -1,5 +1,4 @@
-﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views;
 using CefSharp;
@@ -212,7 +211,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                                 menuItem.Header = string.Format(LanguageManager.GetString(header), tmp.Replace('\n', ' '));
                                 menuItem.Command = new DelegateCommand(() =>
                                 {
-                                    BrowserWindow.Show(SearchEngine.GetUrl(selectionText, GlobalData.Settings.SearchEngine));
+                                    BrowserWindow.Show(SearchEngineUtil.GetUrl(selectionText, GlobalData.Settings.SearchEngine));
                                 });
                                 break;
                             }

@@ -4,7 +4,7 @@
     {
         public bool FirstStart { get; set; }
         public string Language { get; set; }
-        public SearchEngine.Engine SearchEngine { get; set; }
+        public SearchEngine SearchEngine { get; set; }
         public NavigationType NavigationType { get; set; }
         public NewPageBehavior NewPageBehavior { get; set; }
         public bool DisableOnBeforeUnloadDialog { get; set; }
@@ -17,7 +17,7 @@
         {
             FirstStart = true,
             Language = "zh-CN",
-            SearchEngine = Models.SearchEngine.Engine.Baidu,
+            SearchEngine = SearchEngine.Baidu,
             NavigationType = NavigationType.Automatic,
             NewPageBehavior = NewPageBehavior.OriginalWindow,
             DisableOnBeforeUnloadDialog = false,

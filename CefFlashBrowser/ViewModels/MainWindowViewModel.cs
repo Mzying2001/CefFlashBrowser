@@ -44,13 +44,13 @@ namespace CefFlashBrowser.ViewModels
                 case NavigationType.Automatic:
                     {
                         if (!UrlChecker.IsHttpUrl(url))
-                            url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
+                            url = SearchEngineUtil.GetUrl(url, GlobalData.Settings.SearchEngine);
                     }
                     break;
 
                 case NavigationType.SearchOnly:
                     {
-                        url = SearchEngine.GetUrl(url, GlobalData.Settings.SearchEngine);
+                        url = SearchEngineUtil.GetUrl(url, GlobalData.Settings.SearchEngine);
                     }
                     break;
 

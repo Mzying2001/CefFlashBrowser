@@ -6,13 +6,13 @@ namespace CefFlashBrowser.Models
 {
     public static class EnumDescriptions
     {
-        public static IEnumerable<EnumDescription<SearchEngine.Engine>> GetSearchEngines()
+        public static IEnumerable<EnumDescription<SearchEngine>> GetSearchEngines()
         {
-            yield return new EnumDescription<SearchEngine.Engine>(SearchEngine.Engine.Baidu, LanguageManager.GetString("baidu"));
-            yield return new EnumDescription<SearchEngine.Engine>(SearchEngine.Engine.Google, LanguageManager.GetString("google"));
-            yield return new EnumDescription<SearchEngine.Engine>(SearchEngine.Engine.Bing, LanguageManager.GetString("bing"));
-            yield return new EnumDescription<SearchEngine.Engine>(SearchEngine.Engine.Sogou, LanguageManager.GetString("sogou"));
-            yield return new EnumDescription<SearchEngine.Engine>(SearchEngine.Engine.So360, LanguageManager.GetString("so360"));
+            yield return new EnumDescription<SearchEngine>(SearchEngine.Baidu, LanguageManager.GetString("baidu"));
+            yield return new EnumDescription<SearchEngine>(SearchEngine.Google, LanguageManager.GetString("google"));
+            yield return new EnumDescription<SearchEngine>(SearchEngine.Bing, LanguageManager.GetString("bing"));
+            yield return new EnumDescription<SearchEngine>(SearchEngine.Sogou, LanguageManager.GetString("sogou"));
+            yield return new EnumDescription<SearchEngine>(SearchEngine.So360, LanguageManager.GetString("so360"));
         }
 
         public static IEnumerable<EnumDescription<NavigationType>> GetNavigationTypes()

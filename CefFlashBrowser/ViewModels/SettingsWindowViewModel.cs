@@ -34,7 +34,7 @@ namespace CefFlashBrowser.ViewModels
             GlobalData.Settings.NavigationType = type;
         }
 
-        private void SetSearchEngine(SearchEngine.Engine engine)
+        private void SetSearchEngine(SearchEngine engine)
         {
             GlobalData.Settings.SearchEngine = engine;
         }
@@ -90,7 +90,7 @@ namespace CefFlashBrowser.ViewModels
         public SettingsWindowViewModel()
         {
             SetNavigationTypeCommand = new DelegateCommand<NavigationType>(SetNavigationType);
-            SetSearchEngineCommand = new DelegateCommand<SearchEngine.Engine>(SetSearchEngine);
+            SetSearchEngineCommand = new DelegateCommand<SearchEngine>(SetSearchEngine);
             DeleteCacheCommand = new DelegateCommand(DeleteCache);
             PopupAboutCefCommand = new DelegateCommand(PopupAboutCef);
             SetNewPageBehaviorCommand = new DelegateCommand<NewPageBehavior>(SetNewPageBehavior);

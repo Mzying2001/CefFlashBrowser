@@ -294,6 +294,7 @@
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\Data\MessageTokens.cs" />
     <Compile Include="Models\Settings.cs" />
+    <Compile Include="Utils\SearchEngineUtil.cs" />
     <Compile Include="Utils\UrlChecker.cs" />
     <Compile Include="Models\Website.cs" />
     <Compile Include="Models\WindowSizeInfo.cs" />
