@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Utils;
+using System;
 using System.Collections.Generic;
 
 namespace CefFlashBrowser.Models
@@ -25,6 +26,18 @@ namespace CefFlashBrowser.Models
         {
             yield return new EnumDescription<NewPageBehavior>(NewPageBehavior.OriginalWindow, LanguageManager.GetString("newPageBehavior_originalWindow"));
             yield return new EnumDescription<NewPageBehavior>(NewPageBehavior.NewWindow, LanguageManager.GetString("newPageBehavior_newWindow"));
+        }
+
+        public static int GetIndex<T>(IEnumerable<EnumDescription<T>> enumDescriptions, T val) where T : Enum
+        {
+            int index = -1;
+            foreach (var desc in enumDescriptions)
+            {
+                ++index;
+                if (desc.Value.Equals(val))
+                    return index;
+            }
+            return -1;
         }
     }
 }
