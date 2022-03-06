@@ -6,18 +6,14 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         mc:Ignorable="d"
         
-        Width="500"
+        Width="450"
         Height="450"
-        MinWidth="400"
+        MinWidth="300"
         MinHeight="300"
-        Title="{StaticResource menu_settings}">
-
-    <Window.DataContext>
-        <vm:SettingsWindowViewModel/>
-    </Window.DataContext>
+        Title="{StaticResource menu_settings}"
+        DataContext="{Binding Source={StaticResource Locator}, Path=SettingsWindowViewModel}">
 
     <Window.Resources>
 
@@ -59,11 +55,10 @@
                                            Text="{StaticResource settingItem_useSearchEngine}"/>
                             </c:SettingItem.Description>
                             <c:SettingItem.Content>
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding NavigationTypes}"
+                                <ComboBox x:Name="cb_navTypes"
+                                          MinWidth="80"
                                           DisplayMemberPath="Description"
-                                          SelectedValuePath="Value"
-                                          SelectedIndex="{Binding CurrentNavigationTypeIndex, Mode=OneTime}">
+                                          SelectedValuePath="Value">
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="SelectionChanged">
                                             <i:InvokeCommandAction Command="{Binding SetNavigationTypeCommand}"
@@ -80,11 +75,10 @@
                                            Text="{StaticResource settingItem_searchEngine}"/>
                             </c:SettingItem.Description>
                             <c:SettingItem.Content>
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding SearchEngines}"
+                                <ComboBox x:Name="cb_searchEngines"
+                                          MinWidth="80"
                                           DisplayMemberPath="Description"
-                                          SelectedValuePath="Value"
-                                          SelectedIndex="{Binding CurrentSearchEngineIndex, Mode=OneTime}">
+                                          SelectedValuePath="Value">
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="SelectionChanged">
                                             <i:InvokeCommandAction Command="{Binding SetSearchEngineCommand}"
@@ -125,11 +119,10 @@
                                            Text="{StaticResource settingItem_openNewPage}"/>
                             </c:SettingItem.Description>
                             <c:SettingItem.Content>
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding NewPageBehaviors}"
+                                <ComboBox x:Name="cb_newPageBehaviors"
+                                          MinWidth="80"
                                           DisplayMemberPath="Description"
-                                          SelectedValuePath="Value"
-                                          SelectedIndex="{Binding CurrentNewPageBehaviorIndex, Mode=OneTime}">
+                                          SelectedValuePath="Value">
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="SelectionChanged">
                                             <i:InvokeCommandAction Command="{Binding SetNewPageBehaviorCommand}"

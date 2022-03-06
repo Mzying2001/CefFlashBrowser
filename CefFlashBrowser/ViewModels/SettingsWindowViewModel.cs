@@ -7,9 +7,7 @@ using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -20,37 +18,6 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand DeleteCacheCommand { get; set; }
         public DelegateCommand PopupAboutCefCommand { get; set; }
         public DelegateCommand SetNewPageBehaviorCommand { get; set; }
-
-        public ObservableCollection<EnumDescription<SearchEngine.Engine>> SearchEngines { get; set; }
-        public ObservableCollection<EnumDescription<NavigationType>> NavigationTypes { get; set; }
-        public ObservableCollection<EnumDescription<NewPageBehavior>> NewPageBehaviors { get; set; }
-
-        public int CurrentNavigationTypeIndex
-        {
-            get
-            {
-                var li = (from i in EnumDescriptions.GetNavigationTypes() select i.Value).ToList();
-                return li.IndexOf(GlobalData.Settings.NavigationType);
-            }
-        }
-
-        public int CurrentSearchEngineIndex
-        {
-            get
-            {
-                var li = (from i in EnumDescriptions.GetSearchEngines() select i.Value).ToList();
-                return li.IndexOf(GlobalData.Settings.SearchEngine);
-            }
-        }
-
-        public int CurrentNewPageBehaviorIndex
-        {
-            get
-            {
-                var li = (from i in EnumDescriptions.GetNewPageBehaviors() select i.Value).ToList();
-                return li.IndexOf(GlobalData.Settings.NewPageBehavior);
-            }
-        }
 
         public bool DisableOnBeforeUnloadDialog
         {
@@ -122,10 +89,6 @@ namespace CefFlashBrowser.ViewModels
 
         public SettingsWindowViewModel()
         {
-            NavigationTypes = new ObservableCollection<EnumDescription<NavigationType>>(EnumDescriptions.GetNavigationTypes());
-            SearchEngines = new ObservableCollection<EnumDescription<SearchEngine.Engine>>(EnumDescriptions.GetSearchEngines());
-            NewPageBehaviors = new ObservableCollection<EnumDescription<NewPageBehavior>>(EnumDescriptions.GetNewPageBehaviors());
-
             SetNavigationTypeCommand = new DelegateCommand<NavigationType>(SetNavigationType);
             SetSearchEngineCommand = new DelegateCommand<SearchEngine.Engine>(SetSearchEngine);
             DeleteCacheCommand = new DelegateCommand(DeleteCache);
