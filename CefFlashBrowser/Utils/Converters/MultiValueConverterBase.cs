@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
 
-namespace CefFlashBrowser.Models.Converters
+namespace CefFlashBrowser.Utils.Converters
 {
     public abstract class MultiValueConverterBase<TIn, TOut> : IMultiValueConverter
     {

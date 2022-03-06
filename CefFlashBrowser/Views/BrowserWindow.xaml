@@ -9,7 +9,7 @@
         xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
         xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
-        xmlns:converter="clr-namespace:CefFlashBrowser.Models.Converters"
+        xmlns:converter="clr-namespace:CefFlashBrowser.Utils.Converters"
         mc:Ignorable="d"
         
         x:Name="browserWindow"

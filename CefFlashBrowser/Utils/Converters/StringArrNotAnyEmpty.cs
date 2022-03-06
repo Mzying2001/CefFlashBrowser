@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Linq;
 
-namespace CefFlashBrowser.Models.Converters
+namespace CefFlashBrowser.Utils.Converters
 {
     public class StringArrNotAnyEmpty : MultiValueConverterBase<string, bool>
     {

@@ -270,12 +270,12 @@
     <Compile Include="FlashBrowser\Handlers\ContextMenuHandlerBase.cs" />
     <Compile Include="FlashBrowser\Handlers\DefaultWpfMenuHandler.cs" />
     <Compile Include="Models\AppInfo.cs" />
-    <Compile Include="Models\Converters\IsCurrentLanguage.cs" />
-    <Compile Include="Models\Converters\LanguageCodeToName.cs" />
-    <Compile Include="Models\Converters\MultiValueConverterBase.cs" />
-    <Compile Include="Models\Converters\ObjectNotNull.cs" />
-    <Compile Include="Models\Converters\StringArrNotAnyEmpty.cs" />
-    <Compile Include="Models\Converters\UrlDecoder.cs" />
+    <Compile Include="Utils\Converters\IsCurrentLanguage.cs" />
+    <Compile Include="Utils\Converters\LanguageCodeToName.cs" />
+    <Compile Include="Utils\Converters\MultiValueConverterBase.cs" />
+    <Compile Include="Utils\Converters\ObjectNotNull.cs" />
+    <Compile Include="Utils\Converters\StringArrNotAnyEmpty.cs" />
+    <Compile Include="Utils\Converters\UrlDecoder.cs" />
     <Compile Include="Models\EnumDescription.cs" />
     <Compile Include="Models\EnumDescriptions.cs" />
     <Compile Include="Models\FavoritesFile.cs" />
@@ -287,14 +287,14 @@
     <Compile Include="FlashBrowser\Handlers\LifeSpanHandler.cs" />
     <Compile Include="FlashBrowser\Handlers\IEDownloadHandler.cs" />
     <Compile Include="Models\Data\GlobalData.cs" />
-    <Compile Include="Models\LanguageManager.cs" />
+    <Compile Include="Utils\LanguageManager.cs" />
     <Compile Include="Models\NavigationType.cs" />
     <Compile Include="Models\NewPageBehavior.cs" />
     <Compile Include="Models\PathInfo.cs" />
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\Data\MessageTokens.cs" />
     <Compile Include="Models\Settings.cs" />
-    <Compile Include="Models\UrlChecker.cs" />
+    <Compile Include="Utils\UrlChecker.cs" />
     <Compile Include="Models\Website.cs" />
     <Compile Include="Models\WindowSizeInfo.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
@@ -305,8 +305,8 @@
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\Converters\BoolToObject.cs" />
-    <Compile Include="Models\Converters\ValueConverterBase.cs" />
+    <Compile Include="Utils\Converters\BoolToObject.cs" />
+    <Compile Include="Utils\Converters\ValueConverterBase.cs" />
     <Compile Include="Views\Custom\AutoSelectAllTextBox.cs" />
     <Compile Include="Views\Custom\DropableWindow.cs" />
     <Compile Include="Views\Custom\SettingItem.cs" />
@@ -349,7 +349,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Models\Converters\Converters.xaml">
+    <Page Include="Utils\Converters\Converters.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

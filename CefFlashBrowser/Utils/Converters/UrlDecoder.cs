@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Net;
 
-namespace CefFlashBrowser.Models.Converters
+namespace CefFlashBrowser.Utils.Converters
 {
     public class UrlDecoder : ValueConverterBase<string, string>
     {

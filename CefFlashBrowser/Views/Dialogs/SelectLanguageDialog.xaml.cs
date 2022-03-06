@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models;
+﻿using CefFlashBrowser.Utils;
 using SimpleMvvm.Command;
 using System.Windows;
 using System.Windows.Input;

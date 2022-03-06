@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CefFlashBrowser.Utils;
+using System.Collections.Generic;
 
 namespace CefFlashBrowser.Models
 {

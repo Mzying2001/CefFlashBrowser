@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace CefFlashBrowser.Models.Converters
+namespace CefFlashBrowser.Utils.Converters
 {
     public class LanguageCodeToName : ValueConverterBase<string, string>
     {

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text.RegularExpressions;
 
-namespace CefFlashBrowser.Models
+namespace CefFlashBrowser.Utils
 {
     public static class UrlChecker
     {
