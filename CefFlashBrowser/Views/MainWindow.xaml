@@ -125,7 +125,7 @@
                 <Hyperlink Foreground="Black"
                            FontSize="30"
                            TextDecorations="None"
-                           ToolTip="{StaticResource toolTip_viewGithub}"
+                           ToolTip="{DynamicResource toolTip_viewGithub}"
                            Command="{Binding ViewGithubCommand}">
                     <TextBlock Text="Flash Browser"/>
                 </Hyperlink>
