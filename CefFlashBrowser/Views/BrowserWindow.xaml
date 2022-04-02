@@ -166,7 +166,7 @@
         <KeyBinding Gesture="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
         <KeyBinding Gesture="F12"
-                    Command="{Binding OpenDevToolCommand}"
+                    Command="{Binding ShowDevToolsCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
     </Window.InputBindings>
 
