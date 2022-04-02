@@ -258,7 +258,6 @@
             <c:AutoSelectAllTextBox Grid.Column="3"
                                     Margin="5,0"
                                     Height="30"
-                                    Style="{StaticResource TextBoxBaseStyle}"
                                     Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"

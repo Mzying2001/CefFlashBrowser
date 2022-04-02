@@ -110,7 +110,6 @@
                     <TextBlock Text="{StaticResource favorites_name}"
                                Foreground="Black"/>
                     <c:AutoSelectAllTextBox Margin="0,0,0,20"
-                                            Style="{StaticResource TextBoxBaseStyle}"
                                             Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter"
@@ -121,7 +120,6 @@
                     <TextBlock Text="{StaticResource favorites_url}"
                                Foreground="Black"/>
                     <c:AutoSelectAllTextBox Margin="0,0,0,20"
-                                            Style="{StaticResource TextBoxBaseStyle}"
                                             Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter"
