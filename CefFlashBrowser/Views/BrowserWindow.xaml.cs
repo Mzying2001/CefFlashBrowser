@@ -1,7 +1,6 @@
 ﻿using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
-using SimpleMvvm.Messaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -19,17 +18,10 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
 
-            Messenger.Global.Register(MessageTokens.CLOSE_BROWSER, CloseBrowser);
-
             if (GlobalData.Settings.BrowserWindowSizeInfo != null)
                 GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
 
             browser.MenuHandler = new BrowserWindowMenuHandler();
-        }
-
-        private void CloseBrowser(object browser)
-        {
-            if (ReferenceEquals(browser, this.browser)) Close();
         }
 
         private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
@@ -68,7 +60,6 @@ namespace CefFlashBrowser.Views
             {
                 browserWindow.WindowState = WindowState.Normal;
                 GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
-                Messenger.Global.Unregister(MessageTokens.CLOSE_BROWSER, CloseBrowser);
             }
             else
             {

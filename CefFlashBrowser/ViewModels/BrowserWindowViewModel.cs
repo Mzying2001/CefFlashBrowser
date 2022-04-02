@@ -8,7 +8,6 @@ using CefSharp.Wpf;
 using IWshRuntimeLibrary;
 using SimpleMvvm;
 using SimpleMvvm.Command;
-using SimpleMvvm.Messaging;
 using System;
 using System.Diagnostics;
 
@@ -16,12 +15,13 @@ namespace CefFlashBrowser.ViewModels
 {
     public class BrowserWindowViewModel : ViewModelBase
     {
-        public DelegateCommand OpenDevToolCommand { get; set; }
         public DelegateCommand ViewSourceCommand { get; set; }
         public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
         public DelegateCommand CreateShortcutCommand { get; set; }
         public DelegateCommand AddFavoriteCommand { get; set; }
         public DelegateCommand CloseBrowserCommand { get; set; }
+        public DelegateCommand ReloadOrStopCommand { get; set; }
+        public DelegateCommand ShowDevToolsCommand { get; set; }
 
         private void ViewSource(string url)
         {
@@ -70,19 +70,38 @@ namespace CefFlashBrowser.ViewModels
             AddFavoriteDialog.ShowDialog(browser.Title, browser.Address);
         }
 
-        private void CloseBrowser(ChromiumWebBrowser browser)
+        private void CloseBrowser(IWebBrowser browser)
         {
-            Messenger.Global.Send(MessageTokens.CLOSE_BROWSER, browser);
+            bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
+            browser.GetBrowser().CloseBrowser(forceClose);
+        }
+
+        private void ReloadOrStop(IWebBrowser browser)
+        {
+            if (browser.IsLoading)
+            {
+                browser.Stop();
+            }
+            else
+            {
+                browser.Reload();
+            }
+        }
+
+        private void ShowDevTools(IWebBrowser browser)
+        {
+            browser.ShowDevTools();
         }
 
         public BrowserWindowViewModel()
         {
-            OpenDevToolCommand = new DelegateCommand<ChromiumWebBrowser>(b => b.ShowDevTools());
             ViewSourceCommand = new DelegateCommand<string>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<ChromiumWebBrowser>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<ChromiumWebBrowser>(AddFavorite);
-            CloseBrowserCommand = new DelegateCommand<ChromiumWebBrowser>(CloseBrowser);
+            CloseBrowserCommand = new DelegateCommand<IWebBrowser>(CloseBrowser);
+            ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
+            ShowDevToolsCommand = new DelegateCommand<IWebBrowser>(ShowDevTools);
         }
     }
 }

@@ -25,8 +25,6 @@ namespace CefFlashBrowser.FlashBrowser
 
         public ICommand LoadUrlCommand { get; private set; }
 
-        public ICommand ChangeLoadingStateCommand { get; private set; }
-
         public override void BeginInit()
         {
             base.BeginInit();
@@ -35,14 +33,6 @@ namespace CefFlashBrowser.FlashBrowser
             {
                 if (obj is string url)
                     Address = url;
-            });
-
-            ChangeLoadingStateCommand = new DelegateCommand(() =>
-            {
-                if (IsLoading)
-                    GetBrowser().StopLoad();
-                else
-                    GetBrowser().Reload();
             });
 
             DownloadHandler = new IEDownloadHandler();

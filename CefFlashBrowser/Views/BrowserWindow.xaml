@@ -22,28 +22,6 @@
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
-        <!--Converters-->
-        <converter:BoolToObject x:Key="IsLoading2Svg">
-            <converter:BoolToObject.TrueObject>
-                <svgc:SvgViewbox Width="12"
-                                 Height="12"
-                                 Source="/Assets/Svgs/stop.svg"/>
-            </converter:BoolToObject.TrueObject>
-            <converter:BoolToObject.FalseObject>
-                <svgc:SvgViewbox Width="14"
-                                 Height="14"
-                                 Source="/Assets/Svgs/reload.svg"/>
-            </converter:BoolToObject.FalseObject>
-        </converter:BoolToObject>
-        <converter:BoolToObject x:Key="IsLoading2ToolTip">
-            <converter:BoolToObject.TrueObject>
-                <TextBlock Text="{DynamicResource toolTip_stop}"/>
-            </converter:BoolToObject.TrueObject>
-            <converter:BoolToObject.FalseObject>
-                <TextBlock Text="{DynamicResource toolTip_reload}"/>
-            </converter:BoolToObject.FalseObject>
-        </converter:BoolToObject>
-
         <!--ConetxtMenu-->
         <ContextMenu x:Key="more">
             <MenuItem>
@@ -101,7 +79,6 @@
                 </MenuItem.Header>
             </MenuItem>
 
-
             <Separator/>
 
             <MenuItem Header="{DynamicResource menu_favorites}"
@@ -146,7 +123,7 @@
             <Separator/>
 
             <MenuItem Header="{DynamicResource menu_openDevTool}"
-                      Command="{Binding OpenDevToolCommand}"
+                      Command="{Binding ShowDevToolsCommand}"
                       CommandParameter="{x:Reference Name=browser}"
                       InputGestureText="F12"/>
             <MenuItem Header="{DynamicResource menu_viewSource}"
@@ -240,13 +217,42 @@
                     Height="30"
                     Padding="0"
                     Margin="5,0,0,0"
-                    ToolTip="{Binding ElementName=browser, Path=IsLoading, Converter={StaticResource IsLoading2ToolTip}}"
-                    Command="{Binding ElementName=browser, Path=ChangeLoadingStateCommand}">
+                    Command="{Binding ReloadOrStopCommand}"
+                    CommandParameter="{Binding ElementName=browser}">
                 <Button.Content>
                     <Binding ElementName="browser"
-                             Path="IsLoading"
-                             Converter="{StaticResource IsLoading2Svg}"/>
+                             Path="IsLoading">
+                        <Binding.Converter>
+                            <converter:BoolToObject>
+                                <converter:BoolToObject.TrueObject>
+                                    <svgc:SvgViewbox Width="12"
+                                                     Height="12"
+                                                     Source="/Assets/Svgs/stop.svg"/>
+                                </converter:BoolToObject.TrueObject>
+                                <converter:BoolToObject.FalseObject>
+                                    <svgc:SvgViewbox Width="14"
+                                                     Height="14"
+                                                     Source="/Assets/Svgs/reload.svg"/>
+                                </converter:BoolToObject.FalseObject>
+                            </converter:BoolToObject>
+                        </Binding.Converter>
+                    </Binding>
                 </Button.Content>
+                <Button.ToolTip>
+                    <Binding ElementName="browser"
+                             Path="IsLoading">
+                        <Binding.Converter>
+                            <converter:BoolToObject>
+                                <converter:BoolToObject.TrueObject>
+                                    <TextBlock Text="{DynamicResource toolTip_stop}"/>
+                                </converter:BoolToObject.TrueObject>
+                                <converter:BoolToObject.FalseObject>
+                                    <TextBlock Text="{DynamicResource toolTip_reload}"/>
+                                </converter:BoolToObject.FalseObject>
+                            </converter:BoolToObject>
+                        </Binding.Converter>
+                    </Binding>
+                </Button.ToolTip>
             </Button>
 
             <c:AutoSelectAllTextBox Grid.Column="3"
