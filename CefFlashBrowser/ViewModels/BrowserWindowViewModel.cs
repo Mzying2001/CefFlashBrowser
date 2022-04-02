@@ -4,7 +4,6 @@ using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
-using CefSharp.Wpf;
 using IWshRuntimeLibrary;
 using SimpleMvvm;
 using SimpleMvvm.Command;
@@ -33,9 +32,23 @@ namespace CefFlashBrowser.ViewModels
             Process.Start(url);
         }
 
-        private void CreateShortcut(ChromiumWebBrowser browser)
+        private string GetWebBrowserTitle(IWebBrowser browser)
         {
-            var title = browser.Title;
+            try
+            {
+                var frame = browser.GetBrowser().MainFrame;
+                var result = frame.EvaluateScriptAsync("document.title", timeout: TimeSpan.FromSeconds(1)).Result;
+                return result.Result.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private void CreateShortcut(IWebBrowser browser)
+        {
+            var title = GetWebBrowserTitle(browser);
             foreach (var item in "\\/:*?\"<>|.")
                 title = title.Replace(item, '_');
 
@@ -65,9 +78,9 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void AddFavorite(ChromiumWebBrowser browser)
+        private void AddFavorite(IWebBrowser browser)
         {
-            AddFavoriteDialog.ShowDialog(browser.Title, browser.Address);
+            AddFavoriteDialog.ShowDialog(GetWebBrowserTitle(browser), browser.Address);
         }
 
         private void CloseBrowser(IWebBrowser browser)
@@ -97,8 +110,8 @@ namespace CefFlashBrowser.ViewModels
         {
             ViewSourceCommand = new DelegateCommand<string>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
-            CreateShortcutCommand = new DelegateCommand<ChromiumWebBrowser>(CreateShortcut);
-            AddFavoriteCommand = new DelegateCommand<ChromiumWebBrowser>(AddFavorite);
+            CreateShortcutCommand = new DelegateCommand<IWebBrowser>(CreateShortcut);
+            AddFavoriteCommand = new DelegateCommand<IWebBrowser>(AddFavorite);
             CloseBrowserCommand = new DelegateCommand<IWebBrowser>(CloseBrowser);
             ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
             ShowDevToolsCommand = new DelegateCommand<IWebBrowser>(ShowDevTools);
