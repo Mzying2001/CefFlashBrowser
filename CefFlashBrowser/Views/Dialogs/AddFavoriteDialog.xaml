@@ -21,8 +21,6 @@
                BasedOn="{StaticResource TextBoxBaseStyle}">
             <Setter Property="Width"
                     Value="300"/>
-            <Setter Property="Margin"
-                    Value="0,0,0,15"/>
         </Style>
     </Window.Resources>
 
@@ -32,25 +30,28 @@
     </Window.InputBindings>
 
     <StackPanel Margin="15">
-        <TextBlock Text="{DynamicResource favorites_name}"/>
+        <TextBlock Margin="5"
+                   Text="{DynamicResource favorites_name}"/>
         <c:AutoSelectAllTextBox x:Name="NameTextBox"
-                                 Text="{Binding ItemName, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
+                                Margin="0,0,0,5"
+                                Text="{Binding ItemName, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
                             Command="{Binding OkCommand, ElementName=dialog}"/>
             </TextBox.InputBindings>
         </c:AutoSelectAllTextBox>
 
-        <TextBlock Text="{DynamicResource favorites_url}"/>
+        <TextBlock Margin="5"
+                   Text="{DynamicResource favorites_url}"/>
         <c:AutoSelectAllTextBox x:Name="UrlTextBox"
-                                 Text="{Binding ItemUrl, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
+                                Text="{Binding ItemUrl, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
                             Command="{Binding OkCommand, ElementName=dialog}"/>
             </TextBox.InputBindings>
         </c:AutoSelectAllTextBox>
 
-        <Grid>
+        <Grid Margin="0,15,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>

@@ -107,9 +107,10 @@
                 <StackPanel Width="300"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center">
-                    <TextBlock Text="{StaticResource favorites_name}"
+                    <TextBlock Margin="5"
+                               Text="{StaticResource favorites_name}"
                                Foreground="Black"/>
-                    <c:AutoSelectAllTextBox Margin="0,0,0,20"
+                    <c:AutoSelectAllTextBox Margin="0,0,0,10"
                                             Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter"
@@ -117,7 +118,8 @@
                         </TextBox.InputBindings>
                     </c:AutoSelectAllTextBox>
 
-                    <TextBlock Text="{StaticResource favorites_url}"
+                    <TextBlock Margin="5"
+                               Text="{StaticResource favorites_url}"
                                Foreground="Black"/>
                     <c:AutoSelectAllTextBox Margin="0,0,0,20"
                                             Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
@@ -127,7 +129,7 @@
                         </TextBox.InputBindings>
                     </c:AutoSelectAllTextBox>
 
-                    <Grid>
+                    <Grid Margin="0,0,0,10">
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Left">
                             <Button Width="30"
