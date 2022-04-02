@@ -14,7 +14,7 @@
         Topmost="True">
 
     <Window.Resources>
-        <Style x:Key="LanguageButton" TargetType="Button"
+        <Style TargetType="Button"
                BasedOn="{StaticResource ButtonDefault}">
             <Setter Property="Margin" Value="5"/>
             <Setter Property="Width" Value="100"/>
@@ -46,7 +46,7 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                <Button Style="{StaticResource LanguageButton}" Content="English"
+                <Button Content="English"
                         Command="{Binding SelectLanguageCommand, ElementName=dialog}" CommandParameter="en-US">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">
@@ -56,7 +56,7 @@
                     </i:Interaction.Triggers>
                 </Button>
 
-                <Button Style="{StaticResource LanguageButton}" Content="中文"
+                <Button Content="中文"
                         Command="{Binding SelectLanguageCommand, ElementName=dialog}" CommandParameter="zh-CN">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">
@@ -66,7 +66,7 @@
                     </i:Interaction.Triggers>
                 </Button>
 
-                <Button Style="{StaticResource LanguageButton}" Content="中文（繁體）"
+                <Button Content="中文（繁體）"
                         Command="{Binding SelectLanguageCommand, ElementName=dialog}" CommandParameter="zh-TW">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="MouseEnter">

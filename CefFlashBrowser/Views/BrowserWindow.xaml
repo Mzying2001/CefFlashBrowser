@@ -13,8 +13,8 @@
         mc:Ignorable="d"
         
         x:Name="browserWindow"
-        Width="1024"
-        Height="768"
+        Width="Auto"
+        Height="Auto"
         MinWidth="400"
         MinHeight="300"
         Closing="WindowClosing"
@@ -166,7 +166,7 @@
         <KeyBinding Gesture="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
         <KeyBinding Gesture="F12"
-                    Command="{Binding OpenDevToolCommand}"
+                    Command="{Binding ShowDevToolsCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
     </Window.InputBindings>
 
@@ -258,7 +258,6 @@
             <c:AutoSelectAllTextBox Grid.Column="3"
                                     Margin="5,0"
                                     Height="30"
-                                    Style="{StaticResource TextBoxBaseStyle}"
                                     Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
