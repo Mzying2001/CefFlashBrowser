@@ -14,6 +14,7 @@ namespace CefFlashBrowser.ViewModels
 {
     public class BrowserWindowViewModel : ViewModelBase
     {
+        public DelegateCommand ShowMainWindowCommand { get; set; }
         public DelegateCommand ViewSourceCommand { get; set; }
         public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
         public DelegateCommand CreateShortcutCommand { get; set; }
@@ -21,6 +22,11 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand CloseBrowserCommand { get; set; }
         public DelegateCommand ReloadOrStopCommand { get; set; }
         public DelegateCommand ShowDevToolsCommand { get; set; }
+
+        private void ShowMainWindow()
+        {
+            MainWindow.Show();
+        }
 
         private void ViewSource(string url)
         {
@@ -108,6 +114,7 @@ namespace CefFlashBrowser.ViewModels
 
         public BrowserWindowViewModel()
         {
+            ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
             ViewSourceCommand = new DelegateCommand<string>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<IWebBrowser>(CreateShortcut);

@@ -20,7 +20,8 @@
     Title="{DynamicResource window_title}"
     DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}"
     OnDropCommand="{Binding OnDropCommand}"
-    WindowStartupLocation="CenterScreen">
+    WindowStartupLocation="CenterScreen"
+    Closing="MainWindowClosing">
 
     <Window.Resources>
 

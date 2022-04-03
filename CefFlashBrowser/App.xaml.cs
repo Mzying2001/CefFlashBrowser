@@ -27,7 +27,7 @@ namespace CefFlashBrowser
 
             if (e.Args.Length == 0)
             {
-                new MainWindow().Show();
+                Views.MainWindow.Show();
                 return;
             }
 

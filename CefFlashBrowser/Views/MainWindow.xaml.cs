@@ -2,6 +2,7 @@
 using CefFlashBrowser.Views.Custom;
 using CefFlashBrowser.Views.Dialogs;
 using SimpleMvvm.Messaging;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace CefFlashBrowser.Views
@@ -11,6 +12,8 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class MainWindow : DropableWindow
     {
+        private static Window window = null;
+
         public MainWindow()
         {
             if (GlobalData.Settings.FirstStart)
@@ -22,7 +25,6 @@ namespace CefFlashBrowser.Views
             InitializeComponent();
 
             Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
-            Closing += (s, e) => Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
         }
 
         private void UpdateLanguageMenuChecked(object obj)
@@ -37,6 +39,23 @@ namespace CefFlashBrowser.Views
             }
         }
 
+        private void MainWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            window = null;
+            Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
+        }
 
+        public static new void Show()
+        {
+            if (window == null)
+            {
+                window = new MainWindow();
+                window.Show();
+            }
+            else
+            {
+                window.Activate();
+            }
+        }
     }
 }
