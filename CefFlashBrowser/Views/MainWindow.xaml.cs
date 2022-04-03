@@ -54,6 +54,8 @@ namespace CefFlashBrowser.Views
             }
             else
             {
+                if (window.WindowState == WindowState.Minimized)
+                    window.WindowState = WindowState.Normal;
                 window.Activate();
             }
         }
