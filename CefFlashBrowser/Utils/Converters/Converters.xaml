@@ -12,4 +12,6 @@
 
     <local:StringArrNotAnyEmpty x:Key="StringArrNotAnyEmpty"/>
 
+    <local:VisiableIfNotZero x:Key="VisiableIfNotZero"/>
+
 </ResourceDictionary>
