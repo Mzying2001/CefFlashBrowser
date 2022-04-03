@@ -53,7 +53,7 @@
                         <MenuItem Style="{StaticResource MenuItemBaseStyle}"
                                   Header="{DynamicResource menu_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
-                        <Separator/>
+                        <Separator Visibility="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count, Converter={StaticResource VisiableIfNotZero}}"/>
                         <ItemsControl ItemsSource="{x:Static data:GlobalData.Favorites}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
