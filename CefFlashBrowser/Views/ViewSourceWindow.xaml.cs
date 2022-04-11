@@ -30,20 +30,17 @@ namespace CefFlashBrowser.Views
 
         // Using a DependencyProperty as the backing store for Address.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty AddressProperty =
-            DependencyProperty.Register("Address", typeof(string), typeof(ViewSourceWindow), new PropertyMetadata("about:blank"));
+            DependencyProperty.Register("Address", typeof(string), typeof(ViewSourceWindow), new PropertyMetadata(null, (s, e) =>
+            {
+                var window = (ViewSourceWindow)s;
+                window.browser.Load($"view-source:{e.NewValue}");
+            }));
 
 
 
         public ViewSourceWindow()
         {
             InitializeComponent();
-
-            browser.MenuHandler = new DefaultWpfMenuHandler();
-            browser.LifeSpanHandler = new LifeSpanHandler(onCreateNewWindow: (s, e) =>
-            {
-                e.CancelPopup = true;
-                Dispatcher.Invoke(() => BrowserWindow.Show(e.TargetUrl));
-            });
         }
 
         public ViewSourceWindow(string address) : this()
@@ -54,6 +51,12 @@ namespace CefFlashBrowser.Views
         public static void Show(string address)
         {
             new ViewSourceWindow(address).Show();
+        }
+
+        private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
+        {
+            e.CancelPopup = true;
+            Dispatcher.Invoke(() => BrowserWindow.Show(e.TargetUrl));
         }
     }
 }

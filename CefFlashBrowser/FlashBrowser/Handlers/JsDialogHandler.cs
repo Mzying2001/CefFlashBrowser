@@ -2,7 +2,8 @@
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
-using CefSharp.Wpf;
+using CefSharp.WinForms;
+using System;
 
 namespace CefFlashBrowser.FlashBrowser.Handlers
 {
@@ -16,14 +17,14 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                 return true;
             }
 
-            ((ChromiumWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
+            ((ChromiumWebBrowser)chromiumWebBrowser).Invoke(new Action(() =>
             {
                 var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
                 JsConfirmDialog.ShowDialog(messageText, title, result =>
                 {
                     callback.Continue(result == true);
                 });
-            });
+            }));
             return true;
         }
 
@@ -40,36 +41,36 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             {
                 case CefJsDialogType.Alert:
                     {
-                        targetBrowser.Dispatcher.Invoke(() =>
+                        targetBrowser.Invoke(new Action(() =>
                         {
-                            JsAlertDialog.ShowDialog(messageText, targetBrowser.Title);
-                        });
+                            JsAlertDialog.ShowDialog(messageText, targetBrowser.Address);
+                        }));
                         suppressMessage = true;
                         return false;
                     }
 
                 case CefJsDialogType.Confirm:
                     {
-                        targetBrowser.Dispatcher.Invoke(() =>
+                        targetBrowser.Invoke(new Action(() =>
                         {
-                            JsConfirmDialog.ShowDialog(messageText, targetBrowser.Title, result =>
+                            JsConfirmDialog.ShowDialog(messageText, targetBrowser.Address, result =>
                             {
                                 callback.Continue(result == true);
                             });
-                        });
+                        }));
                         suppressMessage = false;
                         return true;
                     }
 
                 case CefJsDialogType.Prompt:
                     {
-                        targetBrowser.Dispatcher.Invoke(() =>
+                        targetBrowser.Invoke(new Action(() =>
                         {
-                            JsPromptDialog.ShowDialog(messageText, targetBrowser.Title, defaultPromptText, result =>
+                            JsPromptDialog.ShowDialog(messageText, targetBrowser.Address, defaultPromptText, result =>
                             {
                                 callback.Continue(result != null, result);
                             });
-                        });
+                        }));
                         suppressMessage = false;
                         return true;
                     }

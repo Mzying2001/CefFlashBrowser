@@ -52,11 +52,11 @@ namespace CefFlashBrowser.Views.Dialogs.JsDialogs
             _callback?.Invoke(_result);
         }
 
-        public static void ShowDialog(string message, string title = "", Action<bool?> callback = null)
+        public static void ShowDialog(string message, string title = null, Action<bool?> callback = null)
         {
             new JsConfirmDialog
             {
-                Title = title,
+                Title = title ?? string.Empty,
                 Message = message,
                 _callback = callback
             }.ShowDialog();

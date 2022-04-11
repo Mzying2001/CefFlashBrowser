@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:cefSharp="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
+        xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         mc:Ignorable="d"
         
@@ -12,6 +12,6 @@
         Height="Auto"
         Width="Auto">
 
-    <cefSharp:ChromiumWebBrowser x:Name="browser"
-                                 Address="{Binding ElementName=window, Path=Address, StringFormat=view-source:\{0\}}"/>
+    <flash:ChromiumFlashBrowser x:Name="browser"
+                                OnCreateNewWindow="Browser_OnCreateNewWindow"/>
 </Window>

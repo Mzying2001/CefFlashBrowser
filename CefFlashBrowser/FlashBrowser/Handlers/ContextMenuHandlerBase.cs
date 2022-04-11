@@ -43,14 +43,14 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             return false;
         }
 
-        protected static IEnumerable<(string header, CefMenuCommand commandId, bool isEnable)> GetMenuItems(IMenuModel model)
+        protected static IEnumerable<(int index, string header, CefMenuCommand commandId, bool isEnable)> GetMenuItems(IMenuModel model)
         {
             for (var i = 0; i < model.Count; i++)
             {
                 var header = model.GetLabelAt(i);
                 var commandId = model.GetCommandIdAt(i);
                 var isEnabled = model.IsEnabledAt(i);
-                yield return (header, commandId, isEnabled);
+                yield return (i, header, commandId, isEnabled);
             }
         }
     }

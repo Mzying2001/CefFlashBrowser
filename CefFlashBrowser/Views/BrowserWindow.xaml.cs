@@ -20,8 +20,6 @@ namespace CefFlashBrowser.Views
 
             if (GlobalData.Settings.BrowserWindowSizeInfo != null)
                 GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
-
-            browser.MenuHandler = new BrowserWindowMenuHandler();
         }
 
         private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
@@ -80,7 +78,7 @@ namespace CefFlashBrowser.Views
         public static void Show(string address)
         {
             var window = new BrowserWindow();
-            window.browser.Address = address;
+            window.browser.Load(address);
             window.Show();
         }
     }

@@ -1,4 +1,4 @@
-﻿using CefSharp.Wpf;
+﻿using CefSharp;
 using System;
 using System.Net;
 using System.Windows;
@@ -19,10 +19,10 @@ namespace CefFlashBrowser.FlashBrowser
         public static readonly DependencyProperty FileNameProperty =
             DependencyProperty.Register("FileName", typeof(string), typeof(ChromiumSwfBrowser), new PropertyMetadata(string.Empty, (d, e) =>
             {
-                if (d is ChromiumWebBrowser browser && e.NewValue is string fileName)
+                if (d is IWebBrowser browser && e.NewValue is string fileName)
                 {
-                    browser.Address = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-                        $"Assets/Html/FlashPlayer.html?src={WebUtility.UrlEncode(fileName)}");
+                    browser.Load(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                        $"Assets/Html/FlashPlayer.html?src={WebUtility.UrlEncode(fileName)}"));
                 }
             }));
 

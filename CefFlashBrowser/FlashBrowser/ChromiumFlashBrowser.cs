@@ -17,6 +17,7 @@ namespace CefFlashBrowser.FlashBrowser
         {
             LoadUrlCommand = new DelegateCommand<string>(Load);
 
+            MenuHandler = new ContextMenuHandler();
             DownloadHandler = new IEDownloadHandler();
             JsDialogHandler = new JsDialogHandler();
             LifeSpanHandler = new LifeSpanHandler(

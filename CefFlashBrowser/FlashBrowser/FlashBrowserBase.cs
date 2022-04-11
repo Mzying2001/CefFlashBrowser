@@ -2,25 +2,28 @@
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
-using CefSharp.Wpf;
+using CefSharp.WinForms;
 using System;
 using System.Diagnostics;
 using System.IO;
 
 namespace CefFlashBrowser.FlashBrowser
 {
-    public abstract class FlashBrowserBase : ChromiumWebBrowser
+    public abstract class FlashBrowserBase : WfChromiumWebBrowser
     {
         public static readonly string CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Caches\");
         public static readonly string FlashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
 
         private static readonly string EmptyExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\CefFlashBrowser.EmptyExe.exe");
 
-        protected override void OnIsBrowserInitializedChanged(bool oldValue, bool newValue)
+        public FlashBrowserBase()
         {
-            base.OnIsBrowserInitializedChanged(oldValue, newValue);
+            browser.IsBrowserInitializedChanged += IsBrowserInitializedChanged;
+        }
 
-            if (newValue)
+        private void IsBrowserInitializedChanged(object sender, EventArgs e)
+        {
+            if (IsBrowserInitialized)
             {
                 Cef.UIThreadTaskFactory.StartNew(() =>
                 {
