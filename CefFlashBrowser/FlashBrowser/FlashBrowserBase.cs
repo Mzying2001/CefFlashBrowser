@@ -1,14 +1,11 @@
-﻿using CefFlashBrowser.FlashBrowser.Handlers;
-using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using CefSharp.Wpf;
-using SimpleMvvm.Command;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Windows.Input;
 
 namespace CefFlashBrowser.FlashBrowser
 {
@@ -18,36 +15,6 @@ namespace CefFlashBrowser.FlashBrowser
         public static readonly string FlashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
 
         private static readonly string EmptyExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\CefFlashBrowser.EmptyExe.exe");
-
-        public event EventHandler<LifeSpanHandler.NewWindowEventArgs> OnCreateNewWindow;
-
-        public event EventHandler<EventArgs> OnClose;
-
-        public ICommand LoadUrlCommand { get; private set; }
-
-        public override void BeginInit()
-        {
-            base.BeginInit();
-
-            LoadUrlCommand = new DelegateCommand(obj =>
-            {
-                if (obj is string url)
-                    Address = url;
-            });
-
-            DownloadHandler = new IEDownloadHandler();
-            JsDialogHandler = new JsDialogHandler();
-            LifeSpanHandler = new LifeSpanHandler(
-                onCreateNewWindow: (s, e) =>
-                {
-                    OnCreateNewWindow?.Invoke(this, e);
-                },
-                onClose: (s, e) =>
-                {
-                    OnClose?.Invoke(this, e);
-                }
-            );
-        }
 
         protected override void OnIsBrowserInitializedChanged(bool oldValue, bool newValue)
         {

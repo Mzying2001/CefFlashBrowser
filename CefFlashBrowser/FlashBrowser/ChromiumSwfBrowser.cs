@@ -5,7 +5,7 @@ using System.Windows;
 
 namespace CefFlashBrowser.FlashBrowser
 {
-    public class ChromiumSwfBrowser : FlashBrowserBase
+    public class ChromiumSwfBrowser : ChromiumFlashBrowser
     {
 
 
