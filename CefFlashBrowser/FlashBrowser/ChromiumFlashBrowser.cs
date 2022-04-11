@@ -11,16 +11,11 @@ namespace CefFlashBrowser.FlashBrowser
 
         public event EventHandler<EventArgs> OnClose;
 
-        public ICommand LoadUrlCommand { get; private set; }
-
-        private void LoadUrl(string url)
-        {
-            Load(url);
-        }
+        public ICommand LoadUrlCommand { get; }
 
         public ChromiumFlashBrowser()
         {
-            LoadUrlCommand = new DelegateCommand<string>(LoadUrl);
+            LoadUrlCommand = new DelegateCommand<string>(Load);
 
             DownloadHandler = new IEDownloadHandler();
             JsDialogHandler = new JsDialogHandler();
