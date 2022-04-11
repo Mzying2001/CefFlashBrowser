@@ -38,7 +38,7 @@ namespace CefFlashBrowser.ViewModels
             Process.Start(url);
         }
 
-        private string GetWebBrowserTitle(IWebBrowser browser)
+        private static string GetWebBrowserTitle(IWebBrowser browser)
         {
             try
             {
