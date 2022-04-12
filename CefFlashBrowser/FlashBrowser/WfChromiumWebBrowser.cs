@@ -191,8 +191,6 @@ namespace CefFlashBrowser.FlashBrowser
 
         public static readonly DependencyProperty ZoomLevelIncrementProperty;
 
-        public IAccessibilityHandler AccessibilityHandler { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
         IBrowserAdapter IWebBrowserInternal.BrowserAdapter => ((IWebBrowserInternal)browser).BrowserAdapter;
 
         bool IWebBrowserInternal.HasParent
@@ -270,71 +268,71 @@ namespace CefFlashBrowser.FlashBrowser
                 SetValue(TitleProperty, e.Title);
             });
 
-            browser.JavascriptMessageReceived += (s, e) =>
+            browser.JavascriptMessageReceived += (s, e) => Dispatcher.Invoke(() =>
             {
                 JavascriptMessageReceived?.Invoke(this, e);
-            };
+            });
 
-            browser.ConsoleMessage += (s, e) =>
+            browser.ConsoleMessage += (s, e) => Dispatcher.Invoke(() =>
             {
                 ConsoleMessage?.Invoke(this, e);
-            };
+            });
 
-            browser.StatusMessage += (s, e) =>
+            browser.StatusMessage += (s, e) => Dispatcher.Invoke(() =>
             {
                 StatusMessage?.Invoke(this, e);
-            };
+            });
 
-            browser.FrameLoadStart += (s, e) =>
+            browser.FrameLoadStart += (s, e) => Dispatcher.Invoke(() =>
             {
                 FrameLoadStart?.Invoke(this, e);
-            };
+            });
 
-            browser.FrameLoadEnd += (s, e) =>
+            browser.FrameLoadEnd += (s, e) => Dispatcher.Invoke(() =>
             {
                 FrameLoadEnd?.Invoke(this, e);
-            };
+            });
 
-            browser.LoadError += (s, e) =>
+            browser.LoadError += (s, e) => Dispatcher.Invoke(() =>
             {
                 LoadError?.Invoke(this, e);
-            };
+            });
 
-            browser.LoadingStateChanged += (s, e) =>
+            browser.LoadingStateChanged += (s, e) => Dispatcher.Invoke(() =>
             {
                 LoadingStateChanged?.Invoke(this, e);
-            };
+            });
 
-            browser.AddressChanged += (s, e) =>
+            browser.AddressChanged += (s, e) => Dispatcher.Invoke(() =>
             {
                 AddressChanged?.Invoke(this, e);
-            };
+            });
 
-            browser.TitleChanged += (s, e) =>
+            browser.TitleChanged += (s, e) => Dispatcher.Invoke(() =>
             {
                 TitleChanged?.Invoke(this, e);
-            };
+            });
 
-            browser.IsBrowserInitializedChanged += (s, e) =>
+            browser.IsBrowserInitializedChanged += (s, e) => Dispatcher.Invoke(() =>
             {
                 IsBrowserInitializedChanged?.Invoke(this, e);
-            };
+            });
 
-            BackCommand = new DelegateCommand(browser.Back) { CanExecute = false };
-            ForwardCommand = new DelegateCommand(browser.Forward) { CanExecute = false };
-            ReloadCommand = new DelegateCommand(browser.Reload) { CanExecute = false };
-            PrintCommand = new DelegateCommand(browser.Print);
-            ZoomOutCommand = new DelegateCommand(() => ZoomLevel -= ZoomLevelIncrement);
-            ZoomInCommand = new DelegateCommand(() => ZoomLevel += ZoomLevelIncrement);
-            ZoomResetCommand = new DelegateCommand(() => ZoomLevel = 0.0);
-            ViewSourceCommand = new DelegateCommand(browser.ViewSource);
-            StopCommand = new DelegateCommand(browser.Stop) { CanExecute = false };
-            CutCommand = new DelegateCommand(browser.Cut);
-            CopyCommand = new DelegateCommand(browser.Copy);
-            PasteCommand = new DelegateCommand(browser.Paste);
-            SelectAllCommand = new DelegateCommand(browser.SelectAll);
-            UndoCommand = new DelegateCommand(browser.Undo);
-            RedoCommand = new DelegateCommand(browser.Redo);
+            BackCommand = new DelegateCommand(this.Back) { CanExecute = false };
+            ForwardCommand = new DelegateCommand(this.Forward) { CanExecute = false };
+            ReloadCommand = new DelegateCommand(this.Reload) { CanExecute = false };
+            PrintCommand = new DelegateCommand(this.Print);
+            ZoomOutCommand = new DelegateCommand(ZoomOut);
+            ZoomInCommand = new DelegateCommand(ZoomIn);
+            ZoomResetCommand = new DelegateCommand(ZoomReset);
+            ViewSourceCommand = new DelegateCommand(this.ViewSource);
+            StopCommand = new DelegateCommand(this.Stop) { CanExecute = false };
+            CutCommand = new DelegateCommand(this.Cut);
+            CopyCommand = new DelegateCommand(this.Copy);
+            PasteCommand = new DelegateCommand(this.Paste);
+            SelectAllCommand = new DelegateCommand(this.SelectAll);
+            UndoCommand = new DelegateCommand(this.Undo);
+            RedoCommand = new DelegateCommand(this.Redo);
         }
 
 
@@ -346,6 +344,21 @@ namespace CefFlashBrowser.FlashBrowser
             browser.Load(url);
             SetValue(AddressProperty, url);
             SetValue(TitleProperty, url);
+        }
+
+        public void ZoomOut()
+        {
+            ZoomLevel -= ZoomLevelIncrement;
+        }
+
+        public void ZoomIn()
+        {
+            ZoomLevel += ZoomLevelIncrement;
+        }
+
+        public void ZoomReset()
+        {
+            ZoomLevel = 0.0;
         }
 
         public IBrowser GetBrowser()
