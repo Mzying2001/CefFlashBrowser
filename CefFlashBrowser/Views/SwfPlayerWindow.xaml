@@ -16,5 +16,6 @@
         Closing="WindowClosing">
 
     <flash:ChromiumSwfBrowser x:Name="browser"
-                              FileName="{Binding ElementName=window, Path=FileName}"/>
+                              FileName="{Binding ElementName=window, Path=FileName}"
+                              OnCreateNewWindow="Browser_OnCreateNewWindow"/>
 </Window>
