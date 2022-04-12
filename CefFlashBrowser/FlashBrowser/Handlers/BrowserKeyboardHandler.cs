@@ -54,7 +54,10 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                 {
                     case '0': //Ctrl+0
                         {
-                            wfChromiumWebBrowser.ZoomReset();
+                            wfChromiumWebBrowser.Dispatcher.Invoke(() =>
+                            {
+                                wfChromiumWebBrowser.ZoomReset();
+                            });
                             return true;
                         }
                     case 'D': //Ctrl+D
