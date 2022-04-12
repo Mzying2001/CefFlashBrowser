@@ -26,7 +26,7 @@ namespace CefFlashBrowser.Views
             browser.KeyboardHandler = new BrowserKeyboardHandler(browser);
         }
 
-        private void Browser_LoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)
+        private void BrowserLoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)
         {
             var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
             if (wfChromiumWebBrowser.IsLoading)
@@ -39,7 +39,7 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void Browser_TitleChanged(object sender, CefSharp.TitleChangedEventArgs e)
+        private void BrowserTitleChanged(object sender, CefSharp.TitleChangedEventArgs e)
         {
             var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
             if (!wfChromiumWebBrowser.IsLoading)
@@ -48,9 +48,9 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
+        private void OnCreateNewBrowser(object sender, LifeSpanHandler.NewBrowserEventArgs e)
         {
-            e.CancelPopup = true;
+            e.Handled = true;
             switch (GlobalData.Settings.NewPageBehavior)
             {
                 case NewPageBehavior.NewWindow:
@@ -66,7 +66,7 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void Browser_OnClose(object sender, System.EventArgs e)
+        private void BrowserOnClose(object sender, System.EventArgs e)
         {
             _doClose = true;
             Close();

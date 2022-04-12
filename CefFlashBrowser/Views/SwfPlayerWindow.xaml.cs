@@ -42,9 +42,9 @@ namespace CefFlashBrowser.Views
             GlobalData.Settings.SwfWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
         }
 
-        private void Browser_OnCreateNewWindow(object sender, FlashBrowser.Handlers.LifeSpanHandler.NewWindowEventArgs e)
+        private void OnCreateNewBrowser(object sender, FlashBrowser.Handlers.LifeSpanHandler.NewBrowserEventArgs e)
         {
-            e.CancelPopup = true;
+            e.Handled = true;
             BrowserWindow.Show(e.TargetUrl);
         }
 

@@ -1,17 +1,5 @@
 ﻿using CefFlashBrowser.FlashBrowser.Handlers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CefFlashBrowser.Views
 {
@@ -37,7 +25,6 @@ namespace CefFlashBrowser.Views
             }));
 
 
-
         public ViewSourceWindow()
         {
             InitializeComponent();
@@ -58,9 +45,9 @@ namespace CefFlashBrowser.Views
             new ViewSourceWindow(address).Show();
         }
 
-        private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
+        private void OnCreateNewBrowser(object sender, LifeSpanHandler.NewBrowserEventArgs e)
         {
-            e.CancelPopup = true;
+            e.Handled = true;
             BrowserWindow.Show(e.TargetUrl);
         }
     }

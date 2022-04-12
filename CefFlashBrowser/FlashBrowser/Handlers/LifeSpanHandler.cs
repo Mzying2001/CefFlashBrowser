@@ -8,33 +8,30 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
 
 
-        public class NewWindowEventArgs : EventArgs
+        public class NewBrowserEventArgs : EventArgs
         {
-            public IWebBrowser Browser { get; set; }
+            public bool Handled { get; set; }
             public string TargetUrl { get; set; }
-            public bool CancelPopup { get; set; }
-            public NewWindowEventArgs() { }
-            public NewWindowEventArgs(IWebBrowser browser, string targetUrl, bool cancelPopup)
-            {
-                Browser = browser;
-                TargetUrl = targetUrl;
-                CancelPopup = cancelPopup;
-            }
+            public IWebBrowser Browser { get; set; }
+            public IWebBrowser NewBrowser { get; set; }
+            public WindowOpenDisposition OpenDisposition { get; set; }
         }
 
 
 
-        public event EventHandler<NewWindowEventArgs> OnCreateNewWindow;
+        public event EventHandler<NewBrowserEventArgs> OnCreateNewBrowser;
 
         public event EventHandler<EventArgs> OnClose;
 
         public LifeSpanHandler() { }
 
-        public LifeSpanHandler(EventHandler<NewWindowEventArgs> onCreateNewWindow = null, EventHandler<EventArgs> onClose = null)
+        public LifeSpanHandler(EventHandler<NewBrowserEventArgs> onCreateNewBrowser = null, EventHandler<EventArgs> onClose = null)
         {
-            OnCreateNewWindow += onCreateNewWindow;
+            OnCreateNewBrowser += onCreateNewBrowser;
             OnClose += onClose;
         }
+
+
 
         public bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
@@ -53,11 +50,18 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
         public bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
         {
-            newBrowser = null;
+            var args = new NewBrowserEventArgs
+            {
+                Handled = false,
+                NewBrowser = null,
+                TargetUrl = targetUrl,
+                Browser = chromiumWebBrowser,
+                OpenDisposition = targetDisposition
+            };
 
-            NewWindowEventArgs args = new NewWindowEventArgs(chromiumWebBrowser, targetUrl, false);
-            OnCreateNewWindow?.Invoke(this, args);
-            return args.CancelPopup;
+            OnCreateNewBrowser?.Invoke(this, args);
+            newBrowser = args.NewBrowser;
+            return args.Handled;
         }
     }
 }

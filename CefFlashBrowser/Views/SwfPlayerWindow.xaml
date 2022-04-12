@@ -17,5 +17,5 @@
 
     <flash:ChromiumSwfBrowser x:Name="browser"
                               FileName="{Binding ElementName=window, Path=FileName}"
-                              OnCreateNewWindow="Browser_OnCreateNewWindow"/>
+                              OnCreateNewBrowser="OnCreateNewBrowser"/>
 </Window>

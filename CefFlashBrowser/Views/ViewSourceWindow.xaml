@@ -13,5 +13,5 @@
         Width="Auto">
 
     <flash:ChromiumFlashBrowser x:Name="browser"
-                                OnCreateNewWindow="Browser_OnCreateNewWindow"/>
+                                OnCreateNewBrowser="OnCreateNewBrowser"/>
 </Window>
