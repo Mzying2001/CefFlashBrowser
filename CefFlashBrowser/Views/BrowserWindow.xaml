@@ -18,7 +18,7 @@
         MinWidth="400"
         MinHeight="300"
         Closing="WindowClosing"
-        Title="FlashBrowser"
+        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
@@ -248,9 +248,7 @@
                                     Grid.Row="1"
                                     ZoomLevelIncrement="0.25"
                                     OnCreateNewWindow="Browser_OnCreateNewWindow"
-                                    OnClose="Browser_OnClose"
-                                    LoadingStateChanged="Browser_LoadingStateChanged"
-                                    TitleChanged="Browser_TitleChanged"/>
+                                    OnClose="Browser_OnClose"/>
     </Grid>
 
 </Window>

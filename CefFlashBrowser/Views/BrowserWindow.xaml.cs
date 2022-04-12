@@ -26,28 +26,6 @@ namespace CefFlashBrowser.Views
             browser.KeyboardHandler = new BrowserKeyboardHandler(browser);
         }
 
-        private void Browser_LoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)
-        {
-            var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
-            if (wfChromiumWebBrowser.IsLoading)
-            {
-                Title = LanguageManager.GetString("label_loading");
-            }
-            else
-            {
-                Title = wfChromiumWebBrowser.Title;
-            }
-        }
-
-        private void Browser_TitleChanged(object sender, CefSharp.TitleChangedEventArgs e)
-        {
-            var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
-            if (!wfChromiumWebBrowser.IsLoading)
-            {
-                Title = e.Title;
-            }
-        }
-
         private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
         {
             e.CancelPopup = true;
