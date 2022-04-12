@@ -3,12 +3,18 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using CefSharp.WinForms;
-using System;
 
 namespace CefFlashBrowser.FlashBrowser.Handlers
 {
     public class JsDialogHandler : IJsDialogHandler
     {
+        private readonly WfChromiumWebBrowser wfChromiumWebBrowser;
+
+        public JsDialogHandler(WfChromiumWebBrowser wfChromiumWebBrowser)
+        {
+            this.wfChromiumWebBrowser = wfChromiumWebBrowser;
+        }
+
         public bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
         {
             if (GlobalData.Settings.DisableOnBeforeUnloadDialog)
@@ -17,14 +23,14 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                 return true;
             }
 
-            ((ChromiumWebBrowser)chromiumWebBrowser).Invoke(new Action(() =>
+            wfChromiumWebBrowser.Dispatcher.Invoke(() =>
             {
                 var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
                 JsConfirmDialog.ShowDialog(messageText, title, result =>
                 {
                     callback.Continue(result == true);
                 });
-            }));
+            });
             return true;
         }
 
@@ -41,36 +47,36 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             {
                 case CefJsDialogType.Alert:
                     {
-                        targetBrowser.Invoke(new Action(() =>
+                        wfChromiumWebBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsAlertDialog.ShowDialog(messageText, targetBrowser.Address);
-                        }));
+                            JsAlertDialog.ShowDialog(messageText, wfChromiumWebBrowser.Title);
+                        });
                         suppressMessage = true;
                         return false;
                     }
 
                 case CefJsDialogType.Confirm:
                     {
-                        targetBrowser.Invoke(new Action(() =>
+                        wfChromiumWebBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsConfirmDialog.ShowDialog(messageText, targetBrowser.Address, result =>
+                            JsConfirmDialog.ShowDialog(messageText, wfChromiumWebBrowser.Title, result =>
                             {
                                 callback.Continue(result == true);
                             });
-                        }));
+                        });
                         suppressMessage = false;
                         return true;
                     }
 
                 case CefJsDialogType.Prompt:
                     {
-                        targetBrowser.Invoke(new Action(() =>
+                        wfChromiumWebBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsPromptDialog.ShowDialog(messageText, targetBrowser.Address, defaultPromptText, result =>
+                            JsPromptDialog.ShowDialog(messageText, wfChromiumWebBrowser.Title, defaultPromptText, result =>
                             {
                                 callback.Continue(result != null, result);
                             });
-                        }));
+                        });
                         suppressMessage = false;
                         return true;
                     }

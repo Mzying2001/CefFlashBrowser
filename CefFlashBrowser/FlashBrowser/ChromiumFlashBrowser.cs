@@ -19,7 +19,7 @@ namespace CefFlashBrowser.FlashBrowser
 
             MenuHandler = new ContextMenuHandler(this);
             DownloadHandler = new IEDownloadHandler();
-            JsDialogHandler = new JsDialogHandler();
+            JsDialogHandler = new JsDialogHandler(this);
             LifeSpanHandler = new LifeSpanHandler(
                 onCreateNewWindow: (s, e) =>
                 {
