@@ -18,10 +18,10 @@ namespace CefFlashBrowser.FlashBrowser
 
         public FlashBrowserBase()
         {
-            browser.IsBrowserInitializedChanged += IsBrowserInitializedChanged;
+            IsBrowserInitializedChanged += FlashBrowserIsBrowserInitializedChanged;
         }
 
-        private void IsBrowserInitializedChanged(object sender, EventArgs e)
+        private void FlashBrowserIsBrowserInitializedChanged(object sender, EventArgs e)
         {
             if (IsBrowserInitialized)
             {
@@ -33,7 +33,7 @@ namespace CefFlashBrowser.FlashBrowser
                     if (!flag)
                     {
                         var title = LanguageManager.GetString("title_error");
-                        Dispatcher.Invoke(() => JsAlertDialog.ShowDialog(err, title));
+                        JsAlertDialog.ShowDialog(err, title);
                     }
                 });
             }
