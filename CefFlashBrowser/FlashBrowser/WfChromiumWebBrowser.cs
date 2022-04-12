@@ -159,6 +159,11 @@ namespace CefFlashBrowser.FlashBrowser
             set => Load(value);
         }
 
+        public string Title
+        {
+            get => (string)GetValue(TitleProperty);
+        }
+
         public string StatusText
         {
             get => (string)GetValue(StatusTextProperty);
@@ -205,8 +210,6 @@ namespace CefFlashBrowser.FlashBrowser
         public ICommand UndoCommand { get; }
 
         public ICommand RedoCommand { get; }
-
-        public string Title => (string)GetValue(TitleProperty);
 
         public static readonly DependencyProperty CanGoBackProperty;
 
