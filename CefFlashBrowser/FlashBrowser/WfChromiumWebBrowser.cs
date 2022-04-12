@@ -305,8 +305,8 @@ namespace CefFlashBrowser.FlashBrowser
 
             browser.StatusMessage += (s, e) => Dispatcher.Invoke(() =>
             {
-                StatusMessage?.Invoke(this, e);
                 SetValue(StatusTextProperty, e.Value);
+                StatusMessage?.Invoke(this, e);
             });
 
             browser.FrameLoadStart += (s, e) => Dispatcher.Invoke(() =>
@@ -326,7 +326,6 @@ namespace CefFlashBrowser.FlashBrowser
 
             browser.LoadingStateChanged += (s, e) => Dispatcher.Invoke(() =>
             {
-                LoadingStateChanged?.Invoke(this, e);
                 SetValue(CanGoForwardProperty, e.CanGoForward);
                 SetValue(CanGoBackProperty, e.CanGoBack);
                 SetValue(IsLoadingProperty, e.IsLoading);
@@ -334,24 +333,25 @@ namespace CefFlashBrowser.FlashBrowser
                 ((DelegateCommand)BackCommand).CanExecute = e.CanGoBack;
                 ((DelegateCommand)ReloadCommand).CanExecute = e.CanReload;
                 ((DelegateCommand)StopCommand).CanExecute = !e.CanReload;
+                LoadingStateChanged?.Invoke(this, e);
             });
 
             browser.AddressChanged += (s, e) => Dispatcher.Invoke(() =>
             {
-                AddressChanged?.Invoke(this, e);
                 SetValue(AddressProperty, e.Address);
+                AddressChanged?.Invoke(this, e);
             });
 
             browser.TitleChanged += (s, e) => Dispatcher.Invoke(() =>
             {
-                TitleChanged?.Invoke(this, e);
                 SetValue(TitleProperty, e.Title);
+                TitleChanged?.Invoke(this, e);
             });
 
             browser.IsBrowserInitializedChanged += (s, e) => Dispatcher.Invoke(() =>
             {
-                IsBrowserInitializedChanged?.Invoke(this, e);
                 SetValue(IsBrowserInitializedProperty, ((CefSharp.WinForms.ChromiumWebBrowser)s).IsBrowserInitialized);
+                IsBrowserInitializedChanged?.Invoke(this, e);
             });
         }
 
