@@ -42,13 +42,20 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                var frame = browser.GetBrowser().MainFrame;
-                var result = frame.EvaluateScriptAsync("document.title", timeout: TimeSpan.FromSeconds(1)).Result;
-                return result.Result.ToString();
+                if (browser is FlashBrowser.WfChromiumWebBrowser b)
+                {
+                    return b.Title;
+                }
+                else
+                {
+                    var frame = browser.GetBrowser().MainFrame;
+                    var result = frame.EvaluateScriptAsync("document.title", timeout: TimeSpan.FromSeconds(1)).Result;
+                    return result.Result.ToString();
+                }
             }
             catch
             {
-                return null;
+                return string.Empty;
             }
         }
 
