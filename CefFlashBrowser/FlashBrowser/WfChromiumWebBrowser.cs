@@ -362,7 +362,6 @@ namespace CefFlashBrowser.FlashBrowser
         public void Load(string url)
         {
             SetValue(AddressProperty, url);
-            SetValue(TitleProperty, url);
             browser.Load(url);
         }
 
