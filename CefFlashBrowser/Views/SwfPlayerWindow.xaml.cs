@@ -38,8 +38,6 @@ namespace CefFlashBrowser.Views
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             browser.GetBrowser().CloseBrowser(true);
-            browser.Dispose();
-
             window.WindowState = WindowState.Normal;
             GlobalData.Settings.SwfWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
         }
