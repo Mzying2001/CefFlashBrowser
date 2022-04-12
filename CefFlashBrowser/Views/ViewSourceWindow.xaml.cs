@@ -45,7 +45,6 @@ namespace CefFlashBrowser.Views
             Closing += (s, e) =>
             {
                 browser.GetBrowser().CloseBrowser(true);
-                browser.Dispose();
             };
         }
 
