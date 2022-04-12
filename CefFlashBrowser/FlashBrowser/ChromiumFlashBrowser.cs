@@ -21,14 +21,14 @@ namespace CefFlashBrowser.FlashBrowser
             DownloadHandler = new IEDownloadHandler();
             JsDialogHandler = new JsDialogHandler(this);
             LifeSpanHandler = new LifeSpanHandler(
-                onCreateNewWindow: (s, e) =>
+                onCreateNewWindow: (s, e) => Dispatcher.Invoke(() =>
                 {
                     OnCreateNewWindow?.Invoke(this, e);
-                },
-                onClose: (s, e) =>
+                }),
+                onClose: (s, e) => Dispatcher.Invoke(() =>
                 {
                     OnClose?.Invoke(this, e);
-                }
+                })
             );
         }
     }
