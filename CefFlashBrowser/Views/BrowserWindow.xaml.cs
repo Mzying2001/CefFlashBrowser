@@ -35,7 +35,7 @@ namespace CefFlashBrowser.Views
             }
             else
             {
-                Title = wfChromiumWebBrowser.Title;
+                Title = wfChromiumWebBrowser.Title ?? string.Empty;
             }
         }
 
@@ -44,7 +44,7 @@ namespace CefFlashBrowser.Views
             var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
             if (!wfChromiumWebBrowser.IsLoading)
             {
-                Title = e.Title;
+                Title = e.Title ?? string.Empty;
             }
         }
 
