@@ -48,7 +48,7 @@ namespace CefFlashBrowser.Views
         private void OnCreateNewBrowser(object sender, LifeSpanHandler.NewBrowserEventArgs e)
         {
             e.Handled = true;
-            BrowserWindow.Show(e.TargetUrl);
+            Application.Current.Dispatcher.Invoke(() => BrowserWindow.Show(e.TargetUrl));
         }
     }
 }
