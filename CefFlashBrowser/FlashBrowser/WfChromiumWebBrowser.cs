@@ -113,23 +113,68 @@ namespace CefFlashBrowser.FlashBrowser
             set => browser.FindHandler = value;
         }
 
-        public string TooltipText => browser.TooltipText;
+        public string TooltipText
+        {
+            get => browser.TooltipText;
+        }
 
-        public bool CanExecuteJavascriptInMainFrame => browser.CanExecuteJavascriptInMainFrame;
+        public bool CanExecuteJavascriptInMainFrame
+        {
+            get => browser.CanExecuteJavascriptInMainFrame;
+        }
 
-        public IRequestContext RequestContext => browser.RequestContext;
+        public IRequestContext RequestContext
+        {
+            get => browser.RequestContext;
+        }
 
-        public bool IsBrowserInitialized => browser.IsBrowserInitialized;
+        public bool IsBrowserInitialized
+        {
+            get => (bool)GetValue(IsBrowserInitializedProperty);
+        }
 
-        public bool IsDisposed => browser.IsDisposed;
+        public bool IsDisposed
+        {
+            get => browser.IsDisposed;
+        }
 
-        public bool IsLoading => browser.IsLoading;
+        public bool IsLoading
+        {
+            get => (bool)GetValue(IsLoadingProperty);
+        }
 
-        public bool CanGoBack => browser.CanGoBack;
+        public bool CanGoBack
+        {
+            get => (bool)GetValue(CanGoBackProperty);
+        }
 
-        public bool CanGoForward => browser.CanGoForward;
+        public bool CanGoForward
+        {
+            get => (bool)GetValue(CanGoForwardProperty);
+        }
 
-        public string Address => browser.Address;
+        public string Address
+        {
+            get => (string)GetValue(AddressProperty);
+            set => Load(value);
+        }
+
+        public string StatusText
+        {
+            get => (string)GetValue(StatusTextProperty);
+        }
+
+        public double ZoomLevel
+        {
+            get => (double)GetValue(ZoomLevelProperty);
+            set => SetValue(ZoomLevelProperty, value);
+        }
+
+        public double ZoomLevelIncrement
+        {
+            get => (double)GetValue(ZoomLevelIncrementProperty);
+            set => SetValue(ZoomLevelIncrementProperty, value);
+        }
 
         public ICommand BackCommand { get; }
 
@@ -161,18 +206,6 @@ namespace CefFlashBrowser.FlashBrowser
 
         public ICommand RedoCommand { get; }
 
-        public double ZoomLevel
-        {
-            get { return (double)GetValue(ZoomLevelProperty); }
-            set { SetValue(ZoomLevelProperty, value); }
-        }
-
-        public double ZoomLevelIncrement
-        {
-            get { return (double)GetValue(ZoomLevelIncrementProperty); }
-            set { SetValue(ZoomLevelIncrementProperty, value); }
-        }
-
         public string Title => (string)GetValue(TitleProperty);
 
         public static readonly DependencyProperty CanGoBackProperty;
@@ -190,6 +223,8 @@ namespace CefFlashBrowser.FlashBrowser
         public static readonly DependencyProperty ZoomLevelProperty;
 
         public static readonly DependencyProperty ZoomLevelIncrementProperty;
+
+        public static readonly DependencyProperty StatusTextProperty;
 
         IBrowserAdapter IWebBrowserInternal.BrowserAdapter => ((IWebBrowserInternal)browser).BrowserAdapter;
 
@@ -234,39 +269,29 @@ namespace CefFlashBrowser.FlashBrowser
             }));
 
             ZoomLevelIncrementProperty = DependencyProperty.Register("ZoomLevelIncrement", typeof(double), typeof(WfChromiumWebBrowser), new PropertyMetadata(0.1));
+
+            StatusTextProperty = DependencyProperty.Register("StatusText", typeof(string), typeof(WfChromiumWebBrowser), new PropertyMetadata(null));
         }
 
         public WfChromiumWebBrowser()
         {
-            browser = new CefSharp.WinForms.ChromiumWebBrowser();
-            Child = browser;
+            Child = browser = new CefSharp.WinForms.ChromiumWebBrowser();
 
-            browser.AddressChanged += (s, e) => Dispatcher.Invoke(() =>
-            {
-                SetValue(AddressProperty, e.Address);
-            });
-
-            browser.LoadingStateChanged += (s, e) => Dispatcher.Invoke(() =>
-            {
-                SetValue(CanGoForwardProperty, e.CanGoForward);
-                SetValue(CanGoBackProperty, e.CanGoBack);
-                SetValue(IsLoadingProperty, e.IsLoading);
-
-                ((DelegateCommand)ForwardCommand).CanExecute = e.CanGoForward;
-                ((DelegateCommand)BackCommand).CanExecute = e.CanGoBack;
-                ((DelegateCommand)ReloadCommand).CanExecute = e.CanReload;
-                ((DelegateCommand)StopCommand).CanExecute = !e.CanReload;
-            });
-
-            browser.IsBrowserInitializedChanged += (s, e) => Dispatcher.Invoke(() =>
-            {
-                SetValue(IsBrowserInitializedProperty, ((CefSharp.WinForms.ChromiumWebBrowser)s).IsBrowserInitialized);
-            });
-
-            browser.TitleChanged += (s, e) => Dispatcher.Invoke(() =>
-            {
-                SetValue(TitleProperty, e.Title);
-            });
+            BackCommand = new DelegateCommand(this.Back) { CanExecute = false };
+            ForwardCommand = new DelegateCommand(this.Forward) { CanExecute = false };
+            ReloadCommand = new DelegateCommand(this.Reload) { CanExecute = false };
+            PrintCommand = new DelegateCommand(this.Print);
+            ZoomOutCommand = new DelegateCommand(ZoomOut);
+            ZoomInCommand = new DelegateCommand(ZoomIn);
+            ZoomResetCommand = new DelegateCommand(ZoomReset);
+            ViewSourceCommand = new DelegateCommand(this.ViewSource);
+            StopCommand = new DelegateCommand(this.Stop) { CanExecute = false };
+            CutCommand = new DelegateCommand(this.Cut);
+            CopyCommand = new DelegateCommand(this.Copy);
+            PasteCommand = new DelegateCommand(this.Paste);
+            SelectAllCommand = new DelegateCommand(this.SelectAll);
+            UndoCommand = new DelegateCommand(this.Undo);
+            RedoCommand = new DelegateCommand(this.Redo);
 
             browser.JavascriptMessageReceived += (s, e) => Dispatcher.Invoke(() =>
             {
@@ -281,6 +306,7 @@ namespace CefFlashBrowser.FlashBrowser
             browser.StatusMessage += (s, e) => Dispatcher.Invoke(() =>
             {
                 StatusMessage?.Invoke(this, e);
+                SetValue(StatusTextProperty, e.Value);
             });
 
             browser.FrameLoadStart += (s, e) => Dispatcher.Invoke(() =>
@@ -301,38 +327,32 @@ namespace CefFlashBrowser.FlashBrowser
             browser.LoadingStateChanged += (s, e) => Dispatcher.Invoke(() =>
             {
                 LoadingStateChanged?.Invoke(this, e);
+                SetValue(CanGoForwardProperty, e.CanGoForward);
+                SetValue(CanGoBackProperty, e.CanGoBack);
+                SetValue(IsLoadingProperty, e.IsLoading);
+                ((DelegateCommand)ForwardCommand).CanExecute = e.CanGoForward;
+                ((DelegateCommand)BackCommand).CanExecute = e.CanGoBack;
+                ((DelegateCommand)ReloadCommand).CanExecute = e.CanReload;
+                ((DelegateCommand)StopCommand).CanExecute = !e.CanReload;
             });
 
             browser.AddressChanged += (s, e) => Dispatcher.Invoke(() =>
             {
                 AddressChanged?.Invoke(this, e);
+                SetValue(AddressProperty, e.Address);
             });
 
             browser.TitleChanged += (s, e) => Dispatcher.Invoke(() =>
             {
                 TitleChanged?.Invoke(this, e);
+                SetValue(TitleProperty, e.Title);
             });
 
             browser.IsBrowserInitializedChanged += (s, e) => Dispatcher.Invoke(() =>
             {
                 IsBrowserInitializedChanged?.Invoke(this, e);
+                SetValue(IsBrowserInitializedProperty, ((CefSharp.WinForms.ChromiumWebBrowser)s).IsBrowserInitialized);
             });
-
-            BackCommand = new DelegateCommand(this.Back) { CanExecute = false };
-            ForwardCommand = new DelegateCommand(this.Forward) { CanExecute = false };
-            ReloadCommand = new DelegateCommand(this.Reload) { CanExecute = false };
-            PrintCommand = new DelegateCommand(this.Print);
-            ZoomOutCommand = new DelegateCommand(ZoomOut);
-            ZoomInCommand = new DelegateCommand(ZoomIn);
-            ZoomResetCommand = new DelegateCommand(ZoomReset);
-            ViewSourceCommand = new DelegateCommand(this.ViewSource);
-            StopCommand = new DelegateCommand(this.Stop) { CanExecute = false };
-            CutCommand = new DelegateCommand(this.Cut);
-            CopyCommand = new DelegateCommand(this.Copy);
-            PasteCommand = new DelegateCommand(this.Paste);
-            SelectAllCommand = new DelegateCommand(this.SelectAll);
-            UndoCommand = new DelegateCommand(this.Undo);
-            RedoCommand = new DelegateCommand(this.Redo);
         }
 
 
@@ -341,9 +361,9 @@ namespace CefFlashBrowser.FlashBrowser
 
         public void Load(string url)
         {
-            browser.Load(url);
             SetValue(AddressProperty, url);
             SetValue(TitleProperty, url);
+            browser.Load(url);
         }
 
         public void ZoomOut()
@@ -424,13 +444,6 @@ namespace CefFlashBrowser.FlashBrowser
         void IWebBrowserInternal.SetCanExecuteJavascriptOnMainFrame(bool canExecute)
         {
             ((IWebBrowserInternal)browser).SetCanExecuteJavascriptOnMainFrame(canExecute);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            if (!browser.IsDisposed)
-                browser.Dispose();
         }
     }
 }
