@@ -20,6 +20,10 @@ namespace CefFlashBrowser.FlashBrowser
         public event EventHandler<LoadErrorEventArgs> LoadError;
         public event EventHandler<LoadingStateChangedEventArgs> LoadingStateChanged;
 
+        public event EventHandler<AddressChangedEventArgs> AddressChanged;
+        public event EventHandler<TitleChangedEventArgs> TitleChanged;
+        public event EventHandler IsBrowserInitializedChanged;
+
         public IJavascriptObjectRepository JavascriptObjectRepository
         {
             get => browser.JavascriptObjectRepository;
@@ -299,6 +303,21 @@ namespace CefFlashBrowser.FlashBrowser
             browser.LoadingStateChanged += (s, e) =>
             {
                 LoadingStateChanged?.Invoke(this, e);
+            };
+
+            browser.AddressChanged += (s, e) =>
+            {
+                AddressChanged?.Invoke(this, e);
+            };
+
+            browser.TitleChanged += (s, e) =>
+            {
+                TitleChanged?.Invoke(this, e);
+            };
+
+            browser.IsBrowserInitializedChanged += (s, e) =>
+            {
+                IsBrowserInitializedChanged?.Invoke(this, e);
             };
 
             BackCommand = new DelegateCommand(browser.Back) { CanExecute = false };
