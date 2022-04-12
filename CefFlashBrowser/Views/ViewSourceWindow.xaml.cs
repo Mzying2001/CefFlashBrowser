@@ -41,6 +41,12 @@ namespace CefFlashBrowser.Views
         public ViewSourceWindow()
         {
             InitializeComponent();
+
+            Closing += (s, e) =>
+            {
+                browser.GetBrowser().CloseBrowser(true);
+                browser.Dispose();
+            };
         }
 
         public ViewSourceWindow(string address) : this()
