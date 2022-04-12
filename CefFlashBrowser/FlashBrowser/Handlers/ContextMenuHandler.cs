@@ -3,8 +3,11 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views;
 using CefSharp;
 using CefSharp.WinForms;
+using SimpleMvvm.Command;
 using System;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace CefFlashBrowser.FlashBrowser.Handlers
 {
@@ -12,6 +15,13 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
     {
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
+
+        private readonly WfChromiumWebBrowser wfChromiumWebBrowser;
+
+        public ContextMenuHandler(WfChromiumWebBrowser wfChromiumWebBrowser)
+        {
+            this.wfChromiumWebBrowser = wfChromiumWebBrowser;
+        }
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
@@ -76,6 +86,10 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
         public override void OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
         {
+            wfChromiumWebBrowser.Dispatcher.Invoke(() =>
+            {
+                wfChromiumWebBrowser.ContextMenu = null;
+            });
         }
 
         public override bool RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
@@ -85,121 +99,139 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             var linkUrl = parameters.LinkUrl;
             var selectionText = parameters.SelectionText;
 
-            foreach (var item in menuItems)
+            wfChromiumWebBrowser.Dispatcher.Invoke(() =>
             {
-                switch (item.commandId)
-                {
-                    case CefMenuCommand.Back:
-                        {
-                            var header = LanguageManager.GetString("menu_back");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.Forward:
-                        {
-                            var header = LanguageManager.GetString("menu_forward");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.Cut:
-                        {
-                            var header = LanguageManager.GetString("menu_cut");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.Copy:
-                        {
-                            var header = LanguageManager.GetString("menu_copy");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.Paste:
-                        {
-                            var header = LanguageManager.GetString("menu_paste");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.Print:
-                        {
-                            var header = LanguageManager.GetString("menu_print");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.ViewSource:
-                        {
-                            var header = LanguageManager.GetString("menu_viewSource");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.Undo:
-                        {
-                            var header = LanguageManager.GetString("menu_undo");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.StopLoad:
-                        {
-                            var header = LanguageManager.GetString("menu_stop");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.SelectAll:
-                        {
-                            var header = LanguageManager.GetString("menu_selectAll");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.Redo:
-                        {
-                            var header = LanguageManager.GetString("menu_redo");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.Find:
-                        {
-                            var header = LanguageManager.GetString("menu_find");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.AddToDictionary:
-                        {
-                            var header = LanguageManager.GetString("menu_addToDictionary");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.Reload:
-                        {
-                            var header = LanguageManager.GetString("menu_reload");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case CefMenuCommand.ReloadNoCache:
-                        {
-                            var header = LanguageManager.GetString("menu_reloadNoCache");
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case OpenInNewWindow:
-                        {
-                            var header = string.Format(LanguageManager.GetString(item.header), linkUrl);
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    case Search:
-                        {
-                            var tmp = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
-                            var header = string.Format(LanguageManager.GetString(item.header), tmp.Replace('\n', ' '));
-                            model.SetLabelAt(item.index, header);
-                            break;
-                        }
-                    default:
-                        {
-                            break;
-                        }
-                }
-            }
+                var menu = new ContextMenu { IsOpen = true };
 
-            return false;
+                RoutedEventHandler handler = null;
+                handler = (s, e) =>
+                {
+                    menu.Closed -= handler;
+                    if (!callback.IsDisposed)
+                        callback.Cancel();
+                };
+                menu.Closed += handler;
+
+                foreach (var item in menuItems)
+                {
+                    string header = string.Empty;
+
+                    if (item.commandId == CefMenuCommand.NotFound)
+                    {
+                        menu.Items.Add(new Separator());
+                        continue;
+                    }
+
+                    switch (item.commandId)
+                    {
+                        case CefMenuCommand.Back:
+                            {
+                                header = LanguageManager.GetString("menu_back");
+                                break;
+                            }
+                        case CefMenuCommand.Forward:
+                            {
+                                header = LanguageManager.GetString("menu_forward");
+                                break;
+                            }
+                        case CefMenuCommand.Cut:
+                            {
+                                header = LanguageManager.GetString("menu_cut");
+                                break;
+                            }
+                        case CefMenuCommand.Copy:
+                            {
+                                header = LanguageManager.GetString("menu_copy");
+                                break;
+                            }
+                        case CefMenuCommand.Paste:
+                            {
+                                header = LanguageManager.GetString("menu_paste");
+                                break;
+                            }
+                        case CefMenuCommand.Print:
+                            {
+                                header = LanguageManager.GetString("menu_print");
+                                break;
+                            }
+                        case CefMenuCommand.ViewSource:
+                            {
+                                header = LanguageManager.GetString("menu_viewSource");
+                                break;
+                            }
+                        case CefMenuCommand.Undo:
+                            {
+                                header = LanguageManager.GetString("menu_undo");
+                                break;
+                            }
+                        case CefMenuCommand.StopLoad:
+                            {
+                                header = LanguageManager.GetString("menu_stop");
+                                break;
+                            }
+                        case CefMenuCommand.SelectAll:
+                            {
+                                header = LanguageManager.GetString("menu_selectAll");
+                                break;
+                            }
+                        case CefMenuCommand.Redo:
+                            {
+                                header = LanguageManager.GetString("menu_redo");
+                                break;
+                            }
+                        case CefMenuCommand.Find:
+                            {
+                                header = LanguageManager.GetString("menu_find");
+                                break;
+                            }
+                        case CefMenuCommand.AddToDictionary:
+                            {
+                                header = LanguageManager.GetString("menu_addToDictionary");
+                                break;
+                            }
+                        case CefMenuCommand.Reload:
+                            {
+                                header = LanguageManager.GetString("menu_reload");
+                                break;
+                            }
+                        case CefMenuCommand.ReloadNoCache:
+                            {
+                                header = LanguageManager.GetString("menu_reloadNoCache");
+                                break;
+                            }
+                        case OpenInNewWindow:
+                            {
+                                header = string.Format(LanguageManager.GetString(item.header), linkUrl);
+                                break;
+                            }
+                        case Search:
+                            {
+                                var tmp = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
+                                header = string.Format(LanguageManager.GetString(item.header), tmp.Replace('\n', ' '));
+                                break;
+                            }
+                        default:
+                            {
+                                header = item.header;
+                                break;
+                            }
+                    }
+
+                    menu.Items.Add(new MenuItem
+                    {
+                        Header = header,
+                        Command = new DelegateCommand
+                        {
+                            CanExecute = item.isEnable,
+                            Execute = obj => callback.Continue(item.commandId, CefEventFlags.None)
+                        }
+                    });
+                }
+
+                wfChromiumWebBrowser.ContextMenu = menu;
+            });
+
+            return true;
         }
     }
 }
