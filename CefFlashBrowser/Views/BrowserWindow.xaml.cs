@@ -26,30 +26,24 @@ namespace CefFlashBrowser.Views
 
         private void Browser_LoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
+            if (wfChromiumWebBrowser.IsLoading)
             {
-                var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
-                if (wfChromiumWebBrowser.IsLoading)
-                {
-                    Title = LanguageManager.GetString("label_loading");
-                }
-                else
-                {
-                    Title = wfChromiumWebBrowser.Title;
-                }
-            });
+                Title = LanguageManager.GetString("label_loading");
+            }
+            else
+            {
+                Title = wfChromiumWebBrowser.Title;
+            }
         }
 
         private void Browser_TitleChanged(object sender, CefSharp.TitleChangedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
+            if (!wfChromiumWebBrowser.IsLoading)
             {
-                var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
-                if (!wfChromiumWebBrowser.IsLoading)
-                {
-                    Title = e.Title;
-                }
-            });
+                Title = e.Title;
+            }
         }
 
         private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)
