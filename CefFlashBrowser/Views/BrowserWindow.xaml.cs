@@ -1,6 +1,8 @@
-﻿using CefFlashBrowser.FlashBrowser.Handlers;
+﻿using CefFlashBrowser.FlashBrowser;
+using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Utils;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -20,6 +22,34 @@ namespace CefFlashBrowser.Views
 
             if (GlobalData.Settings.BrowserWindowSizeInfo != null)
                 GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
+        }
+
+        private void Browser_LoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
+                if (wfChromiumWebBrowser.IsLoading)
+                {
+                    Title = LanguageManager.GetString("label_loading");
+                }
+                else
+                {
+                    Title = wfChromiumWebBrowser.Title;
+                }
+            });
+        }
+
+        private void Browser_TitleChanged(object sender, CefSharp.TitleChangedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
+                if (!wfChromiumWebBrowser.IsLoading)
+                {
+                    Title = e.Title;
+                }
+            });
         }
 
         private void Browser_OnCreateNewWindow(object sender, LifeSpanHandler.NewWindowEventArgs e)

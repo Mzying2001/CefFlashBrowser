@@ -18,7 +18,7 @@
         MinWidth="400"
         MinHeight="300"
         Closing="WindowClosing"
-        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
+        Title="FlashBrowser"
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
@@ -287,15 +287,9 @@
                                     Grid.Row="1"
                                     ZoomLevelIncrement="0.25"
                                     OnCreateNewWindow="Browser_OnCreateNewWindow"
-                                    OnClose="Browser_OnClose"/>
-
-        <Label Grid.Row="1"
-               Margin="5"
-               Opacity="0.8"
-               VerticalAlignment="Bottom"
-               HorizontalAlignment="Left"
-               Content="{DynamicResource label_loading}"
-               Visibility="{Binding ElementName=browser, Path=IsLoading, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                                    OnClose="Browser_OnClose"
+                                    LoadingStateChanged="Browser_LoadingStateChanged"
+                                    TitleChanged="Browser_TitleChanged"/>
     </Grid>
 
 </Window>
