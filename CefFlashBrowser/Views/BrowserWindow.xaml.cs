@@ -22,6 +22,8 @@ namespace CefFlashBrowser.Views
 
             if (GlobalData.Settings.BrowserWindowSizeInfo != null)
                 GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
+
+            browser.KeyboardHandler = new BrowserKeyboardHandler(browser);
         }
 
         private void Browser_LoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)

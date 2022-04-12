@@ -269,6 +269,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FlashBrowser\Handlers\BrowserKeyboardHandler.cs" />
     <Compile Include="FlashBrowser\Handlers\ContextMenuHandlerBase.cs" />
     <Compile Include="FlashBrowser\WfChromiumWebBrowser.cs" />
     <Compile Include="Models\AppInfo.cs" />
@@ -301,6 +302,7 @@
     <Compile Include="Utils\UrlChecker.cs" />
     <Compile Include="Models\Website.cs" />
     <Compile Include="Models\WindowSizeInfo.cs" />
+    <Compile Include="Utils\Win32.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
     <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />

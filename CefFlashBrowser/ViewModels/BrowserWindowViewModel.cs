@@ -23,17 +23,17 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ReloadOrStopCommand { get; set; }
         public DelegateCommand ShowDevToolsCommand { get; set; }
 
-        private void ShowMainWindow()
+        public void ShowMainWindow()
         {
             MainWindow.Show();
         }
 
-        private void ViewSource(string url)
+        public void ViewSource(string url)
         {
             ViewSourceWindow.Show(url);
         }
 
-        private void OpenInDefaultBrowser(string url)
+        public void OpenInDefaultBrowser(string url)
         {
             Process.Start(url);
         }
@@ -52,7 +52,7 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void CreateShortcut(IWebBrowser browser)
+        public void CreateShortcut(IWebBrowser browser)
         {
             var title = GetWebBrowserTitle(browser);
             foreach (var item in "\\/:*?\"<>|.")
@@ -84,18 +84,18 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void AddFavorite(IWebBrowser browser)
+        public void AddFavorite(IWebBrowser browser)
         {
             AddFavoriteDialog.ShowDialog(GetWebBrowserTitle(browser), browser.Address);
         }
 
-        private void CloseBrowser(IWebBrowser browser)
+        public void CloseBrowser(IWebBrowser browser)
         {
             bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
             browser.GetBrowser().CloseBrowser(forceClose);
         }
 
-        private void ReloadOrStop(IWebBrowser browser)
+        public void ReloadOrStop(IWebBrowser browser)
         {
             if (browser.IsLoading)
             {
@@ -107,7 +107,7 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void ShowDevTools(IWebBrowser browser)
+        public void ShowDevTools(IWebBrowser browser)
         {
             browser.ShowDevTools();
         }
