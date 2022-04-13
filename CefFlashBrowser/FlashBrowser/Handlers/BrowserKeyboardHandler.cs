@@ -110,12 +110,12 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             {
                 switch (windowsKeyCode)
                 {
-                    case 'Z': //Alt+Z
+                    case VK_LEFT: //Alt+Left
                         {
                             browser.GoBack();
                             return true;
                         }
-                    case 'X': //Alt+X
+                    case VK_RIGHT: //Alt+Right
                         {
                             browser.GoForward();
                             return true;
