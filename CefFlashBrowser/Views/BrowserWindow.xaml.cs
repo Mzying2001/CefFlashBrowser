@@ -54,7 +54,7 @@ namespace CefFlashBrowser.Views
 
             if (e.OpenDisposition == CefSharp.WindowOpenDisposition.NewPopup)
             {
-                PopupWebPage.Show(e.TargetUrl);
+                PopupWebPage.Show(e.TargetUrl, e.PopupFeatures);
             }
             else
             {

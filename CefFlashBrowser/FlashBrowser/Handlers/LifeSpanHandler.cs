@@ -14,6 +14,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             public string TargetUrl { get; set; }
             public IWebBrowser Browser { get; set; }
             public IWebBrowser NewBrowser { get; set; }
+            public IPopupFeatures PopupFeatures { get; set; }
             public WindowOpenDisposition OpenDisposition { get; set; }
         }
 
@@ -56,6 +57,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                 NewBrowser = null,
                 TargetUrl = targetUrl,
                 Browser = chromiumWebBrowser,
+                PopupFeatures = popupFeatures,
                 OpenDisposition = targetDisposition
             };
 

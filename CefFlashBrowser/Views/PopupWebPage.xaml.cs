@@ -42,6 +42,17 @@ namespace CefFlashBrowser.Views
             new PopupWebPage(address).Show();
         }
 
+        public static void Show(string address, CefSharp.IPopupFeatures popupFeatures)
+        {
+            new PopupWebPage(address)
+            {
+                Left = popupFeatures.X,
+                Top = popupFeatures.Y,
+                Width = popupFeatures.Width,
+                Height = popupFeatures.Height
+            }.Show();
+        }
+
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (!_doClose)

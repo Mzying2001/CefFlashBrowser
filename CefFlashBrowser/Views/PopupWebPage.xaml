@@ -9,8 +9,10 @@
         
         x:Name="window"
         Title="{Binding ElementName=browser, Path=Title, TargetNullValue=PopupWebPage}"
-        Height="400"
-        Width="600"
+        Width="Auto"
+        Height="Auto"
+        MinWidth="400"
+        MinHeight="300"
         Closing="WindowClosing">
 
     <Grid>
