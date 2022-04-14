@@ -334,6 +334,9 @@
     <Compile Include="Views\FavoritesManager.xaml.cs">
       <DependentUpon>FavoritesManager.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\PopupWebPage.xaml.cs">
+      <DependentUpon>PopupWebPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -404,6 +407,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\BrowserWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PopupWebPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

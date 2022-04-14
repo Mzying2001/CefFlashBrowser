@@ -51,18 +51,26 @@ namespace CefFlashBrowser.Views
         private void OnCreateNewBrowser(object sender, LifeSpanHandler.NewBrowserEventArgs e)
         {
             e.Handled = true;
-            switch (GlobalData.Settings.NewPageBehavior)
+
+            if (e.OpenDisposition == CefSharp.WindowOpenDisposition.NewPopup)
             {
-                case NewPageBehavior.NewWindow:
-                    {
-                        Show(e.TargetUrl);
-                        break;
-                    }
-                case NewPageBehavior.OriginalWindow:
-                    {
-                        browser.Load(e.TargetUrl);
-                        break;
-                    }
+                PopupWebPage.Show(e.TargetUrl);
+            }
+            else
+            {
+                switch (GlobalData.Settings.NewPageBehavior)
+                {
+                    case NewPageBehavior.NewWindow:
+                        {
+                            Show(e.TargetUrl);
+                            break;
+                        }
+                    case NewPageBehavior.OriginalWindow:
+                        {
+                            browser.Load(e.TargetUrl);
+                            break;
+                        }
+                }
             }
         }
 
