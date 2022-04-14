@@ -60,7 +60,7 @@ namespace CefFlashBrowser.FlashBrowser
 #endif
 
             settings.CefCommandLineArgs["enable-system-flash"] = "1";
-            settings.CefCommandLineArgs.Add("ppapi-flash-version", FileVersionInfo.GetVersionInfo(FlashPath).FileVersion.Replace(',', '.'));
+            settings.CefCommandLineArgs.Add("ppapi-flash-version", "99.0.0.999");
             settings.CefCommandLineArgs.Add("ppapi-flash-path", FlashPath);
             Cef.Initialize(settings);
         }
