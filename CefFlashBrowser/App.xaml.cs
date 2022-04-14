@@ -2,8 +2,6 @@
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views;
-using CefFlashBrowser.Views.Dialogs.JsDialogs;
-using System;
 using System.Windows;
 
 namespace CefFlashBrowser
@@ -37,14 +35,9 @@ namespace CefFlashBrowser
                 {
                     SwfPlayerWindow.Show(arg);
                 }
-                else if (UrlChecker.IsHttpUrl(arg))
-                {
-                    BrowserWindow.Show(arg);
-                }
                 else
                 {
-                    JsAlertDialog.ShowDialog($"{LanguageManager.GetString("invalidStartUpParam")}: {arg}");
-                    Environment.Exit(0);
+                    BrowserWindow.Show(arg);
                 }
             }
         }
