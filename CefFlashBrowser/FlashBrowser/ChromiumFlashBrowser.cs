@@ -83,7 +83,8 @@ namespace CefFlashBrowser.FlashBrowser
             var msg = e.Message;
             if (msg.StartsWith("Cross-origin plugin content from"))
             {
-                if (msg.Split(' ')?[4] is string url && !BlockedSwfs.Contains(url))
+                var url = msg.Split(' ')?[4];
+                if (!string.IsNullOrWhiteSpace(url) && !BlockedSwfs.Contains(url))
                 {
                     BlockedSwfs.Add(url);
                     SetValue(HasBlockedSwfsProperty, true);
