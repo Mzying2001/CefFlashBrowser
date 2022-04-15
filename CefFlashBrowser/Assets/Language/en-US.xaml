@@ -88,7 +88,7 @@
     <sys:String x:Key="menu_openInDefaultBrowser">Open in default browser</sys:String>
     <sys:String x:Key="menu_createShortcut">Create shortcut</sys:String>
     <sys:String x:Key="menu_addFavorite">Add this site to Favorites</sys:String>
-    <sys:String x:Key="menu_blockedSwfsTips">Some flash content is blocked by chromium kernel, but you can play it in SWF player:</sys:String>
+    <sys:String x:Key="menu_blockedSwfsTips">Some flash content seems to be blocked by the Chromium kernel, you can play it in the SWF player:</sys:String>
     <sys:String x:Key="toolTip_back">Back (Alt+Left)</sys:String>
     <sys:String x:Key="toolTip_forward">Forward (Alt+Right)</sys:String>
     <sys:String x:Key="toolTip_reload">Reload (F5)</sys:String>

@@ -88,7 +88,7 @@
     <sys:String x:Key="menu_openInDefaultBrowser">在默認瀏覽器中打開</sys:String>
     <sys:String x:Key="menu_createShortcut">創建網頁快捷方式</sys:String>
     <sys:String x:Key="menu_addFavorite">添加此網站到我的最愛</sys:String>
-    <sys:String x:Key="menu_blockedSwfsTips">一些flash內容被Chromium內核遮罩，但你可以在SWF播放機中播放它：</sys:String>
+    <sys:String x:Key="menu_blockedSwfsTips">一些flash內容似乎被Chromium內核屏蔽，你可以在SWF播放器中播放它：</sys:String>
     <sys:String x:Key="toolTip_back">返回（Alt+向左鍵）</sys:String>
     <sys:String x:Key="toolTip_forward">前進（Alt+向右鍵）</sys:String>
     <sys:String x:Key="toolTip_reload">重繪（F5）</sys:String>
