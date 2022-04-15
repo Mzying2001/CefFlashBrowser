@@ -278,6 +278,7 @@
     <Compile Include="Utils\Converters\MultiValueConverterBase.cs" />
     <Compile Include="Utils\Converters\ObjectNotNull.cs" />
     <Compile Include="Utils\Converters\StringArrNotAnyEmpty.cs" />
+    <Compile Include="Utils\Converters\TwoThird.cs" />
     <Compile Include="Utils\Converters\UrlDecoder.cs" />
     <Compile Include="Models\EnumDescription.cs" />
     <Compile Include="Models\EnumDescriptions.cs" />
@@ -292,6 +293,7 @@
     <Compile Include="Models\Data\GlobalData.cs" />
     <Compile Include="Utils\Converters\UrlGetFileName.cs" />
     <Compile Include="Utils\Converters\VisiableIfNotZero.cs" />
+    <Compile Include="Utils\Converters\VisiableIfStrNotEmpty.cs" />
     <Compile Include="Utils\LanguageManager.cs" />
     <Compile Include="Models\NavigationType.cs" />
     <Compile Include="Models\NewPageBehavior.cs" />

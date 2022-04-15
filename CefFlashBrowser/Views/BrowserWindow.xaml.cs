@@ -1,11 +1,11 @@
-﻿using CefFlashBrowser.FlashBrowser;
-using CefFlashBrowser.FlashBrowser.Handlers;
+﻿using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Utils;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Interop;
 
 namespace CefFlashBrowser.Views
 {
@@ -26,26 +26,38 @@ namespace CefFlashBrowser.Views
             browser.KeyboardHandler = new BrowserKeyboardHandler(browser);
         }
 
-        private void BrowserLoadingStateChanged(object sender, CefSharp.LoadingStateChangedEventArgs e)
+        private void WindowSourceInitialized(object sender, EventArgs e)
         {
-            var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
-            if (wfChromiumWebBrowser.IsLoading)
-            {
-                Title = LanguageManager.GetString("label_loading");
-            }
-            else
-            {
-                Title = wfChromiumWebBrowser.Title ?? string.Empty;
-            }
+            var hwnd = new WindowInteropHelper(this).Handle;
+            HwndSource.FromHwnd(hwnd).AddHook(new HwndSourceHook(WndProc));
         }
 
-        private void BrowserTitleChanged(object sender, CefSharp.TitleChangedEventArgs e)
+        private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            var wfChromiumWebBrowser = (WfChromiumWebBrowser)sender;
-            if (!wfChromiumWebBrowser.IsLoading)
+            UpdateStatusPopupPosition();
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            switch (msg)
             {
-                Title = e.Title ?? string.Empty;
+                case 0x003: //WM_MOVE
+                    {
+                        UpdateStatusPopupPosition();
+                        break;
+                    }
             }
+            return IntPtr.Zero;
+        }
+
+        private void UpdateStatusPopupPosition()
+        {
+            Point leftBottom = PointToScreen(new Point(0, mainGrid.ActualHeight - statusPopupContent.Height));
+            statusPopup.PlacementRectangle = new Rect
+            {
+                X = leftBottom.X,
+                Y = leftBottom.Y
+            };
         }
 
         private void OnCreateNewBrowser(object sender, LifeSpanHandler.NewBrowserEventArgs e)

@@ -19,8 +19,10 @@
         MinWidth="400"
         MinHeight="300"
         Closing="WindowClosing"
-        Title="FlashBrowser"
-        DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
+        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
+        DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}"
+        SizeChanged="WindowSizeChanged"
+        SourceInitialized="WindowSourceInitialized">
 
     <Window.Resources>
         <!--ConetxtMenu-->
@@ -175,7 +177,7 @@
         </ContextMenu>
     </Window.Resources>
 
-    <Grid>
+    <Grid x:Name="mainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -298,9 +300,37 @@
                                     Grid.Row="1"
                                     ZoomLevelIncrement="0.25"
                                     OnClose="BrowserOnClose"
-                                    TitleChanged="BrowserTitleChanged"
-                                    OnCreateNewBrowser="OnCreateNewBrowser"
-                                    LoadingStateChanged="BrowserLoadingStateChanged"/>
-    </Grid>
+                                    OnCreateNewBrowser="OnCreateNewBrowser"/>
 
+        <Popup x:Name="statusPopup"
+               IsOpen="True"
+               StaysOpen="True"
+               Placement="Absolute"
+               AllowsTransparency="True">
+            <ContentControl x:Name="statusPopupContent"
+                            Height="22"
+                            MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThird}}">
+                <Binding ElementName="browser"
+                         Path="IsLoading">
+                    <Binding.Converter>
+                        <converter:BoolToObject>
+                            <converter:BoolToObject.TrueObject>
+                                <Label Padding="5,0"
+                                       VerticalAlignment="Stretch"
+                                       Content="{DynamicResource label_loading}"/>
+                            </converter:BoolToObject.TrueObject>
+                            <converter:BoolToObject.FalseObject>
+                                <Label Padding="5,0"
+                                       VerticalAlignment="Stretch"
+                                       Visibility="{Binding ElementName=browser, Path=StatusText, Converter={StaticResource VisiableIfStrNotEmpty}}">
+                                    <TextBlock Text="{Binding ElementName=browser, Path=StatusText}"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </Label>
+                            </converter:BoolToObject.FalseObject>
+                        </converter:BoolToObject>
+                    </Binding.Converter>
+                </Binding>
+            </ContentControl>
+        </Popup>
+    </Grid>
 </Window>
