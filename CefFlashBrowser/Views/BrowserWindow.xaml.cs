@@ -95,9 +95,17 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void MenuButton_Clicked(object sender, RoutedEventArgs e)
+        private void MenuButtonClicked(object sender, RoutedEventArgs e)
         {
             var contextMenu = (ContextMenu)Resources["more"];
+            contextMenu.PlacementTarget = sender as UIElement;
+            contextMenu.Placement = PlacementMode.Bottom;
+            contextMenu.IsOpen = true;
+        }
+
+        private void ShowBlockedSwfsButtonClicked(object sender, RoutedEventArgs e)
+        {
+            var contextMenu = (ContextMenu)Resources["blockedSwfs"];
             contextMenu.PlacementTarget = sender as UIElement;
             contextMenu.Placement = PlacementMode.Bottom;
             contextMenu.IsOpen = true;

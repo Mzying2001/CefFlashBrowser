@@ -14,4 +14,6 @@
 
     <local:VisiableIfNotZero x:Key="VisiableIfNotZero"/>
 
+    <local:UrlGetFileName x:Key="UrlGetFileName"/>
+
 </ResourceDictionary>

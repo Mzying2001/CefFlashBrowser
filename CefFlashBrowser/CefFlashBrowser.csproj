@@ -290,6 +290,7 @@
     <Compile Include="FlashBrowser\Handlers\LifeSpanHandler.cs" />
     <Compile Include="FlashBrowser\Handlers\IEDownloadHandler.cs" />
     <Compile Include="Models\Data\GlobalData.cs" />
+    <Compile Include="Utils\Converters\UrlGetFileName.cs" />
     <Compile Include="Utils\Converters\VisiableIfNotZero.cs" />
     <Compile Include="Utils\LanguageManager.cs" />
     <Compile Include="Models\NavigationType.cs" />
@@ -465,6 +466,7 @@
     <Content Include="Assets\Plugins\pepflashplayer.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Assets\Svgs\warning.svg" />
     <Content Include="libcef.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

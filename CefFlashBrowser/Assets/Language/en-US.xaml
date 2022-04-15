@@ -88,11 +88,13 @@
     <sys:String x:Key="menu_openInDefaultBrowser">Open in default browser</sys:String>
     <sys:String x:Key="menu_createShortcut">Create shortcut</sys:String>
     <sys:String x:Key="menu_addFavorite">Add this site to Favorites</sys:String>
+    <sys:String x:Key="menu_blockedSwfsTips">Some flash content is blocked by chromium kernel, but you can play it in SWF player:</sys:String>
     <sys:String x:Key="toolTip_back">Back (Alt+Left)</sys:String>
     <sys:String x:Key="toolTip_forward">Forward (Alt+Right)</sys:String>
     <sys:String x:Key="toolTip_reload">Reload (F5)</sys:String>
     <sys:String x:Key="toolTip_stop">Stop (Esc)</sys:String>
     <sys:String x:Key="toolTip_more">More</sys:String>
+    <sys:String x:Key="toolTip_blockedSwfs">Blocked flash content</sys:String>
     <sys:String x:Key="filter_shortcut">shortcut</sys:String>
     <sys:String x:Key="label_loading">Loading...</sys:String>
 

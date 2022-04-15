@@ -88,11 +88,13 @@
     <sys:String x:Key="menu_openInDefaultBrowser">在默认浏览器中打开</sys:String>
     <sys:String x:Key="menu_createShortcut">创建网页快捷方式</sys:String>
     <sys:String x:Key="menu_addFavorite">添加此网站到收藏夹</sys:String>
+    <sys:String x:Key="menu_blockedSwfsTips">一些flash内容被Chromium内核屏蔽，但你可以在SWF播放器中播放它：</sys:String>
     <sys:String x:Key="toolTip_back">返回（Alt+向左键）</sys:String>
     <sys:String x:Key="toolTip_forward">前进（Alt+向右键）</sys:String>
     <sys:String x:Key="toolTip_reload">刷新（F5）</sys:String>
     <sys:String x:Key="toolTip_stop">停止（Esc）</sys:String>
     <sys:String x:Key="toolTip_more">更多</sys:String>
+    <sys:String x:Key="toolTip_blockedSwfs">被屏蔽的flash内容</sys:String>
     <sys:String x:Key="filter_shortcut">快捷方式</sys:String>
     <sys:String x:Key="label_loading">加载中...</sys:String>
 

@@ -28,11 +28,19 @@ namespace CefFlashBrowser.FlashBrowser
             get => (ICollection<string>)GetValue(BlockedSwfsProperty);
         }
 
+        public bool HasBlockedSwfs
+        {
+            get => (bool)GetValue(HasBlockedSwfsProperty);
+        }
+
         public static readonly DependencyProperty BlockedSwfsProperty;
+
+        public static readonly DependencyProperty HasBlockedSwfsProperty;
 
         static ChromiumFlashBrowser()
         {
             BlockedSwfsProperty = DependencyProperty.Register(nameof(BlockedSwfs), typeof(ICollection<string>), typeof(ChromiumFlashBrowser), new PropertyMetadata(null));
+            HasBlockedSwfsProperty = DependencyProperty.Register(nameof(HasBlockedSwfs), typeof(bool), typeof(ChromiumFlashBrowser), new PropertyMetadata(false));
         }
 
         public ChromiumFlashBrowser()
@@ -62,6 +70,7 @@ namespace CefFlashBrowser.FlashBrowser
         private void OnAddressChanged(object sender, AddressChangedEventArgs e)
         {
             BlockedSwfs.Clear();
+            SetValue(HasBlockedSwfsProperty, false);
         }
 
         private void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
@@ -77,6 +86,7 @@ namespace CefFlashBrowser.FlashBrowser
                 if (msg.Split(' ')?[4] is string url && !BlockedSwfs.Contains(url))
                 {
                     BlockedSwfs.Add(url);
+                    SetValue(HasBlockedSwfsProperty, true);
                 }
             }
         }
