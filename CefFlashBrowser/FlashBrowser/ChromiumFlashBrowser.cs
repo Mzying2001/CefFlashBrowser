@@ -2,6 +2,9 @@
 using CefSharp;
 using SimpleMvvm.Command;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace CefFlashBrowser.FlashBrowser
@@ -18,6 +21,18 @@ namespace CefFlashBrowser.FlashBrowser
         {
             get => base.LifeSpanHandler;
             protected set => base.LifeSpanHandler = value;
+        }
+
+        public ICollection<string> BlockedSwfs
+        {
+            get => (ICollection<string>)GetValue(BlockedSwfsProperty);
+        }
+
+        public static readonly DependencyProperty BlockedSwfsProperty;
+
+        static ChromiumFlashBrowser()
+        {
+            BlockedSwfsProperty = DependencyProperty.Register(nameof(BlockedSwfs), typeof(ICollection<string>), typeof(ChromiumFlashBrowser), new PropertyMetadata(null));
         }
 
         public ChromiumFlashBrowser()
@@ -38,6 +53,32 @@ namespace CefFlashBrowser.FlashBrowser
                     OnClose?.Invoke(this, e);
                 })
             );
+
+            SetValue(BlockedSwfsProperty, new ObservableCollection<string>());
+            ConsoleMessage += OnConsoleMessage;
+            AddressChanged += OnAddressChanged;
+        }
+
+        private void OnAddressChanged(object sender, AddressChangedEventArgs e)
+        {
+            BlockedSwfs.Clear();
+        }
+
+        private void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
+        {
+            if (e.Level != LogSeverity.Info)
+            {
+                return;
+            }
+
+            var msg = e.Message;
+            if (msg.StartsWith("Cross-origin plugin content from"))
+            {
+                if (msg.Split(' ')?[4] is string url && !BlockedSwfs.Contains(url))
+                {
+                    BlockedSwfs.Add(url);
+                }
+            }
         }
     }
 }
