@@ -52,12 +52,8 @@ namespace CefFlashBrowser.Views
 
         private void UpdateStatusPopupPosition()
         {
-            Point leftBottom = PointToScreen(new Point(0, mainGrid.ActualHeight - statusPopupContent.Height));
-            statusPopup.PlacementRectangle = new Rect
-            {
-                X = leftBottom.X,
-                Y = leftBottom.Y
-            };
+            var pos = PointToScreen(new Point(0, mainGrid.ActualHeight - statusPopupContent.Height));
+            statusPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
         }
 
         private void OnCreateNewBrowser(object sender, LifeSpanHandler.NewBrowserEventArgs e)
@@ -86,7 +82,7 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void BrowserOnClose(object sender, System.EventArgs e)
+        private void BrowserOnClose(object sender, EventArgs e)
         {
             _doClose = true;
             Close();
