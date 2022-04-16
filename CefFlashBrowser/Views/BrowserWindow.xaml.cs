@@ -103,20 +103,26 @@ namespace CefFlashBrowser.Views
             }
         }
 
+        private void OpenBottomContextMenu(UIElement target, ContextMenu menu)
+        {
+            menu.IsOpen = true;
+            menu.Placement = PlacementMode.Relative;
+            menu.PlacementTarget = target;
+            menu.PlacementRectangle = new Rect
+            {
+                X = target.RenderSize.Width - menu.RenderSize.Width,
+                Y = target.RenderSize.Height
+            };
+        }
+
         private void MenuButtonClicked(object sender, RoutedEventArgs e)
         {
-            var contextMenu = (ContextMenu)Resources["more"];
-            contextMenu.PlacementTarget = sender as UIElement;
-            contextMenu.Placement = PlacementMode.Bottom;
-            contextMenu.IsOpen = true;
+            OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["more"]);
         }
 
         private void ShowBlockedSwfsButtonClicked(object sender, RoutedEventArgs e)
         {
-            var contextMenu = (ContextMenu)Resources["blockedSwfs"];
-            contextMenu.PlacementTarget = sender as UIElement;
-            contextMenu.Placement = PlacementMode.Bottom;
-            contextMenu.IsOpen = true;
+            OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["blockedSwfs"]);
         }
 
         public static void Show(string address)

@@ -27,7 +27,9 @@
     <Window.Resources>
         <!--ConetxtMenu-->
         <!--more-->
-        <ContextMenu x:Key="more">
+        <ContextMenu x:Key="more"
+                     VerticalOffset="-8"
+                     HorizontalOffset="8">
             <MenuItem>
                 <MenuItem.Template>
                     <ControlTemplate TargetType="MenuItem">
@@ -138,7 +140,9 @@
         </ContextMenu>
 
         <!--blocked swfs-->
-        <ContextMenu x:Key="blockedSwfs">
+        <ContextMenu x:Key="blockedSwfs"
+                     VerticalOffset="-8"
+                     HorizontalOffset="8">
             <ContextMenu.ItemContainerStyle>
                 <Style TargetType="MenuItem">
                     <Setter Property="Template">
