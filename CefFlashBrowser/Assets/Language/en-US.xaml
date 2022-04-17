@@ -33,6 +33,7 @@
     <sys:String x:Key="settingItem_openNewPage">Open new page in ...</sys:String>
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">Disable pop ups on page refresh/close</sys:String>
     <sys:String x:Key="settingItem_enableProxy">Enable proxy</sys:String>
+    <sys:String x:Key="settingItem_enableCustomUserAgent">Custom UserAgent</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp version</sys:String>
     <sys:String x:Key="setting_server">Server</sys:String>
     <sys:String x:Key="setting_username">User Name</sys:String>

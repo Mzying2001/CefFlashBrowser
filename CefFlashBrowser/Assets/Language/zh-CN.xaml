@@ -33,6 +33,7 @@
     <sys:String x:Key="settingItem_openNewPage">打开新页面方式</sys:String>
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">阻止网页刷新/关闭时的弹窗</sys:String>
     <sys:String x:Key="settingItem_enableProxy">使用代理</sys:String>
+    <sys:String x:Key="settingItem_enableCustomUserAgent">自定义UserAgent</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
     <sys:String x:Key="setting_server">服务器</sys:String>
     <sys:String x:Key="setting_username">用户名</sys:String>

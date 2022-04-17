@@ -33,6 +33,7 @@
     <sys:String x:Key="settingItem_openNewPage">打開新頁面管道</sys:String>
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">禁用網頁重繪/關閉時的彈窗</sys:String>
     <sys:String x:Key="settingItem_enableProxy">使用代理</sys:String>
+    <sys:String x:Key="settingItem_enableCustomUserAgent">自定義UserAgent</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
     <sys:String x:Key="setting_server">伺服器</sys:String>
     <sys:String x:Key="setting_username">用戶名</sys:String>

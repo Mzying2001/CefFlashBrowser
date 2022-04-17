@@ -11,6 +11,7 @@
         public WindowSizeInfo BrowserWindowSizeInfo { get; set; }
         public WindowSizeInfo SwfWindowSizeInfo { get; set; }
         public ProxySettings ProxySettings { get; set; }
+        public UserAgentSetting UserAgentSetting { get; set; }
 
 
 
@@ -24,7 +25,8 @@
             DisableOnBeforeUnloadDialog = false,
             BrowserWindowSizeInfo = null,
             SwfWindowSizeInfo = null,
-            ProxySettings = null
+            ProxySettings = null,
+            UserAgentSetting = null
         };
     }
 }

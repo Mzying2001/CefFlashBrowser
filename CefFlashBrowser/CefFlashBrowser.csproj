@@ -274,6 +274,7 @@
     <Compile Include="FlashBrowser\WfChromiumWebBrowser.cs" />
     <Compile Include="Models\AppInfo.cs" />
     <Compile Include="Models\ProxySettings.cs" />
+    <Compile Include="Models\UserAgentSetting.cs" />
     <Compile Include="Utils\Converters\IsCurrentLanguage.cs" />
     <Compile Include="Utils\Converters\LanguageCodeToName.cs" />
     <Compile Include="Utils\Converters\MultiValueConverterBase.cs" />

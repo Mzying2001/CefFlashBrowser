@@ -19,6 +19,26 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand PopupAboutCefCommand { get; set; }
         public DelegateCommand SetNewPageBehaviorCommand { get; set; }
 
+        public bool EnableCustomUserAgent
+        {
+            get => GlobalData.Settings.UserAgentSetting.EnableCustom;
+            set
+            {
+                GlobalData.Settings.UserAgentSetting.EnableCustom = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string UserAgent
+        {
+            get => GlobalData.Settings.UserAgentSetting.UserAgent;
+            set
+            {
+                GlobalData.Settings.UserAgentSetting.UserAgent = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public bool EnableProxy
         {
             get => GlobalData.Settings.ProxySettings.EnableProxy;
@@ -141,6 +161,9 @@ namespace CefFlashBrowser.ViewModels
         {
             if (GlobalData.Settings.ProxySettings == null)
                 GlobalData.Settings.ProxySettings = new ProxySettings();
+
+            if (GlobalData.Settings.UserAgentSetting == null)
+                GlobalData.Settings.UserAgentSetting = new UserAgentSetting();
 
             SetNavigationTypeCommand = new DelegateCommand<NavigationType>(SetNavigationType);
             SetSearchEngineCommand = new DelegateCommand<SearchEngine>(SetSearchEngine);
