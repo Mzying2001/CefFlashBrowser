@@ -25,16 +25,25 @@
     <sys:String x:Key="settingHeader_addressBar">地址栏和搜索</sys:String>
     <sys:String x:Key="settingHeader_browserData">浏览器缓存</sys:String>
     <sys:String x:Key="settingHeader_websiteBehavior">网站行为</sys:String>
+    <sys:String x:Key="settingHeader_advanced">高级</sys:String>
     <sys:String x:Key="settingHeader_aboutCef">关于 CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">在地址栏中使用搜索引擎</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜索引擎</sys:String>
     <sys:String x:Key="settingItem_deleteCache">清除所有缓存</sys:String>
     <sys:String x:Key="settingItem_openNewPage">打开新页面方式</sys:String>
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">阻止网页刷新/关闭时的弹窗</sys:String>
+    <sys:String x:Key="settingItem_enableProxy">使用代理</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
+    <sys:String x:Key="setting_server">服务器</sys:String>
+    <sys:String x:Key="setting_username">用户名</sys:String>
+    <sys:String x:Key="setting_password">密码</sys:String>
     <sys:String x:Key="button_deleteCache">清除</sys:String>
     <sys:String x:Key="button_viewDetails">详情</sys:String>
     <sys:String x:Key="message_deleteCache">确定要清除所有缓存吗？浏览器将会重启。</sys:String>
+    <sys:String x:Key="tips_needRestar">此部分设置将在程序重启后生效。</sys:String>
+    <sys:String x:Key="placeholder_ip">IP</sys:String>
+    <sys:String x:Key="placeholder_port">端口</sys:String>
+    <sys:String x:Key="placeholder_optional">（可选）</sys:String>
 
     <!--主界面导航栏-->
     <sys:String x:Key="navigationType_auto">自动</sys:String>

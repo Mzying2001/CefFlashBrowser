@@ -10,6 +10,7 @@
         public bool DisableOnBeforeUnloadDialog { get; set; }
         public WindowSizeInfo BrowserWindowSizeInfo { get; set; }
         public WindowSizeInfo SwfWindowSizeInfo { get; set; }
+        public ProxySettings ProxySettings { get; set; }
 
 
 
@@ -22,7 +23,8 @@
             NewPageBehavior = NewPageBehavior.OriginalWindow,
             DisableOnBeforeUnloadDialog = false,
             BrowserWindowSizeInfo = null,
-            SwfWindowSizeInfo = null
+            SwfWindowSizeInfo = null,
+            ProxySettings = null
         };
     }
 }

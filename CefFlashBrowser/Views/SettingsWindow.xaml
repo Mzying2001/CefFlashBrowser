@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         
         Width="450"
@@ -144,6 +145,92 @@
                                           Style="{StaticResource ToggleButtonSwitch}"/>
                             </c:SettingItem.Content>
                         </c:SettingItem>
+
+                        <TextBlock Text="{StaticResource settingHeader_advanced}"
+                                   Style="{StaticResource SettingHeaderStyle}"/>
+
+                        <c:SettingItem>
+                            <c:SettingItem.Description>
+                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
+                                           Text="{StaticResource settingItem_enableProxy}"/>
+                            </c:SettingItem.Description>
+                            <c:SettingItem.Content>
+                                <CheckBox Margin="5,0"
+                                          IsChecked="{Binding EnableProxy}"
+                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                            </c:SettingItem.Content>
+                        </c:SettingItem>
+
+                        <Border Margin="5"
+                                Background="White"
+                                Effect="{StaticResource EffectShadow1}"
+                                Visibility="{Binding EnableProxy, Converter={StaticResource Boolean2VisibilityConverter}}">
+                            <Grid Margin="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment"
+                                                Value="Center"/>
+                                        <Setter Property="Margin"
+                                                Value="5"/>
+                                    </Style>
+                                </Grid.Resources>
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="0"
+                                           Text="{StaticResource setting_server}"/>
+                                <Grid Grid.Row="0"
+                                      Grid.Column="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <hc:TextBox Grid.Column="0"
+                                                Margin="5"
+                                                Text="{Binding ProxyIP, UpdateSourceTrigger=PropertyChanged}"
+                                                hc:InfoElement.Placeholder="{StaticResource placeholder_ip}"/>
+                                    <TextBlock Grid.Column="1"
+                                               Text=":"/>
+                                    <hc:TextBox Grid.Column="2"
+                                                Margin="5"
+                                                Width="70"
+                                                Text="{Binding ProxyPort, UpdateSourceTrigger=PropertyChanged}"
+                                                hc:InfoElement.Placeholder="{StaticResource placeholder_port}"/>
+                                </Grid>
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="0"
+                                           Text="{StaticResource setting_username}"/>
+                                <hc:TextBox Grid.Row="1"
+                                            Grid.Column="2"
+                                            Margin="5"
+                                            Text="{Binding ProxyUserName, UpdateSourceTrigger=PropertyChanged}"
+                                            hc:InfoElement.Placeholder="{StaticResource placeholder_optional}"/>
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="0"
+                                           Text="{StaticResource setting_password}"/>
+                                <hc:TextBox Grid.Row="2"
+                                            Grid.Column="2"
+                                            Margin="5"
+                                            Text="{Binding ProxyPassword, UpdateSourceTrigger=PropertyChanged}"
+                                            hc:InfoElement.Placeholder="{StaticResource placeholder_optional}"/>
+                                <Grid Grid.Row="3"
+                                      Grid.ColumnSpan="2"
+                                      Margin="0,10,0,0">
+                                    <TextBlock Text="{StaticResource tips_needRestar}"
+                                               TextWrapping="Wrap"
+                                               Foreground="Gray"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
 
                         <TextBlock Text="{StaticResource settingHeader_aboutCef}"
                                    Style="{StaticResource SettingHeaderStyle}"/>

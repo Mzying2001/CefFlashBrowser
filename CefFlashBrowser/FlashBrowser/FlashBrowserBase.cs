@@ -62,6 +62,13 @@ namespace CefFlashBrowser.FlashBrowser
             settings.CefCommandLineArgs["enable-system-flash"] = "1";
             settings.CefCommandLineArgs.Add("ppapi-flash-version", "99.0.0.999");
             settings.CefCommandLineArgs.Add("ppapi-flash-path", FlashPath);
+
+            if (GlobalData.Settings.ProxySettings?.EnableProxy ?? false)
+            {
+                var proxySettings = GlobalData.Settings.ProxySettings;
+                CefSharpSettings.Proxy = new ProxyOptions(proxySettings.IP, proxySettings.Port, proxySettings.UserName, proxySettings.Password);
+            }
+
             Cef.Initialize(settings);
         }
     }

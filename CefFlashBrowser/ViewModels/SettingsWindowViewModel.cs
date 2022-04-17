@@ -19,6 +19,56 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand PopupAboutCefCommand { get; set; }
         public DelegateCommand SetNewPageBehaviorCommand { get; set; }
 
+        public bool EnableProxy
+        {
+            get => GlobalData.Settings.ProxySettings.EnableProxy;
+            set
+            {
+                GlobalData.Settings.ProxySettings.EnableProxy = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string ProxyIP
+        {
+            get => GlobalData.Settings.ProxySettings.IP;
+            set
+            {
+                GlobalData.Settings.ProxySettings.IP = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string ProxyPort
+        {
+            get => GlobalData.Settings.ProxySettings.Port;
+            set
+            {
+                GlobalData.Settings.ProxySettings.Port = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string ProxyUserName
+        {
+            get => GlobalData.Settings.ProxySettings.UserName;
+            set
+            {
+                GlobalData.Settings.ProxySettings.UserName = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string ProxyPassword
+        {
+            get => GlobalData.Settings.ProxySettings.Password;
+            set
+            {
+                GlobalData.Settings.ProxySettings.Password = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public bool DisableOnBeforeUnloadDialog
         {
             get => GlobalData.Settings.DisableOnBeforeUnloadDialog;
@@ -89,6 +139,9 @@ namespace CefFlashBrowser.ViewModels
 
         public SettingsWindowViewModel()
         {
+            if (GlobalData.Settings.ProxySettings == null)
+                GlobalData.Settings.ProxySettings = new ProxySettings();
+
             SetNavigationTypeCommand = new DelegateCommand<NavigationType>(SetNavigationType);
             SetSearchEngineCommand = new DelegateCommand<SearchEngine>(SetSearchEngine);
             DeleteCacheCommand = new DelegateCommand(DeleteCache);

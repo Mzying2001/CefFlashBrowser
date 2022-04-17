@@ -25,16 +25,25 @@
     <sys:String x:Key="settingHeader_addressBar">地址欄和搜尋</sys:String>
     <sys:String x:Key="settingHeader_browserData">瀏覽器緩存</sys:String>
     <sys:String x:Key="settingHeader_websiteBehavior">網站行為</sys:String>
+    <sys:String x:Key="settingHeader_advanced">高級</sys:String>
     <sys:String x:Key="settingHeader_aboutCef">關於 CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">在地址欄中使用搜尋引擎</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜尋引擎</sys:String>
     <sys:String x:Key="settingItem_deleteCache">清除所有緩存</sys:String>
     <sys:String x:Key="settingItem_openNewPage">打開新頁面管道</sys:String>
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">禁用網頁重繪/關閉時的彈窗</sys:String>
+    <sys:String x:Key="settingItem_enableProxy">使用代理</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
+    <sys:String x:Key="setting_server">伺服器</sys:String>
+    <sys:String x:Key="setting_username">用戶名</sys:String>
+    <sys:String x:Key="setting_password">密碼</sys:String>
     <sys:String x:Key="button_deleteCache">清除</sys:String>
     <sys:String x:Key="button_viewDetails">詳情</sys:String>
     <sys:String x:Key="message_deleteCache">確定要清除所有緩存嗎？ 瀏覽器將會重啓。</sys:String>
+    <sys:String x:Key="tips_needRestar">此部分設定將在程式重啟後生效。</sys:String>
+    <sys:String x:Key="placeholder_ip">IP</sys:String>
+    <sys:String x:Key="placeholder_port">埠</sys:String>
+    <sys:String x:Key="placeholder_optional">（可選）</sys:String>
 
     <!--主介面的巡覽列-->
     <sys:String x:Key="navigationType_auto">自動</sys:String>
@@ -88,7 +97,7 @@
     <sys:String x:Key="menu_openInDefaultBrowser">在默認瀏覽器中打開</sys:String>
     <sys:String x:Key="menu_createShortcut">創建網頁快捷方式</sys:String>
     <sys:String x:Key="menu_addFavorite">添加此網站到我的最愛</sys:String>
-    <sys:String x:Key="menu_blockedSwfsTips">一些flash內容似乎被Chromium內核屏蔽，你可以在SWF播放器中播放它：</sys:String>
+    <sys:String x:Key="menu_blockedSwfsTips">一些flash內容似乎被Chromium內核遮罩，你可以在SWF播放機中播放它：</sys:String>
     <sys:String x:Key="toolTip_back">返回（Alt+向左鍵）</sys:String>
     <sys:String x:Key="toolTip_forward">前進（Alt+向右鍵）</sys:String>
     <sys:String x:Key="toolTip_reload">重繪（F5）</sys:String>
