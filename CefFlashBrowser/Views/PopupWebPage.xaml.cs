@@ -55,7 +55,7 @@ namespace CefFlashBrowser.Views
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!_doClose)
+            if (!browser.IsDisposed && !_doClose)
             {
                 bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
                 browser.GetBrowser().CloseBrowser(forceClose);

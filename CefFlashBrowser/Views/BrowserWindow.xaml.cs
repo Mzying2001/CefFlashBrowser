@@ -90,7 +90,7 @@ namespace CefFlashBrowser.Views
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (_doClose)
+            if (browser.IsDisposed || _doClose)
             {
                 browserWindow.WindowState = WindowState.Normal;
                 GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
