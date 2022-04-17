@@ -40,7 +40,9 @@
     <sys:String x:Key="setting_password">密碼</sys:String>
     <sys:String x:Key="button_deleteCache">清除</sys:String>
     <sys:String x:Key="button_viewDetails">詳情</sys:String>
+    <sys:String x:Key="button_restart">重啓</sys:String>
     <sys:String x:Key="message_deleteCache">確定要清除所有緩存嗎？ 瀏覽器將會重啓。</sys:String>
+    <sys:String x:Key="message_restart">是否要重啓程式？</sys:String>
     <sys:String x:Key="tips_needRestar">此部分設定將在程式重啟後生效。</sys:String>
     <sys:String x:Key="placeholder_ip">IP</sys:String>
     <sys:String x:Key="placeholder_port">埠</sys:String>

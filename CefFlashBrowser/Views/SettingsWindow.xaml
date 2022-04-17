@@ -227,7 +227,12 @@
                                       Margin="0,5,0,0">
                                     <TextBlock Text="{StaticResource tips_needRestar}"
                                                TextWrapping="Wrap"
-                                               Foreground="Gray"/>
+                                               Foreground="Gray">
+                                        <Run Text=" "/>
+                                        <Hyperlink Command="{Binding AskRestartAppCommand}">
+                                            <Run Text="{StaticResource button_restart}"/>
+                                        </Hyperlink>
+                                    </TextBlock>
                                 </Grid>
                             </Grid>
                         </Border>
@@ -266,13 +271,18 @@
                                          Grid.Column="1"
                                          Margin="5"
                                          Text="{Binding UserAgent, UpdateSourceTrigger=PropertyChanged}"/>
-                                <Grid Grid.Row="3"
+                                <Grid Grid.Row="1"
                                       Grid.ColumnSpan="2"
                                       Margin="0,5,0,0">
                                     <TextBlock Text="{StaticResource tips_needRestar}"
                                                Margin="5"
                                                TextWrapping="Wrap"
-                                               Foreground="Gray"/>
+                                               Foreground="Gray">
+                                        <Run Text=" "/>
+                                        <Hyperlink Command="{Binding AskRestartAppCommand}">
+                                            <Run Text="{StaticResource button_restart}"/>
+                                        </Hyperlink>
+                                    </TextBlock>
                                 </Grid>
                             </Grid>
                         </Border>

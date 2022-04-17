@@ -7,7 +7,6 @@ using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
-using System.Diagnostics;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -18,6 +17,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand DeleteCacheCommand { get; set; }
         public DelegateCommand PopupAboutCefCommand { get; set; }
         public DelegateCommand SetNewPageBehaviorCommand { get; set; }
+        public DelegateCommand AskRestartAppCommand { get; set; }
 
         public bool EnableCustomUserAgent
         {
@@ -116,7 +116,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void DeleteCache()
         {
-            JsConfirmDialog.ShowDialog(LanguageManager.GetString("message_deleteCache"), "", result =>
+            JsConfirmDialog.ShowDialog(LanguageManager.GetString("message_deleteCache"), callback: result =>
             {
                 if (result == true)
                 {
@@ -141,8 +141,7 @@ namespace CefFlashBrowser.ViewModels
                         }
                     }
 
-                    Process.Start(Process.GetCurrentProcess().MainModule.FileName);
-                    System.Windows.Application.Current.Shutdown();
+                    App.Restart();
                 }
             });
         }
@@ -155,6 +154,15 @@ namespace CefFlashBrowser.ViewModels
         private void SetNewPageBehavior(NewPageBehavior newPageBehavior)
         {
             GlobalData.Settings.NewPageBehavior = newPageBehavior;
+        }
+
+        private void AskRestartApp()
+        {
+            JsConfirmDialog.ShowDialog(LanguageManager.GetString("message_restart"), callback: result =>
+            {
+                if (result == true)
+                    App.Restart();
+            });
         }
 
         public SettingsWindowViewModel()
@@ -170,6 +178,7 @@ namespace CefFlashBrowser.ViewModels
             DeleteCacheCommand = new DelegateCommand(DeleteCache);
             PopupAboutCefCommand = new DelegateCommand(PopupAboutCef);
             SetNewPageBehaviorCommand = new DelegateCommand<NewPageBehavior>(SetNewPageBehavior);
+            AskRestartAppCommand = new DelegateCommand(AskRestartApp);
         }
     }
 }
