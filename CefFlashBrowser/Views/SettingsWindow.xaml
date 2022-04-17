@@ -14,7 +14,8 @@
         MinWidth="300"
         MinHeight="300"
         Title="{StaticResource menu_settings}"
-        DataContext="{Binding Source={StaticResource Locator}, Path=SettingsWindowViewModel}">
+        DataContext="{Binding Source={StaticResource Locator}, Path=SettingsWindowViewModel}"
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
 
@@ -170,7 +171,6 @@
                                     <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
-                                    <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -222,18 +222,6 @@
                                             Margin="5"
                                             Text="{Binding ProxyPassword, UpdateSourceTrigger=PropertyChanged}"
                                             hc:InfoElement.Placeholder="{StaticResource placeholder_optional}"/>
-                                <Grid Grid.Row="3"
-                                      Grid.ColumnSpan="2"
-                                      Margin="0,5,0,0">
-                                    <TextBlock Text="{StaticResource tips_needRestar}"
-                                               TextWrapping="Wrap"
-                                               Foreground="Gray">
-                                        <Run Text=" "/>
-                                        <Hyperlink Command="{Binding AskRestartAppCommand}">
-                                            <Run Text="{StaticResource button_restart}"/>
-                                        </Hyperlink>
-                                    </TextBlock>
-                                </Grid>
                             </Grid>
                         </Border>
 
@@ -254,38 +242,29 @@
                                 Effect="{StaticResource EffectShadow1}"
                                 Visibility="{Binding EnableCustomUserAgent, Converter={StaticResource Boolean2VisibilityConverter}}">
                             <Grid Margin="10">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Row="0"
-                                           Grid.Column="0"
+                                <TextBlock Grid.Column="0"
                                            Margin="5"
                                            Text="UserAgent"
                                            VerticalAlignment="Center"/>
-                                <TextBox Grid.Row="0"
-                                         Grid.Column="1"
+                                <TextBox Grid.Column="1"
                                          Margin="5"
                                          Text="{Binding UserAgent, UpdateSourceTrigger=PropertyChanged}"/>
-                                <Grid Grid.Row="1"
-                                      Grid.ColumnSpan="2"
-                                      Margin="0,5,0,0">
-                                    <TextBlock Text="{StaticResource tips_needRestar}"
-                                               Margin="5"
-                                               TextWrapping="Wrap"
-                                               Foreground="Gray">
-                                        <Run Text=" "/>
-                                        <Hyperlink Command="{Binding AskRestartAppCommand}">
-                                            <Run Text="{StaticResource button_restart}"/>
-                                        </Hyperlink>
-                                    </TextBlock>
-                                </Grid>
                             </Grid>
                         </Border>
+
+                        <TextBlock Margin="5,10"
+                                   Text="{StaticResource tips_needRestar}"
+                                   TextWrapping="Wrap"
+                                   Foreground="Gray">
+                            <Run Text=" "/>
+                            <Hyperlink Command="{Binding AskRestartAppCommand}">
+                                <Run Text="{StaticResource button_restart}"/>
+                            </Hyperlink>
+                        </TextBlock>
 
                         <TextBlock Text="{StaticResource settingHeader_aboutCef}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
