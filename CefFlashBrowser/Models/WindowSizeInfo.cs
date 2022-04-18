@@ -20,12 +20,15 @@ namespace CefFlashBrowser.Models
             };
         }
 
-        public void Apply(Window window)
+        public static void Apply(WindowSizeInfo windowSizeInfo, Window window)
         {
-            window.Left = Left;
-            window.Top = Top;
-            window.Width = Width;
-            window.Height = Height;
+            if (windowSizeInfo != null)
+            {
+                window.Left = windowSizeInfo.Left;
+                window.Top = windowSizeInfo.Top;
+                window.Width = windowSizeInfo.Width;
+                window.Height = windowSizeInfo.Height;
+            }
         }
     }
 }

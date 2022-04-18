@@ -25,9 +25,7 @@ namespace CefFlashBrowser.Views
         public SwfPlayerWindow()
         {
             InitializeComponent();
-
-            if (GlobalData.Settings.SwfWindowSizeInfo != null)
-                GlobalData.Settings.SwfWindowSizeInfo.Apply(this);
+            WindowSizeInfo.Apply(GlobalData.Settings.SwfWindowSizeInfo, this);
         }
 
         public SwfPlayerWindow(string fileName) : this()

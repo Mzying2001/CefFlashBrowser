@@ -19,9 +19,7 @@ namespace CefFlashBrowser.Views
         public BrowserWindow()
         {
             InitializeComponent();
-
-            if (GlobalData.Settings.BrowserWindowSizeInfo != null)
-                GlobalData.Settings.BrowserWindowSizeInfo.Apply(this);
+            WindowSizeInfo.Apply(GlobalData.Settings.BrowserWindowSizeInfo, this);
 
             browser.KeyboardHandler = new BrowserKeyboardHandler(browser);
         }
