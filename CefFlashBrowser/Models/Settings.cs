@@ -14,19 +14,22 @@
         public UserAgentSetting UserAgentSetting { get; set; }
 
 
+        public static Settings Default => new Settings();
 
-        public static Settings Default => new Settings
+
+        public Settings()
         {
-            FirstStart = true,
-            Language = "zh-CN",
-            SearchEngine = SearchEngine.Baidu,
-            NavigationType = NavigationType.Automatic,
-            NewPageBehavior = NewPageBehavior.OriginalWindow,
-            DisableOnBeforeUnloadDialog = false,
-            BrowserWindowSizeInfo = null,
-            SwfWindowSizeInfo = null,
-            ProxySettings = null,
-            UserAgentSetting = null
-        };
+            // default settings
+            FirstStart = true;
+            Language = "zh-CN";
+            SearchEngine = SearchEngine.Baidu;
+            NavigationType = NavigationType.Automatic;
+            NewPageBehavior = NewPageBehavior.OriginalWindow;
+            DisableOnBeforeUnloadDialog = false;
+            BrowserWindowSizeInfo = null;
+            SwfWindowSizeInfo = null;
+            ProxySettings = new ProxySettings();
+            UserAgentSetting = new UserAgentSetting();
+        }
     }
 }
