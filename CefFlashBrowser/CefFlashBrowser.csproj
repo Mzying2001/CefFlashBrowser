@@ -273,6 +273,7 @@
     <Compile Include="FlashBrowser\Handlers\ContextMenuHandlerBase.cs" />
     <Compile Include="FlashBrowser\WfChromiumWebBrowser.cs" />
     <Compile Include="Models\AppInfo.cs" />
+    <Compile Include="Models\FakeFlashVersionSetting.cs" />
     <Compile Include="Models\ProxySettings.cs" />
     <Compile Include="Models\UserAgentSetting.cs" />
     <Compile Include="Utils\Converters\IsCurrentLanguage.cs" />

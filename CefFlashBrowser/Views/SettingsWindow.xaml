@@ -51,6 +51,7 @@
                         <TextBlock Text="{StaticResource settingHeader_addressBar}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
+                        <!--navigation type-->
                         <c:SettingItem>
                             <c:SettingItem.Description>
                                 <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
@@ -71,6 +72,7 @@
                             </c:SettingItem.Content>
                         </c:SettingItem>
 
+                        <!--search engine-->
                         <c:SettingItem>
                             <c:SettingItem.Description>
                                 <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
@@ -100,6 +102,7 @@
                         <TextBlock Text="{StaticResource settingHeader_browserData}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
+                        <!--clear caches-->
                         <c:SettingItem>
                             <c:SettingItem.Description>
                                 <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
@@ -150,6 +153,7 @@
                         <TextBlock Text="{StaticResource settingHeader_advanced}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
+                        <!--proxy-->
                         <c:SettingItem>
                             <c:SettingItem.Description>
                                 <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
@@ -225,6 +229,7 @@
                             </Grid>
                         </Border>
 
+                        <!--useragent-->
                         <c:SettingItem>
                             <c:SettingItem.Description>
                                 <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
@@ -256,6 +261,38 @@
                             </Grid>
                         </Border>
 
+                        <!--fake flash version-->
+                        <c:SettingItem>
+                            <c:SettingItem.Description>
+                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
+                                           Text="{StaticResource settingItem_enableFakeFlashVersion}"/>
+                            </c:SettingItem.Description>
+                            <c:SettingItem.Content>
+                                <CheckBox Margin="5,0"
+                                          IsChecked="{Binding EnableFakeFlashVersion}"
+                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                            </c:SettingItem.Content>
+                        </c:SettingItem>
+
+                        <Border Margin="5"
+                                Background="White"
+                                Effect="{StaticResource EffectShadow1}"
+                                Visibility="{Binding EnableFakeFlashVersion, Converter={StaticResource Boolean2VisibilityConverter}}">
+                            <Grid Margin="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Margin="5"
+                                           Text="{StaticResource setting_flashVersion}"
+                                           VerticalAlignment="Center"/>
+                                <TextBox Grid.Column="1"
+                                         Margin="5"
+                                         Text="{Binding FakeFlashVersion, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </Border>
+
                         <TextBlock Margin="5,10"
                                    Text="{StaticResource tips_needRestar}"
                                    TextWrapping="Wrap"
@@ -269,6 +306,7 @@
                         <TextBlock Text="{StaticResource settingHeader_aboutCef}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
+                        <!--cefsharp version-->
                         <c:SettingItem>
                             <c:SettingItem.Description>
                                 <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"

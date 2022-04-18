@@ -19,6 +19,26 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand SetNewPageBehaviorCommand { get; set; }
         public DelegateCommand AskRestartAppCommand { get; set; }
 
+        public bool EnableFakeFlashVersion
+        {
+            get => GlobalData.Settings.FakeFlashVersionSetting.Enable;
+            set
+            {
+                GlobalData.Settings.FakeFlashVersionSetting.Enable = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string FakeFlashVersion
+        {
+            get => GlobalData.Settings.FakeFlashVersionSetting.FlashVersion;
+            set
+            {
+                GlobalData.Settings.FakeFlashVersionSetting.FlashVersion = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public bool EnableCustomUserAgent
         {
             get => GlobalData.Settings.UserAgentSetting.EnableCustom;

@@ -12,6 +12,7 @@
         public WindowSizeInfo SwfWindowSizeInfo { get; set; }
         public ProxySettings ProxySettings { get; set; }
         public UserAgentSetting UserAgentSetting { get; set; }
+        public FakeFlashVersionSetting FakeFlashVersionSetting { get; set; }
 
 
         public static Settings Default => new Settings();
@@ -30,6 +31,7 @@
             SwfWindowSizeInfo = null;
             ProxySettings = new ProxySettings();
             UserAgentSetting = new UserAgentSetting();
+            FakeFlashVersionSetting = new FakeFlashVersionSetting();
         }
     }
 }
