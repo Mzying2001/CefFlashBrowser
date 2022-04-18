@@ -167,12 +167,6 @@ namespace CefFlashBrowser.ViewModels
 
         public SettingsWindowViewModel()
         {
-            if (GlobalData.Settings.ProxySettings == null)
-                GlobalData.Settings.ProxySettings = new ProxySettings();
-
-            if (GlobalData.Settings.UserAgentSetting == null)
-                GlobalData.Settings.UserAgentSetting = new UserAgentSetting();
-
             SetNavigationTypeCommand = new DelegateCommand<NavigationType>(SetNavigationType);
             SetSearchEngineCommand = new DelegateCommand<SearchEngine>(SetSearchEngine);
             DeleteCacheCommand = new DelegateCommand(DeleteCache);
