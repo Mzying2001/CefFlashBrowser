@@ -181,6 +181,17 @@ namespace CefFlashBrowser.FlashBrowser
             set => SetValue(ZoomLevelIncrementProperty, value);
         }
 
+        IBrowserAdapter IWebBrowserInternal.BrowserAdapter
+        {
+            get => ((IWebBrowserInternal)browser).BrowserAdapter;
+        }
+
+        bool IWebBrowserInternal.HasParent
+        {
+            get => ((IWebBrowserInternal)browser).HasParent;
+            set => ((IWebBrowserInternal)browser).HasParent = value;
+        }
+
         public ICommand BackCommand { get; }
 
         public ICommand ForwardCommand { get; }
@@ -211,6 +222,7 @@ namespace CefFlashBrowser.FlashBrowser
 
         public ICommand RedoCommand { get; }
 
+
         public static readonly DependencyProperty CanGoBackProperty;
 
         public static readonly DependencyProperty CanGoForwardProperty;
@@ -228,14 +240,6 @@ namespace CefFlashBrowser.FlashBrowser
         public static readonly DependencyProperty ZoomLevelIncrementProperty;
 
         public static readonly DependencyProperty StatusTextProperty;
-
-        IBrowserAdapter IWebBrowserInternal.BrowserAdapter => ((IWebBrowserInternal)browser).BrowserAdapter;
-
-        bool IWebBrowserInternal.HasParent
-        {
-            get => ((IWebBrowserInternal)browser).HasParent;
-            set => ((IWebBrowserInternal)browser).HasParent = value;
-        }
 
 
 
@@ -390,7 +394,7 @@ namespace CefFlashBrowser.FlashBrowser
 
         void IWebBrowserInternal.OnAfterBrowserCreated(IBrowser browser)
         {
-            ((IWebBrowserInternal)browser).OnAfterBrowserCreated(browser);
+            ((IWebBrowserInternal)this.browser).OnAfterBrowserCreated(browser);
         }
 
         void IWebBrowserInternal.SetAddress(AddressChangedEventArgs args)
