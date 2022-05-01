@@ -101,7 +101,12 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
             wfChromiumWebBrowser.Dispatcher.Invoke(() =>
             {
-                var menu = new ContextMenu { IsOpen = true };
+                var menu = new ContextMenu
+                {
+                    IsOpen = true,
+                    VerticalOffset = -8,
+                    HorizontalOffset = -8,
+                };
 
                 RoutedEventHandler handler = null;
                 handler = (s, e) =>
