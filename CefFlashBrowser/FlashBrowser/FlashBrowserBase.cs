@@ -11,10 +11,10 @@ namespace CefFlashBrowser.FlashBrowser
 {
     public abstract class FlashBrowserBase : WfChromiumWebBrowser
     {
-        public static readonly string CachePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Caches\");
-        public static readonly string FlashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
-
-        private static readonly string EmptyExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"CefFlashBrowser.EmptyExe.exe");
+        private static readonly string BaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        private static readonly string EmptyExePath = Path.Combine(BaseDirectory, @"CefFlashBrowser.EmptyExe.exe");
+        public static readonly string CachePath = Path.Combine(BaseDirectory, @"Caches\");
+        public static readonly string FlashPath = Path.Combine(BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
 
         public FlashBrowserBase()
         {
