@@ -27,7 +27,7 @@
         }
 
         window.onload = function () {
-            let src = decodeURIComponent(getQueryVariable("src"));
+            let src = decodeURIComponent(getQueryVariable("src").replace(/\+/g, "%20"));
             let flash = document.createElement("embed");
             flash.id = "flash-player";
             flash.setAttribute("src", src);
