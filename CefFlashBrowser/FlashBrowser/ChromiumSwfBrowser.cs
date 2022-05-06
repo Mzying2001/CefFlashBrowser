@@ -7,25 +7,39 @@ namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumSwfBrowser : ChromiumFlashBrowser
     {
-
-
         public string FileName
         {
             get { return (string)GetValue(FileNameProperty); }
             set { SetValue(FileNameProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for FileName.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty FileNameProperty =
-            DependencyProperty.Register("FileName", typeof(string), typeof(ChromiumSwfBrowser), new PropertyMetadata(string.Empty, (d, e) =>
+        public static readonly DependencyProperty FileNameProperty;
+
+        private static void OnFileNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is IWebBrowser browser && e.NewValue is string fileName)
             {
-                if (d is IWebBrowser browser && e.NewValue is string fileName)
-                {
-                    browser.Load(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-                        $"Assets/Html/FlashPlayer.html?src={WebUtility.UrlEncode(fileName)}"));
-                }
-            }));
+                browser.Load(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                    $"Assets/swfplayer.html?src={WebUtility.UrlEncode(fileName)}"));
+            }
+        }
+
+        static ChromiumSwfBrowser()
+        {
+            FileNameProperty = DependencyProperty.Register("FileName", typeof(string), typeof(ChromiumSwfBrowser),
+                                                            new PropertyMetadata(string.Empty, OnFileNameChanged));
+        }
 
 
+
+        public new string Address
+        {
+            get => base.Address;
+        }
+
+        public new void Load(string fileName)
+        {
+            FileName = fileName;
+        }
     }
 }

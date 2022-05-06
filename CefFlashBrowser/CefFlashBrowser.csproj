@@ -465,7 +465,7 @@
     <Content Include="Assets\CefFlashBrowser.EmptyExe.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Html\FlashPlayer.html">
+    <Content Include="Assets\swfplayer.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Plugins\pepflashplayer.dll">
