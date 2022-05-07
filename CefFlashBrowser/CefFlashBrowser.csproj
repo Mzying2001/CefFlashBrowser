@@ -271,7 +271,6 @@
     </ApplicationDefinition>
     <Compile Include="FlashBrowser\Handlers\BrowserKeyboardHandler.cs" />
     <Compile Include="FlashBrowser\Handlers\ContextMenuHandlerBase.cs" />
-    <Compile Include="FlashBrowser\WfChromiumWebBrowser.cs" />
     <Compile Include="Models\AppInfo.cs" />
     <Compile Include="Models\FakeFlashVersionSetting.cs" />
     <Compile Include="Models\ProxySettings.cs" />
@@ -506,7 +505,12 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj">
+      <Project>{e5af3e66-fcd3-4434-8159-f572bc04918c}</Project>
+      <Name>CefFlashBrowser.WinformCefSharp4WPF</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

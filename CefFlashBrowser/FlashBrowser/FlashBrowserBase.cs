@@ -1,15 +1,15 @@
 ﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
-using CefSharp.WinForms;
 using System;
 using System.Diagnostics;
 using System.IO;
 
 namespace CefFlashBrowser.FlashBrowser
 {
-    public abstract class FlashBrowserBase : WfChromiumWebBrowser
+    public abstract class FlashBrowserBase : ChromiumWebBrowser
     {
         private static readonly string BaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
         private static readonly string EmptyExePath = Path.Combine(BaseDirectory, @"CefFlashBrowser.EmptyExe.exe");

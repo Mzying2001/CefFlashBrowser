@@ -6,9 +6,9 @@ using System.Windows;
 using System.Windows.Forms.Integration;
 using System.Windows.Input;
 
-namespace CefFlashBrowser.FlashBrowser
+namespace CefFlashBrowser.WinformCefSharp4WPF
 {
-    public class WfChromiumWebBrowser : WindowsFormsHost, IWebBrowserInternal, IWebBrowser, IDisposable
+    public class ChromiumWebBrowser : WindowsFormsHost, IWebBrowserInternal, IWebBrowser, IWpfWebBrowser, IDisposable
     {
         protected CefSharp.WinForms.ChromiumWebBrowser browser;
 
@@ -255,32 +255,32 @@ namespace CefFlashBrowser.FlashBrowser
 
 
 
-        static WfChromiumWebBrowser()
+        static ChromiumWebBrowser()
         {
-            CanGoBackProperty = DependencyProperty.Register("CanGoBack", typeof(bool), typeof(WfChromiumWebBrowser));
+            CanGoBackProperty = DependencyProperty.Register("CanGoBack", typeof(bool), typeof(ChromiumWebBrowser));
 
-            CanGoForwardProperty = DependencyProperty.Register("CanGoForward", typeof(bool), typeof(WfChromiumWebBrowser));
+            CanGoForwardProperty = DependencyProperty.Register("CanGoForward", typeof(bool), typeof(ChromiumWebBrowser));
 
-            AddressProperty = DependencyProperty.Register("Address", typeof(string), typeof(WfChromiumWebBrowser), new UIPropertyMetadata(null));
+            AddressProperty = DependencyProperty.Register("Address", typeof(string), typeof(ChromiumWebBrowser), new UIPropertyMetadata(null));
 
-            IsLoadingProperty = DependencyProperty.Register("IsLoading", typeof(bool), typeof(WfChromiumWebBrowser), new PropertyMetadata(false));
+            IsLoadingProperty = DependencyProperty.Register("IsLoading", typeof(bool), typeof(ChromiumWebBrowser), new PropertyMetadata(false));
 
-            IsBrowserInitializedProperty = DependencyProperty.Register("IsBrowserInitialized", typeof(bool), typeof(WfChromiumWebBrowser), new PropertyMetadata(false));
+            IsBrowserInitializedProperty = DependencyProperty.Register("IsBrowserInitialized", typeof(bool), typeof(ChromiumWebBrowser), new PropertyMetadata(false));
 
-            TitleProperty = DependencyProperty.Register("Title", typeof(string), typeof(WfChromiumWebBrowser), new PropertyMetadata(null));
+            TitleProperty = DependencyProperty.Register("Title", typeof(string), typeof(ChromiumWebBrowser), new PropertyMetadata(null));
 
-            ZoomLevelProperty = DependencyProperty.Register("ZoomLevel", typeof(double), typeof(WfChromiumWebBrowser), new UIPropertyMetadata(0.0, (s, e) =>
+            ZoomLevelProperty = DependencyProperty.Register("ZoomLevel", typeof(double), typeof(ChromiumWebBrowser), new UIPropertyMetadata(0.0, (s, e) =>
             {
-                WfChromiumWebBrowser wfChromiumWebBrowser = (WfChromiumWebBrowser)s;
-                wfChromiumWebBrowser.browser.SetZoomLevel((double)e.NewValue);
+                ChromiumWebBrowser chromiumWebBrowser = (ChromiumWebBrowser)s;
+                chromiumWebBrowser.browser.SetZoomLevel((double)e.NewValue);
             }));
 
-            ZoomLevelIncrementProperty = DependencyProperty.Register("ZoomLevelIncrement", typeof(double), typeof(WfChromiumWebBrowser), new PropertyMetadata(0.1));
+            ZoomLevelIncrementProperty = DependencyProperty.Register("ZoomLevelIncrement", typeof(double), typeof(ChromiumWebBrowser), new PropertyMetadata(0.1));
 
-            StatusTextProperty = DependencyProperty.Register("StatusText", typeof(string), typeof(WfChromiumWebBrowser), new PropertyMetadata(null));
+            StatusTextProperty = DependencyProperty.Register("StatusText", typeof(string), typeof(ChromiumWebBrowser), new PropertyMetadata(null));
         }
 
-        public WfChromiumWebBrowser()
+        public ChromiumWebBrowser()
         {
             Child = browser = new CefSharp.WinForms.ChromiumWebBrowser();
 

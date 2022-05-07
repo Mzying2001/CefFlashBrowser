@@ -43,7 +43,7 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                if (browser is FlashBrowser.WfChromiumWebBrowser b)
+                if (browser is WinformCefSharp4WPF.ChromiumWebBrowser b)
                 {
                     return b.Title;
                 }

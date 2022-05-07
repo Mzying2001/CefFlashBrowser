@@ -1,8 +1,8 @@
 ﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
-using CefSharp.WinForms;
 using SimpleMvvm.Command;
 using System;
 using System.Linq;
@@ -16,11 +16,11 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
 
-        private readonly WfChromiumWebBrowser wfChromiumWebBrowser;
+        private readonly ChromiumWebBrowser chromiumWebBrowser;
 
-        public ContextMenuHandler(WfChromiumWebBrowser wfChromiumWebBrowser)
+        public ContextMenuHandler(ChromiumWebBrowser chromiumWebBrowser)
         {
-            this.wfChromiumWebBrowser = wfChromiumWebBrowser;
+            this.chromiumWebBrowser = chromiumWebBrowser;
         }
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
@@ -46,7 +46,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
         public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
         {
-            var webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
+            var webBrowser = (CefSharp.WinForms.ChromiumWebBrowser)chromiumWebBrowser;
 
             var linkUrl = parameters.LinkUrl;
             var selectionText = parameters.SelectionText;
@@ -86,9 +86,9 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
         public override void OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
         {
-            wfChromiumWebBrowser.Dispatcher.Invoke(() =>
+            this.chromiumWebBrowser.Dispatcher.Invoke(() =>
             {
-                wfChromiumWebBrowser.ContextMenu = null;
+                this.chromiumWebBrowser.ContextMenu = null;
             });
         }
 
@@ -99,7 +99,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             var linkUrl = parameters.LinkUrl;
             var selectionText = parameters.SelectionText;
 
-            wfChromiumWebBrowser.Dispatcher.Invoke(() =>
+            this.chromiumWebBrowser.Dispatcher.Invoke(() =>
             {
                 var menu = new ContextMenu
                 {
@@ -109,7 +109,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                 };
 
                 RoutedEventHandler handler = null;
-                handler = (s, e) =>
+                handler = (object s, RoutedEventArgs e) =>
                 {
                     menu.Closed -= handler;
                     if (!callback.IsDisposed)
@@ -233,7 +233,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                     });
                 }
 
-                wfChromiumWebBrowser.ContextMenu = menu;
+                this.chromiumWebBrowser.ContextMenu = menu;
             });
 
             return true;

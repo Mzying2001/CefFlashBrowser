@@ -1,18 +1,18 @@
 ﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
-using CefSharp.WinForms;
 
 namespace CefFlashBrowser.FlashBrowser.Handlers
 {
     public class JsDialogHandler : IJsDialogHandler
     {
-        private readonly WfChromiumWebBrowser wfChromiumWebBrowser;
+        private readonly ChromiumWebBrowser chromiumWebBrowser;
 
-        public JsDialogHandler(WfChromiumWebBrowser wfChromiumWebBrowser)
+        public JsDialogHandler(ChromiumWebBrowser chromiumWebBrowser)
         {
-            this.wfChromiumWebBrowser = wfChromiumWebBrowser;
+            this.chromiumWebBrowser = chromiumWebBrowser;
         }
 
         public bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
@@ -23,7 +23,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                 return true;
             }
 
-            wfChromiumWebBrowser.Dispatcher.Invoke(() =>
+            this.chromiumWebBrowser.Dispatcher.Invoke(() =>
             {
                 var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
                 JsConfirmDialog.ShowDialog(messageText, title, result =>
@@ -47,9 +47,9 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             {
                 case CefJsDialogType.Alert:
                     {
-                        wfChromiumWebBrowser.Dispatcher.Invoke(() =>
+                        this.chromiumWebBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsAlertDialog.ShowDialog(messageText, wfChromiumWebBrowser.Title);
+                            JsAlertDialog.ShowDialog(messageText, this.chromiumWebBrowser.Title);
                         });
                         suppressMessage = true;
                         return false;
@@ -57,9 +57,9 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
                 case CefJsDialogType.Confirm:
                     {
-                        wfChromiumWebBrowser.Dispatcher.Invoke(() =>
+                        this.chromiumWebBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsConfirmDialog.ShowDialog(messageText, wfChromiumWebBrowser.Title, result =>
+                            JsConfirmDialog.ShowDialog(messageText, this.chromiumWebBrowser.Title, result =>
                             {
                                 callback.Continue(result == true);
                             });
@@ -70,9 +70,9 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
                 case CefJsDialogType.Prompt:
                     {
-                        wfChromiumWebBrowser.Dispatcher.Invoke(() =>
+                        this.chromiumWebBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsPromptDialog.ShowDialog(messageText, wfChromiumWebBrowser.Title, defaultPromptText, result =>
+                            JsPromptDialog.ShowDialog(messageText, this.chromiumWebBrowser.Title, defaultPromptText, result =>
                             {
                                 callback.Continue(result != null, result);
                             });
