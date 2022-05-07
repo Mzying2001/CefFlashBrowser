@@ -272,6 +272,7 @@
     <Compile Include="FlashBrowser\Handlers\BrowserKeyboardHandler.cs" />
     <Compile Include="FlashBrowser\Handlers\ContextMenuHandlerBase.cs" />
     <Compile Include="Models\AppInfo.cs" />
+    <Compile Include="Models\CefMenuItemInfo.cs" />
     <Compile Include="Models\FakeFlashVersionSetting.cs" />
     <Compile Include="Models\ProxySettings.cs" />
     <Compile Include="Models\UserAgentSetting.cs" />

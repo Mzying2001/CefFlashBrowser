@@ -1,4 +1,5 @@
-﻿using CefSharp;
+﻿using CefFlashBrowser.Models;
+using CefSharp;
 using System.Collections.Generic;
 
 namespace CefFlashBrowser.FlashBrowser.Handlers
@@ -43,15 +44,28 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             return false;
         }
 
-        protected static IEnumerable<(int index, string header, CefMenuCommand commandId, bool isEnable)> GetMenuItems(IMenuModel model)
+        protected static IList<CefMenuItemInfo> GetMenuItemInfoList(IMenuModel model)
         {
+            if (model == null)
+            {
+                return null;
+            }
+
+            List<CefMenuItemInfo> list = new List<CefMenuItemInfo>();
+
             for (var i = 0; i < model.Count; i++)
             {
-                var header = model.GetLabelAt(i);
-                var commandId = model.GetCommandIdAt(i);
-                var isEnabled = model.IsEnabledAt(i);
-                yield return (i, header, commandId, isEnabled);
+                list.Add(new CefMenuItemInfo
+                {
+                    Header = model.GetLabelAt(i),
+                    IsEnable = model.IsEnabledAt(i),
+                    IsChecked = model.IsCheckedAt(i),
+                    CommandID = model.GetCommandIdAt(i),
+                    SubMenuItemInfos = GetMenuItemInfoList(model.GetSubMenuAt(i))
+                });
             }
+
+            return list;
         }
     }
 }
