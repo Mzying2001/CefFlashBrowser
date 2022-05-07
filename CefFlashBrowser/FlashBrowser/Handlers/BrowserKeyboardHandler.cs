@@ -8,13 +8,13 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 {
     public class BrowserKeyboardHandler : IKeyboardHandler
     {
-        private readonly ChromiumWebBrowser chromiumWebBrowser;
+        private readonly ChromiumWebBrowser webBrowser;
 
         private readonly BrowserWindowViewModel viewModel;
 
         public BrowserKeyboardHandler(ChromiumWebBrowser chromiumWebBrowser)
         {
-            this.chromiumWebBrowser = chromiumWebBrowser;
+            webBrowser = chromiumWebBrowser;
             viewModel = ((ViewModelLocator)Application.Current.Resources["Locator"]).BrowserWindowViewModel;
         }
 
@@ -55,23 +55,23 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                 {
                     case '0': //Ctrl+0
                         {
-                            this.chromiumWebBrowser.Dispatcher.Invoke(() =>
+                            webBrowser.Dispatcher.Invoke(() =>
                             {
-                                this.chromiumWebBrowser.ZoomReset();
+                                webBrowser.ZoomReset();
                             });
                             return true;
                         }
                     case 'D': //Ctrl+D
                         {
-                            this.chromiumWebBrowser.Dispatcher.Invoke(() =>
+                            webBrowser.Dispatcher.Invoke(() =>
                             {
-                                viewModel.AddFavorite(this.chromiumWebBrowser);
+                                viewModel.AddFavorite(webBrowser);
                             });
                             return true;
                         }
                     case 'M': //Ctrl+M
                         {
-                            this.chromiumWebBrowser.Dispatcher.Invoke(() =>
+                            webBrowser.Dispatcher.Invoke(() =>
                             {
                                 viewModel.ShowMainWindow();
                             });
@@ -94,9 +94,9 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                         }
                     case 'S': //Ctrl+S
                         {
-                            this.chromiumWebBrowser.Dispatcher.Invoke(() =>
+                            webBrowser.Dispatcher.Invoke(() =>
                             {
-                                viewModel.CreateShortcut(this.chromiumWebBrowser);
+                                viewModel.CreateShortcut(webBrowser);
                             });
                             return true;
                         }

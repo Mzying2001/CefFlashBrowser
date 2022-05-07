@@ -4,7 +4,6 @@ using CefFlashBrowser.Views;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
-using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,11 +15,11 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
 
-        private readonly ChromiumWebBrowser chromiumWebBrowser;
+        private readonly ChromiumWebBrowser webBrowser;
 
         public ContextMenuHandler(ChromiumWebBrowser chromiumWebBrowser)
         {
-            this.chromiumWebBrowser = chromiumWebBrowser;
+            webBrowser = chromiumWebBrowser;
         }
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
@@ -46,8 +45,6 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
         public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
         {
-            var webBrowser = (CefSharp.WinForms.ChromiumWebBrowser)chromiumWebBrowser;
-
             var linkUrl = parameters.LinkUrl;
             var selectionText = parameters.SelectionText;
 
@@ -55,26 +52,26 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             {
                 case CefMenuCommand.ViewSource:
                     {
-                        webBrowser.Invoke(new Action(() =>
+                        webBrowser.Dispatcher.Invoke(delegate
                         {
                             ViewSourceWindow.Show(webBrowser.Address);
-                        }));
+                        });
                         return true;
                     }
                 case Search:
                     {
-                        webBrowser.Invoke(new Action(() =>
+                        webBrowser.Dispatcher.Invoke(delegate
                         {
                             BrowserWindow.Show(SearchEngineUtil.GetUrl(selectionText, GlobalData.Settings.SearchEngine));
-                        }));
+                        });
                         return true;
                     }
                 case OpenInNewWindow:
                     {
-                        webBrowser.Invoke(new Action(() =>
+                        webBrowser.Dispatcher.Invoke(delegate
                         {
                             BrowserWindow.Show(linkUrl);
-                        }));
+                        });
                         return true;
                     }
                 default:
@@ -86,9 +83,9 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
         public override void OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
         {
-            this.chromiumWebBrowser.Dispatcher.Invoke(() =>
+            webBrowser.Dispatcher.Invoke(() =>
             {
-                this.chromiumWebBrowser.ContextMenu = null;
+                webBrowser.ContextMenu = null;
             });
         }
 
@@ -99,7 +96,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             var linkUrl = parameters.LinkUrl;
             var selectionText = parameters.SelectionText;
 
-            this.chromiumWebBrowser.Dispatcher.Invoke(() =>
+            webBrowser.Dispatcher.Invoke(() =>
             {
                 var menu = new ContextMenu
                 {
@@ -233,7 +230,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                     });
                 }
 
-                this.chromiumWebBrowser.ContextMenu = menu;
+                webBrowser.ContextMenu = menu;
             });
 
             return true;
