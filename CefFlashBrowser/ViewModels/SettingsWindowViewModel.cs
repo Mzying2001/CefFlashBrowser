@@ -1,5 +1,4 @@
-﻿using CefFlashBrowser.FlashBrowser;
-using CefFlashBrowser.Models;
+﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views;
@@ -145,7 +144,7 @@ namespace CefFlashBrowser.ViewModels
                         try
                         {
                             CefSharp.Cef.Shutdown();
-                            DeleteDirectory(FlashBrowserBase.CachePath);
+                            DeleteDirectory(App.CachePath);
                             break;
                         }
                         catch (Exception e)

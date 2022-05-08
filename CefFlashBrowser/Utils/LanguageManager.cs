@@ -67,9 +67,12 @@ namespace CefFlashBrowser.Utils
             return Application.Current.Resources.MergedDictionaries[0][key].ToString();
         }
 
-        public static void InitLanguage()
+
+
+        static LanguageManager()
         {
             CurrentLanguage = GlobalData.Settings.Language;
         }
+
     }
 }

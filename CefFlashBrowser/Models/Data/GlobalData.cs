@@ -18,12 +18,16 @@ namespace CefFlashBrowser.Models.Data
             DataPath = Path.Combine(DocumentPath, "CefFlashBrowser");
             FavoritesPath = Path.Combine(DataPath, "Favorites.json");
             SettingsPath = Path.Combine(DataPath, "Settings.json");
+
+            InitData();
         }
 
         public static void InitData()
         {
             if (!Directory.Exists(DataPath))
+            {
                 Directory.CreateDirectory(DataPath);
+            }
 
             InitFavorites();
             InitSettings();
