@@ -60,15 +60,16 @@ namespace CefFlashBrowser.FlashBrowser
 #endif
 
             settings.CefCommandLineArgs["enable-system-flash"] = "1";
-            settings.CefCommandLineArgs.Add("ppapi-flash-path", FlashPath);
+            settings.CefCommandLineArgs["ppapi-flash-path"] = FlashPath;
+            settings.CefCommandLineArgs["autoplay-policy"] = "no-user-gesture-required";
 
             if (GlobalData.Settings.FakeFlashVersionSetting.Enable)
             {
-                settings.CefCommandLineArgs.Add("ppapi-flash-version", GlobalData.Settings.FakeFlashVersionSetting.FlashVersion);
+                settings.CefCommandLineArgs["ppapi-flash-version"] = GlobalData.Settings.FakeFlashVersionSetting.FlashVersion;
             }
             else
             {
-                settings.CefCommandLineArgs.Add("ppapi-flash-version", FileVersionInfo.GetVersionInfo(FlashPath).FileVersion.Replace(',', '.'));
+                settings.CefCommandLineArgs["ppapi-flash-version"] = FileVersionInfo.GetVersionInfo(FlashPath).FileVersion.Replace(',', '.');
             }
 
             if (GlobalData.Settings.UserAgentSetting.EnableCustom)
