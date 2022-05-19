@@ -8,13 +8,6 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 {
     public class JsDialogHandler : IJsDialogHandler
     {
-        private readonly ChromiumWebBrowser webBrowser;
-
-        public JsDialogHandler(ChromiumWebBrowser chromiumWebBrowser)
-        {
-            webBrowser = chromiumWebBrowser;
-        }
-
         public bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
         {
             if (GlobalData.Settings.DisableOnBeforeUnloadDialog)
@@ -22,6 +15,8 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                 callback.Continue(true);
                 return true;
             }
+
+            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
 
             webBrowser.Dispatcher.Invoke(() =>
             {
@@ -41,6 +36,8 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
         public bool OnJSDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, CefJsDialogType dialogType, string messageText, string defaultPromptText, IJsDialogCallback callback, ref bool suppressMessage)
         {
+            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
+
             switch (dialogType)
             {
                 case CefJsDialogType.Alert:

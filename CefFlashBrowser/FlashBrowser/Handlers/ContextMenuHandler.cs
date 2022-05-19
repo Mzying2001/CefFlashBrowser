@@ -16,13 +16,6 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
 
-        private readonly ChromiumWebBrowser webBrowser;
-
-        public ContextMenuHandler(ChromiumWebBrowser chromiumWebBrowser)
-        {
-            webBrowser = chromiumWebBrowser;
-        }
-
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
             int count = 0;
@@ -53,6 +46,8 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
         {
             var linkUrl = parameters.LinkUrl;
             var selectionText = parameters.SelectionText;
+
+            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
 
             switch (commandId)
             {
@@ -89,6 +84,8 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
         public override void OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
         {
+            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
+
             webBrowser.Dispatcher.Invoke(() =>
             {
                 webBrowser.ContextMenu = null;
@@ -98,6 +95,8 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
         public override bool RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
         {
             var menuItemInfoList = GetMenuItemInfoList(model);
+
+            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
 
             webBrowser.Dispatcher.Invoke(() =>
             {

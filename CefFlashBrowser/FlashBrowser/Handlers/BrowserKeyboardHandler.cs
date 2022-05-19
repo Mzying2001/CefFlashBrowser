@@ -8,13 +8,10 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 {
     public class BrowserKeyboardHandler : IKeyboardHandler
     {
-        private readonly ChromiumWebBrowser webBrowser;
-
         private readonly BrowserWindowViewModel viewModel;
 
-        public BrowserKeyboardHandler(ChromiumWebBrowser chromiumWebBrowser)
+        public BrowserKeyboardHandler()
         {
-            webBrowser = chromiumWebBrowser;
             viewModel = ((ViewModelLocator)Application.Current.Resources["Locator"]).BrowserWindowViewModel;
         }
 
@@ -27,6 +24,8 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
         {
             if (type != KeyType.KeyUp)
                 return false;
+
+            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
 
             if (modifiers == CefEventFlags.None)
             {
