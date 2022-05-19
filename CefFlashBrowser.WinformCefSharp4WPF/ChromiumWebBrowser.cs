@@ -1,4 +1,5 @@
-﻿using CefSharp;
+﻿using CefFlashBrowser.WinformCefSharp4WPF.Internals;
+using CefSharp;
 using CefSharp.Internals;
 using SimpleMvvm.Command;
 using System;
@@ -29,88 +30,158 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             get => browser.JavascriptObjectRepository;
         }
 
+        private IDialogHandler dialogHandler = null;
         public IDialogHandler DialogHandler
         {
-            get => browser.DialogHandler;
-            set => browser.DialogHandler = value;
+            get => dialogHandler;
+            set
+            {
+                dialogHandler = value;
+                browser.DialogHandler = value == null ? null : new DialogHandlerWrapper(dialogHandler, this);
+            }
         }
 
+        private IRequestHandler requestHandler = null;
         public IRequestHandler RequestHandler
         {
-            get => browser.RequestHandler;
-            set => browser.RequestHandler = value;
+            get => requestHandler;
+            set
+            {
+                requestHandler = value;
+                browser.RequestHandler = value == null ? null : new RequestHandlerWrapper(requestHandler, this);
+            }
         }
 
+        private IDisplayHandler displayHandler = null;
         public IDisplayHandler DisplayHandler
         {
-            get => browser.DisplayHandler;
-            set => browser.DisplayHandler = value;
+            get => displayHandler;
+            set
+            {
+                displayHandler = value;
+                browser.DisplayHandler = value == null ? null : new DisplayHandlerWrapper(displayHandler, this);
+            }
         }
 
+        private ILoadHandler loadHandler = null;
         public ILoadHandler LoadHandler
         {
-            get => browser.LoadHandler;
-            set => browser.LoadHandler = value;
+            get => loadHandler;
+            set
+            {
+                loadHandler = value;
+                browser.LoadHandler = value == null ? null : new LoadHandlerWrapper(loadHandler, this);
+            }
         }
 
+        private ILifeSpanHandler lifeSpanHandler = null;
         public ILifeSpanHandler LifeSpanHandler
         {
-            get => browser.LifeSpanHandler;
-            set => browser.LifeSpanHandler = value;
+            get => lifeSpanHandler;
+            set
+            {
+                lifeSpanHandler = value;
+                browser.LifeSpanHandler = value == null ? null : new LifeSpanHandlerWrapper(lifeSpanHandler, this);
+            }
         }
 
+        private IKeyboardHandler keyboardHandler = null;
         public IKeyboardHandler KeyboardHandler
         {
-            get => browser.KeyboardHandler;
-            set => browser.KeyboardHandler = value;
+            get => keyboardHandler;
+            set
+            {
+                keyboardHandler = value;
+                browser.KeyboardHandler = value == null ? null : new KeyboardHandlerWrapper(keyboardHandler, this);
+            }
         }
 
+        private IJsDialogHandler jsDialogHandler = null;
         public IJsDialogHandler JsDialogHandler
         {
-            get => browser.JsDialogHandler;
-            set => browser.JsDialogHandler = value;
+            get => jsDialogHandler;
+            set
+            {
+                jsDialogHandler = value;
+                browser.JsDialogHandler = value == null ? null : new JsDialogHandlerWrapper(jsDialogHandler, this);
+            }
         }
 
+        private IDragHandler dragHandler = null;
         public IDragHandler DragHandler
         {
-            get => browser.DragHandler;
-            set => browser.DragHandler = value;
+            get => dragHandler;
+            set
+            {
+                dragHandler = value;
+                browser.DragHandler = value == null ? null : new DragHandlerWrapper(dragHandler, this);
+            }
         }
 
+        private IDownloadHandler downloadHandler = null;
         public IDownloadHandler DownloadHandler
         {
-            get => browser.DownloadHandler;
-            set => browser.DownloadHandler = value;
+            get => downloadHandler;
+            set
+            {
+                downloadHandler = value;
+                browser.DownloadHandler = value == null ? null : new DownloadHandlerWrapper(downloadHandler, this);
+            }
         }
 
+        private IContextMenuHandler menuHandler = null;
         public IContextMenuHandler MenuHandler
         {
-            get => browser.MenuHandler;
-            set => browser.MenuHandler = value;
+            get => menuHandler;
+            set
+            {
+                menuHandler = value;
+                browser.MenuHandler = value == null ? null : new ContextMenuHandlerWrapper(menuHandler, this);
+            }
         }
 
+        private IFocusHandler focusHandler = null;
         public IFocusHandler FocusHandler
         {
-            get => browser.FocusHandler;
-            set => browser.FocusHandler = value;
+            get => focusHandler;
+            set
+            {
+                focusHandler = value;
+                browser.FocusHandler = value == null ? null : new FocusHandlerWrapper(focusHandler, this);
+            }
         }
 
+        private IResourceRequestHandlerFactory resourceRequestHandlerFactory = null;
         public IResourceRequestHandlerFactory ResourceRequestHandlerFactory
         {
-            get => browser.ResourceRequestHandlerFactory;
-            set => browser.ResourceRequestHandlerFactory = value;
+            get => resourceRequestHandlerFactory;
+            set
+            {
+                resourceRequestHandlerFactory = value;
+                browser.ResourceRequestHandlerFactory = value == null ? null : new ResourceRequestHandlerFactoryWrapper(resourceRequestHandlerFactory, this);
+            }
         }
 
+        private IRenderProcessMessageHandler renderProcessMessageHandler = null;
         public IRenderProcessMessageHandler RenderProcessMessageHandler
         {
-            get => browser.RenderProcessMessageHandler;
-            set => browser.RenderProcessMessageHandler = value;
+            get => renderProcessMessageHandler;
+            set
+            {
+                renderProcessMessageHandler = value;
+                browser.RenderProcessMessageHandler = value == null ? null : new RenderProcessMessageHandlerWrapper(renderProcessMessageHandler, this);
+            }
         }
 
+        private IFindHandler findHandler = null;
         public IFindHandler FindHandler
         {
-            get => browser.FindHandler;
-            set => browser.FindHandler = value;
+            get => findHandler;
+            set
+            {
+                findHandler = value;
+                browser.FindHandler = value == null ? null : new FindHandlerWrapper(findHandler, this);
+            }
         }
 
         public string TooltipText

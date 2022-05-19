@@ -80,6 +80,21 @@
   <ItemGroup>
     <Compile Include="CefSettings.cs" />
     <Compile Include="ChromiumWebBrowser.cs" />
+    <Compile Include="Internals\ContextMenuHandlerWrapper.cs" />
+    <Compile Include="Internals\DialogHandlerWrapper.cs" />
+    <Compile Include="Internals\DisplayHandlerWrapper.cs" />
+    <Compile Include="Internals\DownloadHandlerWrapper.cs" />
+    <Compile Include="Internals\DragHandlerWrapper.cs" />
+    <Compile Include="Internals\FindHandlerWrapper.cs" />
+    <Compile Include="Internals\FocusHandlerWrapper.cs" />
+    <Compile Include="Internals\IHandlerWrapper.cs" />
+    <Compile Include="Internals\JsDialogHandlerWrapper.cs" />
+    <Compile Include="Internals\KeyboardHandlerWrapper.cs" />
+    <Compile Include="Internals\LifeSpanHandlerWrapper.cs" />
+    <Compile Include="Internals\LoadHandlerWrapper.cs" />
+    <Compile Include="Internals\RenderProcessMessageHandlerWrapper.cs" />
+    <Compile Include="Internals\RequestHandlerWrapper.cs" />
+    <Compile Include="Internals\ResourceRequestHandlerFactoryWrapper.cs" />
     <Compile Include="IWpfWebBrowser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -104,6 +119,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
