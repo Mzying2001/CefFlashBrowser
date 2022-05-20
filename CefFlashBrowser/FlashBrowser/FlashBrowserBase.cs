@@ -8,13 +8,10 @@ namespace CefFlashBrowser.FlashBrowser
 {
     public abstract class FlashBrowserBase : ChromiumWebBrowser
     {
-        public FlashBrowserBase()
+        protected override void OnIsBrowserInitializedChanged(EventArgs e)
         {
-            IsBrowserInitializedChanged += FlashBrowserIsBrowserInitializedChanged;
-        }
+            base.OnIsBrowserInitializedChanged(e);
 
-        private void FlashBrowserIsBrowserInitializedChanged(object sender, EventArgs e)
-        {
             if (IsBrowserInitialized)
             {
                 Cef.UIThreadTaskFactory.StartNew(() =>
@@ -30,6 +27,5 @@ namespace CefFlashBrowser.FlashBrowser
                 });
             }
         }
-
     }
 }
