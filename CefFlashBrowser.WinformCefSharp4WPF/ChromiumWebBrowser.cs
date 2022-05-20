@@ -382,38 +382,58 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             UndoCommand = new DelegateCommand(this.Undo);
             RedoCommand = new DelegateCommand(this.Redo);
 
-            browser.JavascriptMessageReceived += (s, e) => Dispatcher.Invoke(() =>
-            {
-                JavascriptMessageReceived?.Invoke(this, e);
-            });
+            browser.JavascriptMessageReceived += OnJavascriptMessageReceived;
+            browser.ConsoleMessage += OnConsoleMessage;
+            browser.StatusMessage += OnStatusMessage;
+            browser.FrameLoadStart += OnFrameLoadStart;
+            browser.FrameLoadEnd += OnFrameLoadEnd;
+            browser.LoadError += OnLoadError;
+            browser.LoadingStateChanged += OnLoadingStateChanged;
+            browser.AddressChanged += OnAddressChanged;
+            browser.TitleChanged += OnTitleChanged;
+            browser.IsBrowserInitializedChanged += OnIsBrowserInitializedChanged;
+        }
 
-            browser.ConsoleMessage += (s, e) => Dispatcher.Invoke(() =>
-            {
-                ConsoleMessage?.Invoke(this, e);
-            });
 
-            browser.StatusMessage += (s, e) => Dispatcher.Invoke(() =>
+
+
+        protected virtual void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
+        {
+            Dispatcher.Invoke(delegate { JavascriptMessageReceived?.Invoke(this, e); });
+        }
+
+        protected virtual void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
+        {
+            Dispatcher.Invoke(delegate { ConsoleMessage?.Invoke(this, e); });
+        }
+
+        protected virtual void OnStatusMessage(object sender, StatusMessageEventArgs e)
+        {
+            Dispatcher.Invoke(delegate
             {
                 SetValue(StatusTextProperty, e.Value);
                 StatusMessage?.Invoke(this, e);
             });
+        }
 
-            browser.FrameLoadStart += (s, e) => Dispatcher.Invoke(() =>
-            {
-                FrameLoadStart?.Invoke(this, e);
-            });
+        protected virtual void OnFrameLoadStart(object sender, FrameLoadStartEventArgs e)
+        {
+            Dispatcher.Invoke(delegate { FrameLoadStart?.Invoke(this, e); });
+        }
 
-            browser.FrameLoadEnd += (s, e) => Dispatcher.Invoke(() =>
-            {
-                FrameLoadEnd?.Invoke(this, e);
-            });
+        protected virtual void OnFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
+        {
+            Dispatcher.Invoke(delegate { FrameLoadEnd?.Invoke(this, e); });
+        }
 
-            browser.LoadError += (s, e) => Dispatcher.Invoke(() =>
-            {
-                LoadError?.Invoke(this, e);
-            });
+        protected virtual void OnLoadError(object sender, LoadErrorEventArgs e)
+        {
+            Dispatcher.Invoke(delegate { LoadError?.Invoke(this, e); });
+        }
 
-            browser.LoadingStateChanged += (s, e) => Dispatcher.Invoke(() =>
+        protected virtual void OnLoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
+        {
+            Dispatcher.Invoke(delegate
             {
                 SetValue(CanGoForwardProperty, e.CanGoForward);
                 SetValue(CanGoBackProperty, e.CanGoBack);
@@ -424,28 +444,36 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 ((DelegateCommand)StopCommand).CanExecute = !e.CanReload;
                 LoadingStateChanged?.Invoke(this, e);
             });
+        }
 
-            browser.AddressChanged += (s, e) => Dispatcher.Invoke(() =>
+        protected virtual void OnAddressChanged(object sender, AddressChangedEventArgs e)
+        {
+            Dispatcher.Invoke(delegate
             {
                 onNotifyAddressChanged = true;
                 SetValue(AddressProperty, e.Address);
                 onNotifyAddressChanged = false;
                 AddressChanged?.Invoke(this, e);
             });
+        }
 
-            browser.TitleChanged += (s, e) => Dispatcher.Invoke(() =>
+        protected virtual void OnTitleChanged(object sender, TitleChangedEventArgs e)
+        {
+            Dispatcher.Invoke(delegate
             {
                 SetValue(TitleProperty, e.Title);
                 TitleChanged?.Invoke(this, e);
             });
+        }
 
-            browser.IsBrowserInitializedChanged += (s, e) => Dispatcher.Invoke(() =>
+        protected virtual void OnIsBrowserInitializedChanged(object sender, EventArgs e)
+        {
+            Dispatcher.Invoke(delegate
             {
-                SetValue(IsBrowserInitializedProperty, ((CefSharp.WinForms.ChromiumWebBrowser)s).IsBrowserInitialized);
+                SetValue(IsBrowserInitializedProperty, browser.IsBrowserInitialized);
                 IsBrowserInitializedChanged?.Invoke(this, e);
             });
         }
-
 
 
 
