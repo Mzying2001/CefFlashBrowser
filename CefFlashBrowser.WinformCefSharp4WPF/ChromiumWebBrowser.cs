@@ -349,6 +349,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
+
         static ChromiumWebBrowser()
         {
             CanGoBackProperty = DependencyProperty.Register("CanGoBack", typeof(bool), typeof(ChromiumWebBrowser));
@@ -397,83 +398,120 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
-        protected virtual void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
+
+        private void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { JavascriptMessageReceived?.Invoke(this, e); });
+            Dispatcher.Invoke(delegate { OnJavascriptMessageReceived(e); });
         }
 
-        protected virtual void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
+        protected virtual void OnJavascriptMessageReceived(JavascriptMessageReceivedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { ConsoleMessage?.Invoke(this, e); });
+            JavascriptMessageReceived?.Invoke(this, e);
         }
 
-        protected virtual void OnStatusMessage(object sender, StatusMessageEventArgs e)
+        private void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
         {
-            Dispatcher.Invoke(delegate
-            {
-                SetValue(StatusTextProperty, e.Value);
-                StatusMessage?.Invoke(this, e);
-            });
+            Dispatcher.Invoke(delegate { OnConsoleMessage(e); });
         }
 
-        protected virtual void OnFrameLoadStart(object sender, FrameLoadStartEventArgs e)
+        protected virtual void OnConsoleMessage(ConsoleMessageEventArgs e)
         {
-            Dispatcher.Invoke(delegate { FrameLoadStart?.Invoke(this, e); });
+            ConsoleMessage?.Invoke(this, e);
         }
 
-        protected virtual void OnFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
+        private void OnStatusMessage(object sender, StatusMessageEventArgs e)
         {
-            Dispatcher.Invoke(delegate { FrameLoadEnd?.Invoke(this, e); });
+            Dispatcher.Invoke(delegate { OnStatusMessage(e); });
         }
 
-        protected virtual void OnLoadError(object sender, LoadErrorEventArgs e)
+        protected virtual void OnStatusMessage(StatusMessageEventArgs e)
         {
-            Dispatcher.Invoke(delegate { LoadError?.Invoke(this, e); });
+            SetValue(StatusTextProperty, e.Value);
+            StatusMessage?.Invoke(this, e);
         }
 
-        protected virtual void OnLoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
+        private void OnFrameLoadStart(object sender, FrameLoadStartEventArgs e)
         {
-            Dispatcher.Invoke(delegate
-            {
-                SetValue(CanGoForwardProperty, e.CanGoForward);
-                SetValue(CanGoBackProperty, e.CanGoBack);
-                SetValue(IsLoadingProperty, e.IsLoading);
-                ((DelegateCommand)ForwardCommand).CanExecute = e.CanGoForward;
-                ((DelegateCommand)BackCommand).CanExecute = e.CanGoBack;
-                ((DelegateCommand)ReloadCommand).CanExecute = e.CanReload;
-                ((DelegateCommand)StopCommand).CanExecute = !e.CanReload;
-                LoadingStateChanged?.Invoke(this, e);
-            });
+            Dispatcher.Invoke(delegate { OnFrameLoadStart(e); });
         }
 
-        protected virtual void OnAddressChanged(object sender, AddressChangedEventArgs e)
+        protected virtual void OnFrameLoadStart(FrameLoadStartEventArgs e)
         {
-            Dispatcher.Invoke(delegate
-            {
-                onNotifyAddressChanged = true;
-                SetValue(AddressProperty, e.Address);
-                onNotifyAddressChanged = false;
-                AddressChanged?.Invoke(this, e);
-            });
+            FrameLoadStart?.Invoke(this, e);
         }
 
-        protected virtual void OnTitleChanged(object sender, TitleChangedEventArgs e)
+        private void OnFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
-            Dispatcher.Invoke(delegate
-            {
-                SetValue(TitleProperty, e.Title);
-                TitleChanged?.Invoke(this, e);
-            });
+            Dispatcher.Invoke(delegate { OnFrameLoadEnd(e); });
         }
 
-        protected virtual void OnIsBrowserInitializedChanged(object sender, EventArgs e)
+        protected virtual void OnFrameLoadEnd(FrameLoadEndEventArgs e)
         {
-            Dispatcher.Invoke(delegate
-            {
-                SetValue(IsBrowserInitializedProperty, browser.IsBrowserInitialized);
-                IsBrowserInitializedChanged?.Invoke(this, e);
-            });
+            FrameLoadEnd?.Invoke(this, e);
         }
+
+        private void OnLoadError(object sender, LoadErrorEventArgs e)
+        {
+            Dispatcher.Invoke(delegate { OnLoadError(e); });
+        }
+
+        protected virtual void OnLoadError(LoadErrorEventArgs e)
+        {
+            LoadError?.Invoke(this, e);
+        }
+
+        private void OnLoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
+        {
+            Dispatcher.Invoke(delegate { OnLoadingStateChanged(e); });
+        }
+
+        protected virtual void OnLoadingStateChanged(LoadingStateChangedEventArgs e)
+        {
+            SetValue(CanGoForwardProperty, e.CanGoForward);
+            SetValue(CanGoBackProperty, e.CanGoBack);
+            SetValue(IsLoadingProperty, e.IsLoading);
+            ((DelegateCommand)ForwardCommand).CanExecute = e.CanGoForward;
+            ((DelegateCommand)BackCommand).CanExecute = e.CanGoBack;
+            ((DelegateCommand)ReloadCommand).CanExecute = e.CanReload;
+            ((DelegateCommand)StopCommand).CanExecute = !e.CanReload;
+            LoadingStateChanged?.Invoke(this, e);
+        }
+
+        private void OnAddressChanged(object sender, AddressChangedEventArgs e)
+        {
+            Dispatcher.Invoke(delegate { OnAddressChanged(e); });
+        }
+
+        protected virtual void OnAddressChanged(AddressChangedEventArgs e)
+        {
+            onNotifyAddressChanged = true;
+            SetValue(AddressProperty, e.Address);
+            onNotifyAddressChanged = false;
+            AddressChanged?.Invoke(this, e);
+        }
+
+        private void OnTitleChanged(object sender, TitleChangedEventArgs e)
+        {
+            Dispatcher.Invoke(delegate { OnTitleChanged(e); });
+        }
+
+        protected virtual void OnTitleChanged(TitleChangedEventArgs e)
+        {
+            SetValue(TitleProperty, e.Title);
+            TitleChanged?.Invoke(this, e);
+        }
+
+        private void OnIsBrowserInitializedChanged(object sender, EventArgs e)
+        {
+            Dispatcher.Invoke(delegate { OnIsBrowserInitializedChanged(e); });
+        }
+
+        protected virtual void OnIsBrowserInitializedChanged(EventArgs e)
+        {
+            SetValue(IsBrowserInitializedProperty, browser.IsBrowserInitialized);
+            IsBrowserInitializedChanged?.Invoke(this, e);
+        }
+
 
 
 

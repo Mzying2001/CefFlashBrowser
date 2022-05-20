@@ -65,39 +65,33 @@ namespace CefFlashBrowser.FlashBrowser
             SetValue(BlockedSwfsProperty, new ObservableCollection<string>());
         }
 
-        protected override void OnAddressChanged(object sender, AddressChangedEventArgs e)
+        protected override void OnAddressChanged(AddressChangedEventArgs e)
         {
-            base.OnAddressChanged(sender, e);
+            base.OnAddressChanged(e);
 
-            Dispatcher.Invoke(delegate
-            {
-                BlockedSwfs.Clear();
-                SetValue(HasBlockedSwfsProperty, false);
-            });
+            BlockedSwfs.Clear();
+            SetValue(HasBlockedSwfsProperty, false);
         }
 
-        protected override void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
+        protected override void OnConsoleMessage(ConsoleMessageEventArgs e)
         {
-            base.OnConsoleMessage(sender, e);
+            base.OnConsoleMessage(e);
 
-            Dispatcher.Invoke(delegate
+            if (e.Level != LogSeverity.Info)
             {
-                if (e.Level != LogSeverity.Info)
-                {
-                    return;
-                }
+                return;
+            }
 
-                var msg = e.Message;
-                if (msg.StartsWith("Cross-origin plugin content from"))
+            var msg = e.Message;
+            if (msg.StartsWith("Cross-origin plugin content from"))
+            {
+                var url = msg.Split(' ')?[4];
+                if (!string.IsNullOrWhiteSpace(url) && !BlockedSwfs.Contains(url))
                 {
-                    var url = msg.Split(' ')?[4];
-                    if (!string.IsNullOrWhiteSpace(url) && !BlockedSwfs.Contains(url))
-                    {
-                        BlockedSwfs.Add(url);
-                        SetValue(HasBlockedSwfsProperty, true);
-                    }
+                    BlockedSwfs.Add(url);
+                    SetValue(HasBlockedSwfsProperty, true);
                 }
-            });
+            }
         }
     }
 }
