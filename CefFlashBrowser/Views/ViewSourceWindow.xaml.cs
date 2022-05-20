@@ -18,11 +18,7 @@ namespace CefFlashBrowser.Views
 
         // Using a DependencyProperty as the backing store for Address.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty AddressProperty =
-            DependencyProperty.Register("Address", typeof(string), typeof(ViewSourceWindow), new PropertyMetadata(null, (s, e) =>
-            {
-                var window = (ViewSourceWindow)s;
-                window.browser.Load($"view-source:{e.NewValue}");
-            }));
+            DependencyProperty.Register("Address", typeof(string), typeof(ViewSourceWindow), new PropertyMetadata(null));
 
 
         public ViewSourceWindow()
