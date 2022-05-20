@@ -63,33 +63,41 @@ namespace CefFlashBrowser.FlashBrowser
             );
 
             SetValue(BlockedSwfsProperty, new ObservableCollection<string>());
-            ConsoleMessage += OnConsoleMessage;
-            AddressChanged += OnAddressChanged;
         }
 
-        private void OnAddressChanged(object sender, AddressChangedEventArgs e)
+        protected override void OnAddressChanged(object sender, AddressChangedEventArgs e)
         {
-            BlockedSwfs.Clear();
-            SetValue(HasBlockedSwfsProperty, false);
+            base.OnAddressChanged(sender, e);
+
+            Dispatcher.Invoke(delegate
+            {
+                BlockedSwfs.Clear();
+                SetValue(HasBlockedSwfsProperty, false);
+            });
         }
 
-        private void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
+        protected override void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
         {
-            if (e.Level != LogSeverity.Info)
-            {
-                return;
-            }
+            base.OnConsoleMessage(sender, e);
 
-            var msg = e.Message;
-            if (msg.StartsWith("Cross-origin plugin content from"))
+            Dispatcher.Invoke(delegate
             {
-                var url = msg.Split(' ')?[4];
-                if (!string.IsNullOrWhiteSpace(url) && !BlockedSwfs.Contains(url))
+                if (e.Level != LogSeverity.Info)
                 {
-                    BlockedSwfs.Add(url);
-                    SetValue(HasBlockedSwfsProperty, true);
+                    return;
                 }
-            }
+
+                var msg = e.Message;
+                if (msg.StartsWith("Cross-origin plugin content from"))
+                {
+                    var url = msg.Split(' ')?[4];
+                    if (!string.IsNullOrWhiteSpace(url) && !BlockedSwfs.Contains(url))
+                    {
+                        BlockedSwfs.Add(url);
+                        SetValue(HasBlockedSwfsProperty, true);
+                    }
+                }
+            });
         }
     }
 }
