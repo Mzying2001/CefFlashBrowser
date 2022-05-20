@@ -11,6 +11,14 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 {
     public class ChromiumWebBrowser : WindowsFormsHost, IWebBrowserInternal, IWebBrowser, IWpfWebBrowser, IDisposable
     {
+        /// <summary>
+        /// Flag used to determine whether the address change is notified by the base browser
+        /// </summary>
+        private bool onNotifyAddressChanged = false;
+
+        /// <summary>
+        /// The base browser
+        /// </summary>
         private readonly CefSharp.WinForms.ChromiumWebBrowser browser;
 
         public event EventHandler<JavascriptMessageReceivedEventArgs> JavascriptMessageReceived;
@@ -331,7 +339,11 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         private static void OnAddressPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             ChromiumWebBrowser chromiumWebBrowser = (ChromiumWebBrowser)sender;
-            chromiumWebBrowser.browser.Load((string)e.NewValue);
+
+            if (!chromiumWebBrowser.onNotifyAddressChanged)
+            {
+                chromiumWebBrowser.browser.Load((string)e.NewValue);
+            }
         }
 
 
@@ -415,7 +427,9 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
             browser.AddressChanged += (s, e) => Dispatcher.Invoke(() =>
             {
+                onNotifyAddressChanged = true;
                 SetValue(AddressProperty, e.Address);
+                onNotifyAddressChanged = false;
                 AddressChanged?.Invoke(this, e);
             });
 
@@ -438,8 +452,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         public void Load(string url)
         {
-            SetValue(AddressProperty, url);
-            browser.Load(url);
+            Address = url;
         }
 
         public void ZoomOut()
