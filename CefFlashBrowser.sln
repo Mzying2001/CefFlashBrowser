@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CefFlashBrowser.EmptyExe", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CefFlashBrowser.WinformCefSharp4WPF", "CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj", "{E5AF3E66-FCD3-4434-8159-F572BC04918C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CefFlashBrowser.FlashBrowser", "CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj", "{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -30,6 +32,10 @@ Global
 		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Debug|x86.Build.0 = Debug|x86
 		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Release|x86.ActiveCfg = Release|x86
 		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Release|x86.Build.0 = Release|x86
+		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Debug|x86.ActiveCfg = Debug|x86
+		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Debug|x86.Build.0 = Debug|x86
+		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Release|x86.ActiveCfg = Release|x86
+		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
