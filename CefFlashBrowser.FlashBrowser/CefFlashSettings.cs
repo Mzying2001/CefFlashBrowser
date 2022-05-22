@@ -8,27 +8,20 @@
 
         public bool EnableSystemFlash
         {
-            get => CefCommandLineArgs[ENABLE_SYSTEM_FLASH] == "1";
+            get => CefCommandLineArgs.ContainsKey(ENABLE_SYSTEM_FLASH) && CefCommandLineArgs[ENABLE_SYSTEM_FLASH] == "1";
             set => CefCommandLineArgs[ENABLE_SYSTEM_FLASH] = value ? "1" : "0";
         }
 
         public string PpapiFlashVersion
         {
-            get => CefCommandLineArgs[PPAPI_FLASH_VERSION];
+            get => CefCommandLineArgs.ContainsKey(PPAPI_FLASH_VERSION) ? CefCommandLineArgs[PPAPI_FLASH_VERSION] : null;
             set => CefCommandLineArgs[PPAPI_FLASH_VERSION] = value;
         }
 
         public string PpapiFlashPath
         {
-            get => CefCommandLineArgs[PPAPI_FLASH_PATH];
+            get => CefCommandLineArgs.ContainsKey(PPAPI_FLASH_PATH) ? CefCommandLineArgs[PPAPI_FLASH_PATH] : null;
             set => CefCommandLineArgs[PPAPI_FLASH_PATH] = value;
-        }
-
-        public CefFlashSettings()
-        {
-            PpapiFlashPath = default;
-            PpapiFlashVersion = default;
-            EnableSystemFlash = default;
         }
     }
 }
