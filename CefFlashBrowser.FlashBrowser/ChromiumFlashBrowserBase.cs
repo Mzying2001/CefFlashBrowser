@@ -1,10 +1,9 @@
-﻿using CefFlashBrowser.WinformCefSharp4WPF;
-using CefSharp;
+﻿using CefSharp;
 using System;
 
 namespace CefFlashBrowser.FlashBrowser
 {
-    public abstract class ChromiumFlashBrowserBase : ChromiumWebBrowser
+    public abstract class ChromiumFlashBrowserBase : ChromiumWebBrowserEx
     {
         protected override void OnIsBrowserInitializedChanged(EventArgs e)
         {

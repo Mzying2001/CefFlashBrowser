@@ -56,6 +56,9 @@
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="SimpleMvvm, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mzying2001.SimpleMvvm.1.0.5\lib\net45\SimpleMvvm.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -71,6 +74,7 @@
     <Compile Include="CefFlashSettings.cs" />
     <Compile Include="ChromiumFlashBrowser.cs" />
     <Compile Include="ChromiumFlashBrowserBase.cs" />
+    <Compile Include="ChromiumWebBrowserEx.cs" />
     <Compile Include="Handlers\ContextMenuHandler.cs" />
     <Compile Include="Handlers\DialogHandler.cs" />
     <Compile Include="Handlers\DisplayHandler.cs" />
