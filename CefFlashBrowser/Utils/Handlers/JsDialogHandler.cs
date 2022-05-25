@@ -1,14 +1,14 @@
 ﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using System.Windows;
 
-namespace CefFlashBrowser.FlashBrowser.Handlers
+namespace CefFlashBrowser.Utils.Handlers
 {
-    public class JsDialogHandler : IJsDialogHandler
+    public class JsDialogHandler : FlashBrowser.Handlers.JsDialogHandler
     {
-        public bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
+        public override bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
         {
             if (GlobalData.Settings.DisableOnBeforeUnloadDialog)
             {
@@ -16,9 +16,7 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                 return true;
             }
 
-            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
-
-            webBrowser.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
                 JsConfirmDialog.ShowDialog(messageText, title, result =>
@@ -29,22 +27,17 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
             return true;
         }
 
-        public void OnDialogClosed(IWebBrowser chromiumWebBrowser, IBrowser browser)
+        public override bool OnJSDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, CefJsDialogType dialogType, string messageText, string defaultPromptText, IJsDialogCallback callback, ref bool suppressMessage)
         {
-            //throw new NotImplementedException();
-        }
-
-        public bool OnJSDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, CefJsDialogType dialogType, string messageText, string defaultPromptText, IJsDialogCallback callback, ref bool suppressMessage)
-        {
-            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
+            var wpfWebBrowser = (IWpfWebBrowser)chromiumWebBrowser;
 
             switch (dialogType)
             {
                 case CefJsDialogType.Alert:
                     {
-                        webBrowser.Dispatcher.Invoke(() =>
+                        wpfWebBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsAlertDialog.ShowDialog(messageText, webBrowser.Title);
+                            JsAlertDialog.ShowDialog(messageText, wpfWebBrowser.Title);
                         });
                         suppressMessage = true;
                         return false;
@@ -52,9 +45,9 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
                 case CefJsDialogType.Confirm:
                     {
-                        webBrowser.Dispatcher.Invoke(() =>
+                        wpfWebBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsConfirmDialog.ShowDialog(messageText, webBrowser.Title, result =>
+                            JsConfirmDialog.ShowDialog(messageText, wpfWebBrowser.Title, result =>
                             {
                                 callback.Continue(result == true);
                             });
@@ -65,9 +58,9 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
 
                 case CefJsDialogType.Prompt:
                     {
-                        webBrowser.Dispatcher.Invoke(() =>
+                        wpfWebBrowser.Dispatcher.Invoke(() =>
                         {
-                            JsPromptDialog.ShowDialog(messageText, webBrowser.Title, defaultPromptText, result =>
+                            JsPromptDialog.ShowDialog(messageText, wpfWebBrowser.Title, defaultPromptText, result =>
                             {
                                 callback.Continue(result != null, result);
                             });
@@ -77,11 +70,6 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
                     }
             }
             return false;
-        }
-
-        public void OnResetDialogState(IWebBrowser chromiumWebBrowser, IBrowser browser)
-        {
-            //throw new NotImplementedException();
         }
     }
 }

@@ -1,5 +1,6 @@
-﻿using CefFlashBrowser.Models.Data;
-using System;
+﻿using CefFlashBrowser.FlashBrowser.Handlers;
+using CefFlashBrowser.Models.Data;
+using CefSharp;
 using System.Windows;
 
 namespace CefFlashBrowser.Views
@@ -9,8 +10,34 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class PopupWebPage : Window
     {
-        private bool _doClose;
+        private class PopWebPageLifeSpanHandler : LifeSpanHandler
+        {
+            private readonly PopupWebPage window;
 
+            public PopWebPageLifeSpanHandler(PopupWebPage window)
+            {
+                this.window = window;
+            }
+
+            public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
+            {
+                window.Dispatcher.Invoke(delegate
+                {
+                    window._doClose = true;
+                    window.Close();
+                });
+                return false;
+            }
+
+            public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
+            {
+                BrowserWindow.Show(targetUrl);
+                newBrowser = null;
+                return true;
+            }
+        }
+
+        private bool _doClose;
 
         public string Address
         {
@@ -30,6 +57,11 @@ namespace CefFlashBrowser.Views
         public PopupWebPage()
         {
             InitializeComponent();
+
+            browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
+            browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
+            browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
+            browser.LifeSpanHandler = new PopWebPageLifeSpanHandler(this);
         }
 
         public PopupWebPage(string address) : this()
@@ -42,7 +74,7 @@ namespace CefFlashBrowser.Views
             new PopupWebPage(address).Show();
         }
 
-        public static void Show(string address, CefSharp.IPopupFeatures popupFeatures)
+        public static void Show(string address, IPopupFeatures popupFeatures)
         {
             new PopupWebPage(address)
             {
@@ -61,18 +93,6 @@ namespace CefFlashBrowser.Views
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
-        }
-
-        private void BrowserOnClose(object sender, EventArgs e)
-        {
-            _doClose = true;
-            Close();
-        }
-
-        private void OnCreateNewBrowser(object sender, FlashBrowser.Handlers.LifeSpanHandler.NewBrowserEventArgs e)
-        {
-            e.Handled = true;
-            BrowserWindow.Show(e.TargetUrl);
         }
     }
 }

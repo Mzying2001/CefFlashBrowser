@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser"
+        xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         mc:Ignorable="d"
         
@@ -13,6 +13,5 @@
         Width="Auto">
 
     <flash:ChromiumFlashBrowser x:Name="browser"
-                                Address="{Binding ElementName=window, Path=Address, StringFormat=view-source:\{0\}}"
-                                OnCreateNewBrowser="OnCreateNewBrowser"/>
+                                Address="{Binding ElementName=window, Path=Address, StringFormat=view-source:\{0\}}"/>
 </Window>

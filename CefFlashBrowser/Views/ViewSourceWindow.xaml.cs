@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.FlashBrowser.Handlers;
+using CefSharp;
 using System.Windows;
 
 namespace CefFlashBrowser.Views
@@ -8,6 +9,15 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class ViewSourceWindow : Window
     {
+        private class ViewSourceBrowserLifeSpanHandler : LifeSpanHandler
+        {
+            public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
+            {
+                Application.Current.Dispatcher.Invoke(() => BrowserWindow.Show(targetUrl));
+                newBrowser = null;
+                return true;
+            }
+        }
 
 
         public string Address
@@ -25,6 +35,11 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
 
+            browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
+            browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
+            browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
+            browser.LifeSpanHandler = new ViewSourceBrowserLifeSpanHandler();
+
             Closing += (s, e) =>
             {
                 browser.GetBrowser().CloseBrowser(true);
@@ -39,12 +54,6 @@ namespace CefFlashBrowser.Views
         public static void Show(string address)
         {
             new ViewSourceWindow(address).Show();
-        }
-
-        private void OnCreateNewBrowser(object sender, LifeSpanHandler.NewBrowserEventArgs e)
-        {
-            e.Handled = true;
-            Application.Current.Dispatcher.Invoke(() => BrowserWindow.Show(e.TargetUrl));
         }
     }
 }

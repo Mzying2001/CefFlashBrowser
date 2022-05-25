@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
-        xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser"
+        xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         mc:Ignorable="d"
         
         x:Name="window"
@@ -16,8 +16,6 @@
         Closing="WindowClosing">
 
     <Grid>
-        <flash:ChromiumFlashBrowser x:Name="browser"
-                                    OnClose="BrowserOnClose"
-                                    OnCreateNewBrowser="OnCreateNewBrowser"/>
+        <flash:ChromiumFlashBrowser x:Name="browser"/>
     </Grid>
 </Window>

@@ -1,6 +1,5 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
@@ -9,10 +8,34 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CefFlashBrowser.FlashBrowser.Handlers
+namespace CefFlashBrowser.Utils.Handlers
 {
-    public class ContextMenuHandler : ContextMenuHandlerBase
+    public class ContextMenuHandler : FlashBrowser.Handlers.ContextMenuHandler
     {
+        private static IList<CefMenuItemInfo> GetMenuItemInfoList(IMenuModel model)
+        {
+            if (model == null)
+            {
+                return null;
+            }
+
+            List<CefMenuItemInfo> list = new List<CefMenuItemInfo>();
+
+            for (var i = 0; i < model.Count; i++)
+            {
+                list.Add(new CefMenuItemInfo
+                {
+                    Header = model.GetLabelAt(i),
+                    IsEnable = model.IsEnabledAt(i),
+                    IsChecked = model.IsCheckedAt(i),
+                    CommandID = model.GetCommandIdAt(i),
+                    SubMenuItemInfos = GetMenuItemInfoList(model.GetSubMenuAt(i))
+                });
+            }
+
+            return list;
+        }
+
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
 

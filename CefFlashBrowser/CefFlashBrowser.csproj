@@ -267,8 +267,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="FlashBrowser\Handlers\BrowserKeyboardHandler.cs" />
-    <Compile Include="FlashBrowser\Handlers\ContextMenuHandlerBase.cs" />
     <Compile Include="Models\AppInfo.cs" />
     <Compile Include="Models\CefMenuItemInfo.cs" />
     <Compile Include="Models\FakeFlashVersionSetting.cs" />
@@ -284,17 +282,13 @@
     <Compile Include="Models\EnumDescription.cs" />
     <Compile Include="Models\EnumDescriptions.cs" />
     <Compile Include="Models\FavoritesFile.cs" />
-    <Compile Include="FlashBrowser\ChromiumFlashBrowser.cs" />
-    <Compile Include="FlashBrowser\ChromiumSwfBrowser.cs" />
-    <Compile Include="FlashBrowser\Handlers\ContextMenuHandler.cs" />
-    <Compile Include="FlashBrowser\FlashBrowserBase.cs" />
-    <Compile Include="FlashBrowser\Handlers\JsDialogHandler.cs" />
-    <Compile Include="FlashBrowser\Handlers\LifeSpanHandler.cs" />
-    <Compile Include="FlashBrowser\Handlers\IEDownloadHandler.cs" />
     <Compile Include="Models\Data\GlobalData.cs" />
     <Compile Include="Utils\Converters\UrlGetFileName.cs" />
     <Compile Include="Utils\Converters\VisiableIfNotZero.cs" />
     <Compile Include="Utils\Converters\VisiableIfStrNotEmpty.cs" />
+    <Compile Include="Utils\Handlers\ContextMenuHandler.cs" />
+    <Compile Include="Utils\Handlers\IEDownloadHandler.cs" />
+    <Compile Include="Utils\Handlers\JsDialogHandler.cs" />
     <Compile Include="Utils\LanguageManager.cs" />
     <Compile Include="Models\NavigationType.cs" />
     <Compile Include="Models\NewPageBehavior.cs" />
@@ -505,11 +499,16 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj">
+      <Project>{e1973a5c-e506-4b97-8042-3f8cf3d6f6a2}</Project>
+      <Name>CefFlashBrowser.FlashBrowser</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj">
       <Project>{e5af3e66-fcd3-4434-8159-f572bc04918c}</Project>
       <Name>CefFlashBrowser.WinformCefSharp4WPF</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

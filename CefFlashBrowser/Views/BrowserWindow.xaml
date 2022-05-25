@@ -7,7 +7,7 @@
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
-        xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser"
+        xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:converter="clr-namespace:CefFlashBrowser.Utils.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -302,9 +302,7 @@
 
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
-                                    ZoomLevelIncrement="0.25"
-                                    OnClose="BrowserOnClose"
-                                    OnCreateNewBrowser="OnCreateNewBrowser"/>
+                                    ZoomLevelIncrement="0.25"/>
 
         <Popup x:Name="statusPopup"
                IsOpen="True"

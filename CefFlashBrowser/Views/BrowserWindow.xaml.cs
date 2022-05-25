@@ -1,6 +1,9 @@
 ﻿using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Utils;
+using CefFlashBrowser.WinformCefSharp4WPF;
+using CefSharp;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +17,176 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserWindow : Window
     {
+        private class BrowserKeyboardHandler : KeyboardHandler
+        {
+            private static readonly ViewModels.BrowserWindowViewModel viewModel;
+
+            static BrowserKeyboardHandler()
+            {
+                viewModel = ((ViewModels.ViewModelLocator)Application.Current.Resources["Locator"]).BrowserWindowViewModel;
+            }
+
+            public override bool OnPreKeyEvent(IWebBrowser chromiumWebBrowser, IBrowser browser, KeyType type, int windowsKeyCode, int nativeKeyCode, CefEventFlags modifiers, bool isSystemKey, ref bool isKeyboardShortcut)
+            {
+                if (type != KeyType.KeyUp)
+                    return false;
+
+                var webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
+                var result = false;
+
+                webBrowser.Dispatcher.Invoke(delegate
+                {
+                    if (modifiers == CefEventFlags.None)
+                    {
+                        switch (windowsKeyCode)
+                        {
+                            case Win32.VirtualKeys.VK_ESCAPE: //Esc
+                                {
+                                    browser.StopLoad();
+                                    result = true;
+                                    break;
+                                }
+                            case Win32.VirtualKeys.VK_F5: //F5
+                                {
+                                    browser.Reload();
+                                    result = true;
+                                    break;
+                                }
+                            case Win32.VirtualKeys.VK_F12: //F12
+                                {
+                                    viewModel.ShowDevTools(chromiumWebBrowser);
+                                    result = true;
+                                    break;
+                                }
+                        }
+                    }
+                    else if (modifiers == CefEventFlags.ControlDown)
+                    {
+                        switch (windowsKeyCode)
+                        {
+                            case '0': //Ctrl+0
+                                {
+                                    webBrowser.ZoomReset();
+                                    result = true;
+                                    break;
+                                }
+                            case 'D': //Ctrl+D
+                                {
+                                    viewModel.AddFavorite(webBrowser);
+                                    result = true;
+                                    break;
+                                }
+                            case 'M': //Ctrl+M
+                                {
+                                    viewModel.ShowMainWindow();
+                                    result = true;
+                                    break;
+                                }
+                            case 'O': //Ctrl+O
+                                {
+                                    viewModel.OpenInDefaultBrowser(chromiumWebBrowser.Address);
+                                    result = true;
+                                    break;
+                                }
+                            case 'P': //Ctrl+P
+                                {
+                                    browser.Print();
+                                    result = true;
+                                    break;
+                                }
+                            case 'U': //Ctrl+U
+                                {
+                                    viewModel.ViewSource(chromiumWebBrowser.Address);
+                                    result = true;
+                                    break;
+                                }
+                            case 'S': //Ctrl+S
+                                {
+                                    viewModel.CreateShortcut(webBrowser);
+                                    result = true;
+                                    break;
+                                }
+                            case 'W': //Ctrl+W
+                                {
+                                    viewModel.CloseBrowser(chromiumWebBrowser);
+                                    result = true;
+                                    break;
+                                }
+                        }
+                    }
+                    else if (modifiers == CefEventFlags.AltDown)
+                    {
+                        switch (windowsKeyCode)
+                        {
+                            case Win32.VirtualKeys.VK_LEFT: //Alt+Left
+                                {
+                                    browser.GoBack();
+                                    result = true;
+                                    break;
+                                }
+                            case Win32.VirtualKeys.VK_RIGHT: //Alt+Right
+                                {
+                                    browser.GoForward();
+                                    result = true;
+                                    break;
+                                }
+                        }
+                    }
+                });
+
+                return result;
+            }
+        }
+
+        private class BrowserLifeSpanHandler : LifeSpanHandler
+        {
+            private readonly BrowserWindow window;
+
+            public BrowserLifeSpanHandler(BrowserWindow window)
+            {
+                this.window = window;
+            }
+
+            public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
+            {
+                window.Dispatcher.Invoke(delegate
+                {
+                    window._doClose = true;
+                    window.Close();
+                });
+                return false;
+            }
+
+            public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
+            {
+                window.Dispatcher.Invoke(delegate
+                {
+                    if (targetDisposition == WindowOpenDisposition.NewPopup)
+                    {
+                        PopupWebPage.Show(targetUrl, popupFeatures);
+                    }
+                    else
+                    {
+                        switch (GlobalData.Settings.NewPageBehavior)
+                        {
+                            case NewPageBehavior.NewWindow:
+                                {
+                                    Show(targetUrl);
+                                    break;
+                                }
+                            case NewPageBehavior.OriginalWindow:
+                                {
+                                    chromiumWebBrowser.Load(targetUrl);
+                                    break;
+                                }
+                        }
+                    }
+                });
+                newBrowser = null;
+                return true;
+            }
+        }
+
         private bool _doClose = false;
 
         public BrowserWindow()
@@ -21,7 +194,11 @@ namespace CefFlashBrowser.Views
             InitializeComponent();
             WindowSizeInfo.Apply(GlobalData.Settings.BrowserWindowSizeInfo, this);
 
+            browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
+            browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
+            browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.KeyboardHandler = new BrowserKeyboardHandler();
+            browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
         }
 
         private void WindowSourceInitialized(object sender, EventArgs e)
@@ -52,38 +229,6 @@ namespace CefFlashBrowser.Views
         {
             var pos = PointToScreen(new Point(0, mainGrid.ActualHeight - statusPopupContent.Height));
             statusPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
-        }
-
-        private void OnCreateNewBrowser(object sender, LifeSpanHandler.NewBrowserEventArgs e)
-        {
-            e.Handled = true;
-
-            if (e.OpenDisposition == CefSharp.WindowOpenDisposition.NewPopup)
-            {
-                PopupWebPage.Show(e.TargetUrl, e.PopupFeatures);
-            }
-            else
-            {
-                switch (GlobalData.Settings.NewPageBehavior)
-                {
-                    case NewPageBehavior.NewWindow:
-                        {
-                            Show(e.TargetUrl);
-                            break;
-                        }
-                    case NewPageBehavior.OriginalWindow:
-                        {
-                            browser.Load(e.TargetUrl);
-                            break;
-                        }
-                }
-            }
-        }
-
-        private void BrowserOnClose(object sender, EventArgs e)
-        {
-            _doClose = true;
-            Close();
         }
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
