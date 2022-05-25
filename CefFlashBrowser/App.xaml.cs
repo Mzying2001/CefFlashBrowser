@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.FlashBrowser;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.WinformCefSharp4WPF;
@@ -73,11 +74,22 @@ namespace CefFlashBrowser
         {
             Environment.SetEnvironmentVariable("ComSpec", EmptyExePath); //Remove black popup window
 
-            CefSettings settings = new CefSettings()
+            var settings = new CefFlashSettings()
             {
                 Locale = GlobalData.Settings.Language,
-                CachePath = CachePath
+                CachePath = CachePath,
+                PpapiFlashPath = FlashPath,
+                EnableSystemFlash = true
             };
+
+            if (GlobalData.Settings.FakeFlashVersionSetting.Enable)
+            {
+                settings.PpapiFlashVersion = GlobalData.Settings.FakeFlashVersionSetting.FlashVersion;
+            }
+            else
+            {
+                settings.PpapiFlashVersion = FileVersionInfo.GetVersionInfo(FlashPath).FileVersion.Replace(',', '.');
+            }
 
             if (GlobalData.Settings.UserAgentSetting.EnableCustom)
             {
@@ -94,19 +106,7 @@ namespace CefFlashBrowser
             settings.LogSeverity = LogSeverity.Disable;
 #endif
 
-            settings.CefCommandLineArgs["enable-system-flash"] = "1";
-            settings.CefCommandLineArgs["ppapi-flash-path"] = FlashPath;
             settings.CefCommandLineArgs["autoplay-policy"] = "no-user-gesture-required";
-
-            if (GlobalData.Settings.FakeFlashVersionSetting.Enable)
-            {
-                settings.CefCommandLineArgs["ppapi-flash-version"] = GlobalData.Settings.FakeFlashVersionSetting.FlashVersion;
-            }
-            else
-            {
-                settings.CefCommandLineArgs["ppapi-flash-version"] = FileVersionInfo.GetVersionInfo(FlashPath).FileVersion.Replace(',', '.');
-            }
-
             Cef.Initialize(settings);
         }
 
