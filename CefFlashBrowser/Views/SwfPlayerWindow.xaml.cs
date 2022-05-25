@@ -15,6 +15,23 @@ namespace CefFlashBrowser.Views
     {
         private class SwfPlayerLifeSpanHandler : LifeSpanHandler
         {
+            private readonly SwfPlayerWindow window;
+
+            public SwfPlayerLifeSpanHandler(SwfPlayerWindow window)
+            {
+                this.window = window;
+            }
+
+            public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
+            {
+                window.Dispatcher.Invoke(delegate
+                {
+                    window._doClose = true;
+                    window.Close();
+                });
+                return false;
+            }
+
             public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
             {
                 Application.Current.Dispatcher.Invoke(() => BrowserWindow.Show(targetUrl));
@@ -22,6 +39,8 @@ namespace CefFlashBrowser.Views
                 return true;
             }
         }
+
+        private bool _doClose = false;
 
 
         public string FileName
@@ -53,7 +72,7 @@ namespace CefFlashBrowser.Views
             browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
-            browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler();
+            browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
         }
 
         public SwfPlayerWindow(string fileName) : this()
@@ -63,9 +82,17 @@ namespace CefFlashBrowser.Views
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            browser.GetBrowser().CloseBrowser(true);
-            window.WindowState = WindowState.Normal;
-            GlobalData.Settings.SwfWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+            if (browser.IsDisposed || _doClose)
+            {
+                window.WindowState = WindowState.Normal;
+                GlobalData.Settings.SwfWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+            }
+            else
+            {
+                bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
+                browser.GetBrowser().CloseBrowser(forceClose);
+                e.Cancel = true;
+            }
         }
 
         public static void Show(string fileName)
