@@ -2,11 +2,9 @@
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views;
-using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Windows;
 
 namespace CefFlashBrowser
@@ -46,7 +44,6 @@ namespace CefFlashBrowser
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
-
             GlobalData.SaveData();
 
             if (_restart)
@@ -65,20 +62,15 @@ namespace CefFlashBrowser
         /*====================================================================================================*/
 
 
-        public static readonly string BaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        public static readonly string EmptyExePath = Path.Combine(BaseDirectory, @"CefFlashBrowser.EmptyExe.exe");
-        public static readonly string CachePath = Path.Combine(BaseDirectory, @"Caches\");
-        public static readonly string FlashPath = Path.Combine(BaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
-
         private static void InitCefFlash()
         {
-            Environment.SetEnvironmentVariable("ComSpec", EmptyExePath); //Remove black popup window
+            Environment.SetEnvironmentVariable("ComSpec", GlobalData.EmptyExePath); //Remove black popup window
 
             var settings = new CefFlashSettings()
             {
                 Locale = GlobalData.Settings.Language,
-                CachePath = CachePath,
-                PpapiFlashPath = FlashPath,
+                CachePath = GlobalData.CachePath,
+                PpapiFlashPath = GlobalData.FlashPath,
                 EnableSystemFlash = true
             };
 
@@ -88,7 +80,7 @@ namespace CefFlashBrowser
             }
             else
             {
-                settings.PpapiFlashVersion = FileVersionInfo.GetVersionInfo(FlashPath).FileVersion.Replace(',', '.');
+                settings.PpapiFlashVersion = FileVersionInfo.GetVersionInfo(GlobalData.FlashPath).FileVersion.Replace(',', '.');
             }
 
             if (GlobalData.Settings.UserAgentSetting.EnableCustom)

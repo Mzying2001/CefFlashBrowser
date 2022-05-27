@@ -8,16 +8,27 @@ namespace CefFlashBrowser.Models.Data
 {
     public static class GlobalData
     {
-        public static string DocumentPath => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        public static string AppBaseDirectory { get; }
+        public static string EmptyExePath { get; }
+        public static string CachePath { get; }
+        public static string FlashPath { get; }
+
+        public static string UserDocumentPath { get; }
         public static string DataPath { get; }
         public static string FavoritesPath { get; }
         public static string SettingsPath { get; }
 
         static GlobalData()
         {
-            DataPath = Path.Combine(DocumentPath, "CefFlashBrowser");
-            FavoritesPath = Path.Combine(DataPath, "Favorites.json");
-            SettingsPath = Path.Combine(DataPath, "Settings.json");
+            AppBaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            EmptyExePath = Path.Combine(AppBaseDirectory, @"CefFlashBrowser.EmptyExe.exe");
+            CachePath = Path.Combine(AppBaseDirectory, @"Caches\");
+            FlashPath = Path.Combine(AppBaseDirectory, @"Assets\Plugins\pepflashplayer.dll");
+
+            UserDocumentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            DataPath = Path.Combine(UserDocumentPath, @"CefFlashBrowser\");
+            FavoritesPath = Path.Combine(DataPath, @"Favorites.json");
+            SettingsPath = Path.Combine(DataPath, @"Settings.json");
 
             InitData();
         }

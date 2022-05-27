@@ -144,7 +144,7 @@ namespace CefFlashBrowser.ViewModels
                         try
                         {
                             CefSharp.Cef.Shutdown();
-                            DeleteDirectory(App.CachePath);
+                            DeleteDirectory(GlobalData.CachePath);
                             break;
                         }
                         catch (Exception e)
