@@ -8,6 +8,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace CefFlashBrowser.Views
@@ -190,6 +191,29 @@ namespace CefFlashBrowser.Views
             }
         }
 
+        private class BrowserFocusHandler : FocusHandler
+        {
+            private readonly BrowserWindow window;
+
+            public BrowserFocusHandler(BrowserWindow window)
+            {
+                this.window = window;
+            }
+
+            private void SetBrowserAsFocusedElement()
+            {
+                window.Dispatcher.Invoke(delegate
+                {
+                    FocusManager.SetFocusedElement(window, window.browser);
+                });
+            }
+
+            public override void OnGotFocus(IWebBrowser chromiumWebBrowser, IBrowser browser)
+            {
+                SetBrowserAsFocusedElement();
+            }
+        }
+
         private bool _doClose = false;
 
         public BrowserWindow()
@@ -202,6 +226,7 @@ namespace CefFlashBrowser.Views
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.KeyboardHandler = new BrowserKeyboardHandler();
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
+            browser.FocusHandler = new BrowserFocusHandler(this);
         }
 
         private void WindowSourceInitialized(object sender, EventArgs e)
