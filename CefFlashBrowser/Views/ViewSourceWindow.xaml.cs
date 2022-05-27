@@ -35,6 +35,7 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
 
+            browser.DragHandler = new Utils.Handlers.DisableDragHandler();
             browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();

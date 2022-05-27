@@ -69,6 +69,7 @@ namespace CefFlashBrowser.Views
 
             WindowSizeInfo.Apply(GlobalData.Settings.SwfWindowSizeInfo, this);
 
+            browser.DragHandler = new Utils.Handlers.DisableDragHandler();
             browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
