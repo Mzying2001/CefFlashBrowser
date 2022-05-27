@@ -69,7 +69,7 @@ namespace CefFlashBrowser
             var settings = new CefFlashSettings()
             {
                 Locale = GlobalData.Settings.Language,
-                CachePath = GlobalData.CachePath,
+                CachePath = GlobalData.CachesPath,
                 PpapiFlashPath = GlobalData.FlashPath,
                 EnableSystemFlash = true
             };
