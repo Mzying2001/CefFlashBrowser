@@ -12,30 +12,6 @@ namespace CefFlashBrowser.Utils.Handlers
 {
     public class ContextMenuHandler : FlashBrowser.Handlers.ContextMenuHandler
     {
-        private static IList<CefMenuItemInfo> GetMenuItemInfoList(IMenuModel model)
-        {
-            if (model == null)
-            {
-                return null;
-            }
-
-            List<CefMenuItemInfo> list = new List<CefMenuItemInfo>();
-
-            for (var i = 0; i < model.Count; i++)
-            {
-                list.Add(new CefMenuItemInfo
-                {
-                    Header = model.GetLabelAt(i),
-                    IsEnable = model.IsEnabledAt(i),
-                    IsChecked = model.IsCheckedAt(i),
-                    CommandID = model.GetCommandIdAt(i),
-                    SubMenuItemInfos = GetMenuItemInfoList(model.GetSubMenuAt(i))
-                });
-            }
-
-            return list;
-        }
-
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
 
@@ -67,61 +43,50 @@ namespace CefFlashBrowser.Utils.Handlers
 
         public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
         {
+            var result = false;
             var linkUrl = parameters.LinkUrl;
             var selectionText = parameters.SelectionText;
 
-            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
-
-            switch (commandId)
+            ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
             {
-                case CefMenuCommand.ViewSource:
-                    {
-                        webBrowser.Dispatcher.Invoke(delegate
+                switch (commandId)
+                {
+                    case CefMenuCommand.ViewSource:
                         {
-                            ViewSourceWindow.Show(webBrowser.Address);
-                        });
-                        return true;
-                    }
-                case Search:
-                    {
-                        webBrowser.Dispatcher.Invoke(delegate
+                            ViewSourceWindow.Show(chromiumWebBrowser.Address);
+                            result = true;
+                            break;
+                        }
+                    case Search:
                         {
                             BrowserWindow.Show(SearchEngineUtil.GetUrl(selectionText, GlobalData.Settings.SearchEngine));
-                        });
-                        return true;
-                    }
-                case OpenInNewWindow:
-                    {
-                        webBrowser.Dispatcher.Invoke(delegate
+                            result = true;
+                            break;
+                        }
+                    case OpenInNewWindow:
                         {
                             BrowserWindow.Show(linkUrl);
-                        });
-                        return true;
-                    }
-                default:
-                    {
-                        return false;
-                    }
-            }
+                            result = true;
+                            break;
+                        }
+                }
+            });
+            return result;
         }
 
         public override void OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
         {
-            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
-
-            webBrowser.Dispatcher.Invoke(() =>
+            ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
             {
-                webBrowser.ContextMenu = null;
+                ((FrameworkElement)chromiumWebBrowser).ContextMenu = null;
             });
         }
 
         public override bool RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
         {
-            var menuItemInfoList = GetMenuItemInfoList(model);
+            var menuItemInfoList = CefMenuItemInfo.GetMenuItemInfoList(model);
 
-            ChromiumWebBrowser webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
-
-            webBrowser.Dispatcher.Invoke(() =>
+            ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
             {
                 var menu = new ContextMenu
                 {
@@ -139,13 +104,13 @@ namespace CefFlashBrowser.Utils.Handlers
                 }
                 menu.Closed += menuClosedHandler;
 
-                webBrowser.ContextMenu = menu;
+                ((FrameworkElement)chromiumWebBrowser).ContextMenu = menu;
             });
 
             return true;
         }
 
-        private IEnumerable<Control> GetMenuItems(IList<CefMenuItemInfo> subMenuItemInfos, IRunContextMenuCallback callback)
+        private static IEnumerable<Control> GetMenuItems(IList<CefMenuItemInfo> subMenuItemInfos, IRunContextMenuCallback callback)
         {
             if (subMenuItemInfos == null)
             {
@@ -164,17 +129,18 @@ namespace CefFlashBrowser.Utils.Handlers
                 {
                     Header = GetHeader(item),
                     IsChecked = item.IsChecked,
+                    ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback),
+
                     Command = new DelegateCommand
                     {
                         CanExecute = item.IsEnable,
                         Execute = delegate { callback.Continue(item.CommandID, CefEventFlags.None); }
-                    },
-                    ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback)
+                    }
                 };
             }
         }
 
-        private string GetHeader(CefMenuItemInfo menuItemInfo)
+        private static string GetHeader(CefMenuItemInfo menuItemInfo)
         {
             string header;
             switch (menuItemInfo.CommandID)
@@ -260,7 +226,6 @@ namespace CefFlashBrowser.Utils.Handlers
                         break;
                     }
             }
-
             return header;
         }
     }

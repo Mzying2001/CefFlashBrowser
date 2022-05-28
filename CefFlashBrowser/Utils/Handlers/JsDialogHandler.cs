@@ -2,7 +2,6 @@
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
-using System.Windows;
 
 namespace CefFlashBrowser.Utils.Handlers
 {
@@ -16,7 +15,7 @@ namespace CefFlashBrowser.Utils.Handlers
                 return true;
             }
 
-            Application.Current.Dispatcher.Invoke(() =>
+            ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
             {
                 var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
                 JsConfirmDialog.ShowDialog(messageText, title, result =>
@@ -30,46 +29,35 @@ namespace CefFlashBrowser.Utils.Handlers
         public override bool OnJSDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, CefJsDialogType dialogType, string messageText, string defaultPromptText, IJsDialogCallback callback, ref bool suppressMessage)
         {
             var wpfWebBrowser = (IWpfWebBrowser)chromiumWebBrowser;
-
-            switch (dialogType)
+            wpfWebBrowser.Dispatcher.Invoke(delegate
             {
-                case CefJsDialogType.Alert:
-                    {
-                        wpfWebBrowser.Dispatcher.Invoke(() =>
+                switch (dialogType)
+                {
+                    case CefJsDialogType.Alert:
                         {
                             JsAlertDialog.ShowDialog(messageText, wpfWebBrowser.Title);
-                        });
-                        suppressMessage = true;
-                        return false;
-                    }
-
-                case CefJsDialogType.Confirm:
-                    {
-                        wpfWebBrowser.Dispatcher.Invoke(() =>
+                            callback.Continue(true);
+                            break;
+                        }
+                    case CefJsDialogType.Confirm:
                         {
                             JsConfirmDialog.ShowDialog(messageText, wpfWebBrowser.Title, result =>
                             {
                                 callback.Continue(result == true);
                             });
-                        });
-                        suppressMessage = false;
-                        return true;
-                    }
-
-                case CefJsDialogType.Prompt:
-                    {
-                        wpfWebBrowser.Dispatcher.Invoke(() =>
+                            break;
+                        }
+                    case CefJsDialogType.Prompt:
                         {
                             JsPromptDialog.ShowDialog(messageText, wpfWebBrowser.Title, defaultPromptText, result =>
                             {
                                 callback.Continue(result != null, result);
                             });
-                        });
-                        suppressMessage = false;
-                        return true;
-                    }
-            }
-            return false;
+                            break;
+                        }
+                }
+            });
+            return true;
         }
     }
 }

@@ -29,12 +29,11 @@ namespace CefFlashBrowser.Views
             public override bool OnPreKeyEvent(IWebBrowser chromiumWebBrowser, IBrowser browser, KeyType type, int windowsKeyCode, int nativeKeyCode, CefEventFlags modifiers, bool isSystemKey, ref bool isKeyboardShortcut)
             {
                 if (type != KeyType.KeyUp)
+                {
                     return false;
-
-                var webBrowser = (ChromiumWebBrowser)chromiumWebBrowser;
+                }
                 var result = false;
-
-                webBrowser.Dispatcher.Invoke(delegate
+                ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
                 {
                     if (modifiers == CefEventFlags.None)
                     {
@@ -66,13 +65,13 @@ namespace CefFlashBrowser.Views
                         {
                             case '0': //Ctrl+0
                                 {
-                                    webBrowser.ZoomReset();
+                                    ((ChromiumWebBrowser)chromiumWebBrowser).ZoomReset();
                                     result = true;
                                     break;
                                 }
                             case 'D': //Ctrl+D
                                 {
-                                    viewModel.AddFavorite(webBrowser);
+                                    viewModel.AddFavorite(chromiumWebBrowser);
                                     result = true;
                                     break;
                                 }
@@ -102,7 +101,7 @@ namespace CefFlashBrowser.Views
                                 }
                             case 'S': //Ctrl+S
                                 {
-                                    viewModel.CreateShortcut(webBrowser);
+                                    viewModel.CreateShortcut(chromiumWebBrowser);
                                     result = true;
                                     break;
                                 }
@@ -133,7 +132,6 @@ namespace CefFlashBrowser.Views
                         }
                     }
                 });
-
                 return result;
             }
         }
@@ -151,7 +149,7 @@ namespace CefFlashBrowser.Views
             {
                 if (!browser.IsPopup)
                 {
-                    window.Dispatcher.Invoke(delegate
+                    ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
                     {
                         window._doClose = true;
                         window.Close();
@@ -162,7 +160,7 @@ namespace CefFlashBrowser.Views
 
             public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
             {
-                window.Dispatcher.Invoke(delegate
+                ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
                 {
                     if (targetDisposition == WindowOpenDisposition.NewPopup)
                     {
