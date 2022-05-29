@@ -305,7 +305,7 @@
                                     ZoomLevelIncrement="0.25"/>
 
         <Popup x:Name="statusPopup"
-               IsOpen="True"
+               IsOpen="{Binding ElementName=browserWindow, Path=IsActive, Mode=OneWay}"
                StaysOpen="True"
                Placement="Absolute"
                AllowsTransparency="True">
