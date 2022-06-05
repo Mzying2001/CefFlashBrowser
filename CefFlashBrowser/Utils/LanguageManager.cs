@@ -58,18 +58,6 @@ namespace CefFlashBrowser.Utils
             return LanguageDictionaries.ContainsKey(language);
         }
 
-        public static string GetLanguageName(string language)
-        {
-            if (IsSupportedLanguage(language))
-            {
-                return LanguageDictionaries[language]["language_name"].ToString();
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public static string CurrentLanguage
         {
             get
@@ -82,7 +70,7 @@ namespace CefFlashBrowser.Utils
                 int index = GetLangResDicIndex();
                 if (index != -1 && IsSupportedLanguage(value))
                 {
-                    Application.Current.Resources.MergedDictionaries[GetLangResDicIndex()] = LanguageDictionaries[value];
+                    Application.Current.Resources.MergedDictionaries[index] = LanguageDictionaries[value];
                     GlobalData.Settings.Language = value;
                     Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, value);
                 }
@@ -108,6 +96,11 @@ namespace CefFlashBrowser.Utils
         public static string GetString(string key)
         {
             return GetString(GlobalData.Settings.Language, key);
+        }
+
+        public static string GetLanguageName(string language)
+        {
+            return GetString(language, "language_name");
         }
     }
 }
