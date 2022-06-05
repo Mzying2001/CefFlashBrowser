@@ -92,9 +92,22 @@ namespace CefFlashBrowser.Utils
 
 
 
+        public static string GetString(string language, string key)
+        {
+            if (IsSupportedLanguage(language))
+            {
+                var dic = LanguageDictionaries[language];
+                return dic[key].ToString();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public static string GetString(string key)
         {
-            return GetCurLangResDic()[key].ToString();
+            return GetString(GlobalData.Settings.Language, key);
         }
     }
 }
