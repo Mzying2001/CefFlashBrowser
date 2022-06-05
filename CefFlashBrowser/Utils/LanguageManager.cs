@@ -9,70 +9,92 @@ namespace CefFlashBrowser.Utils
 {
     public static class LanguageManager
     {
-        private static readonly string[] SupportedLanguage =
+        private static Dictionary<string, ResourceDictionary> LanguageDictionaries { get; }
+
+        static LanguageManager()
         {
-            "en-US",
-            "zh-CN",
-            "zh-TW"
-        };
+            LanguageDictionaries = new Dictionary<string, ResourceDictionary>
+            {
+                ["zh-CN"] = new ResourceDictionary() { Source = new Uri("Assets/Language/zh-CN.xaml", UriKind.Relative) },
+                ["zh-TW"] = new ResourceDictionary() { Source = new Uri("Assets/Language/zh-TW.xaml", UriKind.Relative) },
+                ["en-US"] = new ResourceDictionary() { Source = new Uri("Assets/Language/en-US.xaml", UriKind.Relative) },
+            };
+
+            CurrentLanguage = GlobalData.Settings.Language;
+        }
+
+
+
+
+        private static int GetLangResDicIndex()
+        {
+            var dics = Application.Current.Resources.MergedDictionaries;
+            for (int i = 0; i < dics.Count; i++)
+            {
+                if (dics[i].Source.ToString().StartsWith("Assets/Language/"))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private static ResourceDictionary GetCurLangResDic()
+        {
+            int index = GetLangResDicIndex();
+            return index != -1 ? Application.Current.Resources.MergedDictionaries[index] : null;
+        }
+
+
+
 
         public static IEnumerable<string> GetSupportedLanguage()
         {
-            return from item in SupportedLanguage orderby GetLanguageName(item) select item;
+            return from item in LanguageDictionaries orderby GetLanguageName(item.Key) select item.Key;
         }
 
         public static bool IsSupportedLanguage(string language)
         {
-            return SupportedLanguage.Contains(language);
+            return LanguageDictionaries.ContainsKey(language);
         }
 
-        private static ResourceDictionary LanguageResourceDic
+        public static string GetLanguageName(string language)
         {
-            get => Application.Current.Resources.MergedDictionaries[0];
-        }
-
-        private static Uri GetUri(string language)
-        {
-            return new Uri($"Assets\\Language\\{language}.xaml", UriKind.Relative);
+            if (IsSupportedLanguage(language))
+            {
+                return LanguageDictionaries[language]["language_name"].ToString();
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public static string CurrentLanguage
         {
             get
             {
-                string url = LanguageResourceDic.Source.ToString();
-                return url.Substring(url.LastIndexOf('\\') + 1, url.LastIndexOf('.') - url.LastIndexOf('\\') - 1);
+                string url = GetCurLangResDic().Source.ToString();
+                return url?.Split('/')?.Last()?.Split('.')?.First();
             }
             set
             {
-                if (IsSupportedLanguage(value))
+                int index = GetLangResDicIndex();
+                if (index != -1 && IsSupportedLanguage(value))
                 {
-                    LanguageResourceDic.Source = GetUri(value);
+                    Application.Current.Resources.MergedDictionaries[GetLangResDicIndex()] = LanguageDictionaries[value];
                     GlobalData.Settings.Language = value;
                     Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, value);
                 }
             }
         }
 
-        public static string GetLanguageName(string language)
-        {
-            if (IsSupportedLanguage(language))
-                return new ResourceDictionary() { Source = GetUri(language) }["language_name"].ToString();
-            else
-                throw new Exception("Unsupported language.");
-        }
+
+
 
         public static string GetString(string key)
         {
-            return Application.Current.Resources.MergedDictionaries[0][key].ToString();
+            return GetCurLangResDic()[key].ToString();
         }
-
-
-
-        static LanguageManager()
-        {
-            CurrentLanguage = GlobalData.Settings.Language;
-        }
-
     }
 }
