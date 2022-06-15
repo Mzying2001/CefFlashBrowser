@@ -307,12 +307,12 @@
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\SettingsWindowViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
+    <Compile Include="Utils\Behaviors\TextBoxSelectAllOnFocus.cs" />
     <Compile Include="Views\BrowserWindow.xaml.cs">
       <DependentUpon>BrowserWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\Converters\BoolToObject.cs" />
     <Compile Include="Utils\Converters\ValueConverterBase.cs" />
-    <Compile Include="Views\Custom\AutoSelectAllTextBox.cs" />
     <Compile Include="Views\Custom\DropableWindow.cs" />
     <Compile Include="Views\Custom\SettingItem.cs" />
     <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">

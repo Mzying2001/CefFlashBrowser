@@ -15,10 +15,6 @@
             <!--Application Info-->
             <m:AppInfo x:Key="AppInfo"/>
 
-            <!--Style-->
-            <Style TargetType="{x:Type c:AutoSelectAllTextBox}"
-                   BasedOn="{StaticResource {x:Type TextBox}}"/>
-
 
             <ResourceDictionary.MergedDictionaries>
                 <!--Language-->

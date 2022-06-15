@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:cc="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs.JsDialogs"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
         x:Name="dialog"
@@ -47,16 +48,19 @@
                    Text="{Binding ElementName=dialog, Path=Message}"
                    Style="{StaticResource JsPromptDialogTextStyle}"/>
 
-        <cc:AutoSelectAllTextBox x:Name="inputBox"
-                                 Grid.Row="2"
-                                 Grid.Column="1"
-                                 Style="{StaticResource JsDialogPromptTextBoxStyle}"
-                                 Text="{Binding ElementName=dialog, Path=Input, UpdateSourceTrigger=PropertyChanged}">
+        <TextBox x:Name="inputBox"
+                 Grid.Row="2"
+                 Grid.Column="1"
+                 Style="{StaticResource JsDialogPromptTextBoxStyle}"
+                 Text="{Binding ElementName=dialog, Path=Input, UpdateSourceTrigger=PropertyChanged}">
+            <i:Interaction.Behaviors>
+                <behaviors:TextBoxSelectAllOnFocus/>
+            </i:Interaction.Behaviors>
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
                             Command="{Binding ElementName=dialog, Path=OkCommand}"/>
             </TextBox.InputBindings>
-        </cc:AutoSelectAllTextBox>
+        </TextBox>
 
         <StackPanel Grid.Row="3"
                     Grid.Column="1"

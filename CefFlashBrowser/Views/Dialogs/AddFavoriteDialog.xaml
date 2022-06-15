@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
         x:Name="dialog"
@@ -17,7 +18,7 @@
         Closing="Window_Closing">
 
     <Window.Resources>
-        <Style TargetType="{x:Type c:AutoSelectAllTextBox}"
+        <Style TargetType="TextBox"
                BasedOn="{StaticResource TextBoxBaseStyle}">
             <Setter Property="Width"
                     Value="300"/>
@@ -32,24 +33,30 @@
     <StackPanel Margin="15">
         <TextBlock Margin="5"
                    Text="{DynamicResource favorites_name}"/>
-        <c:AutoSelectAllTextBox x:Name="NameTextBox"
-                                Margin="0,0,0,5"
-                                Text="{Binding ItemName, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
+        <TextBox x:Name="NameTextBox"
+                 Margin="0,0,0,5"
+                 Text="{Binding ItemName, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
+            <i:Interaction.Behaviors>
+                <behaviors:TextBoxSelectAllOnFocus/>
+            </i:Interaction.Behaviors>
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
                             Command="{Binding OkCommand, ElementName=dialog}"/>
             </TextBox.InputBindings>
-        </c:AutoSelectAllTextBox>
+        </TextBox>
 
         <TextBlock Margin="5"
                    Text="{DynamicResource favorites_url}"/>
-        <c:AutoSelectAllTextBox x:Name="UrlTextBox"
-                                Text="{Binding ItemUrl, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
+        <TextBox x:Name="UrlTextBox"
+                 Text="{Binding ItemUrl, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
+            <i:Interaction.Behaviors>
+                <behaviors:TextBoxSelectAllOnFocus/>
+            </i:Interaction.Behaviors>
             <TextBox.InputBindings>
                 <KeyBinding Key="Enter"
                             Command="{Binding OkCommand, ElementName=dialog}"/>
             </TextBox.InputBindings>
-        </c:AutoSelectAllTextBox>
+        </TextBox>
 
         <Grid Margin="0,15,0,0">
             <Grid.ColumnDefinitions>

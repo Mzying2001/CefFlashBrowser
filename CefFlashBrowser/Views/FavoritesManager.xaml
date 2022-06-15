@@ -2,13 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
         Width="700"
@@ -110,24 +110,30 @@
                     <TextBlock Margin="5"
                                Text="{StaticResource favorites_name}"
                                Foreground="Black"/>
-                    <c:AutoSelectAllTextBox Margin="0,0,0,10"
-                                            Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox Margin="0,0,0,10"
+                             Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <i:Interaction.Behaviors>
+                            <behaviors:TextBoxSelectAllOnFocus/>
+                        </i:Interaction.Behaviors>
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter"
                                         Command="{Binding SaveChangesCommand}"/>
                         </TextBox.InputBindings>
-                    </c:AutoSelectAllTextBox>
+                    </TextBox>
 
                     <TextBlock Margin="5"
                                Text="{StaticResource favorites_url}"
                                Foreground="Black"/>
-                    <c:AutoSelectAllTextBox Margin="0,0,0,20"
-                                            Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox Margin="0,0,0,20"
+                             Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <i:Interaction.Behaviors>
+                            <behaviors:TextBoxSelectAllOnFocus/>
+                        </i:Interaction.Behaviors>
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter"
                                         Command="{Binding SaveChangesCommand}"/>
                         </TextBox.InputBindings>
-                    </c:AutoSelectAllTextBox>
+                    </TextBox>
 
                     <Grid Margin="0,0,0,10">
                         <StackPanel Orientation="Horizontal"

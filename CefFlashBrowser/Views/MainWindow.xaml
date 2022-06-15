@@ -5,12 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:CefFlashBrowser"
-    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
     xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
     xmlns:m="clr-namespace:CefFlashBrowser.Models"
     xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
     mc:Ignorable="d"
     
     Width="600"
@@ -133,13 +134,16 @@
             </TextBlock>
 
             <!--The url textBox-->
-            <c:AutoSelectAllTextBox>
+            <TextBox>
+                <i:Interaction.Behaviors>
+                    <behaviors:TextBoxSelectAllOnFocus/>
+                </i:Interaction.Behaviors>
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding OpenUrlCommand}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TextBox}, Path=Text}"/>
                 </TextBox.InputBindings>
-            </c:AutoSelectAllTextBox>
+            </TextBox>
 
         </StackPanel>
 

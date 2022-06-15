@@ -4,13 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
-        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
         xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:converter="clr-namespace:CefFlashBrowser.Utils.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
         x:Name="browserWindow"
@@ -269,16 +270,19 @@
                 </Button.ToolTip>
             </Button>
 
-            <c:AutoSelectAllTextBox Grid.Column="3"
-                                    Margin="5,0"
-                                    Height="30"
-                                    Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
+            <TextBox Grid.Column="3"
+                     Margin="5,0"
+                     Height="30"
+                     Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
+                <i:Interaction.Behaviors>
+                    <behaviors:TextBoxSelectAllOnFocus/>
+                </i:Interaction.Behaviors>
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TextBox}, Path=Text}"/>
                 </TextBox.InputBindings>
-            </c:AutoSelectAllTextBox>
+            </TextBox>
 
             <StackPanel Grid.Column="4"
                         Orientation="Horizontal">
