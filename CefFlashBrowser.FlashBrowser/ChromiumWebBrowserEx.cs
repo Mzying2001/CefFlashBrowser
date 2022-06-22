@@ -3,7 +3,6 @@ using CefSharp;
 using SimpleMvvm.Command;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace CefFlashBrowser.FlashBrowser
 {
@@ -13,10 +12,15 @@ namespace CefFlashBrowser.FlashBrowser
         {
             public override void OnGotFocus(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
+                if (browser.IsPopup)
+                {
+                    return; //ignore if method is called by devtools
+                }
+
                 ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
                 {
                     DependencyObject d = (DependencyObject)chromiumWebBrowser;
-                    while (VisualTreeHelper.GetParent(d) is DependencyObject parent)
+                    while (LogicalTreeHelper.GetParent(d) is DependencyObject parent)
                     {
                         d = parent;
                     }
