@@ -14,7 +14,7 @@
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
-        x:Name="browserWindow"
+        x:Name="window"
         Width="Auto"
         Height="Auto"
         MinWidth="400"
@@ -309,7 +309,7 @@
                                     ZoomLevelIncrement="0.25"/>
 
         <Popup x:Name="statusPopup"
-               IsOpen="{Binding ElementName=browserWindow, Path=IsActive, Mode=OneWay}"
+               IsOpen="{Binding ElementName=window, Path=IsActive, Mode=OneWay}"
                StaysOpen="True"
                Placement="Absolute"
                AllowsTransparency="True">

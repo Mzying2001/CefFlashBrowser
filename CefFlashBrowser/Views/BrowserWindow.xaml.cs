@@ -239,7 +239,7 @@ namespace CefFlashBrowser.Views
         {
             if (browser.IsDisposed || _doClose)
             {
-                browserWindow.WindowState = WindowState.Normal;
+                window.WindowState = WindowState.Normal;
                 GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
             }
             else
