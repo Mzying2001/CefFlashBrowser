@@ -85,7 +85,6 @@ namespace CefFlashBrowser.Views
         {
             if (browser.IsDisposed || _doClose)
             {
-                window.WindowState = WindowState.Normal;
                 GlobalData.Settings.SwfWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
             }
             else
