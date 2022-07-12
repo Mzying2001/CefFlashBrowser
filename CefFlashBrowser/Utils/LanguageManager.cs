@@ -63,7 +63,7 @@ namespace CefFlashBrowser.Utils
             get
             {
                 string url = GetCurLangResDic().Source.ToString();
-                return url?.Split('/')?.Last()?.Split('.')?.First();
+                return System.IO.Path.GetFileNameWithoutExtension(url);
             }
             set
             {
@@ -101,6 +101,11 @@ namespace CefFlashBrowser.Utils
         public static string GetLanguageName(string language)
         {
             return GetString(language, "language_name");
+        }
+
+        public static string GetLocale(string language)
+        {
+            return GetString(language, "locale");
         }
     }
 }
