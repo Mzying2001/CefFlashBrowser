@@ -6,7 +6,6 @@ using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System.Collections.ObjectModel;
-using System.Windows;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -18,7 +17,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand LoadSwfCommand { get; set; }
         public DelegateCommand ViewGithubCommand { get; set; }
         public DelegateCommand OpenWebsiteCommand { get; set; }
-        public DelegateCommand OnDropCommand { get; set; }
+        public DelegateCommand DropFileCommand { get; set; }
         public DelegateCommand SwitchLanguageCommand { get; set; }
 
         public ObservableCollection<string> Language { get; set; }
@@ -96,17 +95,17 @@ namespace CefFlashBrowser.ViewModels
             BrowserWindow.Show(website.Url);
         }
 
-        private void OnDrop(DragEventArgs args)
+        private void DropFile(string[] files)
         {
-            var data = args.Data.GetData(DataFormats.FileDrop) as string[];
-            if (data != null)
+            foreach (var item in files)
             {
-                foreach (var item in data)
+                if (UrlChecker.IsLocalSwfFile(item))
                 {
-                    if (UrlChecker.IsLocalSwfFile(item))
-                        SwfPlayerWindow.Show(item);
-                    else
-                        BrowserWindow.Show(item);
+                    SwfPlayerWindow.Show(item);
+                }
+                else
+                {
+                    BrowserWindow.Show(item);
                 }
             }
         }
@@ -126,7 +125,7 @@ namespace CefFlashBrowser.ViewModels
             LoadSwfCommand = new DelegateCommand(LoadSwf);
             ViewGithubCommand = new DelegateCommand(ViewGithub);
             OpenWebsiteCommand = new DelegateCommand<Website>(OpenWebsite);
-            OnDropCommand = new DelegateCommand<DragEventArgs>(OnDrop);
+            DropFileCommand = new DelegateCommand<string[]>(DropFile);
             SwitchLanguageCommand = new DelegateCommand<string>(SwitchLanguage);
         }
     }

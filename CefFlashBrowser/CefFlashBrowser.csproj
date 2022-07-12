@@ -272,6 +272,7 @@
     <Compile Include="Models\FakeFlashVersionSetting.cs" />
     <Compile Include="Models\ProxySettings.cs" />
     <Compile Include="Models\UserAgentSetting.cs" />
+    <Compile Include="Utils\Behaviors\DropFileBehavior.cs" />
     <Compile Include="Utils\Converters\IsCurrentLanguage.cs" />
     <Compile Include="Utils\Converters\LanguageCodeToName.cs" />
     <Compile Include="Utils\Converters\MultiValueConverterBase.cs" />
@@ -313,7 +314,6 @@
     </Compile>
     <Compile Include="Utils\Converters\BoolToObject.cs" />
     <Compile Include="Utils\Converters\ValueConverterBase.cs" />
-    <Compile Include="Views\Custom\DropableWindow.cs" />
     <Compile Include="Views\Custom\SettingItem.cs" />
     <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">
       <DependentUpon>AddFavoriteDialog.xaml</DependentUpon>

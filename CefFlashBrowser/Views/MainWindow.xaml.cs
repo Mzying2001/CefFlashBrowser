@@ -1,5 +1,4 @@
 ﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Views.Custom;
 using CefFlashBrowser.Views.Dialogs;
 using SimpleMvvm.Messaging;
 using System.Windows;
@@ -10,7 +9,7 @@ namespace CefFlashBrowser.Views
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : DropableWindow
+    public partial class MainWindow : Window
     {
         private static Window window = null;
 
