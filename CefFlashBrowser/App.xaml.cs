@@ -1,7 +1,6 @@
 ﻿using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.Views;
 using CefSharp;
 using System;
 using System.Diagnostics;
@@ -19,8 +18,14 @@ namespace CefFlashBrowser
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-
             InitCefFlash();
+
+            if (GlobalData.Settings.FirstStart)
+            {
+                GlobalData.Settings.FirstStart = false;
+                WindowManager.ShowSelectLanguageDialog();
+                return;
+            }
 
             if (e.Args.Length == 0)
             {

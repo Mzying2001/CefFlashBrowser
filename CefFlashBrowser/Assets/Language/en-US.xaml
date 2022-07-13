@@ -7,6 +7,9 @@
     <!--App-->
     <sys:String x:Key="invalidStartUpParam">Invalid start-up parameter</sys:String>
 
+    <!--Select Language Dialog-->
+    <sys:String x:Key="selectLanguageTips">Select language</sys:String>
+
     <!--Main Window-->
     <sys:String x:Key="window_title">Welcome ♪(^∇^*)</sys:String>
     <sys:String x:Key="button_go">Go</sys:String>

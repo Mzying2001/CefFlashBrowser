@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Views;
+using CefFlashBrowser.Views.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -100,6 +101,11 @@ namespace CefFlashBrowser.Utils
         public static void ShowSettingsWindow()
         {
             ShowWindow<SettingsWindow>(true);
+        }
+
+        public static SelectLanguageDialog ShowSelectLanguageDialog()
+        {
+            return ShowWindow<SelectLanguageDialog>(save: true);
         }
     }
 }

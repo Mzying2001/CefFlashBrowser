@@ -7,74 +7,38 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
         mc:Ignorable="d"
         
-        x:Name="dialog"
-        Height="250"
-        Width="400"
+        Width="300"
+        Height="300"
+        Topmost="True"
+        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Topmost="True">
-
-    <Window.Resources>
-        <Style TargetType="Button"
-               BasedOn="{StaticResource ButtonDefault}">
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Width" Value="100"/>
-        </Style>
-    </Window.Resources>
+        FocusManager.FocusedElement="{Binding ElementName=langList}">
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
-        <TextBlock Grid.Row="1" Margin="0,0,0,50" FontSize="25"
-                   Text="{Binding ElementName=dialog, Path=Header, TargetNullValue=Hello}"
-                   HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"/>
-
+        <Grid Grid.Row="0">
+            <TextBlock Margin="10"
+                       Text="{DynamicResource selectLanguageTips}"
+                       FontSize="20"
+                       HorizontalAlignment="Center"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <ListBox x:Name="langList"
+                     Margin="10,0"
+                     SelectionChanged="LangListSelectionChanged"/>
+        </Grid>
         <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                <Button Content="English"
-                        Command="{Binding SelectLanguageCommand, ElementName=dialog}" CommandParameter="en-US">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseEnter">
-                            <i:InvokeCommandAction Command="{Binding SetHeaderCommand, ElementName=dialog}"
-                                                   CommandParameter="Select language"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </Button>
-
-                <Button Content="中文"
-                        Command="{Binding SelectLanguageCommand, ElementName=dialog}" CommandParameter="zh-CN">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseEnter">
-                            <i:InvokeCommandAction Command="{Binding SetHeaderCommand, ElementName=dialog}"
-                                                   CommandParameter="请选择语言"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </Button>
-
-                <Button Content="中文（繁體）"
-                        Command="{Binding SelectLanguageCommand, ElementName=dialog}" CommandParameter="zh-TW">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseEnter">
-                            <i:InvokeCommandAction Command="{Binding SetHeaderCommand, ElementName=dialog}"
-                                                   CommandParameter="請選擇語言"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </Button>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button Margin="10"
+                        MinWidth="70"
+                        Style="{StaticResource ButtonPrimary}"
+                        Content="{DynamicResource button_ok}"
+                        Click="OkButtonClick"/>
             </StackPanel>
         </Grid>
     </Grid>

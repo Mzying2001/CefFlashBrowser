@@ -7,6 +7,9 @@
     <!--App-->
     <sys:String x:Key="invalidStartUpParam">無效的啟動參數</sys:String>
 
+    <!--選擇語言對話方塊-->
+    <sys:String x:Key="selectLanguageTips">請選擇語言</sys:String>
+
     <!--主介面-->
     <sys:String x:Key="window_title">歡迎 ヾ(≧∇≦*)ゝ</sys:String>
     <sys:String x:Key="button_go">跳轉</sys:String>

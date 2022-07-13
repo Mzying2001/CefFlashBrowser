@@ -1,7 +1,7 @@
 ﻿using CefFlashBrowser.Utils;
-using SimpleMvvm.Command;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
-using System.Windows.Input;
 
 namespace CefFlashBrowser.Views.Dialogs
 {
@@ -10,34 +10,34 @@ namespace CefFlashBrowser.Views.Dialogs
     /// </summary>
     public partial class SelectLanguageDialog : Window
     {
-
-
-        public string Header
-        {
-            get { return (string)GetValue(HeaderProperty); }
-            set { SetValue(HeaderProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for Header.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty HeaderProperty =
-            DependencyProperty.Register("Header", typeof(string), typeof(SelectLanguageDialog), new PropertyMetadata(null));
-
-
-        public ICommand SetHeaderCommand { get; }
-        public ICommand SelectLanguageCommand { get; }
-
+        private readonly List<string> supportedLanguage;
 
         public SelectLanguageDialog()
         {
-            SetHeaderCommand = new DelegateCommand<string>(header => Header = header);
-
-            SelectLanguageCommand = new DelegateCommand<string>(language =>
-            {
-                LanguageManager.CurrentLanguage = language;
-                Close();
-            });
-
             InitializeComponent();
+            supportedLanguage = LanguageManager.GetSupportedLanguage().ToList();
+            langList.ItemsSource = from item in supportedLanguage select LanguageManager.GetLanguageName(item);
+
+            for (int i = 0; i < supportedLanguage.Count; i++)
+            {
+                if (supportedLanguage[i] == LanguageManager.CurrentLanguage)
+                {
+                    langList.SelectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        private void LangListSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (langList.SelectedIndex != -1)
+                LanguageManager.CurrentLanguage = supportedLanguage[langList.SelectedIndex];
+        }
+
+        private void OkButtonClick(object sender, RoutedEventArgs e)
+        {
+            WindowManager.ShowMainWindow();
+            Close();
         }
     }
 }

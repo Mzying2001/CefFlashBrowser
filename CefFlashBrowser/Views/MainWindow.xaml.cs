@@ -1,5 +1,4 @@
 ﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Views.Dialogs;
 using SimpleMvvm.Messaging;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,14 +12,7 @@ namespace CefFlashBrowser.Views
     {
         public MainWindow()
         {
-            if (GlobalData.Settings.FirstStart)
-            {
-                new SelectLanguageDialog().ShowDialog();
-                GlobalData.Settings.FirstStart = false;
-            }
-
             InitializeComponent();
-
             Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
         }
 
