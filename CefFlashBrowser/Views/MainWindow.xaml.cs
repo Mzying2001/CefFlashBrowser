@@ -11,8 +11,6 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static Window window = null;
-
         public MainWindow()
         {
             if (GlobalData.Settings.FirstStart)
@@ -40,23 +38,7 @@ namespace CefFlashBrowser.Views
 
         private void MainWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            window = null;
             Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
-        }
-
-        public static new void Show()
-        {
-            if (window == null)
-            {
-                window = new MainWindow();
-                window.Show();
-            }
-            else
-            {
-                if (window.WindowState == WindowState.Minimized)
-                    window.WindowState = WindowState.Normal;
-                window.Activate();
-            }
         }
     }
 }

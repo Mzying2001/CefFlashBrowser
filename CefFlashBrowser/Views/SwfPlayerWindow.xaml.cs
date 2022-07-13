@@ -1,6 +1,7 @@
 ﻿using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Utils;
 using CefSharp;
 using System;
 using System.Net;
@@ -34,7 +35,7 @@ namespace CefFlashBrowser.Views
 
             public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
             {
-                Application.Current.Dispatcher.Invoke(() => BrowserWindow.Show(targetUrl));
+                Application.Current.Dispatcher.Invoke(() => WindowManager.ShowBrowser(targetUrl));
                 newBrowser = null;
                 return true;
             }
@@ -76,11 +77,6 @@ namespace CefFlashBrowser.Views
             browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
         }
 
-        public SwfPlayerWindow(string fileName) : this()
-        {
-            FileName = fileName;
-        }
-
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (browser.IsDisposed || _doClose)
@@ -93,11 +89,6 @@ namespace CefFlashBrowser.Views
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
-        }
-
-        public static void Show(string fileName)
-        {
-            new SwfPlayerWindow(fileName).Show();
         }
     }
 }

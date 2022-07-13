@@ -1,6 +1,5 @@
 ﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
@@ -26,12 +25,12 @@ namespace CefFlashBrowser.ViewModels
 
         public void ShowMainWindow()
         {
-            MainWindow.Show();
+            WindowManager.ShowMainWindow();
         }
 
         public void ViewSource(string url)
         {
-            ViewSourceWindow.Show(url);
+            WindowManager.ShowViewSourceWindow(url);
         }
 
         public void OpenInDefaultBrowser(string url)
@@ -122,7 +121,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void OpenInSwfPlayer(string url)
         {
-            SwfPlayerWindow.Show(url);
+            WindowManager.ShowSwfPlayer(url);
         }
 
         public BrowserWindowViewModel()

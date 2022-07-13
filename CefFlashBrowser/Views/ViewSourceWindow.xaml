@@ -12,6 +12,5 @@
         Height="Auto"
         Width="Auto">
 
-    <flash:ChromiumFlashBrowser x:Name="browser"
-                                Address="{Binding ElementName=window, Path=Address, StringFormat=view-source:\{0\}}"/>
+    <flash:ChromiumFlashBrowser x:Name="browser"/>
 </Window>

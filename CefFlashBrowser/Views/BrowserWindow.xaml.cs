@@ -167,7 +167,7 @@ namespace CefFlashBrowser.Views
                 {
                     if (targetDisposition == WindowOpenDisposition.NewPopup)
                     {
-                        PopupWebPage.Show(targetUrl, popupFeatures);
+                        WindowManager.ShowPopupWebPage(targetUrl, popupFeatures);
                     }
                     else
                     {
@@ -175,7 +175,7 @@ namespace CefFlashBrowser.Views
                         {
                             case NewPageBehavior.NewWindow:
                                 {
-                                    Show(targetUrl);
+                                    WindowManager.ShowBrowser(targetUrl);
                                     break;
                                 }
                             case NewPageBehavior.OriginalWindow:
@@ -269,13 +269,6 @@ namespace CefFlashBrowser.Views
         private void ShowBlockedSwfsButtonClicked(object sender, RoutedEventArgs e)
         {
             OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["blockedSwfs"]);
-        }
-
-        public static void Show(string address)
-        {
-            var window = new BrowserWindow();
-            window.browser.Load(address);
-            window.Show();
         }
     }
 }

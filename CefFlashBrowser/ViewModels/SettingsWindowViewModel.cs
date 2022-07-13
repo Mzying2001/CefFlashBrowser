@@ -167,7 +167,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void PopupAboutCef()
         {
-            BrowserWindow.Show("chrome://version/");
+            WindowManager.ShowBrowser("chrome://version/");
         }
 
         private void SetNewPageBehavior(NewPageBehavior newPageBehavior)

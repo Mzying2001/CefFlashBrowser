@@ -24,7 +24,7 @@ namespace CefFlashBrowser
 
             if (e.Args.Length == 0)
             {
-                Views.MainWindow.Show();
+                WindowManager.ShowMainWindow();
                 return;
             }
 
@@ -32,11 +32,11 @@ namespace CefFlashBrowser
             {
                 if (UrlChecker.IsLocalSwfFile(arg))
                 {
-                    SwfPlayerWindow.Show(arg);
+                    WindowManager.ShowSwfPlayer(arg);
                 }
                 else
                 {
-                    BrowserWindow.Show(arg);
+                    WindowManager.ShowBrowser(arg);
                 }
             }
         }

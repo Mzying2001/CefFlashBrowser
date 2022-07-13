@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.FlashBrowser.Handlers;
+using CefFlashBrowser.Utils;
 using CefSharp;
 using System.Windows;
 
@@ -13,7 +14,7 @@ namespace CefFlashBrowser.Views
         {
             public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
             {
-                Application.Current.Dispatcher.Invoke(() => BrowserWindow.Show(targetUrl));
+                Application.Current.Dispatcher.Invoke(() => WindowManager.ShowBrowser(targetUrl));
                 newBrowser = null;
                 return true;
             }
@@ -28,7 +29,10 @@ namespace CefFlashBrowser.Views
 
         // Using a DependencyProperty as the backing store for Address.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty AddressProperty =
-            DependencyProperty.Register("Address", typeof(string), typeof(ViewSourceWindow), new PropertyMetadata(null));
+            DependencyProperty.Register("Address", typeof(string), typeof(ViewSourceWindow), new PropertyMetadata(null, (d, e) =>
+            {
+                ((ViewSourceWindow)d).browser.Address = $"view-source:{e.NewValue}";
+            }));
 
 
         public ViewSourceWindow()
@@ -45,16 +49,6 @@ namespace CefFlashBrowser.Views
             {
                 browser.GetBrowser().CloseBrowser(true);
             };
-        }
-
-        public ViewSourceWindow(string address) : this()
-        {
-            Address = address;
-        }
-
-        public static void Show(string address)
-        {
-            new ViewSourceWindow(address).Show();
         }
     }
 }

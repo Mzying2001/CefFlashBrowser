@@ -34,7 +34,7 @@ namespace CefFlashBrowser.ViewModels
 
             if (UrlChecker.IsLocalSwfFile(url))
             {
-                SwfPlayerWindow.Show(url);
+                WindowManager.ShowSwfPlayer(url);
                 return;
             }
 
@@ -60,17 +60,17 @@ namespace CefFlashBrowser.ViewModels
                     break;
             }
 
-            BrowserWindow.Show(url);
+            WindowManager.ShowBrowser(url);
         }
 
         private void OpenSettingsWindow()
         {
-            new SettingsWindow().ShowDialog();
+            WindowManager.ShowSettingsWindow();
         }
 
         private void OpenFavoritesManager()
         {
-            new FavoritesManager().ShowDialog();
+            WindowManager.ShowFavoritesManager();
         }
 
         private void LoadSwf()
@@ -81,18 +81,18 @@ namespace CefFlashBrowser.ViewModels
             };
             if (ofd.ShowDialog() == true)
             {
-                SwfPlayerWindow.Show(ofd.FileName);
+                WindowManager.ShowSwfPlayer(ofd.FileName);
             }
         }
 
         private void ViewGithub()
         {
-            BrowserWindow.Show("https://github.com/Mzying2001/CefFlashBrowser");
+            WindowManager.ShowBrowser("https://github.com/Mzying2001/CefFlashBrowser");
         }
 
         private void OpenWebsite(Website website)
         {
-            BrowserWindow.Show(website.Url);
+            WindowManager.ShowBrowser(website.Url);
         }
 
         private void DropFile(string[] files)
@@ -101,11 +101,11 @@ namespace CefFlashBrowser.ViewModels
             {
                 if (UrlChecker.IsLocalSwfFile(item))
                 {
-                    SwfPlayerWindow.Show(item);
+                    WindowManager.ShowSwfPlayer(item);
                 }
                 else
                 {
-                    BrowserWindow.Show(item);
+                    WindowManager.ShowBrowser(item);
                 }
             }
         }

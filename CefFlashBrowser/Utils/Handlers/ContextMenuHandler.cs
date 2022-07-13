@@ -1,6 +1,5 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Views;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
@@ -53,19 +52,19 @@ namespace CefFlashBrowser.Utils.Handlers
                 {
                     case CefMenuCommand.ViewSource:
                         {
-                            ViewSourceWindow.Show(chromiumWebBrowser.Address);
+                            WindowManager.ShowViewSourceWindow(chromiumWebBrowser.Address);
                             result = true;
                             break;
                         }
                     case Search:
                         {
-                            BrowserWindow.Show(SearchEngineUtil.GetUrl(selectionText, GlobalData.Settings.SearchEngine));
+                            WindowManager.ShowBrowser(SearchEngineUtil.GetUrl(selectionText, GlobalData.Settings.SearchEngine));
                             result = true;
                             break;
                         }
                     case OpenInNewWindow:
                         {
-                            BrowserWindow.Show(linkUrl);
+                            WindowManager.ShowBrowser(linkUrl);
                             result = true;
                             break;
                         }
