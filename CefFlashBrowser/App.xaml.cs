@@ -22,8 +22,8 @@ namespace CefFlashBrowser
 
             if (GlobalData.Settings.FirstStart)
             {
-                GlobalData.Settings.FirstStart = false;
-                WindowManager.ShowSelectLanguageDialog();
+                if (WindowManager.ShowSelectLanguageDialog())
+                    GlobalData.Settings.FirstStart = false;
                 return;
             }
 

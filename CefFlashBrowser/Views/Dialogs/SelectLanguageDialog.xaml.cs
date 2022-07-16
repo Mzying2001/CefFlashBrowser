@@ -28,16 +28,16 @@ namespace CefFlashBrowser.Views.Dialogs
             }
         }
 
-        private void LangListSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void OnLangListSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (langList.SelectedIndex != -1)
                 LanguageManager.CurrentLanguage = supportedLanguage[langList.SelectedIndex];
         }
 
-        private void OkButtonClick(object sender, RoutedEventArgs e)
+        private void OnConfirmButtonClick(object sender, RoutedEventArgs e)
         {
             WindowManager.ShowMainWindow();
-            Close();
+            DialogResult = true;
         }
     }
 }
