@@ -1,7 +1,6 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
@@ -72,11 +71,10 @@ namespace CefFlashBrowser.ViewModels
 
         private void AddItem()
         {
-            AddFavoriteDialog.ShowDialog(LanguageManager.GetString("favorites_defaultName"), "about:blank", result =>
+            if (WindowManager.ShowAddFavoriteDialog(LanguageManager.GetString("favorites_defaultName"), "about:blank"))
             {
-                if (result == true)
-                    SelectedIndex = GlobalData.Favorites.Count - 1;
-            });
+                SelectedIndex = GlobalData.Favorites.Count - 1;
+            };
         }
 
         private void RemoveItem(Website item)

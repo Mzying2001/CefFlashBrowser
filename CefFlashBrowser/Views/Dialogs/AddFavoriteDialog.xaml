@@ -5,84 +5,65 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
-        x:Name="dialog"
-        Title="{DynamicResource title_addFavorite}"
+        x:Name="window"
+        Width="350"
+        Height="220"
         Topmost="True"
-        SizeToContent="WidthAndHeight"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Loaded="Window_Loaded"
-        Closing="Window_Closing">
+        Title="{DynamicResource title_addFavorite}"
+        FocusManager.FocusedElement="{Binding ElementName=NameTextBox}">
 
-    <Window.Resources>
-        <Style TargetType="TextBox"
-               BasedOn="{StaticResource TextBoxBaseStyle}">
-            <Setter Property="Width"
-                    Value="300"/>
-        </Style>
-    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-    <Window.InputBindings>
-        <KeyBinding Key="Esc"
-                    Command="{Binding CancelCommand, ElementName=dialog}"/>
-    </Window.InputBindings>
-
-    <StackPanel Margin="15">
-        <TextBlock Margin="5"
-                   Text="{DynamicResource favorites_name}"/>
-        <TextBox x:Name="NameTextBox"
-                 Margin="0,0,0,5"
-                 Text="{Binding ItemName, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
-            <i:Interaction.Behaviors>
-                <behaviors:TextBoxSelectAllOnFocus/>
-            </i:Interaction.Behaviors>
-            <TextBox.InputBindings>
-                <KeyBinding Key="Enter"
-                            Command="{Binding OkCommand, ElementName=dialog}"/>
-            </TextBox.InputBindings>
-        </TextBox>
-
-        <TextBlock Margin="5"
-                   Text="{DynamicResource favorites_url}"/>
-        <TextBox x:Name="UrlTextBox"
-                 Text="{Binding ItemUrl, ElementName=dialog, UpdateSourceTrigger=PropertyChanged}">
-            <i:Interaction.Behaviors>
-                <behaviors:TextBoxSelectAllOnFocus/>
-            </i:Interaction.Behaviors>
-            <TextBox.InputBindings>
-                <KeyBinding Key="Enter"
-                            Command="{Binding OkCommand, ElementName=dialog}"/>
-            </TextBox.InputBindings>
-        </TextBox>
-
-        <Grid Margin="0,15,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <Button Grid.Column="1"
-                    MinWidth="70"
-                    Content="{DynamicResource button_cancel}"
-                    Command="{Binding CancelCommand, ElementName=dialog}"/>
-
-            <Button Grid.Column="2"
-                    MinWidth="70"
-                    Margin="10,0,0,0"
-                    Content="{DynamicResource button_ok}"
-                    Style="{StaticResource ButtonPrimary}"
-                    Command="{Binding OkCommand, ElementName=dialog}">
-                <Button.IsEnabled>
-                    <MultiBinding Converter="{StaticResource StringArrNotAnyEmpty}">
-                        <Binding ElementName="dialog" Path="ItemName"/>
-                        <Binding ElementName="dialog" Path="ItemUrl"/>
-                    </MultiBinding>
-                </Button.IsEnabled>
-            </Button>
+        <Grid Grid.Row="0">
+            <StackPanel Margin="15,0"
+                        VerticalAlignment="Center">
+                <hc:TextBox x:Name="NameTextBox"
+                            hc:TitleElement.Title="{DynamicResource favorites_name}"
+                            Text="{Binding ElementName=window, Path=ItemName, UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:TextBoxSelectAllOnFocus/>
+                    </i:Interaction.Behaviors>
+                </hc:TextBox>
+                <hc:TextBox x:Name="UrlTextBox"
+                            hc:TitleElement.Title="{DynamicResource favorites_url}"
+                            Text="{Binding ElementName=window, Path=ItemUrl, UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:TextBoxSelectAllOnFocus/>
+                    </i:Interaction.Behaviors>
+                </hc:TextBox>
+            </StackPanel>
         </Grid>
-    </StackPanel>
+
+        <Grid Grid.Row="1">
+            <StackPanel Margin="15"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button MinWidth="70"
+                        Content="{DynamicResource button_cancel}"
+                        Click="OnCancelButtonClick"/>
+                <Button MinWidth="70"
+                        Margin="10,0,0,0"
+                        Content="{DynamicResource button_ok}"
+                        Style="{StaticResource ButtonPrimary}"
+                        Click="OnConfirmButtonClick">
+                    <Button.IsEnabled>
+                        <MultiBinding Converter="{StaticResource StringArrNotAnyEmpty}">
+                            <Binding ElementName="window" Path="ItemName"/>
+                            <Binding ElementName="window" Path="ItemUrl"/>
+                        </MultiBinding>
+                    </Button.IsEnabled>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
 </Window>

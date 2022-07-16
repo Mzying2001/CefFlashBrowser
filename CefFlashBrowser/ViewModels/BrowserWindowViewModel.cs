@@ -1,6 +1,5 @@
 ﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using IWshRuntimeLibrary;
@@ -93,7 +92,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void AddFavorite(IWebBrowser browser)
         {
-            AddFavoriteDialog.ShowDialog(GetWebBrowserTitle(browser), browser.Address);
+            WindowManager.ShowAddFavoriteDialog(GetWebBrowserTitle(browser), browser.Address);
         }
 
         public void CloseBrowser(IWebBrowser browser)

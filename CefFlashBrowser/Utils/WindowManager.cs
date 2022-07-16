@@ -107,5 +107,10 @@ namespace CefFlashBrowser.Utils
         {
             return ShowWindow<SelectLanguageDialog>(save: true);
         }
+
+        public static bool ShowAddFavoriteDialog(string name = "", string url = "")
+        {
+            return new AddFavoriteDialog() { ItemName = name, ItemUrl = url }.ShowDialog() == true;
+        }
     }
 }
