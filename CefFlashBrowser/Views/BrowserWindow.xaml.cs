@@ -191,7 +191,36 @@ namespace CefFlashBrowser.Views
             }
         }
 
+        private class BrowserDisplayHandler : DisplayHandler
+        {
+            private readonly BrowserWindow window;
+
+            public BrowserDisplayHandler(BrowserWindow window)
+            {
+                this.window = window;
+            }
+
+            public override void OnFullscreenModeChange(IWebBrowser chromiumWebBrowser, IBrowser browser, bool fullscreen)
+            {
+                window.Dispatcher.Invoke(() => window.FullScreen = fullscreen);
+            }
+        }
+
+
         private bool _doClose = false;
+        private bool _isMaximizedBeforeFullScreen = false;
+
+
+        public bool FullScreen
+        {
+            get { return (bool)GetValue(FullScreenProperty); }
+            set { SetValue(FullScreenProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for FullScreen.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty FullScreenProperty =
+            DependencyProperty.Register("FullScreen", typeof(bool), typeof(BrowserWindow), new PropertyMetadata(false, OnFullScreenChange));
+
 
         public BrowserWindow()
         {
@@ -203,6 +232,31 @@ namespace CefFlashBrowser.Views
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.KeyboardHandler = new BrowserKeyboardHandler();
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
+            browser.DisplayHandler = new BrowserDisplayHandler(this);
+        }
+
+        private static void OnFullScreenChange(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            BrowserWindow window = (BrowserWindow)d;
+            if ((e.OldValue != e.NewValue) && (bool)e.NewValue)
+            {
+                window._isMaximizedBeforeFullScreen = window.WindowState == WindowState.Maximized;
+                if (window._isMaximizedBeforeFullScreen)
+                    window.WindowState = WindowState.Normal;
+
+                window.Topmost = true;
+                window.WindowStyle = WindowStyle.None;
+                window.WindowState = WindowState.Maximized;
+            }
+            else
+            {
+                window.Topmost = false;
+                window.WindowStyle = WindowStyle.SingleBorderWindow;
+                window.WindowState = WindowState.Normal;
+
+                if (window._isMaximizedBeforeFullScreen)
+                    window.WindowState = WindowState.Maximized;
+            }
         }
 
         private void WindowSourceInitialized(object sender, EventArgs e)
@@ -239,7 +293,8 @@ namespace CefFlashBrowser.Views
         {
             if (browser.IsDisposed || _doClose)
             {
-                GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+                if (!FullScreen)
+                    GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
             }
             else
             {
