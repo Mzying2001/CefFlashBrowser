@@ -19,11 +19,17 @@ namespace CefFlashBrowser.Views
     {
         private class BrowserKeyboardHandler : KeyboardHandler
         {
+            private readonly BrowserWindow window;
             private static readonly ViewModels.BrowserWindowViewModel viewModel;
 
             static BrowserKeyboardHandler()
             {
                 viewModel = ((ViewModels.ViewModelLocator)Application.Current.Resources["Locator"]).BrowserWindowViewModel;
+            }
+
+            public BrowserKeyboardHandler(BrowserWindow window)
+            {
+                this.window = window;
             }
 
             public override bool OnPreKeyEvent(IWebBrowser chromiumWebBrowser, IBrowser browser, KeyType type, int windowsKeyCode, int nativeKeyCode, CefEventFlags modifiers, bool isSystemKey, ref bool isKeyboardShortcut)
@@ -49,6 +55,11 @@ namespace CefFlashBrowser.Views
                                 {
                                     browser.Reload();
                                     result = true;
+                                    break;
+                                }
+                            case Win32.VirtualKeys.VK_F11: //F11
+                                {
+                                    window.FullScreen = !window.FullScreen;
                                     break;
                                 }
                             case Win32.VirtualKeys.VK_F12: //F12
@@ -230,7 +241,7 @@ namespace CefFlashBrowser.Views
             browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
-            browser.KeyboardHandler = new BrowserKeyboardHandler();
+            browser.KeyboardHandler = new BrowserKeyboardHandler(this);
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.DisplayHandler = new BrowserDisplayHandler(this);
         }
