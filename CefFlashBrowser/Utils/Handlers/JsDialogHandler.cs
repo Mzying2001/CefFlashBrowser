@@ -1,5 +1,4 @@
 ﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 
@@ -18,7 +17,7 @@ namespace CefFlashBrowser.Utils.Handlers
             ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
             {
                 var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
-                JsConfirmDialog.ShowDialog(messageText, title, result =>
+                WindowManager.Confirm(messageText, title, result =>
                 {
                     callback.Continue(result == true);
                 });
@@ -35,13 +34,13 @@ namespace CefFlashBrowser.Utils.Handlers
                 {
                     case CefJsDialogType.Alert:
                         {
-                            JsAlertDialog.ShowDialog(messageText, wpfWebBrowser.Title);
+                            WindowManager.Alert(messageText, wpfWebBrowser.Title);
                             callback.Continue(true);
                             break;
                         }
                     case CefJsDialogType.Confirm:
                         {
-                            JsConfirmDialog.ShowDialog(messageText, wpfWebBrowser.Title, result =>
+                            WindowManager.Confirm(messageText, wpfWebBrowser.Title, result =>
                             {
                                 callback.Continue(result == true);
                             });
@@ -49,9 +48,9 @@ namespace CefFlashBrowser.Utils.Handlers
                         }
                     case CefJsDialogType.Prompt:
                         {
-                            JsPromptDialog.ShowDialog(messageText, wpfWebBrowser.Title, defaultPromptText, result =>
+                            WindowManager.Prompt(messageText, wpfWebBrowser.Title, defaultPromptText, (success, input) =>
                             {
-                                callback.Continue(result != null, result);
+                                callback.Continue(success == true, input);
                             });
                             break;
                         }

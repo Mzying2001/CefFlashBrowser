@@ -1,0 +1,49 @@
+﻿<Window x:Class="CefFlashBrowser.Views.Dialogs.JsPromptDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        mc:Ignorable="d"
+        
+        x:Name="window"
+        Width="420"
+        Height="200"
+        Topmost="True"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        FocusManager.FocusedElement="{Binding ElementName=okButton}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <hc:TextBox Margin="15"
+                        TextWrapping="Wrap"
+                        AcceptsReturn="True"
+                        VerticalContentAlignment="Top"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        Text="{Binding ElementName=window, Path=InputText, UpdateSourceTrigger=PropertyChanged}"
+                        hc:TitleElement.Title="{Binding ElementName=window, Path=Message}"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <StackPanel Margin="0,0,15,15"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button x:Name="cancelButton"
+                        MinWidth="70"
+                        Content="{StaticResource button_cancel}"
+                        Click="OnCancelButtonClick"/>
+                <Button x:Name="okButton"
+                        Margin="10,0,0,0"
+                        MinWidth="70"
+                        Style="{StaticResource ButtonPrimary}"
+                        Content="{StaticResource button_ok}"
+                        Click="OnOkButtonClick"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

@@ -122,5 +122,36 @@ namespace CefFlashBrowser.Utils
                 window.NameTextBox.SelectAll();
             }).DialogResult == true;
         }
+
+        public static void Alert(string message = "", string title = "", Action<bool> callback = null)
+        {
+            bool result = ShowWindow<JsAlertDialog>(true, initializer: window =>
+            {
+                window.Title = title;
+                window.Message = message;
+            }).DialogResult == true;
+            callback?.Invoke(result);
+        }
+
+        public static void Confirm(string message = "", string title = "", Action<bool?> callback = null)
+        {
+            bool? result = ShowWindow<JsConfirmDialog>(true, initializer: window =>
+            {
+                window.Title = title;
+                window.Message = message;
+            }).DialogResult;
+            callback?.Invoke(result);
+        }
+
+        public static void Prompt(string message = "", string title = "", string defaultInputText = "", Action<bool?, string> callback = null)
+        {
+            JsPromptDialog dialog = ShowWindow<JsPromptDialog>(true, initializer: window =>
+            {
+                window.Title = title;
+                window.Message = message;
+                window.InputText = defaultInputText;
+            });
+            callback?.Invoke(dialog.DialogResult, dialog.InputText);
+        }
     }
 }

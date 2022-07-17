@@ -1,6 +1,5 @@
 ﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using CefSharp;
 using IWshRuntimeLibrary;
 using SimpleMvvm;
@@ -85,7 +84,7 @@ namespace CefFlashBrowser.ViewModels
                 }
                 catch (Exception e)
                 {
-                    JsAlertDialog.ShowDialog(e.Message);
+                    WindowManager.Alert(e.Message);
                 }
             }
         }

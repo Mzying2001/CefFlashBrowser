@@ -1,7 +1,6 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 
@@ -79,7 +78,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void RemoveItem(Website item)
         {
-            JsConfirmDialog.ShowDialog(string.Format(LanguageManager.GetString("message_removeItem"), GlobalData.Favorites[SelectedIndex].Name), "", result =>
+            WindowManager.Confirm(string.Format(LanguageManager.GetString("message_removeItem"), GlobalData.Favorites[SelectedIndex].Name), "", result =>
             {
                 if (result == true)
                 {

@@ -1,8 +1,6 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.Views;
-using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
@@ -135,7 +133,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void DeleteCache()
         {
-            JsConfirmDialog.ShowDialog(LanguageManager.GetString("message_deleteCache"), callback: result =>
+            WindowManager.Confirm(LanguageManager.GetString("message_deleteCache"), callback: result =>
             {
                 if (result == true)
                 {
@@ -177,7 +175,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void AskRestartApp()
         {
-            JsConfirmDialog.ShowDialog(LanguageManager.GetString("message_restart"), callback: result =>
+            WindowManager.Confirm(LanguageManager.GetString("message_restart"), callback: result =>
             {
                 if (result == true)
                     App.Restart();

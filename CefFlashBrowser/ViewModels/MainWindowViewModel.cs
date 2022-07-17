@@ -1,8 +1,6 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.Views;
-using CefFlashBrowser.Views.Dialogs.JsDialogs;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System.Collections.ObjectModel;
@@ -26,7 +24,7 @@ namespace CefFlashBrowser.ViewModels
         {
             if (string.IsNullOrWhiteSpace(url))
             {
-                JsAlertDialog.ShowDialog(LanguageManager.GetString("message_emptyUrl"));
+                WindowManager.Alert(LanguageManager.GetString("message_emptyUrl"));
                 return;
             }
 

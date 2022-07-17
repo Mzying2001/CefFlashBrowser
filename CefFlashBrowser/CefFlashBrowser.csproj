@@ -319,13 +319,13 @@
     <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">
       <DependentUpon>AddFavoriteDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Dialogs\JsDialogs\JsAlertDialog.xaml.cs">
+    <Compile Include="Views\Dialogs\JsAlertDialog.xaml.cs">
       <DependentUpon>JsAlertDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Dialogs\JsDialogs\JsConfirmDialog.xaml.cs">
+    <Compile Include="Views\Dialogs\JsConfirmDialog.xaml.cs">
       <DependentUpon>JsConfirmDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Dialogs\JsDialogs\JsPromptDialog.xaml.cs">
+    <Compile Include="Views\Dialogs\JsPromptDialog.xaml.cs">
       <DependentUpon>JsPromptDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dialogs\SelectLanguageDialog.xaml.cs">
@@ -370,19 +370,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Dialogs\JsDialogs\JsAlertDialog.xaml">
+    <Page Include="Views\Dialogs\JsAlertDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Dialogs\JsDialogs\JsConfirmDialog.xaml">
+    <Page Include="Views\Dialogs\JsConfirmDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Dialogs\JsDialogs\JsDialogResources.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Dialogs\JsDialogs\JsPromptDialog.xaml">
+    <Page Include="Views\Dialogs\JsPromptDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
