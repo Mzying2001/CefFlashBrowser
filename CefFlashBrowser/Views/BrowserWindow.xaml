@@ -189,7 +189,8 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0"
-              Margin="10">
+              Margin="10"
+              Visibility="{Binding ElementName=window,Path=FullScreen, Converter={StaticResource Boolean2VisibilityReConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
