@@ -63,9 +63,9 @@ namespace CefFlashBrowser.Utils
             return window;
         }
 
-        public static MainWindow ShowMainWindow()
+        public static void ShowMainWindow()
         {
-            return ShowWindow<MainWindow>(save: true);
+            ShowWindow<MainWindow>(save: true);
         }
 
         public static BrowserWindow ShowBrowser(string address)
@@ -100,7 +100,7 @@ namespace CefFlashBrowser.Utils
 
         public static void ShowFavoritesManager()
         {
-            ShowWindow<FavoritesManager>(true);
+            ShowWindow<FavoritesManager>(save: true);
         }
 
         public static void ShowSettingsWindow()
