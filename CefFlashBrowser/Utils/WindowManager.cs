@@ -15,7 +15,7 @@ namespace CefFlashBrowser.Utils
             _windows = new Dictionary<Type, Window>();
         }
 
-        public static TWindow ShowWindow<TWindow>(bool modal = false, bool save = false) where TWindow : Window, new()
+        public static TWindow ShowWindow<TWindow>(bool modal = false, bool save = false, Action<TWindow> initializer = null) where TWindow : Window, new()
         {
             TWindow window = null;
 
@@ -41,6 +41,16 @@ namespace CefFlashBrowser.Utils
                 window = new TWindow();
             }
 
+            if (initializer != null)
+            {
+                window.SourceInitialized += WindowSourceInitializedHandler;
+                void WindowSourceInitializedHandler(object sender, EventArgs e)
+                {
+                    initializer((TWindow)sender);
+                    ((TWindow)sender).SourceInitialized -= WindowSourceInitializedHandler;
+                }
+            }
+
             if (modal)
             {
                 window.ShowDialog();
@@ -60,37 +70,32 @@ namespace CefFlashBrowser.Utils
 
         public static BrowserWindow ShowBrowser(string address)
         {
-            BrowserWindow window = ShowWindow<BrowserWindow>();
-            window.browser.Load(address);
-            return window;
+            return ShowWindow<BrowserWindow>(initializer: window => window.browser.Address = address);
         }
 
         public static SwfPlayerWindow ShowSwfPlayer(string fileName)
         {
-            SwfPlayerWindow window = ShowWindow<SwfPlayerWindow>();
-            window.FileName = fileName;
-            return window;
+            return ShowWindow<SwfPlayerWindow>(initializer: window => window.FileName = fileName);
         }
 
         public static PopupWebPage ShowPopupWebPage(string address, CefSharp.IPopupFeatures popupFeatures = null)
         {
-            PopupWebPage window = ShowWindow<PopupWebPage>();
-            window.Address = address;
-            if (popupFeatures != null)
+            return ShowWindow<PopupWebPage>(initializer: window =>
             {
-                window.Left = popupFeatures.X;
-                window.Top = popupFeatures.Y;
-                window.Width = popupFeatures.Width;
-                window.Height = popupFeatures.Height;
-            }
-            return window;
+                window.Address = address;
+                if (popupFeatures != null)
+                {
+                    window.Left = popupFeatures.X;
+                    window.Top = popupFeatures.Y;
+                    window.Width = popupFeatures.Width;
+                    window.Height = popupFeatures.Height;
+                }
+            });
         }
 
         public static ViewSourceWindow ShowViewSourceWindow(string address)
         {
-            ViewSourceWindow window = ShowWindow<ViewSourceWindow>();
-            window.Address = address;
-            return window;
+            return ShowWindow<ViewSourceWindow>(initializer: window => window.Address = address);
         }
 
         public static void ShowFavoritesManager()
@@ -105,13 +110,17 @@ namespace CefFlashBrowser.Utils
 
         public static bool ShowSelectLanguageDialog()
         {
-            SelectLanguageDialog window = ShowWindow<SelectLanguageDialog>(true);
-            return window.DialogResult == true;
+            return ShowWindow<SelectLanguageDialog>(true).DialogResult == true;
         }
 
         public static bool ShowAddFavoriteDialog(string name = "", string url = "")
         {
-            return new AddFavoriteDialog() { ItemName = name, ItemUrl = url }.ShowDialog() == true;
+            return ShowWindow<AddFavoriteDialog>(true, initializer: window =>
+            {
+                window.ItemName = name;
+                window.ItemUrl = url;
+                window.NameTextBox.SelectAll();
+            }).DialogResult == true;
         }
     }
 }
