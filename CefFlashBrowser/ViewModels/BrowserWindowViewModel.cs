@@ -84,7 +84,7 @@ namespace CefFlashBrowser.ViewModels
                 }
                 catch (Exception e)
                 {
-                    WindowManager.Alert(e.Message);
+                    WindowManager.ShowError(e.Message);
                 }
             }
         }

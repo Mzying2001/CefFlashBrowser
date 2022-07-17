@@ -153,5 +153,10 @@ namespace CefFlashBrowser.Utils
             });
             callback?.Invoke(dialog.DialogResult, dialog.InputText);
         }
+
+        public static void ShowError(string errMsg)
+        {
+            MessageBox.Show(errMsg, LanguageManager.GetString("title_error"), MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }
