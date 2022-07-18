@@ -181,6 +181,7 @@ namespace CefFlashBrowser.Views
                 {
                     if (targetDisposition == WindowOpenDisposition.NewPopup)
                     {
+                        window.FullScreen = false;
                         WindowManager.ShowPopupWebPage(targetUrl, popupFeatures);
                     }
                     else
@@ -189,6 +190,7 @@ namespace CefFlashBrowser.Views
                         {
                             case NewPageBehavior.NewWindow:
                                 {
+                                    window.FullScreen = false;
                                     WindowManager.ShowBrowser(targetUrl);
                                     break;
                                 }
