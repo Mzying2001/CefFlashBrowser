@@ -64,6 +64,7 @@ namespace CefFlashBrowser.Views
                                 }
                             case Win32.VirtualKeys.VK_F12: //F12
                                 {
+                                    window.FullScreen = false;
                                     viewModel.ShowDevTools(chromiumWebBrowser);
                                     result = true;
                                     break;
@@ -94,6 +95,7 @@ namespace CefFlashBrowser.Views
                                 }
                             case 'O': //Ctrl+O
                                 {
+                                    window.FullScreen = false;
                                     viewModel.OpenInDefaultBrowser(chromiumWebBrowser.Address);
                                     result = true;
                                     break;
@@ -106,6 +108,7 @@ namespace CefFlashBrowser.Views
                                 }
                             case 'U': //Ctrl+U
                                 {
+                                    window.FullScreen = false;
                                     viewModel.ViewSource(chromiumWebBrowser.Address);
                                     result = true;
                                     break;
@@ -213,7 +216,32 @@ namespace CefFlashBrowser.Views
 
             public override void OnFullscreenModeChange(IWebBrowser chromiumWebBrowser, IBrowser browser, bool fullscreen)
             {
-                window.Dispatcher.Invoke(() => window.FullScreen = fullscreen);
+                ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() => window.FullScreen = fullscreen);
+            }
+        }
+
+        private class BrowserMenuHandler : Utils.Handlers.ContextMenuHandler
+        {
+            private readonly BrowserWindow window;
+
+            public BrowserMenuHandler(BrowserWindow window)
+            {
+                this.window = window;
+            }
+
+            public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
+            {
+                switch (commandId)
+                {
+                    case Search:
+                    case OpenInNewWindow:
+                    case CefMenuCommand.ViewSource:
+                        {
+                            ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() => window.FullScreen = false);
+                            break;
+                        }
+                }
+                return base.OnContextMenuCommand(chromiumWebBrowser, browser, frame, parameters, commandId, eventFlags);
             }
         }
 
@@ -238,12 +266,12 @@ namespace CefFlashBrowser.Views
             InitializeComponent();
             WindowSizeInfo.Apply(GlobalData.Settings.BrowserWindowSizeInfo, this);
 
-            browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.KeyboardHandler = new BrowserKeyboardHandler(this);
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.DisplayHandler = new BrowserDisplayHandler(this);
+            browser.MenuHandler = new BrowserMenuHandler(this);
         }
 
         private static void OnFullScreenChange(DependencyObject d, DependencyPropertyChangedEventArgs e)
