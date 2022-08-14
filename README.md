@@ -3,7 +3,9 @@
     <br />
     CefFlashBrowser
     <br />
-    <img src="https://img.shields.io/github/license/Mzying2001/CefFlashBrowser" /> <img src="https://img.shields.io/github/v/release/Mzying2001/CefFlashBrowser?include_prereleases" /> <img src="https://img.shields.io/github/downloads/Mzying2001/CefFlashBrowser/total" />
+    <img src="https://img.shields.io/github/license/Mzying2001/CefFlashBrowser" />
+    <img src="https://img.shields.io/github/v/release/Mzying2001/CefFlashBrowser?include_prereleases" />
+    <img src="https://img.shields.io/github/downloads/Mzying2001/CefFlashBrowser/total" />
 </h1>
 
 FLASH BROWSER!
