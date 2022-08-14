@@ -3,7 +3,7 @@ using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -18,7 +18,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand DropFileCommand { get; set; }
         public DelegateCommand SwitchLanguageCommand { get; set; }
 
-        public ObservableCollection<string> Language { get; set; }
+        public List<string> Language { get; }
+            = new List<string>(LanguageManager.GetSupportedLanguage());
 
         private void OpenUrl(string url)
         {
@@ -115,8 +116,6 @@ namespace CefFlashBrowser.ViewModels
 
         public MainWindowViewModel()
         {
-            Language = new ObservableCollection<string>(LanguageManager.GetSupportedLanguage());
-
             OpenUrlCommand = new DelegateCommand<string>(OpenUrl);
             OpenSettingsWindowCommand = new DelegateCommand(OpenSettingsWindow);
             OpenFavoritesManagerCommand = new DelegateCommand(OpenFavoritesManager);
