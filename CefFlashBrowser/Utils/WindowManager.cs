@@ -23,7 +23,6 @@ namespace CefFlashBrowser.Utils
             {
                 if (_windows.ContainsKey(typeof(TWindow)))
                 {
-
                     window = (TWindow)_windows[typeof(TWindow)];
                     window.WindowState = window.WindowState == WindowState.Minimized ? WindowState.Normal : window.WindowState;
                     window.Activate();
@@ -105,7 +104,7 @@ namespace CefFlashBrowser.Utils
 
         public static void ShowSettingsWindow()
         {
-            ShowWindow<SettingsWindow>(true);
+            ShowWindow<SettingsWindow>(save: true);
         }
 
         public static bool ShowSelectLanguageDialog()

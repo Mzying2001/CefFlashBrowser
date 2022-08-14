@@ -4,6 +4,7 @@ using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
+using System.Collections.Generic;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -15,6 +16,43 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand PopupAboutCefCommand { get; set; }
         public DelegateCommand SetNewPageBehaviorCommand { get; set; }
         public DelegateCommand AskRestartAppCommand { get; set; }
+
+        public List<ItemViewModel<NavigationType>> NavigationTypes { get; } = new List<ItemViewModel<NavigationType>>
+        {
+            new ItemViewModel<NavigationType>(NavigationType.Automatic, "navigationType_auto"),
+            new ItemViewModel<NavigationType>(NavigationType.SearchOnly, "navigationType_searchOnly"),
+            new ItemViewModel<NavigationType>(NavigationType.NavigateOnly, "navigationType_navigateOnly")
+        };
+
+        public int CurrentNavigationTypeIndex
+        {
+            get => ItemViewModel.GetIndex(NavigationTypes, GlobalData.Settings.NavigationType);
+        }
+
+        public List<ItemViewModel<SearchEngine>> SearchEngines { get; } = new List<ItemViewModel<SearchEngine>>
+        {
+            new ItemViewModel<SearchEngine>(SearchEngine.Baidu, "baidu"),
+            new ItemViewModel<SearchEngine>(SearchEngine.Google, "google"),
+            new ItemViewModel<SearchEngine>(SearchEngine.Bing, "bing"),
+            new ItemViewModel<SearchEngine>(SearchEngine.Sogou, "sogou"),
+            new ItemViewModel<SearchEngine>(SearchEngine.So360, "so360")
+        };
+
+        public int CurrentSearchEngineIndex
+        {
+            get => ItemViewModel.GetIndex(SearchEngines, GlobalData.Settings.SearchEngine);
+        }
+
+        public List<ItemViewModel<NewPageBehavior>> NewPageBehaviors = new List<ItemViewModel<NewPageBehavior>>
+        {
+            new ItemViewModel<NewPageBehavior>(NewPageBehavior.OriginalWindow, "newPageBehavior_originalWindow"),
+            new ItemViewModel<NewPageBehavior>(NewPageBehavior.NewWindow, "newPageBehavior_newWindow")
+        };
+
+        public int CurrentNewPageBehaviorIndex
+        {
+            get => ItemViewModel.GetIndex(NewPageBehaviors, GlobalData.Settings.NewPageBehavior);
+        }
 
         public bool EnableFakeFlashVersion
         {

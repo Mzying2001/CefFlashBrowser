@@ -280,8 +280,6 @@
     <Compile Include="Utils\Converters\StringArrNotAnyEmpty.cs" />
     <Compile Include="Utils\Converters\TwoThird.cs" />
     <Compile Include="Utils\Converters\UrlDecoder.cs" />
-    <Compile Include="Models\EnumDescription.cs" />
-    <Compile Include="Models\EnumDescriptions.cs" />
     <Compile Include="Models\FavoritesFile.cs" />
     <Compile Include="Models\Data\GlobalData.cs" />
     <Compile Include="Utils\Converters\UrlGetFileName.cs" />
@@ -306,6 +304,7 @@
     <Compile Include="Utils\WindowManager.cs" />
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
     <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
+    <Compile Include="ViewModels\ItemViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\SettingsWindowViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
