@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
+using System.IO;
 
 namespace CefFlashBrowser.Utils.Converters
 {
@@ -8,14 +8,7 @@ namespace CefFlashBrowser.Utils.Converters
     {
         public override string Convert(string value, object parameter, CultureInfo culture)
         {
-            if (value == null)
-            {
-                return null;
-            }
-            else
-            {
-                return value.Split('/').LastOrDefault();
-            }
+            return Path.GetFileName(value);
         }
 
         public override string ConvertBack(string value, object parameter, CultureInfo culture)
