@@ -94,14 +94,14 @@
                 <!--Languages Option-->
                 <MenuItem x:Name="languageMenu"
                           Header="{DynamicResource menu_languages}"
-                          ItemsSource="{Binding Language}">
+                          ItemsSource="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel.LanguageList}">
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem"
                                BasedOn="{StaticResource MenuItemBaseStyle}">
                             <Setter Property="Header"
                                     Value="{Binding LanguageName, Mode=OneWay}"/>
                             <Setter Property="Command"
-                                    Value="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel.SwitchLanguageCommand}"/>
+                                    Value="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel.SetLanguageCommand}"/>
                             <Setter Property="CommandParameter"
                                     Value="{Binding Language}"/>
                             <Setter Property="IsChecked"

@@ -304,6 +304,7 @@
     <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
     <Compile Include="ViewModels\ItemViewModel.cs" />
     <Compile Include="ViewModels\LanguageItemViewModel.cs" />
+    <Compile Include="ViewModels\LanguageSelectorViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\SettingsWindowViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />

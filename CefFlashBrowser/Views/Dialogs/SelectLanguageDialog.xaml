@@ -12,7 +12,8 @@
         Topmost="True"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        FocusManager.FocusedElement="{Binding ElementName=langList}">
+        FocusManager.FocusedElement="{Binding ElementName=langList}"
+        DataContext="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel}">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -29,7 +30,23 @@
         <Grid Grid.Row="1">
             <ListBox x:Name="langList"
                      Margin="15,0"
-                     SelectionChanged="OnLangListSelectionChanged"/>
+                     ItemsSource="{Binding LanguageList}"
+                     DisplayMemberPath="LanguageName"
+                     SelectedValuePath="Language">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem"
+                           BasedOn="{StaticResource ListBoxItemBaseStyle}">
+                        <Setter Property="IsSelected"
+                                Value="{Binding IsCurrentLanguage, Mode=OneWay}"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding SetLanguageCommand}"
+                                               CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}, Path=SelectedValue}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
         </Grid>
         <Grid Grid.Row="2">
             <StackPanel Orientation="Horizontal"
