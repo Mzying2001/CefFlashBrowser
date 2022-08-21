@@ -273,8 +273,6 @@
     <Compile Include="Models\ProxySettings.cs" />
     <Compile Include="Models\UserAgentSetting.cs" />
     <Compile Include="Utils\Behaviors\DropFileBehavior.cs" />
-    <Compile Include="Utils\Converters\IsCurrentLanguage.cs" />
-    <Compile Include="Utils\Converters\LanguageCodeToName.cs" />
     <Compile Include="Utils\Converters\MultiValueConverterBase.cs" />
     <Compile Include="Utils\Converters\ObjectNotNull.cs" />
     <Compile Include="Utils\Converters\StringArrNotAnyEmpty.cs" />
@@ -305,6 +303,8 @@
     <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
     <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
     <Compile Include="ViewModels\ItemViewModel.cs" />
+    <Compile Include="ViewModels\LanguageItemViewModel.cs" />
+    <Compile Include="ViewModels\LanguageSelectorViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\SettingsWindowViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />

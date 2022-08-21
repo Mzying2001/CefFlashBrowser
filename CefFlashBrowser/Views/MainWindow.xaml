@@ -18,8 +18,7 @@
         MinHeight="300"
         Title="{DynamicResource window_title}"
         DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}"
-        WindowStartupLocation="CenterScreen"
-        Closing="MainWindowClosing">
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
 
@@ -95,18 +94,18 @@
                 <!--Languages Option-->
                 <MenuItem x:Name="languageMenu"
                           Header="{DynamicResource menu_languages}"
-                          ItemsSource="{Binding Language}">
+                          ItemsSource="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel.LanguageList}">
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem"
                                BasedOn="{StaticResource MenuItemBaseStyle}">
                             <Setter Property="Header"
-                                    Value="{Binding Converter={StaticResource LanguageCodeToName}}"/>
+                                    Value="{Binding LanguageName, Mode=OneWay}"/>
                             <Setter Property="Command"
-                                    Value="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel.SwitchLanguageCommand}"/>
+                                    Value="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel.SetLanguageCommand}"/>
                             <Setter Property="CommandParameter"
-                                    Value="{Binding}"/>
+                                    Value="{Binding Language}"/>
                             <Setter Property="IsChecked"
-                                    Value="{Binding Mode=OneTime, Converter={StaticResource IsCurrentLanguage}}"/>
+                                    Value="{Binding IsCurrentLanguage, Mode=OneWay}"/>
                         </Style>
                     </MenuItem.ItemContainerStyle>
                 </MenuItem>

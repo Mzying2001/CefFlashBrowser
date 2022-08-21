@@ -6,10 +6,6 @@
 
     <local:ObjectNotNull x:Key="NotNull"/>
 
-    <local:IsCurrentLanguage x:Key="IsCurrentLanguage"/>
-
-    <local:LanguageCodeToName x:Key="LanguageCodeToName"/>
-
     <local:StringArrNotAnyEmpty x:Key="StringArrNotAnyEmpty"/>
 
     <local:VisiableIfNotZero x:Key="VisiableIfNotZero"/>

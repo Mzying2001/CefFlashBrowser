@@ -3,7 +3,6 @@ using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
-using System.Collections.Generic;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -16,10 +15,6 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ViewGithubCommand { get; set; }
         public DelegateCommand OpenWebsiteCommand { get; set; }
         public DelegateCommand DropFileCommand { get; set; }
-        public DelegateCommand SwitchLanguageCommand { get; set; }
-
-        public List<string> Language { get; }
-            = new List<string>(LanguageManager.GetSupportedLanguage());
 
         private void OpenUrl(string url)
         {
@@ -109,11 +104,6 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void SwitchLanguage(string language)
-        {
-            LanguageManager.CurrentLanguage = language;
-        }
-
         public MainWindowViewModel()
         {
             OpenUrlCommand = new DelegateCommand<string>(OpenUrl);
@@ -123,7 +113,6 @@ namespace CefFlashBrowser.ViewModels
             ViewGithubCommand = new DelegateCommand(ViewGithub);
             OpenWebsiteCommand = new DelegateCommand<Website>(OpenWebsite);
             DropFileCommand = new DelegateCommand<string[]>(DropFile);
-            SwitchLanguageCommand = new DelegateCommand<string>(SwitchLanguage);
         }
     }
 }

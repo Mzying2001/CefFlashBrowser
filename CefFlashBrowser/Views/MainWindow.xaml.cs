@@ -1,7 +1,4 @@
-﻿using CefFlashBrowser.Models.Data;
-using SimpleMvvm.Messaging;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows;
 
 namespace CefFlashBrowser.Views
 {
@@ -13,24 +10,6 @@ namespace CefFlashBrowser.Views
         public MainWindow()
         {
             InitializeComponent();
-            Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
-        }
-
-        private void UpdateLanguageMenuChecked(object obj)
-        {
-            if (obj is string current)
-            {
-                foreach (var item in languageMenu.Items)
-                {
-                    MenuItem menuItem = (MenuItem)languageMenu.ItemContainerGenerator.ContainerFromItem(item);
-                    menuItem.IsChecked = (string)item == current;
-                }
-            }
-        }
-
-        private void MainWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, UpdateLanguageMenuChecked);
         }
     }
 }
