@@ -4,6 +4,7 @@ using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -18,8 +19,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand DropFileCommand { get; set; }
         public DelegateCommand SwitchLanguageCommand { get; set; }
 
-        public List<string> Language { get; }
-            = new List<string>(LanguageManager.GetSupportedLanguage());
+        public List<LanguageItemViewModel> Language { get; }
+            = LanguageManager.GetSupportedLanguage().Select(item => new LanguageItemViewModel(item)).ToList();
 
         private void OpenUrl(string url)
         {
