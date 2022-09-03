@@ -188,18 +188,11 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0"
-              Margin="10"
-              Visibility="{Binding ElementName=window,Path=FullScreen, Converter={StaticResource Boolean2VisibilityReConverter}}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <DockPanel Grid.Row="0"
+                   Margin="10"
+                   Visibility="{Binding ElementName=window,Path=FullScreen, Converter={StaticResource Boolean2VisibilityReConverter}}">
 
-            <Grid.Resources>
+            <DockPanel.Resources>
                 <Style TargetType="Button"
                        BasedOn="{StaticResource ButtonDefault}">
                     <Setter Property="Width"
@@ -209,83 +202,69 @@
                     <Setter Property="Padding"
                             Value="0"/>
                 </Style>
-            </Grid.Resources>
+            </DockPanel.Resources>
 
-            <Button Grid.Column="0"
-                    ToolTip="{DynamicResource toolTip_back}"
-                    Command="{Binding ElementName=browser, Path=BackCommand}">
-                <Button.Content>
-                    <svgc:SvgViewbox Width="12"
-                                     Height="12"
-                                     Source="/Assets/Svgs/back.svg"/>
-                </Button.Content>
-            </Button>
+            <StackPanel DockPanel.Dock="Left"
+                        Orientation="Horizontal">
+                <Button ToolTip="{DynamicResource toolTip_back}"
+                        Command="{Binding ElementName=browser, Path=BackCommand}">
+                    <Button.Content>
+                        <svgc:SvgViewbox Width="12"
+                                         Height="12"
+                                         Source="/Assets/Svgs/back.svg"/>
+                    </Button.Content>
+                </Button>
 
-            <Button Grid.Column="1"
-                    ToolTip="{DynamicResource toolTip_forward}"
-                    Command="{Binding ElementName=browser, Path=ForwardCommand}">
-                <Button.Content>
-                    <svgc:SvgViewbox Width="12"
-                                     Height="12"
-                                     Source="/Assets/Svgs/forward.svg"/>
-                </Button.Content>
-            </Button>
+                <Button ToolTip="{DynamicResource toolTip_forward}"
+                        Command="{Binding ElementName=browser, Path=ForwardCommand}">
+                    <Button.Content>
+                        <svgc:SvgViewbox Width="12"
+                                         Height="12"
+                                         Source="/Assets/Svgs/forward.svg"/>
+                    </Button.Content>
+                </Button>
 
-            <Button Grid.Column="2"
-                    Margin="5,0,0,0"
-                    Command="{Binding ReloadOrStopCommand}"
-                    CommandParameter="{Binding ElementName=browser}">
-                <Button.Content>
-                    <Binding ElementName="browser"
-                             Path="IsLoading">
-                        <Binding.Converter>
-                            <converter:BoolToObject>
-                                <converter:BoolToObject.TrueObject>
-                                    <svgc:SvgViewbox Width="12"
-                                                     Height="12"
-                                                     Source="/Assets/Svgs/stop.svg"/>
-                                </converter:BoolToObject.TrueObject>
-                                <converter:BoolToObject.FalseObject>
-                                    <svgc:SvgViewbox Width="14"
-                                                     Height="14"
-                                                     Source="/Assets/Svgs/reload.svg"/>
-                                </converter:BoolToObject.FalseObject>
-                            </converter:BoolToObject>
-                        </Binding.Converter>
-                    </Binding>
-                </Button.Content>
-                <Button.ToolTip>
-                    <Binding ElementName="browser"
-                             Path="IsLoading">
-                        <Binding.Converter>
-                            <converter:BoolToObject>
-                                <converter:BoolToObject.TrueObject>
-                                    <TextBlock Text="{DynamicResource toolTip_stop}"/>
-                                </converter:BoolToObject.TrueObject>
-                                <converter:BoolToObject.FalseObject>
-                                    <TextBlock Text="{DynamicResource toolTip_reload}"/>
-                                </converter:BoolToObject.FalseObject>
-                            </converter:BoolToObject>
-                        </Binding.Converter>
-                    </Binding>
-                </Button.ToolTip>
-            </Button>
+                <Button Margin="5,0,0,0"
+                        Command="{Binding ReloadOrStopCommand}"
+                        CommandParameter="{Binding ElementName=browser}">
+                    <Button.Content>
+                        <Binding ElementName="browser"
+                                 Path="IsLoading">
+                            <Binding.Converter>
+                                <converter:BoolToObject>
+                                    <converter:BoolToObject.TrueObject>
+                                        <svgc:SvgViewbox Width="12"
+                                                         Height="12"
+                                                         Source="/Assets/Svgs/stop.svg"/>
+                                    </converter:BoolToObject.TrueObject>
+                                    <converter:BoolToObject.FalseObject>
+                                        <svgc:SvgViewbox Width="14"
+                                                         Height="14"
+                                                         Source="/Assets/Svgs/reload.svg"/>
+                                    </converter:BoolToObject.FalseObject>
+                                </converter:BoolToObject>
+                            </Binding.Converter>
+                        </Binding>
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <Binding ElementName="browser"
+                                 Path="IsLoading">
+                            <Binding.Converter>
+                                <converter:BoolToObject>
+                                    <converter:BoolToObject.TrueObject>
+                                        <TextBlock Text="{DynamicResource toolTip_stop}"/>
+                                    </converter:BoolToObject.TrueObject>
+                                    <converter:BoolToObject.FalseObject>
+                                        <TextBlock Text="{DynamicResource toolTip_reload}"/>
+                                    </converter:BoolToObject.FalseObject>
+                                </converter:BoolToObject>
+                            </Binding.Converter>
+                        </Binding>
+                    </Button.ToolTip>
+                </Button>
+            </StackPanel>
 
-            <TextBox Grid.Column="3"
-                     Margin="5,0"
-                     Height="30"
-                     Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
-                <i:Interaction.Behaviors>
-                    <behaviors:TextBoxSelectAllOnFocus/>
-                </i:Interaction.Behaviors>
-                <TextBox.InputBindings>
-                    <KeyBinding Key="Enter"
-                                Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
-                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TextBox}, Path=Text}"/>
-                </TextBox.InputBindings>
-            </TextBox>
-
-            <StackPanel Grid.Column="4"
+            <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal">
                 <Button Click="ShowBlockedSwfsButtonClicked"
                         Margin="0,0,5,0"
@@ -303,7 +282,20 @@
                                      Source="/Assets/Svgs/more.svg"/>
                 </Button>
             </StackPanel>
-        </Grid>
+
+            <TextBox Margin="5,0"
+                     Height="30"
+                     Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
+                <i:Interaction.Behaviors>
+                    <behaviors:TextBoxSelectAllOnFocus/>
+                </i:Interaction.Behaviors>
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Enter"
+                                Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TextBox}, Path=Text}"/>
+                </TextBox.InputBindings>
+            </TextBox>
+        </DockPanel>
 
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
