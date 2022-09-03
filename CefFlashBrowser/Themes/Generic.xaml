@@ -23,8 +23,10 @@
                                 <ColumnDefinition Width="5"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <ContentPresenter Grid.Column="0"
-                                              Content="{TemplateBinding Description}"/>
+                            <TextBlock HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       Text="{TemplateBinding Description}"/>
                             <ContentPresenter Grid.Column="2"
                                               Content="{TemplateBinding Content}"/>
                         </Grid>

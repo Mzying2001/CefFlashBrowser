@@ -29,7 +29,7 @@
                     Value="Bold"/>
         </Style>
 
-        <Style x:Key="SettingItemDescriptionStyle"
+        <!--<Style x:Key="SettingItemDescriptionStyle"
                TargetType="TextBlock">
             <Setter Property="VerticalAlignment"
                     Value="Center"/>
@@ -37,7 +37,7 @@
                     Value="Left"/>
             <Setter Property="TextTrimming"
                     Value="CharacterEllipsis"/>
-        </Style>
+        </Style>-->
 
     </Window.Resources>
 
@@ -52,47 +52,35 @@
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
                         <!--navigation type-->
-                        <c:SettingItem>
-                            <c:SettingItem.Description>
-                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{DynamicResource settingItem_useSearchEngine}"/>
-                            </c:SettingItem.Description>
-                            <c:SettingItem.Content>
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding NavigationTypes}"
-                                          SelectedIndex="{Binding CurrentNavigationTypeIndex, Mode=OneWay}"
-                                          DisplayMemberPath="Name"
-                                          SelectedValuePath="Value">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="SelectionChanged">
-                                            <i:InvokeCommandAction Command="{Binding SetNavigationTypeCommand}"
-                                                                   CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                </ComboBox>
-                            </c:SettingItem.Content>
+                        <c:SettingItem Description="{DynamicResource settingItem_useSearchEngine}">
+                            <ComboBox MinWidth="80"
+                                      ItemsSource="{Binding NavigationTypes}"
+                                      SelectedIndex="{Binding CurrentNavigationTypeIndex, Mode=OneWay}"
+                                      DisplayMemberPath="Name"
+                                      SelectedValuePath="Value">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding SetNavigationTypeCommand}"
+                                                               CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </ComboBox>
                         </c:SettingItem>
 
                         <!--search engine-->
-                        <c:SettingItem>
-                            <c:SettingItem.Description>
-                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{DynamicResource settingItem_searchEngine}"/>
-                            </c:SettingItem.Description>
-                            <c:SettingItem.Content>
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding SearchEngines}"
-                                          SelectedIndex="{Binding CurrentSearchEngineIndex, Mode=OneWay}"
-                                          DisplayMemberPath="Name"
-                                          SelectedValuePath="Value">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="SelectionChanged">
-                                            <i:InvokeCommandAction Command="{Binding SetSearchEngineCommand}"
-                                                                   CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                </ComboBox>
-                            </c:SettingItem.Content>
+                        <c:SettingItem Description="{DynamicResource settingItem_searchEngine}">
+                            <ComboBox MinWidth="80"
+                                      ItemsSource="{Binding SearchEngines}"
+                                      SelectedIndex="{Binding CurrentSearchEngineIndex, Mode=OneWay}"
+                                      DisplayMemberPath="Name"
+                                      SelectedValuePath="Value">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding SetSearchEngineCommand}"
+                                                               CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </ComboBox>
                         </c:SettingItem>
                     </StackPanel>
                 </ScrollViewer>
@@ -105,68 +93,44 @@
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
                         <!--clear caches-->
-                        <c:SettingItem>
-                            <c:SettingItem.Description>
-                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{DynamicResource settingItem_deleteCache}"/>
-                            </c:SettingItem.Description>
-                            <c:SettingItem.Content>
-                                <Button MinWidth="80"
-                                        Content="{DynamicResource button_deleteCache}"
-                                        Command="{Binding DeleteCacheCommand}"/>
-                            </c:SettingItem.Content>
+                        <c:SettingItem Description="{DynamicResource settingItem_deleteCache}">
+                            <Button MinWidth="80"
+                                    Content="{DynamicResource button_deleteCache}"
+                                    Command="{Binding DeleteCacheCommand}"/>
                         </c:SettingItem>
 
                         <TextBlock Text="{DynamicResource settingHeader_websiteBehavior}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
-                        <c:SettingItem>
-                            <c:SettingItem.Description>
-                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{DynamicResource settingItem_openNewPage}"/>
-                            </c:SettingItem.Description>
-                            <c:SettingItem.Content>
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding NavigationTypes}"
-                                          SelectedIndex="{Binding CurrentNewPageBehaviorIndex, Mode=OneWay}"
-                                          DisplayMemberPath="Name"
-                                          SelectedValuePath="Value">
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="SelectionChanged">
-                                            <i:InvokeCommandAction Command="{Binding SetNewPageBehaviorCommand}"
-                                                                   CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                </ComboBox>
-                            </c:SettingItem.Content>
+                        <c:SettingItem Description="{DynamicResource settingItem_openNewPage}">
+                            <ComboBox MinWidth="80"
+                                      ItemsSource="{Binding NavigationTypes}"
+                                      SelectedIndex="{Binding CurrentNewPageBehaviorIndex, Mode=OneWay}"
+                                      DisplayMemberPath="Name"
+                                      SelectedValuePath="Value">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectionChanged">
+                                        <i:InvokeCommandAction Command="{Binding SetNewPageBehaviorCommand}"
+                                                               CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </ComboBox>
                         </c:SettingItem>
 
-                        <c:SettingItem>
-                            <c:SettingItem.Description>
-                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{DynamicResource settingItem_disableOnBeforeUnloadDialog}"/>
-                            </c:SettingItem.Description>
-                            <c:SettingItem.Content>
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding DisableOnBeforeUnloadDialog}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
-                            </c:SettingItem.Content>
+                        <c:SettingItem Description="{DynamicResource settingItem_disableOnBeforeUnloadDialog}">
+                            <CheckBox Margin="5,0"
+                                      IsChecked="{Binding DisableOnBeforeUnloadDialog}"
+                                      Style="{StaticResource ToggleButtonSwitch}"/>
                         </c:SettingItem>
 
                         <TextBlock Text="{DynamicResource settingHeader_advanced}"
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
                         <!--proxy-->
-                        <c:SettingItem>
-                            <c:SettingItem.Description>
-                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{DynamicResource settingItem_enableProxy}"/>
-                            </c:SettingItem.Description>
-                            <c:SettingItem.Content>
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding EnableProxy}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
-                            </c:SettingItem.Content>
+                        <c:SettingItem Description="{DynamicResource settingItem_enableProxy}">
+                            <CheckBox Margin="5,0"
+                                      IsChecked="{Binding EnableProxy}"
+                                      Style="{StaticResource ToggleButtonSwitch}"/>
                         </c:SettingItem>
 
                         <Border Margin="5"
@@ -233,16 +197,10 @@
                         </Border>
 
                         <!--useragent-->
-                        <c:SettingItem>
-                            <c:SettingItem.Description>
-                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{DynamicResource settingItem_enableCustomUserAgent}"/>
-                            </c:SettingItem.Description>
-                            <c:SettingItem.Content>
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding EnableCustomUserAgent}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
-                            </c:SettingItem.Content>
+                        <c:SettingItem Description="{DynamicResource settingItem_enableCustomUserAgent}">
+                            <CheckBox Margin="5,0"
+                                      IsChecked="{Binding EnableCustomUserAgent}"
+                                      Style="{StaticResource ToggleButtonSwitch}"/>
                         </c:SettingItem>
 
                         <Border Margin="5"
@@ -265,16 +223,10 @@
                         </Border>
 
                         <!--fake flash version-->
-                        <c:SettingItem>
-                            <c:SettingItem.Description>
-                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{DynamicResource settingItem_enableFakeFlashVersion}"/>
-                            </c:SettingItem.Description>
-                            <c:SettingItem.Content>
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding EnableFakeFlashVersion}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
-                            </c:SettingItem.Content>
+                        <c:SettingItem Description="{DynamicResource settingItem_enableFakeFlashVersion}">
+                            <CheckBox Margin="5,0"
+                                      IsChecked="{Binding EnableFakeFlashVersion}"
+                                      Style="{StaticResource ToggleButtonSwitch}"/>
                         </c:SettingItem>
 
                         <Border Margin="5"
@@ -310,16 +262,10 @@
                                    Style="{StaticResource SettingHeaderStyle}"/>
 
                         <!--cefsharp version-->
-                        <c:SettingItem>
-                            <c:SettingItem.Description>
-                                <TextBlock Style="{StaticResource SettingItemDescriptionStyle}"
-                                           Text="{DynamicResource settingItem_cefVersion}"/>
-                            </c:SettingItem.Description>
-                            <c:SettingItem.Content>
-                                <Button MinWidth="80"
-                                        Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource button_viewDetails}}"
-                                        Command="{Binding PopupAboutCefCommand}"/>
-                            </c:SettingItem.Content>
+                        <c:SettingItem Description="{DynamicResource settingItem_cefVersion}">
+                            <Button MinWidth="80"
+                                    Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource button_viewDetails}}"
+                                    Command="{Binding PopupAboutCefCommand}"/>
                         </c:SettingItem>
                     </StackPanel>
                 </ScrollViewer>
