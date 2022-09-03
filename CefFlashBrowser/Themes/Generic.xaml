@@ -7,6 +7,37 @@
 
 
 
+    <!--SettingGroup-->
+    <Style TargetType="{x:Type local:SettingGroup}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:SettingGroup}">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0"
+                                       Margin="5,10"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       Text="{TemplateBinding Header}"/>
+                            <ItemsPresenter Grid.Row="1"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+
+
+
     <!--SettingItem-->
     <Style TargetType="{x:Type local:SettingItem}">
         <Setter Property="Padding" Value="5"/>
@@ -27,16 +58,13 @@
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
                                        Text="{TemplateBinding Description}"/>
-                            <ContentPresenter Grid.Column="2"
-                                              Content="{TemplateBinding Content}"/>
+                            <ContentPresenter Grid.Column="2"/>
                         </Grid>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-
-
 
 
 

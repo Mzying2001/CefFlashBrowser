@@ -314,6 +314,7 @@
     </Compile>
     <Compile Include="Utils\Converters\BoolToObject.cs" />
     <Compile Include="Utils\Converters\ValueConverterBase.cs" />
+    <Compile Include="Views\Custom\SettingGroup.cs" />
     <Compile Include="Views\Custom\SettingItem.cs" />
     <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">
       <DependentUpon>AddFavoriteDialog.xaml</DependentUpon>
