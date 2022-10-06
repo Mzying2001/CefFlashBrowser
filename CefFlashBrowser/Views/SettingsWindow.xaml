@@ -219,9 +219,9 @@
                             </Border>
 
                             <TextBlock Margin="5,10"
-                                       Text="{DynamicResource tips_needRestar}"
                                        TextWrapping="Wrap"
                                        Foreground="Gray">
+                                <Run Text="{DynamicResource tips_needRestar}"/>
                                 <Run Text=" "/>
                                 <Hyperlink Command="{Binding AskRestartAppCommand}">
                                     <Run Text="{DynamicResource button_restart}"/>
