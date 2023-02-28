@@ -64,8 +64,8 @@
     <Reference Include="Costura, Version=5.7.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.5.7.0\lib\netstandard1.0\Costura.dll</HintPath>
     </Reference>
-    <Reference Include="HandyControl, Version=3.3.0.0, Culture=neutral, PublicKeyToken=45be8712787a1e5b, processorArchitecture=MSIL">
-      <HintPath>..\packages\HandyControl.3.3.0\lib\net472\HandyControl.dll</HintPath>
+    <Reference Include="HandyControl, Version=3.4.0.0, Culture=neutral, PublicKeyToken=45be8712787a1e5b, processorArchitecture=MSIL">
+      <HintPath>..\packages\HandyControl.3.4.0\lib\net472\HandyControl.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\Microsoft.Expression.Interactions.dll</HintPath>
@@ -76,31 +76,31 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="SharpVectors.Converters.Wpf, Version=1.7.7.0, Culture=neutral, PublicKeyToken=b532964b8548be77, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpVectors.1.7.7\lib\net47\SharpVectors.Converters.Wpf.dll</HintPath>
+    <Reference Include="SharpVectors.Converters.Wpf, Version=1.8.1.0, Culture=neutral, PublicKeyToken=b532964b8548be77, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpVectors.1.8.1\lib\net47\SharpVectors.Converters.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="SharpVectors.Core, Version=1.7.7.0, Culture=neutral, PublicKeyToken=7407205e337c98ef, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpVectors.1.7.7\lib\net47\SharpVectors.Core.dll</HintPath>
+    <Reference Include="SharpVectors.Core, Version=1.8.1.0, Culture=neutral, PublicKeyToken=7407205e337c98ef, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpVectors.1.8.1\lib\net47\SharpVectors.Core.dll</HintPath>
     </Reference>
-    <Reference Include="SharpVectors.Css, Version=1.7.7.0, Culture=neutral, PublicKeyToken=7a46e3f532fdb787, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpVectors.1.7.7\lib\net47\SharpVectors.Css.dll</HintPath>
+    <Reference Include="SharpVectors.Css, Version=1.8.1.0, Culture=neutral, PublicKeyToken=7a46e3f532fdb787, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpVectors.1.8.1\lib\net47\SharpVectors.Css.dll</HintPath>
     </Reference>
-    <Reference Include="SharpVectors.Dom, Version=1.7.7.0, Culture=neutral, PublicKeyToken=517340b6277b1a7a, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpVectors.1.7.7\lib\net47\SharpVectors.Dom.dll</HintPath>
+    <Reference Include="SharpVectors.Dom, Version=1.8.1.0, Culture=neutral, PublicKeyToken=517340b6277b1a7a, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpVectors.1.8.1\lib\net47\SharpVectors.Dom.dll</HintPath>
     </Reference>
-    <Reference Include="SharpVectors.Model, Version=1.7.7.0, Culture=neutral, PublicKeyToken=2236cfc76b505845, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpVectors.1.7.7\lib\net47\SharpVectors.Model.dll</HintPath>
+    <Reference Include="SharpVectors.Model, Version=1.8.1.0, Culture=neutral, PublicKeyToken=2236cfc76b505845, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpVectors.1.8.1\lib\net47\SharpVectors.Model.dll</HintPath>
     </Reference>
-    <Reference Include="SharpVectors.Rendering.Gdi, Version=1.7.7.0, Culture=neutral, PublicKeyToken=03902092284347e3, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpVectors.1.7.7\lib\net47\SharpVectors.Rendering.Gdi.dll</HintPath>
+    <Reference Include="SharpVectors.Rendering.Gdi, Version=1.8.1.0, Culture=neutral, PublicKeyToken=03902092284347e3, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpVectors.1.8.1\lib\net47\SharpVectors.Rendering.Gdi.dll</HintPath>
     </Reference>
-    <Reference Include="SharpVectors.Rendering.Wpf, Version=1.7.7.0, Culture=neutral, PublicKeyToken=d0902381100df30e, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpVectors.1.7.7\lib\net47\SharpVectors.Rendering.Wpf.dll</HintPath>
+    <Reference Include="SharpVectors.Rendering.Wpf, Version=1.8.1.0, Culture=neutral, PublicKeyToken=d0902381100df30e, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpVectors.1.8.1\lib\net47\SharpVectors.Rendering.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="SharpVectors.Runtime.Wpf, Version=1.7.7.0, Culture=neutral, PublicKeyToken=d16e717f0a981fb9, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpVectors.1.7.7\lib\net47\SharpVectors.Runtime.Wpf.dll</HintPath>
+    <Reference Include="SharpVectors.Runtime.Wpf, Version=1.8.1.0, Culture=neutral, PublicKeyToken=d16e717f0a981fb9, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpVectors.1.8.1\lib\net47\SharpVectors.Runtime.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="SimpleMvvm, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Mzying2001.SimpleMvvm.1.0.5\lib\net45\SimpleMvvm.dll</HintPath>
@@ -121,8 +121,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Data" />
-    <Reference Include="System.Diagnostics.DiagnosticSource, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.6.0.0\lib\net461\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=7.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.7.0.1\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
     <Reference Include="System.Diagnostics.Tracing, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Diagnostics.Tracing.4.3.0\lib\net462\System.Diagnostics.Tracing.dll</HintPath>
@@ -171,8 +171,8 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
@@ -519,7 +519,7 @@
     <Error Condition="!Exists('..\packages\Costura.Fody.5.7.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.5.7.0\build\Costura.Fody.props'))" />
     <Error Condition="!Exists('..\packages\Costura.Fody.5.7.0\build\Costura.Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.5.7.0\build\Costura.Fody.targets'))" />
     <Error Condition="!Exists('..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets'))" />
-    <Error Condition="!Exists('..\packages\Fody.6.6.1\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.6.1\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\Fody.6.6.4\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.6.4\build\Fody.targets'))" />
   </Target>
   <Import Project="..\packages\CefSharp.Common.79.1.360\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.79.1.360\build\CefSharp.Common.targets')" />
   <Import Project="..\packages\Costura.Fody.5.7.0\build\Costura.Fody.targets" Condition="Exists('..\packages\Costura.Fody.5.7.0\build\Costura.Fody.targets')" />
@@ -527,5 +527,5 @@
   <PropertyGroup>
     <PostBuildEvent>del *.pdb&amp;del *.xml</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Fody.6.6.1\build\Fody.targets" Condition="Exists('..\packages\Fody.6.6.1\build\Fody.targets')" />
+  <Import Project="..\packages\Fody.6.6.4\build\Fody.targets" Condition="Exists('..\packages\Fody.6.6.4\build\Fody.targets')" />
 </Project>
