@@ -306,8 +306,12 @@
                StaysOpen="True"
                Placement="Absolute"
                AllowsTransparency="True">
+            <Popup.Resources>
+                <sys:Double x:Key="ContentHeight">22</sys:Double>
+            </Popup.Resources>
             <ContentControl x:Name="statusPopupContent"
-                            Height="22"
+                            Opacity="0.85"
+                            Height="{StaticResource ContentHeight}"
                             MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThird}}">
                 <Binding ElementName="browser"
                          Path="IsLoading">
@@ -315,12 +319,12 @@
                         <converter:BoolToObject>
                             <converter:BoolToObject.TrueObject>
                                 <Label Padding="5,0"
-                                       VerticalAlignment="Stretch"
+                                       Height="{StaticResource ContentHeight}"
                                        Content="{DynamicResource label_loading}"/>
                             </converter:BoolToObject.TrueObject>
                             <converter:BoolToObject.FalseObject>
                                 <Label Padding="5,0"
-                                       VerticalAlignment="Stretch"
+                                       Height="{StaticResource ContentHeight}"
                                        Visibility="{Binding ElementName=browser, Path=StatusText, Converter={StaticResource VisiableIfStrNotEmpty}}">
                                     <TextBlock Text="{Binding ElementName=browser, Path=StatusText}"
                                                TextTrimming="CharacterEllipsis"/>
