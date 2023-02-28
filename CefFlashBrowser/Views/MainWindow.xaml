@@ -51,7 +51,8 @@
                 </MenuItem.ItemContainerStyle>
                 <MenuItem.ItemsSource>
                     <x:Array Type="{x:Type sys:Object}">
-                        <MenuItem Style="{StaticResource MenuItemBaseStyle}"
+                        <MenuItem Padding="10,7"
+                                  Style="{StaticResource MenuItemBaseStyle}"
                                   Header="{DynamicResource menu_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
                         <Separator Visibility="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count, Converter={StaticResource VisiableIfNotZero}}"/>
