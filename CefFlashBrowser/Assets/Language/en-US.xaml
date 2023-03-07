@@ -120,7 +120,7 @@
     <sys:String x:Key="button_ok">OK</sys:String>
     <sys:String x:Key="button_cancel">Cancel</sys:String>
     <sys:String x:Key="button_yes">Yes</sys:String>
-    <sys:String x:Key="button_No">No</sys:String>
+    <sys:String x:Key="button_no">No</sys:String>
     <sys:String x:Key="title_error">Error</sys:String>
     <sys:String x:Key="title_addFavorite">Add Favorite</sys:String>
     <sys:String x:Key="title_askWhetherToLeave">Do you want to leave this page?</sys:String>

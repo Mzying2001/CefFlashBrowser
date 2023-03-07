@@ -35,7 +35,7 @@
                         HorizontalAlignment="Right">
                 <Button x:Name="noButton"
                         MinWidth="70"
-                        Content="{StaticResource button_No}"
+                        Content="{StaticResource button_no}"
                         Click="OnNoButtonClick"/>
                 <Button x:Name="yesButton"
                         Margin="10,0,0,0"
