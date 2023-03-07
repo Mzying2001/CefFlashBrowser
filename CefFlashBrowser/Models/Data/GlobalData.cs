@@ -20,6 +20,11 @@ namespace CefFlashBrowser.Models.Data
         public static string FavoritesPath { get; }
         public static string SettingsPath { get; }
 
+        /// <summary>
+        /// true if the program is started with parameters
+        /// </summary>
+        public static bool IsStartWithoutMainWindow { get; set; } = false;
+
         static GlobalData()
         {
             AppBaseDirectory = AppDomain.CurrentDomain.BaseDirectory;

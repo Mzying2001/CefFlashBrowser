@@ -33,6 +33,7 @@ namespace CefFlashBrowser
                 return;
             }
 
+            GlobalData.IsStartWithoutMainWindow = true;
             foreach (var arg in e.Args)
             {
                 if (UrlChecker.IsLocalSwfFile(arg))

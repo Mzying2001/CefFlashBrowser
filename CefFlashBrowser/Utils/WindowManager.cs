@@ -83,7 +83,7 @@ namespace CefFlashBrowser.Utils
                     return;
                 var window = (BrowserWindow)s;
                 _browserWindows.Remove(window);
-                if (_browserWindows.Count == 0 && GlobalData.Settings.HideMainWindowOnBrowsing)
+                if (_browserWindows.Count == 0 && !GlobalData.IsStartWithoutMainWindow && GlobalData.Settings.HideMainWindowOnBrowsing)
                     ShowMainWindow();
             };
             return browserWindow;
