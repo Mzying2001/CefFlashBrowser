@@ -24,7 +24,7 @@
     <sys:String x:Key="toolTip_viewGithub">在GitHub中查看</sys:String>
 
     <!--設定視窗-->
-    <sys:String x:Key="tabItem_main">主介面</sys:String>
+    <sys:String x:Key="tabItem_mainWindow">主視窗</sys:String>
     <sys:String x:Key="tabItem_browser">瀏覽器</sys:String>
     <sys:String x:Key="settingHeader_addressBar">地址欄和搜尋</sys:String>
     <sys:String x:Key="settingHeader_browserData">瀏覽器緩存</sys:String>
@@ -65,7 +65,7 @@
 
     <!--搜尋引擎-->
     <sys:String x:Key="baidu">百度</sys:String>
-    <sys:String x:Key="google">穀歌</sys:String>
+    <sys:String x:Key="google">谷歌</sys:String>
     <sys:String x:Key="bing">必應</sys:String>
     <sys:String x:Key="sogou">搜狗</sys:String>
     <sys:String x:Key="so360">360</sys:String>

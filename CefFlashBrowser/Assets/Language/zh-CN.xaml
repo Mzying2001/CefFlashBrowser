@@ -24,7 +24,7 @@
     <sys:String x:Key="toolTip_viewGithub">在GitHub中查看</sys:String>
 
     <!--设置窗口-->
-    <sys:String x:Key="tabItem_main">主界面</sys:String>
+    <sys:String x:Key="tabItem_mainWindow">主窗口</sys:String>
     <sys:String x:Key="tabItem_browser">浏览器</sys:String>
     <sys:String x:Key="settingHeader_addressBar">地址栏和搜索</sys:String>
     <sys:String x:Key="settingHeader_browserData">浏览器缓存</sys:String>

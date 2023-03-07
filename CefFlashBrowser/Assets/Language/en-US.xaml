@@ -24,7 +24,7 @@
     <sys:String x:Key="toolTip_viewGithub">View in GitHub</sys:String>
 
     <!--Settings Window-->
-    <sys:String x:Key="tabItem_main">Main window</sys:String>
+    <sys:String x:Key="tabItem_mainWindow">Main Window</sys:String>
     <sys:String x:Key="tabItem_browser">Browser</sys:String>
     <sys:String x:Key="settingHeader_addressBar">Address Bar and Search</sys:String>
     <sys:String x:Key="settingHeader_browserData">Browser Cache</sys:String>

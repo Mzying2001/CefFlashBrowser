@@ -21,7 +21,7 @@
         <TabControl Margin="10"
                     SelectedIndex="0"
                     Style="{StaticResource TabControlCapsuleSolid}">
-            <TabItem Header="{DynamicResource tabItem_main}">
+            <TabItem Header="{DynamicResource tabItem_mainWindow}">
                 <ScrollViewer Padding="10">
                     <StackPanel>
                         <c:SettingGroup Header="{DynamicResource settingHeader_addressBar}">
