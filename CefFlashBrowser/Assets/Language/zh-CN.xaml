@@ -27,12 +27,14 @@
     <sys:String x:Key="tabItem_mainWindow">主窗口</sys:String>
     <sys:String x:Key="tabItem_browser">浏览器</sys:String>
     <sys:String x:Key="settingHeader_addressBar">地址栏和搜索</sys:String>
+    <sys:String x:Key="settingHeader_other">其他</sys:String>
     <sys:String x:Key="settingHeader_browserData">浏览器缓存</sys:String>
     <sys:String x:Key="settingHeader_websiteBehavior">网站行为</sys:String>
     <sys:String x:Key="settingHeader_advanced">高级</sys:String>
     <sys:String x:Key="settingHeader_aboutCef">关于 CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">在地址栏中使用搜索引擎</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜索引擎</sys:String>
+    <sys:String x:Key="settingItem_hideMainWindowOnBrowsing">浏览网页时隐藏主窗口</sys:String>
     <sys:String x:Key="settingItem_deleteCache">清除所有缓存</sys:String>
     <sys:String x:Key="settingItem_openNewPage">打开新页面方式</sys:String>
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">阻止网页刷新/关闭时的弹窗</sys:String>

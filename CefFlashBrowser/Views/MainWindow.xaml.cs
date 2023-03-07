@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using CefFlashBrowser.Models.Data;
+using SimpleMvvm.Messaging;
+using System.Windows;
 
 namespace CefFlashBrowser.Views
 {
@@ -10,6 +12,14 @@ namespace CefFlashBrowser.Views
         public MainWindow()
         {
             InitializeComponent();
+
+            Messenger.Global.Register(MessageTokens.CLOSE_MAINWINDOW, CloseMainWindowHandler);
+            Closed += delegate { Messenger.Global.Unregister(MessageTokens.CLOSE_MAINWINDOW, CloseMainWindowHandler); };
+        }
+
+        private void CloseMainWindowHandler(object obj)
+        {
+            Close();
         }
     }
 }

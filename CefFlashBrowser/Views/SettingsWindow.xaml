@@ -24,6 +24,7 @@
             <TabItem Header="{DynamicResource tabItem_mainWindow}">
                 <ScrollViewer Padding="10">
                     <StackPanel>
+                        <!--address bar and search-->
                         <c:SettingGroup Header="{DynamicResource settingHeader_addressBar}">
                             <!--navigation type-->
                             <c:SettingItem Description="{DynamicResource settingItem_useSearchEngine}">
@@ -55,6 +56,15 @@
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </ComboBox>
+                            </c:SettingItem>
+                        </c:SettingGroup>
+                        
+                        <!--other-->
+                        <c:SettingGroup Header="{DynamicResource settingHeader_other}">
+                            <c:SettingItem Description="{DynamicResource settingItem_hideMainWindowOnBrowsing}">
+                                <CheckBox Margin="5,0"
+                                          IsChecked="{Binding HideMainWindowOnBrowsing}"
+                                          Style="{StaticResource ToggleButtonSwitch}"/>
                             </c:SettingItem>
                         </c:SettingGroup>
                     </StackPanel>

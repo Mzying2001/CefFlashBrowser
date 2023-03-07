@@ -154,6 +154,16 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool HideMainWindowOnBrowsing
+        {
+            get => GlobalData.Settings.HideMainWindowOnBrowsing;
+            set
+            {
+                GlobalData.Settings.HideMainWindowOnBrowsing = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private void SetNavigationType(NavigationType type)
         {
             GlobalData.Settings.NavigationType = type;

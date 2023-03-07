@@ -13,6 +13,7 @@
         public ProxySettings ProxySettings { get; set; }
         public UserAgentSetting UserAgentSetting { get; set; }
         public FakeFlashVersionSetting FakeFlashVersionSetting { get; set; }
+        public bool HideMainWindowOnBrowsing { get; set; }
 
 
         public static Settings Default => new Settings();
@@ -32,6 +33,7 @@
             ProxySettings = new ProxySettings();
             UserAgentSetting = new UserAgentSetting();
             FakeFlashVersionSetting = new FakeFlashVersionSetting();
+            HideMainWindowOnBrowsing = false;
         }
     }
 }

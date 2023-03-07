@@ -3,6 +3,7 @@ using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -15,6 +16,13 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ViewGithubCommand { get; set; }
         public DelegateCommand OpenWebsiteCommand { get; set; }
         public DelegateCommand DropFileCommand { get; set; }
+
+        private void ShowBrowser(string address)
+        {
+            WindowManager.ShowBrowser(address);
+            if (GlobalData.Settings.HideMainWindowOnBrowsing)
+                Messenger.Global.Send(MessageTokens.CLOSE_MAINWINDOW, null);
+        }
 
         private void OpenUrl(string url)
         {
@@ -54,7 +62,7 @@ namespace CefFlashBrowser.ViewModels
                     break;
             }
 
-            WindowManager.ShowBrowser(url);
+            ShowBrowser(url);
         }
 
         private void OpenSettingsWindow()
@@ -81,12 +89,12 @@ namespace CefFlashBrowser.ViewModels
 
         private void ViewGithub()
         {
-            WindowManager.ShowBrowser("https://github.com/Mzying2001/CefFlashBrowser");
+            ShowBrowser("https://github.com/Mzying2001/CefFlashBrowser");
         }
 
         private void OpenWebsite(Website website)
         {
-            WindowManager.ShowBrowser(website.Url);
+            ShowBrowser(website.Url);
         }
 
         private void DropFile(string[] files)
@@ -99,7 +107,7 @@ namespace CefFlashBrowser.ViewModels
                 }
                 else
                 {
-                    WindowManager.ShowBrowser(item);
+                    ShowBrowser(item);
                 }
             }
         }
