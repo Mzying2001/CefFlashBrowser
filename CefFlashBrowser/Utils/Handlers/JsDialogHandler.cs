@@ -14,10 +14,11 @@ namespace CefFlashBrowser.Utils.Handlers
                 return true;
             }
 
-            ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
+            var wpfWebBrowser = (IWpfWebBrowser)chromiumWebBrowser;
+            wpfWebBrowser.Dispatcher.Invoke(delegate
             {
-                var title = LanguageManager.GetString(isReload ? "title_askWhetherToReload" : "title_askWhetherToLeave");
-                WindowManager.Confirm(messageText, title, result =>
+                var msg = LanguageManager.GetString(isReload ? "message_askWhetherToReload" : "message_askWhetherToLeave");
+                WindowManager.Confirm(msg, wpfWebBrowser.Title, result =>
                 {
                     callback.Continue(result == true);
                 });

@@ -125,8 +125,8 @@
     <sys:String x:Key="button_no">No</sys:String>
     <sys:String x:Key="title_error">Error</sys:String>
     <sys:String x:Key="title_addFavorite">Add Favorite</sys:String>
-    <sys:String x:Key="title_askWhetherToLeave">Do you want to leave this page?</sys:String>
-    <sys:String x:Key="title_askWhetherToReload">Do you want to reload this page?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">Do you want to leave this page?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">Do you want to reload this page?</sys:String>
 
     <!--Message-->
     <sys:String x:Key="error_message">Error Message</sys:String>
