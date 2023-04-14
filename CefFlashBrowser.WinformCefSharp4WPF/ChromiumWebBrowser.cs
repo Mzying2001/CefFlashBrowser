@@ -399,6 +399,16 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
+        protected override void OnGotFocus(RoutedEventArgs e)
+        {
+            base.OnGotFocus(e);
+            browser.Focus();
+        }
+
+
+
+
+
         private void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
             Dispatcher.Invoke(delegate { OnJavascriptMessageReceived(e); });
