@@ -1,0 +1,136 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="locale">it</sys:String>
+    <sys:String x:Key="language_name">Italiano</sys:String>
+
+    <!--App-->
+    <sys:String x:Key="invalidStartUpParam">Invalid start-up parameter</sys:String>
+
+    <!--Seleziona Lingua Dialoghi-->
+    <sys:String x:Key="selectLanguageTips">Seleziona lingua</sys:String>
+
+    <!--Finestra Principale-->
+    <sys:String x:Key="window_title">Benvenuto ♪(^∇^*)</sys:String>
+    <sys:String x:Key="button_go">Vai</sys:String>
+    <sys:String x:Key="menu_favorites">Preferiti</sys:String>
+    <sys:String x:Key="menu_manageFavorites">Gestisci Preferiti</sys:String>
+    <sys:String x:Key="menu_languages">Lingue</sys:String>
+    <sys:String x:Key="menu_options">Opzioni</sys:String>
+    <sys:String x:Key="menu_settings">Impostazioni</sys:String>
+    <sys:String x:Key="menu_loadSwf">Carica file swf locale...</sys:String>
+    <sys:String x:Key="filter_swf">swf file</sys:String>
+    <sys:String x:Key="message_emptyUrl">Prego, inserisci l'url.</sys:String>
+    <sys:String x:Key="toolTip_viewGithub">Vedi su GitHub</sys:String>
+
+    <!--Impostazioni Finestra-->
+    <sys:String x:Key="tabItem_mainWindow">Finestra Principale</sys:String>
+    <sys:String x:Key="tabItem_browser">Browser</sys:String>
+    <sys:String x:Key="settingHeader_addressBar">Barra degli indirizzi e Ricerca</sys:String>
+    <sys:String x:Key="settingHeader_other">Altro</sys:String>
+    <sys:String x:Key="settingHeader_browserData">Browser Cache</sys:String>
+    <sys:String x:Key="settingHeader_websiteBehavior">Funzionamento siti web</sys:String>
+    <sys:String x:Key="settingHeader_advanced">Avanzate</sys:String>
+    <sys:String x:Key="settingHeader_aboutCef">Circa CEF</sys:String>
+    <sys:String x:Key="settingItem_useSearchEngine">Usa i motori di ricerca nella barra degli indirizzi</sys:String>
+    <sys:String x:Key="settingItem_searchEngine">Motore di ricerca</sys:String>
+    <sys:String x:Key="settingItem_hideMainWindowOnBrowsing">Nascondi la finestra principale quando navighi</sys:String>
+    <sys:String x:Key="settingItem_deleteCache">Elimina la cache</sys:String>
+    <sys:String x:Key="settingItem_openNewPage">Apri nuova pagina in ...</sys:String>
+    <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">Disabilita pop up sulla pagina ricarica/chiudi</sys:String>
+    <sys:String x:Key="settingItem_enableProxy">Abilita proxy</sys:String>
+    <sys:String x:Key="settingItem_enableCustomUserAgent">Personalizza UserAgent</sys:String>
+    <sys:String x:Key="settingItem_enableFakeFlashVersion">Falsa versione flash</sys:String>
+    <sys:String x:Key="settingItem_cefVersion">Versione CefSharp</sys:String>
+    <sys:String x:Key="setting_server">Server</sys:String>
+    <sys:String x:Key="setting_username">Nome Utente</sys:String>
+    <sys:String x:Key="setting_password">Password</sys:String>
+    <sys:String x:Key="setting_flashVersion">Versione Flash</sys:String>
+    <sys:String x:Key="button_deleteCache">Elimina</sys:String>
+    <sys:String x:Key="button_viewDetails">Dettagli</sys:String>
+    <sys:String x:Key="button_restart">Riavvia</sys:String>
+    <sys:String x:Key="message_deleteCache">Sei sicuro di voler eliminare la cache? Il browser si riavvierà.</sys:String>
+    <sys:String x:Key="message_restart">Vuoi riavviare il programma?</sys:String>
+    <sys:String x:Key="tips_needRestar">Le modifiche delle impostazioni si attiveranno dopo il riavvio.</sys:String>
+    <sys:String x:Key="placeholder_ip">IP</sys:String>
+    <sys:String x:Key="placeholder_port">Porta</sys:String>
+    <sys:String x:Key="placeholder_optional">(Opzionale)</sys:String>
+
+    <!--Barra di navigazione dell'interfaccia principale-->
+    <sys:String x:Key="navigationType_auto">Automatico</sys:String>
+    <sys:String x:Key="navigationType_searchOnly">Solo Ricerca</sys:String>
+    <sys:String x:Key="navigationType_navigateOnly">Solo Navigazione</sys:String>
+
+    <!--Nuovi comportamenti delle pagine web-->
+    <sys:String x:Key="newPageBehavior_originalWindow">Finestra originale</sys:String>
+    <sys:String x:Key="newPageBehavior_newWindow">Nuova Finestra</sys:String>
+
+    <!--Motore di ricerca-->
+    <sys:String x:Key="baidu">Baidu</sys:String>
+    <sys:String x:Key="google">Google</sys:String>
+    <sys:String x:Key="bing">Bing</sys:String>
+    <sys:String x:Key="sogou">Sogou</sys:String>
+    <sys:String x:Key="so360">360</sys:String>
+
+    <!--Gestione preferiti-->
+    <sys:String x:Key="favorites_managerTitle">Gestione preferiti</sys:String>
+    <sys:String x:Key="favorites_add">Aggiungi</sys:String>
+    <sys:String x:Key="favorites_remove">Rimuovi</sys:String>
+    <sys:String x:Key="favorites_toTop">Sposta in cima</sys:String>
+    <sys:String x:Key="favorites_toBottom">Sposta in fondo</sys:String>
+    <sys:String x:Key="favorites_edit">Modifica</sys:String>
+    <sys:String x:Key="favorites_name">Nome</sys:String>
+    <sys:String x:Key="favorites_url">Url</sys:String>
+    <sys:String x:Key="favorites_save">Salva</sys:String>
+    <sys:String x:Key="favorites_defaultName">Nuovo prefeito</sys:String>
+    <sys:String x:Key="message_removeItem">Sei sicuro di rimuovere "{0}"?</sys:String>
+
+    <!--Finestra Browser-->
+    <sys:String x:Key="menu_back">Indietro</sys:String>
+    <sys:String x:Key="menu_forward">Avanti</sys:String>
+    <sys:String x:Key="menu_reload">Ricarica</sys:String>
+    <sys:String x:Key="menu_stop">Stop</sys:String>
+    <sys:String x:Key="menu_cut">Taglia</sys:String>
+    <sys:String x:Key="menu_copy">Copia</sys:String>
+    <sys:String x:Key="menu_paste">Incolla</sys:String>
+    <sys:String x:Key="menu_selectAll">Seleziona tutto</sys:String>
+    <sys:String x:Key="menu_print">Stampa</sys:String>
+    <sys:String x:Key="menu_redo">Rifai</sys:String>
+    <sys:String x:Key="menu_undo">Annulla</sys:String>
+    <sys:String x:Key="menu_find">Trova</sys:String>
+    <sys:String x:Key="menu_search">Cerca "{0}"</sys:String>
+    <sys:String x:Key="menu_openInNewWindow">Apri in una nuova finestra</sys:String>
+    <sys:String x:Key="menu_addToDictionary">Aggiungi al dizionario</sys:String>
+    <sys:String x:Key="menu_reloadNoCache">Ricarica ignorando la cache</sys:String>
+    <sys:String x:Key="menu_openDevTool">Apri devtools</sys:String>
+    <sys:String x:Key="menu_viewSource">Vedi Sorgente</sys:String>
+    <sys:String x:Key="menu_zoom">Zoom</sys:String>
+    <sys:String x:Key="menu_openInDefaultBrowser">Apri nel browser predefinito</sys:String>
+    <sys:String x:Key="menu_createShortcut">Crea scorciatoia</sys:String>
+    <sys:String x:Key="menu_addFavorite">Aggiungi a Preferiti</sys:String>
+    <sys:String x:Key="menu_blockedSwfsTips">Alcuni contenuti flash sembrano bloccati dal kernel Chromium, puoi avviarli in SWF player:</sys:String>
+    <sys:String x:Key="toolTip_back">Indietro (Alt+Left)</sys:String>
+    <sys:String x:Key="toolTip_forward">Avanti (Alt+Right)</sys:String>
+    <sys:String x:Key="toolTip_reload">Ricarica (F5)</sys:String>
+    <sys:String x:Key="toolTip_stop">Stop (Esc)</sys:String>
+    <sys:String x:Key="toolTip_more">Altro</sys:String>
+    <sys:String x:Key="toolTip_blockedSwfs">Contenuti flash bloccati</sys:String>
+    <sys:String x:Key="filter_shortcut">Scorciatoia</sys:String>
+    <sys:String x:Key="label_loading">Caricamento...</sys:String>
+
+    <!--Dialoghi-->
+    <sys:String x:Key="button_ok">OK</sys:String>
+    <sys:String x:Key="button_cancel">Annulla</sys:String>
+    <sys:String x:Key="button_yes">Si</sys:String>
+    <sys:String x:Key="button_no">No</sys:String>
+    <sys:String x:Key="title_error">Errore</sys:String>
+    <sys:String x:Key="title_addFavorite">Aggiungi a Preferiti</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">Vuoi uscire da questa pagina?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">Vuoi ricaricare questa pagina?</sys:String>
+
+    <!--Messaggi-->
+    <sys:String x:Key="error_message">Messaggio di Errore</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">Il nome non può essere vuoto.</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">L'URL non può essere vuoto.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">Si è verificato un errore durante la cancellazione della cache. Vuoi provare di nuovo?</sys:String>
+</ResourceDictionary>

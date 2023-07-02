@@ -18,6 +18,7 @@ namespace CefFlashBrowser.Utils
                 ["zh-CN"] = new ResourceDictionary() { Source = new Uri("Assets/Language/zh-CN.xaml", UriKind.Relative) },
                 ["zh-TW"] = new ResourceDictionary() { Source = new Uri("Assets/Language/zh-TW.xaml", UriKind.Relative) },
                 ["en-US"] = new ResourceDictionary() { Source = new Uri("Assets/Language/en-US.xaml", UriKind.Relative) },
+                ["it"] = new ResourceDictionary() { Source = new Uri("Assets/Language/it.xaml", UriKind.Relative) },
             };
 
             CurrentLanguage = GlobalData.Settings.Language;
