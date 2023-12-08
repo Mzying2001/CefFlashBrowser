@@ -127,6 +127,7 @@ namespace CefFlashBrowser.Utils.Handlers
                 yield return new MenuItem
                 {
                     Header = GetHeader(item),
+                    Padding = new Thickness(10, 5, 10, 5),
                     IsChecked = item.IsChecked,
                     ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback),
 
