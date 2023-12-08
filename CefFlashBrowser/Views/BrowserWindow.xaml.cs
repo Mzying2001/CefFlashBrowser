@@ -75,6 +75,18 @@ namespace CefFlashBrowser.Views
                     {
                         switch (windowsKeyCode)
                         {
+                            case Win32.VirtualKeys.VK_OEM_PLUS: //Ctrl+'+'
+                                {
+                                    ((ChromiumWebBrowser)chromiumWebBrowser).ZoomIn();
+                                    result = true;
+                                    break;
+                                }
+                            case Win32.VirtualKeys.VK_OEM_MINUS: //Ctrl+'-'
+                                {
+                                    ((ChromiumWebBrowser)chromiumWebBrowser).ZoomOut();
+                                    result = true;
+                                    break;
+                                }
                             case '0': //Ctrl+0
                                 {
                                     ((ChromiumWebBrowser)chromiumWebBrowser).ZoomReset();
