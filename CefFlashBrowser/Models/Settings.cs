@@ -35,5 +35,16 @@
             FakeFlashVersionSetting = new FakeFlashVersionSetting();
             HideMainWindowOnBrowsing = false;
         }
+
+        public void SetNullPropertiesToDefault()
+        {
+            var defaultSettings = Default;
+
+            foreach (var property in GetType().GetProperties())
+            {
+                if (property.GetValue(this) == null)
+                    property.SetValue(this, property.GetValue(defaultSettings));
+            }
+        }
     }
 }

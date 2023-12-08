@@ -99,6 +99,7 @@ namespace CefFlashBrowser.Models.Data
             {
                 var file = File.ReadAllText(SettingsPath);
                 Settings = JsonConvert.DeserializeObject<Settings>(file);
+                Settings.SetNullPropertiesToDefault();
             }
             catch
             {
