@@ -9,12 +9,12 @@ namespace CefFlashBrowser.Models.Data
     public static class GlobalData
     {
         public static string AppBaseDirectory { get; }
-        public static string EmptyExePath { get; }
         public static string AssetsPath { get; }
         public static string CachesPath { get; }
         public static string CefDllPath { get; }
         public static string PluginsPath { get; }
         public static string FlashPath { get; }
+        public static string EmptyExePath { get; }
 
         public static string UserDocumentPath { get; }
         public static string DataPath { get; }
@@ -29,12 +29,12 @@ namespace CefFlashBrowser.Models.Data
         static GlobalData()
         {
             AppBaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            EmptyExePath = Path.Combine(AppBaseDirectory, @"CefFlashBrowser.EmptyExe.exe");
             AssetsPath = Path.Combine(AppBaseDirectory, @"Assets\");
             CachesPath = Path.Combine(AppBaseDirectory, @"Caches\");
             CefDllPath = Path.Combine(AssetsPath, @"CEF\");
             PluginsPath = Path.Combine(AssetsPath, @"Plugins\");
             FlashPath = Path.Combine(PluginsPath, @"pepflashplayer.dll");
+            EmptyExePath = Path.Combine(AssetsPath, @"CefFlashBrowser.EmptyExe.exe");
 
             UserDocumentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             DataPath = Path.Combine(UserDocumentPath, @"CefFlashBrowser\");

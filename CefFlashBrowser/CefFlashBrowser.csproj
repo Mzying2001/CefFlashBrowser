@@ -529,13 +529,15 @@
   <Import Project="..\packages\Costura.Fody.5.7.0\build\Costura.Fody.targets" Condition="Exists('..\packages\Costura.Fody.5.7.0\build\Costura.Fody.targets')" />
   <Import Project="..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>del *.pdb
-del *.xml
+    <PostBuildEvent>set ASSETS_PATH=Assets\
+set CEF_PATH=%25ASSETS_PATH%25CEF\
 
-set CEF_PATH=Assets\CEF\
+del *.pdb
+del *.xml
+move CefFlashBrowser.EmptyExe.* %25ASSETS_PATH%25
+
 rd /s /q %25CEF_PATH%25
 mkdir %25CEF_PATH%25
-
 move cef.pak %25CEF_PATH%25
 move cef_100_percent.pak %25CEF_PATH%25
 move cef_200_percent.pak %25CEF_PATH%25
