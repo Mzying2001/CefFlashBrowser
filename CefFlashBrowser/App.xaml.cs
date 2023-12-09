@@ -33,32 +33,40 @@ namespace CefFlashBrowser
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            InitCefFlash();
 
-            if (GlobalData.Settings.FirstStart)
+            try
             {
-                if (WindowManager.ShowSelectLanguageDialog())
-                    GlobalData.Settings.FirstStart = false;
-                return;
-            }
+                InitCefFlash();
 
-            if (e.Args.Length == 0)
-            {
-                WindowManager.ShowMainWindow();
-                return;
-            }
-
-            GlobalData.IsStartWithoutMainWindow = true;
-            foreach (var arg in e.Args)
-            {
-                if (UrlChecker.IsLocalSwfFile(arg))
+                if (GlobalData.Settings.FirstStart)
                 {
-                    WindowManager.ShowSwfPlayer(arg);
+                    if (WindowManager.ShowSelectLanguageDialog())
+                        GlobalData.Settings.FirstStart = false;
+                    return;
                 }
-                else
+
+                if (e.Args.Length == 0)
                 {
-                    WindowManager.ShowBrowser(arg);
+                    WindowManager.ShowMainWindow();
+                    return;
                 }
+
+                GlobalData.IsStartWithoutMainWindow = true;
+                foreach (var arg in e.Args)
+                {
+                    if (UrlChecker.IsLocalSwfFile(arg))
+                    {
+                        WindowManager.ShowSwfPlayer(arg);
+                    }
+                    else
+                    {
+                        WindowManager.ShowBrowser(arg);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                WindowManager.Alert(ex.ToString(), LanguageManager.GetString("title_error"));
             }
         }
 
