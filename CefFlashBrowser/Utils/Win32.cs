@@ -1,7 +1,12 @@
-﻿namespace CefFlashBrowser.Utils
+﻿using System.Runtime.InteropServices;
+
+namespace CefFlashBrowser.Utils
 {
     public static class Win32
     {
+        [DllImport("kernel32.dll")]
+        public static extern bool SetDllDirectory(string lpPathName);
+
         public static class VirtualKeys
         {
             public const int VK_LBUTTON = 0x01; // Left mouse button

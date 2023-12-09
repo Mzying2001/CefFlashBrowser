@@ -15,6 +15,11 @@ namespace CefFlashBrowser
     {
         private static bool _restart = false;
 
+        public App() : base()
+        {
+            Win32.SetDllDirectory(GlobalData.CefDllPath);
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);

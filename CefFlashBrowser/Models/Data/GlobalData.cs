@@ -12,6 +12,7 @@ namespace CefFlashBrowser.Models.Data
         public static string EmptyExePath { get; }
         public static string AssetsPath { get; }
         public static string CachesPath { get; }
+        public static string CefDllPath { get; }
         public static string PluginsPath { get; }
         public static string FlashPath { get; }
 
@@ -31,6 +32,7 @@ namespace CefFlashBrowser.Models.Data
             EmptyExePath = Path.Combine(AppBaseDirectory, @"CefFlashBrowser.EmptyExe.exe");
             AssetsPath = Path.Combine(AppBaseDirectory, @"Assets\");
             CachesPath = Path.Combine(AppBaseDirectory, @"Caches\");
+            CefDllPath = Path.Combine(AssetsPath, @"CEF\");
             PluginsPath = Path.Combine(AssetsPath, @"Plugins\");
             FlashPath = Path.Combine(PluginsPath, @"pepflashplayer.dll");
 
