@@ -4,7 +4,6 @@ using CefFlashBrowser.Utils;
 using CefSharp;
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Windows;
