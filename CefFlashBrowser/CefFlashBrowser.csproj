@@ -534,6 +534,7 @@ set CEF_PATH=%25ASSETS_PATH%25CEF\
 
 del *.pdb
 del *.xml
+move CefSharp.* %25ASSETS_PATH%25
 move CefFlashBrowser.EmptyExe.* %25ASSETS_PATH%25
 
 rd /s /q %25CEF_PATH%25

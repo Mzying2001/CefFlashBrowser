@@ -4,6 +4,9 @@ using CefFlashBrowser.Utils;
 using CefSharp;
 using System;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
 using System.Windows;
 
 namespace CefFlashBrowser
@@ -18,6 +21,14 @@ namespace CefFlashBrowser
         public App() : base()
         {
             Win32.SetDllDirectory(GlobalData.CefDllPath);
+
+            AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
+            {
+                // Load dlls in the Assets folder
+                var assembly = Assembly.GetExecutingAssembly();
+                var assemblyPath = Path.Combine(GlobalData.AssetsPath, new AssemblyName(e.Name).Name + ".dll");
+                return File.Exists(assemblyPath) ? Assembly.LoadFile(assemblyPath) : null;
+            };
         }
 
         protected override void OnStartup(StartupEventArgs e)
