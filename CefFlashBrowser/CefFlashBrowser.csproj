@@ -463,7 +463,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Resource Include="Assets\Svgs\warning.svg" />
-    <Content Include="libcef.dll">
+    <Content Include="Assets\CefSharp\libcef.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Resource Include="Assets\Svgs\add.svg" />
@@ -530,15 +530,16 @@
   <Import Project="..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />
   <PropertyGroup>
     <PostBuildEvent>set ASSETS_PATH=Assets\
-set CEF_PATH=%25ASSETS_PATH%25CEF\
+set CEF_PATH=%25ASSETS_PATH%25CefSharp\
 
 del *.pdb
 del *.xml
-move CefSharp.* %25ASSETS_PATH%25
-move CefFlashBrowser.EmptyExe.* %25ASSETS_PATH%25
+del libcef.dll
 
-rd /s /q %25CEF_PATH%25
-mkdir %25CEF_PATH%25
+rd /s /q %25CEF_PATH%25locales
+rd /s /q %25CEF_PATH%25swiftshader
+
+move CefSharp.* %25CEF_PATH%25
 move cef.pak %25CEF_PATH%25
 move cef_100_percent.pak %25CEF_PATH%25
 move cef_200_percent.pak %25CEF_PATH%25
@@ -547,7 +548,7 @@ move chrome_elf.dll %25CEF_PATH%25
 move d3dcompiler_47.dll %25CEF_PATH%25
 move devtools_resources.pak %25CEF_PATH%25
 move icudtl.dat %25CEF_PATH%25
-move libcef.dll %25CEF_PATH%25
+::move libcef.dll %25CEF_PATH%25
 move libEGL.dll %25CEF_PATH%25
 move libGLESv2.dll %25CEF_PATH%25
 move locales %25CEF_PATH%25
@@ -555,7 +556,10 @@ move natives_blob.bin %25CEF_PATH%25
 move README.txt %25CEF_PATH%25
 move snapshot_blob.bin %25CEF_PATH%25
 move swiftshader %25CEF_PATH%25
-move v8_context_snapshot.bin %25CEF_PATH%25</PostBuildEvent>
+move v8_context_snapshot.bin %25CEF_PATH%25
+
+move CefFlashBrowser.EmptyExe.* %25ASSETS_PATH%25
+</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\Fody.6.6.4\build\Fody.targets" Condition="Exists('..\packages\Fody.6.6.4\build\Fody.targets')" />
 </Project>

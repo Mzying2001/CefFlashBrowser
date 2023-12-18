@@ -23,9 +23,9 @@ namespace CefFlashBrowser
 
             AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
             {
-                // Load dlls in the Assets folder
+                // Load CefSharp dlls
                 string assemblyName = new AssemblyName(e.Name).Name;
-                string assemblyPath = Path.Combine(GlobalData.AssetsPath, assemblyName + ".dll");
+                string assemblyPath = Path.Combine(GlobalData.CefDllPath, assemblyName + ".dll");
                 return File.Exists(assemblyPath) ? Assembly.LoadFrom(assemblyPath) : null;
             };
         }
