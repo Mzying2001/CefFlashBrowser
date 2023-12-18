@@ -456,7 +456,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\swfplayer.html">
+    <Content Include="Assets\SwfPlayer\swfplayer.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Plugins\pepflashplayer.dll">

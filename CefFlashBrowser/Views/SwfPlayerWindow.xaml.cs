@@ -59,7 +59,7 @@ namespace CefFlashBrowser.Views
             if (d is SwfPlayerWindow swfPlayerWindow)
             {
                 swfPlayerWindow.browser.Address = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-                    $"Assets/swfplayer.html?src={WebUtility.UrlEncode((string)e.NewValue)}");
+                    $"Assets/SwfPlayer/swfplayer.html?src={WebUtility.UrlEncode((string)e.NewValue)}");
             }
         }
 
