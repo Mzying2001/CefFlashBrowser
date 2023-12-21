@@ -1,6 +1,6 @@
 ﻿namespace CefFlashBrowser.WinformCefSharp4WPF
 {
-    public class CefSettings : CefSharp.AbstractCefSettings
+    public class CefSettings : CefSharp.CefSettingsBase
     {
         public CefSettings()
         {

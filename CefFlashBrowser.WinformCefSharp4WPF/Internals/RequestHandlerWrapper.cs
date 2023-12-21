@@ -64,5 +64,10 @@ namespace CefFlashBrowser.WinformCefSharp4WPF.Internals
         {
             Handler.OnRenderProcessTerminated(TargetBrowser, browser, status);
         }
+
+        public void OnDocumentAvailableInMainFrame(IWebBrowser chromiumWebBrowser, IBrowser browser)
+        {
+            Handler.OnDocumentAvailableInMainFrame(TargetBrowser, browser);
+        }
     }
 }

@@ -329,6 +329,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             get => (CefSharp.WinForms.ChromiumWebBrowser)base.Child;
             private set => base.Child = value;
         }
+        public IAudioHandler AudioHandler { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         private static void OnZoomLevelPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -608,9 +609,9 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             ((IWebBrowserInternal)browser).OnLoadError(args);
         }
 
-        void IWebBrowserInternal.SetCanExecuteJavascriptOnMainFrame(bool canExecute)
+        public void SetCanExecuteJavascriptOnMainFrame(long frameId, bool canExecute)
         {
-            ((IWebBrowserInternal)browser).SetCanExecuteJavascriptOnMainFrame(canExecute);
+            ((IWebBrowserInternal)browser).SetCanExecuteJavascriptOnMainFrame(frameId, canExecute);
         }
     }
 }
