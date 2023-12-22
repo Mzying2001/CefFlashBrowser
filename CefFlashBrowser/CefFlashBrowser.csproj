@@ -60,6 +60,12 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <OutputPath>..\bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\bin\x64\Release\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Costura, Version=5.7.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.5.7.0\lib\netstandard1.0\Costura.dll</HintPath>
@@ -456,6 +462,12 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\CefSharp\libcef.x64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\CefSharp\libcef.x86.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\SwfPlayer\swfplayer.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -463,9 +475,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Resource Include="Assets\Svgs\warning.svg" />
-    <Content Include="Assets\CefSharp\libcef.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Resource Include="Assets\Svgs\add.svg" />
     <Resource Include="Assets\Svgs\back.svg" />
     <Resource Include="Assets\Svgs\down.svg" />
@@ -533,7 +542,6 @@ set CEF_PATH=%25ASSETS_PATH%25CefSharp\
 
 del *.pdb
 del *.xml
-del libcef.dll
 
 rd /s /q %25CEF_PATH%25locales
 rd /s /q %25CEF_PATH%25swiftshader
@@ -547,15 +555,17 @@ move chrome_elf.dll %25CEF_PATH%25
 move d3dcompiler_47.dll %25CEF_PATH%25
 move devtools_resources.pak %25CEF_PATH%25
 move icudtl.dat %25CEF_PATH%25
-::move libcef.dll %25CEF_PATH%25
+move libcef.dll %25CEF_PATH%25
 move libEGL.dll %25CEF_PATH%25
 move libGLESv2.dll %25CEF_PATH%25
 move locales %25CEF_PATH%25
-move natives_blob.bin %25CEF_PATH%25
 move README.txt %25CEF_PATH%25
 move snapshot_blob.bin %25CEF_PATH%25
 move swiftshader %25CEF_PATH%25
 move v8_context_snapshot.bin %25CEF_PATH%25
+
+move %25CEF_PATH%25libcef.$(PlatformName).dll %25CEF_PATH%25libcef.dll
+del %25CEF_PATH%25libcef.*.dll
 
 move CefFlashBrowser.EmptyExe.* %25ASSETS_PATH%25
 </PostBuildEvent>
