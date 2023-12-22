@@ -478,10 +478,13 @@
     <Content Include="Assets\CefSharp\libcef.x86.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\SwfPlayer\swfplayer.html">
+    <Content Include="Assets\Plugins\pepflashplayer.x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Plugins\pepflashplayer.dll">
+    <Content Include="Assets\Plugins\pepflashplayer.x86.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\SwfPlayer\swfplayer.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Resource Include="Assets\Svgs\warning.svg" />
@@ -549,6 +552,7 @@
   <PropertyGroup>
     <PostBuildEvent>set ASSETS_PATH=Assets\
 set CEF_PATH=%25ASSETS_PATH%25CefSharp\
+set PLUGINS_PATH=%25ASSETS_PATH%25Plugins\
 
 del *.pdb
 del *.xml
@@ -576,6 +580,9 @@ move v8_context_snapshot.bin %25CEF_PATH%25
 
 move %25CEF_PATH%25libcef.$(PlatformName).dll %25CEF_PATH%25libcef.dll
 del %25CEF_PATH%25libcef.*.dll
+
+move %25PLUGINS_PATH%25pepflashplayer.$(PlatformName).dll %25PLUGINS_PATH%25pepflashplayer.dll
+del %25PLUGINS_PATH%25pepflashplayer.*.dll
 
 move CefFlashBrowser.EmptyExe.* %25ASSETS_PATH%25
 </PostBuildEvent>
