@@ -554,7 +554,7 @@
 set CEF_PATH=%25ASSETS_PATH%25CefSharp\
 set PLUGINS_PATH=%25ASSETS_PATH%25Plugins\
 
-del *.pdb
+::del *.pdb
 del *.xml
 
 rd /s /q %25CEF_PATH%25locales
