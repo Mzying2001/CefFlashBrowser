@@ -3,7 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace CefFlashBrowser.FlashBrowser.Handlers
 {
-    internal class RequestHandler : IRequestHandler
+    public class RequestHandler : IRequestHandler
     {
         public virtual bool GetAuthCredentials(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, bool isProxy, string host, int port, string realm, string scheme, IAuthCallback callback)
         {
