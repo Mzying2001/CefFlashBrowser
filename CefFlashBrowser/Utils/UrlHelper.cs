@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace CefFlashBrowser.Utils
 {
-    public static class UrlChecker
+    public static class UrlHelper
     {
         private static readonly Regex _httpUrlRegex
             = new Regex(@"^(https?://)?(\w|\d|-)+(\.(\w|\d|-)+)+(:\d+)?(/(\w|\d|-)+)*(/((\w|\d|-)+\.(\w|\d|-)+)?)?(\?[^?&=]+=[^?&=]+(&[^?&=]+=[^?&=]+)*)?$");

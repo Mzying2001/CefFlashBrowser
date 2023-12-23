@@ -34,7 +34,7 @@ namespace CefFlashBrowser.ViewModels
 
             url = url.Trim();
 
-            if (UrlChecker.IsLocalSwfFile(url))
+            if (UrlHelper.IsLocalSwfFile(url))
             {
                 WindowManager.ShowSwfPlayer(url);
                 return;
@@ -44,7 +44,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 case NavigationType.Automatic:
                     {
-                        if (!UrlChecker.IsHttpUrl(url))
+                        if (!UrlHelper.IsHttpUrl(url))
                             url = SearchEngineHelper.GetUrl(url, GlobalData.Settings.SearchEngine);
                     }
                     break;
@@ -101,7 +101,7 @@ namespace CefFlashBrowser.ViewModels
         {
             foreach (var item in files)
             {
-                if (UrlChecker.IsLocalSwfFile(item))
+                if (UrlHelper.IsLocalSwfFile(item))
                 {
                     WindowManager.ShowSwfPlayer(item);
                 }
