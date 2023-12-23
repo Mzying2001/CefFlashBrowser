@@ -24,7 +24,7 @@
             // default settings
             FirstStart = true;
             Language = "zh-CN";
-            SearchEngine = SearchEngine.Baidu;
+            SearchEngine = SearchEngine.Bing;
             NavigationType = NavigationType.Automatic;
             NewPageBehavior = NewPageBehavior.OriginalWindow;
             DisableOnBeforeUnloadDialog = false;
