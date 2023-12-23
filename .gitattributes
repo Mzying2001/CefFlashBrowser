@@ -4,6 +4,11 @@
 * text=auto
 
 ###############################################################################
+# git lfs
+###############################################################################
+*.dll filter=lfs diff=lfs merge=lfs -text
+
+###############################################################################
 # Set default behavior for command prompt diff.
 #
 # This is need for earlier builds of msysgit that does not have it on by

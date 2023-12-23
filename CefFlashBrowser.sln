@@ -16,24 +16,42 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CefFlashBrowser.FlashBrowse
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Debug|x64.ActiveCfg = Debug|x64
+		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Debug|x64.Build.0 = Debug|x64
 		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Debug|x86.ActiveCfg = Debug|x86
 		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Debug|x86.Build.0 = Debug|x86
+		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Release|x64.ActiveCfg = Release|x64
+		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Release|x64.Build.0 = Release|x64
 		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Release|x86.ActiveCfg = Release|x86
 		{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}.Release|x86.Build.0 = Release|x86
-		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Debug|x86.Build.0 = Debug|Any CPU
-		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Release|x86.ActiveCfg = Release|Any CPU
-		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Release|x86.Build.0 = Release|Any CPU
+		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Debug|x64.ActiveCfg = Debug|x64
+		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Debug|x64.Build.0 = Debug|x64
+		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Debug|x86.ActiveCfg = Debug|x86
+		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Debug|x86.Build.0 = Debug|x86
+		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Release|x64.ActiveCfg = Release|x64
+		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Release|x64.Build.0 = Release|x64
+		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Release|x86.ActiveCfg = Release|x86
+		{9FCD8168-1CCD-47D4-A3D1-4283D13788B8}.Release|x86.Build.0 = Release|x86
+		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Debug|x64.ActiveCfg = Debug|x64
+		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Debug|x64.Build.0 = Debug|x64
 		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Debug|x86.ActiveCfg = Debug|x86
 		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Debug|x86.Build.0 = Debug|x86
+		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Release|x64.ActiveCfg = Release|x64
+		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Release|x64.Build.0 = Release|x64
 		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Release|x86.ActiveCfg = Release|x86
 		{E5AF3E66-FCD3-4434-8159-F572BC04918C}.Release|x86.Build.0 = Release|x86
+		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Debug|x64.ActiveCfg = Debug|x64
+		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Debug|x64.Build.0 = Debug|x64
 		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Debug|x86.ActiveCfg = Debug|x86
 		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Debug|x86.Build.0 = Debug|x86
+		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Release|x64.ActiveCfg = Release|x64
+		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Release|x64.Build.0 = Release|x64
 		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Release|x86.ActiveCfg = Release|x86
 		{E1973A5C-E506-4B97-8042-3F8CF3D6F6A2}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
