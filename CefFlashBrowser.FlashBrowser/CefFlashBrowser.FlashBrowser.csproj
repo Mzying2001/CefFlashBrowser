@@ -93,6 +93,7 @@
     <Compile Include="Handlers\LifeSpanHandler.cs" />
     <Compile Include="Handlers\LoadHandler.cs" />
     <Compile Include="Handlers\RenderProcessMessageHandler.cs" />
+    <Compile Include="Handlers\RequestHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
