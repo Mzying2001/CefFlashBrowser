@@ -19,7 +19,7 @@ namespace CefFlashBrowser.Utils
                     return $"www.google.com/search?q={str}";
 
                 case SearchEngine.Bing:
-                    return $"bing.com/search?q={str}";
+                    return $"www.bing.com/search?q={str}";
 
                 case SearchEngine.Sogou:
                     return $"www.sogou.com/web?query={str}";
