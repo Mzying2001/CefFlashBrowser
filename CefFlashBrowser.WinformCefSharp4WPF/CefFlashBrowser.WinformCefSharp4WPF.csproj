@@ -86,6 +86,7 @@
   <ItemGroup>
     <Compile Include="CefSettings.cs" />
     <Compile Include="ChromiumWebBrowser.cs" />
+    <Compile Include="Internals\AudioHandlerWrapper.cs" />
     <Compile Include="Internals\ContextMenuHandlerWrapper.cs" />
     <Compile Include="Internals\DialogHandlerWrapper.cs" />
     <Compile Include="Internals\DisplayHandlerWrapper.cs" />

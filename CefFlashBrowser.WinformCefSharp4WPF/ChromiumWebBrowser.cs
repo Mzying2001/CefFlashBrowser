@@ -38,6 +38,17 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             get => browser.JavascriptObjectRepository;
         }
 
+        private IAudioHandler audioHandler;
+        public IAudioHandler AudioHandler
+        {
+            get => audioHandler;
+            set
+            {
+                audioHandler = value;
+                browser.AudioHandler = value == null ? null : new AudioHandlerWrapper(audioHandler, this);
+            }
+        }
+
         private IDialogHandler dialogHandler = null;
         public IDialogHandler DialogHandler
         {
@@ -329,7 +340,6 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             get => (CefSharp.WinForms.ChromiumWebBrowser)base.Child;
             private set => base.Child = value;
         }
-        public IAudioHandler AudioHandler { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         private static void OnZoomLevelPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
