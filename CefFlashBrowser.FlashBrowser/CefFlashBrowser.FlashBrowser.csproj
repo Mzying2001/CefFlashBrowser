@@ -81,6 +81,7 @@
     <Compile Include="ChromiumFlashBrowser.cs" />
     <Compile Include="ChromiumFlashBrowserBase.cs" />
     <Compile Include="ChromiumWebBrowserEx.cs" />
+    <Compile Include="Handlers\AudioHandler.cs" />
     <Compile Include="Handlers\ContextMenuHandler.cs" />
     <Compile Include="Handlers\DialogHandler.cs" />
     <Compile Include="Handlers\DisplayHandler.cs" />
