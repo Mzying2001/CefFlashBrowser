@@ -58,7 +58,7 @@ namespace CefFlashBrowser.Utils.Handlers
                         }
                     case Search:
                         {
-                            WindowManager.ShowBrowser(SearchEngineUtil.GetUrl(selectionText, GlobalData.Settings.SearchEngine));
+                            WindowManager.ShowBrowser(SearchEngineHelper.GetUrl(selectionText, GlobalData.Settings.SearchEngine));
                             result = true;
                             break;
                         }

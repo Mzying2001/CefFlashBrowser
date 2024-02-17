@@ -310,8 +310,8 @@
     <Compile Include="Models\SearchEngine.cs" />
     <Compile Include="Models\Data\MessageTokens.cs" />
     <Compile Include="Models\Settings.cs" />
-    <Compile Include="Utils\SearchEngineUtil.cs" />
-    <Compile Include="Utils\UrlChecker.cs" />
+    <Compile Include="Utils\SearchEngineHelper.cs" />
+    <Compile Include="Utils\UrlHelper.cs" />
     <Compile Include="Models\Website.cs" />
     <Compile Include="Models\WindowSizeInfo.cs" />
     <Compile Include="Utils\Win32.cs" />

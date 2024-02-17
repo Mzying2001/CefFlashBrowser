@@ -3,13 +3,14 @@ using CefSharp;
 using CefSharp.Internals;
 using SimpleMvvm.Command;
 using System;
+using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Forms.Integration;
 using System.Windows.Input;
+using System.Windows.Interop;
 
 namespace CefFlashBrowser.WinformCefSharp4WPF
 {
-    public class ChromiumWebBrowser : WindowsFormsHost, IWebBrowserInternal, IWebBrowser, IWpfWebBrowser, IDisposable
+    public class ChromiumWebBrowser : HwndHost, IWebBrowserInternal, IWebBrowser, IWpfWebBrowser, IDisposable
     {
         /// <summary>
         /// Flag used to determine whether the address change is notified by the base browser
@@ -335,12 +336,6 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
-        public new CefSharp.WinForms.ChromiumWebBrowser Child
-        {
-            get => (CefSharp.WinForms.ChromiumWebBrowser)base.Child;
-            private set => base.Child = value;
-        }
-
         private static void OnZoomLevelPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             ChromiumWebBrowser chromiumWebBrowser = (ChromiumWebBrowser)sender;
@@ -377,7 +372,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         public ChromiumWebBrowser()
         {
 #pragma warning disable CS0618 // type or member is obsolete
-            Child = browser = new CefSharp.WinForms.ChromiumWebBrowser();
+            browser = new CefSharp.WinForms.ChromiumWebBrowser();
 #pragma warning restore CS0618 // type or member is obsolete
 
             BackCommand = new DelegateCommand(this.Back) { CanExecute = false };
@@ -411,6 +406,16 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
+
+        protected override HandleRef BuildWindowCore(HandleRef hwndParent)
+        {
+            Win32.SetParent(browser.Handle, hwndParent.Handle);
+            return new HandleRef(this, browser.Handle);
+        }
+
+        protected override void DestroyWindowCore(HandleRef hwnd)
+        {
+        }
 
         protected override void OnGotFocus(RoutedEventArgs e)
         {

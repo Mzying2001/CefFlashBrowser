@@ -4,13 +4,13 @@ using System.Net;
 
 namespace CefFlashBrowser.Utils
 {
-    public static class SearchEngineUtil
+    public static class SearchEngineHelper
     {
-        public static string GetUrl(string str, SearchEngine e = SearchEngine.Baidu)
+        public static string GetUrl(string str, SearchEngine engine)
         {
             str = WebUtility.UrlEncode(str);
 
-            switch (e)
+            switch (engine)
             {
                 case SearchEngine.Baidu:
                     return $"www.baidu.com/s?wd={str}";
@@ -19,7 +19,7 @@ namespace CefFlashBrowser.Utils
                     return $"www.google.com/search?q={str}";
 
                 case SearchEngine.Bing:
-                    return $"bing.com/search?q={str}";
+                    return $"www.bing.com/search?q={str}";
 
                 case SearchEngine.Sogou:
                     return $"www.sogou.com/web?query={str}";
@@ -28,7 +28,7 @@ namespace CefFlashBrowser.Utils
                     return $"www.so.com/s?&q={str}";
 
                 default:
-                    throw new Exception("Unknown search engine.");
+                    throw new ArgumentException("Unknown search engine.", nameof(engine));
             }
         }
     }
