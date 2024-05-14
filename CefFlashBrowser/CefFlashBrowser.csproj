@@ -462,6 +462,18 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="Assets\CefSharp\libcef_x64.tar.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\CefSharp\libcef_x86.tar.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Plugins\pepflashplayer_x64.tar.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Plugins\pepflashplayer_x86.tar.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -472,18 +484,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\CefSharp\libcef.x64.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\CefSharp\libcef.x86.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Plugins\pepflashplayer.x64.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Plugins\pepflashplayer.x86.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Assets\SwfPlayer\swfplayer.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -578,11 +578,11 @@ move snapshot_blob.bin %25CEF_PATH%25
 move swiftshader %25CEF_PATH%25
 move v8_context_snapshot.bin %25CEF_PATH%25
 
-move %25CEF_PATH%25libcef.$(PlatformName).dll %25CEF_PATH%25libcef.dll
-del %25CEF_PATH%25libcef.*.dll
+tar -xvf %25CEF_PATH%25libcef_$(PlatformName).tar.gz -C %25CEF_PATH%25
+del %25CEF_PATH%25libcef_*.tar.gz
 
-move %25PLUGINS_PATH%25pepflashplayer.$(PlatformName).dll %25PLUGINS_PATH%25pepflashplayer.dll
-del %25PLUGINS_PATH%25pepflashplayer.*.dll
+tar -xvf %25PLUGINS_PATH%25pepflashplayer_$(PlatformName).tar.gz -C %25PLUGINS_PATH%25
+del %25PLUGINS_PATH%25pepflashplayer_*.tar.gz
 
 move CefFlashBrowser.EmptyExe.* %25ASSETS_PATH%25
 </PostBuildEvent>
