@@ -35,7 +35,7 @@ namespace CefFlashBrowser.Models.Data
             CefDllPath = Path.Combine(AssetsPath, @"CefSharp\");
             PluginsPath = Path.Combine(AssetsPath, @"Plugins\");
             FlashPath = Path.Combine(PluginsPath, @"pepflashplayer.dll");
-            EmptyExePath = Path.Combine(AssetsPath, @"CefFlashBrowser.EmptyExe.exe");
+            EmptyExePath = Path.Combine(AssetsPath, @"EmptyExe\CefFlashBrowser.EmptyExe.exe");
 
             UserDocumentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             DataPath = Path.Combine(UserDocumentPath, @"CefFlashBrowser\");

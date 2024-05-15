@@ -553,6 +553,7 @@
     <PostBuildEvent>set ASSETS_PATH=Assets\
 set CEF_PATH=%25ASSETS_PATH%25CefSharp\
 set PLUGINS_PATH=%25ASSETS_PATH%25Plugins\
+set EMPTYEXE_PATH=%25ASSETS_PATH%25EmptyExe\
 
 ::del *.pdb
 del *.xml
@@ -584,7 +585,9 @@ del %25CEF_PATH%25libcef_*.tar.gz
 tar -xvf %25PLUGINS_PATH%25pepflashplayer_$(PlatformName).tar.gz -C %25PLUGINS_PATH%25
 del %25PLUGINS_PATH%25pepflashplayer_*.tar.gz
 
-move CefFlashBrowser.EmptyExe.* %25ASSETS_PATH%25
+rd /s /q %25EMPTYEXE_PATH%25
+mkdir %25EMPTYEXE_PATH%25
+move CefFlashBrowser.EmptyExe.* %25EMPTYEXE_PATH%25
 </PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\Fody.6.6.4\build\Fody.targets" Condition="Exists('..\packages\Fody.6.6.4\build\Fody.targets')" />
