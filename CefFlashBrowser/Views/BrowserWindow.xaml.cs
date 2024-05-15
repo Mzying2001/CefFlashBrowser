@@ -47,8 +47,11 @@ namespace CefFlashBrowser.Views
                         {
                             case Win32.VirtualKeys.VK_ESCAPE: //Esc
                                 {
-                                    browser.StopLoad();
-                                    result = true;
+                                    if (browser.IsLoading)
+                                    {
+                                        browser.StopLoad();
+                                        result = true;
+                                    }
                                     break;
                                 }
                             case Win32.VirtualKeys.VK_F5: //F5
@@ -60,6 +63,7 @@ namespace CefFlashBrowser.Views
                             case Win32.VirtualKeys.VK_F11: //F11
                                 {
                                     window.FullScreen = !window.FullScreen;
+                                    result = true;
                                     break;
                                 }
                             case Win32.VirtualKeys.VK_F12: //F12
