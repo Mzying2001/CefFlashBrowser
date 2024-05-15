@@ -207,8 +207,7 @@
                     Command="{Binding OpenInDefaultBrowserCommand}"
                     CommandParameter="{Binding ElementName=browser, Path=Address}"/>
         <KeyBinding Gesture="Ctrl+P"
-                    Command="{Binding PrintWebpageCommand}"
-                    CommandParameter="{Binding ElementName=browser}"/>
+                    Command="{Binding ElementName=browser, Path=PrintCommand}"/>
         <KeyBinding Gesture="Ctrl+U"
                     Command="{Binding ViewSourceCommand}"
                     CommandParameter="{Binding ElementName=browser, Path=Address}"/>
