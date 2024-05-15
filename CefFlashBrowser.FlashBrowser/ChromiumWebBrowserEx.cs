@@ -19,8 +19,18 @@ namespace CefFlashBrowser.FlashBrowser
 
                 (chromiumWebBrowser as UIElement)?.Dispatcher.Invoke(delegate
                 {
-                    var element = (UIElement)chromiumWebBrowser;
-                    element.Focus();
+                    //var element = (UIElement)chromiumWebBrowser;
+                    //element.Focus();
+
+                    DependencyObject d = (DependencyObject)chromiumWebBrowser;
+                    while (LogicalTreeHelper.GetParent(d) is DependencyObject parent)
+                    {
+                        d = parent;
+                    }
+                    if (!ReferenceEquals(d, chromiumWebBrowser))
+                    {
+                        FocusManager.SetFocusedElement(d, (IInputElement)chromiumWebBrowser);
+                    }
                 });
             }
         }
