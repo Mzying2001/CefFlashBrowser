@@ -187,8 +187,8 @@
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>
         <KeyBinding Key="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
-        <!--<KeyBinding Key="F11"
-                    Command="{Binding }"-->
+        <KeyBinding Key="F11"
+                    Command="{Binding ElementName=window, Path=ToggleFullScreenCommand}"/>
         <KeyBinding Key="F12"
                     Command="{Binding ShowDevToolsCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>

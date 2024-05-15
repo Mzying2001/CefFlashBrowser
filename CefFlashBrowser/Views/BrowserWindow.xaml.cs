@@ -4,10 +4,12 @@ using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using SimpleMvvm.Command;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace CefFlashBrowser.Views
@@ -119,6 +121,9 @@ namespace CefFlashBrowser.Views
         private bool _isMaximizedBeforeFullScreen = false;
 
 
+        public ICommand ToggleFullScreenCommand { get; }
+
+
         public bool FullScreen
         {
             get { return (bool)GetValue(FullScreenProperty); }
@@ -132,6 +137,8 @@ namespace CefFlashBrowser.Views
 
         public BrowserWindow()
         {
+            ToggleFullScreenCommand = new DelegateCommand(() => { FullScreen = !FullScreen; });
+
             InitializeComponent();
             WindowSizeInfo.Apply(GlobalData.Settings.BrowserWindowSizeInfo, this);
 
@@ -151,13 +158,13 @@ namespace CefFlashBrowser.Views
                 if (window._isMaximizedBeforeFullScreen)
                     window.WindowState = WindowState.Normal;
 
-                window.Topmost = true;
+                //window.Topmost = true;
                 window.WindowStyle = WindowStyle.None;
                 window.WindowState = WindowState.Maximized;
             }
             else
             {
-                window.Topmost = false;
+                //window.Topmost = false;
                 window.WindowStyle = WindowStyle.SingleBorderWindow;
                 window.WindowState = WindowState.Normal;
 
