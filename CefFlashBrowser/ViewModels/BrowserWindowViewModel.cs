@@ -19,6 +19,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand CloseBrowserCommand { get; set; }
         public DelegateCommand ReloadOrStopCommand { get; set; }
         public DelegateCommand ShowDevToolsCommand { get; set; }
+        public DelegateCommand PrintWebpageCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
 
         public void ShowMainWindow()
@@ -117,6 +118,11 @@ namespace CefFlashBrowser.ViewModels
             browser.ShowDevTools();
         }
 
+        public void PrintWebpage(IWebBrowser browser)
+        {
+            browser.Print();
+        }
+
         public void OpenInSwfPlayer(string url)
         {
             WindowManager.ShowSwfPlayer(url);
@@ -132,6 +138,7 @@ namespace CefFlashBrowser.ViewModels
             CloseBrowserCommand = new DelegateCommand<IWebBrowser>(CloseBrowser);
             ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
             ShowDevToolsCommand = new DelegateCommand<IWebBrowser>(ShowDevTools);
+            PrintWebpageCommand = new DelegateCommand<IWebBrowser>(PrintWebpage);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
         }
     }

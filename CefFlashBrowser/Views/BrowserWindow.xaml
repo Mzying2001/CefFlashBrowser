@@ -182,6 +182,48 @@
         </ContextMenu>
     </Window.Resources>
 
+    <Window.InputBindings>
+        <KeyBinding Key="Esc"
+                    Command="{Binding ElementName=browser, Path=StopCommand}"/>
+        <KeyBinding Key="F5"
+                    Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
+        <!--<KeyBinding Key="F11"
+                    Command="{Binding }"-->
+        <KeyBinding Key="F12"
+                    Command="{Binding ShowDevToolsCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
+        <KeyBinding Gesture="Ctrl+OemPlus"
+                    Command="{Binding ElementName=browser, Path=ZoomInCommand}"/>
+        <KeyBinding Gesture="Ctrl+OemMinus"
+                    Command="{Binding ElementName=browser, Path=ZoomOutCommand}"/>
+        <KeyBinding Gesture="Ctrl+0"
+                    Command="{Binding ElementName=browser, Path=ZoomResetCommand}"/>
+        <KeyBinding Gesture="Ctrl+D"
+                    Command="{Binding AddFavoriteCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
+        <KeyBinding Gesture="Ctrl+M"
+                    Command="{Binding ShowMainWindowCommand}"/>
+        <KeyBinding Gesture="Ctrl+O"
+                    Command="{Binding OpenInDefaultBrowserCommand}"
+                    CommandParameter="{Binding ElementName=browser, Path=Address}"/>
+        <KeyBinding Gesture="Ctrl+P"
+                    Command="{Binding PrintWebpageCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
+        <KeyBinding Gesture="Ctrl+U"
+                    Command="{Binding ViewSourceCommand}"
+                    CommandParameter="{Binding ElementName=browser, Path=Address}"/>
+        <KeyBinding Gesture="Ctrl+S"
+                    Command="{Binding CreateShortcutCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding CloseBrowserCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
+        <KeyBinding Gesture="Alt+Left"
+                    Command="{Binding ElementName=browser, Path=BackCommand}"/>
+        <KeyBinding Gesture="Alt+Right"
+                    Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
+    </Window.InputBindings>
+
     <Grid x:Name="mainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

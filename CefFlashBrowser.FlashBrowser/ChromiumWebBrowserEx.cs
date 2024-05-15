@@ -8,7 +8,7 @@ namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumWebBrowserEx : ChromiumWebBrowser
     {
-        private class NotifyWpfFocusHandler : Handlers.FocusHandler
+        private class WpfFocusHandler : Handlers.FocusHandler
         {
             public override void OnGotFocus(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
@@ -25,11 +25,37 @@ namespace CefFlashBrowser.FlashBrowser
             }
         }
 
+        private class WpfKeyboardHandler : Handlers.KeyboardHandler
+        {
+            public override bool OnPreKeyEvent(IWebBrowser chromiumWebBrowser, IBrowser browser, KeyType type, int windowsKeyCode, int nativeKeyCode, CefEventFlags modifiers, bool isSystemKey, ref bool isKeyboardShortcut)
+            {
+                if (type != KeyType.RawKeyDown)
+                    return false;
+
+                bool result = false;
+
+                (chromiumWebBrowser as UIElement)?.Dispatcher.Invoke(delegate
+                {
+                    UIElement element = (UIElement)chromiumWebBrowser;
+                    PresentationSource source = PresentationSource.FromVisual(element);
+
+                    Key key = KeyInterop.KeyFromVirtualKey(windowsKeyCode);
+                    KeyEventArgs args = new KeyEventArgs(Keyboard.PrimaryDevice, source, 0, key) { RoutedEvent = Keyboard.KeyDownEvent, };
+                    element.RaiseEvent(args);
+
+                    result = args.Handled;
+                });
+
+                return result;
+            }
+        }
+
         public ICommand LoadUrlCommand { get; }
 
         public ChromiumWebBrowserEx()
         {
-            FocusHandler = new NotifyWpfFocusHandler();
+            FocusHandler = new WpfFocusHandler();
+            KeyboardHandler = new WpfKeyboardHandler();
             LoadUrlCommand = new DelegateCommand<string>(Load);
         }
     }
