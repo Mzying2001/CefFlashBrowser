@@ -173,13 +173,24 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void WindowSourceInitialized(object sender, EventArgs e)
+        private void KeyDownHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape && browser.IsLoading)
+            {
+                // Why not use KeyBinding: The Esc key serves other purposes in many situations, 
+                // not just stopping loading. If KeyBinding is used, this would be considered as 
+                // the event being handled, thus intercepting the Esc key event.
+                browser.Stop();
+            }
+        }
+
+        private void SourceInitializedHandler(object sender, EventArgs e)
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             HwndSource.FromHwnd(hwnd).AddHook(new HwndSourceHook(WndProc));
         }
 
-        private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
+        private void SizeChangedHandler(object sender, SizeChangedEventArgs e)
         {
             UpdateStatusPopupPosition();
         }

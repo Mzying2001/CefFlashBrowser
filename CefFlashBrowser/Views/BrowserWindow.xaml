@@ -22,8 +22,9 @@
         Closing="WindowClosing"
         Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}"
-        SizeChanged="WindowSizeChanged"
-        SourceInitialized="WindowSourceInitialized">
+        KeyDown="KeyDownHandler"
+        SizeChanged="SizeChangedHandler"
+        SourceInitialized="SourceInitializedHandler">
 
     <Window.Resources>
         <!--ConetxtMenu-->
@@ -185,8 +186,8 @@
 
 
     <Window.InputBindings>
-        <KeyBinding Key="Esc"
-                    Command="{Binding ElementName=browser, Path=StopCommand}"/>
+        <!--<KeyBinding Key="Esc"
+                    Command="{Binding ElementName=browser, Path=StopCommand}"/>-->
         <KeyBinding Key="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
         <KeyBinding Key="F11"
