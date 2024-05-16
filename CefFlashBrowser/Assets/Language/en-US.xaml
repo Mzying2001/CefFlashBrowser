@@ -115,6 +115,8 @@
     <sys:String x:Key="toolTip_stop">Stop (Esc)</sys:String>
     <sys:String x:Key="toolTip_more">More</sys:String>
     <sys:String x:Key="toolTip_blockedSwfs">Blocked flash content</sys:String>
+    <sys:String x:Key="toolTip_zoomIn">Zoom in (Ctrl+Plus)</sys:String>
+    <sys:String x:Key="toolTip_zoomOut">Zoom out (Ctrl+Minus)</sys:String>
     <sys:String x:Key="filter_shortcut">shortcut</sys:String>
     <sys:String x:Key="label_loading">Loading...</sys:String>
 

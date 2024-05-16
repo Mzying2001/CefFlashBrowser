@@ -22,6 +22,12 @@ namespace CefFlashBrowser.Views
 
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
+                bool hasDevTools = chromiumWebBrowser.GetBrowserHost()?.HasDevTools ?? false;
+                if (hasDevTools && browser.IsPopup)
+                {
+                    return false;
+                }
+
                 window.Dispatcher.Invoke(delegate
                 {
                     window._doClose = true;

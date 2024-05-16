@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
+        xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
         mc:Ignorable="d"
         
         x:Name="window"
@@ -14,6 +15,13 @@
         MinWidth="400"
         MinHeight="300"
         Closing="WindowClosing">
+
+    <Window.InputBindings>
+        <KeyBinding Key="W"
+                    Modifiers="Ctrl"
+                    Command="{Binding ElementName=browser, Path=CloseBrowserCommand}"
+                    CommandParameter="{Binding Source={x:Static data:GlobalData.Settings}, Path=DisableOnBeforeUnloadDialog}"/>
+    </Window.InputBindings>
 
     <Grid>
         <flash:ChromiumFlashBrowser x:Name="browser"/>

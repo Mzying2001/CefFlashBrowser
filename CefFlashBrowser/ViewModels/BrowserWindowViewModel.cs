@@ -1,5 +1,4 @@
-﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Utils;
+﻿using CefFlashBrowser.Utils;
 using CefSharp;
 using IWshRuntimeLibrary;
 using SimpleMvvm;
@@ -16,9 +15,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
         public DelegateCommand CreateShortcutCommand { get; set; }
         public DelegateCommand AddFavoriteCommand { get; set; }
-        public DelegateCommand CloseBrowserCommand { get; set; }
         public DelegateCommand ReloadOrStopCommand { get; set; }
-        public DelegateCommand ShowDevToolsCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
 
         public void ShowMainWindow()
@@ -94,12 +91,6 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowAddFavoriteDialog(GetWebBrowserTitle(browser), browser.Address);
         }
 
-        public void CloseBrowser(IWebBrowser browser)
-        {
-            bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
-            browser.GetBrowser().CloseBrowser(forceClose);
-        }
-
         public void ReloadOrStop(IWebBrowser browser)
         {
             if (browser.IsLoading)
@@ -110,11 +101,6 @@ namespace CefFlashBrowser.ViewModels
             {
                 browser.Reload();
             }
-        }
-
-        public void ShowDevTools(IWebBrowser browser)
-        {
-            browser.ShowDevTools();
         }
 
         public void OpenInSwfPlayer(string url)
@@ -129,9 +115,7 @@ namespace CefFlashBrowser.ViewModels
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<IWebBrowser>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<IWebBrowser>(AddFavorite);
-            CloseBrowserCommand = new DelegateCommand<IWebBrowser>(CloseBrowser);
             ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
-            ShowDevToolsCommand = new DelegateCommand<IWebBrowser>(ShowDevTools);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
         }
     }

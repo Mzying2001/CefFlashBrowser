@@ -4,10 +4,12 @@ using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using SimpleMvvm.Command;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace CefFlashBrowser.Views
@@ -17,151 +19,6 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserWindow : Window
     {
-        private class BrowserKeyboardHandler : KeyboardHandler
-        {
-            private readonly BrowserWindow window;
-            private static readonly ViewModels.BrowserWindowViewModel viewModel;
-
-            static BrowserKeyboardHandler()
-            {
-                viewModel = ((ViewModels.ViewModelLocator)Application.Current.Resources["Locator"]).BrowserWindowViewModel;
-            }
-
-            public BrowserKeyboardHandler(BrowserWindow window)
-            {
-                this.window = window;
-            }
-
-            public override bool OnPreKeyEvent(IWebBrowser chromiumWebBrowser, IBrowser browser, KeyType type, int windowsKeyCode, int nativeKeyCode, CefEventFlags modifiers, bool isSystemKey, ref bool isKeyboardShortcut)
-            {
-                if (type != KeyType.KeyUp)
-                {
-                    return false;
-                }
-                var result = false;
-                ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
-                {
-                    if (modifiers == CefEventFlags.None)
-                    {
-                        switch (windowsKeyCode)
-                        {
-                            case Win32.VirtualKeys.VK_ESCAPE: //Esc
-                                {
-                                    browser.StopLoad();
-                                    result = true;
-                                    break;
-                                }
-                            case Win32.VirtualKeys.VK_F5: //F5
-                                {
-                                    browser.Reload();
-                                    result = true;
-                                    break;
-                                }
-                            case Win32.VirtualKeys.VK_F11: //F11
-                                {
-                                    window.FullScreen = !window.FullScreen;
-                                    break;
-                                }
-                            case Win32.VirtualKeys.VK_F12: //F12
-                                {
-                                    window.FullScreen = false;
-                                    viewModel.ShowDevTools(chromiumWebBrowser);
-                                    result = true;
-                                    break;
-                                }
-                        }
-                    }
-                    else if (modifiers == CefEventFlags.ControlDown)
-                    {
-                        switch (windowsKeyCode)
-                        {
-                            case Win32.VirtualKeys.VK_OEM_PLUS: //Ctrl+'+'
-                                {
-                                    ((ChromiumWebBrowser)chromiumWebBrowser).ZoomIn();
-                                    result = true;
-                                    break;
-                                }
-                            case Win32.VirtualKeys.VK_OEM_MINUS: //Ctrl+'-'
-                                {
-                                    ((ChromiumWebBrowser)chromiumWebBrowser).ZoomOut();
-                                    result = true;
-                                    break;
-                                }
-                            case '0': //Ctrl+0
-                                {
-                                    ((ChromiumWebBrowser)chromiumWebBrowser).ZoomReset();
-                                    result = true;
-                                    break;
-                                }
-                            case 'D': //Ctrl+D
-                                {
-                                    viewModel.AddFavorite(chromiumWebBrowser);
-                                    result = true;
-                                    break;
-                                }
-                            case 'M': //Ctrl+M
-                                {
-                                    viewModel.ShowMainWindow();
-                                    result = true;
-                                    break;
-                                }
-                            case 'O': //Ctrl+O
-                                {
-                                    window.FullScreen = false;
-                                    viewModel.OpenInDefaultBrowser(chromiumWebBrowser.Address);
-                                    result = true;
-                                    break;
-                                }
-                            case 'P': //Ctrl+P
-                                {
-                                    browser.Print();
-                                    result = true;
-                                    break;
-                                }
-                            case 'U': //Ctrl+U
-                                {
-                                    window.FullScreen = false;
-                                    viewModel.ViewSource(chromiumWebBrowser.Address);
-                                    result = true;
-                                    break;
-                                }
-                            case 'S': //Ctrl+S
-                                {
-                                    viewModel.CreateShortcut(chromiumWebBrowser);
-                                    result = true;
-                                    break;
-                                }
-                            case 'W': //Ctrl+W
-                                {
-                                    viewModel.CloseBrowser(chromiumWebBrowser);
-                                    result = true;
-                                    break;
-                                }
-                        }
-                    }
-                    else if (modifiers == CefEventFlags.AltDown)
-                    {
-                        switch (windowsKeyCode)
-                        {
-                            case Win32.VirtualKeys.VK_LEFT: //Alt+Left
-                                {
-                                    browser.GoBack();
-                                    result = true;
-                                    break;
-                                }
-                            case Win32.VirtualKeys.VK_RIGHT: //Alt+Right
-                                {
-                                    browser.GoForward();
-                                    result = true;
-                                    break;
-                                }
-                        }
-                    }
-                });
-                return result;
-            }
-        }
-
         private class BrowserLifeSpanHandler : LifeSpanHandler
         {
             private readonly BrowserWindow window;
@@ -264,6 +121,9 @@ namespace CefFlashBrowser.Views
         private bool _isMaximizedBeforeFullScreen = false;
 
 
+        public ICommand ToggleFullScreenCommand { get; }
+
+
         public bool FullScreen
         {
             get { return (bool)GetValue(FullScreenProperty); }
@@ -277,12 +137,13 @@ namespace CefFlashBrowser.Views
 
         public BrowserWindow()
         {
+            ToggleFullScreenCommand = new DelegateCommand(() => { FullScreen = !FullScreen; });
+
             InitializeComponent();
             WindowSizeInfo.Apply(GlobalData.Settings.BrowserWindowSizeInfo, this);
 
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
-            browser.KeyboardHandler = new BrowserKeyboardHandler(this);
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.DisplayHandler = new BrowserDisplayHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
@@ -297,13 +158,13 @@ namespace CefFlashBrowser.Views
                 if (window._isMaximizedBeforeFullScreen)
                     window.WindowState = WindowState.Normal;
 
-                window.Topmost = true;
+                //window.Topmost = true;
                 window.WindowStyle = WindowStyle.None;
                 window.WindowState = WindowState.Maximized;
             }
             else
             {
-                window.Topmost = false;
+                //window.Topmost = false;
                 window.WindowStyle = WindowStyle.SingleBorderWindow;
                 window.WindowState = WindowState.Normal;
 

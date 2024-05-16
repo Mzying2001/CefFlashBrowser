@@ -115,6 +115,8 @@
     <sys:String x:Key="toolTip_stop">停止（Esc）</sys:String>
     <sys:String x:Key="toolTip_more">更多</sys:String>
     <sys:String x:Key="toolTip_blockedSwfs">被屏蔽的flash内容</sys:String>
+    <sys:String x:Key="toolTip_zoomIn">放大（Ctrl+加号键）</sys:String>
+    <sys:String x:Key="toolTip_zoomOut">缩小（Ctrl+减号键）</sys:String>
     <sys:String x:Key="filter_shortcut">快捷方式</sys:String>
     <sys:String x:Key="label_loading">加载中...</sys:String>
 

@@ -3,14 +3,22 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
+        xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
+        xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
         mc:Ignorable="d"
         
         x:Name="window"
         Title="{Binding ElementName=browser, Path=Title, TargetNullValue=view-source}"
         Height="Auto"
         Width="Auto">
+
+    <Window.InputBindings>
+        <KeyBinding Key="W"
+                    Modifiers="Ctrl"
+                    Command="{Binding ElementName=browser, Path=CloseBrowserCommand}"
+                    CommandParameter="{Binding Source={x:Static data:GlobalData.Settings}, Path=DisableOnBeforeUnloadDialog}"/>
+    </Window.InputBindings>
 
     <flash:ChromiumFlashBrowser x:Name="browser"/>
 </Window>

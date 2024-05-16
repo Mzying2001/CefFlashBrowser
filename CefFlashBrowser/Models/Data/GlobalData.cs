@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -34,7 +35,7 @@ namespace CefFlashBrowser.Models.Data
             CefDllPath = Path.Combine(AssetsPath, @"CefSharp\");
             PluginsPath = Path.Combine(AssetsPath, @"Plugins\");
             FlashPath = Path.Combine(PluginsPath, @"pepflashplayer.dll");
-            EmptyExePath = Path.Combine(AssetsPath, @"CefFlashBrowser.EmptyExe.exe");
+            EmptyExePath = Path.Combine(AssetsPath, @"EmptyExe\CefFlashBrowser.EmptyExe.exe");
 
             UserDocumentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             DataPath = Path.Combine(UserDocumentPath, @"CefFlashBrowser\");
@@ -81,10 +82,17 @@ namespace CefFlashBrowser.Models.Data
             }
         }
 
-        public static void SaveFavorites()
+        public static bool SaveFavorites()
         {
-            var file = new FavoritesFile { Favorites = Favorites.ToArray() };
-            File.WriteAllText(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
+            try
+            {
+                var file = new FavoritesFile { Favorites = Favorites.ToArray() };
+                File.WriteAllText(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
+                return true;
+            }
+            catch
+            { }
+            return false;
         }
 
         #endregion
@@ -109,9 +117,17 @@ namespace CefFlashBrowser.Models.Data
             }
         }
 
-        public static void SaveSettings()
+        public static bool SaveSettings()
         {
-            File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+            try
+            {
+                JObject settingsJson = JObject.Parse(File.ReadAllText(SettingsPath));
+                settingsJson.Merge(JToken.FromObject(Settings));
+                File.WriteAllText(SettingsPath, settingsJson.ToString(Formatting.Indented));
+                return true;
+            }
+            catch { }
+            return false;
         }
 
         #endregion
