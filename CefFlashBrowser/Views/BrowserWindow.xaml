@@ -182,6 +182,7 @@
         </ContextMenu>
     </Window.Resources>
 
+
     <Window.InputBindings>
         <KeyBinding Key="Esc"
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>
@@ -190,8 +191,7 @@
         <KeyBinding Key="F11"
                     Command="{Binding ElementName=window, Path=ToggleFullScreenCommand}"/>
         <KeyBinding Key="F12"
-                    Command="{Binding ShowDevToolsCommand}"
-                    CommandParameter="{Binding ElementName=browser}"/>
+                    Command="{Binding ElementName=browser, Path=ShowDevToolsCommand}"/>
         <KeyBinding Gesture="Ctrl+OemPlus"
                     Command="{Binding ElementName=browser, Path=ZoomInCommand}"/>
         <KeyBinding Gesture="Ctrl+OemMinus"
@@ -222,6 +222,7 @@
         <KeyBinding Gesture="Alt+Right"
                     Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
     </Window.InputBindings>
+
 
     <Grid x:Name="mainGrid">
         <Grid.RowDefinitions>

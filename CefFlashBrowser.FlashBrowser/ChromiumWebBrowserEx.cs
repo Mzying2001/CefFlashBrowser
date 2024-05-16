@@ -62,6 +62,8 @@ namespace CefFlashBrowser.FlashBrowser
 
         public ICommand LoadUrlCommand { get; }
         public ICommand CloseBrowserCommand { get; }
+        public ICommand ShowDevToolsCommand { get; }
+        public ICommand CloseDevToolsCommand { get; }
 
         public ChromiumWebBrowserEx()
         {
@@ -69,11 +71,23 @@ namespace CefFlashBrowser.FlashBrowser
             KeyboardHandler = new WpfKeyboardHandler();
             LoadUrlCommand = new DelegateCommand<string>(Load);
             CloseBrowserCommand = new DelegateCommand<bool>(CloseBrowser);
+            ShowDevToolsCommand = new DelegateCommand(ShowDevTools);
+            CloseDevToolsCommand = new DelegateCommand(CloseDevTools);
         }
 
         public void CloseBrowser(bool forceClose)
         {
             GetBrowser().CloseBrowser(forceClose);
+        }
+
+        public void ShowDevTools()
+        {
+            GetBrowser().ShowDevTools();
+        }
+
+        public void CloseDevTools()
+        {
+            GetBrowser().CloseDevTools();
         }
     }
 }
