@@ -215,8 +215,8 @@
                     Command="{Binding CreateShortcutCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+W"
-                    Command="{Binding CloseBrowserCommand}"
-                    CommandParameter="{Binding ElementName=browser}"/>
+                    Command="{Binding ElementName=browser, Path=CloseBrowserCommand}"
+                    CommandParameter="{Binding Source={x:Static data:GlobalData.Settings}, Path=DisableOnBeforeUnloadDialog}"/>
         <KeyBinding Gesture="Alt+Left"
                     Command="{Binding ElementName=browser, Path=BackCommand}"/>
         <KeyBinding Gesture="Alt+Right"
