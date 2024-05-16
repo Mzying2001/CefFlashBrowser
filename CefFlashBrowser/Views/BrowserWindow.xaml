@@ -133,8 +133,7 @@
             <Separator/>
 
             <MenuItem Header="{DynamicResource menu_openDevTool}"
-                      Command="{Binding ShowDevToolsCommand}"
-                      CommandParameter="{x:Reference Name=browser}"
+                      Command="{Binding Source={x:Reference Name=browser}, Path=ShowDevToolsCommand}"
                       InputGestureText="F12"/>
             <MenuItem Header="{DynamicResource menu_viewSource}"
                       Command="{Binding ViewSourceCommand}"
