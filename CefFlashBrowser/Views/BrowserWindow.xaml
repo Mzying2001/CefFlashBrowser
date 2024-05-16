@@ -64,6 +64,7 @@
                             <Button Width="30"
                                     Height="30"
                                     Padding="0"
+                                    ToolTip="{DynamicResource toolTip_zoomOut}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
                                 <Button.Content>
                                     <svgc:SvgViewbox Width="10"
@@ -74,6 +75,7 @@
                             <Button Width="30"
                                     Height="30"
                                     Padding="0"
+                                    ToolTip="{DynamicResource toolTip_zoomIn}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
                                 <Button.Content>
                                     <svgc:SvgViewbox Width="10"
