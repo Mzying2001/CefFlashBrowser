@@ -16,7 +16,6 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand CreateShortcutCommand { get; set; }
         public DelegateCommand AddFavoriteCommand { get; set; }
         public DelegateCommand ReloadOrStopCommand { get; set; }
-        public DelegateCommand ShowDevToolsCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
 
         public void ShowMainWindow()
@@ -104,11 +103,6 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void ShowDevTools(IWebBrowser browser)
-        {
-            browser.ShowDevTools();
-        }
-
         public void OpenInSwfPlayer(string url)
         {
             WindowManager.ShowSwfPlayer(url);
@@ -122,7 +116,6 @@ namespace CefFlashBrowser.ViewModels
             CreateShortcutCommand = new DelegateCommand<IWebBrowser>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<IWebBrowser>(AddFavorite);
             ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
-            ShowDevToolsCommand = new DelegateCommand<IWebBrowser>(ShowDevTools);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
         }
     }
