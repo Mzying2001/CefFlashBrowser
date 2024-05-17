@@ -10,7 +10,7 @@
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:converter="clr-namespace:CefFlashBrowser.Utils.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
