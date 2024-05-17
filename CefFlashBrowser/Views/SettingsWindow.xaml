@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         
@@ -58,7 +58,7 @@
                                 </ComboBox>
                             </c:SettingItem>
                         </c:SettingGroup>
-                        
+
                         <!--other-->
                         <c:SettingGroup Header="{DynamicResource settingHeader_other}">
                             <c:SettingItem Description="{DynamicResource settingItem_hideMainWindowOnBrowsing}">

@@ -1,6 +1,6 @@
-﻿using System.Windows.Controls;
+﻿using Microsoft.Xaml.Behaviors;
+using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interactivity;
 
 namespace CefFlashBrowser.Utils.Behaviors
 {

@@ -10,7 +10,7 @@
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:converter="clr-namespace:CefFlashBrowser.Utils.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
@@ -22,8 +22,9 @@
         Closing="WindowClosing"
         Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}"
-        SizeChanged="WindowSizeChanged"
-        SourceInitialized="WindowSourceInitialized">
+        KeyDown="KeyDownHandler"
+        SizeChanged="SizeChangedHandler"
+        SourceInitialized="SourceInitializedHandler">
 
     <Window.Resources>
         <!--ConetxtMenu-->
@@ -133,8 +134,7 @@
             <Separator/>
 
             <MenuItem Header="{DynamicResource menu_openDevTool}"
-                      Command="{Binding ShowDevToolsCommand}"
-                      CommandParameter="{x:Reference Name=browser}"
+                      Command="{Binding Source={x:Reference Name=browser}, Path=ShowDevToolsCommand}"
                       InputGestureText="F12"/>
             <MenuItem Header="{DynamicResource menu_viewSource}"
                       Command="{Binding ViewSourceCommand}"
@@ -186,8 +186,8 @@
 
 
     <Window.InputBindings>
-        <KeyBinding Key="Esc"
-                    Command="{Binding ElementName=browser, Path=StopCommand}"/>
+        <!--<KeyBinding Key="Esc"
+                    Command="{Binding ElementName=browser, Path=StopCommand}"/>-->
         <KeyBinding Key="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
         <KeyBinding Key="F11"
