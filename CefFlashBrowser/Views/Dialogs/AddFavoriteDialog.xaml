@@ -18,6 +18,10 @@
         Title="{DynamicResource title_addFavorite}"
         FocusManager.FocusedElement="{Binding ElementName=NameTextBox}">
 
+    <i:Interaction.Behaviors>
+        <behaviors:EscToCloseBehavior/>
+    </i:Interaction.Behaviors>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
