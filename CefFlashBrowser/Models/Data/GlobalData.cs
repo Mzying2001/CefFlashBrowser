@@ -121,9 +121,16 @@ namespace CefFlashBrowser.Models.Data
         {
             try
             {
-                JObject settingsJson = JObject.Parse(File.ReadAllText(SettingsPath));
-                settingsJson.Merge(JToken.FromObject(Settings));
-                File.WriteAllText(SettingsPath, settingsJson.ToString(Formatting.Indented));
+                if (File.Exists(SettingsPath))
+                {
+                    JObject settingsJson = JObject.Parse(File.ReadAllText(SettingsPath));
+                    settingsJson.Merge(JToken.FromObject(Settings));
+                    File.WriteAllText(SettingsPath, settingsJson.ToString(Formatting.Indented));
+                }
+                else
+                {
+                    File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+                }
                 return true;
             }
             catch { }
