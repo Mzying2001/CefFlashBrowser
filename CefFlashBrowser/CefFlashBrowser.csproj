@@ -76,6 +76,9 @@
     </DefineConstants>
     <Optimize>true</Optimize>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>CefFlashBrowser.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Costura, Version=5.7.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.5.7.0\lib\netstandard1.0\Costura.dll</HintPath>
@@ -285,6 +288,7 @@
     <Compile Include="Models\FakeFlashVersionSetting.cs" />
     <Compile Include="Models\ProxySettings.cs" />
     <Compile Include="Models\UserAgentSetting.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Utils\Behaviors\DropFileBehavior.cs" />
     <Compile Include="Utils\Behaviors\EscToCloseBehavior.cs" />
     <Compile Include="Utils\Converters\MultiValueConverterBase.cs" />
