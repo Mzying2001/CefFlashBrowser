@@ -1,6 +1,5 @@
 ﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using System;
 using System.Diagnostics;
 using System.Windows;
 
@@ -17,22 +16,19 @@ namespace CefFlashBrowser
         {
             base.OnStartup(e);
 
-            try
+            if (GlobalData.Settings.FirstStart)
             {
-                if (GlobalData.Settings.FirstStart)
-                {
-                    if (WindowManager.ShowSelectLanguageDialog())
-                        GlobalData.Settings.FirstStart = false;
-                    return;
-                }
-
-                if (e.Args.Length == 0)
-                {
-                    WindowManager.ShowMainWindow();
-                    return;
-                }
-
+                if (WindowManager.ShowSelectLanguageDialog())
+                    GlobalData.Settings.FirstStart = false;
+            }
+            else if (e.Args.Length == 0)
+            {
+                WindowManager.ShowMainWindow();
+            }
+            else
+            {
                 GlobalData.IsStartWithoutMainWindow = true;
+
                 foreach (var arg in e.Args)
                 {
                     if (UrlHelper.IsLocalSwfFile(arg))
@@ -44,10 +40,6 @@ namespace CefFlashBrowser
                         WindowManager.ShowBrowser(arg);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                WindowManager.Alert(ex.ToString(), LanguageManager.GetString("title_error"));
             }
         }
 

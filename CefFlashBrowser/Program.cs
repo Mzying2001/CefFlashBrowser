@@ -17,11 +17,18 @@ namespace CefFlashBrowser
             Win32.SetDllDirectory(GlobalData.CefDllPath);
             AppDomain.CurrentDomain.AssemblyResolve += ResolveCefSharpAssembly;
 
-            var app = new App();
-            app.InitializeComponent();
+            try
+            {
+                var app = new App();
+                app.InitializeComponent();
 
-            InitCefFlash();
-            app.Run();
+                InitCefFlash();
+                app.Run();
+            }
+            catch (Exception e)
+            {
+                WindowManager.Alert(e.ToString(), LanguageManager.GetString("title_error"));
+            }
         }
 
         static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs e)
