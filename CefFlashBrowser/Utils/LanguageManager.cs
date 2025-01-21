@@ -13,13 +13,15 @@ namespace CefFlashBrowser.Utils
 
         static LanguageManager()
         {
-            LanguageDictionaries = new Dictionary<string, ResourceDictionary>
+            var languages = new ResourceDictionary
+            { Source = new Uri("Assets/Language/langs.xaml", UriKind.Relative) };
+
+            LanguageDictionaries = new Dictionary<string, ResourceDictionary>();
+            foreach (var langDic in (ResourceDictionary[])languages["SupportedLanguages"])
             {
-                ["zh-CN"] = new ResourceDictionary() { Source = new Uri("Assets/Language/zh-CN.xaml", UriKind.Relative) },
-                ["zh-TW"] = new ResourceDictionary() { Source = new Uri("Assets/Language/zh-TW.xaml", UriKind.Relative) },
-                ["en-US"] = new ResourceDictionary() { Source = new Uri("Assets/Language/en-US.xaml", UriKind.Relative) },
-                ["it"] = new ResourceDictionary() { Source = new Uri("Assets/Language/it.xaml", UriKind.Relative) },
-            };
+                string lang = System.IO.Path.GetFileNameWithoutExtension(langDic.Source.ToString());
+                LanguageDictionaries.Add(lang, langDic);
+            }
 
             CurrentLanguage = GlobalData.Settings.Language;
         }
@@ -27,23 +29,14 @@ namespace CefFlashBrowser.Utils
 
 
 
-        private static int GetLangResDicIndex()
-        {
-            var dics = Application.Current.Resources.MergedDictionaries;
-            for (int i = 0; i < dics.Count; i++)
-            {
-                if (dics[i].Source.ToString().StartsWith("Assets/Language/"))
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
         private static ResourceDictionary GetCurLangResDic()
         {
-            int index = GetLangResDicIndex();
-            return index != -1 ? Application.Current.Resources.MergedDictionaries[index] : null;
+            return Application.Current.Resources.MergedDictionaries[0];
+        }
+
+        private static void SetCurLangResDic(ResourceDictionary dic)
+        {
+            Application.Current.Resources.MergedDictionaries[0] = dic;
         }
 
 
@@ -68,10 +61,9 @@ namespace CefFlashBrowser.Utils
             }
             set
             {
-                int index = GetLangResDicIndex();
-                if (index != -1 && IsSupportedLanguage(value))
+                if (IsSupportedLanguage(value))
                 {
-                    Application.Current.Resources.MergedDictionaries[index] = LanguageDictionaries[value];
+                    SetCurLangResDic(LanguageDictionaries[value]);
                     GlobalData.Settings.Language = value;
                     Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, value);
                 }
@@ -86,7 +78,7 @@ namespace CefFlashBrowser.Utils
             if (IsSupportedLanguage(language))
             {
                 var dic = LanguageDictionaries[language];
-                return dic[key].ToString();
+                return dic.Contains(key) ? dic[key].ToString() : string.Empty;
             }
             else
             {

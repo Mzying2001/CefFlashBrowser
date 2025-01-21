@@ -18,6 +18,7 @@
 
             <ResourceDictionary.MergedDictionaries>
                 <!--Language-->
+                <!--Must be the first in MergedDictionaries so LanguageManager can find it for language switching-->
                 <ResourceDictionary Source="Assets/Language/zh-CN.xaml"/>
                 <!--HandyControl-->
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
