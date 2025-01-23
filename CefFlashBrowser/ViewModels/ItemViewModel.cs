@@ -43,7 +43,7 @@ namespace CefFlashBrowser.ViewModels
 
         ~ItemViewModel()
         {
-            Dispose();
+            Dispose(false);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -72,7 +72,7 @@ namespace CefFlashBrowser.ViewModels
     {
         public static int GetIndex<TValue>(IEnumerable<ItemViewModel<TValue>> list, TValue value)
         {
-            return list.Select(item => item.Value).ToList().IndexOf(value);
+            return list.ToList().FindIndex(item => item.Value.Equals(value));
         }
     }
 }
