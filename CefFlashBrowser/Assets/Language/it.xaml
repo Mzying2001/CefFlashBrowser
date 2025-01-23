@@ -11,7 +11,7 @@
     <sys:String x:Key="selectLanguageTips">Seleziona lingua</sys:String>
 
     <!--Finestra Principale-->
-    <sys:String x:Key="window_title">Benvenuto ♪(^∇^*)</sys:String>
+    <sys:String x:Key="window_title">Benvenuto</sys:String>
     <sys:String x:Key="button_go">Vai</sys:String>
     <sys:String x:Key="menu_favorites">Preferiti</sys:String>
     <sys:String x:Key="menu_manageFavorites">Gestisci Preferiti</sys:String>

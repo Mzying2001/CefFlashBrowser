@@ -301,6 +301,7 @@
     <Compile Include="Utils\Converters\UrlGetFileName.cs" />
     <Compile Include="Utils\Converters\VisiableIfNotZero.cs" />
     <Compile Include="Utils\Converters\VisiableIfStrNotEmpty.cs" />
+    <Compile Include="Utils\EmoticonsHelper.cs" />
     <Compile Include="Utils\Handlers\ContextMenuHandler.cs" />
     <Compile Include="Utils\Handlers\DisableDragHandler.cs" />
     <Compile Include="Utils\Handlers\IEDownloadHandler.cs" />
@@ -364,6 +365,10 @@
     <Compile Include="Views\ViewSourceWindow.xaml.cs">
       <DependentUpon>ViewSourceWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Assets\Emoticons\Emoticons.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Assets\Language\en-US.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

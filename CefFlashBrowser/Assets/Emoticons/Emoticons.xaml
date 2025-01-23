@@ -1,0 +1,58 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <x:Array x:Key="Emoticons" Type="{x:Type sys:String}">
+        <sys:String>(๑╹ヮ╹๑)ﾉ</sys:String>
+        <sys:String>♪(^∇^*)</sys:String>
+        <sys:String>(๑•̀ㅂ•́)و✧</sys:String>
+        <sys:String>ヾ(≧▽≦*)o</sys:String>
+        <sys:String>(o゜▽゜)o☆</sys:String>
+        <sys:String>～(￣▽￣～)(～￣▽￣)～</sys:String>
+        <sys:String>ヾ(^▽^*)))</sys:String>
+        <sys:String>φ(゜▽゜*)♪</sys:String>
+        <sys:String>╰(￣▽￣)╭</sys:String>
+        <sys:String>o(￣▽￣)ｄ</sys:String>
+        <sys:String>*′∀`)′∀`)*′∀`)*′∀`)</sys:String>
+        <sys:String>(｡･∀･)ﾉﾞ</sys:String>
+        <sys:String>ヾ(≧∇≦*)ゝ</sys:String>
+        <sys:String>(u‿ฺu✿ฺ)</sys:String>
+        <sys:String>（゜▽＾*））</sys:String>
+        <sys:String>(*^▽^*)</sys:String>
+        <sys:String>ヽ(✿ﾟ▽ﾟ)ノ</sys:String>
+        <sys:String>o(*￣▽￣*)ブ</sys:String>
+        <sys:String>|･ω･｀)</sys:String>
+        <sys:String>ヾ(￣ー￣)X(^▽^)ゞ</sys:String>
+        <sys:String>╰(*°▽°*)╯</sys:String>
+        <sys:String>⊙▽⊙</sys:String>
+        <sys:String>( ￣ー￣)人(^▽^ )</sys:String>
+        <sys:String>(*^▽^*)</sys:String>
+        <sys:String>♪(^∇^*)</sys:String>
+        <sys:String>(๑′ㅂ`๑)</sys:String>
+        <sys:String>φ(≧ω≦*)♪</sys:String>
+        <sys:String>(≧∀≦)ゞ</sys:String>
+        <sys:String>(๑ˉ∀ˉ๑)</sys:String>
+        <sys:String>o(*￣︶￣*)o</sys:String>
+        <sys:String>(๑´ㅂ`๑)</sys:String>
+        <sys:String>（。＾▽＾）</sys:String>
+        <sys:String>(　ﾟ∀ﾟ) ﾉ♡</sys:String>
+        <sys:String>ο(=•ω＜=)ρ⌒☆</sys:String>
+        <sys:String>(～￣▽￣)～</sys:String>
+        <sys:String>︿(￣︶￣)︿</sys:String>
+        <sys:String>(/≧▽≦)/</sys:String>
+        <sys:String>(☆▽☆)</sys:String>
+        <sys:String>✧(≖ ◡ ≖✿)</sys:String>
+        <sys:String>ヽ(ﾟ∀ﾟ*)ﾉ━━━ｩ♪</sys:String>
+        <sys:String>( *︾▽︾)</sys:String>
+        <sys:String>♪(′∇`*)</sys:String>
+        <sys:String>~(～￣▽￣)～</sys:String>
+        <sys:String>(p≧w≦q)</sys:String>
+        <sys:String>o(*￣▽￣*)o</sys:String>
+        <sys:String>(＾－＾)V</sys:String>
+        <sys:String>(＾Ｕ＾)ノ~ＹＯ</sys:String>
+        <sys:String>(o゜▽゜)o☆</sys:String>
+        <sys:String>(((o(*ﾟ▽ﾟ*)o)))</sys:String>
+        <sys:String>o(^▽^)o</sys:String>
+    </x:Array>
+
+</ResourceDictionary>
