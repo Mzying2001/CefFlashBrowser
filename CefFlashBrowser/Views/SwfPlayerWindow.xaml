@@ -23,5 +23,6 @@
                     CommandParameter="{Binding Source={x:Static data:GlobalData.Settings}, Path=DisableOnBeforeUnloadDialog}"/>
     </Window.InputBindings>
 
-    <flash:ChromiumFlashBrowser x:Name="browser"/>
+    <flash:ChromiumFlashBrowser x:Name="browser"
+                                FrameLoadEnd="OnBrowserFrameLoadEnd"/>
 </Window>

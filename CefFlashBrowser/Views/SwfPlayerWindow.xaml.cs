@@ -4,7 +4,6 @@ using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using System;
-using System.Net;
 using System.Windows;
 
 namespace CefFlashBrowser.Views
@@ -64,8 +63,8 @@ namespace CefFlashBrowser.Views
         {
             if (d is SwfPlayerWindow swfPlayerWindow)
             {
-                swfPlayerWindow.browser.Address = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-                    $"Assets/SwfPlayer/swfplayer.html?src={WebUtility.UrlEncode((string)e.NewValue)}");
+                if (swfPlayerWindow.browser.IsLoaded)
+                    swfPlayerWindow.LoadSwf(e.NewValue as string);
             }
         }
 
@@ -81,6 +80,9 @@ namespace CefFlashBrowser.Views
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
+
+            browser.Address = System.IO.Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory, $"Assets/SwfPlayer/swfplayer.html");
         }
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -95,6 +97,17 @@ namespace CefFlashBrowser.Views
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
+        }
+
+        private void LoadSwf(string fileName)
+        {
+            string script = $"loadSwf('{fileName.Replace('\\', '/')}');";
+            browser.ExecuteScriptAsync(script);
+        }
+
+        private void OnBrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
+        {
+            LoadSwf(FileName);
         }
     }
 }

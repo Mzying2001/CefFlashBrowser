@@ -13,31 +13,23 @@
             height: 100vh;
         }
     </style>
-    <Script>
-        function getQueryVariable(variable) {
-            let query = window.location.search.substring(1);
-            let vars = query.split("&");
-            for (let i = 0; i < vars.length; i++) {
-                let pair = vars[i].split("=");
-                if (pair[0] == variable) {
-                    return pair[1];
-                }
-            }
-            return undefined;
+    <script>
+        function getFileName(src) {
+            src = src.replace(/\\/g, '/');
+            return src.split('/').pop().split('?')[0];
         }
-
-        window.onload = function () {
-            let src = decodeURIComponent(getQueryVariable("src").replace(/\+/g, "%20"));
+        function loadSwf(src) { // called by CefSharp
             let flash = document.createElement("embed");
             flash.id = "flash-player";
             flash.setAttribute("src", src);
-            document.querySelector("body").appendChild(flash);
-            document.title = src;
+            document.body.replaceChild(flash, document.getElementById(flash.id));
+            document.title = getFileName(src);
         }
-    </Script>
+    </script>
 </head>
 
 <body>
+    <embed id="flash-player" src="" />
 </body>
 
 </html>
