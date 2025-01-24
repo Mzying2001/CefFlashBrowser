@@ -2,13 +2,16 @@
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Messaging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
 {
-    public class ItemViewModel<TValue> : ViewModelBase
+    public class ItemViewModel<TValue> : ViewModelBase, IDisposable
     {
+        private bool _disposed = false;
+
         public TValue Value { get; set; }
 
         public string NameLanguageKey { get; } = null;
@@ -40,10 +43,28 @@ namespace CefFlashBrowser.ViewModels
 
         ~ItemViewModel()
         {
-            if (NameLanguageKey != null)
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
             {
-                Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+                if (disposing)
+                {
+                }
+                if (NameLanguageKey != null)
+                {
+                    Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+                }
+                _disposed = true;
             }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 
@@ -51,7 +72,7 @@ namespace CefFlashBrowser.ViewModels
     {
         public static int GetIndex<TValue>(IEnumerable<ItemViewModel<TValue>> list, TValue value)
         {
-            return list.Select(item => item.Value).ToList().IndexOf(value);
+            return list.ToList().FindIndex(item => item.Value.Equals(value));
         }
     }
 }

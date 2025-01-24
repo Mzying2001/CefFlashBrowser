@@ -11,7 +11,7 @@
     <sys:String x:Key="selectLanguageTips">請選擇語言</sys:String>
 
     <!--主介面-->
-    <sys:String x:Key="window_title">歡迎 ヾ(≧∇≦*)ゝ</sys:String>
+    <sys:String x:Key="window_title">歡迎</sys:String>
     <sys:String x:Key="button_go">跳轉</sys:String>
     <sys:String x:Key="menu_favorites">我的最愛</sys:String>
     <sys:String x:Key="menu_manageFavorites">管理我的最愛</sys:String>

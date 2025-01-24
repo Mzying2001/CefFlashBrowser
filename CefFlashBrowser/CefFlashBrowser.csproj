@@ -76,6 +76,9 @@
     </DefineConstants>
     <Optimize>true</Optimize>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>CefFlashBrowser.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Costura, Version=5.7.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.5.7.0\lib\netstandard1.0\Costura.dll</HintPath>
@@ -118,8 +121,8 @@
     <Reference Include="SharpVectors.Runtime.Wpf, Version=1.8.4.0, Culture=neutral, PublicKeyToken=d16e717f0a981fb9, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpVectors.1.8.4\lib\net47\SharpVectors.Runtime.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="SimpleMvvm, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mzying2001.SimpleMvvm.1.0.5\lib\net45\SimpleMvvm.dll</HintPath>
+    <Reference Include="SimpleMvvm, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mzying2001.SimpleMvvm.1.0.6\lib\net45\SimpleMvvm.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.AppContext, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -285,6 +288,7 @@
     <Compile Include="Models\FakeFlashVersionSetting.cs" />
     <Compile Include="Models\ProxySettings.cs" />
     <Compile Include="Models\UserAgentSetting.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Utils\Behaviors\DropFileBehavior.cs" />
     <Compile Include="Utils\Behaviors\EscToCloseBehavior.cs" />
     <Compile Include="Utils\Converters\MultiValueConverterBase.cs" />
@@ -297,6 +301,7 @@
     <Compile Include="Utils\Converters\UrlGetFileName.cs" />
     <Compile Include="Utils\Converters\VisiableIfNotZero.cs" />
     <Compile Include="Utils\Converters\VisiableIfStrNotEmpty.cs" />
+    <Compile Include="Utils\EmoticonsHelper.cs" />
     <Compile Include="Utils\Handlers\ContextMenuHandler.cs" />
     <Compile Include="Utils\Handlers\DisableDragHandler.cs" />
     <Compile Include="Utils\Handlers\IEDownloadHandler.cs" />
@@ -360,11 +365,19 @@
     <Compile Include="Views\ViewSourceWindow.xaml.cs">
       <DependentUpon>ViewSourceWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Assets\Emoticons\Emoticons.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Assets\Language\en-US.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Assets\Language\it.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Assets\Language\langs.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

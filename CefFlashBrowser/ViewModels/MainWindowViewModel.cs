@@ -4,11 +4,14 @@ using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using SimpleMvvm.Messaging;
+using System;
 
 namespace CefFlashBrowser.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase
+    public class MainWindowViewModel : ViewModelBase, IDisposable
     {
+        private bool _disposed;
+
         public DelegateCommand OpenUrlCommand { get; set; }
         public DelegateCommand OpenSettingsWindowCommand { get; set; }
         public DelegateCommand OpenFavoritesManagerCommand { get; set; }
@@ -16,6 +19,12 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ViewGithubCommand { get; set; }
         public DelegateCommand OpenWebsiteCommand { get; set; }
         public DelegateCommand DropFileCommand { get; set; }
+
+        public string WelcomeText
+        {
+            get => string.Format("{0} {1}",
+                LanguageManager.GetString("window_title"), EmoticonsHelper.GetNextEmoticon());
+        }
 
         private void ShowBrowser(string address)
         {
@@ -112,6 +121,28 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void OnLanguageChanged(object _)
+        {
+            RaisePropertyChanged(nameof(WelcomeText));
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                { }
+                Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
         public MainWindowViewModel()
         {
             OpenUrlCommand = new DelegateCommand<string>(OpenUrl);
@@ -121,6 +152,13 @@ namespace CefFlashBrowser.ViewModels
             ViewGithubCommand = new DelegateCommand(ViewGithub);
             OpenWebsiteCommand = new DelegateCommand<Website>(OpenWebsite);
             DropFileCommand = new DelegateCommand<string[]>(DropFile);
+
+            Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+        }
+
+        ~MainWindowViewModel()
+        {
+            Dispose(disposing: false);
         }
     }
 }
