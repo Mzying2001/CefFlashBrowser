@@ -22,7 +22,7 @@ namespace CefFlashBrowser.ViewModels
 
         public string WelcomeText
         {
-            get => string.Format("{0} {1}",
+            get => string.Format("{0}  {1}",
                 LanguageManager.GetString("window_title"), EmoticonsHelper.GetNextEmoticon());
         }
 
