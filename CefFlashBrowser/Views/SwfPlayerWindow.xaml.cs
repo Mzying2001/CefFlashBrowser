@@ -101,8 +101,8 @@ namespace CefFlashBrowser.Views
 
         private void LoadSwf(string fileName)
         {
-            string script = $"loadSwf(\"{fileName?.Replace('\\', '/')}\");";
-            browser.ExecuteScriptAsync(script);
+            try { browser.ExecuteScriptAsync("loadSwf", fileName); }
+            catch { }
         }
 
         private void OnBrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
