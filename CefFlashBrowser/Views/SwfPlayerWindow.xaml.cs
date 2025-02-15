@@ -81,8 +81,7 @@ namespace CefFlashBrowser.Views
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
 
-            browser.Address = System.IO.Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory, $"Assets/SwfPlayer/swfplayer.html");
+            browser.Address = GlobalData.SwfPlayerPath;
         }
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
