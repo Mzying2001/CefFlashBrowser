@@ -195,14 +195,13 @@ namespace CefFlashBrowser.ViewModels
                         }
                         catch (Exception e)
                         {
-                            var tmp = System.Windows.MessageBox.Show(
-                                string.Format("{0}\n\n{1}:\n{2}", LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message),
-                                LanguageManager.GetString("title_error"), System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Error);
+                            string msg = string.Format("{0}\n\n{1}:\n{2}",
+                                LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message);
 
-                            if (tmp == System.Windows.MessageBoxResult.No)
-                            {
-                                break;
-                            }
+                            bool retry = false;
+                            WindowManager.Confirm(msg, LanguageManager.GetString("title_error"), tmp => retry = tmp ?? false);
+
+                            if (!retry) { break; }
                         }
                     }
 
