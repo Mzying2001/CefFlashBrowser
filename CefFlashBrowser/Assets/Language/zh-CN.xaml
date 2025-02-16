@@ -4,12 +4,6 @@
     <sys:String x:Key="locale">zh-CN</sys:String>
     <sys:String x:Key="language_name">中文</sys:String>
 
-    <!--App-->
-    <sys:String x:Key="invalidStartUpParam">无效的启动参数</sys:String>
-
-    <!--选择语言对话框-->
-    <sys:String x:Key="selectLanguageTips">请选择语言</sys:String>
-
     <!--主界面-->
     <sys:String x:Key="window_title">欢迎</sys:String>
     <sys:String x:Key="button_go">跳转</sys:String>
@@ -20,7 +14,6 @@
     <sys:String x:Key="menu_settings">设置</sys:String>
     <sys:String x:Key="menu_loadSwf">加载本地swf文件...</sys:String>
     <sys:String x:Key="filter_swf">swf文件</sys:String>
-    <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
     <sys:String x:Key="toolTip_viewGithub">在GitHub中查看</sys:String>
 
     <!--设置窗口-->
@@ -49,8 +42,6 @@
     <sys:String x:Key="button_deleteCache">清除</sys:String>
     <sys:String x:Key="button_viewDetails">详情</sys:String>
     <sys:String x:Key="button_restart">重启</sys:String>
-    <sys:String x:Key="message_deleteCache">确定要清除所有缓存吗？浏览器将会重启。</sys:String>
-    <sys:String x:Key="message_restart">是否要重启程序？</sys:String>
     <sys:String x:Key="tips_needRestar">此部分设置的改动将在程序重启后生效。</sys:String>
     <sys:String x:Key="placeholder_ip">IP</sys:String>
     <sys:String x:Key="placeholder_port">端口</sys:String>
@@ -83,7 +74,6 @@
     <sys:String x:Key="favorites_url">地址</sys:String>
     <sys:String x:Key="favorites_save">保存</sys:String>
     <sys:String x:Key="favorites_defaultName">新收藏夹项</sys:String>
-    <sys:String x:Key="message_removeItem">确定要移除“{0}”吗？</sys:String>
 
     <!--浏览器窗口-->
     <sys:String x:Key="menu_back">返回</sys:String>
@@ -127,10 +117,15 @@
     <sys:String x:Key="button_no">否</sys:String>
     <sys:String x:Key="title_error">错误</sys:String>
     <sys:String x:Key="title_addFavorite">添加收藏夹</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">要离开此页面吗？</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">要重新加载此页面吗？</sys:String>
+    <sys:String x:Key="tips_selectLanguage">请选择语言</sys:String>
 
     <!--提示信息-->
+    <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
+    <sys:String x:Key="message_deleteCache">确定要清除所有缓存吗？浏览器将会重启。</sys:String>
+    <sys:String x:Key="message_restart">是否要重启程序？</sys:String>
+    <sys:String x:Key="message_removeItem">确定要移除“{0}”吗？</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">要离开此页面吗？</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">要重新加载此页面吗？</sys:String>
     <sys:String x:Key="error_message">错误信息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名称不能为空。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">网址不能为空。</sys:String>
