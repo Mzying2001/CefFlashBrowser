@@ -205,7 +205,7 @@ namespace CefFlashBrowser.ViewModels
                         }
                     }
 
-                    App.Restart();
+                    Program.Restart();
                 }
             });
         }
@@ -225,7 +225,7 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.Confirm(LanguageManager.GetString("message_restart"), callback: result =>
             {
                 if (result == true)
-                    App.Restart();
+                    Program.Restart();
             });
         }
 

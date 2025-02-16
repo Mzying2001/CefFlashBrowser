@@ -1,6 +1,5 @@
 ﻿using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
-using System.Diagnostics;
 using System.Windows;
 
 namespace CefFlashBrowser
@@ -10,8 +9,6 @@ namespace CefFlashBrowser
     /// </summary>
     public partial class App : Application
     {
-        private static bool _restart = false;
-
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -41,22 +38,6 @@ namespace CefFlashBrowser
                     }
                 }
             }
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            base.OnExit(e);
-
-            if (_restart)
-            {
-                Process.Start(Process.GetCurrentProcess().MainModule.FileName);
-            }
-        }
-
-        public static void Restart()
-        {
-            _restart = true;
-            Current.Shutdown();
         }
     }
 }

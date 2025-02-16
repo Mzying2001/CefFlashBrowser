@@ -6,11 +6,14 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Windows;
 
 namespace CefFlashBrowser
 {
     internal static class Program
     {
+        private static bool _restart = false;
+
         [STAThread]
         private static void Main()
         {
@@ -31,7 +34,7 @@ namespace CefFlashBrowser
             }
             finally
             {
-                ExitApp();
+                OnTerminate();
             }
         }
 
@@ -82,11 +85,21 @@ namespace CefFlashBrowser
             Cef.Initialize(settings);
         }
 
-        private static void ExitApp()
+        private static void OnTerminate()
         {
             Cef.Shutdown();
             GlobalData.SaveData();
-            Environment.Exit(0);
+
+            if (_restart)
+            {
+                Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+            }
+        }
+
+        public static void Restart()
+        {
+            _restart = true;
+            Application.Current.Shutdown();
         }
     }
 }
