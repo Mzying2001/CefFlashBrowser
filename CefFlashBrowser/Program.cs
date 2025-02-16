@@ -85,6 +85,7 @@ namespace CefFlashBrowser
         static void ExitApp()
         {
             Cef.Shutdown();
+            GlobalData.SaveData();
             Environment.Exit(0);
         }
     }
