@@ -17,6 +17,7 @@ namespace CefFlashBrowser.Models.Data
         public static string FlashPath { get; }
         public static string EmptyExePath { get; }
         public static string SwfPlayerPath { get; }
+        public static string SubprocessPath { get; }
 
         public static string UserDocumentPath { get; }
         public static string DataPath { get; }
@@ -38,6 +39,7 @@ namespace CefFlashBrowser.Models.Data
             FlashPath = Path.Combine(PluginsPath, @"pepflashplayer.dll");
             EmptyExePath = Path.Combine(AssetsPath, @"EmptyExe\CefFlashBrowser.EmptyExe.exe");
             SwfPlayerPath = Path.Combine(AssetsPath, @"SwfPlayer\swfplayer.html");
+            SubprocessPath = Path.Combine(CefDllPath, @"CefSharp.BrowserSubprocess.exe");
 
             UserDocumentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             DataPath = Path.Combine(UserDocumentPath, @"CefFlashBrowser\");

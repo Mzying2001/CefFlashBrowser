@@ -48,7 +48,8 @@ namespace CefFlashBrowser
                 Locale = LanguageManager.GetLocale(GlobalData.Settings.Language),
                 CachePath = GlobalData.CachesPath,
                 PpapiFlashPath = GlobalData.FlashPath,
-                EnableSystemFlash = true
+                EnableSystemFlash = true,
+                BrowserSubprocessPath = GlobalData.SubprocessPath
             };
 
             if (GlobalData.Settings.FakeFlashVersionSetting.Enable)
