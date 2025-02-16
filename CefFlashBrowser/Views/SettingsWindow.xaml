@@ -88,7 +88,7 @@
                         <c:SettingGroup Header="{DynamicResource settingHeader_websiteBehavior}">
                             <c:SettingItem Description="{DynamicResource settingItem_openNewPage}">
                                 <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding NavigationTypes}"
+                                          ItemsSource="{Binding NewPageBehaviors}"
                                           SelectedIndex="{Binding CurrentNewPageBehaviorIndex, Mode=OneWay}"
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Value">
