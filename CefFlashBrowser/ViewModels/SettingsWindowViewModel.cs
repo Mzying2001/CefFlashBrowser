@@ -43,7 +43,7 @@ namespace CefFlashBrowser.ViewModels
             get => ItemViewModel.GetIndex(SearchEngines, GlobalData.Settings.SearchEngine);
         }
 
-        public List<ItemViewModel<NewPageBehavior>> NewPageBehaviors = new List<ItemViewModel<NewPageBehavior>>
+        public List<ItemViewModel<NewPageBehavior>> NewPageBehaviors { get; } = new List<ItemViewModel<NewPageBehavior>>
         {
             new ItemViewModel<NewPageBehavior>(NewPageBehavior.OriginalWindow, "newPageBehavior_originalWindow"),
             new ItemViewModel<NewPageBehavior>(NewPageBehavior.NewWindow, "newPageBehavior_newWindow")
