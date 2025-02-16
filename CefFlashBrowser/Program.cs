@@ -29,6 +29,10 @@ namespace CefFlashBrowser
             {
                 WindowManager.Alert(e.ToString(), LanguageManager.GetString("title_error"));
             }
+            finally
+            {
+                ExitApp();
+            }
         }
 
         static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs e)
@@ -76,6 +80,12 @@ namespace CefFlashBrowser
 #endif
             settings.CefCommandLineArgs["autoplay-policy"] = "no-user-gesture-required";
             Cef.Initialize(settings);
+        }
+
+        static void ExitApp()
+        {
+            Cef.Shutdown();
+            Environment.Exit(0);
         }
     }
 }
