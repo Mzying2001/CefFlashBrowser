@@ -23,7 +23,7 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <TextBlock Margin="15"
-                       Text="{DynamicResource selectLanguageTips}"
+                       Text="{DynamicResource tips_selectLanguage}"
                        FontSize="20"
                        HorizontalAlignment="Center"/>
         </Grid>

@@ -4,12 +4,6 @@
     <sys:String x:Key="locale">it</sys:String>
     <sys:String x:Key="language_name">Italiano</sys:String>
 
-    <!--App-->
-    <sys:String x:Key="invalidStartUpParam">Invalid start-up parameter</sys:String>
-
-    <!--Seleziona Lingua Dialoghi-->
-    <sys:String x:Key="selectLanguageTips">Seleziona lingua</sys:String>
-
     <!--Finestra Principale-->
     <sys:String x:Key="window_title">Benvenuto</sys:String>
     <sys:String x:Key="button_go">Vai</sys:String>
@@ -20,7 +14,6 @@
     <sys:String x:Key="menu_settings">Impostazioni</sys:String>
     <sys:String x:Key="menu_loadSwf">Carica file swf locale...</sys:String>
     <sys:String x:Key="filter_swf">swf file</sys:String>
-    <sys:String x:Key="message_emptyUrl">Prego, inserisci l'url.</sys:String>
     <sys:String x:Key="toolTip_viewGithub">Vedi su GitHub</sys:String>
 
     <!--Impostazioni Finestra-->
@@ -49,8 +42,6 @@
     <sys:String x:Key="button_deleteCache">Elimina</sys:String>
     <sys:String x:Key="button_viewDetails">Dettagli</sys:String>
     <sys:String x:Key="button_restart">Riavvia</sys:String>
-    <sys:String x:Key="message_deleteCache">Sei sicuro di voler eliminare la cache? Il browser si riavvierà.</sys:String>
-    <sys:String x:Key="message_restart">Vuoi riavviare il programma?</sys:String>
     <sys:String x:Key="tips_needRestar">Le modifiche delle impostazioni si attiveranno dopo il riavvio.</sys:String>
     <sys:String x:Key="placeholder_ip">IP</sys:String>
     <sys:String x:Key="placeholder_port">Porta</sys:String>
@@ -83,7 +74,6 @@
     <sys:String x:Key="favorites_url">Url</sys:String>
     <sys:String x:Key="favorites_save">Salva</sys:String>
     <sys:String x:Key="favorites_defaultName">Nuovo prefeito</sys:String>
-    <sys:String x:Key="message_removeItem">Sei sicuro di rimuovere "{0}"?</sys:String>
 
     <!--Finestra Browser-->
     <sys:String x:Key="menu_back">Indietro</sys:String>
@@ -127,10 +117,15 @@
     <sys:String x:Key="button_no">No</sys:String>
     <sys:String x:Key="title_error">Errore</sys:String>
     <sys:String x:Key="title_addFavorite">Aggiungi a Preferiti</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">Vuoi uscire da questa pagina?</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">Vuoi ricaricare questa pagina?</sys:String>
+    <sys:String x:Key="tips_selectLanguage">Seleziona lingua</sys:String>
 
     <!--Messaggi-->
+    <sys:String x:Key="message_emptyUrl">Prego, inserisci l'url.</sys:String>
+    <sys:String x:Key="message_deleteCache">Sei sicuro di voler eliminare la cache? Il browser si riavvierà.</sys:String>
+    <sys:String x:Key="message_restart">Vuoi riavviare il programma?</sys:String>
+    <sys:String x:Key="message_removeItem">Sei sicuro di rimuovere "{0}"?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">Vuoi uscire da questa pagina?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">Vuoi ricaricare questa pagina?</sys:String>
     <sys:String x:Key="error_message">Messaggio di Errore</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Il nome non può essere vuoto.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">L'URL non può essere vuoto.</sys:String>

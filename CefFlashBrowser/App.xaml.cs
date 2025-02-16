@@ -46,7 +46,6 @@ namespace CefFlashBrowser
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
-            GlobalData.SaveData();
 
             if (_restart)
             {
