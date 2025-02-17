@@ -5,7 +5,7 @@
     <sys:String x:Key="language_name">Italiano</sys:String>
 
     <!--Finestra Principale-->
-    <sys:String x:Key="window_title">Benvenuto</sys:String>
+    <sys:String x:Key="title_mainWindow">Benvenuto</sys:String>
     <sys:String x:Key="button_go">Vai</sys:String>
     <sys:String x:Key="menu_favorites">Preferiti</sys:String>
     <sys:String x:Key="menu_manageFavorites">Gestisci Preferiti</sys:String>

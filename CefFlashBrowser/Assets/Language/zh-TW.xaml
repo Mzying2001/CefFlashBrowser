@@ -5,7 +5,7 @@
     <sys:String x:Key="language_name">中文（繁體）</sys:String>
 
     <!--主介面-->
-    <sys:String x:Key="window_title">歡迎</sys:String>
+    <sys:String x:Key="title_mainWindow">歡迎</sys:String>
     <sys:String x:Key="button_go">前往</sys:String>
     <sys:String x:Key="menu_favorites">我的最愛</sys:String>
     <sys:String x:Key="menu_manageFavorites">管理我的最愛</sys:String>
