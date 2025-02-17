@@ -4,6 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
         x:Name="window"
@@ -13,7 +15,18 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         FocusManager.FocusedElement="{Binding ElementName=yesButton}">
-    
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+        <KeyBinding Gesture="Esc"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+    </Window.InputBindings>
+
+    <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior x:Name="windowBehavior"/>
+    </i:Interaction.Behaviors>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
