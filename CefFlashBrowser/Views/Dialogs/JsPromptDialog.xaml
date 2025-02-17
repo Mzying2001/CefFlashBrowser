@@ -12,11 +12,11 @@
         
         x:Name="window"
         Width="420"
-        Height="200"
+        SizeToContent="Height"
         Topmost="True"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        FocusManager.FocusedElement="{Binding ElementName=okButton}">
+        FocusManager.FocusedElement="{Binding ElementName=inputTextBox}">
 
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+W"
@@ -45,11 +45,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <hc:TextBox Margin="15"
-                        TextWrapping="Wrap"
-                        AcceptsReturn="True"
-                        VerticalContentAlignment="Top"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+            <hc:TextBox x:Name="inputTextBox"
+                        Margin="15"
                         Text="{Binding ElementName=window, Path=InputText, UpdateSourceTrigger=PropertyChanged}"
                         hc:TitleElement.Title="{Binding ElementName=window, Path=Message}"/>
         </Grid>
