@@ -289,6 +289,7 @@
     <Compile Include="Models\ProxySettings.cs" />
     <Compile Include="Models\UserAgentSetting.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Utils\Behaviors\WindowBehavior.cs" />
     <Compile Include="Utils\Behaviors\DropFileBehavior.cs" />
     <Compile Include="Utils\Behaviors\EscToCloseBehavior.cs" />
     <Compile Include="Utils\Converters\MultiValueConverterBase.cs" />
