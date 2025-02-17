@@ -20,11 +20,13 @@
         MinHeight="300"
         WindowStartupLocation="CenterScreen">
 
-    <Window.Resources>
-
-    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+    </Window.InputBindings>
 
     <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior x:Name="windowBehavior"/>
         <behaviors:DropFileBehavior Command="{Binding DropFileCommand}"/>
     </i:Interaction.Behaviors>
 
