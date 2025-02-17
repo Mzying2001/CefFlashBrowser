@@ -15,9 +15,13 @@ namespace CefFlashBrowser.Models
         public AppInfo()
         {
             Name = Application.ResourceAssembly.GetName().Name;
-            Version = Application.ResourceAssembly.GetName().Version.ToString();
             BaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             CefSharpVersion = Cef.CefSharpVersion;
+#if DEBUG
+            Version = Application.ResourceAssembly.GetName().Version.ToString() + " (Debug)";
+#else
+            Version = Application.ResourceAssembly.GetName().Version.ToString();
+#endif
         }
     }
 }
