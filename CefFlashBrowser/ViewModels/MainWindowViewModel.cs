@@ -23,7 +23,7 @@ namespace CefFlashBrowser.ViewModels
         public string WelcomeText
         {
             get => string.Format("{0}  {1}",
-                LanguageManager.GetString("window_title"), EmoticonsHelper.GetNextEmoticon());
+                LanguageManager.GetString("title_mainWindow"), EmoticonsHelper.GetNextEmoticon());
         }
 
         private void ShowBrowser(string address)

@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Models.Data;
+using System;
 using System.Windows;
 
 namespace CefFlashBrowser.Views.Dialogs
@@ -37,6 +38,16 @@ namespace CefFlashBrowser.Views.Dialogs
             InitializeComponent();
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+
+            if (DialogResult == true)
+            {
+                GlobalData.Favorites.Add(new Models.Website(ItemName, ItemUrl));
+            }
+        }
+
         private void OnCancelButtonClick(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
@@ -44,7 +55,6 @@ namespace CefFlashBrowser.Views.Dialogs
 
         private void OnConfirmButtonClick(object sender, RoutedEventArgs e)
         {
-            GlobalData.Favorites.Add(new Models.Website(ItemName, ItemUrl));
             DialogResult = true;
         }
     }

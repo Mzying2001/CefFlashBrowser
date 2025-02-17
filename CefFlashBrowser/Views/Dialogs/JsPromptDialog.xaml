@@ -5,15 +5,39 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         
         x:Name="window"
         Width="420"
-        Height="200"
+        SizeToContent="Height"
         Topmost="True"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        FocusManager.FocusedElement="{Binding ElementName=okButton}">
+        FocusManager.FocusedElement="{Binding ElementName=inputTextBox}">
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+        <KeyBinding Gesture="Esc"
+                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
+            <KeyBinding.CommandParameter>
+                <sys:Boolean>False</sys:Boolean>
+            </KeyBinding.CommandParameter>
+        </KeyBinding>
+        <KeyBinding Gesture="Enter"
+                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
+            <KeyBinding.CommandParameter>
+                <sys:Boolean>True</sys:Boolean>
+            </KeyBinding.CommandParameter>
+        </KeyBinding>
+    </Window.InputBindings>
+
+    <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior x:Name="windowBehavior"/>
+    </i:Interaction.Behaviors>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -21,11 +45,8 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <hc:TextBox Margin="15"
-                        TextWrapping="Wrap"
-                        AcceptsReturn="True"
-                        VerticalContentAlignment="Top"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+            <hc:TextBox x:Name="inputTextBox"
+                        Margin="15"
                         Text="{Binding ElementName=window, Path=InputText, UpdateSourceTrigger=PropertyChanged}"
                         hc:TitleElement.Title="{Binding ElementName=window, Path=Message}"/>
         </Grid>

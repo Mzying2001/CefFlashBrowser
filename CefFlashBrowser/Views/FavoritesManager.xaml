@@ -19,9 +19,14 @@
         DataContext="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel}"
         Title="{DynamicResource favorites_managerTitle}">
 
-    <Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+    </Window.InputBindings>
 
-    </Window.Resources>
+    <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior x:Name="windowBehavior"/>
+    </i:Interaction.Behaviors>
 
     <Grid>
         <Grid.ColumnDefinitions>

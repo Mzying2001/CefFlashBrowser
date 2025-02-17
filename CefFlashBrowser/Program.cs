@@ -6,13 +6,16 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Windows;
 
 namespace CefFlashBrowser
 {
     internal static class Program
     {
+        private static bool _restart = false;
+
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             Win32.SetDllDirectory(GlobalData.CefDllPath);
             AppDomain.CurrentDomain.AssemblyResolve += ResolveCefSharpAssembly;
@@ -31,11 +34,11 @@ namespace CefFlashBrowser
             }
             finally
             {
-                ExitApp();
+                OnTerminate();
             }
         }
 
-        static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs e)
+        private static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs e)
         {
             // Load CefSharp dlls
             string assemblyName = new AssemblyName(e.Name).Name;
@@ -43,7 +46,7 @@ namespace CefFlashBrowser
             return File.Exists(assemblyPath) ? Assembly.LoadFrom(assemblyPath) : null;
         }
 
-        static void InitCefFlash()
+        private static void InitCefFlash()
         {
             Environment.SetEnvironmentVariable("ComSpec", GlobalData.EmptyExePath); //Remove black popup window
 
@@ -82,11 +85,21 @@ namespace CefFlashBrowser
             Cef.Initialize(settings);
         }
 
-        static void ExitApp()
+        private static void OnTerminate()
         {
             Cef.Shutdown();
             GlobalData.SaveData();
-            Environment.Exit(0);
+
+            if (_restart)
+            {
+                Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+            }
+        }
+
+        public static void Restart()
+        {
+            _restart = true;
+            Application.Current.Shutdown();
         }
     }
 }

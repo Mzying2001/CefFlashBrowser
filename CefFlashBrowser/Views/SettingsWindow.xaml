@@ -7,6 +7,7 @@
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
         Width="450"
@@ -16,6 +17,15 @@
         Title="{DynamicResource menu_settings}"
         DataContext="{Binding Source={StaticResource Locator}, Path=SettingsWindowViewModel}"
         WindowStartupLocation="CenterScreen">
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+    </Window.InputBindings>
+
+    <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior x:Name="windowBehavior"/>
+    </i:Interaction.Behaviors>
 
     <Grid>
         <TabControl Margin="10"

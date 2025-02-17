@@ -5,7 +5,7 @@
     <sys:String x:Key="language_name">English</sys:String>
 
     <!--Main Window-->
-    <sys:String x:Key="window_title">Welcome</sys:String>
+    <sys:String x:Key="title_mainWindow">Welcome</sys:String>
     <sys:String x:Key="button_go">Go</sys:String>
     <sys:String x:Key="menu_favorites">Favorites</sys:String>
     <sys:String x:Key="menu_manageFavorites">Manage Favorites</sys:String>
