@@ -10,6 +10,9 @@ namespace CefFlashBrowser.Utils.Behaviors
         private ICommand _closeWindowCommand;
         public ICommand CloseWindowCommand => _closeWindowCommand;
 
+        private ICommand _setDialogResultCommand;
+        public ICommand SetDialogResultCommand => _setDialogResultCommand;
+
         public WindowBehavior()
         {
         }
@@ -18,12 +21,14 @@ namespace CefFlashBrowser.Utils.Behaviors
         {
             base.OnAttached();
             _closeWindowCommand = new DelegateCommand(AssociatedObject.Close);
+            _setDialogResultCommand = new DelegateCommand<bool?>(res => AssociatedObject.DialogResult = res);
         }
 
         protected override void OnDetaching()
         {
             base.OnDetaching();
             _closeWindowCommand = null;
+            _setDialogResultCommand = null;
         }
     }
 }

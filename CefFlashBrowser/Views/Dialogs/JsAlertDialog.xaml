@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         
         x:Name="window"
@@ -20,7 +21,17 @@
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
         <KeyBinding Gesture="Esc"
-                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
+            <KeyBinding.CommandParameter>
+                <sys:Boolean>False</sys:Boolean>
+            </KeyBinding.CommandParameter>
+        </KeyBinding>
+        <KeyBinding Gesture="Enter"
+                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
+            <KeyBinding.CommandParameter>
+                <sys:Boolean>True</sys:Boolean>
+            </KeyBinding.CommandParameter>
+        </KeyBinding>
     </Window.InputBindings>
 
     <i:Interaction.Behaviors>
