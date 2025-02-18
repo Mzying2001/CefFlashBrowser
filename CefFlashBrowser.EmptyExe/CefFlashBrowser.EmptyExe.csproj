@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)' == 'x64'">
-    <OutputPath>..\bin\x64\$(Configuration)\</OutputPath>
+    <OutputPath>..\bin\$(Platform)\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
 </Project>
