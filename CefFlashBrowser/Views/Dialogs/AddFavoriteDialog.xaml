@@ -12,7 +12,7 @@
         
         x:Name="window"
         Width="350"
-        Height="220"
+        SizeToContent="Height"
         Topmost="True"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
@@ -47,8 +47,7 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
-            <StackPanel Margin="15,0"
-                        VerticalAlignment="Center">
+            <StackPanel Margin="15">
                 <hc:TextBox x:Name="NameTextBox"
                             hc:TitleElement.Title="{DynamicResource favorites_name}"
                             Text="{Binding ElementName=window, Path=ItemName, UpdateSourceTrigger=PropertyChanged}">
@@ -67,7 +66,7 @@
         </Grid>
 
         <Grid Grid.Row="1">
-            <StackPanel Margin="15"
+            <StackPanel Margin="0,0,15,15"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <Button MinWidth="70"
