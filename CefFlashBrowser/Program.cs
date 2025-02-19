@@ -53,6 +53,7 @@ namespace CefFlashBrowser
             var settings = new CefFlashSettings()
             {
                 Locale = LanguageManager.GetLocale(GlobalData.Settings.Language),
+                LogFile = GlobalData.CefLogPath,
                 CachePath = GlobalData.CachesPath,
                 PpapiFlashPath = GlobalData.FlashPath,
                 EnableSystemFlash = true,
@@ -78,9 +79,7 @@ namespace CefFlashBrowser
                 var proxySettings = GlobalData.Settings.ProxySettings;
                 CefSharpSettings.Proxy = new ProxyOptions(proxySettings.IP, proxySettings.Port, proxySettings.UserName, proxySettings.Password);
             }
-#if !DEBUG
-            settings.LogSeverity = LogSeverity.Disable;
-#endif
+
             settings.CefCommandLineArgs["autoplay-policy"] = "no-user-gesture-required";
             Cef.Initialize(settings);
         }

@@ -12,8 +12,11 @@ namespace CefFlashBrowser.Models.Data
         public static string AppBaseDirectory { get; }
         public static string AssetsPath { get; }
         public static string CachesPath { get; }
+        public static string LogsPath { get; }
         public static string CefDllPath { get; }
         public static string PluginsPath { get; }
+
+        public static string CefLogPath { get; }
         public static string FlashPath { get; }
         public static string EmptyExePath { get; }
         public static string SwfPlayerPath { get; }
@@ -32,29 +35,39 @@ namespace CefFlashBrowser.Models.Data
         static GlobalData()
         {
             AppBaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            AssetsPath = Path.Combine(AppBaseDirectory, @"Assets\");
-            CachesPath = Path.Combine(AppBaseDirectory, @"Caches\");
-            CefDllPath = Path.Combine(AssetsPath, @"CefSharp\");
-            PluginsPath = Path.Combine(AssetsPath, @"Plugins\");
-            FlashPath = Path.Combine(PluginsPath, @"pepflashplayer.dll");
-            EmptyExePath = Path.Combine(AssetsPath, @"EmptyExe\CefFlashBrowser.EmptyExe.exe");
-            SwfPlayerPath = Path.Combine(AssetsPath, @"SwfPlayer\swfplayer.html");
-            SubprocessPath = Path.Combine(CefDllPath, @"CefSharp.BrowserSubprocess.exe");
+            AssetsPath = Path.Combine(AppBaseDirectory, "Assets\\");
+            CachesPath = Path.Combine(AppBaseDirectory, "Caches\\");
+            LogsPath = Path.Combine(AppBaseDirectory, "Logs\\");
+            CefDllPath = Path.Combine(AssetsPath, "CefSharp\\");
+            PluginsPath = Path.Combine(AssetsPath, "Plugins\\");
+
+            CefLogPath = Path.Combine(LogsPath, $"cef_{DateTime.Now:yyyyMMdd}.log");
+            FlashPath = Path.Combine(PluginsPath, "pepflashplayer.dll");
+            EmptyExePath = Path.Combine(AssetsPath, "EmptyExe\\CefFlashBrowser.EmptyExe.exe");
+            SwfPlayerPath = Path.Combine(AssetsPath, "SwfPlayer\\swfplayer.html");
+            SubprocessPath = Path.Combine(CefDllPath, "CefSharp.BrowserSubprocess.exe");
 
             UserDocumentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            DataPath = Path.Combine(UserDocumentPath, @"CefFlashBrowser\");
-            FavoritesPath = Path.Combine(DataPath, @"favorites.json");
-            SettingsPath = Path.Combine(DataPath, @"settings.json");
+            DataPath = Path.Combine(UserDocumentPath, "CefFlashBrowser\\");
+            FavoritesPath = Path.Combine(DataPath, "favorites.json");
+            SettingsPath = Path.Combine(DataPath, "settings.json");
 
             InitData();
         }
 
+        private static void CreateDirIfNotExist(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+        }
+
         public static void InitData()
         {
-            if (!Directory.Exists(DataPath))
-            {
-                Directory.CreateDirectory(DataPath);
-            }
+            CreateDirIfNotExist(DataPath);
+            CreateDirIfNotExist(CachesPath);
+            CreateDirIfNotExist(LogsPath);
 
             InitFavorites();
             InitSettings();
