@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# FodyWeavers
+FodyWeavers.xml
+FodyWeavers.xsd
