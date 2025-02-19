@@ -11,6 +11,9 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <StartupObject>CefFlashBrowser.Program</StartupObject>
     <ApplicationIcon>Assets\Icon\icon.ico</ApplicationIcon>
+    <Version>1.0.8</Version>
+    <Authors>Mzying2001</Authors>
+    <Copyright>Copyright ©  2021</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)' == 'x86'">
