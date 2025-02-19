@@ -10,7 +10,6 @@
         
         Width="300"
         Height="300"
-        Topmost="True"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         FocusManager.FocusedElement="{Binding ElementName=langList}"

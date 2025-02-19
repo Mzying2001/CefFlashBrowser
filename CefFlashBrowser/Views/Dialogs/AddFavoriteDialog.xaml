@@ -13,7 +13,6 @@
         x:Name="window"
         Width="350"
         SizeToContent="Height"
-        Topmost="True"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Title="{DynamicResource title_addFavorite}"
