@@ -1,352 +1,40 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A6EC0A08-7E2C-4746-B964-69B10CCB4FDC}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>CefFlashBrowser</RootNamespace>
-    <AssemblyName>CefFlashBrowser</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <DebugType>embedded</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>none</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <DebugSymbols>false</DebugSymbols>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <OutputPath>..\bin\x64\Debug\</OutputPath>
-    <DebugType>embedded</DebugType>
-    <Prefer32Bit>false</Prefer32Bit>
-    <PlatformTarget>x64</PlatformTarget>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\bin\x64\Release\</OutputPath>
-    <Prefer32Bit>false</Prefer32Bit>
-    <PlatformTarget>x64</PlatformTarget>
-    <DefineConstants>
-    </DefineConstants>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>CefFlashBrowser.Program</StartupObject>
-  </PropertyGroup>
-  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Platforms>x86;x64</Platforms>
     <NuGetAudit>False</NuGetAudit>
+    <DebugType>embedded</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <StartupObject>CefFlashBrowser.Program</StartupObject>
+    <ApplicationIcon>Assets\Icon\icon.ico</ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+
+  <PropertyGroup Condition="'$(Platform)' == 'x86'">
+    <OutputPath>..\bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'x64'">
+    <OutputPath>..\bin\$(Platform)\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Microsoft.Win32.Primitives" />
-    <Reference Include="System" />
-    <Reference Include="System.AppContext" />
-    <Reference Include="System.Buffers" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Console" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Diagnostics.DiagnosticSource" />
-    <Reference Include="System.Diagnostics.Tracing" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Globalization.Calendars" />
-    <Reference Include="System.IO" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.IO.Compression.ZipFile" />
-    <Reference Include="System.IO.FileSystem" />
-    <Reference Include="System.IO.FileSystem.Primitives" />
-    <Reference Include="System.Linq" />
-    <Reference Include="System.Linq.Expressions" />
-    <Reference Include="System.Memory" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Sockets" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors" />
-    <Reference Include="System.Reflection" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
-    <Reference Include="System.Security.Cryptography.Algorithms" />
-    <Reference Include="System.Security.Cryptography.Encoding" />
-    <Reference Include="System.Security.Cryptography.Primitives" />
-    <Reference Include="System.Security.Cryptography.X509Certificates" />
-    <Reference Include="System.Text.RegularExpressions" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.ReaderWriter" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="WindowsFormsIntegration" />
+    <COMReference Include="IWshRuntimeLibrary">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
+
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Compile Include="Models\AppInfo.cs" />
-    <Compile Include="Models\CefMenuItemInfo.cs" />
-    <Compile Include="Models\FakeFlashVersionSetting.cs" />
-    <Compile Include="Models\ProxySettings.cs" />
-    <Compile Include="Models\UserAgentSetting.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Utils\Behaviors\WindowBehavior.cs" />
-    <Compile Include="Utils\Behaviors\DropFileBehavior.cs" />
-    <Compile Include="Utils\Converters\MultiValueConverterBase.cs" />
-    <Compile Include="Utils\Converters\ObjectNotNull.cs" />
-    <Compile Include="Utils\Converters\StringArrNotAnyEmpty.cs" />
-    <Compile Include="Utils\Converters\TwoThird.cs" />
-    <Compile Include="Utils\Converters\UrlDecoder.cs" />
-    <Compile Include="Models\FavoritesFile.cs" />
-    <Compile Include="Models\Data\GlobalData.cs" />
-    <Compile Include="Utils\Converters\UrlGetFileName.cs" />
-    <Compile Include="Utils\Converters\VisiableIfNotZero.cs" />
-    <Compile Include="Utils\Converters\VisiableIfStrNotEmpty.cs" />
-    <Compile Include="Utils\EmoticonsHelper.cs" />
-    <Compile Include="Utils\Handlers\ContextMenuHandler.cs" />
-    <Compile Include="Utils\Handlers\DisableDragHandler.cs" />
-    <Compile Include="Utils\Handlers\IEDownloadHandler.cs" />
-    <Compile Include="Utils\Handlers\JsDialogHandler.cs" />
-    <Compile Include="Utils\LanguageManager.cs" />
-    <Compile Include="Models\NavigationType.cs" />
-    <Compile Include="Models\NewPageBehavior.cs" />
-    <Compile Include="Models\PathInfo.cs" />
-    <Compile Include="Models\SearchEngine.cs" />
-    <Compile Include="Models\Data\MessageTokens.cs" />
-    <Compile Include="Models\Settings.cs" />
-    <Compile Include="Utils\SearchEngineHelper.cs" />
-    <Compile Include="Utils\UrlHelper.cs" />
-    <Compile Include="Models\Website.cs" />
-    <Compile Include="Models\WindowSizeInfo.cs" />
-    <Compile Include="Utils\Win32.cs" />
-    <Compile Include="Utils\WindowManager.cs" />
-    <Compile Include="ViewModels\BrowserWindowViewModel.cs" />
-    <Compile Include="ViewModels\FavoritesManagerViewModel.cs" />
-    <Compile Include="ViewModels\ItemViewModel.cs" />
-    <Compile Include="ViewModels\LanguageItemViewModel.cs" />
-    <Compile Include="ViewModels\LanguageSelectorViewModel.cs" />
-    <Compile Include="ViewModels\MainWindowViewModel.cs" />
-    <Compile Include="ViewModels\SettingsWindowViewModel.cs" />
-    <Compile Include="ViewModels\ViewModelLocator.cs" />
-    <Compile Include="Utils\Behaviors\TextBoxSelectAllOnFocus.cs" />
-    <Compile Include="Views\BrowserWindow.xaml.cs">
-      <DependentUpon>BrowserWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Utils\Converters\BoolToObject.cs" />
-    <Compile Include="Utils\Converters\ValueConverterBase.cs" />
-    <Compile Include="Views\Custom\SettingGroup.cs" />
-    <Compile Include="Views\Custom\SettingItem.cs" />
-    <Compile Include="Views\Dialogs\AddFavoriteDialog.xaml.cs">
-      <DependentUpon>AddFavoriteDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Dialogs\JsAlertDialog.xaml.cs">
-      <DependentUpon>JsAlertDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Dialogs\JsConfirmDialog.xaml.cs">
-      <DependentUpon>JsConfirmDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Dialogs\JsPromptDialog.xaml.cs">
-      <DependentUpon>JsPromptDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Dialogs\SelectLanguageDialog.xaml.cs">
-      <DependentUpon>SelectLanguageDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\FavoritesManager.xaml.cs">
-      <DependentUpon>FavoritesManager.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\PopupWebPage.xaml.cs">
-      <DependentUpon>PopupWebPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\SettingsWindow.xaml.cs">
-      <DependentUpon>SettingsWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\SwfPlayerWindow.xaml.cs">
-      <DependentUpon>SwfPlayerWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ViewSourceWindow.xaml.cs">
-      <DependentUpon>ViewSourceWindow.xaml</DependentUpon>
-    </Compile>
-    <Page Include="Assets\Emoticons\Emoticons.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Assets\Language\en-US.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Assets\Language\it.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Assets\Language\langs.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Assets\Language\zh-CN.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Assets\Language\zh-TW.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Utils\Converters\Converters.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Themes\Generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\Dialogs\AddFavoriteDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Dialogs\JsAlertDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Dialogs\JsConfirmDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Dialogs\JsPromptDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Dialogs\SelectLanguageDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\FavoritesManager.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Views\MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="Views\BrowserWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\PopupWebPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\SettingsWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\SwfPlayerWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ViewSourceWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <None Include="Assets\CefSharp\libcef_x64.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\CefSharp\libcef_x86.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Plugins\pepflashplayer_x64.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\Plugins\pepflashplayer_x86.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Assets\SwfPlayer\swfplayer.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Resource Include="Assets\Svgs\warning.svg" />
+    <Content Include="Assets\Icon\icon.ico" />
     <Resource Include="Assets\Svgs\add.svg" />
     <Resource Include="Assets\Svgs\back.svg" />
     <Resource Include="Assets\Svgs\down.svg" />
@@ -356,108 +44,51 @@
     <Resource Include="Assets\Svgs\stop.svg" />
     <Resource Include="Assets\Svgs\sub.svg" />
     <Resource Include="Assets\Svgs\up.svg" />
-    <None Include="Resources\icon.ico" />
+    <Resource Include="Assets\Svgs\warning.svg" />
   </ItemGroup>
+
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 和 x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="IWshRuntimeLibrary">
-      <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj">
-      <Project>{e1973a5c-e506-4b97-8042-3f8cf3d6f6a2}</Project>
-      <Name>CefFlashBrowser.FlashBrowser</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj">
-      <Project>{e5af3e66-fcd3-4434-8159-f572bc04918c}</Project>
-      <Name>CefFlashBrowser.WinformCefSharp4WPF</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="CefSharp.Common">
-      <Version>84.4.10</Version>
-    </PackageReference>
-    <PackageReference Include="Costura.Fody">
-      <Version>6.0.0</Version>
+    <PackageReference Include="CefSharp.WinForms" Version="84.4.10" />
+    <PackageReference Include="Costura.Fody" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="HandyControl">
-      <Version>3.5.1</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
-      <Version>1.1.135</Version>
-    </PackageReference>
-    <PackageReference Include="Mzying2001.SimpleMvvm">
-      <Version>1.0.6</Version>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.3</Version>
-    </PackageReference>
-    <PackageReference Include="SharpVectors">
-      <Version>1.8.4.2</Version>
-    </PackageReference>
+    <PackageReference Include="HandyControl" Version="3.5.1" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.0.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SharpVectors" Version="1.8.4.2" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild" />
-  <PropertyGroup>
-    <PostBuildEvent>set ASSETS_PATH=Assets\
-set CEF_PATH=%25ASSETS_PATH%25CefSharp\
-set PLUGINS_PATH=%25ASSETS_PATH%25Plugins\
-set EMPTYEXE_PATH=%25ASSETS_PATH%25EmptyExe\
 
-del *.pdb
-del *.xml
+  <ItemGroup>
+    <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj" />
+    <ProjectReference Include="..\CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj" />
+  </ItemGroup>
 
-rd /s /q %25CEF_PATH%25locales
-rd /s /q %25CEF_PATH%25swiftshader
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
 
-move CefSharp.* %25CEF_PATH%25
-move cef.pak %25CEF_PATH%25
-move cef_100_percent.pak %25CEF_PATH%25
-move cef_200_percent.pak %25CEF_PATH%25
-move cef_extensions.pak %25CEF_PATH%25
-move chrome_elf.dll %25CEF_PATH%25
-move d3dcompiler_47.dll %25CEF_PATH%25
-move devtools_resources.pak %25CEF_PATH%25
-move icudtl.dat %25CEF_PATH%25
-move libcef.dll %25CEF_PATH%25
-move libEGL.dll %25CEF_PATH%25
-move libGLESv2.dll %25CEF_PATH%25
-move locales %25CEF_PATH%25
-move README.txt %25CEF_PATH%25
-move snapshot_blob.bin %25CEF_PATH%25
-move swiftshader %25CEF_PATH%25
-move v8_context_snapshot.bin %25CEF_PATH%25
+  <ItemGroup>
+    <None Update="Assets\CefSharp\libcef_x64.tar.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\CefSharp\libcef_x86.tar.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Plugins\pepflashplayer_x64.tar.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\Plugins\pepflashplayer_x86.tar.gz">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\SwfPlayer\swfplayer.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
-tar -xvf %25CEF_PATH%25libcef_$(PlatformName).tar.gz -C %25CEF_PATH%25
-del %25CEF_PATH%25libcef_*.tar.gz
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="cd &quot;$(TargetDir)&quot;&#xD;&#xA;&#xD;&#xA;set ASSETS_PATH=Assets\&#xD;&#xA;set CEF_PATH=%25ASSETS_PATH%25CefSharp\&#xD;&#xA;set PLUGINS_PATH=%25ASSETS_PATH%25Plugins\&#xD;&#xA;set EMPTYEXE_PATH=%25ASSETS_PATH%25EmptyExe\&#xD;&#xA;&#xD;&#xA;del *.pdb&#xD;&#xA;del *.xml&#xD;&#xA;&#xD;&#xA;rd /s /q %25CEF_PATH%25locales&#xD;&#xA;rd /s /q %25CEF_PATH%25swiftshader&#xD;&#xA;&#xD;&#xA;move CefSharp.* %25CEF_PATH%25&#xD;&#xA;move cef.pak %25CEF_PATH%25&#xD;&#xA;move cef_100_percent.pak %25CEF_PATH%25&#xD;&#xA;move cef_200_percent.pak %25CEF_PATH%25&#xD;&#xA;move cef_extensions.pak %25CEF_PATH%25&#xD;&#xA;move chrome_elf.dll %25CEF_PATH%25&#xD;&#xA;move d3dcompiler_47.dll %25CEF_PATH%25&#xD;&#xA;move devtools_resources.pak %25CEF_PATH%25&#xD;&#xA;move icudtl.dat %25CEF_PATH%25&#xD;&#xA;move libcef.dll %25CEF_PATH%25&#xD;&#xA;move libEGL.dll %25CEF_PATH%25&#xD;&#xA;move libGLESv2.dll %25CEF_PATH%25&#xD;&#xA;move locales %25CEF_PATH%25&#xD;&#xA;move README.txt %25CEF_PATH%25&#xD;&#xA;move snapshot_blob.bin %25CEF_PATH%25&#xD;&#xA;move swiftshader %25CEF_PATH%25&#xD;&#xA;move v8_context_snapshot.bin %25CEF_PATH%25&#xD;&#xA;&#xD;&#xA;tar -xvf %25CEF_PATH%25libcef_$(PlatformName).tar.gz -C %25CEF_PATH%25&#xD;&#xA;del %25CEF_PATH%25libcef_*.tar.gz&#xD;&#xA;&#xD;&#xA;tar -xvf %25PLUGINS_PATH%25pepflashplayer_$(PlatformName).tar.gz -C %25PLUGINS_PATH%25&#xD;&#xA;del %25PLUGINS_PATH%25pepflashplayer_*.tar.gz&#xD;&#xA;&#xD;&#xA;rd /s /q %25EMPTYEXE_PATH%25&#xD;&#xA;mkdir %25EMPTYEXE_PATH%25&#xD;&#xA;move CefFlashBrowser.EmptyExe.* %25EMPTYEXE_PATH%25&#xD;&#xA;&#xD;&#xA;del *.dll" />
+  </Target>
 
-tar -xvf %25PLUGINS_PATH%25pepflashplayer_$(PlatformName).tar.gz -C %25PLUGINS_PATH%25
-del %25PLUGINS_PATH%25pepflashplayer_*.tar.gz
-
-rd /s /q %25EMPTYEXE_PATH%25
-mkdir %25EMPTYEXE_PATH%25
-move CefFlashBrowser.EmptyExe.* %25EMPTYEXE_PATH%25
-
-del *.dll
-</PostBuildEvent>
-  </PropertyGroup>
 </Project>
