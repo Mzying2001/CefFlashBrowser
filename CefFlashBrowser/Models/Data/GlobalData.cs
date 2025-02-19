@@ -43,8 +43,8 @@ namespace CefFlashBrowser.Models.Data
 
             UserDocumentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             DataPath = Path.Combine(UserDocumentPath, @"CefFlashBrowser\");
-            FavoritesPath = Path.Combine(DataPath, @"Favorites.json");
-            SettingsPath = Path.Combine(DataPath, @"Settings.json");
+            FavoritesPath = Path.Combine(DataPath, @"favorites.json");
+            SettingsPath = Path.Combine(DataPath, @"settings.json");
 
             InitData();
         }
