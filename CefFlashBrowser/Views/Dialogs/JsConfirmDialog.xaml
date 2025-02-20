@@ -12,7 +12,6 @@
         x:Name="window"
         Width="420"
         Height="200"
-        Topmost="True"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         FocusManager.FocusedElement="{Binding ElementName=yesButton}">

@@ -12,11 +12,20 @@ namespace CefFlashBrowser
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             if (GlobalData.Settings.FirstStart)
             {
                 if (WindowManager.ShowSelectLanguageDialog())
+                {
                     GlobalData.Settings.FirstStart = false;
+                    WindowManager.ShowMainWindow();
+                }
+                else
+                {
+                    Shutdown();
+                    return;
+                }
             }
             else if (e.Args.Length == 0)
             {
@@ -38,6 +47,8 @@ namespace CefFlashBrowser
                     }
                 }
             }
+
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
     }
 }
