@@ -1,5 +1,4 @@
-﻿using CefFlashBrowser.Utils;
-using System.Windows;
+﻿using System.Windows;
 
 namespace CefFlashBrowser.Views.Dialogs
 {
@@ -15,7 +14,6 @@ namespace CefFlashBrowser.Views.Dialogs
 
         private void OnConfirmButtonClick(object sender, RoutedEventArgs e)
         {
-            WindowManager.ShowMainWindow();
             DialogResult = true;
         }
     }
