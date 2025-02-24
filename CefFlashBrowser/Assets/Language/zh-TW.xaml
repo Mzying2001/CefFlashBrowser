@@ -90,6 +90,7 @@
     <sys:String x:Key="menu_find">尋找</sys:String>
     <sys:String x:Key="menu_search">搜尋「{0}」</sys:String>
     <sys:String x:Key="menu_openInNewWindow">在新視窗開啟</sys:String>
+    <sys:String x:Key="menu_openSelectedUrl">前往「{0}」</sys:String>
     <sys:String x:Key="menu_addToDictionary">新增到字典</sys:String>
     <sys:String x:Key="menu_reloadNoCache">重新整理（忽略快取）</sys:String>
     <sys:String x:Key="menu_openDevTool">開啟開發者工具</sys:String>

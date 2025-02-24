@@ -106,6 +106,7 @@ namespace CefFlashBrowser.Views
                 {
                     case Search:
                     case OpenInNewWindow:
+                    case OpenSelectedUrl:
                     case CefMenuCommand.ViewSource:
                         {
                             ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() => window.FullScreen = false);

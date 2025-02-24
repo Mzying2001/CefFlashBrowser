@@ -2,11 +2,14 @@
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Messaging;
+using System;
 
 namespace CefFlashBrowser.ViewModels
 {
-    public class LanguageItemViewModel : ViewModelBase
+    public class LanguageItemViewModel : ViewModelBase, IDisposable
     {
+        private bool _disposed;
+
         public string Language { get; }
 
         public string LanguageName
@@ -39,8 +42,28 @@ namespace CefFlashBrowser.ViewModels
 
         ~LanguageItemViewModel()
         {
-            if (Language != null)
-                Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+            Dispose(disposing: false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                }
+                if (Language != null)
+                {
+                    Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+                }
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
