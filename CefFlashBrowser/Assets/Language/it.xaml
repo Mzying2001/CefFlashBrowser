@@ -90,6 +90,7 @@
     <sys:String x:Key="menu_find">Trova</sys:String>
     <sys:String x:Key="menu_search">Cerca "{0}"</sys:String>
     <sys:String x:Key="menu_openInNewWindow">Apri in una nuova finestra</sys:String>
+    <sys:String x:Key="menu_openSelectedUrl">Vai a "{0}"</sys:String>
     <sys:String x:Key="menu_addToDictionary">Aggiungi al dizionario</sys:String>
     <sys:String x:Key="menu_reloadNoCache">Ricarica ignorando la cache</sys:String>
     <sys:String x:Key="menu_openDevTool">Apri devtools</sys:String>

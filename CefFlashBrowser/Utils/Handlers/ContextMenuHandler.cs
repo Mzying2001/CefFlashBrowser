@@ -13,6 +13,7 @@ namespace CefFlashBrowser.Utils.Handlers
     {
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
+        public const CefMenuCommand OpenSelectedUrl = CefMenuCommand.UserFirst + 3;
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
@@ -21,11 +22,18 @@ namespace CefFlashBrowser.Utils.Handlers
             if (!string.IsNullOrWhiteSpace(parameters.SelectionText))
             {
                 var selectionText = parameters.SelectionText;
-                var header = LanguageManager.GetString("menu_search");
-                var tmp = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
-                header = string.Format(header, tmp.Replace('\n', ' '));
+                var truncatedText = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
+
+                var header = string.Format(LanguageManager.GetString("menu_search"), truncatedText.Replace('\n', ' '));
                 model.InsertItemAt(0, Search, header);
                 count++;
+
+                if (UrlHelper.IsHttpUrl(selectionText))
+                {
+                    header = string.Format(LanguageManager.GetString("menu_openSelectedUrl"), truncatedText);
+                    model.InsertCheckItemAt(0, OpenSelectedUrl, header);
+                    count++;
+                }
             }
             if (!string.IsNullOrWhiteSpace(parameters.LinkUrl))
             {
@@ -65,6 +73,12 @@ namespace CefFlashBrowser.Utils.Handlers
                     case OpenInNewWindow:
                         {
                             WindowManager.ShowBrowser(linkUrl);
+                            result = true;
+                            break;
+                        }
+                    case OpenSelectedUrl:
+                        {
+                            WindowManager.ShowBrowser(selectionText);
                             result = true;
                             break;
                         }
