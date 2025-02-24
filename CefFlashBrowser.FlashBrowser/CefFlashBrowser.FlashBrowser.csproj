@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="CefSharp.Common" Version="84.4.10" />
-    <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.0.8" />
+    <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.0.9" />
   </ItemGroup>
 
   <ItemGroup>
