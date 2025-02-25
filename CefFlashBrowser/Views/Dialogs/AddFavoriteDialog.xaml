@@ -55,6 +55,7 @@
                     </i:Interaction.Behaviors>
                 </hc:TextBox>
                 <hc:TextBox x:Name="UrlTextBox"
+                            Margin="0,5,0,0"
                             hc:TitleElement.Title="{DynamicResource favorites_url}"
                             Text="{Binding ElementName=window, Path=ItemUrl, UpdateSourceTrigger=PropertyChanged}">
                     <i:Interaction.Behaviors>
