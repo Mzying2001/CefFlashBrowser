@@ -373,6 +373,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         {
 #pragma warning disable CS0618 // type or member is obsolete
             browser = new CefSharp.WinForms.ChromiumWebBrowser();
+            browser.CreateControl();
 #pragma warning restore CS0618 // type or member is obsolete
 
             BackCommand = new DelegateCommand(this.Back) { CanExecute = false };
@@ -624,7 +625,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             ((IWebBrowserInternal)browser).OnLoadError(args);
         }
 
-        public void SetCanExecuteJavascriptOnMainFrame(long frameId, bool canExecute)
+        void IWebBrowserInternal.SetCanExecuteJavascriptOnMainFrame(long frameId, bool canExecute)
         {
             ((IWebBrowserInternal)browser).SetCanExecuteJavascriptOnMainFrame(frameId, canExecute);
         }
