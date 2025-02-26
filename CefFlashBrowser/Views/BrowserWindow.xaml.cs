@@ -138,7 +138,7 @@ namespace CefFlashBrowser.Views
 
         public BrowserWindow()
         {
-            ToggleFullScreenCommand = new DelegateCommand(() => { FullScreen = !FullScreen; });
+            ToggleFullScreenCommand = new DelegateCommand(ToggleFullScreen);
 
             InitializeComponent();
             WindowSizeInfo.Apply(GlobalData.Settings.BrowserWindowSizeInfo, this);
@@ -148,6 +148,21 @@ namespace CefFlashBrowser.Views
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.DisplayHandler = new BrowserDisplayHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
+        }
+
+        private void ToggleFullScreen()
+        {
+            if (FullScreen)
+            {
+                if (browser.CanExecuteJavascriptInMainFrame)
+                    browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
+                FullScreen = false;
+            }
+            else
+            {
+                //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
+                FullScreen = true;
+            }
         }
 
         private static void OnFullScreenChange(DependencyObject d, DependencyPropertyChangedEventArgs e)
