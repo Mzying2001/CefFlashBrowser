@@ -41,12 +41,15 @@ namespace CefFlashBrowser.FlashBrowser
 
 
 
-        protected override void OnAddressChanged(AddressChangedEventArgs e)
+        protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
         {
-            base.OnAddressChanged(e);
+            base.OnFrameLoadStart(e);
 
-            BlockedSwfs.Clear();
-            SetValue(HasBlockedSwfsProperty, false);
+            if (e.Frame.IsMain)
+            {
+                BlockedSwfs.Clear();
+                SetValue(HasBlockedSwfsProperty, false);
+            }
         }
 
         protected override void OnConsoleMessage(ConsoleMessageEventArgs e)
