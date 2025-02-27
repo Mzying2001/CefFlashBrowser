@@ -6,6 +6,7 @@ using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -89,6 +90,17 @@ namespace CefFlashBrowser.Views
             {
                 ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() => window.FullScreen = fullscreen);
             }
+
+            public override void OnFaviconUrlChange(IWebBrowser chromiumWebBrowser, IBrowser browser, IList<string> urls)
+            {
+                ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
+                {
+                    if (urls != null && urls.Count > 0)
+                        window.FaviconUrl = urls[0];
+                    else
+                        window.SetDefaultFavicon();
+                });
+            }
         }
 
         private class BrowserMenuHandler : Utils.Handlers.ContextMenuHandler
@@ -118,11 +130,12 @@ namespace CefFlashBrowser.Views
         }
 
 
+
         private bool _doClose = false;
         private bool _isMaximizedBeforeFullScreen = false;
 
-
         public ICommand ToggleFullScreenCommand { get; }
+
 
 
         public bool FullScreen
@@ -131,16 +144,28 @@ namespace CefFlashBrowser.Views
             set { SetValue(FullScreenProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for FullScreen.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty FullScreenProperty =
-            DependencyProperty.Register("FullScreen", typeof(bool), typeof(BrowserWindow), new PropertyMetadata(false, OnFullScreenChange));
+            DependencyProperty.Register(nameof(FullScreen), typeof(bool), typeof(BrowserWindow), new PropertyMetadata(false, OnFullScreenChange));
+
+
+
+        public string FaviconUrl
+        {
+            get { return (string)GetValue(FaviconUrlProperty); }
+            private set { SetValue(FaviconUrlProperty, value); }
+        }
+
+        public static readonly DependencyProperty FaviconUrlProperty =
+            DependencyProperty.Register(nameof(FaviconUrl), typeof(string), typeof(BrowserWindow), new PropertyMetadata(null));
+
 
 
         public BrowserWindow()
         {
-            ToggleFullScreenCommand = new DelegateCommand(() => { FullScreen = !FullScreen; });
+            ToggleFullScreenCommand = new DelegateCommand(ToggleFullScreen);
 
             InitializeComponent();
+            SetDefaultFavicon();
             WindowSizeInfo.Apply(GlobalData.Settings.BrowserWindowSizeInfo, this);
 
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
@@ -148,6 +173,21 @@ namespace CefFlashBrowser.Views
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.DisplayHandler = new BrowserDisplayHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
+        }
+
+        private void ToggleFullScreen()
+        {
+            if (FullScreen)
+            {
+                if (browser.CanExecuteJavascriptInMainFrame)
+                    browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
+                FullScreen = false;
+            }
+            else
+            {
+                //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
+                FullScreen = true;
+            }
         }
 
         private static void OnFullScreenChange(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -250,6 +290,17 @@ namespace CefFlashBrowser.Views
         private void ShowBlockedSwfsButtonClicked(object sender, RoutedEventArgs e)
         {
             OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["blockedSwfs"]);
+        }
+
+        private void BrowserFrameLoadStart(object sender, FrameLoadStartEventArgs e)
+        {
+            if (e.Frame.IsMain)
+                SetDefaultFavicon();
+        }
+
+        private void SetDefaultFavicon()
+        {
+            FaviconUrl = "pack://application:,,,/Assets/Icons/page.png";
         }
     }
 }

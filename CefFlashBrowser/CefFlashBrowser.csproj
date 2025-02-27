@@ -10,7 +10,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <StartupObject>CefFlashBrowser.Program</StartupObject>
-    <ApplicationIcon>Assets\Icon\icon.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\Icons\icon.ico</ApplicationIcon>
     <Version>1.0.8</Version>
     <Authors>Mzying2001</Authors>
     <Copyright>Copyright ©  2021</Copyright>
@@ -37,7 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\Icon\icon.ico" />
+    <Content Include="Assets\Icons\icon.ico" />
+    <Resource Include="Assets\Icons\page.png" />
     <Resource Include="Assets\Svgs\add.svg" />
     <Resource Include="Assets\Svgs\back.svg" />
     <Resource Include="Assets\Svgs\down.svg" />

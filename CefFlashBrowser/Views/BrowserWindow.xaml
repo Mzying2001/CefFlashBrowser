@@ -268,7 +268,7 @@
                     </Button.Content>
                 </Button>
 
-                <Button Margin="5,0,0,0"
+                <Button Margin="10,0,0,0"
                         Command="{Binding ReloadOrStopCommand}"
                         CommandParameter="{Binding ElementName=browser}">
                     <Button.Content>
@@ -311,7 +311,7 @@
             <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal">
                 <Button Click="ShowBlockedSwfsButtonClicked"
-                        Margin="0,0,5,0"
+                        Margin="0,0,10,0"
                         ToolTip="{DynamicResource toolTip_blockedSwfs}"
                         Visibility="{Binding ElementName=browser, Path=HasBlockedSwfs, Converter={StaticResource Boolean2VisibilityConverter}}">
                     <svgc:SvgViewbox Width="14"
@@ -327,23 +327,42 @@
                 </Button>
             </StackPanel>
 
-            <TextBox Margin="5,0"
-                     Height="30"
-                     Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
-                <i:Interaction.Behaviors>
-                    <behaviors:TextBoxSelectAllOnFocus/>
-                </i:Interaction.Behaviors>
-                <TextBox.InputBindings>
-                    <KeyBinding Key="Enter"
-                                Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
-                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TextBox}, Path=Text}"/>
-                </TextBox.InputBindings>
-            </TextBox>
+            <Grid Margin="10,0"
+                  Height="30">
+                <!--address-->
+                <TextBox Padding="35,0,8,0"
+                         Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:TextBoxSelectAllOnFocus/>
+                    </i:Interaction.Behaviors>
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter"
+                                    Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TextBox}, Path=Text}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+                <!--icon-->
+                <StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            IsHitTestVisible="False">
+                    <Image Width="16"
+                           Height="16"
+                           Margin="8,0,5,0"
+                           Source="{Binding ElementName=window, Path=FaviconUrl}"/>
+                    <Separator Width="20">
+                        <Separator.LayoutTransform>
+                            <RotateTransform Angle="90"/>
+                        </Separator.LayoutTransform>
+                    </Separator>
+                </StackPanel>
+            </Grid>
         </DockPanel>
 
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
-                                    ZoomLevelIncrement="0.25"/>
+                                    ZoomLevelIncrement="0.25"
+                                    FrameLoadStart="BrowserFrameLoadStart"/>
 
         <Popup x:Name="statusPopup"
                IsOpen="{Binding ElementName=window, Path=IsActive, Mode=OneWay}"

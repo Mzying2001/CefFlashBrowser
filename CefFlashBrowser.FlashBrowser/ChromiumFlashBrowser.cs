@@ -1,27 +1,31 @@
 ﻿using CefSharp;
+using System;
 using System.Collections.ObjectModel;
 using System.Windows;
 
 namespace CefFlashBrowser.FlashBrowser
 {
-    public class ChromiumFlashBrowser : ChromiumFlashBrowserBase
+    public class ChromiumFlashBrowser : ChromiumWebBrowserEx
     {
         public static readonly DependencyProperty BlockedSwfsProperty;
 
         public static readonly DependencyProperty HasBlockedSwfsProperty;
 
+
+
         static ChromiumFlashBrowser()
         {
-            BlockedSwfsProperty = DependencyProperty.Register(nameof(BlockedSwfs), typeof(ObservableCollection<string>), typeof(ChromiumFlashBrowser), new PropertyMetadata(null));
-            HasBlockedSwfsProperty = DependencyProperty.Register(nameof(HasBlockedSwfs), typeof(bool), typeof(ChromiumFlashBrowser), new PropertyMetadata(false));
+            BlockedSwfsProperty = DependencyProperty.Register(
+                nameof(BlockedSwfs), typeof(ObservableCollection<string>), typeof(ChromiumFlashBrowser), new PropertyMetadata(null));
+
+            HasBlockedSwfsProperty = DependencyProperty.Register(
+                nameof(HasBlockedSwfs), typeof(bool), typeof(ChromiumFlashBrowser), new PropertyMetadata(false));
         }
 
         public ChromiumFlashBrowser()
         {
             SetValue(BlockedSwfsProperty, new ObservableCollection<string>());
         }
-
-
 
 
 
@@ -35,12 +39,17 @@ namespace CefFlashBrowser.FlashBrowser
             get => (bool)GetValue(HasBlockedSwfsProperty);
         }
 
-        protected override void OnAddressChanged(AddressChangedEventArgs e)
-        {
-            base.OnAddressChanged(e);
 
-            BlockedSwfs.Clear();
-            SetValue(HasBlockedSwfsProperty, false);
+
+        protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
+        {
+            base.OnFrameLoadStart(e);
+
+            if (e.Frame.IsMain)
+            {
+                BlockedSwfs.Clear();
+                SetValue(HasBlockedSwfsProperty, false);
+            }
         }
 
         protected override void OnConsoleMessage(ConsoleMessageEventArgs e)
@@ -61,6 +70,20 @@ namespace CefFlashBrowser.FlashBrowser
                     BlockedSwfs.Add(url);
                     SetValue(HasBlockedSwfsProperty, true);
                 }
+            }
+        }
+
+        protected override void OnIsBrowserInitializedChanged(EventArgs e)
+        {
+            base.OnIsBrowserInitializedChanged(e);
+
+            if (IsBrowserInitialized)
+            {
+                Cef.UIThreadTaskFactory.StartNew(() =>
+                { // enable flash contents automatically
+                    var requestContext = GetBrowser().GetHost().RequestContext;
+                    requestContext.SetPreference("profile.default_content_setting_values.plugins", 1, out _);
+                });
             }
         }
     }
