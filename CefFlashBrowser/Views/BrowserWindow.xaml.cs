@@ -6,10 +6,10 @@ using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
 using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 
@@ -134,6 +134,9 @@ namespace CefFlashBrowser.Views
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
+
+            BindingOperations.SetBinding(this, FullScreenProperty, new Binding
+            { Source = browser, Path = new PropertyPath("FullscreenMode"), Mode = BindingMode.OneWay });
         }
 
         private void ToggleFullScreen()
@@ -142,12 +145,12 @@ namespace CefFlashBrowser.Views
             {
                 if (browser.CanExecuteJavascriptInMainFrame)
                     browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
-                FullScreen = false;
+                SetCurrentValue(FullScreenProperty, false);
             }
             else
             {
                 //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
-                FullScreen = true;
+                SetCurrentValue(FullScreenProperty, true);
             }
         }
 
@@ -251,11 +254,6 @@ namespace CefFlashBrowser.Views
         private void ShowBlockedSwfsButtonClicked(object sender, RoutedEventArgs e)
         {
             OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["blockedSwfs"]);
-        }
-
-        private void BrowserFullscreenModeChanged(object sender, EventArgs e)
-        {
-            FullScreen = browser.FullscreenMode;
         }
     }
 }
