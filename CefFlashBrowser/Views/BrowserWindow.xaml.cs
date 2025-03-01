@@ -6,10 +6,10 @@ using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
 using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 
@@ -77,32 +77,6 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private class BrowserDisplayHandler : DisplayHandler
-        {
-            private readonly BrowserWindow window;
-
-            public BrowserDisplayHandler(BrowserWindow window)
-            {
-                this.window = window;
-            }
-
-            public override void OnFullscreenModeChange(IWebBrowser chromiumWebBrowser, IBrowser browser, bool fullscreen)
-            {
-                ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() => window.FullScreen = fullscreen);
-            }
-
-            public override void OnFaviconUrlChange(IWebBrowser chromiumWebBrowser, IBrowser browser, IList<string> urls)
-            {
-                ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
-                {
-                    if (urls != null && urls.Count > 0)
-                        window.FaviconUrl = urls[0];
-                    else
-                        window.SetDefaultFavicon();
-                });
-            }
-        }
-
         private class BrowserMenuHandler : Utils.Handlers.ContextMenuHandler
         {
             private readonly BrowserWindow window;
@@ -149,30 +123,20 @@ namespace CefFlashBrowser.Views
 
 
 
-        public string FaviconUrl
-        {
-            get { return (string)GetValue(FaviconUrlProperty); }
-            private set { SetValue(FaviconUrlProperty, value); }
-        }
-
-        public static readonly DependencyProperty FaviconUrlProperty =
-            DependencyProperty.Register(nameof(FaviconUrl), typeof(string), typeof(BrowserWindow), new PropertyMetadata(null));
-
-
-
         public BrowserWindow()
         {
             ToggleFullScreenCommand = new DelegateCommand(ToggleFullScreen);
 
             InitializeComponent();
-            SetDefaultFavicon();
             WindowSizeInfo.Apply(GlobalData.Settings.BrowserWindowSizeInfo, this);
 
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
-            browser.DisplayHandler = new BrowserDisplayHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
+
+            BindingOperations.SetBinding(this, FullScreenProperty, new Binding
+            { Source = browser, Path = new PropertyPath("FullscreenMode"), Mode = BindingMode.OneWay });
         }
 
         private void ToggleFullScreen()
@@ -181,12 +145,12 @@ namespace CefFlashBrowser.Views
             {
                 if (browser.CanExecuteJavascriptInMainFrame)
                     browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
-                FullScreen = false;
+                SetCurrentValue(FullScreenProperty, false);
             }
             else
             {
                 //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
-                FullScreen = true;
+                SetCurrentValue(FullScreenProperty, true);
             }
         }
 
@@ -290,17 +254,6 @@ namespace CefFlashBrowser.Views
         private void ShowBlockedSwfsButtonClicked(object sender, RoutedEventArgs e)
         {
             OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["blockedSwfs"]);
-        }
-
-        private void BrowserFrameLoadStart(object sender, FrameLoadStartEventArgs e)
-        {
-            if (e.Frame.IsMain)
-                SetDefaultFavicon();
-        }
-
-        private void SetDefaultFavicon()
-        {
-            FaviconUrl = "pack://application:,,,/Assets/Icons/page.png";
         }
     }
 }

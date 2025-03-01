@@ -80,6 +80,10 @@ namespace CefFlashBrowser
                 CefSharpSettings.Proxy = new ProxyOptions(proxySettings.IP, proxySettings.Port, proxySettings.UserName, proxySettings.Password);
             }
 
+#if !DEBUG
+            settings.LogSeverity = LogSeverity.Error;
+#endif
+
             settings.CefCommandLineArgs["autoplay-policy"] = "no-user-gesture-required";
             Cef.Initialize(settings);
         }

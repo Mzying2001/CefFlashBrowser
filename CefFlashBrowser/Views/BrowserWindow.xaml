@@ -349,7 +349,7 @@
                     <Image Width="16"
                            Height="16"
                            Margin="8,0,5,0"
-                           Source="{Binding ElementName=window, Path=FaviconUrl}"/>
+                           Source="{Binding ElementName=browser, Path=FaviconUrl, TargetNullValue=pack://application:\,\,\,/Assets/Icons/page.png}"/>
                     <Separator Width="20">
                         <Separator.LayoutTransform>
                             <RotateTransform Angle="90"/>
@@ -361,8 +361,7 @@
 
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
-                                    ZoomLevelIncrement="0.25"
-                                    FrameLoadStart="BrowserFrameLoadStart"/>
+                                    ZoomLevelIncrement="0.25"/>
 
         <Popup x:Name="statusPopup"
                IsOpen="{Binding ElementName=window, Path=IsActive, Mode=OneWay}"

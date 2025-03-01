@@ -16,11 +16,19 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         /// Flag used to determine whether the address change is notified by the base browser
         /// </summary>
         private bool onNotifyAddressChanged = false;
+        private readonly object onNotifyAddressChangedLock = new object();
 
         /// <summary>
         /// The base browser
         /// </summary>
         private readonly CefSharp.WinForms.ChromiumWebBrowser browser;
+
+
+
+        private const double ZOOMLEVELMAX = 7d;
+        private const double ZOOMLEVELMIN = -7d;
+        private const double ZOOMLEVELDEFAULT = 0d;
+        private const double ZOOMLEVELINCREMENTDEFAULT = 0.1d;
 
 
 
@@ -267,7 +275,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         public double ZoomLevel
         {
             get => (double)GetValue(ZoomLevelProperty);
-            set => SetValue(ZoomLevelProperty, Math.Min(7d, Math.Max(-7d, value)));
+            set => SetValue(ZoomLevelProperty, Math.Min(ZOOMLEVELMAX, Math.Max(ZOOMLEVELMIN, value)));
         }
 
         public double ZoomLevelIncrement
@@ -381,10 +389,10 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 nameof(Title), typeof(string), typeof(ChromiumWebBrowser), new PropertyMetadata(null));
 
             ZoomLevelProperty = DependencyProperty.Register(
-                nameof(ZoomLevel), typeof(double), typeof(ChromiumWebBrowser), new UIPropertyMetadata(0.0, OnZoomLevelPropertyChanged));
+                nameof(ZoomLevel), typeof(double), typeof(ChromiumWebBrowser), new UIPropertyMetadata(ZOOMLEVELDEFAULT, OnZoomLevelPropertyChanged));
 
             ZoomLevelIncrementProperty = DependencyProperty.Register(
-                nameof(ZoomLevelIncrement), typeof(double), typeof(ChromiumWebBrowser), new PropertyMetadata(0.1));
+                nameof(ZoomLevelIncrement), typeof(double), typeof(ChromiumWebBrowser), new PropertyMetadata(ZOOMLEVELINCREMENTDEFAULT));
 
             StatusTextProperty = DependencyProperty.Register(
                 nameof(StatusText), typeof(string), typeof(ChromiumWebBrowser), new PropertyMetadata(null));
@@ -473,7 +481,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnStatusMessage(StatusMessageEventArgs e)
         {
-            SetValue(StatusTextProperty, e.Value);
+            SetCurrentValue(StatusTextProperty, e.Value);
             StatusMessage?.Invoke(this, e);
         }
 
@@ -514,9 +522,9 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnLoadingStateChanged(LoadingStateChangedEventArgs e)
         {
-            SetValue(CanGoForwardProperty, e.CanGoForward);
-            SetValue(CanGoBackProperty, e.CanGoBack);
-            SetValue(IsLoadingProperty, e.IsLoading);
+            SetCurrentValue(CanGoForwardProperty, e.CanGoForward);
+            SetCurrentValue(CanGoBackProperty, e.CanGoBack);
+            SetCurrentValue(IsLoadingProperty, e.IsLoading);
             ((DelegateCommand)ForwardCommand).CanExecute = e.CanGoForward;
             ((DelegateCommand)BackCommand).CanExecute = e.CanGoBack;
             ((DelegateCommand)ReloadCommand).CanExecute = e.CanReload;
@@ -531,9 +539,12 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnAddressChanged(AddressChangedEventArgs e)
         {
-            onNotifyAddressChanged = true;
-            SetValue(AddressProperty, e.Address);
-            onNotifyAddressChanged = false;
+            lock (onNotifyAddressChangedLock)
+            {
+                onNotifyAddressChanged = true;
+                SetCurrentValue(AddressProperty, e.Address);
+                onNotifyAddressChanged = false;
+            }
             AddressChanged?.Invoke(this, e);
         }
 
@@ -544,7 +555,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnTitleChanged(TitleChangedEventArgs e)
         {
-            SetValue(TitleProperty, e.Title);
+            SetCurrentValue(TitleProperty, e.Title);
             TitleChanged?.Invoke(this, e);
         }
 
@@ -555,7 +566,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnIsBrowserInitializedChanged(EventArgs e)
         {
-            SetValue(IsBrowserInitializedProperty, browser.IsBrowserInitialized);
+            SetCurrentValue(IsBrowserInitializedProperty, browser.IsBrowserInitialized);
             IsBrowserInitializedChanged?.Invoke(this, e);
         }
 
@@ -563,27 +574,32 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         public void Load(string url)
         {
-            Address = url;
+            SetCurrentValue(AddressProperty, url);
         }
 
         public void ZoomOut()
         {
-            ZoomLevel -= ZoomLevelIncrement;
+            SetCurrentZoomLevel(ZoomLevel - ZoomLevelIncrement);
         }
 
         public void ZoomIn()
         {
-            ZoomLevel += ZoomLevelIncrement;
+            SetCurrentZoomLevel(ZoomLevel + ZoomLevelIncrement);
         }
 
         public void ZoomReset()
         {
-            ZoomLevel = 0.0;
+            SetCurrentZoomLevel(ZOOMLEVELDEFAULT);
         }
 
         public IBrowser GetBrowser()
         {
             return browser.GetBrowser();
+        }
+
+        private void SetCurrentZoomLevel(double zoomLevel)
+        {
+            SetCurrentValue(ZoomLevelProperty, Math.Min(ZOOMLEVELMAX, Math.Max(ZOOMLEVELMIN, zoomLevel)));
         }
 
 
