@@ -25,6 +25,13 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
+        private const double ZOOMLEVELMAX = 7d;
+        private const double ZOOMLEVELMIN = -7d;
+        private const double ZOOMLEVELDEFAULT = 0d;
+        private const double ZOOMLEVELINCREMENTDEFAULT = 0.1d;
+
+
+
         public event EventHandler<JavascriptMessageReceivedEventArgs> JavascriptMessageReceived;
         public event EventHandler<ConsoleMessageEventArgs> ConsoleMessage;
         public event EventHandler<StatusMessageEventArgs> StatusMessage;
@@ -268,7 +275,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         public double ZoomLevel
         {
             get => (double)GetValue(ZoomLevelProperty);
-            set => SetValue(ZoomLevelProperty, Math.Min(7d, Math.Max(-7d, value)));
+            set => SetValue(ZoomLevelProperty, Math.Min(ZOOMLEVELMAX, Math.Max(ZOOMLEVELMIN, value)));
         }
 
         public double ZoomLevelIncrement
@@ -382,10 +389,10 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 nameof(Title), typeof(string), typeof(ChromiumWebBrowser), new PropertyMetadata(null));
 
             ZoomLevelProperty = DependencyProperty.Register(
-                nameof(ZoomLevel), typeof(double), typeof(ChromiumWebBrowser), new UIPropertyMetadata(0.0, OnZoomLevelPropertyChanged));
+                nameof(ZoomLevel), typeof(double), typeof(ChromiumWebBrowser), new UIPropertyMetadata(ZOOMLEVELDEFAULT, OnZoomLevelPropertyChanged));
 
             ZoomLevelIncrementProperty = DependencyProperty.Register(
-                nameof(ZoomLevelIncrement), typeof(double), typeof(ChromiumWebBrowser), new PropertyMetadata(0.1));
+                nameof(ZoomLevelIncrement), typeof(double), typeof(ChromiumWebBrowser), new PropertyMetadata(ZOOMLEVELINCREMENTDEFAULT));
 
             StatusTextProperty = DependencyProperty.Register(
                 nameof(StatusText), typeof(string), typeof(ChromiumWebBrowser), new PropertyMetadata(null));
@@ -582,7 +589,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         public void ZoomReset()
         {
-            SetCurrentZoomLevel(0.0);
+            SetCurrentZoomLevel(ZOOMLEVELDEFAULT);
         }
 
         public IBrowser GetBrowser()
@@ -592,7 +599,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void SetCurrentZoomLevel(double zoomLevel)
         {
-            SetCurrentValue(ZoomLevelProperty, Math.Min(7d, Math.Max(-7d, zoomLevel)));
+            SetCurrentValue(ZoomLevelProperty, Math.Min(ZOOMLEVELMAX, Math.Max(ZOOMLEVELMIN, zoomLevel)));
         }
 
 
