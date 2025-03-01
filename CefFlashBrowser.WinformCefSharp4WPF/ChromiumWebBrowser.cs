@@ -16,6 +16,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         /// Flag used to determine whether the address change is notified by the base browser
         /// </summary>
         private bool onNotifyAddressChanged = false;
+        private readonly object onNotifyAddressChangedLock = new object();
 
         /// <summary>
         /// The base browser
@@ -531,9 +532,12 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnAddressChanged(AddressChangedEventArgs e)
         {
-            onNotifyAddressChanged = true;
-            SetCurrentValue(AddressProperty, e.Address);
-            onNotifyAddressChanged = false;
+            lock (onNotifyAddressChangedLock)
+            {
+                onNotifyAddressChanged = true;
+                SetCurrentValue(AddressProperty, e.Address);
+                onNotifyAddressChanged = false;
+            }
             AddressChanged?.Invoke(this, e);
         }
 
