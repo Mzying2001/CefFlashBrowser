@@ -473,7 +473,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnStatusMessage(StatusMessageEventArgs e)
         {
-            SetValue(StatusTextProperty, e.Value);
+            SetCurrentValue(StatusTextProperty, e.Value);
             StatusMessage?.Invoke(this, e);
         }
 
@@ -514,9 +514,9 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnLoadingStateChanged(LoadingStateChangedEventArgs e)
         {
-            SetValue(CanGoForwardProperty, e.CanGoForward);
-            SetValue(CanGoBackProperty, e.CanGoBack);
-            SetValue(IsLoadingProperty, e.IsLoading);
+            SetCurrentValue(CanGoForwardProperty, e.CanGoForward);
+            SetCurrentValue(CanGoBackProperty, e.CanGoBack);
+            SetCurrentValue(IsLoadingProperty, e.IsLoading);
             ((DelegateCommand)ForwardCommand).CanExecute = e.CanGoForward;
             ((DelegateCommand)BackCommand).CanExecute = e.CanGoBack;
             ((DelegateCommand)ReloadCommand).CanExecute = e.CanReload;
@@ -532,7 +532,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         protected virtual void OnAddressChanged(AddressChangedEventArgs e)
         {
             onNotifyAddressChanged = true;
-            SetValue(AddressProperty, e.Address);
+            SetCurrentValue(AddressProperty, e.Address);
             onNotifyAddressChanged = false;
             AddressChanged?.Invoke(this, e);
         }
@@ -544,7 +544,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnTitleChanged(TitleChangedEventArgs e)
         {
-            SetValue(TitleProperty, e.Title);
+            SetCurrentValue(TitleProperty, e.Title);
             TitleChanged?.Invoke(this, e);
         }
 
@@ -555,7 +555,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnIsBrowserInitializedChanged(EventArgs e)
         {
-            SetValue(IsBrowserInitializedProperty, browser.IsBrowserInitialized);
+            SetCurrentValue(IsBrowserInitializedProperty, browser.IsBrowserInitialized);
             IsBrowserInitializedChanged?.Invoke(this, e);
         }
 
@@ -563,27 +563,32 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         public void Load(string url)
         {
-            Address = url;
+            SetCurrentValue(AddressProperty, url);
         }
 
         public void ZoomOut()
         {
-            ZoomLevel -= ZoomLevelIncrement;
+            SetCurrentZoomLevel(ZoomLevel - ZoomLevelIncrement);
         }
 
         public void ZoomIn()
         {
-            ZoomLevel += ZoomLevelIncrement;
+            SetCurrentZoomLevel(ZoomLevel + ZoomLevelIncrement);
         }
 
         public void ZoomReset()
         {
-            ZoomLevel = 0.0;
+            SetCurrentZoomLevel(0.0);
         }
 
         public IBrowser GetBrowser()
         {
             return browser.GetBrowser();
+        }
+
+        private void SetCurrentZoomLevel(double zoomLevel)
+        {
+            SetCurrentValue(ZoomLevelProperty, Math.Min(7d, Math.Max(-7d, zoomLevel)));
         }
 
 
