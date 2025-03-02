@@ -70,8 +70,8 @@
                         </c:SettingGroup>
 
                         <!--theme-->
-                        <c:SettingGroup Header="Theme">
-                            <c:SettingItem Description="Current theme">
+                        <c:SettingGroup Header="{DynamicResource settingHeader_theme}">
+                            <c:SettingItem Description="{DynamicResource settingItem_currentTheme}">
                                 <ComboBox MinWidth="80"
                                           ItemsSource="{Binding Themes}"
                                           SelectedIndex="{Binding CurrentThemeIndex, Mode=OneWay}"

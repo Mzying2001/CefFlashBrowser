@@ -20,6 +20,7 @@
     <sys:String x:Key="tabItem_mainWindow">Finestra Principale</sys:String>
     <sys:String x:Key="tabItem_browser">Browser</sys:String>
     <sys:String x:Key="settingHeader_addressBar">Barra degli indirizzi e Ricerca</sys:String>
+    <sys:String x:Key="settingHeader_theme">Tema</sys:String>
     <sys:String x:Key="settingHeader_other">Altro</sys:String>
     <sys:String x:Key="settingHeader_browserData">Browser Cache</sys:String>
     <sys:String x:Key="settingHeader_websiteBehavior">Funzionamento siti web</sys:String>
@@ -27,6 +28,7 @@
     <sys:String x:Key="settingHeader_aboutCef">Circa CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">Usa i motori di ricerca nella barra degli indirizzi</sys:String>
     <sys:String x:Key="settingItem_searchEngine">Motore di ricerca</sys:String>
+    <sys:String x:Key="settingItem_currentTheme">Tema attuale</sys:String>
     <sys:String x:Key="settingItem_hideMainWindowOnBrowsing">Nascondi la finestra principale quando navighi</sys:String>
     <sys:String x:Key="settingItem_deleteCache">Elimina la cache</sys:String>
     <sys:String x:Key="settingItem_openNewPage">Apri nuova pagina in ...</sys:String>
@@ -62,6 +64,10 @@
     <sys:String x:Key="bing">Bing</sys:String>
     <sys:String x:Key="sogou">Sogou</sys:String>
     <sys:String x:Key="so360">360</sys:String>
+
+    <!--Tema-->
+    <sys:String x:Key="theme_light">Chiaro</sys:String>
+    <sys:String x:Key="theme_dark">Scuro</sys:String>
 
     <!--Gestione preferiti-->
     <sys:String x:Key="favorites_managerTitle">Gestione preferiti</sys:String>

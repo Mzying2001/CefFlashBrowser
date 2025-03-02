@@ -20,6 +20,7 @@
     <sys:String x:Key="tabItem_mainWindow">主視窗</sys:String>
     <sys:String x:Key="tabItem_browser">瀏覽器</sys:String>
     <sys:String x:Key="settingHeader_addressBar">網址列與搜尋</sys:String>
+    <sys:String x:Key="settingHeader_theme">主題</sys:String>
     <sys:String x:Key="settingHeader_other">其他</sys:String>
     <sys:String x:Key="settingHeader_browserData">瀏覽器快取</sys:String>
     <sys:String x:Key="settingHeader_websiteBehavior">網站行為</sys:String>
@@ -27,6 +28,7 @@
     <sys:String x:Key="settingHeader_aboutCef">關於 CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">在網址列使用搜尋引擎</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜尋引擎</sys:String>
+    <sys:String x:Key="settingItem_currentTheme">目前的主題</sys:String>
     <sys:String x:Key="settingItem_hideMainWindowOnBrowsing">瀏覽網頁時隱藏主視窗</sys:String>
     <sys:String x:Key="settingItem_deleteCache">清除所有快取</sys:String>
     <sys:String x:Key="settingItem_openNewPage">開啟新分頁方式</sys:String>
@@ -62,6 +64,10 @@
     <sys:String x:Key="bing">Bing</sys:String>
     <sys:String x:Key="sogou">搜狗</sys:String>
     <sys:String x:Key="so360">360</sys:String>
+
+    <!--主題-->
+    <sys:String x:Key="theme_light">淺色</sys:String>
+    <sys:String x:Key="theme_dark">深色</sys:String>
 
     <!--我的最愛管理員-->
     <sys:String x:Key="favorites_managerTitle">我的最愛管理員</sys:String>

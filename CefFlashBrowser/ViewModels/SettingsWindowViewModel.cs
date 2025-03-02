@@ -57,8 +57,8 @@ namespace CefFlashBrowser.ViewModels
 
         public List<ItemViewModel<Theme>> Themes { get; } = new List<ItemViewModel<Theme>>
         {
-            new ItemViewModel<Theme>(Theme.Light),
-            new ItemViewModel<Theme>(Theme.Dark)
+            new ItemViewModel<Theme>(Theme.Light, "theme_light"),
+            new ItemViewModel<Theme>(Theme.Dark, "theme_dark")
         };
 
         public int CurrentThemeIndex

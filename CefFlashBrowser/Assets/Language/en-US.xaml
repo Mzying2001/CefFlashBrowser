@@ -20,6 +20,7 @@
     <sys:String x:Key="tabItem_mainWindow">Main Window</sys:String>
     <sys:String x:Key="tabItem_browser">Browser</sys:String>
     <sys:String x:Key="settingHeader_addressBar">Address Bar and Search</sys:String>
+    <sys:String x:Key="settingHeader_theme">Theme</sys:String>
     <sys:String x:Key="settingHeader_other">Other</sys:String>
     <sys:String x:Key="settingHeader_browserData">Browser Cache</sys:String>
     <sys:String x:Key="settingHeader_websiteBehavior">Website Behavior</sys:String>
@@ -27,6 +28,7 @@
     <sys:String x:Key="settingHeader_aboutCef">About CEF</sys:String>
     <sys:String x:Key="settingItem_useSearchEngine">Use search engines in the address bar</sys:String>
     <sys:String x:Key="settingItem_searchEngine">Search Engine</sys:String>
+    <sys:String x:Key="settingItem_currentTheme">Current theme</sys:String>
     <sys:String x:Key="settingItem_hideMainWindowOnBrowsing">Hide main window when browsing web pages</sys:String>
     <sys:String x:Key="settingItem_deleteCache">Delete all caches</sys:String>
     <sys:String x:Key="settingItem_openNewPage">Open new page in ...</sys:String>
@@ -62,6 +64,10 @@
     <sys:String x:Key="bing">Bing</sys:String>
     <sys:String x:Key="sogou">Sogou</sys:String>
     <sys:String x:Key="so360">360</sys:String>
+
+    <!--Theme-->
+    <sys:String x:Key="theme_light">Light</sys:String>
+    <sys:String x:Key="theme_dark">Dark</sys:String>
 
     <!--Favorites Manager-->
     <sys:String x:Key="favorites_managerTitle">Favorites Manager</sys:String>
