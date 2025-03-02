@@ -14,19 +14,21 @@ namespace CefFlashBrowser.Utils
 
         public static void SetTheme(Theme theme)
         {
-            var dic = Application.Current.Resources.MergedDictionaries[1];
+            var skinDic = Application.Current.Resources.MergedDictionaries[1];
+            var themeDic = Application.Current.Resources.MergedDictionaries[2];
 
             switch (theme)
             {
                 case Theme.Light:
-                    dic.Source = new Uri("pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml");
+                    skinDic.Source = new Uri("pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml");
                     break;
 
                 case Theme.Dark:
-                    dic.Source = new Uri("pack://application:,,,/HandyControl;component/Themes/SkinDark.xaml");
+                    skinDic.Source = new Uri("pack://application:,,,/HandyControl;component/Themes/SkinDark.xaml");
                     break;
             }
 
+            themeDic.Source = themeDic.Source; // Refresh theme
             GlobalData.Settings.Theme = theme;
         }
     }

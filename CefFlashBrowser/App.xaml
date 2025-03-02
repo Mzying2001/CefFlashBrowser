@@ -37,7 +37,7 @@
                 <ResourceDictionary Source="Assets/Language/zh-CN.xaml"/>
 
                 <!--HandyControl-->
-                <!--The skin dictionary must be this second in MergedDictionaries so ThemeManager can find it for theme switching-->
+                <!--The skin and theme dictionary must be the second and third in MergedDictionaries so ThemeManager can find it for theme switching-->
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
 
