@@ -228,7 +228,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0"
                                                Margin="5"
-                                               Text="UserAgent"
+                                               Text="{DynamicResource setting_userAgent}"
                                                VerticalAlignment="Center"/>
                                     <TextBox Grid.Column="1"
                                              Margin="5"

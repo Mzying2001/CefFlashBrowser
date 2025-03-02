@@ -35,12 +35,13 @@
     <sys:String x:Key="settingItem_openNewPage">Open new page in ...</sys:String>
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">Disable pop ups on page refresh/close</sys:String>
     <sys:String x:Key="settingItem_enableProxy">Enable proxy</sys:String>
-    <sys:String x:Key="settingItem_enableCustomUserAgent">Custom UserAgent</sys:String>
+    <sys:String x:Key="settingItem_enableCustomUserAgent">Custom User Agent</sys:String>
     <sys:String x:Key="settingItem_enableFakeFlashVersion">Fake flash version</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp version</sys:String>
     <sys:String x:Key="setting_server">Server</sys:String>
     <sys:String x:Key="setting_username">User Name</sys:String>
     <sys:String x:Key="setting_password">Password</sys:String>
+    <sys:String x:Key="setting_userAgent">User Agent</sys:String>
     <sys:String x:Key="setting_flashVersion">Flash Version</sys:String>
     <sys:String x:Key="button_deleteCache">Delete</sys:String>
     <sys:String x:Key="button_viewDetails">Details</sys:String>
@@ -60,11 +61,11 @@
     <sys:String x:Key="newPageBehavior_newWindow">New window</sys:String>
 
     <!--Search Engine-->
-    <sys:String x:Key="baidu">Baidu</sys:String>
-    <sys:String x:Key="google">Google</sys:String>
-    <sys:String x:Key="bing">Bing</sys:String>
-    <sys:String x:Key="sogou">Sogou</sys:String>
-    <sys:String x:Key="so360">360</sys:String>
+    <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
+    <sys:String x:Key="searchEngine_google">Google</sys:String>
+    <sys:String x:Key="searchEngine_bing">Bing</sys:String>
+    <sys:String x:Key="searchEngine_sogou">Sogou</sys:String>
+    <sys:String x:Key="searchEngine_so360">360</sys:String>
 
     <!--Theme-->
     <sys:String x:Key="theme_light">Light</sys:String>

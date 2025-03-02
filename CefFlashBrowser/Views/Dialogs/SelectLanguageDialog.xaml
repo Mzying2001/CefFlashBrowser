@@ -34,9 +34,10 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <TextBlock Margin="15"
-                       Text="{DynamicResource tips_selectLanguage}"
                        FontSize="20"
-                       HorizontalAlignment="Center"/>
+                       HorizontalAlignment="Center"
+                       Text="{DynamicResource tips_selectLanguage}"
+                       Foreground="{DynamicResource PrimaryTextBrush}"/>
         </Grid>
         <Grid Grid.Row="1">
             <ListBox x:Name="langList"
