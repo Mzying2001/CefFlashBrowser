@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.FlashBrowser;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
@@ -25,6 +26,7 @@ namespace CefFlashBrowser
                 var app = new App();
                 app.InitializeComponent();
 
+                ThemeManager.SetTheme(Theme.Light);
                 InitCefFlash();
                 app.Run();
             }
