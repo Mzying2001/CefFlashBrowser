@@ -85,6 +85,12 @@
                                     </i:Interaction.Triggers>
                                 </ComboBox>
                             </c:SettingItem>
+                            
+                            <c:SettingItem Description="{DynamicResource settingItem_followSystemTheme}">
+                                <CheckBox Margin="5,0"
+                                          IsChecked="{Binding FollowSystemTheme}"
+                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                            </c:SettingItem>
                         </c:SettingGroup>
 
                         <!--other-->

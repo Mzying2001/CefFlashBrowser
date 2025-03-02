@@ -29,6 +29,7 @@
     <sys:String x:Key="settingItem_useSearchEngine">在網址列使用搜尋引擎</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜尋引擎</sys:String>
     <sys:String x:Key="settingItem_currentTheme">目前的主題</sys:String>
+    <sys:String x:Key="settingItem_followSystemTheme">跟隨系統主題</sys:String>
     <sys:String x:Key="settingItem_hideMainWindowOnBrowsing">瀏覽網頁時隱藏主視窗</sys:String>
     <sys:String x:Key="settingItem_deleteCache">清除所有快取</sys:String>
     <sys:String x:Key="settingItem_openNewPage">開啟新分頁方式</sys:String>

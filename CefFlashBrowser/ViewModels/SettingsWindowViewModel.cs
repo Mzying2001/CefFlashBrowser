@@ -176,6 +176,17 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool FollowSystemTheme
+        {
+            get => GlobalData.Settings.FollowSystemTheme;
+            set
+            {
+                GlobalData.Settings.FollowSystemTheme = value;
+                ThemeManager.ChangeTheme(value ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme);
+                RaisePropertyChanged();
+            }
+        }
+
         private void SetNavigationType(NavigationType type)
         {
             GlobalData.Settings.NavigationType = type;

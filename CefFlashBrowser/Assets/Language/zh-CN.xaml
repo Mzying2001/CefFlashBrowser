@@ -29,6 +29,7 @@
     <sys:String x:Key="settingItem_useSearchEngine">在地址栏中使用搜索引擎</sys:String>
     <sys:String x:Key="settingItem_searchEngine">搜索引擎</sys:String>
     <sys:String x:Key="settingItem_currentTheme">当前主题</sys:String>
+    <sys:String x:Key="settingItem_followSystemTheme">跟随系统主题</sys:String>
     <sys:String x:Key="settingItem_hideMainWindowOnBrowsing">浏览网页时隐藏主窗口</sys:String>
     <sys:String x:Key="settingItem_deleteCache">清除所有缓存</sys:String>
     <sys:String x:Key="settingItem_openNewPage">打开新页面方式</sys:String>
