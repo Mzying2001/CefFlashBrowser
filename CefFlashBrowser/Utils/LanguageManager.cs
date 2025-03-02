@@ -75,7 +75,7 @@ namespace CefFlashBrowser.Utils
 
         public static string GetString(string language, string key)
         {
-            if (IsSupportedLanguage(language))
+            if (key != null && IsSupportedLanguage(language))
             {
                 var dic = LanguageDictionaries[language];
                 return dic.Contains(key) ? dic[key].ToString() : string.Empty;
