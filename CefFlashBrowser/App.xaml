@@ -4,7 +4,8 @@
              xmlns:local="clr-namespace:CefFlashBrowser"
              xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
              xmlns:m="clr-namespace:CefFlashBrowser.Models"
-             xmlns:mv="clr-namespace:CefFlashBrowser.ViewModels">
+             xmlns:mv="clr-namespace:CefFlashBrowser.ViewModels"
+             xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
     <Application.Resources>
         <ResourceDictionary>
 
@@ -12,17 +13,34 @@
             <!--ViewModelLocator-->
             <mv:ViewModelLocator x:Key="Locator"/>
 
+
             <!--Application Info-->
             <m:AppInfo x:Key="AppInfo"/>
+
+
+            <!--Custom window style, WindowManager will set this for all windows-->
+            <Style x:Key="CustomWindowStyle"
+                   TargetType="{x:Type Window}">
+                <Setter Property="Background" Value="{DynamicResource RegionBrush}"/>
+            </Style>
+
+
+            <!--Change icon colors according to the theme-->
+            <Style TargetType="{x:Type svgc:SvgIcon}">
+                <Setter Property="Fill" Value="{DynamicResource PrimaryTextBrush}"/>
+            </Style>
 
 
             <ResourceDictionary.MergedDictionaries>
                 <!--Language-->
                 <!--Must be the first in MergedDictionaries so LanguageManager can find it for language switching-->
                 <ResourceDictionary Source="Assets/Language/zh-CN.xaml"/>
+
                 <!--HandyControl-->
+                <!--<ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDark.xaml"/>-->
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+
                 <!--Converters-->
                 <ResourceDictionary Source="Utils/Converters/Converters.xaml"/>
             </ResourceDictionary.MergedDictionaries>

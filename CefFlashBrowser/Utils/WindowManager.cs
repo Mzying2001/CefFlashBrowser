@@ -9,38 +9,38 @@ namespace CefFlashBrowser.Utils
 {
     public static class WindowManager
     {
-        private static readonly Dictionary<Type, Window> _savedWindows;
+        private static readonly Dictionary<Type, Window> _singletonWindows;
         private static readonly List<BrowserWindow> _browserWindows;
 
         static WindowManager()
         {
-            _savedWindows = new Dictionary<Type, Window>();
+            _singletonWindows = new Dictionary<Type, Window>();
             _browserWindows = new List<BrowserWindow>();
         }
 
-        public static TWindow ShowWindow<TWindow>(bool modal = false, bool save = false, Action<TWindow> initializer = null) where TWindow : Window, new()
+        public static TWindow ShowWindow<TWindow>(bool modal = false, bool singleton = false, Action<TWindow> initializer = null) where TWindow : Window, new()
         {
             TWindow window = null;
 
-            if (save)
+            if (singleton)
             {
-                if (_savedWindows.ContainsKey(typeof(TWindow)))
+                if (_singletonWindows.ContainsKey(typeof(TWindow)))
                 {
-                    window = (TWindow)_savedWindows[typeof(TWindow)];
+                    window = (TWindow)_singletonWindows[typeof(TWindow)];
                     window.WindowState = window.WindowState == WindowState.Minimized ? WindowState.Normal : window.WindowState;
                     window.Activate();
                     return window;
                 }
                 else
                 {
-                    window = new TWindow();
-                    window.Closing += (s, e) => _savedWindows.Remove(s.GetType());
-                    _savedWindows.Add(typeof(TWindow), window);
+                    window = NewWindow<TWindow>();
+                    window.Closing += (s, e) => _singletonWindows.Remove(s.GetType());
+                    _singletonWindows.Add(typeof(TWindow), window);
                 }
             }
             else
             {
-                window = new TWindow();
+                window = NewWindow<TWindow>();
             }
 
             if (initializer != null)
@@ -65,9 +65,15 @@ namespace CefFlashBrowser.Utils
             return window;
         }
 
+        public static TWindow NewWindow<TWindow>() where TWindow : Window, new()
+        {
+            var style = (Style)Application.Current.Resources["CustomWindowStyle"];
+            return new TWindow() { Style = style };
+        }
+
         public static void ShowMainWindow()
         {
-            ShowWindow<MainWindow>(save: true);
+            ShowWindow<MainWindow>(singleton: true);
         }
 
         public static BrowserWindow ShowBrowser(string address)
@@ -116,12 +122,12 @@ namespace CefFlashBrowser.Utils
 
         public static void ShowFavoritesManager()
         {
-            ShowWindow<FavoritesManager>(save: true);
+            ShowWindow<FavoritesManager>(singleton: true);
         }
 
         public static void ShowSettingsWindow()
         {
-            ShowWindow<SettingsWindow>(save: true);
+            ShowWindow<SettingsWindow>(singleton: true);
         }
 
         public static bool ShowSelectLanguageDialog()
