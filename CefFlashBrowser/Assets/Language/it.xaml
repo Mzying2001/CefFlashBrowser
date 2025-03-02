@@ -60,11 +60,11 @@
     <sys:String x:Key="newPageBehavior_newWindow">Nuova Finestra</sys:String>
 
     <!--Motore di ricerca-->
-    <sys:String x:Key="baidu">Baidu</sys:String>
-    <sys:String x:Key="google">Google</sys:String>
-    <sys:String x:Key="bing">Bing</sys:String>
-    <sys:String x:Key="sogou">Sogou</sys:String>
-    <sys:String x:Key="so360">360</sys:String>
+    <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
+    <sys:String x:Key="searchEngine_google">Google</sys:String>
+    <sys:String x:Key="searchEngine_bing">Bing</sys:String>
+    <sys:String x:Key="searchEngine_sogou">Sogou</sys:String>
+    <sys:String x:Key="searchEngine_so360">360</sys:String>
 
     <!--Tema-->
     <sys:String x:Key="theme_light">Chiaro</sys:String>

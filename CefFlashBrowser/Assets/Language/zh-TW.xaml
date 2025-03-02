@@ -60,11 +60,11 @@
     <sys:String x:Key="newPageBehavior_newWindow">新視窗</sys:String>
 
     <!--搜尋引擎-->
-    <sys:String x:Key="baidu">百度</sys:String>
-    <sys:String x:Key="google">Google</sys:String>
-    <sys:String x:Key="bing">Bing</sys:String>
-    <sys:String x:Key="sogou">搜狗</sys:String>
-    <sys:String x:Key="so360">360</sys:String>
+    <sys:String x:Key="searchEngine_baidu">百度</sys:String>
+    <sys:String x:Key="searchEngine_google">Google</sys:String>
+    <sys:String x:Key="searchEngine_bing">Bing</sys:String>
+    <sys:String x:Key="searchEngine_sogou">搜狗</sys:String>
+    <sys:String x:Key="searchEngine_so360">360</sys:String>
 
     <!--主題-->
     <sys:String x:Key="theme_light">淺色</sys:String>
