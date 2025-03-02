@@ -69,6 +69,30 @@
                             </c:SettingItem>
                         </c:SettingGroup>
 
+                        <!--theme-->
+                        <c:SettingGroup Header="{DynamicResource settingHeader_theme}">
+                            <c:SettingItem Description="{DynamicResource settingItem_currentTheme}">
+                                <ComboBox MinWidth="80"
+                                          ItemsSource="{Binding Themes}"
+                                          SelectedIndex="{Binding CurrentThemeIndex, Mode=OneWay}"
+                                          DisplayMemberPath="Name"
+                                          SelectedValuePath="Value">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectionChanged">
+                                            <i:InvokeCommandAction Command="{Binding SetThemeCommand}"
+                                                                   CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
+                            </c:SettingItem>
+                            
+                            <c:SettingItem Description="{DynamicResource settingItem_followSystemTheme}">
+                                <CheckBox Margin="5,0"
+                                          IsChecked="{Binding FollowSystemTheme}"
+                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                            </c:SettingItem>
+                        </c:SettingGroup>
+
                         <!--other-->
                         <c:SettingGroup Header="{DynamicResource settingHeader_other}">
                             <c:SettingItem Description="{DynamicResource settingItem_hideMainWindowOnBrowsing}">
@@ -128,7 +152,7 @@
                             </c:SettingItem>
 
                             <Border Margin="5"
-                                    Background="White"
+                                    Background="{DynamicResource SecondaryRegionBrush}"
                                     Effect="{StaticResource EffectShadow1}"
                                     Visibility="{Binding EnableProxy, Converter={StaticResource Boolean2VisibilityConverter}}">
                                 <Grid Margin="10">
@@ -194,7 +218,7 @@
                             </c:SettingItem>
 
                             <Border Margin="5"
-                                    Background="White"
+                                    Background="{DynamicResource SecondaryRegionBrush}"
                                     Effect="{StaticResource EffectShadow1}"
                                     Visibility="{Binding EnableCustomUserAgent, Converter={StaticResource Boolean2VisibilityConverter}}">
                                 <Grid Margin="10">
@@ -220,7 +244,7 @@
                             </c:SettingItem>
 
                             <Border Margin="5"
-                                    Background="White"
+                                    Background="{DynamicResource SecondaryRegionBrush}"
                                     Effect="{StaticResource EffectShadow1}"
                                     Visibility="{Binding EnableFakeFlashVersion, Converter={StaticResource Boolean2VisibilityConverter}}">
                                 <Grid Margin="10">
@@ -240,7 +264,7 @@
 
                             <TextBlock Margin="5,10"
                                        TextWrapping="Wrap"
-                                       Foreground="Gray">
+                                       Foreground="{DynamicResource SecondaryTextBrush}">
                                 <Run Text="{DynamicResource tips_needRestar}"/>
                                 <Run Text=" "/>
                                 <Hyperlink Command="{Binding AskRestartAppCommand}">

@@ -51,7 +51,7 @@ namespace CefFlashBrowser.Views
                 {
                     if (targetDisposition == WindowOpenDisposition.NewPopup)
                     {
-                        window.FullScreen = false;
+                        window.SetCurrentValue(FullScreenProperty, false);
                         WindowManager.ShowPopupWebPage(targetUrl, popupFeatures);
                     }
                     else
@@ -60,7 +60,7 @@ namespace CefFlashBrowser.Views
                         {
                             case NewPageBehavior.NewWindow:
                                 {
-                                    window.FullScreen = false;
+                                    window.SetCurrentValue(FullScreenProperty, false);
                                     WindowManager.ShowBrowser(targetUrl);
                                     break;
                                 }
@@ -95,7 +95,8 @@ namespace CefFlashBrowser.Views
                     case OpenSelectedUrl:
                     case CefMenuCommand.ViewSource:
                         {
-                            ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() => window.FullScreen = false);
+                            ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(
+                                () => window.SetCurrentValue(FullScreenProperty, false));
                             break;
                         }
                 }

@@ -12,6 +12,8 @@
 
     <local:UrlGetFileName x:Key="UrlGetFileName"/>
 
+    <local:VisiableIfStrEmpty x:Key="VisiableIfStrEmpty"/>
+
     <local:VisiableIfStrNotEmpty x:Key="VisiableIfStrNotEmpty"/>
 
     <local:TwoThird x:Key="TwoThird"/>

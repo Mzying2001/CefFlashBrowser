@@ -4,6 +4,7 @@
     {
         public bool FirstStart { get; set; }
         public string Language { get; set; }
+        public Theme Theme { get; set; }
         public SearchEngine SearchEngine { get; set; }
         public NavigationType NavigationType { get; set; }
         public NewPageBehavior NewPageBehavior { get; set; }
@@ -14,6 +15,7 @@
         public UserAgentSetting UserAgentSetting { get; set; }
         public FakeFlashVersionSetting FakeFlashVersionSetting { get; set; }
         public bool HideMainWindowOnBrowsing { get; set; }
+        public bool FollowSystemTheme { get; set; }
 
 
         public static Settings Default => new Settings();
@@ -24,6 +26,7 @@
             // default settings
             FirstStart = true;
             Language = "zh-CN";
+            Theme = Theme.Light;
             SearchEngine = SearchEngine.Bing;
             NavigationType = NavigationType.Automatic;
             NewPageBehavior = NewPageBehavior.OriginalWindow;
@@ -34,6 +37,7 @@
             UserAgentSetting = new UserAgentSetting();
             FakeFlashVersionSetting = new FakeFlashVersionSetting();
             HideMainWindowOnBrowsing = false;
+            FollowSystemTheme = true;
         }
 
         public void SetNullPropertiesToDefault()

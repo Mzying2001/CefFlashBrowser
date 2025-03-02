@@ -51,9 +51,9 @@
                         Command="{Binding AddItemCommand}">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal">
-                            <svgc:SvgViewbox Width="12"
-                                             Height="12"
-                                             Source="/Assets/Svgs/add.svg"/>
+                            <svgc:SvgIcon Width="12"
+                                          Height="12"
+                                          UriSource="/Assets/Svgs/add.svg"/>
                             <TextBlock Margin="8,0,0,0"
                                        Text="{DynamicResource favorites_add}"/>
                         </StackPanel>
@@ -144,9 +144,9 @@
                                     VerticalAlignment="Center"
                                     Command="{Binding MoveUpCommand}"
                                     CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
-                                <svgc:SvgViewbox Width="12"
-                                                 Height="12"
-                                                 Source="/Assets/Svgs/up.svg"/>
+                                <svgc:SvgIcon Width="12"
+                                              Height="12"
+                                              UriSource="/Assets/Svgs/up.svg"/>
                             </Button>
                             <Button Width="30"
                                     Height="30"
@@ -154,9 +154,9 @@
                                     VerticalAlignment="Center"
                                     Command="{Binding MoveDownCommand}"
                                     CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
-                                <svgc:SvgViewbox Width="12"
-                                                 Height="12"
-                                                 Source="/Assets/Svgs/down.svg"/>
+                                <svgc:SvgIcon Width="12"
+                                              Height="12"
+                                              UriSource="/Assets/Svgs/down.svg"/>
                             </Button>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"

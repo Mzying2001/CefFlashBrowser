@@ -19,9 +19,9 @@
         Height="Auto"
         MinWidth="400"
         MinHeight="300"
-        Closing="WindowClosing"
         Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}"
+        Closing="WindowClosing"
         KeyDown="KeyDownHandler"
         SizeChanged="SizeChangedHandler"
         SourceInitialized="SourceInitializedHandler">
@@ -68,9 +68,14 @@
                                     ToolTip="{DynamicResource toolTip_zoomOut}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
                                 <Button.Content>
-                                    <svgc:SvgViewbox Width="10"
-                                                     Height="10"
-                                                     Source="/Assets/Svgs/sub.svg"/>
+                                    <svgc:SvgIcon Width="10"
+                                                  Height="10"
+                                                  UriSource="/Assets/Svgs/sub.svg">
+                                        <svgc:SvgIcon.LayoutTransform>
+                                            <!--disappear when there is only a horzontal line???-->
+                                            <RotateTransform Angle="0.01"/>
+                                        </svgc:SvgIcon.LayoutTransform>
+                                    </svgc:SvgIcon>
                                 </Button.Content>
                             </Button>
                             <Button Width="30"
@@ -79,9 +84,9 @@
                                     ToolTip="{DynamicResource toolTip_zoomIn}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
                                 <Button.Content>
-                                    <svgc:SvgViewbox Width="10"
-                                                     Height="10"
-                                                     Source="/Assets/Svgs/add.svg"/>
+                                    <svgc:SvgIcon Width="10"
+                                                  Height="10"
+                                                  UriSource="/Assets/Svgs/add.svg"/>
                                 </Button.Content>
                             </Button>
                         </StackPanel>
@@ -253,18 +258,18 @@
                 <Button ToolTip="{DynamicResource toolTip_back}"
                         Command="{Binding ElementName=browser, Path=BackCommand}">
                     <Button.Content>
-                        <svgc:SvgViewbox Width="12"
-                                         Height="12"
-                                         Source="/Assets/Svgs/back.svg"/>
+                        <svgc:SvgIcon Width="12"
+                                      Height="12"
+                                      UriSource="/Assets/Svgs/back.svg"/>
                     </Button.Content>
                 </Button>
 
                 <Button ToolTip="{DynamicResource toolTip_forward}"
                         Command="{Binding ElementName=browser, Path=ForwardCommand}">
                     <Button.Content>
-                        <svgc:SvgViewbox Width="12"
-                                         Height="12"
-                                         Source="/Assets/Svgs/forward.svg"/>
+                        <svgc:SvgIcon Width="12"
+                                      Height="12"
+                                      UriSource="/Assets/Svgs/forward.svg"/>
                     </Button.Content>
                 </Button>
 
@@ -277,14 +282,14 @@
                             <Binding.Converter>
                                 <converter:BoolToObject>
                                     <converter:BoolToObject.TrueObject>
-                                        <svgc:SvgViewbox Width="12"
-                                                         Height="12"
-                                                         Source="/Assets/Svgs/stop.svg"/>
+                                        <svgc:SvgIcon Width="12"
+                                                      Height="12"
+                                                      UriSource="/Assets/Svgs/stop.svg"/>
                                     </converter:BoolToObject.TrueObject>
                                     <converter:BoolToObject.FalseObject>
-                                        <svgc:SvgViewbox Width="14"
-                                                         Height="14"
-                                                         Source="/Assets/Svgs/reload.svg"/>
+                                        <svgc:SvgIcon Width="14"
+                                                      Height="14"
+                                                      UriSource="/Assets/Svgs/reload.svg"/>
                                     </converter:BoolToObject.FalseObject>
                                 </converter:BoolToObject>
                             </Binding.Converter>
@@ -314,16 +319,16 @@
                         Margin="0,0,10,0"
                         ToolTip="{DynamicResource toolTip_blockedSwfs}"
                         Visibility="{Binding ElementName=browser, Path=HasBlockedSwfs, Converter={StaticResource Boolean2VisibilityConverter}}">
-                    <svgc:SvgViewbox Width="14"
-                                     Height="14"
-                                     Source="/Assets/Svgs/warning.svg"/>
+                    <svgc:SvgIcon Width="14"
+                                  Height="14"
+                                  UriSource="/Assets/Svgs/warning.svg"/>
                 </Button>
 
                 <Button Click="MenuButtonClicked"
                         ToolTip="{DynamicResource toolTip_more}">
-                    <svgc:SvgViewbox Width="10"
-                                     Height="10"
-                                     Source="/Assets/Svgs/more.svg"/>
+                    <svgc:SvgIcon Width="10"
+                                  Height="10"
+                                  UriSource="/Assets/Svgs/more.svg"/>
                 </Button>
             </StackPanel>
 
@@ -346,10 +351,18 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left"
                             IsHitTestVisible="False">
-                    <Image Width="16"
-                           Height="16"
-                           Margin="8,0,5,0"
-                           Source="{Binding ElementName=browser, Path=FaviconUrl, TargetNullValue=pack://application:\,\,\,/Assets/Icons/page.png}"/>
+                    <Grid>
+                        <Image Width="16"
+                               Height="16"
+                               Margin="8,0,5,0"
+                               Source="{Binding ElementName=browser, Path=FaviconUrl, TargetNullValue=pack://application:\,\,\,/Assets/Icons/page.png}"
+                               Visibility="{Binding ElementName=browser, Path=FaviconUrl, Converter={StaticResource VisiableIfStrNotEmpty}}"/>
+                        <svgc:SvgIcon Width="15"
+                                      Height="15"
+                                      Margin="8.5,0,5.5,0"
+                                      UriSource="/Assets/Svgs/page.svg"
+                                      Visibility="{Binding ElementName=browser, Path=FaviconUrl, Converter={StaticResource VisiableIfStrEmpty}}"/>
+                    </Grid>
                     <Separator Width="20">
                         <Separator.LayoutTransform>
                             <RotateTransform Angle="90"/>
