@@ -1,5 +1,4 @@
 ﻿using CefFlashBrowser.FlashBrowser;
-using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
@@ -26,7 +25,7 @@ namespace CefFlashBrowser
                 var app = new App();
                 app.InitializeComponent();
 
-                ThemeManager.ChangeTheme(GlobalData.Settings.Theme);
+                InitTheme();
                 InitCefFlash();
                 app.Run();
             }
@@ -37,6 +36,21 @@ namespace CefFlashBrowser
             finally
             {
                 OnTerminate();
+            }
+        }
+
+        private static void InitTheme()
+        {
+            ThemeManager.ChangeTheme(GlobalData.Settings.FollowSystemTheme ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme);
+            Microsoft.Win32.SystemEvents.UserPreferenceChanged += UserPreferenceChangedHandler;
+        }
+
+        private static void UserPreferenceChangedHandler(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs e)
+        {
+            if (e.Category == Microsoft.Win32.UserPreferenceCategory.General && GlobalData.Settings.FollowSystemTheme)
+            {
+                var theme = ThemeManager.GetSystemTheme();
+                ThemeManager.ChangeTheme(theme);
             }
         }
 

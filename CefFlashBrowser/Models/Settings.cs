@@ -15,6 +15,7 @@
         public UserAgentSetting UserAgentSetting { get; set; }
         public FakeFlashVersionSetting FakeFlashVersionSetting { get; set; }
         public bool HideMainWindowOnBrowsing { get; set; }
+        public bool FollowSystemTheme { get; set; }
 
 
         public static Settings Default => new Settings();
@@ -36,6 +37,7 @@
             UserAgentSetting = new UserAgentSetting();
             FakeFlashVersionSetting = new FakeFlashVersionSetting();
             HideMainWindowOnBrowsing = false;
+            FollowSystemTheme = true;
         }
 
         public void SetNullPropertiesToDefault()

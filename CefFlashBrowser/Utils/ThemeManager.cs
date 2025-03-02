@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
+using Microsoft.Win32;
 using SimpleMvvm.Messaging;
 using System;
 using System.Windows;
@@ -38,6 +39,28 @@ namespace CefFlashBrowser.Utils
                 Win32.DwmSetWindowAttribute(hwnd, Win32.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
             }
             catch { }
+        }
+
+        public static bool IsSystemDarkMode()
+        {
+            const string registryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+            const string registryValueName = "AppsUseLightTheme";
+
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(registryKeyPath))
+            {
+                if (key != null)
+                {
+                    var value = key.GetValue(registryValueName);
+                    if (value != null)
+                        return value.ToString() == "0";
+                }
+            }
+            return false;
+        }
+
+        public static Theme GetSystemTheme()
+        {
+            return IsSystemDarkMode() ? Theme.Dark : Theme.Light;
         }
     }
 }

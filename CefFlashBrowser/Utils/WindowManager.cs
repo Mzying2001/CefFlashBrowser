@@ -79,7 +79,8 @@ namespace CefFlashBrowser.Utils
 
             window.SourceInitialized += (sender, e) =>
             {
-                ThemeManager.ChangeTitleBarColor((Window)sender, GlobalData.Settings.Theme);
+                var theme = GlobalData.Settings.FollowSystemTheme ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme;
+                ThemeManager.ChangeTitleBarColor((Window)sender, theme);
                 Messenger.Global.Register(MessageTokens.THEME_CHANGED, ThemeChangedHandler);
             };
             window.Closed += (sender, e) =>
