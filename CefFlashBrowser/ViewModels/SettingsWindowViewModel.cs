@@ -16,6 +16,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand PopupAboutCefCommand { get; set; }
         public DelegateCommand SetNewPageBehaviorCommand { get; set; }
         public DelegateCommand AskRestartAppCommand { get; set; }
+        public DelegateCommand SetThemeCommand { get; set; }
 
         public List<ItemViewModel<NavigationType>> NavigationTypes { get; } = new List<ItemViewModel<NavigationType>>
         {
@@ -52,6 +53,17 @@ namespace CefFlashBrowser.ViewModels
         public int CurrentNewPageBehaviorIndex
         {
             get => ItemViewModel.GetIndex(NewPageBehaviors, GlobalData.Settings.NewPageBehavior);
+        }
+
+        public List<ItemViewModel<Theme>> Themes { get; } = new List<ItemViewModel<Theme>>
+        {
+            new ItemViewModel<Theme>(Theme.Light),
+            new ItemViewModel<Theme>(Theme.Dark)
+        };
+
+        public int CurrentThemeIndex
+        {
+            get => ItemViewModel.GetIndex(Themes, GlobalData.Settings.Theme);
         }
 
         public bool EnableFakeFlashVersion
@@ -229,6 +241,12 @@ namespace CefFlashBrowser.ViewModels
             });
         }
 
+        private void SetTheme(Theme theme)
+        {
+            //GlobalData.Settings.Theme = theme;
+            ThemeManager.SetTheme(theme);
+        }
+
         public SettingsWindowViewModel()
         {
             SetNavigationTypeCommand = new DelegateCommand<NavigationType>(SetNavigationType);
@@ -237,6 +255,7 @@ namespace CefFlashBrowser.ViewModels
             PopupAboutCefCommand = new DelegateCommand(PopupAboutCef);
             SetNewPageBehaviorCommand = new DelegateCommand<NewPageBehavior>(SetNewPageBehavior);
             AskRestartAppCommand = new DelegateCommand(AskRestartApp);
+            SetThemeCommand = new DelegateCommand<Theme>(SetTheme);
         }
     }
 }

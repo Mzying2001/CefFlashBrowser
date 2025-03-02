@@ -69,6 +69,24 @@
                             </c:SettingItem>
                         </c:SettingGroup>
 
+                        <!--theme-->
+                        <c:SettingGroup Header="Theme">
+                            <c:SettingItem Description="Current theme">
+                                <ComboBox MinWidth="80"
+                                          ItemsSource="{Binding Themes}"
+                                          SelectedIndex="{Binding CurrentThemeIndex, Mode=OneWay}"
+                                          DisplayMemberPath="Name"
+                                          SelectedValuePath="Value">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectionChanged">
+                                            <i:InvokeCommandAction Command="{Binding SetThemeCommand}"
+                                                                   CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
+                            </c:SettingItem>
+                        </c:SettingGroup>
+
                         <!--other-->
                         <c:SettingGroup Header="{DynamicResource settingHeader_other}">
                             <c:SettingItem Description="{DynamicResource settingItem_hideMainWindowOnBrowsing}">
