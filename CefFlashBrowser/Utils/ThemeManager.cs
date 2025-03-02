@@ -1,6 +1,9 @@
 ﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
+using SimpleMvvm.Messaging;
 using System;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace CefFlashBrowser.Utils
 {
@@ -23,6 +26,18 @@ namespace CefFlashBrowser.Utils
             }
 
             themeDic.Source = themeDic.Source; // Refresh theme
+            Messenger.Global.Send(MessageTokens.THEME_CHANGED, theme);
+        }
+
+        public static void ChangeTitleBarColor(Window window, Theme theme)
+        {
+            try
+            {
+                var hwnd = new WindowInteropHelper(window).Handle;
+                int darkMode = theme == Theme.Dark ? 1 : 0;
+                Win32.DwmSetWindowAttribute(hwnd, Win32.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
+            }
+            catch { }
         }
     }
 }

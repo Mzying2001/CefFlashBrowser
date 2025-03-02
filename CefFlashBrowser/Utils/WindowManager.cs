@@ -1,6 +1,8 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
+using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -67,8 +69,24 @@ namespace CefFlashBrowser.Utils
 
         public static TWindow NewWindow<TWindow>() where TWindow : Window, new()
         {
-            var style = (Style)Application.Current.Resources["CustomWindowStyle"];
-            return new TWindow() { Style = style };
+            var window = new TWindow()
+            { Style = (Style)Application.Current.Resources["CustomWindowStyle"] };
+
+            void ThemeChangedHandler(object theme)
+            {
+                ThemeManager.ChangeTitleBarColor(window, (Theme)theme);
+            }
+
+            window.SourceInitialized += (sender, e) =>
+            {
+                ThemeManager.ChangeTitleBarColor((Window)sender, GlobalData.Settings.Theme);
+                Messenger.Global.Register(MessageTokens.THEME_CHANGED, ThemeChangedHandler);
+            };
+            window.Closed += (sender, e) =>
+            {
+                Messenger.Global.Unregister(MessageTokens.THEME_CHANGED, ThemeChangedHandler);
+            };
+            return window;
         }
 
         public static void ShowMainWindow()
