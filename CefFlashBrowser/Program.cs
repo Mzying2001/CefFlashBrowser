@@ -26,7 +26,7 @@ namespace CefFlashBrowser
                 var app = new App();
                 app.InitializeComponent();
 
-                ThemeManager.SetTheme(GlobalData.Settings.Theme);
+                ThemeManager.ChangeTheme(GlobalData.Settings.Theme);
                 InitCefFlash();
                 app.Run();
             }

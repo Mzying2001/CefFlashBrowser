@@ -1,5 +1,4 @@
 ﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.Data;
 using System;
 using System.Windows;
 
@@ -7,12 +6,7 @@ namespace CefFlashBrowser.Utils
 {
     public static class ThemeManager
     {
-        public static Theme GetTheme()
-        {
-            return GlobalData.Settings.Theme;
-        }
-
-        public static void SetTheme(Theme theme)
+        public static void ChangeTheme(Theme theme)
         {
             var skinDic = Application.Current.Resources.MergedDictionaries[1];
             var themeDic = Application.Current.Resources.MergedDictionaries[2];
@@ -29,7 +23,6 @@ namespace CefFlashBrowser.Utils
             }
 
             themeDic.Source = themeDic.Source; // Refresh theme
-            GlobalData.Settings.Theme = theme;
         }
     }
 }

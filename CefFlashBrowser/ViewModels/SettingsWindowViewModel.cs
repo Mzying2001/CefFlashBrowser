@@ -243,8 +243,8 @@ namespace CefFlashBrowser.ViewModels
 
         private void SetTheme(Theme theme)
         {
-            //GlobalData.Settings.Theme = theme;
-            ThemeManager.SetTheme(theme);
+            ThemeManager.ChangeTheme(theme);
+            GlobalData.Settings.Theme = theme;
         }
 
         public SettingsWindowViewModel()
