@@ -35,12 +35,13 @@
     <sys:String x:Key="settingItem_openNewPage">開啟新分頁方式</sys:String>
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">阻止網頁重新整理/關閉時的確認對話框</sys:String>
     <sys:String x:Key="settingItem_enableProxy">使用代理伺服器</sys:String>
-    <sys:String x:Key="settingItem_enableCustomUserAgent">自訂使用者代理</sys:String>
+    <sys:String x:Key="settingItem_enableCustomUserAgent">自訂使用者代理（UA）</sys:String>
     <sys:String x:Key="settingItem_enableFakeFlashVersion">偽造flash版本</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
     <sys:String x:Key="setting_server">伺服器</sys:String>
     <sys:String x:Key="setting_username">使用者名稱</sys:String>
     <sys:String x:Key="setting_password">密碼</sys:String>
+    <sys:String x:Key="setting_userAgent">使用者代理</sys:String>
     <sys:String x:Key="setting_flashVersion">Flash版本</sys:String>
     <sys:String x:Key="button_deleteCache">清除</sys:String>
     <sys:String x:Key="button_viewDetails">詳細資料</sys:String>
