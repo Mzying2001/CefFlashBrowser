@@ -4,6 +4,7 @@
     {
         public bool FirstStart { get; set; }
         public string Language { get; set; }
+        public Theme Theme { get; set; }
         public SearchEngine SearchEngine { get; set; }
         public NavigationType NavigationType { get; set; }
         public NewPageBehavior NewPageBehavior { get; set; }
@@ -24,6 +25,7 @@
             // default settings
             FirstStart = true;
             Language = "zh-CN";
+            Theme = Theme.Light;
             SearchEngine = SearchEngine.Bing;
             NavigationType = NavigationType.Automatic;
             NewPageBehavior = NewPageBehavior.OriginalWindow;
