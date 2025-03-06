@@ -36,6 +36,13 @@ namespace CefFlashBrowser.Utils
 
         private static void SetCurLangResDic(ResourceDictionary dic)
         {
+            var oldDic = GetCurLangResDic();
+            foreach (var key in oldDic.Keys)
+            {
+                if (!dic.Contains(key))
+                    dic[key] = oldDic[key];
+            }
+
             Application.Current.Resources.MergedDictionaries[0] = dic;
         }
 
