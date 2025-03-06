@@ -5,6 +5,7 @@ namespace CefFlashBrowser.Utils
 {
     public static class Win32
     {
+        public const int WM_MOVE = 0x0003;
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
 
 

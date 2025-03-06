@@ -205,7 +205,7 @@ namespace CefFlashBrowser.Views
         {
             switch (msg)
             {
-                case 0x003: //WM_MOVE
+                case Win32.WM_MOVE:
                     {
                         UpdateStatusPopupPosition();
                         break;
