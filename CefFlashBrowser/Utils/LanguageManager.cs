@@ -15,6 +15,11 @@ namespace CefFlashBrowser.Utils
         static LanguageManager()
         {
             LanguageDictionaries = new Dictionary<string, ResourceDictionary>();
+        }
+
+        public static void InitLanguage()
+        {
+            LanguageDictionaries.Clear();
 
             var languages = new ResourceDictionary
             { Source = new Uri("Assets/Language/langs.xaml", UriKind.Relative) };

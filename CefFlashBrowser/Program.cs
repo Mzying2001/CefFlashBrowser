@@ -25,8 +25,11 @@ namespace CefFlashBrowser
                 var app = new App();
                 app.InitializeComponent();
 
-                InitTheme();
+                GlobalData.InitData();
+                LanguageManager.InitLanguage();
+
                 InitCefFlash();
+                InitTheme();
                 app.Run();
             }
             catch (Exception e)
@@ -68,7 +71,7 @@ namespace CefFlashBrowser
 
             var settings = new CefFlashSettings()
             {
-                Locale = LanguageManager.GetLocale(GlobalData.Settings.Language),
+                Locale = LanguageManager.GetLocale(LanguageManager.CurrentLanguage),
                 LogFile = GlobalData.CefLogPath,
                 CachePath = GlobalData.CachesPath,
                 PpapiFlashPath = GlobalData.FlashPath,
@@ -106,8 +109,8 @@ namespace CefFlashBrowser
 
         private static void OnTerminate()
         {
-            Cef.Shutdown();
             GlobalData.SaveData();
+            Cef.Shutdown();
 
             if (_restart)
             {
