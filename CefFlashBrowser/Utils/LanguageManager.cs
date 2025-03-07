@@ -1,6 +1,7 @@
 ﻿using CefFlashBrowser.Models.Data;
 using SimpleMvvm.Messaging;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -13,14 +14,22 @@ namespace CefFlashBrowser.Utils
 
         static LanguageManager()
         {
+            LanguageDictionaries = new Dictionary<string, ResourceDictionary>();
+        }
+
+        public static void InitLanguage()
+        {
+            LanguageDictionaries.Clear();
+
             var languages = new ResourceDictionary
             { Source = new Uri("Assets/Language/langs.xaml", UriKind.Relative) };
 
-            LanguageDictionaries = new Dictionary<string, ResourceDictionary>();
-            foreach (var langDic in (ResourceDictionary[])languages["SupportedLanguages"])
+            foreach (DictionaryEntry entry in languages)
             {
-                string lang = System.IO.Path.GetFileNameWithoutExtension(langDic.Source.ToString());
-                LanguageDictionaries.Add(lang, langDic);
+                if (entry.Key is string lang && entry.Value is ResourceDictionary langDic)
+                {
+                    LanguageDictionaries.Add(lang, langDic);
+                }
             }
 
             CurrentLanguage = GlobalData.Settings.Language;
@@ -36,15 +45,22 @@ namespace CefFlashBrowser.Utils
 
         private static void SetCurLangResDic(ResourceDictionary dic)
         {
+            var oldDic = GetCurLangResDic();
+            foreach (var key in oldDic.Keys)
+            {
+                if (!dic.Contains(key))
+                    dic[key] = oldDic[key];
+            }
+
             Application.Current.Resources.MergedDictionaries[0] = dic;
         }
 
 
 
 
-        public static IEnumerable<string> GetSupportedLanguage()
+        public static string[] GetSupportedLanguage()
         {
-            return from item in LanguageDictionaries orderby GetLanguageName(item.Key) select item.Key;
+            return (from item in LanguageDictionaries orderby GetLanguageName(item.Key) select item.Key).ToArray();
         }
 
         public static bool IsSupportedLanguage(string language)
@@ -56,8 +72,12 @@ namespace CefFlashBrowser.Utils
         {
             get
             {
-                string url = GetCurLangResDic().Source.ToString();
-                return System.IO.Path.GetFileNameWithoutExtension(url);
+                var curDic = GetCurLangResDic();
+                foreach (var pair in LanguageDictionaries)
+                {
+                    if (pair.Value == curDic) return pair.Key;
+                }
+                return null;
             }
             set
             {

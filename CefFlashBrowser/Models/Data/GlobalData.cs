@@ -51,8 +51,6 @@ namespace CefFlashBrowser.Models.Data
             DataPath = Path.Combine(UserDocumentPath, "CefFlashBrowser\\");
             FavoritesPath = Path.Combine(DataPath, "favorites.json");
             SettingsPath = Path.Combine(DataPath, "settings.json");
-
-            InitData();
         }
 
         private static void CreateDirIfNotExist(string path)

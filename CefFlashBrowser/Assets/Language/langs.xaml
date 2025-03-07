@@ -1,12 +1,10 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <x:Array x:Key="SupportedLanguages" Type="ResourceDictionary">
-        <!--Add language XAML file here-->
-        <ResourceDictionary Source="zh-CN.xaml"/>
-        <ResourceDictionary Source="zh-TW.xaml"/>
-        <ResourceDictionary Source="en-US.xaml"/>
-        <ResourceDictionary Source="it.xaml"/>
-    </x:Array>
+    <!--Add language XAML file here-->
+    <ResourceDictionary x:Key="zh-CN" Source="zh-CN.xaml"/>
+    <ResourceDictionary x:Key="zh-TW" Source="zh-TW.xaml"/>
+    <ResourceDictionary x:Key="en-US" Source="en-US.xaml"/>
+    <ResourceDictionary x:Key="it" Source="it.xaml"/>
 
 </ResourceDictionary>
