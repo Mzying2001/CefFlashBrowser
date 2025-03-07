@@ -1,6 +1,7 @@
 ﻿using CefFlashBrowser.Models.Data;
 using SimpleMvvm.Messaging;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -13,14 +14,17 @@ namespace CefFlashBrowser.Utils
 
         static LanguageManager()
         {
+            LanguageDictionaries = new Dictionary<string, ResourceDictionary>();
+
             var languages = new ResourceDictionary
             { Source = new Uri("Assets/Language/langs.xaml", UriKind.Relative) };
 
-            LanguageDictionaries = new Dictionary<string, ResourceDictionary>();
-            foreach (var langDic in (ResourceDictionary[])languages["SupportedLanguages"])
+            foreach (DictionaryEntry entry in languages)
             {
-                string lang = System.IO.Path.GetFileNameWithoutExtension(langDic.Source.ToString());
-                LanguageDictionaries.Add(lang, langDic);
+                if (entry.Key is string lang && entry.Value is ResourceDictionary langDic)
+                {
+                    LanguageDictionaries.Add(lang, langDic);
+                }
             }
 
             CurrentLanguage = GlobalData.Settings.Language;
@@ -63,12 +67,11 @@ namespace CefFlashBrowser.Utils
         {
             get
             {
-                string url = GetCurLangResDic().Source.ToString();
-                return System.IO.Path.GetFileNameWithoutExtension(url);
+                return GlobalData.Settings.Language;
             }
             set
             {
-                if (IsSupportedLanguage(value))
+                if (CurrentLanguage != value && IsSupportedLanguage(value))
                 {
                     SetCurLangResDic(LanguageDictionaries[value]);
                     GlobalData.Settings.Language = value;
