@@ -72,11 +72,16 @@ namespace CefFlashBrowser.Utils
         {
             get
             {
-                return GlobalData.Settings.Language;
+                var curDic = GetCurLangResDic();
+                foreach (var pair in LanguageDictionaries)
+                {
+                    if (pair.Value == curDic) return pair.Key;
+                }
+                return null;
             }
             set
             {
-                if (CurrentLanguage != value && IsSupportedLanguage(value))
+                if (IsSupportedLanguage(value))
                 {
                     SetCurLangResDic(LanguageDictionaries[value]);
                     GlobalData.Settings.Language = value;
