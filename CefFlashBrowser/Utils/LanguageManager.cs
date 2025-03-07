@@ -58,9 +58,9 @@ namespace CefFlashBrowser.Utils
 
 
 
-        public static IEnumerable<string> GetSupportedLanguage()
+        public static string[] GetSupportedLanguage()
         {
-            return from item in LanguageDictionaries orderby GetLanguageName(item.Key) select item.Key;
+            return (from item in LanguageDictionaries orderby GetLanguageName(item.Key) select item.Key).ToArray();
         }
 
         public static bool IsSupportedLanguage(string language)
