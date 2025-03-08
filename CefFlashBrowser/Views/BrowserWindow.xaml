@@ -168,6 +168,7 @@
                                MaxWidth="250"
                                TextWrapping="Wrap"
                                FontWeight="Bold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                Text="{DynamicResource menu_blockedSwfsTips}"/>
                     <ItemsControl ItemsSource="{Binding Source={x:Reference Name=browser}, Path=BlockedSwfs}">
                         <ItemsControl.ItemTemplate>
