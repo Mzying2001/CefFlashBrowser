@@ -52,7 +52,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IAudioHandler audioHandler;
-        public IAudioHandler AudioHandler
+        public virtual IAudioHandler AudioHandler
         {
             get => audioHandler;
             set
@@ -63,7 +63,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IDialogHandler dialogHandler = null;
-        public IDialogHandler DialogHandler
+        public virtual IDialogHandler DialogHandler
         {
             get => dialogHandler;
             set
@@ -74,7 +74,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IRequestHandler requestHandler = null;
-        public IRequestHandler RequestHandler
+        public virtual IRequestHandler RequestHandler
         {
             get => requestHandler;
             set
@@ -85,7 +85,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IDisplayHandler displayHandler = null;
-        public IDisplayHandler DisplayHandler
+        public virtual IDisplayHandler DisplayHandler
         {
             get => displayHandler;
             set
@@ -96,7 +96,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private ILoadHandler loadHandler = null;
-        public ILoadHandler LoadHandler
+        public virtual ILoadHandler LoadHandler
         {
             get => loadHandler;
             set
@@ -107,7 +107,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private ILifeSpanHandler lifeSpanHandler = null;
-        public ILifeSpanHandler LifeSpanHandler
+        public virtual ILifeSpanHandler LifeSpanHandler
         {
             get => lifeSpanHandler;
             set
@@ -118,7 +118,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IKeyboardHandler keyboardHandler = null;
-        public IKeyboardHandler KeyboardHandler
+        public virtual IKeyboardHandler KeyboardHandler
         {
             get => keyboardHandler;
             set
@@ -129,7 +129,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IJsDialogHandler jsDialogHandler = null;
-        public IJsDialogHandler JsDialogHandler
+        public virtual IJsDialogHandler JsDialogHandler
         {
             get => jsDialogHandler;
             set
@@ -140,7 +140,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IDragHandler dragHandler = null;
-        public IDragHandler DragHandler
+        public virtual IDragHandler DragHandler
         {
             get => dragHandler;
             set
@@ -151,7 +151,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IDownloadHandler downloadHandler = null;
-        public IDownloadHandler DownloadHandler
+        public virtual IDownloadHandler DownloadHandler
         {
             get => downloadHandler;
             set
@@ -162,7 +162,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IContextMenuHandler menuHandler = null;
-        public IContextMenuHandler MenuHandler
+        public virtual IContextMenuHandler MenuHandler
         {
             get => menuHandler;
             set
@@ -173,7 +173,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IFocusHandler focusHandler = null;
-        public IFocusHandler FocusHandler
+        public virtual IFocusHandler FocusHandler
         {
             get => focusHandler;
             set
@@ -184,7 +184,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IResourceRequestHandlerFactory resourceRequestHandlerFactory = null;
-        public IResourceRequestHandlerFactory ResourceRequestHandlerFactory
+        public virtual IResourceRequestHandlerFactory ResourceRequestHandlerFactory
         {
             get => resourceRequestHandlerFactory;
             set
@@ -195,7 +195,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IRenderProcessMessageHandler renderProcessMessageHandler = null;
-        public IRenderProcessMessageHandler RenderProcessMessageHandler
+        public virtual IRenderProcessMessageHandler RenderProcessMessageHandler
         {
             get => renderProcessMessageHandler;
             set
@@ -206,7 +206,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IFindHandler findHandler = null;
-        public IFindHandler FindHandler
+        public virtual IFindHandler FindHandler
         {
             get => findHandler;
             set
