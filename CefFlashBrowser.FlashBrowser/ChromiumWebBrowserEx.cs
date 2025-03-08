@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.WinformCefSharp4WPF;
+﻿using CefFlashBrowser.FlashBrowser.Internals;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
 using System;
@@ -10,89 +11,27 @@ namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumWebBrowserEx : ChromiumWebBrowser
     {
-        private class WpfFocusHandler : Handlers.FocusHandler
-        {
-            public override void OnGotFocus(IWebBrowser chromiumWebBrowser, IBrowser browser)
-            {
-                if (browser.IsPopup)
-                {
-                    return; //ignore if method is called by devtools
-                }
-
-                (chromiumWebBrowser as UIElement)?.Dispatcher.Invoke(delegate
-                {
-                    //DependencyObject d = (DependencyObject)chromiumWebBrowser;
-                    //while (LogicalTreeHelper.GetParent(d) is DependencyObject parent)
-                    //{
-                    //    d = parent;
-                    //}
-                    //if (!ReferenceEquals(d, chromiumWebBrowser))
-                    //{
-                    //    FocusManager.SetFocusedElement(d, (IInputElement)chromiumWebBrowser);
-                    //}
-
-                    UIElement element = (UIElement)chromiumWebBrowser;
-                    if (!element.Focus() && element.IsFocused) Keyboard.Focus(element);
-                });
-            }
-        }
-
-        private class WpfKeyboardHandler : Handlers.KeyboardHandler
-        {
-            public override bool OnPreKeyEvent(IWebBrowser chromiumWebBrowser, IBrowser browser, KeyType type, int windowsKeyCode, int nativeKeyCode, CefEventFlags modifiers, bool isSystemKey, ref bool isKeyboardShortcut)
-            {
-                if (type != KeyType.RawKeyDown)
-                    return false;
-
-                bool result = false;
-
-                (chromiumWebBrowser as UIElement)?.Dispatcher.Invoke(delegate
-                {
-                    UIElement element = (UIElement)chromiumWebBrowser;
-                    PresentationSource source = PresentationSource.FromVisual(element);
-
-                    Key key = KeyInterop.KeyFromVirtualKey(windowsKeyCode);
-                    KeyEventArgs args = new KeyEventArgs(Keyboard.PrimaryDevice, source, 0, key) { RoutedEvent = Keyboard.KeyDownEvent, };
-                    element.RaiseEvent(args);
-
-                    result = args.Handled;
-                });
-
-                return result;
-            }
-        }
-
-        class MyDisplayHandler : Handlers.DisplayHandler
-        {
-            public override void OnFullscreenModeChange(IWebBrowser chromiumWebBrowser, IBrowser browser, bool fullscreen)
-            {
-                if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
-                {
-                    browserEx.Dispatcher.Invoke(() => browserEx.OnFullscreenModeChanged(fullscreen));
-                }
-            }
-
-            public override void OnFaviconUrlChange(IWebBrowser chromiumWebBrowser, IBrowser browser, IList<string> urls)
-            {
-                if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
-                {
-                    browserEx.Dispatcher.Invoke(() => browserEx.OnFaviconUrlChanged(urls));
-                }
-            }
-        }
-
-
-
         public event EventHandler FullscreenModeChanged;
         public event EventHandler FaviconUrlChanged;
+
+
+        public static readonly DependencyProperty FullscreenModeProperty;
+        public static readonly DependencyProperty FaviconUrlProperty;
+
+        static ChromiumWebBrowserEx()
+        {
+            FullscreenModeProperty = DependencyProperty.Register(
+                nameof(FullscreenMode), typeof(bool), typeof(ChromiumWebBrowserEx), new PropertyMetadata(false));
+
+            FaviconUrlProperty = DependencyProperty.Register(
+                nameof(FaviconUrl), typeof(string), typeof(ChromiumWebBrowserEx), new PropertyMetadata(null));
+        }
+
 
         public ICommand LoadUrlCommand { get; }
         public ICommand CloseBrowserCommand { get; }
         public ICommand ShowDevToolsCommand { get; }
         public ICommand CloseDevToolsCommand { get; }
-
-        public static readonly DependencyProperty FullscreenModeProperty;
-        public static readonly DependencyProperty FaviconUrlProperty;
 
         public bool FullscreenMode
         {
@@ -105,27 +44,59 @@ namespace CefFlashBrowser.FlashBrowser
         }
 
 
-
-        static ChromiumWebBrowserEx()
-        {
-            FullscreenModeProperty = DependencyProperty.Register(
-                nameof(FullscreenMode), typeof(bool), typeof(ChromiumWebBrowserEx), new PropertyMetadata(false));
-
-            FaviconUrlProperty = DependencyProperty.Register(
-                nameof(FaviconUrl), typeof(string), typeof(ChromiumWebBrowserEx), new PropertyMetadata(null));
-        }
-
         public ChromiumWebBrowserEx()
         {
-            FocusHandler = new WpfFocusHandler();
-            KeyboardHandler = new WpfKeyboardHandler();
-            DisplayHandler = new MyDisplayHandler();
+            // Apply decorator handlers
+            FocusHandler = null;
+            KeyboardHandler = null;
+            DisplayHandler = null;
 
             LoadUrlCommand = new DelegateCommand<string>(Load);
             CloseBrowserCommand = new DelegateCommand<bool>(CloseBrowser);
             ShowDevToolsCommand = new DelegateCommand(ShowDevTools);
             CloseDevToolsCommand = new DelegateCommand(CloseDevTools);
         }
+
+
+        public override IFocusHandler FocusHandler
+        {
+            get
+            {
+                var handler = base.FocusHandler;
+                return handler is WpfFocusHandler wpfFocusHandler ? wpfFocusHandler.InnerHandler : handler;
+            }
+            set
+            {
+                base.FocusHandler = new WpfFocusHandler(value);
+            }
+        }
+
+        public override IKeyboardHandler KeyboardHandler
+        {
+            get
+            {
+                var handler = base.KeyboardHandler;
+                return handler is WpfKeyboardHandler wpfKeyboardHandler ? wpfKeyboardHandler.InnerHandler : handler;
+            }
+            set
+            {
+                base.KeyboardHandler = new WpfKeyboardHandler(value);
+            }
+        }
+
+        public override IDisplayHandler DisplayHandler
+        {
+            get
+            {
+                var handler = base.DisplayHandler;
+                return handler is MyDisplayHandler myDisplayHandler ? myDisplayHandler.InnerHandler : handler;
+            }
+            set
+            {
+                base.DisplayHandler = new MyDisplayHandler(value);
+            }
+        }
+
 
         public void CloseBrowser(bool forceClose)
         {
@@ -144,13 +115,13 @@ namespace CefFlashBrowser.FlashBrowser
 
         protected virtual void OnFullscreenModeChanged(bool fullscreen)
         {
-            SetValue(FullscreenModeProperty, fullscreen);
+            SetCurrentValue(FullscreenModeProperty, fullscreen);
             FullscreenModeChanged?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual void OnFaviconUrlChanged(IList<string> urls)
         {
-            SetValue(FaviconUrlProperty, urls != null && urls.Count > 0 ? urls[0] : null);
+            SetCurrentValue(FaviconUrlProperty, urls != null && urls.Count > 0 ? urls[0] : null);
             FaviconUrlChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -163,5 +134,71 @@ namespace CefFlashBrowser.FlashBrowser
                 OnFaviconUrlChanged(null);
             }
         }
+
+
+        #region Inner Classes
+        class MyDisplayHandler : IDisplayHandler
+        {
+            public IDisplayHandler InnerHandler { get; }
+
+            public MyDisplayHandler(IDisplayHandler innerHandler)
+            {
+                InnerHandler = innerHandler;
+            }
+
+            public void OnAddressChanged(IWebBrowser chromiumWebBrowser, AddressChangedEventArgs addressChangedArgs)
+            {
+                InnerHandler?.OnAddressChanged(chromiumWebBrowser, addressChangedArgs);
+            }
+
+            public bool OnAutoResize(IWebBrowser chromiumWebBrowser, IBrowser browser, CefSharp.Structs.Size newSize)
+            {
+                return InnerHandler?.OnAutoResize(chromiumWebBrowser, browser, newSize) ?? false;
+            }
+
+            public bool OnConsoleMessage(IWebBrowser chromiumWebBrowser, ConsoleMessageEventArgs consoleMessageArgs)
+            {
+                return InnerHandler?.OnConsoleMessage(chromiumWebBrowser, consoleMessageArgs) ?? false;
+            }
+
+            public void OnFaviconUrlChange(IWebBrowser chromiumWebBrowser, IBrowser browser, IList<string> urls)
+            {
+                if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
+                {
+                    browserEx.Dispatcher.Invoke(() => browserEx.OnFaviconUrlChanged(urls));
+                }
+                InnerHandler?.OnFaviconUrlChange(chromiumWebBrowser, browser, urls);
+            }
+
+            public void OnFullscreenModeChange(IWebBrowser chromiumWebBrowser, IBrowser browser, bool fullscreen)
+            {
+                if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
+                {
+                    browserEx.Dispatcher.Invoke(() => browserEx.OnFullscreenModeChanged(fullscreen));
+                }
+                InnerHandler?.OnFullscreenModeChange(chromiumWebBrowser, browser, fullscreen);
+            }
+
+            public void OnLoadingProgressChange(IWebBrowser chromiumWebBrowser, IBrowser browser, double progress)
+            {
+                InnerHandler?.OnLoadingProgressChange(chromiumWebBrowser, browser, progress);
+            }
+
+            public void OnStatusMessage(IWebBrowser chromiumWebBrowser, StatusMessageEventArgs statusMessageArgs)
+            {
+                InnerHandler?.OnStatusMessage(chromiumWebBrowser, statusMessageArgs);
+            }
+
+            public void OnTitleChanged(IWebBrowser chromiumWebBrowser, TitleChangedEventArgs titleChangedArgs)
+            {
+                InnerHandler?.OnTitleChanged(chromiumWebBrowser, titleChangedArgs);
+            }
+
+            public bool OnTooltipChanged(IWebBrowser chromiumWebBrowser, ref string text)
+            {
+                return InnerHandler?.OnTooltipChanged(chromiumWebBrowser, ref text) ?? false;
+            }
+        }
+        #endregion
     }
 }
