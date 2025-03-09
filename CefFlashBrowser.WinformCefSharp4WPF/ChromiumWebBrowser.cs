@@ -519,7 +519,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
-            InvokeOnUIThread(delegate { OnFrameLoadEnd(e); });
+            InvokeOnUIThread(delegate { OnFrameLoadEnd(e); }, invokeAsync: false);
         }
 
         protected virtual void OnFrameLoadEnd(FrameLoadEndEventArgs e)
@@ -529,7 +529,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnLoadError(object sender, LoadErrorEventArgs e)
         {
-            InvokeOnUIThread(delegate { OnLoadError(e); });
+            InvokeOnUIThread(delegate { OnLoadError(e); }, invokeAsync: false);
         }
 
         protected virtual void OnLoadError(LoadErrorEventArgs e)
