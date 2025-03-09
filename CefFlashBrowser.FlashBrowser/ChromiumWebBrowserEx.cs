@@ -13,6 +13,8 @@ namespace CefFlashBrowser.FlashBrowser
     {
         public event EventHandler FullscreenModeChanged;
         public event EventHandler FaviconUrlChanged;
+        public event EventHandler<JsContextEventArgs> JsContextCreated;
+        public event EventHandler<JsContextEventArgs> JsContextReleased;
 
 
         public static readonly DependencyProperty FullscreenModeProperty;
@@ -50,6 +52,7 @@ namespace CefFlashBrowser.FlashBrowser
             FocusHandler = null;
             KeyboardHandler = null;
             DisplayHandler = null;
+            RenderProcessMessageHandler = null;
 
             LoadUrlCommand = new DelegateCommand<string>(Load);
             CloseBrowserCommand = new DelegateCommand<bool>(CloseBrowser);
@@ -97,6 +100,19 @@ namespace CefFlashBrowser.FlashBrowser
             }
         }
 
+        public override IRenderProcessMessageHandler RenderProcessMessageHandler
+        {
+            get
+            {
+                var handler = base.RenderProcessMessageHandler;
+                return handler is MyRenderProcessMessageHandler myHandler ? myHandler.InnerHandler : handler;
+            }
+            set
+            {
+                base.RenderProcessMessageHandler = new MyRenderProcessMessageHandler(value);
+            }
+        }
+
 
         public void CloseBrowser(bool forceClose)
         {
@@ -123,6 +139,16 @@ namespace CefFlashBrowser.FlashBrowser
         {
             SetCurrentValue(FaviconUrlProperty, urls != null && urls.Count > 0 ? urls[0] : null);
             FaviconUrlChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnJsContextCreated(IBrowser browser, IFrame frame)
+        {
+            JsContextCreated?.Invoke(this, new JsContextEventArgs(browser, frame));
+        }
+
+        protected virtual void OnJsContextReleased(IBrowser browser, IFrame frame)
+        {
+            JsContextReleased?.Invoke(this, new JsContextEventArgs(browser, frame));
         }
 
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
@@ -197,6 +223,44 @@ namespace CefFlashBrowser.FlashBrowser
             public bool OnTooltipChanged(IWebBrowser chromiumWebBrowser, ref string text)
             {
                 return InnerHandler?.OnTooltipChanged(chromiumWebBrowser, ref text) ?? false;
+            }
+        }
+
+        class MyRenderProcessMessageHandler : IRenderProcessMessageHandler
+        {
+            public IRenderProcessMessageHandler InnerHandler { get; }
+
+            public MyRenderProcessMessageHandler(IRenderProcessMessageHandler innerHandler)
+            {
+                InnerHandler = innerHandler;
+            }
+
+            public void OnContextCreated(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
+            {
+                if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
+                {
+                    browserEx.Dispatcher.Invoke(() => browserEx.OnJsContextCreated(browser, frame));
+                }
+                InnerHandler?.OnContextCreated(chromiumWebBrowser, browser, frame);
+            }
+
+            public void OnContextReleased(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
+            {
+                if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
+                {
+                    browserEx.Dispatcher.Invoke(() => browserEx.OnJsContextReleased(browser, frame));
+                }
+                InnerHandler?.OnContextReleased(chromiumWebBrowser, browser, frame);
+            }
+
+            public void OnFocusedNodeChanged(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IDomNode node)
+            {
+                InnerHandler?.OnFocusedNodeChanged(chromiumWebBrowser, browser, frame, node);
+            }
+
+            public void OnUncaughtException(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, JavascriptException exception)
+            {
+                InnerHandler?.OnUncaughtException(chromiumWebBrowser, browser, frame, exception);
             }
         }
         #endregion
