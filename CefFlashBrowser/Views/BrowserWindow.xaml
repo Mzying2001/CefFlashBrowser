@@ -391,8 +391,11 @@
                         <converter:BoolToObject>
                             <converter:BoolToObject.TrueObject>
                                 <Label Padding="5,0"
-                                       Height="{StaticResource ContentHeight}"
-                                       Content="{DynamicResource label_loading}"/>
+                                       Height="{StaticResource ContentHeight}">
+                                    <TextBlock>
+                                        <Run Text="{DynamicResource label_loading}"/> (<Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat=p0}"/>)
+                                    </TextBlock>
+                                </Label>
                             </converter:BoolToObject.TrueObject>
                             <converter:BoolToObject.FalseObject>
                                 <Label Padding="5,0"
