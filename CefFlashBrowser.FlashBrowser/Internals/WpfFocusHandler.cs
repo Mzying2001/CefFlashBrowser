@@ -17,7 +17,7 @@ namespace CefFlashBrowser.FlashBrowser.Internals
         {
             if (!browser.IsPopup && chromiumWebBrowser is UIElement element)
             {
-                element.Dispatcher.Invoke(() =>
+                element.Dispatcher.InvokeAsync(() =>
                 {
                     if (!element.Focus() && element.IsFocused)
                     {

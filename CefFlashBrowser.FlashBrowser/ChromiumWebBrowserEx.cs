@@ -191,7 +191,7 @@ namespace CefFlashBrowser.FlashBrowser
             {
                 if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
                 {
-                    browserEx.Dispatcher.Invoke(() => browserEx.OnFaviconUrlChanged(urls));
+                    browserEx.Dispatcher.InvokeAsync(() => browserEx.OnFaviconUrlChanged(urls));
                 }
                 InnerHandler?.OnFaviconUrlChange(chromiumWebBrowser, browser, urls);
             }
@@ -200,7 +200,7 @@ namespace CefFlashBrowser.FlashBrowser
             {
                 if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
                 {
-                    browserEx.Dispatcher.Invoke(() => browserEx.OnFullscreenModeChanged(fullscreen));
+                    browserEx.Dispatcher.InvokeAsync(() => browserEx.OnFullscreenModeChanged(fullscreen));
                 }
                 InnerHandler?.OnFullscreenModeChange(chromiumWebBrowser, browser, fullscreen);
             }
@@ -239,7 +239,7 @@ namespace CefFlashBrowser.FlashBrowser
             {
                 if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
                 {
-                    browserEx.Dispatcher.Invoke(() => browserEx.OnJsContextCreated(browser, frame));
+                    browserEx.Dispatcher.InvokeAsync(() => browserEx.OnJsContextCreated(browser, frame));
                 }
                 InnerHandler?.OnContextCreated(chromiumWebBrowser, browser, frame);
             }
@@ -248,7 +248,7 @@ namespace CefFlashBrowser.FlashBrowser
             {
                 if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
                 {
-                    browserEx.Dispatcher.Invoke(() => browserEx.OnJsContextReleased(browser, frame));
+                    browserEx.Dispatcher.InvokeAsync(() => browserEx.OnJsContextReleased(browser, frame));
                 }
                 InnerHandler?.OnContextReleased(chromiumWebBrowser, browser, frame);
             }
