@@ -13,12 +13,14 @@ namespace CefFlashBrowser.FlashBrowser
     {
         public event EventHandler FullscreenModeChanged;
         public event EventHandler FaviconUrlChanged;
+        public event EventHandler LoadingProgressChanged;
         public event EventHandler<JsContextEventArgs> JsContextCreated;
         public event EventHandler<JsContextEventArgs> JsContextReleased;
 
 
         public static readonly DependencyProperty FullscreenModeProperty;
         public static readonly DependencyProperty FaviconUrlProperty;
+        public static readonly DependencyProperty LoadingProgressProperty;
 
         static ChromiumWebBrowserEx()
         {
@@ -27,6 +29,9 @@ namespace CefFlashBrowser.FlashBrowser
 
             FaviconUrlProperty = DependencyProperty.Register(
                 nameof(FaviconUrl), typeof(string), typeof(ChromiumWebBrowserEx), new PropertyMetadata(null));
+
+            LoadingProgressProperty = DependencyProperty.Register(
+                nameof(LoadingProgress), typeof(double), typeof(ChromiumWebBrowserEx), new PropertyMetadata(0.0));
         }
 
 
@@ -43,6 +48,11 @@ namespace CefFlashBrowser.FlashBrowser
         public string FaviconUrl
         {
             get { return (string)GetValue(FaviconUrlProperty); }
+        }
+
+        public double LoadingProgress
+        {
+            get { return (double)GetValue(LoadingProgressProperty); }
         }
 
 
@@ -141,6 +151,12 @@ namespace CefFlashBrowser.FlashBrowser
             FaviconUrlChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        protected virtual void OnLoadingProgressChanged(double progress)
+        {
+            SetCurrentValue(LoadingProgressProperty, progress);
+            LoadingProgressChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         protected virtual void OnJsContextCreated(IBrowser browser, IFrame frame)
         {
             JsContextCreated?.Invoke(this, new JsContextEventArgs(browser, frame));
@@ -207,6 +223,10 @@ namespace CefFlashBrowser.FlashBrowser
 
             public void OnLoadingProgressChange(IWebBrowser chromiumWebBrowser, IBrowser browser, double progress)
             {
+                if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
+                {
+                    browserEx.Dispatcher.InvokeAsync(() => browserEx.OnLoadingProgressChanged(progress));
+                }
                 InnerHandler?.OnLoadingProgressChange(chromiumWebBrowser, browser, progress);
             }
 
