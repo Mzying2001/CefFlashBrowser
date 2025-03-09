@@ -20,11 +20,7 @@
         MinWidth="400"
         MinHeight="300"
         Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
-        DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}"
-        Closing="WindowClosing"
-        KeyDown="KeyDownHandler"
-        SizeChanged="SizeChangedHandler"
-        SourceInitialized="SourceInitializedHandler">
+        DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
         <!--ConetxtMenu-->
