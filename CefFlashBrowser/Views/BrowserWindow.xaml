@@ -20,11 +20,7 @@
         MinWidth="400"
         MinHeight="300"
         Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
-        DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}"
-        Closing="WindowClosing"
-        KeyDown="KeyDownHandler"
-        SizeChanged="SizeChangedHandler"
-        SourceInitialized="SourceInitializedHandler">
+        DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
         <!--ConetxtMenu-->
@@ -168,6 +164,7 @@
                                MaxWidth="250"
                                TextWrapping="Wrap"
                                FontWeight="Bold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                Text="{DynamicResource menu_blockedSwfsTips}"/>
                     <ItemsControl ItemsSource="{Binding Source={x:Reference Name=browser}, Path=BlockedSwfs}">
                         <ItemsControl.ItemTemplate>
@@ -394,8 +391,11 @@
                         <converter:BoolToObject>
                             <converter:BoolToObject.TrueObject>
                                 <Label Padding="5,0"
-                                       Height="{StaticResource ContentHeight}"
-                                       Content="{DynamicResource label_loading}"/>
+                                       Height="{StaticResource ContentHeight}">
+                                    <TextBlock>
+                                        <Run Text="{DynamicResource label_loading}"/> (<Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat=p0}"/>)
+                                    </TextBlock>
+                                </Label>
                             </converter:BoolToObject.TrueObject>
                             <converter:BoolToObject.FalseObject>
                                 <Label Padding="5,0"

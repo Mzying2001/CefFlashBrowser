@@ -8,10 +8,7 @@ namespace CefFlashBrowser.FlashBrowser
     public class ChromiumFlashBrowser : ChromiumWebBrowserEx
     {
         public static readonly DependencyProperty BlockedSwfsProperty;
-
         public static readonly DependencyProperty HasBlockedSwfsProperty;
-
-
 
         static ChromiumFlashBrowser()
         {
@@ -28,7 +25,6 @@ namespace CefFlashBrowser.FlashBrowser
         }
 
 
-
         public ObservableCollection<string> BlockedSwfs
         {
             get => (ObservableCollection<string>)GetValue(BlockedSwfsProperty);
@@ -40,7 +36,6 @@ namespace CefFlashBrowser.FlashBrowser
         }
 
 
-
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
         {
             base.OnFrameLoadStart(e);
@@ -48,7 +43,7 @@ namespace CefFlashBrowser.FlashBrowser
             if (e.Frame.IsMain)
             {
                 BlockedSwfs.Clear();
-                SetValue(HasBlockedSwfsProperty, false);
+                SetCurrentValue(HasBlockedSwfsProperty, false);
             }
         }
 
@@ -68,7 +63,7 @@ namespace CefFlashBrowser.FlashBrowser
                 if (!string.IsNullOrWhiteSpace(url) && !BlockedSwfs.Contains(url))
                 {
                     BlockedSwfs.Add(url);
-                    SetValue(HasBlockedSwfsProperty, true);
+                    SetCurrentValue(HasBlockedSwfsProperty, true);
                 }
             }
         }

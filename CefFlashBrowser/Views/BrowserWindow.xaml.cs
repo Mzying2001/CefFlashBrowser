@@ -6,6 +6,7 @@ using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -179,8 +180,10 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void KeyDownHandler(object sender, KeyEventArgs e)
+        protected override void OnKeyDown(KeyEventArgs e)
         {
+            base.OnKeyDown(e);
+
             if (e.Key == Key.Escape && browser.IsLoading)
             {
                 // Why not use KeyBinding: The Esc key serves other purposes in many situations, 
@@ -190,15 +193,11 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void SourceInitializedHandler(object sender, EventArgs e)
+        protected override void OnSourceInitialized(EventArgs e)
         {
+            base.OnSourceInitialized(e);
             var hwnd = new WindowInteropHelper(this).Handle;
             HwndSource.FromHwnd(hwnd).AddHook(new HwndSourceHook(WndProc));
-        }
-
-        private void SizeChangedHandler(object sender, SizeChangedEventArgs e)
-        {
-            UpdateStatusPopupPosition();
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -214,14 +213,23 @@ namespace CefFlashBrowser.Views
             return IntPtr.Zero;
         }
 
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            base.OnRenderSizeChanged(sizeInfo);
+            UpdateStatusPopupPosition();
+        }
+
         private void UpdateStatusPopupPosition()
         {
             var pos = PointToScreen(new Point(0, mainGrid.ActualHeight - statusPopupContent.Height));
             statusPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
         }
 
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
+            base.OnClosing(e);
+            if (e.Cancel) return;
+
             if (browser.IsDisposed || _doClose)
             {
                 if (!FullScreen)

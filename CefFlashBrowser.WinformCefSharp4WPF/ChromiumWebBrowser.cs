@@ -52,7 +52,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IAudioHandler audioHandler;
-        public IAudioHandler AudioHandler
+        public virtual IAudioHandler AudioHandler
         {
             get => audioHandler;
             set
@@ -63,7 +63,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IDialogHandler dialogHandler = null;
-        public IDialogHandler DialogHandler
+        public virtual IDialogHandler DialogHandler
         {
             get => dialogHandler;
             set
@@ -74,7 +74,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IRequestHandler requestHandler = null;
-        public IRequestHandler RequestHandler
+        public virtual IRequestHandler RequestHandler
         {
             get => requestHandler;
             set
@@ -85,7 +85,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IDisplayHandler displayHandler = null;
-        public IDisplayHandler DisplayHandler
+        public virtual IDisplayHandler DisplayHandler
         {
             get => displayHandler;
             set
@@ -96,7 +96,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private ILoadHandler loadHandler = null;
-        public ILoadHandler LoadHandler
+        public virtual ILoadHandler LoadHandler
         {
             get => loadHandler;
             set
@@ -107,7 +107,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private ILifeSpanHandler lifeSpanHandler = null;
-        public ILifeSpanHandler LifeSpanHandler
+        public virtual ILifeSpanHandler LifeSpanHandler
         {
             get => lifeSpanHandler;
             set
@@ -118,7 +118,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IKeyboardHandler keyboardHandler = null;
-        public IKeyboardHandler KeyboardHandler
+        public virtual IKeyboardHandler KeyboardHandler
         {
             get => keyboardHandler;
             set
@@ -129,7 +129,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IJsDialogHandler jsDialogHandler = null;
-        public IJsDialogHandler JsDialogHandler
+        public virtual IJsDialogHandler JsDialogHandler
         {
             get => jsDialogHandler;
             set
@@ -140,7 +140,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IDragHandler dragHandler = null;
-        public IDragHandler DragHandler
+        public virtual IDragHandler DragHandler
         {
             get => dragHandler;
             set
@@ -151,7 +151,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IDownloadHandler downloadHandler = null;
-        public IDownloadHandler DownloadHandler
+        public virtual IDownloadHandler DownloadHandler
         {
             get => downloadHandler;
             set
@@ -162,7 +162,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IContextMenuHandler menuHandler = null;
-        public IContextMenuHandler MenuHandler
+        public virtual IContextMenuHandler MenuHandler
         {
             get => menuHandler;
             set
@@ -173,7 +173,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IFocusHandler focusHandler = null;
-        public IFocusHandler FocusHandler
+        public virtual IFocusHandler FocusHandler
         {
             get => focusHandler;
             set
@@ -184,7 +184,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IResourceRequestHandlerFactory resourceRequestHandlerFactory = null;
-        public IResourceRequestHandlerFactory ResourceRequestHandlerFactory
+        public virtual IResourceRequestHandlerFactory ResourceRequestHandlerFactory
         {
             get => resourceRequestHandlerFactory;
             set
@@ -195,7 +195,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IRenderProcessMessageHandler renderProcessMessageHandler = null;
-        public IRenderProcessMessageHandler RenderProcessMessageHandler
+        public virtual IRenderProcessMessageHandler RenderProcessMessageHandler
         {
             get => renderProcessMessageHandler;
             set
@@ -206,7 +206,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         }
 
         private IFindHandler findHandler = null;
-        public IFindHandler FindHandler
+        public virtual IFindHandler FindHandler
         {
             get => findHandler;
             set
@@ -454,9 +454,31 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
+        private void InvokeOnUIThread(Action action, bool invokeAsync = true)
+        {
+            if (action == null)
+                return;
+
+            if (invokeAsync)
+            {
+                Dispatcher.InvokeAsync(action);
+            }
+            else
+            {
+                if (Dispatcher.CheckAccess())
+                {
+                    action();
+                }
+                else
+                {
+                    Dispatcher.Invoke(action);
+                }
+            }
+        }
+
         private void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnJavascriptMessageReceived(e); });
+            InvokeOnUIThread(delegate { OnJavascriptMessageReceived(e); });
         }
 
         protected virtual void OnJavascriptMessageReceived(JavascriptMessageReceivedEventArgs e)
@@ -466,7 +488,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnConsoleMessage(e); });
+            InvokeOnUIThread(delegate { OnConsoleMessage(e); });
         }
 
         protected virtual void OnConsoleMessage(ConsoleMessageEventArgs e)
@@ -476,7 +498,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnStatusMessage(object sender, StatusMessageEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnStatusMessage(e); });
+            InvokeOnUIThread(delegate { OnStatusMessage(e); });
         }
 
         protected virtual void OnStatusMessage(StatusMessageEventArgs e)
@@ -487,7 +509,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnFrameLoadStart(object sender, FrameLoadStartEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnFrameLoadStart(e); });
+            InvokeOnUIThread(delegate { OnFrameLoadStart(e); }, invokeAsync: false);
         }
 
         protected virtual void OnFrameLoadStart(FrameLoadStartEventArgs e)
@@ -497,7 +519,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnFrameLoadEnd(e); });
+            InvokeOnUIThread(delegate { OnFrameLoadEnd(e); }, invokeAsync: false);
         }
 
         protected virtual void OnFrameLoadEnd(FrameLoadEndEventArgs e)
@@ -507,7 +529,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnLoadError(object sender, LoadErrorEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnLoadError(e); });
+            InvokeOnUIThread(delegate { OnLoadError(e); }, invokeAsync: false);
         }
 
         protected virtual void OnLoadError(LoadErrorEventArgs e)
@@ -517,7 +539,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnLoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnLoadingStateChanged(e); });
+            InvokeOnUIThread(delegate { OnLoadingStateChanged(e); });
         }
 
         protected virtual void OnLoadingStateChanged(LoadingStateChangedEventArgs e)
@@ -534,7 +556,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnAddressChanged(object sender, AddressChangedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnAddressChanged(e); });
+            InvokeOnUIThread(delegate { OnAddressChanged(e); });
         }
 
         protected virtual void OnAddressChanged(AddressChangedEventArgs e)
@@ -550,7 +572,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnTitleChanged(object sender, TitleChangedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnTitleChanged(e); });
+            InvokeOnUIThread(delegate { OnTitleChanged(e); });
         }
 
         protected virtual void OnTitleChanged(TitleChangedEventArgs e)
@@ -561,7 +583,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnIsBrowserInitializedChanged(object sender, EventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnIsBrowserInitializedChanged(e); });
+            InvokeOnUIThread(delegate { OnIsBrowserInitializedChanged(e); });
         }
 
         protected virtual void OnIsBrowserInitializedChanged(EventArgs e)
