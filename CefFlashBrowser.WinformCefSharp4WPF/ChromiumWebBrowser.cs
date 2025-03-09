@@ -454,9 +454,31 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
+        private void InvokeOnUIThread(Action action, bool invokeAsync = true)
+        {
+            if (action == null)
+                return;
+
+            if (invokeAsync)
+            {
+                Dispatcher.InvokeAsync(action);
+            }
+            else
+            {
+                if (Dispatcher.CheckAccess())
+                {
+                    action();
+                }
+                else
+                {
+                    Dispatcher.Invoke(action);
+                }
+            }
+        }
+
         private void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnJavascriptMessageReceived(e); });
+            InvokeOnUIThread(delegate { OnJavascriptMessageReceived(e); });
         }
 
         protected virtual void OnJavascriptMessageReceived(JavascriptMessageReceivedEventArgs e)
@@ -466,7 +488,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnConsoleMessage(object sender, ConsoleMessageEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnConsoleMessage(e); });
+            InvokeOnUIThread(delegate { OnConsoleMessage(e); });
         }
 
         protected virtual void OnConsoleMessage(ConsoleMessageEventArgs e)
@@ -476,7 +498,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnStatusMessage(object sender, StatusMessageEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnStatusMessage(e); });
+            InvokeOnUIThread(delegate { OnStatusMessage(e); });
         }
 
         protected virtual void OnStatusMessage(StatusMessageEventArgs e)
@@ -487,7 +509,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnFrameLoadStart(object sender, FrameLoadStartEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnFrameLoadStart(e); });
+            InvokeOnUIThread(delegate { OnFrameLoadStart(e); });
         }
 
         protected virtual void OnFrameLoadStart(FrameLoadStartEventArgs e)
@@ -497,7 +519,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnFrameLoadEnd(e); });
+            InvokeOnUIThread(delegate { OnFrameLoadEnd(e); });
         }
 
         protected virtual void OnFrameLoadEnd(FrameLoadEndEventArgs e)
@@ -507,7 +529,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnLoadError(object sender, LoadErrorEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnLoadError(e); });
+            InvokeOnUIThread(delegate { OnLoadError(e); });
         }
 
         protected virtual void OnLoadError(LoadErrorEventArgs e)
@@ -517,7 +539,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnLoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnLoadingStateChanged(e); });
+            InvokeOnUIThread(delegate { OnLoadingStateChanged(e); });
         }
 
         protected virtual void OnLoadingStateChanged(LoadingStateChangedEventArgs e)
@@ -534,7 +556,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnAddressChanged(object sender, AddressChangedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnAddressChanged(e); });
+            InvokeOnUIThread(delegate { OnAddressChanged(e); });
         }
 
         protected virtual void OnAddressChanged(AddressChangedEventArgs e)
@@ -550,7 +572,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnTitleChanged(object sender, TitleChangedEventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnTitleChanged(e); });
+            InvokeOnUIThread(delegate { OnTitleChanged(e); });
         }
 
         protected virtual void OnTitleChanged(TitleChangedEventArgs e)
@@ -561,7 +583,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnIsBrowserInitializedChanged(object sender, EventArgs e)
         {
-            Dispatcher.Invoke(delegate { OnIsBrowserInitializedChanged(e); });
+            InvokeOnUIThread(delegate { OnIsBrowserInitializedChanged(e); });
         }
 
         protected virtual void OnIsBrowserInitializedChanged(EventArgs e)
