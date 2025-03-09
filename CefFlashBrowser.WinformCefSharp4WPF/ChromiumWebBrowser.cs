@@ -509,7 +509,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnFrameLoadStart(object sender, FrameLoadStartEventArgs e)
         {
-            InvokeOnUIThread(delegate { OnFrameLoadStart(e); });
+            InvokeOnUIThread(delegate { OnFrameLoadStart(e); }, invokeAsync: false);
         }
 
         protected virtual void OnFrameLoadStart(FrameLoadStartEventArgs e)
