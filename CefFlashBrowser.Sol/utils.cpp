@@ -1,0 +1,59 @@
+#include "utils.h"
+#include <fstream>
+#include <msclr/marshal.h>
+#include <msclr/marshal_cppstd.h>
+
+using namespace System;
+using namespace System::Text;
+
+std::vector<uint8_t> utils::ReadFile(const std::string& path)
+{
+    std::vector<uint8_t> result;
+
+    std::ifstream ifs(path, std::ios::binary | std::ios::ate);
+    if (!ifs.is_open()) throw std::runtime_error("Failed to open file");
+
+    std::streamsize size = ifs.tellg();
+    if (size < 0) throw std::runtime_error("Failed to get file size");
+    if (size == 0) return result;
+
+    ifs.seekg(0, std::ios::beg);
+    result.resize(size);
+
+    if (!ifs.read(reinterpret_cast<char*>(result.data()), size)) {
+        throw std::runtime_error("Failed to read file");
+    }
+    return result;
+}
+
+System::String^ utils::ToSystemString(const std::string& str, bool utf8)
+{
+    if (utf8) {
+        return gcnew String(str.c_str(), 0, (int)str.size(), Encoding::UTF8);
+    }
+    else {
+        return msclr::interop::marshal_as<String^>(str);
+    }
+}
+
+std::string utils::ToStdString(System::String^ str, bool utf8)
+{
+    if (utf8) {
+        array<Byte>^ bytes = Encoding::UTF8->GetBytes(str);
+        pin_ptr<Byte> pinned = &bytes[0];
+        return std::string(reinterpret_cast<const char*>(pinned), bytes->Length);
+    }
+    else {
+        return msclr::interop::marshal_as<std::string>(str);
+    }
+}
+
+array<System::Byte>^ utils::ToByteArray(const std::vector<uint8_t>& vec)
+{
+    int i = 0;
+    auto arr = gcnew array<Byte>((int)vec.size());
+    for (uint8_t b : vec) {
+        arr[i++] = b;
+    }
+    return arr;
+}
