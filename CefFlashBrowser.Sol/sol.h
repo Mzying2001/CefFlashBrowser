@@ -56,6 +56,9 @@ namespace sol
         SolValue(const SolValue& v) : type(v.type), value(v.value) {}
 
         template <typename T>
+        SolValue(SolType t, const T& v) : type(t), value(v) {}
+
+        template <typename T>
         bool is() const
         {
             switch (type)
@@ -112,6 +115,32 @@ namespace sol
             }
         }
     };
+
+
+    struct SolFile
+    {
+        std::string path;
+        std::string solname;
+        std::string errmsg;
+        SolObject data;
+
+        bool valid() const { return errmsg.empty(); }
+    };
+
+
+    bool IsKnownType(SolType type);
+
+    bool ReadSolFile(SolFile& file);
+
+    SolInteger ReadSolInteger(uint8_t* data, int size, int& index, bool unsign = false);
+
+    SolDouble ReadSolDouble(uint8_t* data, int size, int& index);
+
+    SolString ReadSolString(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, bool add2pool = true);
+
+    SolXml ReadSolXml(uint8_t* data, int size, int& index, std::vector<std::string>& strpool);
+
+    SolBinary ReadSolBinary(uint8_t* data, int size, int& index);
 }
 
 #endif // !__SOL_H__
