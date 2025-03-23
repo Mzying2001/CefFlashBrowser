@@ -105,6 +105,12 @@ namespace sol
     };
 
 
+    struct SolRefTable
+    {
+        std::vector<std::string> strpool;
+    };
+
+
     bool IsKnownType(SolType type);
 
     bool ReadSolFile(SolFile& file);
@@ -113,17 +119,17 @@ namespace sol
 
     SolDouble ReadSolDouble(uint8_t* data, int size, int& index);
 
-    SolString ReadSolString(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, bool add2pool = true);
+    SolString ReadSolString(uint8_t* data, int size, int& index, SolRefTable& reftable, bool add2pool = true);
 
-    SolValue ReadSolXml(uint8_t* data, int size, int& index, std::vector<std::string>& strpool);
+    SolValue ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
     SolBinary ReadSolBinary(uint8_t* data, int size, int& index);
 
-    SolArray ReadSolArray(uint8_t* data, int size, int& index, std::vector<std::string>& strpool);
+    SolArray ReadSolArray(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
-    SolObject ReadSolObject(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, bool istop = false);
+    SolObject ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable, bool istop = false);
 
-    SolValue ReadSolValue(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, SolType type, bool istop = false);
+    SolValue ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop = false);
 }
 
 #endif // !__SOL_H__

@@ -95,17 +95,17 @@ bool sol::ReadSolFile(SolFile& file)
         index += 4;
 
         std::string key;
-        std::vector<std::string> strpool;
+        SolRefTable reftable;
 
         while (index < size) {
-            key = ReadSolString(data, size, index, strpool);
+            key = ReadSolString(data, size, index, reftable);
 
             if (index >= size) {
                 throw std::runtime_error(ERR_INVALID_FILE);
             }
 
             SolType type = static_cast<SolType>(data[index++]);
-            file.data[key] = ReadSolValue(data, size, index, strpool, type, true);
+            file.data[key] = ReadSolValue(data, size, index, reftable, type, true);
         }
 
         return true;
@@ -157,12 +157,12 @@ sol::SolDouble sol::ReadSolDouble(uint8_t* data, int size, int& index)
     return *reinterpret_cast<double*>(&tmp);
 }
 
-sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, bool add2pool)
+sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, SolRefTable& reftable, bool add2pool)
 {
     int len = ReadSolInteger(data, size, index, true);
 
     if (!(len & 1)) {
-        return strpool.at(len >> 1);
+        return reftable.strpool.at(len >> 1);
     }
 
     len >>= 1;
@@ -174,16 +174,16 @@ sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, std::vect
     std::string result(data + index, data + index + len);
 
     if (len != 0 && add2pool) {
-        strpool.push_back(result);
+        reftable.strpool.push_back(result);
     }
 
     index += len;
     return result;
 }
 
-sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, std::vector<std::string>& strpool)
+sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable)
 {
-    return SolValue(SolType::Xml, ReadSolString(data, size, index, strpool));
+    return SolValue(SolType::Xml, ReadSolString(data, size, index, reftable, false));
 }
 
 sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index)
@@ -199,7 +199,7 @@ sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index)
     return result;
 }
 
-sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, std::vector<std::string>& strpool)
+sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, SolRefTable& reftable)
 {
     int len = ReadSolInteger(data, size, index, true) >> 1;
 
@@ -215,13 +215,13 @@ sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, std::vector
             throw std::runtime_error(ERR_INVALID_FILE);
         }
         SolType type = static_cast<SolType>(data[index++]);
-        result.push_back(ReadSolValue(data, size, index, strpool, type));
+        result.push_back(ReadSolValue(data, size, index, reftable, type));
     }
 
     return result;
 }
 
-sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, bool istop)
+sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable, bool istop)
 {
     if (istop) {
         if (index >= size) {
@@ -245,20 +245,20 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, std::vect
             break;
         }
 
-        key = ReadSolString(data, size, index, strpool);
+        key = ReadSolString(data, size, index, reftable);
 
         if (index >= size) {
             throw std::runtime_error(ERR_INVALID_OBJECT);
         }
 
         SolType type = static_cast<SolType>(data[index++]);
-        result[key] = ReadSolValue(data, size, index, strpool, type);
+        result[key] = ReadSolValue(data, size, index, reftable, type);
     }
 
     return result;
 }
 
-sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, SolType type, bool istop)
+sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop)
 {
     SolValue result;
 
@@ -285,19 +285,19 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, std::vector
         break;
 
     case sol::SolType::String:
-        result = ReadSolString(data, size, index, strpool);
+        result = ReadSolString(data, size, index, reftable);
         break;
 
     case sol::SolType::Array:
-        result = ReadSolArray(data, size, index, strpool);
+        result = ReadSolArray(data, size, index, reftable);
         break;
 
     case sol::SolType::Object:
-        result = ReadSolObject(data, size, index, strpool, istop);
+        result = ReadSolObject(data, size, index, reftable, istop);
         break;
 
     case sol::SolType::Xml:
-        result = ReadSolXml(data, size, index, strpool);
+        result = ReadSolXml(data, size, index, reftable);
         break;
 
     case sol::SolType::Binary:
