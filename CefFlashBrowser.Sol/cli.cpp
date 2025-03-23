@@ -82,6 +82,9 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
         return res;
     }
 
+    case SolType::Binary:
+        return utils::ToByteArray(_pval->get<SolBinary>());
+
     case SolType::Null:
     default:
         return nullptr;
