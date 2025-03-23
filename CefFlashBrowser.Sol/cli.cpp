@@ -61,6 +61,11 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
     }
 }
 
+bool CefFlashBrowser::Sol::SolValueWrapper::IsUndefined::get()
+{
+    return _pval->type == SolType::Undefined;
+}
+
 bool CefFlashBrowser::Sol::SolValueWrapper::IsNull::get()
 {
     return _pval->type == SolType::Null;

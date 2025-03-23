@@ -68,6 +68,7 @@ namespace CefFlashBrowser::Sol
 
     public:
         property Type^ Type { System::Type^ get(); }
+        property bool IsUndefined { bool get(); }
         property bool IsNull { bool get(); }
 
         Object^ GetValue();
