@@ -1,10 +1,12 @@
 #include "cli.h"
 #include "utils.h"
 
+
 using namespace sol;
 
-CefFlashBrowser::Sol::SolValueWrapper::SolValueWrapper(sol::SolValue* _pval)
-    : _pval(_pval)
+
+CefFlashBrowser::Sol::SolValueWrapper::SolValueWrapper(sol::SolValue* pval)
+    : _pval(pval)
 {
 }
 
@@ -35,6 +37,9 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
     case SolType::String:
         return String::typeid;
 
+    case SolType::XmlDoc:
+        return SolXmlDoc::typeid;
+
     case SolType::Array:
         return array<SolValueWrapper^>::typeid;
 
@@ -42,7 +47,7 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
         return Dictionary<String^, SolValueWrapper^>::typeid;
 
     case SolType::Xml:
-        return XmlDocument::typeid;
+        return SolXml::typeid;
 
     case SolType::Binary:
         return array<Byte>::typeid;
@@ -75,6 +80,9 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
     case SolType::String:
         return utils::ToSystemString(_pval->get<SolString>());
 
+    case SolType::XmlDoc:
+        return gcnew SolXmlDoc(utils::ToSystemString(_pval->get<SolString>()));
+
     case SolType::Array: {
         auto arr = _pval->get<SolArray>();
         auto res = gcnew array<SolValueWrapper^>((int)arr.size());
@@ -94,7 +102,7 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
     }
 
     case SolType::Xml:
-        return utils::ToXmlDocument(_pval->get<SolXml>());
+        return gcnew SolXml(utils::ToSystemString(_pval->get<SolString>()));
 
     case SolType::Binary:
         return utils::ToByteArray(_pval->get<SolBinary>());
@@ -132,6 +140,10 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
         _pval->type = SolType::String;
         _pval->value = utils::ToStdString((String^)value);
     }
+    else if (type == SolXmlDoc::typeid) {
+        _pval->type = SolType::XmlDoc;
+        _pval->value = utils::ToStdString(((SolXmlDoc^)value)->Data);
+    }
     else if (type == array<SolValueWrapper^>::typeid) {
         auto arr = (array<SolValueWrapper^>^)value;
         SolArray res;
@@ -151,9 +163,9 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
         _pval->type = SolType::Object;
         _pval->value = res;
     }
-    else if (type == XmlDocument::typeid) {
+    else if (type == SolXml::typeid) {
         _pval->type = SolType::Xml;
-        _pval->value = utils::ToXmlString((XmlDocument^)value);
+        _pval->value = utils::ToStdString(((SolXml^)value)->Data);
     }
     else if (type == array<Byte>::typeid) {
         _pval->type = SolType::Binary;

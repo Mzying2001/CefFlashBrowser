@@ -7,7 +7,36 @@ namespace CefFlashBrowser::Sol
 {
     using namespace System;
     using namespace System::Collections::Generic;
-    using namespace System::Xml;
+
+
+    public ref class SolXmlDoc
+    {
+    private:
+        String^ _xml;
+
+    public:
+        SolXmlDoc(String^ xml) : _xml(xml) {}
+        ~SolXmlDoc() {}
+
+    public:
+        property String^ Data { String^ get() { return _xml; } }
+        virtual String^ ToString() override { return _xml; }
+    };
+
+
+    public ref class SolXml
+    {
+    private:
+        String^ _xml;
+
+    public:
+        SolXml(String^ xml) : _xml(xml) {}
+        ~SolXml() {}
+
+    public:
+        property String^ Data { String^ get() { return _xml; } }
+        virtual String^ ToString() override { return _xml; }
+    };
 
 
     public ref class SolValueWrapper
@@ -16,7 +45,7 @@ namespace CefFlashBrowser::Sol
         sol::SolValue* _pval;
 
     internal:
-        SolValueWrapper(sol::SolValue* _pval);
+        SolValueWrapper(sol::SolValue* pval);
 
     public:
         SolValueWrapper();

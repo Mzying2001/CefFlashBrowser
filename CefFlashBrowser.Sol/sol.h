@@ -20,7 +20,6 @@ namespace sol
     using SolString = std::string;
     using SolArray = std::vector<SolValue>;
     using SolObject = std::map<std::string, SolValue>;
-    using SolXml = SolString;
     using SolBinary = std::vector<uint8_t>;
 
 
@@ -32,6 +31,7 @@ namespace sol
         Integer = 0x04,
         Double = 0x05,
         String = 0x06,
+        XmlDoc = 0x07,
         Array = 0x09,
         Object = 0x0A,
         Xml = 0x0B,
@@ -127,7 +127,7 @@ namespace sol
 
     SolObject ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable, bool istop = false);
 
-    SolValue ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable);
+    SolValue ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType xmltype);
 
     SolValue ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop = false);
 }

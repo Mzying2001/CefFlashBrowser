@@ -20,10 +20,6 @@ namespace utils
 
     std::vector<uint8_t> ToByteVector(array<System::Byte>^ arr);
 
-    System::Xml::XmlDocument^ ToXmlDocument(const std::string& str);
-
-    std::string ToXmlString(System::Xml::XmlDocument^ doc);
-
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, T> ReverseEndian(T value)

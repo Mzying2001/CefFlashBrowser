@@ -23,6 +23,7 @@ bool sol::IsKnownType(SolType type)
     case SolType::Integer:
     case SolType::Double:
     case SolType::String:
+    case SolType::XmlDoc:
     case SolType::Array:
     case SolType::Object:
     case SolType::Xml:
@@ -252,7 +253,7 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
     return result;
 }
 
-sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable)
+sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType xmltype)
 {
     int len = ReadSolInteger(data, size, index, true) >> 1;
 
@@ -262,7 +263,7 @@ sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& 
 
     std::string xml(data + index, data + index + len);
     index += len;
-    return SolValue(SolType::Xml, xml);
+    return SolValue(xmltype, xml);
 }
 
 sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop)
@@ -295,6 +296,10 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
         result = ReadSolString(data, size, index, reftable);
         break;
 
+    case sol::SolType::XmlDoc:
+        result = ReadSolXml(data, size, index, reftable, sol::SolType::XmlDoc);
+        break;
+
     case sol::SolType::Array:
         result = ReadSolArray(data, size, index, reftable);
         break;
@@ -304,7 +309,7 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
         break;
 
     case sol::SolType::Xml:
-        result = ReadSolXml(data, size, index, reftable);
+        result = ReadSolXml(data, size, index, reftable, SolType::Xml);
         break;
 
     case sol::SolType::Binary:

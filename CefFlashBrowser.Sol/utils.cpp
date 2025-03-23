@@ -5,7 +5,6 @@
 
 using namespace System;
 using namespace System::Text;
-using namespace System::Xml;
 
 std::vector<uint8_t> utils::ReadFile(const std::string& path)
 {
@@ -77,16 +76,4 @@ std::vector<uint8_t> utils::ToByteVector(array<System::Byte>^ arr)
         vec.push_back(b);
     }
     return vec;
-}
-
-System::Xml::XmlDocument^ utils::ToXmlDocument(const std::string& str)
-{
-    auto xml = gcnew XmlDocument();
-    xml->LoadXml(ToSystemString(str));
-    return xml;
-}
-
-std::string utils::ToXmlString(System::Xml::XmlDocument^ doc)
-{
-    return ToStdString(doc->OuterXml);
 }
