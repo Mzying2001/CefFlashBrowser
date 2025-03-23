@@ -167,7 +167,7 @@ CefFlashBrowser::Sol::SolFileWrapper::~SolFileWrapper()
 
 System::String^ CefFlashBrowser::Sol::SolFileWrapper::Path::get()
 {
-    return utils::ToSystemString(_pfile->path);
+    return utils::ToSystemString(_pfile->path, false);
 }
 
 System::String^ CefFlashBrowser::Sol::SolFileWrapper::SolName::get()
