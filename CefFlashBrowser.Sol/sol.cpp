@@ -17,6 +17,7 @@ bool sol::IsKnownType(SolType type)
 {
     switch (type)
     {
+    case SolType::Undefined:
     case SolType::Null:
     case SolType::BooleanFalse:
     case SolType::BooleanTrue:
@@ -272,47 +273,51 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
 
     switch (type)
     {
-    case sol::SolType::Null:
-        result = nullptr;
+    case SolType::Undefined:
+        result.type = SolType::Undefined;
         break;
 
-    case sol::SolType::BooleanFalse:
+    case SolType::Null:
+        //result = nullptr;
+        break;
+
+    case SolType::BooleanFalse:
         result = false;
         break;
 
-    case sol::SolType::BooleanTrue:
+    case SolType::BooleanTrue:
         result = true;
         break;
 
-    case sol::SolType::Integer:
+    case SolType::Integer:
         result = ReadSolInteger(data, size, index);
         break;
 
-    case sol::SolType::Double:
+    case SolType::Double:
         result = ReadSolDouble(data, size, index);
         break;
 
-    case sol::SolType::String:
+    case SolType::String:
         result = ReadSolString(data, size, index, reftable);
         break;
 
-    case sol::SolType::XmlDoc:
+    case SolType::XmlDoc:
         result = ReadSolXml(data, size, index, reftable, sol::SolType::XmlDoc);
         break;
 
-    case sol::SolType::Array:
+    case SolType::Array:
         result = ReadSolArray(data, size, index, reftable);
         break;
 
-    case sol::SolType::Object:
+    case SolType::Object:
         result = ReadSolObject(data, size, index, reftable, istop);
         break;
 
-    case sol::SolType::Xml:
+    case SolType::Xml:
         result = ReadSolXml(data, size, index, reftable, SolType::Xml);
         break;
 
-    case sol::SolType::Binary:
+    case SolType::Binary:
         result = ReadSolBinary(data, size, index);
         break;
 

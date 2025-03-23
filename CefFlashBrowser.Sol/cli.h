@@ -9,6 +9,21 @@ namespace CefFlashBrowser::Sol
     using namespace System::Collections::Generic;
 
 
+    public ref class SolUndefined sealed
+    {
+    private:
+        static SolUndefined^ _value = gcnew SolUndefined();
+        SolUndefined() {}
+
+    public:
+        static property SolUndefined^ Value { SolUndefined^ get() { return _value; } }
+        virtual bool Equals(Object^ obj) override { return obj != nullptr && obj->GetType() == SolUndefined::typeid; }
+        virtual int GetHashCode() override { return 0; }
+        static bool operator ==(SolUndefined^ left, SolUndefined^ right) { return true; }
+        static bool operator !=(SolUndefined^ left, SolUndefined^ right) { return false; }
+    };
+
+
     public ref class SolXmlDoc
     {
     private:

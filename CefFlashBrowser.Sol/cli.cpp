@@ -24,6 +24,9 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
 {
     switch (_pval->type)
     {
+    case SolType::Undefined:
+        return SolUndefined::typeid;
+
     case SolType::BooleanTrue:
     case SolType::BooleanFalse:
         return Boolean::typeid;
@@ -67,6 +70,9 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
 {
     switch (_pval->type)
     {
+    case SolType::Undefined:
+        return SolUndefined::Value;
+
     case SolType::BooleanTrue:
     case SolType::BooleanFalse:
         return gcnew Boolean(_pval->get<SolBoolean>());
@@ -123,7 +129,11 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
 
     auto type = value->GetType();
 
-    if (type == Boolean::typeid) {
+    if (type == SolUndefined::typeid) {
+        _pval->type = SolType::Undefined;
+        _pval->value = nullptr;
+    }
+    else if (type == Boolean::typeid) {
         bool b = (bool)value;
         _pval->type = b ? SolType::BooleanTrue : SolType::BooleanFalse;
         _pval->value = b;

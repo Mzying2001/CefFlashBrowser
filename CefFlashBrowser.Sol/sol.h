@@ -25,6 +25,7 @@ namespace sol
 
     enum class SolType : uint8_t
     {
+        Undefined = 0x00,
         Null = 0x01,
         BooleanFalse = 0x02,
         BooleanTrue = 0x03,
@@ -62,6 +63,7 @@ namespace sol
         {
             switch (type)
             {
+            case SolType::Undefined:
             case SolType::Null:
                 return std::is_same_v<T, SolNull>;
             case SolType::BooleanFalse:
@@ -72,6 +74,7 @@ namespace sol
             case SolType::Double:
                 return std::is_same_v<T, SolDouble>;
             case SolType::String:
+            case SolType::XmlDoc:
             case SolType::Xml:
                 return std::is_same_v<T, SolString>;
             case SolType::Array:
