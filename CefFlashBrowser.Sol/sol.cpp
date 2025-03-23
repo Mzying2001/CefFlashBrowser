@@ -85,6 +85,15 @@ bool sol::ReadSolFile(SolFile& file)
         file.solname = std::string(data + index, data + index + namesize);
         index += namesize;
 
+        if (index + 4 > size) {
+            file.errmsg = ERR_INVALID_FILE;
+            return false;
+        }
+
+        file.version = utils::ReverseEndian(
+            *reinterpret_cast<uint32_t*>(data + index));
+        index += 4;
+
         std::string key;
         std::vector<std::string> strpool;
 

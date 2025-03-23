@@ -120,8 +120,9 @@ namespace sol
     struct SolFile
     {
         std::string path;
-        std::string solname;
         std::string errmsg;
+        std::string solname;
+        uint32_t version;
         SolObject data;
 
         bool valid() const { return errmsg.empty(); }
