@@ -181,9 +181,9 @@ sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, std::vect
     return result;
 }
 
-sol::SolXml sol::ReadSolXml(uint8_t* data, int size, int& index, std::vector<std::string>& strpool)
+sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, std::vector<std::string>& strpool)
 {
-    return ReadSolString(data, size, index, strpool, false);
+    return SolValue(SolType::Xml, ReadSolString(data, size, index, strpool));
 }
 
 sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index)

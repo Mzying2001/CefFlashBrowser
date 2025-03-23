@@ -115,7 +115,7 @@ namespace sol
 
     SolString ReadSolString(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, bool add2pool = true);
 
-    SolXml ReadSolXml(uint8_t* data, int size, int& index, std::vector<std::string>& strpool);
+    SolValue ReadSolXml(uint8_t* data, int size, int& index, std::vector<std::string>& strpool);
 
     SolBinary ReadSolBinary(uint8_t* data, int size, int& index);
 
