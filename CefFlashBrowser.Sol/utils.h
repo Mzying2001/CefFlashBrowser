@@ -10,11 +10,14 @@ namespace utils
 {
     std::vector<uint8_t> ReadFile(const std::string& path);
 
+    void WriteFile(const std::string& path, const std::vector<uint8_t>& data);
+
     System::String^ ToSystemString(const std::string& str, bool utf8 = true);
 
     std::string ToStdString(System::String^ str, bool utf8 = true);
 
     array<System::Byte>^ ToByteArray(const std::vector<uint8_t>& vec);
+
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, T> ReverseEndian(T value)

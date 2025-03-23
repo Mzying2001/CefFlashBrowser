@@ -26,6 +26,16 @@ std::vector<uint8_t> utils::ReadFile(const std::string& path)
     return result;
 }
 
+void utils::WriteFile(const std::string& path, const std::vector<uint8_t>& data)
+{
+    std::ofstream ofs(path, std::ios::binary);
+    if (!ofs.is_open()) throw std::runtime_error("Failed to open file");
+
+    if (!ofs.write(reinterpret_cast<const char*>(data.data()), data.size())) {
+        throw std::runtime_error("Failed to write file");
+    }
+}
+
 System::String^ utils::ToSystemString(const std::string& str, bool utf8)
 {
     if (utf8) {
