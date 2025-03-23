@@ -67,3 +67,13 @@ array<System::Byte>^ utils::ToByteArray(const std::vector<uint8_t>& vec)
     }
     return arr;
 }
+
+std::vector<uint8_t> utils::ToByteVector(array<System::Byte>^ arr)
+{
+    std::vector<uint8_t> vec;
+    vec.reserve(arr->Length);
+    for each (Byte b in arr) {
+        vec.push_back(b);
+    }
+    return vec;
+}

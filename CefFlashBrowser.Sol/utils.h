@@ -18,6 +18,8 @@ namespace utils
 
     array<System::Byte>^ ToByteArray(const std::vector<uint8_t>& vec);
 
+    std::vector<uint8_t> ToByteVector(array<System::Byte>^ arr);
+
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, T> ReverseEndian(T value)

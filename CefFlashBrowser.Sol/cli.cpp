@@ -138,14 +138,8 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
         _pval->value = res;
     }
     else if (type == array<Byte>::typeid) {
-        auto arr = (array<Byte>^)value;
-        SolBinary res;
-        res.reserve(arr->Length);
-        for (int i = 0; i < arr->Length; i++) {
-            res[i] = arr[i];
-        }
         _pval->type = SolType::Binary;
-        _pval->value = res;
+        _pval->value = utils::ToByteVector((array<Byte>^)value);
     }
     else {
         throw gcnew ArgumentException("Unsupported type");
