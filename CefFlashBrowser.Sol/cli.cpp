@@ -8,6 +8,11 @@ CefFlashBrowser::Sol::SolValueWrapper::SolValueWrapper(sol::SolValue* _pval)
 {
 }
 
+CefFlashBrowser::Sol::SolValueWrapper::SolValueWrapper()
+    : _pval(new SolValue())
+{
+}
+
 CefFlashBrowser::Sol::SolValueWrapper::~SolValueWrapper()
 {
     delete _pval;
@@ -154,9 +159,24 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
     }
 }
 
-CefFlashBrowser::Sol::SolFileWrapper::SolFileWrapper(sol::SolFile* _pfile)
-    : _pfile(_pfile)
+CefFlashBrowser::Sol::SolFileWrapper::SolFileWrapper(String^ path)
+    : _pfile(new SolFile())
 {
+    _pfile->path = utils::ToStdString(path, false);
+
+    if (!sol::ReadSolFile(*_pfile)) {
+        auto errmsg = utils::ToSystemString(_pfile->errmsg);
+        delete _pfile;
+        _pfile = nullptr;
+        throw gcnew Exception(errmsg);
+    }
+
+    auto& data = _pfile->data;
+    _data = gcnew Dictionary<String^, SolValueWrapper^>((int)data.size());
+
+    for (auto& [key, val] : data) {
+        _data->Add(utils::ToSystemString(key), gcnew SolValueWrapper(new SolValue(data[key])));
+    }
 }
 
 CefFlashBrowser::Sol::SolFileWrapper::~SolFileWrapper()
@@ -183,22 +203,4 @@ System::Collections::Generic::Dictionary<System::String^, CefFlashBrowser::Sol::
 CefFlashBrowser::Sol::SolFileWrapper::Data::get()
 {
     return _data;
-}
-
-CefFlashBrowser::Sol::SolFileWrapper^ CefFlashBrowser::Sol::SolFileWrapper::Read(String^ path)
-{
-    auto result = gcnew SolFileWrapper(new SolFile());
-    result->_pfile->path = utils::ToStdString(path, false);
-
-    if (!sol::ReadSolFile(*result->_pfile)) {
-        throw gcnew Exception(utils::ToSystemString(result->_pfile->errmsg));
-    }
-
-    auto& data = result->_pfile->data;
-    result->_data = gcnew Dictionary<String^, SolValueWrapper^>((int)data.size());
-
-    for (auto& [key, val] : data) {
-        result->_data->Add(utils::ToSystemString(key), gcnew SolValueWrapper(new SolValue(data[key])));
-    }
-    return result;
 }
