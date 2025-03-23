@@ -141,6 +141,12 @@ namespace sol
     SolXml ReadSolXml(uint8_t* data, int size, int& index, std::vector<std::string>& strpool);
 
     SolBinary ReadSolBinary(uint8_t* data, int size, int& index);
+
+    SolArray ReadSolArray(uint8_t* data, int size, int& index, std::vector<std::string>& strpool);
+
+    SolObject ReadSolObject(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, bool istop = false);
+
+    SolValue ReadSolValue(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, SolType type, bool istop = false);
 }
 
 #endif // !__SOL_H__

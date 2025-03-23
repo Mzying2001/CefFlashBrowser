@@ -9,6 +9,8 @@ constexpr char ERR_FILE_TOO_SMALL[] = "File too small";
 constexpr char ERR_INVALID_MAGIC[] = "Invalid file magic";
 constexpr char ERR_INVALID_SIZE[] = "Invalid file size";
 constexpr char ERR_INVALID_FILE[] = "Invalid file format";
+constexpr char ERR_INVALID_TYPE[] = "Invalid value type";
+constexpr char ERR_INVALID_OBJECT[] = "Invalid object format";
 
 
 bool sol::IsKnownType(SolType type)
@@ -87,7 +89,14 @@ bool sol::ReadSolFile(SolFile& file)
         std::vector<std::string> strpool;
 
         while (index < size) {
-            // TODO
+            key = ReadSolString(data, size, index, strpool);
+
+            if (index >= size) {
+                throw std::runtime_error(ERR_INVALID_FILE);
+            }
+
+            SolType type = static_cast<SolType>(data[index++]);
+            file.data[key] = ReadSolValue(data, size, index, strpool, type, true);
         }
 
         return true;
@@ -178,5 +187,123 @@ sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index)
 
     std::vector<uint8_t> result(data + index, data + index + len);
     index += len;
+    return result;
+}
+
+sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, std::vector<std::string>& strpool)
+{
+    int len = ReadSolInteger(data, size, index, true) >> 1;
+
+    if (index >= size || data[index++] != 0x01) {
+        throw std::runtime_error(ERR_INVALID_FILE);
+    }
+
+    std::vector<SolValue> result;
+    result.reserve(len);
+
+    for (int i = 0; i < len; ++i) {
+        if (index >= size) {
+            throw std::runtime_error(ERR_INVALID_FILE);
+        }
+        SolType type = static_cast<SolType>(data[index++]);
+        result.push_back(ReadSolValue(data, size, index, strpool, type));
+    }
+
+    return result;
+}
+
+sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, bool istop)
+{
+    if (istop) {
+        if (index >= size) {
+            throw std::runtime_error(ERR_INVALID_FILE);
+        }
+        if (data[index++] != 0x0B) {
+            throw std::runtime_error(ERR_INVALID_OBJECT);
+        }
+    }
+
+    if (index >= size || data[index++] != 0x01) {
+        throw std::runtime_error(ERR_INVALID_OBJECT);
+    }
+
+    std::string key;
+    SolObject result;
+
+    while (index < size) {
+        if (data[index] == 0x01) {
+            ++index;
+            break;
+        }
+
+        key = ReadSolString(data, size, index, strpool);
+
+        if (index >= size) {
+            throw std::runtime_error(ERR_INVALID_OBJECT);
+        }
+
+        SolType type = static_cast<SolType>(data[index++]);
+        result[key] = ReadSolValue(data, size, index, strpool, type);
+    }
+
+    return result;
+}
+
+sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, std::vector<std::string>& strpool, SolType type, bool istop)
+{
+    SolValue result;
+
+    switch (type)
+    {
+    case sol::SolType::Null:
+        result = nullptr;
+        break;
+
+    case sol::SolType::BooleanFalse:
+        result = false;
+        break;
+
+    case sol::SolType::BooleanTrue:
+        result = true;
+        break;
+
+    case sol::SolType::Integer:
+        result = ReadSolInteger(data, size, index);
+        break;
+
+    case sol::SolType::Double:
+        result = ReadSolDouble(data, size, index);
+        break;
+
+    case sol::SolType::String:
+        result = ReadSolString(data, size, index, strpool);
+        break;
+
+    case sol::SolType::Array:
+        result = ReadSolArray(data, size, index, strpool);
+        break;
+
+    case sol::SolType::Object:
+        result = ReadSolObject(data, size, index, strpool, istop);
+        break;
+
+    case sol::SolType::Xml:
+        result = ReadSolXml(data, size, index, strpool);
+        break;
+
+    case sol::SolType::Binary:
+        result = ReadSolBinary(data, size, index);
+        break;
+
+    default:
+        throw std::runtime_error(ERR_INVALID_TYPE);
+    }
+
+    if (istop) {
+        if (index >= size || data[index++] != 0x00) {
+            throw std::runtime_error(ERR_INVALID_FILE);
+        }
+    }
+
     return result;
 }
