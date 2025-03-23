@@ -28,7 +28,6 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
         return Double::typeid;
 
     case SolType::String:
-    case SolType::Xml:
         return String::typeid;
 
     case SolType::Array:
@@ -36,6 +35,9 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
 
     case SolType::Object:
         return Dictionary<String^, SolValueWrapper^>::typeid;
+
+    case SolType::Xml:
+        return XmlDocument::typeid;
 
     case SolType::Binary:
         return array<Byte>::typeid;
@@ -61,7 +63,6 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
         return gcnew Double(_pval->get<SolDouble>());
 
     case SolType::String:
-    case SolType::Xml:
         return utils::ToSystemString(_pval->get<SolString>());
 
     case SolType::Array: {
@@ -81,6 +82,9 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
         }
         return res;
     }
+
+    case SolType::Xml:
+        return utils::ToXmlDocument(_pval->get<SolXml>());
 
     case SolType::Binary:
         return utils::ToByteArray(_pval->get<SolBinary>());
@@ -137,6 +141,10 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
         _pval->type = SolType::Object;
         _pval->value = res;
     }
+    else if (type == XmlDocument::typeid) {
+        _pval->type = SolType::Xml;
+        _pval->value = utils::ToXmlString((XmlDocument^)value);
+    }
     else if (type == array<Byte>::typeid) {
         _pval->type = SolType::Binary;
         _pval->value = utils::ToByteVector((array<Byte>^)value);
@@ -144,12 +152,6 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
     else {
         throw gcnew ArgumentException("Unsupported type");
     }
-}
-
-void CefFlashBrowser::Sol::SolValueWrapper::SetXmlValue(String^ value)
-{
-    _pval->type = SolType::Xml;
-    _pval->value = utils::ToStdString(value);
 }
 
 CefFlashBrowser::Sol::SolFileWrapper::SolFileWrapper(sol::SolFile* _pfile)

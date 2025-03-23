@@ -149,6 +149,9 @@
     <ClCompile Include="sol.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Xml" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

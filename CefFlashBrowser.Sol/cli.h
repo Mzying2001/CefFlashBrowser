@@ -7,6 +7,7 @@ namespace CefFlashBrowser::Sol
 {
     using namespace System;
     using namespace System::Collections::Generic;
+    using namespace System::Xml;
 
 
     public ref class SolValueWrapper
@@ -24,7 +25,6 @@ namespace CefFlashBrowser::Sol
         property Type^ Type { System::Type^ get(); }
         Object^ GetValue();
         void SetValue(Object^ value);
-        void SetXmlValue(String^ value);
     };
 
 
