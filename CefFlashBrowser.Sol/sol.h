@@ -48,8 +48,7 @@ namespace sol
         SolValue(SolBoolean v) : type(v ? SolType::BooleanTrue : SolType::BooleanFalse), value(v) {}
         SolValue(SolInteger v) : type(SolType::Integer), value(v) {}
         SolValue(SolDouble v) : type(SolType::Double), value(v) {}
-        SolValue(const SolString& v, bool isXml = false) : type(isXml ? SolType::Xml : SolType::String), value(v) {}
-        SolValue(const char* v) : SolValue(SolString(v)) {}
+        SolValue(const SolString& v) : type(SolType::String), value(v) {}
         SolValue(const SolArray& v) : type(SolType::Array), value(v) {}
         SolValue(const SolObject& v) : type(SolType::Object), value(v) {}
         SolValue(const SolBinary& v) : type(SolType::Binary), value(v) {}
