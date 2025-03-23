@@ -32,6 +32,7 @@ namespace CefFlashBrowser::Sol
     {
     private:
         sol::SolFile* _pfile;
+        Dictionary<String^, SolValueWrapper^>^ _data;
 
     internal:
         SolFileWrapper(sol::SolFile* _pfile);
@@ -43,7 +44,7 @@ namespace CefFlashBrowser::Sol
         property String^ Path { String^ get(); }
         property String^ SolName { String^ get(); }
         property UInt32 Version { UInt32 get(); }
-        property SolValueWrapper^ Data { SolValueWrapper^ get(); }
+        property Dictionary<String^, SolValueWrapper^>^ Data { Dictionary<String^, SolValueWrapper^>^ get(); }
         static SolFileWrapper^ Read(String^ path);
     };
 }

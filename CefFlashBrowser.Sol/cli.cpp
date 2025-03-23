@@ -180,9 +180,10 @@ System::UInt32 CefFlashBrowser::Sol::SolFileWrapper::Version::get()
     return _pfile->version;
 }
 
-CefFlashBrowser::Sol::SolValueWrapper^ CefFlashBrowser::Sol::SolFileWrapper::Data::get()
+System::Collections::Generic::Dictionary<System::String^, CefFlashBrowser::Sol::SolValueWrapper^>^
+CefFlashBrowser::Sol::SolFileWrapper::Data::get()
 {
-    return gcnew SolValueWrapper(new SolValue(_pfile->data));
+    return _data;
 }
 
 CefFlashBrowser::Sol::SolFileWrapper^ CefFlashBrowser::Sol::SolFileWrapper::Read(String^ path)
@@ -192,6 +193,13 @@ CefFlashBrowser::Sol::SolFileWrapper^ CefFlashBrowser::Sol::SolFileWrapper::Read
 
     if (!sol::ReadSolFile(*result->_pfile)) {
         throw gcnew Exception(utils::ToSystemString(result->_pfile->errmsg));
+    }
+
+    auto& data = result->_pfile->data;
+    result->_data = gcnew Dictionary<String^, SolValueWrapper^>((int)data.size());
+
+    for (auto& [key, val] : data) {
+        result->_data->Add(utils::ToSystemString(key), gcnew SolValueWrapper(new SolValue(data[key])));
     }
     return result;
 }
