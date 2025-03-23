@@ -23,6 +23,8 @@ namespace CefFlashBrowser::Sol
     public:
         property Type^ Type { System::Type^ get(); }
         Object^ GetValue();
+        void SetValue(Object^ value);
+        void SetXmlValue(String^ value);
     };
 
 

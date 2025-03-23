@@ -66,8 +66,8 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
 
     case SolType::Array: {
         auto arr = _pval->get<SolArray>();
-        auto res = gcnew array<SolValueWrapper^>(arr.size());
-        for (size_t i = 0; i < arr.size(); i++) {
+        auto res = gcnew array<SolValueWrapper^>((int)arr.size());
+        for (int i = 0; i < (int)arr.size(); i++) {
             res[i] = gcnew SolValueWrapper(new SolValue(arr[i]));
         }
         return res;
@@ -75,7 +75,7 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
 
     case SolType::Object: {
         auto obj = _pval->get<SolObject>();
-        auto res = gcnew Dictionary<String^, SolValueWrapper^>(obj.size());
+        auto res = gcnew Dictionary<String^, SolValueWrapper^>((int)obj.size());
         for (auto& [key, val] : obj) {
             res->Add(utils::ToSystemString(key), gcnew SolValueWrapper(new SolValue(val)));
         }
@@ -86,6 +86,73 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
     default:
         return nullptr;
     }
+}
+
+void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
+{
+    if (value == nullptr) {
+        _pval->type = SolType::Null;
+        _pval->value = nullptr;
+        return;
+    }
+
+    auto type = value->GetType();
+
+    if (type == Boolean::typeid) {
+        bool b = (bool)value;
+        _pval->type = b ? SolType::BooleanTrue : SolType::BooleanFalse;
+        _pval->value = b;
+    }
+    else if (type == Int32::typeid) {
+        _pval->type = SolType::Integer;
+        _pval->value = (int32_t)(int)value;
+    }
+    else if (type == Double::typeid) {
+        _pval->type = SolType::Double;
+        _pval->value = (double)value;
+    }
+    else if (type == String::typeid) {
+        _pval->type = SolType::String;
+        _pval->value = utils::ToStdString((String^)value);
+    }
+    else if (type == array<SolValueWrapper^>::typeid) {
+        auto arr = (array<SolValueWrapper^>^)value;
+        SolArray res;
+        res.reserve(arr->Length);
+        for (int i = 0; i < arr->Length; i++) {
+            res.push_back(*arr[i]->_pval);
+        }
+        _pval->type = SolType::Array;
+        _pval->value = res;
+    }
+    else if (type == Dictionary<String^, SolValueWrapper^>::typeid) {
+        auto obj = (Dictionary<String^, SolValueWrapper^>^)value;
+        SolObject res;
+        for each (KeyValuePair<String^, SolValueWrapper^> ^ pair in obj) {
+            res[utils::ToStdString(pair->Key)] = *pair->Value->_pval;
+        }
+        _pval->type = SolType::Object;
+        _pval->value = res;
+    }
+    else if (type == array<Byte>::typeid) {
+        auto arr = (array<Byte>^)value;
+        SolBinary res;
+        res.reserve(arr->Length);
+        for (int i = 0; i < arr->Length; i++) {
+            res[i] = arr[i];
+        }
+        _pval->type = SolType::Binary;
+        _pval->value = res;
+    }
+    else {
+        throw gcnew ArgumentException("Unsupported type");
+    }
+}
+
+void CefFlashBrowser::Sol::SolValueWrapper::SetXmlValue(String^ value)
+{
+    _pval->type = SolType::Xml;
+    _pval->value = utils::ToStdString(value);
 }
 
 CefFlashBrowser::Sol::SolFileWrapper::SolFileWrapper(sol::SolFile* _pfile)
