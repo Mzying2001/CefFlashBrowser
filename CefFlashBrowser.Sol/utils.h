@@ -2,6 +2,7 @@
 #define __UTILS_H__
 
 #include <cstdint>
+#include <cstdio>
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -29,6 +30,14 @@ namespace utils
             result = (result << 8) | (value & 0xFF);
             value >>= 8;
         }
+        return result;
+    }
+
+    template <typename... Args>
+    std::string FormatString(const std::string& fmt, Args... args)
+    {
+        std::string result(snprintf(nullptr, 0, fmt.c_str(), args...) + 1, '\0');
+        result.resize(snprintf(&result[0], result.size(), fmt.c_str(), args...));
         return result;
     }
 }
