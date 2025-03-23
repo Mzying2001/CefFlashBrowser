@@ -89,30 +89,7 @@ namespace sol
         template <typename T>
         T get() const
         {
-            switch (type)
-            {
-            case SolType::Null:
-                return T();
-            case SolType::BooleanFalse:
-                return T(false);
-            case SolType::BooleanTrue:
-                return T(true);
-            case SolType::Integer:
-                return std::get<SolInteger>(value);
-            case SolType::Double:
-                return std::get<SolDouble>(value);
-            case SolType::String:
-            case SolType::Xml:
-                return std::get<SolString>(value);
-            case SolType::Array:
-                return std::get<SolArray>(value);
-            case SolType::Object:
-                return std::get<SolObject>(value);
-            case SolType::Binary:
-                return std::get<SolBinary>(value);
-            default:
-                throw std::runtime_error("Type mismatch");
-            }
+            return std::get<T>(value);
         }
     };
 
