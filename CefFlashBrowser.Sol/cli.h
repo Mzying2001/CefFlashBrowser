@@ -24,6 +24,8 @@ namespace CefFlashBrowser::Sol
 
     public:
         property Type^ Type { System::Type^ get(); }
+        property bool IsNull { bool get(); }
+
         Object^ GetValue();
         void SetValue(Object^ value);
     };
