@@ -119,15 +119,15 @@ namespace sol
 
     SolDouble ReadSolDouble(uint8_t* data, int size, int& index);
 
-    SolString ReadSolString(uint8_t* data, int size, int& index, SolRefTable& reftable, bool add2pool = true);
-
-    SolValue ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable);
+    SolString ReadSolString(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
     SolBinary ReadSolBinary(uint8_t* data, int size, int& index);
 
     SolArray ReadSolArray(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
     SolObject ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable, bool istop = false);
+
+    SolValue ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
     SolValue ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop = false);
 }

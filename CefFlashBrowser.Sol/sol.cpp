@@ -157,33 +157,29 @@ sol::SolDouble sol::ReadSolDouble(uint8_t* data, int size, int& index)
     return *reinterpret_cast<double*>(&tmp);
 }
 
-sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, SolRefTable& reftable, bool add2pool)
+sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, SolRefTable& reftable)
 {
-    int len = ReadSolInteger(data, size, index, true);
+    int ref = ReadSolInteger(data, size, index, true);
 
-    if (!(len & 1)) {
-        return reftable.strpool.at(len >> 1);
+    if ((ref & 1) == 0) {
+        return reftable.strpool.at(ref >> 1);
     }
 
-    len >>= 1;
+    int len = ref >> 1;
 
     if (index + len > size) {
         throw std::runtime_error(ERR_INVALID_FILE);
     }
 
-    std::string result(data + index, data + index + len);
-
-    if (len != 0 && add2pool) {
-        reftable.strpool.push_back(result);
+    if (len == 0) {
+        return std::string();
     }
+
+    std::string result(data + index, data + index + len);
+    reftable.strpool.push_back(result);
 
     index += len;
     return result;
-}
-
-sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable)
-{
-    return SolValue(SolType::Xml, ReadSolString(data, size, index, reftable, false));
 }
 
 sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index)
@@ -240,13 +236,11 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
     SolObject result;
 
     while (index < size) {
-        if (data[index] == 0x01) {
-            ++index;
-            break;
-        }
-
         key = ReadSolString(data, size, index, reftable);
 
+        if (key.empty()) {
+            break;
+        }
         if (index >= size) {
             throw std::runtime_error(ERR_INVALID_OBJECT);
         }
@@ -256,6 +250,19 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
     }
 
     return result;
+}
+
+sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable)
+{
+    int len = ReadSolInteger(data, size, index, true) >> 1;
+
+    if (index + len > size) {
+        throw std::runtime_error(ERR_INVALID_FILE);
+    }
+
+    std::string xml(data + index, data + index + len);
+    index += len;
+    return SolValue(SolType::Xml, xml);
 }
 
 sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop)
