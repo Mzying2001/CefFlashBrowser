@@ -173,7 +173,7 @@ sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, std::vect
 
     std::string result(data + index, data + index + len);
 
-    if (add2pool) {
+    if (len != 0 && add2pool) {
         strpool.push_back(result);
     }
 
