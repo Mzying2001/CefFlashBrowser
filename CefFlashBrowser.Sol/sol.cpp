@@ -218,7 +218,20 @@ sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, SolRefTab
     return result;
 }
 
-sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index)
+sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType xmltype)
+{
+    int len = ReadSolInteger(data, size, index, true) >> 1;
+
+    if (index + len > size) {
+        ThrowFileEndedImproperlyOnReadingType(xmltype);
+    }
+
+    std::string xml(data + index, data + index + len);
+    index += len;
+    return SolValue(xmltype, xml);
+}
+
+sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index, SolRefTable& reftable)
 {
     int len = ReadSolInteger(data, size, index, true) >> 1;
 
@@ -299,19 +312,6 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
     return result;
 }
 
-sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType xmltype)
-{
-    int len = ReadSolInteger(data, size, index, true) >> 1;
-
-    if (index + len > size) {
-        ThrowFileEndedImproperlyOnReadingType(xmltype);
-    }
-
-    std::string xml(data + index, data + index + len);
-    index += len;
-    return SolValue(xmltype, xml);
-}
-
 sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop)
 {
     SolValue result;
@@ -363,7 +363,7 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
         break;
 
     case SolType::Binary:
-        result = ReadSolBinary(data, size, index);
+        result = ReadSolBinary(data, size, index, reftable);
         break;
 
     default:

@@ -111,6 +111,7 @@ namespace sol
     struct SolRefTable
     {
         std::vector<std::string> strpool;
+        std::vector<SolValue> objpool;
     };
 
 
@@ -124,13 +125,13 @@ namespace sol
 
     SolString ReadSolString(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
-    SolBinary ReadSolBinary(uint8_t* data, int size, int& index);
+    SolValue ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType xmltype);
+
+    SolBinary ReadSolBinary(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
     SolArray ReadSolArray(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
     SolObject ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable, bool istop = false);
-
-    SolValue ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType xmltype);
 
     SolValue ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop = false);
 }
