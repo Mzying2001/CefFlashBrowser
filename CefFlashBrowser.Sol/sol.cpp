@@ -2,15 +2,42 @@
 #include "utils.h"
 
 
-constexpr uint8_t SOLMAGIC[] = { 0x00, 0xBF };
-constexpr uint8_t SOLCONSTANT[] = { 0x54, 0x43, 0x53, 0x4F, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 };
+constexpr uint8_t SOL_MAGIC[] = { 0x00, 0xBF };
+constexpr uint8_t SOL_CONSTANT[] = { 0x54, 0x43, 0x53, 0x4F, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 };
 
-constexpr char ERR_FILE_TOO_SMALL[] = "File too small";
-constexpr char ERR_INVALID_MAGIC[] = "Invalid file magic";
-constexpr char ERR_INVALID_SIZE[] = "Invalid file size";
-constexpr char ERR_INVALID_FILE[] = "Invalid file format";
-constexpr char ERR_INVALID_TYPE[] = "Invalid value type";
-constexpr char ERR_INVALID_OBJECT[] = "Invalid object format";
+
+namespace
+{
+    [[noreturn]] void ThrowFileEndedImproperly()
+    {
+        throw std::runtime_error(
+            "File ended improperly");
+    }
+
+    [[noreturn]] void ThrowFileEndedImproperlyOnReadingType(sol::SolType type)
+    {
+        throw std::runtime_error(utils::FormatString(
+            "File ended improperly on reading type %d", static_cast<int>(type)));
+    }
+
+    [[noreturn]] void ThrowUnknownType(sol::SolType type)
+    {
+        throw std::runtime_error(utils::FormatString(
+            "Unknown type: %d", static_cast<int>(type)));
+    }
+
+    [[noreturn]] void ThrowBadFormatOfType(sol::SolType type, int index, int read, int desire)
+    {
+        throw std::runtime_error(utils::FormatString(
+            "Bad format of type %d at index %d: read %d, desire %d", static_cast<int>(type), index, read, desire));
+    }
+
+    [[noreturn]] void ThrowEndRequired(int index, int read, int desire = 0)
+    {
+        throw std::runtime_error(utils::FormatString(
+            "End required at index %d: read %d, desire %d", index, read, desire));
+    }
+}
 
 
 bool sol::IsKnownType(SolType type)
@@ -45,12 +72,12 @@ bool sol::ReadSolFile(SolFile& file)
         int index = 0;
 
         if (size < 18) {
-            file.errmsg = ERR_FILE_TOO_SMALL;
+            file.errmsg = "File too small";
             return false;
         }
 
-        if (memcmp(data, SOLMAGIC, 2) != 0) {
-            file.errmsg = ERR_INVALID_MAGIC;
+        if (memcmp(data, SOL_MAGIC, 2) != 0) {
+            file.errmsg = "File magic mismatch";
             return false;
         }
         index += 2;
@@ -59,20 +86,19 @@ bool sol::ReadSolFile(SolFile& file)
             *reinterpret_cast<uint32_t*>(data + index));
 
         if (chunksize != size - 6) {
-            file.errmsg = ERR_INVALID_SIZE;
+            file.errmsg = "Chunk size mismatch";
             return false;
         }
         index += 4;
 
-        if (memcmp(data + index, SOLCONSTANT, 10) != 0) {
-            file.errmsg = ERR_INVALID_FILE;
+        if (memcmp(data + index, SOL_CONSTANT, 10) != 0) {
+            file.errmsg = "File constant mismatch";
             return false;
         }
         index += 10;
 
         if (index + 2 > size) {
-            file.errmsg = ERR_INVALID_FILE;
-            return false;
+            ThrowFileEndedImproperly();
         }
 
         uint16_t namesize = utils::ReverseEndian(
@@ -80,16 +106,14 @@ bool sol::ReadSolFile(SolFile& file)
         index += 2;
 
         if (index + namesize > size) {
-            file.errmsg = ERR_INVALID_FILE;
-            return false;
+            ThrowFileEndedImproperly();
         }
 
         file.solname = std::string(data + index, data + index + namesize);
         index += namesize;
 
         if (index + 4 > size) {
-            file.errmsg = ERR_INVALID_FILE;
-            return false;
+            ThrowFileEndedImproperly();
         }
 
         file.version = utils::ReverseEndian(
@@ -103,7 +127,7 @@ bool sol::ReadSolFile(SolFile& file)
             key = ReadSolString(data, size, index, reftable);
 
             if (index >= size) {
-                throw std::runtime_error(ERR_INVALID_FILE);
+                ThrowFileEndedImproperly();
             }
 
             SolType type = static_cast<SolType>(data[index++]);
@@ -125,7 +149,7 @@ sol::SolInteger sol::ReadSolInteger(uint8_t* data, int size, int& index, bool un
     int i = 0;
     for (; i < 3; ++i) {
         if (index + i >= size) {
-            throw std::runtime_error(ERR_INVALID_FILE);
+            ThrowFileEndedImproperlyOnReadingType(SolType::Integer);
         }
         result = result << 7 | (data[index + i] & 0x7F);
         if (!(data[index + i] & 0x80)) break;
@@ -133,7 +157,7 @@ sol::SolInteger sol::ReadSolInteger(uint8_t* data, int size, int& index, bool un
 
     if (i == 4) {
         if (index + i >= size) {
-            throw std::runtime_error(ERR_INVALID_FILE);
+            ThrowFileEndedImproperlyOnReadingType(SolType::Integer);
         }
         result = result << 8 | data[index + i];
     }
@@ -149,7 +173,7 @@ sol::SolInteger sol::ReadSolInteger(uint8_t* data, int size, int& index, bool un
 sol::SolDouble sol::ReadSolDouble(uint8_t* data, int size, int& index)
 {
     if (index + 8 > size) {
-        throw std::runtime_error(ERR_INVALID_FILE);
+        ThrowFileEndedImproperlyOnReadingType(SolType::Double);
     }
 
     uint64_t tmp = utils::ReverseEndian(
@@ -170,7 +194,7 @@ sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, SolRefTab
     int len = ref >> 1;
 
     if (index + len > size) {
-        throw std::runtime_error(ERR_INVALID_FILE);
+        ThrowFileEndedImproperlyOnReadingType(SolType::String);
     }
 
     if (len == 0) {
@@ -189,7 +213,7 @@ sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index)
     int len = ReadSolInteger(data, size, index, true) >> 1;
 
     if (index + len > size) {
-        throw std::runtime_error(ERR_INVALID_FILE);
+        ThrowFileEndedImproperlyOnReadingType(SolType::Binary);
     }
 
     std::vector<uint8_t> result(data + index, data + index + len);
@@ -201,16 +225,21 @@ sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, SolRefTable
 {
     int len = ReadSolInteger(data, size, index, true) >> 1;
 
-    if (index >= size || data[index++] != 0x01) {
-        throw std::runtime_error(ERR_INVALID_FILE);
+    if (index >= size) {
+        ThrowFileEndedImproperlyOnReadingType(SolType::Array);
     }
+
+    if (data[index] != 0x01) {
+        ThrowBadFormatOfType(SolType::Array, index, data[index], 0x01);
+    }
+    ++index;
 
     std::vector<SolValue> result;
     result.reserve(len);
 
     for (int i = 0; i < len; ++i) {
         if (index >= size) {
-            throw std::runtime_error(ERR_INVALID_FILE);
+            ThrowFileEndedImproperlyOnReadingType(SolType::Array);
         }
         SolType type = static_cast<SolType>(data[index++]);
         result.push_back(ReadSolValue(data, size, index, reftable, type));
@@ -223,16 +252,22 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
 {
     if (istop) {
         if (index >= size) {
-            throw std::runtime_error(ERR_INVALID_FILE);
+            ThrowFileEndedImproperlyOnReadingType(SolType::Object);
         }
-        if (data[index++] != 0x0B) {
-            throw std::runtime_error(ERR_INVALID_OBJECT);
+        if (data[index] != 0x0B) {
+            ThrowBadFormatOfType(SolType::Object, index, data[index], 0x0B);
         }
+        ++index;
     }
 
-    if (index >= size || data[index++] != 0x01) {
-        throw std::runtime_error(ERR_INVALID_OBJECT);
+    if (index >= size) {
+        ThrowFileEndedImproperlyOnReadingType(SolType::Object);
     }
+
+    if (data[index] != 0x01) {
+        ThrowBadFormatOfType(SolType::Object, index, data[index], 0x01);
+    }
+    ++index;
 
     std::string key;
     SolObject result;
@@ -244,7 +279,7 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
             break;
         }
         if (index >= size) {
-            throw std::runtime_error(ERR_INVALID_OBJECT);
+            ThrowFileEndedImproperlyOnReadingType(SolType::Object);
         }
 
         SolType type = static_cast<SolType>(data[index++]);
@@ -259,7 +294,7 @@ sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& 
     int len = ReadSolInteger(data, size, index, true) >> 1;
 
     if (index + len > size) {
-        throw std::runtime_error(ERR_INVALID_FILE);
+        ThrowFileEndedImproperlyOnReadingType(xmltype);
     }
 
     std::string xml(data + index, data + index + len);
@@ -322,13 +357,17 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
         break;
 
     default:
-        throw std::runtime_error(ERR_INVALID_TYPE);
+        ThrowUnknownType(type);
     }
 
     if (istop) {
-        if (index >= size || data[index++] != 0x00) {
-            throw std::runtime_error(ERR_INVALID_FILE);
+        if (index >= size) {
+            ThrowFileEndedImproperly();
         }
+        if (data[index] != 0x00) {
+            ThrowEndRequired(index, data[index]);
+        }
+        ++index;
     }
 
     return result;
