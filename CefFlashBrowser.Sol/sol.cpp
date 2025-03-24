@@ -37,6 +37,15 @@ namespace
         throw std::runtime_error(utils::FormatString(
             "End required at index %d: read %d, desire %d", index, read, desire));
     }
+
+    template <typename T>
+    void CheckRefIndex(const std::vector<T>& pool, int index)
+    {
+        if (index >= pool.size()) {
+            throw std::runtime_error(utils::FormatString(
+                "Reference index %d not found", index));
+        }
+    }
 }
 
 
@@ -188,7 +197,8 @@ sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, SolRefTab
     int ref = ReadSolInteger(data, size, index, true);
 
     if ((ref & 1) == 0) {
-        return reftable.strpool.at(ref >> 1);
+        CheckRefIndex(reftable.strpool, ref >> 1);
+        return reftable.strpool[ref >> 1];
     }
 
     int len = ref >> 1;
