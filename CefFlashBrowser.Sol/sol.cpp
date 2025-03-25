@@ -141,7 +141,15 @@ bool sol::ReadSolFile(SolFile& file)
             }
 
             SolType type = static_cast<SolType>(data[index++]);
-            file.data[key] = ReadSolValue(data, size, index, reftable, type, true);
+            file.data[key] = ReadSolValue(data, size, index, reftable, type);
+
+            if (index >= size) {
+                ThrowFileEndedImproperly();
+            }
+            if (data[index] != 0x00) {
+                ThrowEndRequired(index, data[index]);
+            }
+            ++index;
         }
 
         return true;
@@ -213,28 +221,44 @@ sol::SolString sol::ReadSolString(uint8_t* data, int size, int& index, SolRefTab
     }
 
     std::string result(data + index, data + index + len);
-    reftable.strpool.push_back(result);
-
     index += len;
+
+    reftable.strpool.push_back(result);
     return result;
 }
 
 sol::SolValue sol::ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType xmltype)
 {
-    int len = ReadSolInteger(data, size, index, true) >> 1;
+    int ref = ReadSolInteger(data, size, index, true);
+
+    if ((ref & 1) == 0) {
+        CheckRefIndex(reftable.objpool, ref >> 1);
+        return reftable.objpool[ref >> 1];
+    }
+
+    int len = ref >> 1;
 
     if (index + len > size) {
         ThrowFileEndedImproperlyOnReadingType(xmltype);
     }
 
-    std::string xml(data + index, data + index + len);
+    SolValue result(xmltype, std::string(data + index, data + index + len));
     index += len;
-    return SolValue(xmltype, xml);
+
+    reftable.objpool.push_back(result);
+    return result;
 }
 
 sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index, SolRefTable& reftable)
 {
-    int len = ReadSolInteger(data, size, index, true) >> 1;
+    int ref = ReadSolInteger(data, size, index, true);
+
+    if ((ref & 1) == 0) {
+        CheckRefIndex(reftable.objpool, ref >> 1);
+        return reftable.objpool[ref >> 1].get<SolBinary>();
+    }
+
+    int len = ref >> 1;
 
     if (index + len > size) {
         ThrowFileEndedImproperlyOnReadingType(SolType::Binary);
@@ -242,36 +266,39 @@ sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index, SolRefTab
 
     std::vector<uint8_t> result(data + index, data + index + len);
     index += len;
+
+    reftable.objpool.push_back(result);
     return result;
 }
 
 sol::SolValue sol::ReadSolDate(uint8_t* data, int size, int& index, SolRefTable& reftable)
 {
-    if (index >= size) {
-        ThrowFileEndedImproperlyOnReadingType(SolType::Date);
+    int ref = ReadSolInteger(data, size, index, true);
+
+    if ((ref & 1) == 0) {
+        CheckRefIndex(reftable.objpool, ref >> 1);
+        return reftable.objpool[ref >> 1];
     }
 
-    if (data[index] != 0x01) {
-        ThrowBadFormatOfType(SolType::Date, index, data[index], 0x01);
-    }
-    ++index;
-
-    double value = ReadSolDouble(data, size, index);
-    return SolValue(SolType::Date, value);
+    SolValue result(SolType::Date, ReadSolDouble(data, size, index));
+    reftable.objpool.push_back(result);
+    return result;
 }
 
 sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, SolRefTable& reftable)
 {
-    int len = ReadSolInteger(data, size, index, true) >> 1;
+    int ref = ReadSolInteger(data, size, index, true);
 
-    if (index >= size) {
-        ThrowFileEndedImproperlyOnReadingType(SolType::Array);
+    if ((ref & 1) == 0) {
+        CheckRefIndex(reftable.objpool, ref >> 1);
+        return reftable.objpool[ref >> 1].get<SolArray>();
     }
 
-    if (data[index] != 0x01) {
-        ThrowBadFormatOfType(SolType::Array, index, data[index], 0x01);
+    int len = ref >> 1;
+
+    if (!ReadSolString(data, size, index, reftable).empty()) {
+        throw std::runtime_error("Associative portion of array is not supported");
     }
-    ++index;
 
     std::vector<SolValue> result;
     result.reserve(len);
@@ -284,29 +311,34 @@ sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, SolRefTable
         result.push_back(ReadSolValue(data, size, index, reftable, type));
     }
 
+    reftable.objpool.push_back(result);
     return result;
 }
 
-sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable, bool istop)
+sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable)
 {
-    if (istop) {
-        if (index >= size) {
-            ThrowFileEndedImproperlyOnReadingType(SolType::Object);
-        }
-        if (data[index] != 0x0B) {
-            ThrowBadFormatOfType(SolType::Object, index, data[index], 0x0B);
-        }
-        ++index;
+    int ref = ReadSolInteger(data, size, index, true);
+
+    if ((ref & 1) == 0) {
+        CheckRefIndex(reftable.objpool, ref >> 1);
+        return reftable.objpool[ref >> 1].get<SolObject>();
     }
 
-    if (index >= size) {
-        ThrowFileEndedImproperlyOnReadingType(SolType::Object);
+    int classref = ref >> 1;
+
+    if ((classref & 1) == 0) {
+        throw std::runtime_error("Class reference is not supported");
     }
 
-    if (data[index] != 0x01) {
-        ThrowBadFormatOfType(SolType::Object, index, data[index], 0x01);
+    int externalizable = (classref >> 1) & 1;
+    int dynamic = (classref >> 2) & 1;
+    int propnum = classref >> 3;
+
+    if (!(!externalizable && dynamic)) {
+        throw std::runtime_error("Only dynamic class is supported");
     }
-    ++index;
+
+    ReadSolString(data, size, index, reftable); // skip class name
 
     std::string key;
     SolObject result;
@@ -325,10 +357,11 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
         result[key] = ReadSolValue(data, size, index, reftable, type);
     }
 
+    reftable.objpool.push_back(result);
     return result;
 }
 
-sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop)
+sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type)
 {
     SolValue result;
 
@@ -375,7 +408,7 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
         break;
 
     case SolType::Object:
-        result = ReadSolObject(data, size, index, reftable, istop);
+        result = ReadSolObject(data, size, index, reftable);
         break;
 
     case SolType::Xml:
@@ -388,16 +421,6 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
 
     default:
         ThrowUnknownType(type);
-    }
-
-    if (istop) {
-        if (index >= size) {
-            ThrowFileEndedImproperly();
-        }
-        if (data[index] != 0x00) {
-            ThrowEndRequired(index, data[index]);
-        }
-        ++index;
     }
 
     return result;

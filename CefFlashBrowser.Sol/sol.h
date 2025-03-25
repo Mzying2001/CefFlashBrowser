@@ -104,7 +104,7 @@ namespace sol
         std::string errmsg;
         std::string solname;
         uint32_t version;
-        SolObject data;
+        std::map<std::string, SolValue> data;
 
         bool valid() const { return errmsg.empty(); }
     };
@@ -135,9 +135,9 @@ namespace sol
 
     SolArray ReadSolArray(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
-    SolObject ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable, bool istop = false);
+    SolObject ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
-    SolValue ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type, bool istop = false);
+    SolValue ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type);
 }
 
 #endif // !__SOL_H__
