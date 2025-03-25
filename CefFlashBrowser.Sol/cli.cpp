@@ -27,8 +27,8 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
     case SolType::Undefined:
         return SolUndefined::typeid;
 
-    case SolType::BooleanTrue:
     case SolType::BooleanFalse:
+    case SolType::BooleanTrue:
         return Boolean::typeid;
 
     case SolType::Integer:
@@ -42,6 +42,9 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
 
     case SolType::XmlDoc:
         return SolXmlDoc::typeid;
+
+    case SolType::Date:
+        return DateTime::typeid;
 
     case SolType::Array:
         return array<SolValueWrapper^>::typeid;
@@ -78,8 +81,8 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
     case SolType::Undefined:
         return SolUndefined::Value;
 
-    case SolType::BooleanTrue:
     case SolType::BooleanFalse:
+    case SolType::BooleanTrue:
         return gcnew Boolean(_pval->get<SolBoolean>());
 
     case SolType::Integer:
@@ -93,6 +96,9 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
 
     case SolType::XmlDoc:
         return gcnew SolXmlDoc(utils::ToSystemString(_pval->get<SolString>()));
+
+    case SolType::Date:
+        return utils::ToSystemDateTime(_pval->get<SolDouble>());
 
     case SolType::Array: {
         auto arr = _pval->get<SolArray>();
@@ -158,6 +164,10 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
     else if (type == SolXmlDoc::typeid) {
         _pval->type = SolType::XmlDoc;
         _pval->value = utils::ToStdString(((SolXmlDoc^)value)->Data);
+    }
+    else if (type == DateTime::typeid) {
+        _pval->type = SolType::Date;
+        _pval->value = utils::ToTimestamp((DateTime)value);
     }
     else if (type == array<SolValueWrapper^>::typeid) {
         auto arr = (array<SolValueWrapper^>^)value;

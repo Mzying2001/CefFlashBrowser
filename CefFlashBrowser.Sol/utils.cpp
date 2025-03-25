@@ -77,3 +77,14 @@ std::vector<uint8_t> utils::ToByteVector(array<System::Byte>^ arr)
     }
     return vec;
 }
+
+System::DateTime utils::ToSystemDateTime(double timestamp)
+{
+    return DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc).AddMilliseconds(timestamp);
+}
+
+double utils::ToTimestamp(System::DateTime datetime)
+{
+    DateTime utc = datetime.ToUniversalTime();
+    return (utc - DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc)).TotalMilliseconds;
+}

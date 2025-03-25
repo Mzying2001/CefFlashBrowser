@@ -33,6 +33,7 @@ namespace sol
         Double = 0x05,
         String = 0x06,
         XmlDoc = 0x07,
+        Date = 0x08,
         Array = 0x09,
         Object = 0x0A,
         Xml = 0x0B,
@@ -72,6 +73,7 @@ namespace sol
             case SolType::Integer:
                 return std::is_same_v<T, SolInteger>;
             case SolType::Double:
+            case SolType::Date:
                 return std::is_same_v<T, SolDouble>;
             case SolType::String:
             case SolType::XmlDoc:
@@ -128,6 +130,8 @@ namespace sol
     SolValue ReadSolXml(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType xmltype);
 
     SolBinary ReadSolBinary(uint8_t* data, int size, int& index, SolRefTable& reftable);
+
+    SolValue ReadSolDate(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
     SolArray ReadSolArray(uint8_t* data, int size, int& index, SolRefTable& reftable);
 

@@ -61,6 +61,7 @@ bool sol::IsKnownType(SolType type)
     case SolType::Double:
     case SolType::String:
     case SolType::XmlDoc:
+    case SolType::Date:
     case SolType::Array:
     case SolType::Object:
     case SolType::Xml:
@@ -153,7 +154,7 @@ bool sol::ReadSolFile(SolFile& file)
 
 sol::SolInteger sol::ReadSolInteger(uint8_t* data, int size, int& index, bool unsign)
 {
-    SolInteger result = 0;
+    int32_t result = 0;
 
     int i = 0;
     for (; i < 3; ++i) {
@@ -242,6 +243,21 @@ sol::SolBinary sol::ReadSolBinary(uint8_t* data, int size, int& index, SolRefTab
     std::vector<uint8_t> result(data + index, data + index + len);
     index += len;
     return result;
+}
+
+sol::SolValue sol::ReadSolDate(uint8_t* data, int size, int& index, SolRefTable& reftable)
+{
+    if (index >= size) {
+        ThrowFileEndedImproperlyOnReadingType(SolType::Date);
+    }
+
+    if (data[index] != 0x01) {
+        ThrowBadFormatOfType(SolType::Date, index, data[index], 0x01);
+    }
+    ++index;
+
+    double value = ReadSolDouble(data, size, index);
+    return SolValue(SolType::Date, value);
 }
 
 sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, SolRefTable& reftable)
@@ -348,6 +364,10 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
 
     case SolType::XmlDoc:
         result = ReadSolXml(data, size, index, reftable, sol::SolType::XmlDoc);
+        break;
+
+    case SolType::Date:
+        result = ReadSolDate(data, size, index, reftable);
         break;
 
     case SolType::Array:

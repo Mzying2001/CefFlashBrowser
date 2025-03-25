@@ -21,6 +21,10 @@ namespace utils
 
     std::vector<uint8_t> ToByteVector(array<System::Byte>^ arr);
 
+    System::DateTime ToSystemDateTime(double timestamp);
+
+    double ToTimestamp(System::DateTime datetime);
+
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, T> ReverseEndian(T value)
