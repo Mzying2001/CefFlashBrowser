@@ -296,19 +296,24 @@ sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, SolRefTable
 
     int len = ref >> 1;
 
-    if (!ReadSolString(data, size, index, reftable).empty()) {
-        throw std::runtime_error("Associative portion of array is not supported");
-    }
+    SolArray result;
+    result.dense.reserve(len);
 
-    std::vector<SolValue> result;
-    result.reserve(len);
+    std::string name;
+    while (!(name = ReadSolString(data, size, index, reftable)).empty()) {
+        if (index >= size) {
+            ThrowFileEndedImproperlyOnReadingType(SolType::Array);
+        }
+        SolType type = static_cast<SolType>(data[index++]);
+        result.assoc.emplace_back(name, ReadSolValue(data, size, index, reftable, type));
+    }
 
     for (int i = 0; i < len; ++i) {
         if (index >= size) {
             ThrowFileEndedImproperlyOnReadingType(SolType::Array);
         }
         SolType type = static_cast<SolType>(data[index++]);
-        result.push_back(ReadSolValue(data, size, index, reftable, type));
+        result.dense.push_back(ReadSolValue(data, size, index, reftable, type));
     }
 
     reftable.objpool.push_back(result);

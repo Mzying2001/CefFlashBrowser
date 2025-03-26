@@ -56,10 +56,8 @@ namespace CefFlashBrowser::Sol
 
     public ref class SolValueWrapper
     {
-    private:
-        sol::SolValue* _pval;
-
     internal:
+        sol::SolValue* _pval;
         SolValueWrapper(sol::SolValue* pval);
 
     public:
@@ -91,6 +89,28 @@ namespace CefFlashBrowser::Sol
         property String^ SolName { String^ get(); }
         property UInt32 Version { UInt32 get(); }
         property Dictionary<String^, SolValueWrapper^>^ Data { Dictionary<String^, SolValueWrapper^>^ get(); }
+    };
+
+
+    public ref class SolArrayWrapper
+    {
+    private:
+        List<SolValueWrapper^>^ _dense;
+        Dictionary<String^, SolValueWrapper^>^ _assoc;
+
+    internal:
+        sol::SolArray* _parr;
+        SolArrayWrapper(sol::SolArray* parr);
+
+        void UpdateUnmanagedData();
+
+    public:
+        SolArrayWrapper();
+        ~SolArrayWrapper();
+
+    public:
+        property List<SolValueWrapper^>^ Dense { List<SolValueWrapper^>^ get(); }
+        property Dictionary<String^, SolValueWrapper^>^ Assoc { Dictionary<String^, SolValueWrapper^>^ get(); }
     };
 }
 

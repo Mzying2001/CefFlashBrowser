@@ -47,7 +47,7 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
         return DateTime::typeid;
 
     case SolType::Array:
-        return array<SolValueWrapper^>::typeid;
+        return SolArrayWrapper::typeid;
 
     case SolType::Object:
         return Dictionary<String^, SolValueWrapper^>::typeid;
@@ -100,14 +100,8 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
     case SolType::Date:
         return utils::ToSystemDateTime(_pval->get<SolDouble>());
 
-    case SolType::Array: {
-        auto arr = _pval->get<SolArray>();
-        auto res = gcnew array<SolValueWrapper^>((int)arr.size());
-        for (int i = 0; i < (int)arr.size(); i++) {
-            res[i] = gcnew SolValueWrapper(new SolValue(arr[i]));
-        }
-        return res;
-    }
+    case SolType::Array:
+        return gcnew SolArrayWrapper(new SolArray(_pval->get<SolArray>()));
 
     case SolType::Object: {
         auto obj = _pval->get<SolObject>();
@@ -169,21 +163,17 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
         _pval->type = SolType::Date;
         _pval->value = utils::ToTimestamp((DateTime)value);
     }
-    else if (type == array<SolValueWrapper^>::typeid) {
-        auto arr = (array<SolValueWrapper^>^)value;
-        SolArray res;
-        res.reserve(arr->Length);
-        for (int i = 0; i < arr->Length; i++) {
-            res.push_back(*arr[i]->_pval);
-        }
+    else if (type == SolArrayWrapper::typeid) {
+        auto arr = (SolArrayWrapper^)value;
+        arr->UpdateUnmanagedData();
         _pval->type = SolType::Array;
-        _pval->value = res;
+        _pval->value = *arr->_parr;
     }
     else if (type == Dictionary<String^, SolValueWrapper^>::typeid) {
         auto obj = (Dictionary<String^, SolValueWrapper^>^)value;
         SolObject res;
-        for each (KeyValuePair<String^, SolValueWrapper^> ^ pair in obj) {
-            res[utils::ToStdString(pair->Key)] = *pair->Value->_pval;
+        for each (auto pair in obj) {
+            res[utils::ToStdString(pair.Key)] = *pair.Value->_pval;
         }
         _pval->type = SolType::Object;
         _pval->value = res;
@@ -245,4 +235,55 @@ System::Collections::Generic::Dictionary<System::String^, CefFlashBrowser::Sol::
 CefFlashBrowser::Sol::SolFileWrapper::Data::get()
 {
     return _data;
+}
+
+CefFlashBrowser::Sol::SolArrayWrapper::SolArrayWrapper(SolArray* parr)
+    : _parr(parr)
+{
+    _assoc = gcnew Dictionary<String^, SolValueWrapper^>((int)parr->assoc.size());
+    _dense = gcnew List<SolValueWrapper^>((int)parr->dense.size());
+
+    for (auto& [key, val] : parr->assoc) {
+        _assoc->Add(utils::ToSystemString(key), gcnew SolValueWrapper(new SolValue(val)));
+    }
+    for (auto& val : parr->dense) {
+        _dense->Add(gcnew SolValueWrapper(new SolValue(val)));
+    }
+}
+
+void CefFlashBrowser::Sol::SolArrayWrapper::UpdateUnmanagedData()
+{
+    _parr->assoc.clear();
+    _parr->dense.clear();
+
+    for each (auto pair in _assoc) {
+        _parr->assoc.emplace_back(utils::ToStdString(pair.Key), *pair.Value->_pval);
+    }
+    for each (auto val in _dense) {
+        _parr->dense.push_back(*val->_pval);
+    }
+}
+
+CefFlashBrowser::Sol::SolArrayWrapper::SolArrayWrapper()
+    : _parr(new SolArray())
+{
+    _assoc = gcnew Dictionary<String^, SolValueWrapper^>(10);
+    _dense = gcnew List<SolValueWrapper^>(10);
+}
+
+CefFlashBrowser::Sol::SolArrayWrapper::~SolArrayWrapper()
+{
+    delete _parr;
+}
+
+System::Collections::Generic::List<CefFlashBrowser::Sol::SolValueWrapper^>^
+CefFlashBrowser::Sol::SolArrayWrapper::Dense::get()
+{
+    return _dense;
+}
+
+System::Collections::Generic::Dictionary<System::String^, CefFlashBrowser::Sol::SolValueWrapper^>^
+CefFlashBrowser::Sol::SolArrayWrapper::Assoc::get()
+{
+    return _assoc;
 }

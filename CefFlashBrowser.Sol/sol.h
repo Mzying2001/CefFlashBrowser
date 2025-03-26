@@ -12,13 +12,13 @@
 namespace sol
 {
     struct SolValue;
+    struct SolArray;
 
     using SolNull = std::nullptr_t;
     using SolBoolean = bool;
     using SolInteger = int32_t;
     using SolDouble = double;
     using SolString = std::string;
-    using SolArray = std::vector<SolValue>;
     using SolObject = std::map<std::string, SolValue>;
     using SolBinary = std::vector<uint8_t>;
 
@@ -38,6 +38,13 @@ namespace sol
         Object = 0x0A,
         Xml = 0x0B,
         Binary = 0x0C,
+    };
+
+
+    struct SolArray
+    {
+        std::vector<std::pair<std::string, SolValue>> assoc;
+        std::vector<SolValue> dense;
     };
 
 
