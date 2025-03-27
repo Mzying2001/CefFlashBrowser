@@ -24,7 +24,7 @@ namespace CefFlashBrowser::Sol
     };
 
 
-    public ref class SolXmlDoc
+    public ref class SolXmlDoc sealed
     {
     private:
         String^ _xml;
@@ -34,12 +34,15 @@ namespace CefFlashBrowser::Sol
         ~SolXmlDoc() {}
 
     public:
-        property String^ Data { String^ get() { return _xml; } }
+        property String^ Data {
+            String^ get() { return _xml; }
+            void set(String^ value) { _xml = value; }
+        }
         virtual String^ ToString() override { return _xml; }
     };
 
 
-    public ref class SolXml
+    public ref class SolXml sealed
     {
     private:
         String^ _xml;
@@ -49,12 +52,15 @@ namespace CefFlashBrowser::Sol
         ~SolXml() {}
 
     public:
-        property String^ Data { String^ get() { return _xml; } }
+        property String^ Data {
+            String^ get() { return _xml; }
+            void set(String^ value) { _xml = value; }
+        }
         virtual String^ ToString() override { return _xml; }
     };
 
 
-    public ref class SolValueWrapper
+    public ref class SolValueWrapper sealed
     {
     internal:
         sol::SolValue* _pval;
@@ -92,7 +98,7 @@ namespace CefFlashBrowser::Sol
     };
 
 
-    public ref class SolArrayWrapper
+    public ref class SolArrayWrapper sealed
     {
     private:
         List<SolValueWrapper^>^ _dense;
