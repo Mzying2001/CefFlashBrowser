@@ -257,7 +257,7 @@ void CefFlashBrowser::Sol::SolArrayWrapper::UpdateUnmanagedData()
     _parr->dense.clear();
 
     for each (auto pair in _assoc) {
-        _parr->assoc.emplace_back(utils::ToStdString(pair.Key), *pair.Value->_pval);
+        _parr->assoc[utils::ToStdString(pair.Key)] = *pair.Value->_pval;
     }
     for each (auto val in _dense) {
         _parr->dense.push_back(*val->_pval);

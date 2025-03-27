@@ -43,7 +43,7 @@ namespace sol
 
     struct SolArray
     {
-        std::vector<std::pair<std::string, SolValue>> assoc;
+        std::map<std::string, SolValue> assoc;
         std::vector<SolValue> dense;
     };
 

@@ -305,7 +305,7 @@ sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, SolRefTable
             ThrowFileEndedImproperlyOnReadingType(SolType::Array);
         }
         SolType type = static_cast<SolType>(data[index++]);
-        result.assoc.emplace_back(name, ReadSolValue(data, size, index, reftable, type));
+        result.assoc[name] = ReadSolValue(data, size, index, reftable, type);
     }
 
     for (int i = 0; i < len; ++i) {
