@@ -182,6 +182,24 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
     }
 }
 
+CefFlashBrowser::Sol::SolFileWrapper::SolFileWrapper(SolFile* pfile)
+    : _pfile(pfile)
+{
+    if (pfile->data.empty())
+    {
+        _data = gcnew Dictionary<String^, SolValueWrapper^>(10);
+    }
+    else
+    {
+        auto& data = _pfile->data;
+        _data = gcnew Dictionary<String^, SolValueWrapper^>((int)data.size());
+
+        for (auto& [key, val] : data) {
+            _data->Add(utils::ToSystemString(key), gcnew SolValueWrapper(new SolValue(data[key])));
+        }
+    }
+}
+
 CefFlashBrowser::Sol::SolFileWrapper::SolFileWrapper(String^ path)
     : _pfile(new SolFile())
 {
@@ -217,9 +235,19 @@ System::String^ CefFlashBrowser::Sol::SolFileWrapper::SolName::get()
     return utils::ToSystemString(_pfile->solname);
 }
 
+void CefFlashBrowser::Sol::SolFileWrapper::SolName::set(String^ value)
+{
+    _pfile->solname = utils::ToStdString(value);
+}
+
 System::UInt32 CefFlashBrowser::Sol::SolFileWrapper::Version::get()
 {
     return _pfile->version;
+}
+
+void CefFlashBrowser::Sol::SolFileWrapper::Version::set(UInt32 value)
+{
+    _pfile->version = value;
 }
 
 System::Collections::Generic::Dictionary<System::String^, CefFlashBrowser::Sol::SolValueWrapper^>^

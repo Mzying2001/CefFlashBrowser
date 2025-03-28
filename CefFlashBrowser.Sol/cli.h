@@ -80,11 +80,14 @@ namespace CefFlashBrowser::Sol
     };
 
 
-    public ref class SolFileWrapper
+    public ref class SolFileWrapper sealed
     {
     private:
-        sol::SolFile* _pfile;
         Dictionary<String^, SolValueWrapper^>^ _data;
+
+    internal:
+        sol::SolFile* _pfile;
+        SolFileWrapper(sol::SolFile* pfile);
 
     public:
         SolFileWrapper(String^ path);
@@ -92,8 +95,8 @@ namespace CefFlashBrowser::Sol
 
     public:
         property String^ Path { String^ get(); }
-        property String^ SolName { String^ get(); }
-        property UInt32 Version { UInt32 get(); }
+        property String^ SolName { String^ get(); void set(String^ value); }
+        property UInt32 Version { UInt32 get(); void set(UInt32 value); }
         property Dictionary<String^, SolValueWrapper^>^ Data { Dictionary<String^, SolValueWrapper^>^ get(); }
     };
 
