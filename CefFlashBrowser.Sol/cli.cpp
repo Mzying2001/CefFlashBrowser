@@ -50,7 +50,7 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
         return SolArrayWrapper::typeid;
 
     case SolType::Object:
-        return Dictionary<String^, SolValueWrapper^>::typeid;
+        return SolObjectWrapper::typeid;
 
     case SolType::Xml:
         return SolXml::typeid;
@@ -103,14 +103,8 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
     case SolType::Array:
         return gcnew SolArrayWrapper(new SolArray(_pval->get<SolArray>()));
 
-    case SolType::Object: {
-        auto obj = _pval->get<SolObject>();
-        auto res = gcnew Dictionary<String^, SolValueWrapper^>((int)obj.props.size());
-        for (auto& [key, val] : obj.props) {
-            res->Add(utils::ToSystemString(key), gcnew SolValueWrapper(new SolValue(val)));
-        }
-        return res;
-    }
+    case SolType::Object:
+        return gcnew SolObjectWrapper(new SolObject(_pval->get<SolObject>()));
 
     case SolType::Xml:
         return gcnew SolXml(utils::ToSystemString(_pval->get<SolString>()));
@@ -169,17 +163,11 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
         _pval->type = SolType::Array;
         _pval->value = *arr->_parr;
     }
-    else if (type == Dictionary<String^, SolValueWrapper^>::typeid) {
-        auto obj = (Dictionary<String^, SolValueWrapper^>^)value;
-        SolObject res;
-        res.classdef.externalizable = false;
-        res.classdef.dynamic = true;
-        res.classdef.name = "";
-        for each (auto pair in obj) {
-            res.props[utils::ToStdString(pair.Key)] = *pair.Value->_pval;
-        }
+    else if (type == SolObjectWrapper::typeid) {
+        auto obj = (SolObjectWrapper^)value;
+        obj->UpdateUnmanagedData();
         _pval->type = SolType::Object;
-        _pval->value = res;
+        _pval->value = *obj->_pobj;
     }
     else if (type == SolXml::typeid) {
         _pval->type = SolType::Xml;
@@ -289,4 +277,59 @@ System::Collections::Generic::Dictionary<System::String^, CefFlashBrowser::Sol::
 CefFlashBrowser::Sol::SolArrayWrapper::Assoc::get()
 {
     return _assoc;
+}
+
+
+CefFlashBrowser::Sol::SolObjectWrapper::SolObjectWrapper(SolObject* pobj)
+    : _pobj(pobj)
+{
+    _class = utils::ToSystemString(pobj->classdef.name);
+    _props = gcnew Dictionary<String^, SolValueWrapper^>((int)pobj->props.size());
+
+    for (auto& [key, val] : pobj->props) {
+        _props->Add(utils::ToSystemString(key), gcnew SolValueWrapper(new SolValue(val)));
+    }
+}
+
+void CefFlashBrowser::Sol::SolObjectWrapper::UpdateUnmanagedData()
+{
+    _pobj->classdef.externalizable = false;
+    _pobj->classdef.dynamic = true;
+
+    _pobj->classdef.name = utils::ToStdString(_class);
+    _pobj->classdef.members.clear();
+
+    _pobj->props.clear();
+
+    for each (auto pair in _props) {
+        _pobj->props[utils::ToStdString(pair.Key)] = *pair.Value->_pval;
+    }
+}
+
+CefFlashBrowser::Sol::SolObjectWrapper::SolObjectWrapper()
+    : _pobj(new SolObject())
+{
+    _class = String::Empty;
+    _props = gcnew Dictionary<String^, SolValueWrapper^>(10);
+}
+
+CefFlashBrowser::Sol::SolObjectWrapper::~SolObjectWrapper()
+{
+    delete _pobj;
+}
+
+System::String^ CefFlashBrowser::Sol::SolObjectWrapper::Class::get()
+{
+    return _class;
+}
+
+void CefFlashBrowser::Sol::SolObjectWrapper::Class::set(String^ value)
+{
+    _class = value;
+}
+
+System::Collections::Generic::Dictionary<System::String^, CefFlashBrowser::Sol::SolValueWrapper^>^
+CefFlashBrowser::Sol::SolObjectWrapper::Props::get()
+{
+    return _props;
 }

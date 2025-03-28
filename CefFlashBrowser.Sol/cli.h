@@ -118,6 +118,28 @@ namespace CefFlashBrowser::Sol
         property List<SolValueWrapper^>^ Dense { List<SolValueWrapper^>^ get(); }
         property Dictionary<String^, SolValueWrapper^>^ Assoc { Dictionary<String^, SolValueWrapper^>^ get(); }
     };
+
+
+    public ref class SolObjectWrapper sealed
+    {
+    private:
+        String^ _class;
+        Dictionary<String^, SolValueWrapper^>^ _props;
+
+    internal:
+        sol::SolObject* _pobj;
+        SolObjectWrapper(sol::SolObject* pobj);
+
+        void UpdateUnmanagedData();
+
+    public:
+        SolObjectWrapper();
+        ~SolObjectWrapper();
+
+    public:
+        property String^ Class { String^ get(); void set(String^ value); }
+        property Dictionary<String^, SolValueWrapper^>^ Props { Dictionary<String^, SolValueWrapper^>^ get(); }
+    };
 }
 
 #endif // !__CLI_H__
