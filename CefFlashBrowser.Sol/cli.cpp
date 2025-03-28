@@ -105,8 +105,8 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
 
     case SolType::Object: {
         auto obj = _pval->get<SolObject>();
-        auto res = gcnew Dictionary<String^, SolValueWrapper^>((int)obj.size());
-        for (auto& [key, val] : obj) {
+        auto res = gcnew Dictionary<String^, SolValueWrapper^>((int)obj.props.size());
+        for (auto& [key, val] : obj.props) {
             res->Add(utils::ToSystemString(key), gcnew SolValueWrapper(new SolValue(val)));
         }
         return res;
@@ -172,8 +172,11 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
     else if (type == Dictionary<String^, SolValueWrapper^>::typeid) {
         auto obj = (Dictionary<String^, SolValueWrapper^>^)value;
         SolObject res;
+        res.classdef.externalizable = false;
+        res.classdef.dynamic = true;
+        res.classdef.name = "";
         for each (auto pair in obj) {
-            res[utils::ToStdString(pair.Key)] = *pair.Value->_pval;
+            res.props[utils::ToStdString(pair.Key)] = *pair.Value->_pval;
         }
         _pval->type = SolType::Object;
         _pval->value = res;

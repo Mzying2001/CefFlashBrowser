@@ -329,37 +329,51 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
         return reftable.objpool[ref >> 1].get<SolObject>();
     }
 
+    SolObject result;
     int classref = ref >> 1;
 
     if ((classref & 1) == 0) {
-        throw std::runtime_error("Class reference is not supported");
+        int classindex = classref >> 1;
+        CheckRefIndex(reftable.classpool, classindex);
+        result.classdef = reftable.classpool[classindex];
     }
+    else {
+        result.classdef.externalizable = (classref >> 1) & 1;
+        result.classdef.dynamic = (classref >> 2) & 1;
 
-    int externalizable = (classref >> 1) & 1;
-    int dynamic = (classref >> 2) & 1;
-    int propnum = classref >> 3;
+        int membernum = classref >> 3;
+        result.classdef.members.reserve(membernum);
 
-    if (!(!externalizable && dynamic)) {
-        throw std::runtime_error("Only dynamic class is supported");
-    }
-
-    ReadSolString(data, size, index, reftable); // skip class name
-
-    std::string key;
-    SolObject result;
-
-    while (index < size) {
-        key = ReadSolString(data, size, index, reftable);
-
-        if (key.empty()) {
-            break;
+        if (result.classdef.externalizable) {
+            throw std::runtime_error("Externalizable class is not supported");
         }
+
+        result.classdef.name = ReadSolString(data, size, index, reftable);
+
+        for (int i = 0; i < membernum; ++i) {
+            result.classdef.members.push_back(ReadSolString(data, size, index, reftable));
+        }
+
+        reftable.classpool.push_back(result.classdef);
+    }
+
+    for (auto& member : result.classdef.members) {
         if (index >= size) {
             ThrowFileEndedImproperlyOnReadingType(SolType::Object);
         }
-
         SolType type = static_cast<SolType>(data[index++]);
-        result[key] = ReadSolValue(data, size, index, reftable, type);
+        result.props[member] = ReadSolValue(data, size, index, reftable, type);
+    }
+
+    if (result.classdef.dynamic) {
+        std::string key;
+        while (!(key = ReadSolString(data, size, index, reftable)).empty()) {
+            if (index >= size) {
+                ThrowFileEndedImproperlyOnReadingType(SolType::Object);
+            }
+            SolType type = static_cast<SolType>(data[index++]);
+            result.props[key] = ReadSolValue(data, size, index, reftable, type);
+        }
     }
 
     reftable.objpool.push_back(result);

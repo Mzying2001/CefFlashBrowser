@@ -19,7 +19,6 @@ namespace sol
     using SolInteger = int32_t;
     using SolDouble = double;
     using SolString = std::string;
-    using SolObject = std::map<std::string, SolValue>;
     using SolBinary = std::vector<uint8_t>;
 
 
@@ -45,6 +44,22 @@ namespace sol
     {
         std::map<std::string, SolValue> assoc;
         std::vector<SolValue> dense;
+    };
+
+
+    struct SolClassDef
+    {
+        bool dynamic;
+        bool externalizable;
+        std::string name;
+        std::vector<std::string> members;
+    };
+
+
+    struct SolObject
+    {
+        SolClassDef classdef;
+        std::map<std::string, SolValue> props;
     };
 
 
@@ -121,6 +136,7 @@ namespace sol
     {
         std::vector<std::string> strpool;
         std::vector<SolValue> objpool;
+        std::vector<SolClassDef> classpool;
     };
 
 
