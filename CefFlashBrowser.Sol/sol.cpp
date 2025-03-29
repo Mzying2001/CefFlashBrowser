@@ -1,5 +1,6 @@
 #include "sol.h"
 #include "utils.h"
+#include <sstream>
 
 
 constexpr uint8_t SOL_MAGIC[] = { 0x00, 0xBF };
@@ -20,10 +21,16 @@ namespace
             "File ended improperly on reading type %d", static_cast<int>(type)));
     }
 
-    [[noreturn]] void ThrowUnknownType(sol::SolType type, int index)
+    [[noreturn]] void ThrowUnknownType(sol::SolType type, int index = -1)
     {
-        throw std::runtime_error(utils::FormatString(
-            "Unknown type %d at index %d", static_cast<int>(type), index));
+        if (index < 0) {
+            throw std::runtime_error(utils::FormatString(
+                "Unknown type %d", static_cast<int>(type)));
+        }
+        else {
+            throw std::runtime_error(utils::FormatString(
+                "Unknown type %d at index %d", static_cast<int>(type), index));
+        }
     }
 
     [[noreturn]] void ThrowBadFormatOfType(sol::SolType type, int index, int read, int desire)
@@ -44,6 +51,29 @@ namespace
         if (index >= pool.size()) {
             throw std::runtime_error(utils::FormatString(
                 "Reference index %d not found", index));
+        }
+    }
+
+    std::string GetClassDefUniqueStr(const sol::SolClassDef& classdef)
+    {
+        std::stringstream ss;
+        ss << classdef.name << ';'
+            << classdef.dynamic << ';'
+            << classdef.externalizable << ';';
+        for (const auto& member : classdef.members) {
+            ss << member << ';';
+        }
+        return ss.str();
+    }
+
+    int GetRefIndex(std::map<std::string, int>& pool, const std::string& id)
+    {
+        if (pool.count(id)) {
+            return pool[id];
+        }
+        else {
+            pool[id] = static_cast<int>(pool.size());
+            return -1;
         }
     }
 }
@@ -435,4 +465,250 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
     }
 
     return result;
+}
+
+bool sol::WriteSolFile(SolFile& file)
+{
+    try {
+        std::vector<uint8_t> buffer;
+        buffer.reserve(1024 * 100); // 100 KB
+
+        // magic
+        buffer.insert(buffer.end(), std::begin(SOL_MAGIC), std::end(SOL_MAGIC));
+
+        // chunk size, to be filled later
+        buffer.insert(buffer.end(), 4, 0);
+
+        // constant
+        buffer.insert(buffer.end(), std::begin(SOL_CONSTANT), std::end(SOL_CONSTANT));
+
+        // sol name
+        uint16_t namesize = utils::ReverseEndian((uint16_t)file.solname.size());
+        buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&namesize), reinterpret_cast<uint8_t*>(&namesize) + 2);
+        buffer.insert(buffer.end(), file.solname.begin(), file.solname.end());
+
+        // version
+        uint32_t version = utils::ReverseEndian(file.version);
+        buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&version), reinterpret_cast<uint8_t*>(&version) + 4);
+
+        // ref table
+        SolWriteRefTable reftable;
+
+        // data
+        for (auto& [key, value] : file.data) {
+            // key
+            WriteSolString(buffer, key, reftable);
+            // value
+            WriteSolType(buffer, value.type);
+            WriteSolValue(buffer, value, reftable);
+            // end
+            buffer.push_back(0x00);
+        }
+
+        // fill chunk size
+        uint32_t chunksize = utils::ReverseEndian((uint32_t)buffer.size() - 6);
+        std::copy_n(reinterpret_cast<uint8_t*>(&chunksize), 4, buffer.begin() + 2);
+
+        // write to file
+        utils::WriteFile(file.path, buffer);
+        return true;
+    }
+    catch (const std::exception& e) {
+        file.errmsg = e.what();
+        return false;
+    }
+}
+
+void sol::WriteSolType(std::vector<uint8_t>& buffer, SolType type)
+{
+    buffer.push_back(static_cast<uint8_t>(type));
+}
+
+void sol::WriteSolInteger(std::vector<uint8_t>& buffer, SolInteger value, bool unsign)
+{
+    if (!unsign && value < 0) {
+        value += 0x20000000;
+    }
+
+    if (value < 0x80) {
+        buffer.push_back(value);
+    }
+    else if (value < 0x4000) {
+        buffer.push_back((value >> 7) | 0x80);
+        buffer.push_back(value & 0x7F);
+    }
+    else if (value < 0x200000) {
+        buffer.push_back((value >> 14) | 0x80);
+        buffer.push_back((value >> 7) | 0x80);
+        buffer.push_back(value & 0x7F);
+    }
+    else {
+        buffer.push_back((value >> 22) | 0x80);
+        buffer.push_back((value >> 15) | 0x80);
+        buffer.push_back((value >> 8) | 0x80);
+        buffer.push_back(value & 0xFF);
+    }
+}
+
+void sol::WriteSolDouble(std::vector<uint8_t>& buffer, SolDouble value)
+{
+    uint64_t tmp = *reinterpret_cast<uint64_t*>(&value);
+    tmp = utils::ReverseEndian(tmp);
+    buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&tmp), reinterpret_cast<uint8_t*>(&tmp) + 8);
+}
+
+void sol::WriteSolString(std::vector<uint8_t>& buffer, const SolString& value, SolWriteRefTable& reftable)
+{
+    if (value.empty()) {
+        WriteSolInteger(buffer, 1, true);
+        return;
+    }
+
+    int ref = GetRefIndex(reftable.strpool, value);
+
+    if (ref >= 0) {
+        WriteSolInteger(buffer, ref << 1, true);
+        return;
+    }
+
+    int len = (int)value.size();
+    WriteSolInteger(buffer, (len << 1) | 1, true);
+    buffer.insert(buffer.end(), value.begin(), value.end());
+}
+
+void sol::WriteSolXml(std::vector<uint8_t>& buffer, const SolString& value, SolWriteRefTable& reftable, SolType xmltype)
+{
+    int len = (int)value.size();
+    WriteSolInteger(buffer, (len << 1) | 1, true);
+    buffer.insert(buffer.end(), value.begin(), value.end());
+}
+
+void sol::WriteSolBinary(std::vector<uint8_t>& buffer, const SolBinary& value, SolWriteRefTable& reftable)
+{
+    int len = (int)value.size();
+    WriteSolInteger(buffer, (len << 1) | 1, true);
+    buffer.insert(buffer.end(), value.begin(), value.end());
+}
+
+void sol::WriteSolDate(std::vector<uint8_t>& buffer, SolDouble value, SolWriteRefTable& reftable)
+{
+    WriteSolInteger(buffer, 1, true);
+    WriteSolDouble(buffer, value);
+}
+
+void sol::WriteSolArray(std::vector<uint8_t>& buffer, const SolArray& value, SolWriteRefTable& reftable)
+{
+    int len = (int)value.dense.size();
+    WriteSolInteger(buffer, (len << 1) | 1, true);
+
+    for (auto& [key, val] : value.assoc) {
+        WriteSolString(buffer, key, reftable);
+        WriteSolType(buffer, val.type);
+        WriteSolValue(buffer, val, reftable);
+    }
+
+    WriteSolString(buffer, std::string(), reftable);
+
+    for (auto& val : value.dense) {
+        WriteSolType(buffer, val.type);
+        WriteSolValue(buffer, val, reftable);
+    }
+}
+
+void sol::WriteSolObject(std::vector<uint8_t>& buffer, const SolObject& value, SolWriteRefTable& reftable)
+{
+    if (value.classdef.externalizable) {
+        throw std::runtime_error("Externalizable class is not supported");
+    }
+
+    auto classid = GetClassDefUniqueStr(value.classdef);
+    int classindex = GetRefIndex(reftable.classpool, classid);
+
+    if (classindex >= 0) {
+        int classref = classindex << 1;
+        WriteSolInteger(buffer, (classref << 1) | 1, true);
+    }
+    else {
+        int classref = (int)value.classdef.members.size();
+        classref = (classref << 1) | !!(int)value.classdef.dynamic;
+        classref = (classref << 1) | !!(int)value.classdef.externalizable;
+        classref = (classref << 1) | 1;
+        WriteSolInteger(buffer, (classref << 1) | 1, true);
+        WriteSolString(buffer, value.classdef.name, reftable);
+    }
+
+    std::map<std::string, const SolValue*> members;
+    std::map<std::string, const SolValue*> dynamicprops;
+
+    for (auto& member : value.classdef.members) {
+        members[member] = value.props.count(member) ? &value.props.at(member) : nullptr;
+    }
+    for (auto& [key, val] : value.props) {
+        if (!members.count(key)) {
+            dynamicprops[key] = &val;
+        }
+    }
+
+    for (auto& [member, val] : members) {
+        WriteSolType(buffer, val ? val->type : SolType::Undefined);
+        WriteSolValue(buffer, val ? *val : SolValue(SolType::Undefined, nullptr), reftable);
+    }
+    if (value.classdef.dynamic) {
+        for (auto& [key, val] : dynamicprops) {
+            WriteSolString(buffer, key, reftable);
+            WriteSolType(buffer, val->type);
+            WriteSolValue(buffer, *val, reftable);
+        }
+    }
+
+    WriteSolString(buffer, std::string(), reftable);
+}
+
+void sol::WriteSolValue(std::vector<uint8_t>& buffer, const SolValue& value, SolWriteRefTable& reftable)
+{
+    switch (value.type)
+    {
+    case SolType::Undefined:
+    case SolType::Null:
+    case SolType::BooleanFalse:
+    case SolType::BooleanTrue:
+        // nothing to write
+        break;
+
+    case SolType::Integer:
+        WriteSolInteger(buffer, value.get<SolInteger>());
+        break;
+
+    case SolType::Double:
+        WriteSolDouble(buffer, value.get<SolDouble>());
+        break;
+
+    case SolType::String:
+        WriteSolString(buffer, value.get<SolString>(), reftable);
+        break;
+
+    case SolType::XmlDoc:
+    case SolType::Xml:
+        WriteSolXml(buffer, value.get<SolString>(), reftable, value.type);
+        break;
+
+    case SolType::Date:
+        WriteSolDate(buffer, value.get<SolDouble>(), reftable);
+        break;
+
+    case SolType::Array:
+        WriteSolArray(buffer, value.get<SolArray>(), reftable);
+        break;
+
+    case SolType::Object:
+        WriteSolObject(buffer, value.get<SolObject>(), reftable);
+        break;
+
+    case SolType::Binary:
+        WriteSolBinary(buffer, value.get<SolBinary>(), reftable);
+        break;
+
+    default:
+        ThrowUnknownType(value.type);
+    }
 }

@@ -141,6 +141,14 @@ namespace sol
     };
 
 
+    struct SolWriteRefTable
+    {
+        std::map<std::string, int> strpool;
+        //std::map<std::string, int> objpool; // not supported
+        std::map<std::string, int> classpool;
+    };
+
+
     bool IsKnownType(SolType type);
 
     bool ReadSolFile(SolFile& file);
@@ -164,6 +172,29 @@ namespace sol
     SolObject ReadSolObject(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
     SolValue ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type);
+
+
+    bool WriteSolFile(SolFile& file);
+
+    void WriteSolType(std::vector<uint8_t>& buffer, SolType type);
+
+    void WriteSolInteger(std::vector<uint8_t>& buffer, SolInteger value, bool unsign = false);
+
+    void WriteSolDouble(std::vector<uint8_t>& buffer, SolDouble value);
+
+    void WriteSolString(std::vector<uint8_t>& buffer, const SolString& value, SolWriteRefTable& reftable);
+
+    void WriteSolXml(std::vector<uint8_t>& buffer, const SolString& value, SolWriteRefTable& reftable, SolType xmltype);
+
+    void WriteSolBinary(std::vector<uint8_t>& buffer, const SolBinary& value, SolWriteRefTable& reftable);
+
+    void WriteSolDate(std::vector<uint8_t>& buffer, SolDouble value, SolWriteRefTable& reftable);
+
+    void WriteSolArray(std::vector<uint8_t>& buffer, const SolArray& value, SolWriteRefTable& reftable);
+
+    void WriteSolObject(std::vector<uint8_t>& buffer, const SolObject& value, SolWriteRefTable& reftable);
+
+    void WriteSolValue(std::vector<uint8_t>& buffer, const SolValue& value, SolWriteRefTable& reftable);
 }
 
 #endif // !__SOL_H__
