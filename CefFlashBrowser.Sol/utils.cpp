@@ -38,6 +38,9 @@ void utils::WriteFile(const std::string& path, const std::vector<uint8_t>& data)
 
 System::String^ utils::ToSystemString(const std::string& str, bool utf8)
 {
+    if (str.empty()) {
+        return String::Empty;
+    }
     if (utf8) {
         return gcnew String(str.c_str(), 0, (int)str.size(), Encoding::UTF8);
     }
@@ -48,6 +51,9 @@ System::String^ utils::ToSystemString(const std::string& str, bool utf8)
 
 std::string utils::ToStdString(System::String^ str, bool utf8)
 {
+    if (String::IsNullOrEmpty(str)) {
+        return std::string();
+    }
     if (utf8) {
         array<Byte>^ bytes = Encoding::UTF8->GetBytes(str);
         pin_ptr<Byte> pinned = &bytes[0];
