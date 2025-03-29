@@ -633,8 +633,13 @@ void sol::WriteSolObject(std::vector<uint8_t>& buffer, const SolObject& value, S
         classref = (classref << 1) | !!(int)value.classdef.dynamic;
         classref = (classref << 1) | !!(int)value.classdef.externalizable;
         classref = (classref << 1) | 1;
+
         WriteSolInteger(buffer, (classref << 1) | 1, true);
         WriteSolString(buffer, value.classdef.name, reftable);
+
+        for (auto& member : value.classdef.members) {
+            WriteSolString(buffer, member, reftable);
+        }
     }
 
     std::map<std::string, const SolValue*> members;
