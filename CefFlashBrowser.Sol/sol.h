@@ -13,6 +13,7 @@ namespace sol
 {
     struct SolValue;
     struct SolArray;
+    struct SolObject;
 
     using SolNull = std::nullptr_t;
     using SolBoolean = bool;

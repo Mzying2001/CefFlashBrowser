@@ -20,10 +20,10 @@ namespace
             "File ended improperly on reading type %d", static_cast<int>(type)));
     }
 
-    [[noreturn]] void ThrowUnknownType(sol::SolType type)
+    [[noreturn]] void ThrowUnknownType(sol::SolType type, int index)
     {
         throw std::runtime_error(utils::FormatString(
-            "Unknown type: %d", static_cast<int>(type)));
+            "Unknown type %d at index %d", static_cast<int>(type), index));
     }
 
     [[noreturn]] void ThrowBadFormatOfType(sol::SolType type, int index, int read, int desire)
@@ -439,7 +439,7 @@ sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable
         break;
 
     default:
-        ThrowUnknownType(type);
+        ThrowUnknownType(type, index - 1);
     }
 
     return result;
