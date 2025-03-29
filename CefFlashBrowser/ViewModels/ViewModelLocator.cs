@@ -11,6 +11,7 @@ namespace CefFlashBrowser.ViewModels
             Register<SettingsWindowViewModel>();
             Register<FavoritesManagerViewModel>();
             Register<LanguageSelectorViewModel>();
+            Register<SolSaveManagerViewModel>();
         }
 
         public MainWindowViewModel MainWindowViewModel
@@ -36,6 +37,11 @@ namespace CefFlashBrowser.ViewModels
         public LanguageSelectorViewModel LanguageSelectorViewModel
         {
             get => GetInstance<LanguageSelectorViewModel>();
+        }
+
+        public SolSaveManagerViewModel SolSaveManagerViewModel
+        {
+            get => GetInstance<SolSaveManagerViewModel>();
         }
     }
 }

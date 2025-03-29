@@ -19,6 +19,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ViewGithubCommand { get; set; }
         public DelegateCommand OpenWebsiteCommand { get; set; }
         public DelegateCommand DropFileCommand { get; set; }
+        public DelegateCommand OpenSolSaveManagerCommand { get; set; }
 
         public string WelcomeText
         {
@@ -121,6 +122,11 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void OpenSolSaveManager()
+        {
+            WindowManager.ShowSolSaveManager();
+        }
+
         private void OnLanguageChanged(object _)
         {
             RaisePropertyChanged(nameof(WelcomeText));
@@ -152,6 +158,7 @@ namespace CefFlashBrowser.ViewModels
             ViewGithubCommand = new DelegateCommand(ViewGithub);
             OpenWebsiteCommand = new DelegateCommand<Website>(OpenWebsite);
             DropFileCommand = new DelegateCommand<string[]>(DropFile);
+            OpenSolSaveManagerCommand = new DelegateCommand(OpenSolSaveManager);
 
             Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
         }

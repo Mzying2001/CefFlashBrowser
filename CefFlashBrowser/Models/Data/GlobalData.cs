@@ -15,6 +15,7 @@ namespace CefFlashBrowser.Models.Data
         public static string LogsPath { get; }
         public static string CefDllPath { get; }
         public static string PluginsPath { get; }
+        public static string SharedObjectsPath { get; }
 
         public static string CefLogPath { get; }
         public static string FlashPath { get; }
@@ -40,6 +41,7 @@ namespace CefFlashBrowser.Models.Data
             LogsPath = Path.Combine(AppBaseDirectory, "Logs\\");
             CefDllPath = Path.Combine(AssetsPath, "CefSharp\\");
             PluginsPath = Path.Combine(AssetsPath, "Plugins\\");
+            SharedObjectsPath = Path.Combine(CachesPath, "Pepper Data\\Shockwave Flash\\WritableRoot\\#SharedObjects\\");
 
             CefLogPath = Path.Combine(LogsPath, $"cef_{DateTime.Now:yyyyMMdd}.log");
             FlashPath = Path.Combine(PluginsPath, "pepflashplayer.dll");

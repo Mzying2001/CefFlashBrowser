@@ -9,11 +9,12 @@
     <sys:String x:Key="button_go">Vai</sys:String>
     <sys:String x:Key="menu_favorites">Preferiti</sys:String>
     <sys:String x:Key="menu_manageFavorites">Gestisci Preferiti</sys:String>
+    <sys:String x:Key="menu_manageSolSaveFiles">Gestisci i file di salvataggio SOL</sys:String>
     <sys:String x:Key="menu_languages">Lingue</sys:String>
     <sys:String x:Key="menu_options">Opzioni</sys:String>
     <sys:String x:Key="menu_settings">Impostazioni</sys:String>
-    <sys:String x:Key="menu_loadSwf">Carica file swf locale...</sys:String>
-    <sys:String x:Key="filter_swf">swf file</sys:String>
+    <sys:String x:Key="menu_loadSwf">Carica file SWF locale...</sys:String>
+    <sys:String x:Key="filter_swf">SWF file</sys:String>
     <sys:String x:Key="toolTip_viewGithub">Vedi su GitHub</sys:String>
 
     <!--Impostazioni Finestra-->
@@ -36,7 +37,7 @@
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">Disabilita pop up sulla pagina ricarica/chiudi</sys:String>
     <sys:String x:Key="settingItem_enableProxy">Abilita proxy</sys:String>
     <sys:String x:Key="settingItem_enableCustomUserAgent">Personalizza User Agent</sys:String>
-    <sys:String x:Key="settingItem_enableFakeFlashVersion">Falsa versione flash</sys:String>
+    <sys:String x:Key="settingItem_enableFakeFlashVersion">Falsa versione Flash</sys:String>
     <sys:String x:Key="settingItem_cefVersion">Versione CefSharp</sys:String>
     <sys:String x:Key="setting_server">Server</sys:String>
     <sys:String x:Key="setting_username">Nome Utente</sys:String>
@@ -107,17 +108,27 @@
     <sys:String x:Key="menu_openInDefaultBrowser">Apri nel browser predefinito</sys:String>
     <sys:String x:Key="menu_createShortcut">Crea scorciatoia</sys:String>
     <sys:String x:Key="menu_addFavorite">Aggiungi a Preferiti</sys:String>
-    <sys:String x:Key="menu_blockedSwfsTips">Alcuni contenuti flash sembrano bloccati dal kernel Chromium, puoi avviarli in SWF player:</sys:String>
+    <sys:String x:Key="menu_blockedSwfsTips">Alcuni contenuti Flash sembrano bloccati dal kernel Chromium, puoi avviarli in SWF player:</sys:String>
     <sys:String x:Key="toolTip_back">Indietro (Alt+Left)</sys:String>
     <sys:String x:Key="toolTip_forward">Avanti (Alt+Right)</sys:String>
     <sys:String x:Key="toolTip_reload">Ricarica (F5)</sys:String>
     <sys:String x:Key="toolTip_stop">Stop (Esc)</sys:String>
     <sys:String x:Key="toolTip_more">Altro</sys:String>
-    <sys:String x:Key="toolTip_blockedSwfs">Contenuti flash bloccati</sys:String>
+    <sys:String x:Key="toolTip_blockedSwfs">Contenuti Flash bloccati</sys:String>
     <sys:String x:Key="toolTip_zoomIn">Ingrandisci (Ctrl+Plus)</sys:String>
     <sys:String x:Key="toolTip_zoomOut">Riduci (Ctrl+Minus)</sys:String>
     <sys:String x:Key="filter_shortcut">Scorciatoia</sys:String>
     <sys:String x:Key="label_loading">Caricamento...</sys:String>
+
+    <!--Gestore dei salvataggi-->
+    <sys:String x:Key="solSaveManager_title">Gestore dei salvataggi SOL</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileName">Nome file</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileDir">Percorso file</sys:String>
+    <sys:String x:Key="solSaveManager_headerOperations">Operazioni</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipReload">Aggiorna</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipImport">Importa</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipExport">Esporta</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipDelete">Elimina</sys:String>
 
     <!--Dialoghi-->
     <sys:String x:Key="button_ok">OK</sys:String>

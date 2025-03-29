@@ -1,0 +1,139 @@
+﻿<Window x:Class="CefFlashBrowser.Views.SolSaveManager"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CefFlashBrowser.Views"
+        xmlns:m="clr-namespace:CefFlashBrowser.Models"
+        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+        mc:Ignorable="d"
+        
+        Height="500"
+        Width="800"
+        WindowStartupLocation="CenterScreen"
+        Title="{DynamicResource solSaveManager_title}"
+        DataContext="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel}">
+
+    <Window.Resources>
+        <CollectionViewSource x:Key="SolFilesView"
+                              Source="{Binding SolFiles}">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="WebsiteFolder"/>
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+    </Window.Resources>
+
+    <DockPanel>
+        <DockPanel Margin="10"
+                   DockPanel.Dock="Top">
+            <DockPanel.Resources>
+                <Style TargetType="Button"
+                       BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Width" Value="30"/>
+                    <Setter Property="Height" Value="30"/>
+                    <Setter Property="Padding" Value="0"/>
+                </Style>
+            </DockPanel.Resources>
+
+            <Button Margin="0,0,10,0"
+                    Command="{Binding ReloadWorkSpacesCommand}"
+                    ToolTip="{DynamicResource solSaveManager_toolTipReload}">
+                <svgc:SvgIcon Width="14"
+                              Height="14"
+                              UriSource="/Assets/Svgs/reload.svg"/>
+            </Button>
+
+            <ComboBox ItemsSource="{Binding WorkSpaces}"
+                      SelectedValue="{Binding CurrentWorkSpace}"/>
+        </DockPanel>
+
+        <ListView Margin="10,0,10,10"
+                  ItemsSource="{Binding Source={StaticResource SolFilesView}}">
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="GroupItem">
+                            <Setter Property="Margin" Value="0,0,0,5"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="GroupItem">
+                                        <Expander IsExpanded="True"
+                                                  Header="{Binding Name}">
+                                            <ItemsPresenter Margin="0,3,0,0"/>
+                                        </Expander>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+            </ListView.GroupStyle>
+
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="150"
+                                    Header="{DynamicResource solSaveManager_headerFileName}"
+                                    DisplayMemberBinding="{Binding FileName}"/>
+
+                    <GridViewColumn Width="400"
+                                    Header="{DynamicResource solSaveManager_headerFileDir}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type m:SolFileInfo}">
+                                <TextBlock TextTrimming="CharacterEllipsis"
+                                           ToolTip="{Binding FilePath}">
+                                    <Hyperlink Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.ShowInExplorerCommand}"
+                                               CommandParameter="{Binding}"
+                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=Foreground}">
+                                        <Run Text="{Binding PathInWebsiteFolder}"/>
+                                    </Hyperlink>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Header="{DynamicResource solSaveManager_headerOperations}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type m:SolFileInfo}">
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel.Resources>
+                                        <Style TargetType="Button"
+                                               BasedOn="{StaticResource {x:Type Button}}">
+                                            <Setter Property="Width" Value="30"/>
+                                            <Setter Property="Height" Value="30"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                        </Style>
+                                    </StackPanel.Resources>
+                                    <Button ToolTip="{DynamicResource solSaveManager_toolTipExport}"
+                                            Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.ExportSolCommand}"
+                                            CommandParameter="{Binding}">
+                                        <svgc:SvgIcon Width="14"
+                                                      Height="14"
+                                                      UriSource="/Assets/Svgs/export.svg"/>
+                                    </Button>
+                                    <Button Margin="5,0,0,0"
+                                            ToolTip="{DynamicResource solSaveManager_toolTipImport}"
+                                            Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.ImportSolCommand}"
+                                            CommandParameter="{Binding}">
+                                        <svgc:SvgIcon Width="14"
+                                                      Height="14"
+                                                      UriSource="/Assets/Svgs/import.svg"/>
+                                    </Button>
+                                    <Button Margin="5,0,0,0"
+                                            ToolTip="{DynamicResource solSaveManager_toolTipDelete}"
+                                            Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.DeleteSolCommand}"
+                                            CommandParameter="{Binding}">
+                                        <svgc:SvgIcon Width="14"
+                                                      Height="14"
+                                                      UriSource="/Assets/Svgs/trash.svg"
+                                                      Fill="{DynamicResource DangerBrush}"/>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </DockPanel>
+</Window>

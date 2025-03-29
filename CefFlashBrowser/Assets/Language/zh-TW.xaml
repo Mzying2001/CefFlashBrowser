@@ -9,11 +9,12 @@
     <sys:String x:Key="button_go">前往</sys:String>
     <sys:String x:Key="menu_favorites">我的最愛</sys:String>
     <sys:String x:Key="menu_manageFavorites">管理我的最愛</sys:String>
+    <sys:String x:Key="menu_manageSolSaveFiles">管理SOL存檔</sys:String>
     <sys:String x:Key="menu_languages">語言</sys:String>
     <sys:String x:Key="menu_options">選項</sys:String>
     <sys:String x:Key="menu_settings">設定</sys:String>
-    <sys:String x:Key="menu_loadSwf">載入本機swf檔案...</sys:String>
-    <sys:String x:Key="filter_swf">swf檔案</sys:String>
+    <sys:String x:Key="menu_loadSwf">載入本機SWF檔案...</sys:String>
+    <sys:String x:Key="filter_swf">SWF檔案</sys:String>
     <sys:String x:Key="toolTip_viewGithub">在GitHub檢視</sys:String>
 
     <!--設定視窗-->
@@ -36,7 +37,7 @@
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">阻止網頁重新整理/關閉時的確認對話框</sys:String>
     <sys:String x:Key="settingItem_enableProxy">使用代理伺服器</sys:String>
     <sys:String x:Key="settingItem_enableCustomUserAgent">自訂使用者代理（UA）</sys:String>
-    <sys:String x:Key="settingItem_enableFakeFlashVersion">偽造flash版本</sys:String>
+    <sys:String x:Key="settingItem_enableFakeFlashVersion">偽造Flash版本</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
     <sys:String x:Key="setting_server">伺服器</sys:String>
     <sys:String x:Key="setting_username">使用者名稱</sys:String>
@@ -107,17 +108,27 @@
     <sys:String x:Key="menu_openInDefaultBrowser">在預設瀏覽器開啟</sys:String>
     <sys:String x:Key="menu_createShortcut">建立網頁捷徑</sys:String>
     <sys:String x:Key="menu_addFavorite">將此網站加入我的最愛</sys:String>
-    <sys:String x:Key="menu_blockedSwfsTips">部分flash內容可能被Chromium核心封鎖，您可以在SWF播放器中播放：</sys:String>
+    <sys:String x:Key="menu_blockedSwfsTips">部分Flash內容可能被Chromium核心封鎖，您可以在SWF播放器中播放：</sys:String>
     <sys:String x:Key="toolTip_back">上一頁（Alt+向左鍵）</sys:String>
     <sys:String x:Key="toolTip_forward">下一頁（Alt+向右鍵）</sys:String>
     <sys:String x:Key="toolTip_reload">重新整理（F5）</sys:String>
     <sys:String x:Key="toolTip_stop">停止（Esc）</sys:String>
     <sys:String x:Key="toolTip_more">更多功能</sys:String>
-    <sys:String x:Key="toolTip_blockedSwfs">被封鎖的flash內容</sys:String>
+    <sys:String x:Key="toolTip_blockedSwfs">被封鎖的Flash內容</sys:String>
     <sys:String x:Key="toolTip_zoomIn">放大（Ctrl+加號鍵）</sys:String>
     <sys:String x:Key="toolTip_zoomOut">縮小（Ctrl+減號鍵）</sys:String>
     <sys:String x:Key="filter_shortcut">捷徑</sys:String>
     <sys:String x:Key="label_loading">載入中...</sys:String>
+
+    <!--存檔管理器-->
+    <sys:String x:Key="solSaveManager_title">SOL存檔管理器</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileName">檔案名稱</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileDir">檔案路徑</sys:String>
+    <sys:String x:Key="solSaveManager_headerOperations">操作</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipReload">重新整理</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipImport">匯入</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipExport">匯出</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipDelete">刪除</sys:String>
 
     <!--對話框-->
     <sys:String x:Key="button_ok">確定</sys:String>
