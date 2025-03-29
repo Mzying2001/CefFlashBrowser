@@ -89,6 +89,8 @@ namespace CefFlashBrowser::Sol
         sol::SolFile* _pfile;
         SolFileWrapper(sol::SolFile* pfile);
 
+        void UpdateUnmanagedData();
+
     public:
         SolFileWrapper(String^ path);
         ~SolFileWrapper();

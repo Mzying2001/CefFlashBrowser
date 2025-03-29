@@ -200,6 +200,15 @@ CefFlashBrowser::Sol::SolFileWrapper::SolFileWrapper(SolFile* pfile)
     }
 }
 
+void CefFlashBrowser::Sol::SolFileWrapper::UpdateUnmanagedData()
+{
+    _pfile->data.clear();
+
+    for each (auto pair in _data) {
+        _pfile->data[utils::ToStdString(pair.Key)] = *pair.Value->_pval;
+    }
+}
+
 CefFlashBrowser::Sol::SolFileWrapper::SolFileWrapper(String^ path)
     : _pfile(new SolFile())
 {
@@ -227,6 +236,8 @@ CefFlashBrowser::Sol::SolFileWrapper::~SolFileWrapper()
 
 void CefFlashBrowser::Sol::SolFileWrapper::Save()
 {
+    UpdateUnmanagedData();
+
     if (!sol::WriteSolFile(*_pfile)) {
         throw gcnew Exception(utils::ToSystemString(_pfile->errmsg));
     }
