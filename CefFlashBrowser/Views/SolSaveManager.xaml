@@ -7,6 +7,8 @@
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
         Height="500"
@@ -14,6 +16,17 @@
         WindowStartupLocation="CenterScreen"
         Title="{DynamicResource solSaveManager_title}"
         DataContext="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel}">
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+        <KeyBinding Gesture="F5"
+                    Command="{Binding ReloadWorkSpacesCommand}"/>
+    </Window.InputBindings>
+
+    <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior x:Name="windowBehavior"/>
+    </i:Interaction.Behaviors>
 
     <Window.Resources>
         <CollectionViewSource x:Key="SolFilesView"
