@@ -129,6 +129,7 @@
     <sys:String x:Key="solSaveManager_toolTipImport">Import</sys:String>
     <sys:String x:Key="solSaveManager_toolTipExport">Export</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">Delete</sys:String>
+    <sys:String x:Key="solSaveManager_filterSol">SOL file</sys:String>
 
     <!--Dialogs-->
     <sys:String x:Key="button_ok">OK</sys:String>
@@ -146,6 +147,10 @@
     <sys:String x:Key="message_removeItem">Are you sure to remove "{0}"?</sys:String>
     <sys:String x:Key="message_askWhetherToLeave">Do you want to leave this page?</sys:String>
     <sys:String x:Key="message_askWhetherToReload">Do you want to reload this page?</sys:String>
+    <sys:String x:Key="message_deleteFile">Do you want to delete the file "{0}"?</sys:String>
+    <sys:String x:Key="message_deleted">Deletion successful.</sys:String>
+    <sys:String x:Key="message_imported">Import successful.</sys:String>
+    <sys:String x:Key="message_exported">Export successful.</sys:String>
     <sys:String x:Key="error_message">Error Message</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Name cannot be empty.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">The URL cannot be empty.</sys:String>

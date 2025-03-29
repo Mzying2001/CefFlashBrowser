@@ -101,7 +101,17 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                //TODO
+                var sfd = new Microsoft.Win32.SaveFileDialog
+                {
+                    FileName = solFile.FileName,
+                    Filter = $"{LanguageManager.GetString("solSaveManager_filterSol")}|*.sol",
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    File.Copy(solFile.FilePath, sfd.FileName, true);
+                    WindowManager.Alert(LanguageManager.GetString("message_exported"));
+                }
             }
             catch (Exception e)
             {
@@ -113,7 +123,16 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                //TODO
+                var ofd = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = $"{LanguageManager.GetString("solSaveManager_filterSol")}|*.sol",
+                };
+
+                if (ofd.ShowDialog() == true)
+                {
+                    File.Copy(ofd.FileName, solFile.FilePath, true);
+                    WindowManager.Alert(LanguageManager.GetString("message_imported"));
+                }
             }
             catch (Exception e)
             {
@@ -125,7 +144,17 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                //TODO
+                string msg = string.Format(LanguageManager.GetString("message_deleteFile"), solFile.FileName);
+
+                WindowManager.Confirm(msg, callback: result =>
+                {
+                    if (result == true)
+                    {
+                        File.Delete(solFile.FilePath);
+                        SolFiles.Remove(solFile);
+                        WindowManager.Alert(LanguageManager.GetString("message_deleted"));
+                    }
+                });
             }
             catch (Exception e)
             {

@@ -129,6 +129,7 @@
     <sys:String x:Key="solSaveManager_toolTipImport">导入</sys:String>
     <sys:String x:Key="solSaveManager_toolTipExport">导出</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">删除</sys:String>
+    <sys:String x:Key="solSaveManager_filterSol">SOL文件</sys:String>
 
     <!--对话框-->
     <sys:String x:Key="button_ok">确定</sys:String>
@@ -146,6 +147,10 @@
     <sys:String x:Key="message_removeItem">确定要移除“{0}”吗？</sys:String>
     <sys:String x:Key="message_askWhetherToLeave">要离开此页面吗？</sys:String>
     <sys:String x:Key="message_askWhetherToReload">要重新加载此页面吗？</sys:String>
+    <sys:String x:Key="message_deleteFile">是否删除文件“{0}”？</sys:String>
+    <sys:String x:Key="message_deleted">删除成功。</sys:String>
+    <sys:String x:Key="message_imported">导入成功。</sys:String>
+    <sys:String x:Key="message_exported">导出成功。</sys:String>
     <sys:String x:Key="error_message">错误信息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名称不能为空。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">网址不能为空。</sys:String>
