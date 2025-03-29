@@ -93,6 +93,12 @@
                           Command="{Binding LoadSwfCommand}"/>
 
                 <Separator/>
+                
+                <!--SolSaveManager-->
+                <MenuItem Header="{DynamicResource menu_manageSolSaveFiles}"
+                          Command="{Binding OpenSolSaveManagerCommand}"/>
+
+                <Separator/>
 
                 <!--Languages Option-->
                 <MenuItem x:Name="languageMenu"

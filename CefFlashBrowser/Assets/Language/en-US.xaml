@@ -9,11 +9,12 @@
     <sys:String x:Key="button_go">Go</sys:String>
     <sys:String x:Key="menu_favorites">Favorites</sys:String>
     <sys:String x:Key="menu_manageFavorites">Manage Favorites</sys:String>
+    <sys:String x:Key="menu_manageSolSaveFiles">Manage SOL Save Files</sys:String>
     <sys:String x:Key="menu_languages">Language</sys:String>
     <sys:String x:Key="menu_options">Options</sys:String>
     <sys:String x:Key="menu_settings">Settings</sys:String>
-    <sys:String x:Key="menu_loadSwf">Load local swf file...</sys:String>
-    <sys:String x:Key="filter_swf">swf file</sys:String>
+    <sys:String x:Key="menu_loadSwf">Load local SWF file...</sys:String>
+    <sys:String x:Key="filter_swf">SWF file</sys:String>
     <sys:String x:Key="toolTip_viewGithub">View in GitHub</sys:String>
 
     <!--Settings Window-->
@@ -36,7 +37,7 @@
     <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">Disable pop ups on page refresh/close</sys:String>
     <sys:String x:Key="settingItem_enableProxy">Enable proxy</sys:String>
     <sys:String x:Key="settingItem_enableCustomUserAgent">Custom User Agent</sys:String>
-    <sys:String x:Key="settingItem_enableFakeFlashVersion">Fake flash version</sys:String>
+    <sys:String x:Key="settingItem_enableFakeFlashVersion">Fake Flash version</sys:String>
     <sys:String x:Key="settingItem_cefVersion">CefSharp version</sys:String>
     <sys:String x:Key="setting_server">Server</sys:String>
     <sys:String x:Key="setting_username">User Name</sys:String>
@@ -107,17 +108,28 @@
     <sys:String x:Key="menu_openInDefaultBrowser">Open in default browser</sys:String>
     <sys:String x:Key="menu_createShortcut">Create shortcut</sys:String>
     <sys:String x:Key="menu_addFavorite">Add this site to Favorites</sys:String>
-    <sys:String x:Key="menu_blockedSwfsTips">Some flash content seems to be blocked by the Chromium kernel, you can play it in the SWF player:</sys:String>
+    <sys:String x:Key="menu_blockedSwfsTips">Some Flash content seems to be blocked by the Chromium kernel, you can play it in the SWF player:</sys:String>
     <sys:String x:Key="toolTip_back">Back (Alt+Left)</sys:String>
     <sys:String x:Key="toolTip_forward">Forward (Alt+Right)</sys:String>
     <sys:String x:Key="toolTip_reload">Reload (F5)</sys:String>
     <sys:String x:Key="toolTip_stop">Stop (Esc)</sys:String>
     <sys:String x:Key="toolTip_more">More</sys:String>
-    <sys:String x:Key="toolTip_blockedSwfs">Blocked flash content</sys:String>
+    <sys:String x:Key="toolTip_blockedSwfs">Blocked Flash content</sys:String>
     <sys:String x:Key="toolTip_zoomIn">Zoom in (Ctrl+Plus)</sys:String>
     <sys:String x:Key="toolTip_zoomOut">Zoom out (Ctrl+Minus)</sys:String>
     <sys:String x:Key="filter_shortcut">shortcut</sys:String>
     <sys:String x:Key="label_loading">Loading...</sys:String>
+
+    <!-- Save Manager -->
+    <sys:String x:Key="solSaveManager_title">SOL Save Manager</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileName">File Name</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileDir">File Path</sys:String>
+    <sys:String x:Key="solSaveManager_headerOperations">Operations</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipReload">Refresh</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipImport">Import</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipExport">Export</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipDelete">Delete</sys:String>
+    <sys:String x:Key="solSaveManager_filterSol">SOL file</sys:String>
 
     <!--Dialogs-->
     <sys:String x:Key="button_ok">OK</sys:String>
@@ -135,6 +147,10 @@
     <sys:String x:Key="message_removeItem">Are you sure to remove "{0}"?</sys:String>
     <sys:String x:Key="message_askWhetherToLeave">Do you want to leave this page?</sys:String>
     <sys:String x:Key="message_askWhetherToReload">Do you want to reload this page?</sys:String>
+    <sys:String x:Key="message_deleteFile">Do you want to delete the file "{0}"?</sys:String>
+    <sys:String x:Key="message_deleted">Deletion successful.</sys:String>
+    <sys:String x:Key="message_imported">Import successful.</sys:String>
+    <sys:String x:Key="message_exported">Export successful.</sys:String>
     <sys:String x:Key="error_message">Error Message</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Name cannot be empty.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">The URL cannot be empty.</sys:String>
