@@ -225,6 +225,27 @@ CefFlashBrowser::Sol::SolFileWrapper::~SolFileWrapper()
     delete _pfile;
 }
 
+void CefFlashBrowser::Sol::SolFileWrapper::Save()
+{
+    if (!sol::WriteSolFile(*_pfile)) {
+        throw gcnew Exception(utils::ToSystemString(_pfile->errmsg));
+    }
+}
+
+CefFlashBrowser::Sol::SolFileWrapper^ CefFlashBrowser::Sol::SolFileWrapper::ReadFile(String^ path)
+{
+    return gcnew SolFileWrapper(path);
+}
+
+CefFlashBrowser::Sol::SolFileWrapper^ CefFlashBrowser::Sol::SolFileWrapper::CreateEmpty(String^ path)
+{
+    auto pfile = new SolFile;
+    pfile->path = utils::ToStdString(path, false);
+    pfile->solname = utils::ToStdString(System::IO::Path::GetFileNameWithoutExtension(path));
+    pfile->version = 3;
+    return gcnew SolFileWrapper(pfile);
+}
+
 System::String^ CefFlashBrowser::Sol::SolFileWrapper::Path::get()
 {
     return utils::ToSystemString(_pfile->path, false);

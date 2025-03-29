@@ -98,6 +98,10 @@ namespace CefFlashBrowser::Sol
         property String^ SolName { String^ get(); void set(String^ value); }
         property UInt32 Version { UInt32 get(); void set(UInt32 value); }
         property Dictionary<String^, SolValueWrapper^>^ Data { Dictionary<String^, SolValueWrapper^>^ get(); }
+
+        void Save();
+        static SolFileWrapper^ ReadFile(String^ path);
+        static SolFileWrapper^ CreateEmpty(String^ path);
     };
 
 
