@@ -42,12 +42,16 @@
     <Resource Include="Assets\Svgs\add.svg" />
     <Resource Include="Assets\Svgs\back.svg" />
     <Resource Include="Assets\Svgs\down.svg" />
+    <Resource Include="Assets\Svgs\edit.svg" />
+    <Resource Include="Assets\Svgs\export.svg" />
     <Resource Include="Assets\Svgs\forward.svg" />
+    <Resource Include="Assets\Svgs\import.svg" />
     <Resource Include="Assets\Svgs\more.svg" />
     <Resource Include="Assets\Svgs\page.svg" />
     <Resource Include="Assets\Svgs\reload.svg" />
     <Resource Include="Assets\Svgs\stop.svg" />
     <Resource Include="Assets\Svgs\sub.svg" />
+    <Resource Include="Assets\Svgs\trash.svg" />
     <Resource Include="Assets\Svgs\up.svg" />
     <Resource Include="Assets\Svgs\warning.svg" />
   </ItemGroup>
