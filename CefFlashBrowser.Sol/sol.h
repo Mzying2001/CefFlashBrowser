@@ -145,6 +145,8 @@ namespace sol
 
     bool ReadSolFile(SolFile& file);
 
+    SolType ReadSolType(uint8_t* data, int size, int& index);
+
     SolInteger ReadSolInteger(uint8_t* data, int size, int& index, bool unsign = false);
 
     SolDouble ReadSolDouble(uint8_t* data, int size, int& index);

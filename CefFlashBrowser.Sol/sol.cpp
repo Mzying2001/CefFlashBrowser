@@ -136,11 +136,7 @@ bool sol::ReadSolFile(SolFile& file)
         while (index < size) {
             key = ReadSolString(data, size, index, reftable);
 
-            if (index >= size) {
-                ThrowFileEndedImproperly();
-            }
-
-            SolType type = static_cast<SolType>(data[index++]);
+            SolType type = ReadSolType(data, size, index);
             file.data[key] = ReadSolValue(data, size, index, reftable, type);
 
             if (index >= size) {
@@ -158,6 +154,14 @@ bool sol::ReadSolFile(SolFile& file)
         file.errmsg = e.what();
         return false;
     }
+}
+
+sol::SolType sol::ReadSolType(uint8_t* data, int size, int& index)
+{
+    if (index >= size) {
+        throw std::runtime_error("File ended improperly, type expected");
+    }
+    return static_cast<SolType>(data[index++]);
 }
 
 sol::SolInteger sol::ReadSolInteger(uint8_t* data, int size, int& index, bool unsign)
@@ -301,18 +305,12 @@ sol::SolArray sol::ReadSolArray(uint8_t* data, int size, int& index, SolRefTable
 
     std::string name;
     while (!(name = ReadSolString(data, size, index, reftable)).empty()) {
-        if (index >= size) {
-            ThrowFileEndedImproperlyOnReadingType(SolType::Array);
-        }
-        SolType type = static_cast<SolType>(data[index++]);
+        SolType type = ReadSolType(data, size, index);
         result.assoc[name] = ReadSolValue(data, size, index, reftable, type);
     }
 
     for (int i = 0; i < len; ++i) {
-        if (index >= size) {
-            ThrowFileEndedImproperlyOnReadingType(SolType::Array);
-        }
-        SolType type = static_cast<SolType>(data[index++]);
+        SolType type = ReadSolType(data, size, index);
         result.dense.push_back(ReadSolValue(data, size, index, reftable, type));
     }
 
@@ -358,20 +356,14 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
     }
 
     for (auto& member : result.classdef.members) {
-        if (index >= size) {
-            ThrowFileEndedImproperlyOnReadingType(SolType::Object);
-        }
-        SolType type = static_cast<SolType>(data[index++]);
+        SolType type = ReadSolType(data, size, index);
         result.props[member] = ReadSolValue(data, size, index, reftable, type);
     }
 
     if (result.classdef.dynamic) {
         std::string key;
         while (!(key = ReadSolString(data, size, index, reftable)).empty()) {
-            if (index >= size) {
-                ThrowFileEndedImproperlyOnReadingType(SolType::Object);
-            }
-            SolType type = static_cast<SolType>(data[index++]);
+            SolType type = ReadSolType(data, size, index);
             result.props[key] = ReadSolValue(data, size, index, reftable, type);
         }
     }
