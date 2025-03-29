@@ -76,7 +76,7 @@ namespace CefFlashBrowser::Sol
         property bool IsNull { bool get(); }
 
         Object^ GetValue();
-        void SetValue(Object^ value);
+        SolValueWrapper^ SetValue(Object^ value);
     };
 
 

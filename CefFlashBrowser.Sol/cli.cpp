@@ -118,12 +118,12 @@ System::Object^ CefFlashBrowser::Sol::SolValueWrapper::GetValue()
     }
 }
 
-void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
+CefFlashBrowser::Sol::SolValueWrapper^ CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
 {
     if (value == nullptr) {
         _pval->type = SolType::Null;
         _pval->value = nullptr;
-        return;
+        return this;
     }
 
     auto type = value->GetType();
@@ -180,6 +180,8 @@ void CefFlashBrowser::Sol::SolValueWrapper::SetValue(Object^ value)
     else {
         throw gcnew ArgumentException("Unsupported type");
     }
+
+    return this;
 }
 
 CefFlashBrowser::Sol::SolFileWrapper::SolFileWrapper(SolFile* pfile)
