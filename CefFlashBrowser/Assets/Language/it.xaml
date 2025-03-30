@@ -129,6 +129,7 @@
     <sys:String x:Key="solSaveManager_toolTipImport">Importa</sys:String>
     <sys:String x:Key="solSaveManager_toolTipExport">Esporta</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">Elimina</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipEdit">Modifica</sys:String>
     <sys:String x:Key="solSaveManager_filterSol">SOL file</sys:String>
 
     <!--Dialoghi-->

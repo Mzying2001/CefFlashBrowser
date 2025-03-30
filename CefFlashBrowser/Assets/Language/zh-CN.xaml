@@ -129,6 +129,7 @@
     <sys:String x:Key="solSaveManager_toolTipImport">导入</sys:String>
     <sys:String x:Key="solSaveManager_toolTipExport">导出</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">删除</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipEdit">编辑</sys:String>
     <sys:String x:Key="solSaveManager_filterSol">SOL文件</sys:String>
 
     <!--对话框-->

@@ -138,6 +138,14 @@
                                                       UriSource="/Assets/Svgs/import.svg"/>
                                     </Button>
                                     <Button Margin="5,0,0,0"
+                                            ToolTip="{DynamicResource solSaveManager_toolTipEdit}"
+                                            Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.EditSolCommand}"
+                                            CommandParameter="{Binding}">
+                                        <svgc:SvgIcon Width="13"
+                                                      Height="13"
+                                                      UriSource="/Assets/Svgs/edit.svg"/>
+                                    </Button>
+                                    <Button Margin="5,0,0,0"
                                             ToolTip="{DynamicResource solSaveManager_toolTipDelete}"
                                             Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.DeleteSolCommand}"
                                             CommandParameter="{Binding}">
