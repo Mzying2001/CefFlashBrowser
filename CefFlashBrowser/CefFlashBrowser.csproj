@@ -6,7 +6,6 @@
     <UseWPF>true</UseWPF>
     <Platforms>x86;x64</Platforms>
     <NuGetAudit>False</NuGetAudit>
-    <DebugType>embedded</DebugType>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <StartupObject>CefFlashBrowser.Program</StartupObject>
@@ -14,6 +13,7 @@
     <Version>1.0.9.1</Version>
     <Authors>Mzying2001</Authors>
     <Copyright>Copyright ©  2021</Copyright>
+    <ApplicationManifest>App.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)' == 'x86'">
@@ -98,7 +98,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="cd &quot;$(TargetDir)&quot;&#xD;&#xA;&#xD;&#xA;set ASSETS_PATH=Assets\&#xD;&#xA;set CEF_PATH=%25ASSETS_PATH%25CefSharp\&#xD;&#xA;set PLUGINS_PATH=%25ASSETS_PATH%25Plugins\&#xD;&#xA;set EMPTYEXE_PATH=%25ASSETS_PATH%25EmptyExe\&#xD;&#xA;&#xD;&#xA;del *.pdb&#xD;&#xA;del *.xml&#xD;&#xA;&#xD;&#xA;rd /s /q %25CEF_PATH%25locales&#xD;&#xA;rd /s /q %25CEF_PATH%25swiftshader&#xD;&#xA;&#xD;&#xA;move CefSharp.* %25CEF_PATH%25&#xD;&#xA;move cef.pak %25CEF_PATH%25&#xD;&#xA;move cef_100_percent.pak %25CEF_PATH%25&#xD;&#xA;move cef_200_percent.pak %25CEF_PATH%25&#xD;&#xA;move cef_extensions.pak %25CEF_PATH%25&#xD;&#xA;move chrome_elf.dll %25CEF_PATH%25&#xD;&#xA;move d3dcompiler_47.dll %25CEF_PATH%25&#xD;&#xA;move devtools_resources.pak %25CEF_PATH%25&#xD;&#xA;move icudtl.dat %25CEF_PATH%25&#xD;&#xA;move libcef.dll %25CEF_PATH%25&#xD;&#xA;move libEGL.dll %25CEF_PATH%25&#xD;&#xA;move libGLESv2.dll %25CEF_PATH%25&#xD;&#xA;move locales %25CEF_PATH%25&#xD;&#xA;move README.txt %25CEF_PATH%25&#xD;&#xA;move snapshot_blob.bin %25CEF_PATH%25&#xD;&#xA;move swiftshader %25CEF_PATH%25&#xD;&#xA;move v8_context_snapshot.bin %25CEF_PATH%25&#xD;&#xA;&#xD;&#xA;tar -xvf %25CEF_PATH%25libcef_$(PlatformName).tar.gz -C %25CEF_PATH%25&#xD;&#xA;del %25CEF_PATH%25libcef_*.tar.gz&#xD;&#xA;&#xD;&#xA;tar -xvf %25PLUGINS_PATH%25pepflashplayer_$(PlatformName).tar.gz -C %25PLUGINS_PATH%25&#xD;&#xA;del %25PLUGINS_PATH%25pepflashplayer_*.tar.gz&#xD;&#xA;&#xD;&#xA;rd /s /q %25EMPTYEXE_PATH%25&#xD;&#xA;mkdir %25EMPTYEXE_PATH%25&#xD;&#xA;move CefFlashBrowser.EmptyExe.* %25EMPTYEXE_PATH%25" />
+    <Exec Command="cd &quot;$(TargetDir)&quot;&#xD;&#xA;&#xD;&#xA;set ASSETS_PATH=Assets\&#xD;&#xA;set CEF_PATH=%25ASSETS_PATH%25CefSharp\&#xD;&#xA;set PLUGINS_PATH=%25ASSETS_PATH%25Plugins\&#xD;&#xA;set EMPTYEXE_PATH=%25ASSETS_PATH%25EmptyExe\&#xD;&#xA;&#xD;&#xA;if &quot;$(Configuration)&quot;==&quot;Release&quot; (del *.pdb)&#xD;&#xA;&#xD;&#xA;rd /s /q %25CEF_PATH%25locales&#xD;&#xA;rd /s /q %25CEF_PATH%25swiftshader&#xD;&#xA;&#xD;&#xA;move CefSharp.* %25CEF_PATH%25&#xD;&#xA;move cef.pak %25CEF_PATH%25&#xD;&#xA;move cef_100_percent.pak %25CEF_PATH%25&#xD;&#xA;move cef_200_percent.pak %25CEF_PATH%25&#xD;&#xA;move cef_extensions.pak %25CEF_PATH%25&#xD;&#xA;move chrome_elf.dll %25CEF_PATH%25&#xD;&#xA;move d3dcompiler_47.dll %25CEF_PATH%25&#xD;&#xA;move devtools_resources.pak %25CEF_PATH%25&#xD;&#xA;move icudtl.dat %25CEF_PATH%25&#xD;&#xA;move libcef.dll %25CEF_PATH%25&#xD;&#xA;move libEGL.dll %25CEF_PATH%25&#xD;&#xA;move libGLESv2.dll %25CEF_PATH%25&#xD;&#xA;move locales %25CEF_PATH%25&#xD;&#xA;move README.txt %25CEF_PATH%25&#xD;&#xA;move snapshot_blob.bin %25CEF_PATH%25&#xD;&#xA;move swiftshader %25CEF_PATH%25&#xD;&#xA;move v8_context_snapshot.bin %25CEF_PATH%25&#xD;&#xA;&#xD;&#xA;tar -xvf %25CEF_PATH%25libcef_$(PlatformName).tar.gz -C %25CEF_PATH%25&#xD;&#xA;del %25CEF_PATH%25libcef_*.tar.gz&#xD;&#xA;&#xD;&#xA;tar -xvf %25PLUGINS_PATH%25pepflashplayer_$(PlatformName).tar.gz -C %25PLUGINS_PATH%25&#xD;&#xA;del %25PLUGINS_PATH%25pepflashplayer_*.tar.gz&#xD;&#xA;&#xD;&#xA;rd /s /q %25EMPTYEXE_PATH%25&#xD;&#xA;mkdir %25EMPTYEXE_PATH%25&#xD;&#xA;move CefFlashBrowser.EmptyExe.* %25EMPTYEXE_PATH%25" />
   </Target>
 
 </Project>

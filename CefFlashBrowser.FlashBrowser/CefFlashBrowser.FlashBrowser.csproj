@@ -5,7 +5,6 @@
     <Platforms>x86;x64</Platforms>
     <UseWPF>true</UseWPF>
     <NuGetAudit>False</NuGetAudit>
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

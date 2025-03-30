@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
@@ -19,6 +20,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ExportSolCommand { get; }
         public DelegateCommand ImportSolCommand { get; }
         public DelegateCommand DeleteSolCommand { get; }
+        public DelegateCommand EditSolCommand { get; }
 
 
         private string[] _workSpaces;
@@ -162,6 +164,19 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void EditSolFile(SolFileInfo solFile)
+        {
+            try
+            {
+                var file = SolFileWrapper.ReadFile(solFile.FilePath);
+                WindowManager.Alert("Coming soon...");
+            }
+            catch (Exception e)
+            {
+                WindowManager.ShowError(e.Message);
+            }
+        }
+
         public SolSaveManagerViewModel()
         {
             ReloadWorkSpacesCommand = new DelegateCommand(ReloadWorkSpaces);
@@ -169,6 +184,7 @@ namespace CefFlashBrowser.ViewModels
             ExportSolCommand = new DelegateCommand<SolFileInfo>(ExportSol);
             ImportSolCommand = new DelegateCommand<SolFileInfo>(ImportSol);
             DeleteSolCommand = new DelegateCommand<SolFileInfo>(DeleteSol);
+            EditSolCommand = new DelegateCommand<SolFileInfo>(EditSolFile);
 
             ReloadWorkSpaces();
         }

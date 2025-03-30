@@ -340,5 +340,4 @@ ASALocalRun/
 healthchecksdb
 
 # FodyWeavers
-FodyWeavers.xml
 FodyWeavers.xsd

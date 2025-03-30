@@ -11,8 +11,8 @@
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
-        Height="500"
         Width="800"
+        Height="500"
         WindowStartupLocation="CenterScreen"
         Title="{DynamicResource solSaveManager_title}"
         DataContext="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel}">
@@ -71,9 +71,27 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="GroupItem">
-                                        <Expander IsExpanded="True"
-                                                  Header="{Binding Name}">
-                                            <ItemsPresenter Margin="0,3,0,0"/>
+                                        <Expander>
+                                            <Expander.Style>
+                                                <Style TargetType="Expander"
+                                                       BasedOn="{StaticResource {x:Type Expander}}">
+                                                    <Setter Property="IsExpanded" Value="True"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Name}"
+                                                                     Value="macromedia.com">
+                                                            <!--Collapse items of `macromedia.com` by default-->
+                                                            <Setter Property="IsExpanded" Value="False"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Expander.Style>
+                                            <Expander.Header>
+                                                <TextBlock FontWeight="Bold"
+                                                           Text="{Binding Name}"/>
+                                            </Expander.Header>
+                                            <Expander.Content>
+                                                <ItemsPresenter Margin="0,3,0,0"/>
+                                            </Expander.Content>
                                         </Expander>
                                     </ControlTemplate>
                                 </Setter.Value>
@@ -131,6 +149,14 @@
                                         <svgc:SvgIcon Width="14"
                                                       Height="14"
                                                       UriSource="/Assets/Svgs/import.svg"/>
+                                    </Button>
+                                    <Button Margin="5,0,0,0"
+                                            ToolTip="{DynamicResource solSaveManager_toolTipEdit}"
+                                            Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.EditSolCommand}"
+                                            CommandParameter="{Binding}">
+                                        <svgc:SvgIcon Width="13"
+                                                      Height="13"
+                                                      UriSource="/Assets/Svgs/edit.svg"/>
                                     </Button>
                                     <Button Margin="5,0,0,0"
                                             ToolTip="{DynamicResource solSaveManager_toolTipDelete}"
