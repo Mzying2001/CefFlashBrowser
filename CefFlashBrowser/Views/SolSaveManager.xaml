@@ -11,8 +11,8 @@
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
-        Height="500"
         Width="800"
+        Height="500"
         WindowStartupLocation="CenterScreen"
         Title="{DynamicResource solSaveManager_title}"
         DataContext="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel}">
@@ -71,9 +71,14 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="GroupItem">
-                                        <Expander IsExpanded="True"
-                                                  Header="{Binding Name}">
-                                            <ItemsPresenter Margin="0,3,0,0"/>
+                                        <Expander IsExpanded="True">
+                                            <Expander.Header>
+                                                <TextBlock FontWeight="Bold"
+                                                           Text="{Binding Name}"/>
+                                            </Expander.Header>
+                                            <Expander.Content>
+                                                <ItemsPresenter Margin="0,3,0,0"/>
+                                            </Expander.Content>
                                         </Expander>
                                     </ControlTemplate>
                                 </Setter.Value>
