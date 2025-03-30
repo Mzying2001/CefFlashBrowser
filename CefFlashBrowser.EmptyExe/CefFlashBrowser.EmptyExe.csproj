@@ -6,7 +6,6 @@
     <Platforms>x86;x64</Platforms>
     <UseWPF>true</UseWPF>
     <StartupObject>CefFlashBrowser.EmptyExe.Program</StartupObject>
-    <DebugType>none</DebugType>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>

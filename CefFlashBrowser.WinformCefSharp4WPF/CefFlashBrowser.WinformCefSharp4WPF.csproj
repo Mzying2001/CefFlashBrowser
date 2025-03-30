@@ -6,7 +6,6 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <NuGetAudit>False</NuGetAudit>
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
