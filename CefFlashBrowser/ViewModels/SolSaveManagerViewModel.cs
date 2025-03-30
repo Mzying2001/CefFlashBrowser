@@ -169,7 +169,7 @@ namespace CefFlashBrowser.ViewModels
             try
             {
                 var file = SolFileWrapper.ReadFile(solFile.FilePath);
-                WindowManager.Alert("Coming soon...");
+                WindowManager.ShowSolEditorWindow(file);
             }
             catch (Exception e)
             {

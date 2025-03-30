@@ -45,6 +45,37 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _children, value);
         }
 
+        private static Dictionary<Type, string> TypeStringDic { get; } = new Dictionary<Type, string>
+        {
+            [typeof(int)] = "int",
+            [typeof(double)] = "double",
+            [typeof(string)] = "string",
+            [typeof(bool)] = "bool",
+            [typeof(DateTime)] = "date",
+            [typeof(byte[])] = "byte[]",
+            [typeof(SolArray)] = "array",
+            [typeof(SolObject)] = "object",
+            [typeof(SolUndefined)] = "undefined",
+            [typeof(SolXmlDoc)] = "XmlDoc",
+            [typeof(SolXml)] = "Xml"
+        };
+
+        public string TypeString
+        {
+            get
+            {
+                if (Value == null)
+                {
+                    return "null";
+                }
+                else
+                {
+                    var type = Value.GetType();
+                    return TypeStringDic.ContainsKey(type) ? TypeStringDic[type] : string.Empty;
+                }
+            }
+        }
+
 
         private void UpdateChildren()
         {
@@ -159,14 +190,16 @@ namespace CefFlashBrowser.ViewModels
         {
             Parent = parent;
             Name = name;
-            Value = value;
+            _value = value;
+            UpdateChildren();
         }
 
         public SolNodeViewModel(SolFileWrapper file) : this()
         {
             Parent = null;
             Name = file.SolName;
-            Value = file;
+            _value = file;
+            UpdateChildren();
         }
 
         private SolNodeViewModel()

@@ -1,5 +1,7 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Sol;
+using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
 using SimpleMvvm.Messaging;
@@ -203,6 +205,14 @@ namespace CefFlashBrowser.Utils
         public static void ShowSolSaveManager()
         {
             ShowWindow<SolSaveManager>(singleton: true);
+        }
+
+        public static void ShowSolEditorWindow(SolFileWrapper file)
+        {
+            ShowWindow<SolEditorWindow>(initializer: window =>
+            {
+                window.DataContext = new SolEditorWindowViewModel(file);
+            });
         }
     }
 }
