@@ -14,6 +14,7 @@
     <Version>1.0.9.1</Version>
     <Authors>Mzying2001</Authors>
     <Copyright>Copyright ©  2021</Copyright>
+    <ApplicationManifest>App.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)' == 'x86'">
