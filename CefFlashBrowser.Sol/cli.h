@@ -97,7 +97,7 @@ namespace CefFlashBrowser::Sol
         ~SolFileWrapper();
 
     public:
-        property String^ Path { String^ get(); }
+        property String^ Path { String^ get(); void set(String^ value); }
         property String^ SolName { String^ get(); void set(String^ value); }
         property UInt32 Version { UInt32 get(); void set(UInt32 value); }
         property Dictionary<String^, SolValueWrapper^>^ Data { Dictionary<String^, SolValueWrapper^>^ get(); }
