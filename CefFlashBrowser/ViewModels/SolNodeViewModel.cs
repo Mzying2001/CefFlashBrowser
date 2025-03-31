@@ -13,7 +13,10 @@ namespace CefFlashBrowser.ViewModels
     public class SolNodeViewModel : ViewModelBase
     {
         public DelegateCommand RemoveCommand { get; set; }
-        public DelegateCommand AddChildComman { get; set; }
+        public DelegateCommand AddChildCommand { get; set; }
+        public DelegateCommand EditTextCommand { get; set; }
+        public DelegateCommand ImportBinaryCommand { get; set; }
+        public DelegateCommand ExportBinaryCommand { get; set; }
 
 
         public SolNodeViewModel Parent { get; }
@@ -186,6 +189,21 @@ namespace CefFlashBrowser.ViewModels
             // TODO
         }
 
+        public void EditText()
+        {
+            // TODO
+        }
+
+        public void ImportBinary()
+        {
+            // TODO
+        }
+
+        public void ExportBinary()
+        {
+            // TODO
+        }
+
         public SolNodeViewModel(SolNodeViewModel parent, object name, object value) : this()
         {
             Parent = parent;
@@ -205,7 +223,10 @@ namespace CefFlashBrowser.ViewModels
         private SolNodeViewModel()
         {
             RemoveCommand = new DelegateCommand(Remove);
-            AddChildComman = new DelegateCommand(AddChild);
+            AddChildCommand = new DelegateCommand(AddChild);
+            EditTextCommand = new DelegateCommand(EditText);
+            ImportBinaryCommand = new DelegateCommand(ImportBinary);
+            ExportBinaryCommand = new DelegateCommand(ExportBinary);
         }
     }
 }
