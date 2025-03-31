@@ -99,7 +99,8 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <Button Command="{Binding AddChildCommand}">
+                <Button Command="{Binding Editor.AddChildCommand}"
+                        CommandParameter="{Binding}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="/Assets/Svgs/add.svg"/>
@@ -112,7 +113,8 @@
                       DataType="{x:Type vm:SolNodeViewModel}">
             <Button Width="100"
                     Padding="0"
-                    Command="{Binding EditTextCommand}"
+                    Command="{Binding Editor.EditTextCommand}"
+                    CommandParameter="{Binding}"
                     ToolTip="{Binding Value, Mode=OneWay}">
                 <TextBlock Width="80"
                            TextWrapping="NoWrap"
@@ -132,12 +134,14 @@
                         <Setter Property="Padding" Value="0"/>
                     </Style>
                 </StackPanel.Resources>
-                <Button Command="{Binding ExportBinaryCommand}">
+                <Button Command="{Binding Editor.ExportBinaryCommand}"
+                        CommandParameter="{Binding}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="/Assets/Svgs/export.svg"/>
                 </Button>
-                <Button Command="{Binding ImportBinaryCommand}">
+                <Button Command="{Binding Editor.ImportBinaryCommand}"
+                        CommandParameter="{Binding}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="/Assets/Svgs/import.svg"/>

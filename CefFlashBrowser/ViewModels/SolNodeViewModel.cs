@@ -12,13 +12,7 @@ namespace CefFlashBrowser.ViewModels
 {
     public class SolNodeViewModel : ViewModelBase
     {
-        public DelegateCommand RemoveCommand { get; set; }
-        public DelegateCommand AddChildCommand { get; set; }
-        public DelegateCommand EditTextCommand { get; set; }
-        public DelegateCommand ImportBinaryCommand { get; set; }
-        public DelegateCommand ExportBinaryCommand { get; set; }
-
-
+        public SolEditorWindowViewModel Editor { get; }
         public SolNodeViewModel Parent { get; }
 
         private object _name;
@@ -54,10 +48,10 @@ namespace CefFlashBrowser.ViewModels
             [typeof(double)] = "double",
             [typeof(string)] = "string",
             [typeof(bool)] = "bool",
-            [typeof(DateTime)] = "date",
+            [typeof(DateTime)] = "DateTime",
             [typeof(byte[])] = "byte[]",
-            [typeof(SolArray)] = "array",
-            [typeof(SolObject)] = "object",
+            [typeof(SolArray)] = "Array",
+            [typeof(SolObject)] = "Object",
             [typeof(SolUndefined)] = "undefined",
             [typeof(SolXmlDoc)] = "XmlDoc",
             [typeof(SolXml)] = "Xml"
@@ -88,25 +82,25 @@ namespace CefFlashBrowser.ViewModels
             {
                 foreach (var pair in SolHelper.GetAllValues(file))
                 {
-                    children.Add(new SolNodeViewModel(this, pair.Key, pair.Value));
+                    children.Add(new SolNodeViewModel(Editor, this, pair.Key, pair.Value));
                 }
             }
             else if (Value is SolArray arr)
             {
                 foreach (var pair in arr.AssocPortion)
                 {
-                    children.Add(new SolNodeViewModel(this, pair.Key, pair.Value));
+                    children.Add(new SolNodeViewModel(Editor, this, pair.Key, pair.Value));
                 }
                 for (int i = 0; i < arr.DensePortion.Count; i++)
                 {
-                    children.Add(new SolNodeViewModel(this, i, arr.DensePortion[i]));
+                    children.Add(new SolNodeViewModel(Editor, this, i, arr.DensePortion[i]));
                 }
             }
             else if (Value is SolObject obj)
             {
                 foreach (var pair in obj.Properties)
                 {
-                    children.Add(new SolNodeViewModel(this, pair.Key, pair.Value));
+                    children.Add(new SolNodeViewModel(Editor, this, pair.Key, pair.Value));
                 }
             }
 
@@ -180,53 +174,30 @@ namespace CefFlashBrowser.ViewModels
             {
                 obj.Properties[name.ToString()] = value;
             }
+            else
+            {
+                return;
+            }
 
-            Children.Add(new SolNodeViewModel(this, name, value));
+            Children.Add(new SolNodeViewModel(Editor, this, name, value));
         }
 
-        public void AddChild()
+        public SolNodeViewModel(SolEditorWindowViewModel editor, SolNodeViewModel parent, object name, object value)
         {
-            // TODO
-        }
-
-        public void EditText()
-        {
-            // TODO
-        }
-
-        public void ImportBinary()
-        {
-            // TODO
-        }
-
-        public void ExportBinary()
-        {
-            // TODO
-        }
-
-        public SolNodeViewModel(SolNodeViewModel parent, object name, object value) : this()
-        {
+            Editor = editor;
             Parent = parent;
             Name = name;
             _value = value;
             UpdateChildren();
         }
 
-        public SolNodeViewModel(SolFileWrapper file) : this()
+        public SolNodeViewModel(SolEditorWindowViewModel editor, SolFileWrapper file)
         {
+            Editor = editor;
             Parent = null;
             Name = file.SolName;
             _value = file;
             UpdateChildren();
-        }
-
-        private SolNodeViewModel()
-        {
-            RemoveCommand = new DelegateCommand(Remove);
-            AddChildCommand = new DelegateCommand(AddChild);
-            EditTextCommand = new DelegateCommand(EditText);
-            ImportBinaryCommand = new DelegateCommand(ImportBinary);
-            ExportBinaryCommand = new DelegateCommand(ExportBinary);
         }
     }
 }
