@@ -2,7 +2,6 @@
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
-using SimpleMvvm.Command;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,7 +18,15 @@ namespace CefFlashBrowser.ViewModels
         public object Name
         {
             get => _name;
-            set => UpdateValue(ref _name, value);
+            set
+            {
+                if (!EqualityComparer<object>.Default.Equals(_name, value))
+                {
+                    _name = value;
+                    RaisePropertyChanged();
+                    RaisePropertyChanged(nameof(DisplayName));
+                }
+            }
         }
 
         private object _value;
@@ -28,10 +35,13 @@ namespace CefFlashBrowser.ViewModels
             get => _value;
             set
             {
-                UpdateValue(ref _value, value);
-                RaisePropertyChanged(nameof(ValueType));
-                UpdateChildren();
-                Parent?.OnChildrenValueChanged(this);
+                if (!EqualityComparer<object>.Default.Equals(_value, value))
+                {
+                    UpdateValue(ref _value, value);
+                    RaisePropertyChanged(nameof(TypeString));
+                    UpdateChildren();
+                    Parent?.OnChildrenValueChanged(this);
+                }
             }
         }
 
@@ -70,6 +80,20 @@ namespace CefFlashBrowser.ViewModels
                     var type = Value.GetType();
                     return TypeStringDic.ContainsKey(type) ? TypeStringDic[type] : string.Empty;
                 }
+            }
+        }
+
+        public bool IsArrayItem
+        {
+            get => Parent != null && Parent.Value is SolArray;
+        }
+
+        public string DisplayName
+        {
+            get
+            {
+                string name = Name == null ? "null" : Name.ToString();
+                return IsArrayItem ? $"[{name}]" : name;
             }
         }
 

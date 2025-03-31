@@ -193,7 +193,7 @@
 
                         <StackPanel Orientation="Horizontal"
                                     VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Text="{Binding DisplayName}"/>
                             <TextBlock>
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock"
