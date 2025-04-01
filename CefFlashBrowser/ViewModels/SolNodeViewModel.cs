@@ -97,6 +97,16 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool CanAddChild
+        {
+            get => Value is SolFileWrapper || Value is SolArray || Value is SolObject;
+        }
+
+        public bool CanRemove
+        {
+            get => Parent != null;
+        }
+
 
         private void UpdateChildren()
         {
@@ -183,7 +193,11 @@ namespace CefFlashBrowser.ViewModels
 
         public void AddChild(object name, object value)
         {
-            if (Value is SolArray arr)
+            if (Value is SolFileWrapper)
+            {
+                // Do nothing
+            }
+            else if (Value is SolArray arr)
             {
                 if (name is string key)
                 {
