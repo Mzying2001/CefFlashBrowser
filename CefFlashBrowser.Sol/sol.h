@@ -83,6 +83,12 @@ namespace sol
         SolValue(SolType t, const T& v) : type(t), value(v) {}
 
         template <typename T>
+        const T& get() const { return std::get<T>(value); }
+
+        template <typename T>
+        T& get() { return std::get<T>(value); }
+
+        template <typename T>
         bool is() const
         {
             switch (type)
@@ -111,12 +117,6 @@ namespace sol
             default:
                 return false;
             }
-        }
-
-        template <typename T>
-        T get() const
-        {
-            return std::get<T>(value);
         }
     };
 
