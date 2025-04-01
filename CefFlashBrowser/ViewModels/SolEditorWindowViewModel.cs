@@ -88,7 +88,11 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                SaveFile();
+                if (Status != SolEditorStatus.Ready &&
+                    Status != SolEditorStatus.Saved)
+                {
+                    SaveFile();
+                }
             }
             catch (Exception e)
             {
@@ -104,8 +108,8 @@ namespace CefFlashBrowser.ViewModels
             {
                 var sfd = new Microsoft.Win32.SaveFileDialog
                 {
-                    Filter = "Sol files|*.sol",
-                    FileName = _file.SolName
+                    Filter = $"{LanguageManager.GetString("solSaveManager_filterSol")}|*.sol",
+                    FileName = SolName
                 };
 
                 if (sfd.ShowDialog() == true)
