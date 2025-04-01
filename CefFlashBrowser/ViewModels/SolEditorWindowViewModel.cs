@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Sol;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
@@ -29,6 +30,13 @@ namespace CefFlashBrowser.ViewModels
         public string FilePath
         {
             get => _file.Path;
+        }
+
+        private SolEditorStatus _status = SolEditorStatus.Ready;
+        public SolEditorStatus Status
+        {
+            get => _status;
+            set => UpdateValue(ref _status, value);
         }
 
 
@@ -67,6 +75,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 UpdateSolData();
                 _file.Save();
+                Status = SolEditorStatus.Saved;
             }
             catch (Exception e)
             {
@@ -92,6 +101,7 @@ namespace CefFlashBrowser.ViewModels
                     _file.Path = sfd.FileName;
                     _file.Save();
                     RaisePropertyChanged(nameof(FilePath));
+                    Status = SolEditorStatus.Saved;
                 }
             }
             catch (Exception e)
@@ -124,6 +134,11 @@ namespace CefFlashBrowser.ViewModels
         private void ExportBinary(SolNodeViewModel target)
         {
             // TODO: Implement
+        }
+
+        internal void OnNodeChanged(SolNodeViewModel node)
+        {
+            Status = SolEditorStatus.Modified;
         }
     }
 }

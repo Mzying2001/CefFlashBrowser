@@ -41,6 +41,7 @@ namespace CefFlashBrowser.ViewModels
                     RaisePropertyChanged(nameof(TypeString));
                     UpdateChildren();
                     Parent?.OnChildrenValueChanged(this);
+                    Editor?.OnNodeChanged(this);
                 }
             }
         }

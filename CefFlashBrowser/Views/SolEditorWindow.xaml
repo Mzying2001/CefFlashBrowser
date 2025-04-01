@@ -178,6 +178,36 @@
             </MenuItem>
         </Menu>
 
+        <StatusBar DockPanel.Dock="Bottom">
+            <TextBlock>
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="Unknown status"/>
+                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Ready}">
+                                <Setter Property="Text" Value="Ready"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Error}">
+                                <Setter Property="Text" Value="Error"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Modified}">
+                                <Setter Property="Text" Value="Modified"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Saved}">
+                                <Setter Property="Text" Value="Saved"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <Separator/>
+            <TextBlock TextTrimming="CharacterEllipsis"
+                       Foreground="{DynamicResource SecondaryTextBrush}"
+                       Text="{Binding FilePath, Mode=OneWay}"
+                       ToolTip="{Binding FilePath, Mode=OneWay}"/>
+        </StatusBar>
+
         <TreeView x:Name="treeView"
                   Margin="10"
                   ItemsSource="{Binding RootNodes}">
