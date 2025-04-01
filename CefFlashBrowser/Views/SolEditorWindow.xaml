@@ -202,6 +202,8 @@
                 </TextBlock.Style>
             </TextBlock>
             <Separator/>
+            <TextBlock Text="{Binding FileFormat, Mode=OneWay}"/>
+            <Separator/>
             <TextBlock TextTrimming="CharacterEllipsis"
                        Foreground="{DynamicResource SecondaryTextBrush}"
                        Text="{Binding FilePath, Mode=OneWay}"

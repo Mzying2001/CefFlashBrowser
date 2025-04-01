@@ -20,7 +20,11 @@ namespace CefFlashBrowser.ViewModels
 
         private readonly SolFileWrapper _file;
         public SolNodeViewModel Root { get; }
-        public SolNodeViewModel[] RootNodes { get; }
+
+        public SolNodeViewModel[] RootNodes
+        {
+            get => new SolNodeViewModel[] { Root };
+        }
 
         public string SolName
         {
@@ -30,6 +34,11 @@ namespace CefFlashBrowser.ViewModels
         public string FilePath
         {
             get => _file.Path;
+        }
+
+        public SolVersion FileFormat
+        {
+            get => _file.Version;
         }
 
         private SolEditorStatus _status = SolEditorStatus.Ready;
@@ -44,7 +53,6 @@ namespace CefFlashBrowser.ViewModels
         {
             _file = file;
             Root = new SolNodeViewModel(this, file);
-            RootNodes = new SolNodeViewModel[] { Root };
         }
 
         [Obsolete("Designer only", true)]
