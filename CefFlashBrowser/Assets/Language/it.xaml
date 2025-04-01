@@ -132,6 +132,21 @@
     <sys:String x:Key="solSaveManager_toolTipEdit">Modifica</sys:String>
     <sys:String x:Key="solSaveManager_filterSol">SOL file</sys:String>
 
+    <!--Editor SOL-->
+    <sys:String x:Key="solEditor_title">Editor SOL</sys:String>
+    <sys:String x:Key="solEditor_file">File</sys:String>
+    <sys:String x:Key="solEditor_save">Salva</sys:String>
+    <sys:String x:Key="solEditor_saveAs">Salva come...</sys:String>
+    <sys:String x:Key="solEditor_close">Chiudi</sys:String>
+    <sys:String x:Key="solEditor_edit">Modifica</sys:String>
+    <sys:String x:Key="solEditor_addItem">Aggiungi elemento</sys:String>
+    <sys:String x:Key="solEditor_removeItem">Rimuovi elemento</sys:String>
+    <sys:String x:Key="solEditor_statusReady">Pronto</sys:String>
+    <sys:String x:Key="solEditor_statusError">Errore</sys:String>
+    <sys:String x:Key="solEditor_statusModified">Modificato</sys:String>
+    <sys:String x:Key="solEditor_statusSaved">Salvato</sys:String>
+    <sys:String x:Key="solEditor_statusUnknown">Stato sconosciuto</sys:String>
+
     <!--Dialoghi-->
     <sys:String x:Key="button_ok">OK</sys:String>
     <sys:String x:Key="button_cancel">Annulla</sys:String>
@@ -152,6 +167,7 @@
     <sys:String x:Key="message_deleted">Eliminazione riuscita.</sys:String>
     <sys:String x:Key="message_imported">Importazione riuscita.</sys:String>
     <sys:String x:Key="message_exported">Esportazione riuscita.</sys:String>
+    <sys:String x:Key="message_askSaveChange">Vuoi salvare le modifiche a "{0}"?</sys:String>
     <sys:String x:Key="error_message">Messaggio di Errore</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Il nome non può essere vuoto.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">L'URL non può essere vuoto.</sys:String>

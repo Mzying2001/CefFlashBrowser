@@ -120,7 +120,7 @@
     <sys:String x:Key="filter_shortcut">shortcut</sys:String>
     <sys:String x:Key="label_loading">Loading...</sys:String>
 
-    <!-- Save Manager -->
+    <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL Save Manager</sys:String>
     <sys:String x:Key="solSaveManager_headerFileName">File Name</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">File Path</sys:String>
@@ -131,6 +131,21 @@
     <sys:String x:Key="solSaveManager_toolTipDelete">Delete</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">Edit</sys:String>
     <sys:String x:Key="solSaveManager_filterSol">SOL file</sys:String>
+
+    <!--SOL Editor-->
+    <sys:String x:Key="solEditor_title">SOL Editor</sys:String>
+    <sys:String x:Key="solEditor_file">File</sys:String>
+    <sys:String x:Key="solEditor_save">Save</sys:String>
+    <sys:String x:Key="solEditor_saveAs">Save As...</sys:String>
+    <sys:String x:Key="solEditor_close">Close</sys:String>
+    <sys:String x:Key="solEditor_edit">Edit</sys:String>
+    <sys:String x:Key="solEditor_addItem">Add Item</sys:String>
+    <sys:String x:Key="solEditor_removeItem">Remove Item</sys:String>
+    <sys:String x:Key="solEditor_statusReady">Ready</sys:String>
+    <sys:String x:Key="solEditor_statusError">Error</sys:String>
+    <sys:String x:Key="solEditor_statusModified">Modified</sys:String>
+    <sys:String x:Key="solEditor_statusSaved">Saved</sys:String>
+    <sys:String x:Key="solEditor_statusUnknown">Unknown Status</sys:String>
 
     <!--Dialogs-->
     <sys:String x:Key="button_ok">OK</sys:String>
@@ -152,6 +167,7 @@
     <sys:String x:Key="message_deleted">Deletion successful.</sys:String>
     <sys:String x:Key="message_imported">Import successful.</sys:String>
     <sys:String x:Key="message_exported">Export successful.</sys:String>
+    <sys:String x:Key="message_askSaveChange">Would you like to save changes to "{0}"?</sys:String>
     <sys:String x:Key="error_message">Error Message</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Name cannot be empty.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">The URL cannot be empty.</sys:String>

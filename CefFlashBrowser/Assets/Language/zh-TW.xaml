@@ -132,6 +132,21 @@
     <sys:String x:Key="solSaveManager_toolTipEdit">編輯</sys:String>
     <sys:String x:Key="solSaveManager_filterSol">SOL檔案</sys:String>
 
+    <!--存檔編輯器-->
+    <sys:String x:Key="solEditor_title">SOL編輯器</sys:String>
+    <sys:String x:Key="solEditor_file">檔案</sys:String>
+    <sys:String x:Key="solEditor_save">儲存</sys:String>
+    <sys:String x:Key="solEditor_saveAs">另存新檔...</sys:String>
+    <sys:String x:Key="solEditor_close">關閉</sys:String>
+    <sys:String x:Key="solEditor_edit">編輯</sys:String>
+    <sys:String x:Key="solEditor_addItem">新增項目</sys:String>
+    <sys:String x:Key="solEditor_removeItem">移除項目</sys:String>
+    <sys:String x:Key="solEditor_statusReady">就緒</sys:String>
+    <sys:String x:Key="solEditor_statusError">錯誤</sys:String>
+    <sys:String x:Key="solEditor_statusModified">已修改</sys:String>
+    <sys:String x:Key="solEditor_statusSaved">已儲存</sys:String>
+    <sys:String x:Key="solEditor_statusUnknown">未知狀態</sys:String>
+
     <!--對話框-->
     <sys:String x:Key="button_ok">確定</sys:String>
     <sys:String x:Key="button_cancel">取消</sys:String>
@@ -152,6 +167,7 @@
     <sys:String x:Key="message_deleted">刪除成功。</sys:String>
     <sys:String x:Key="message_imported">匯入成功。</sys:String>
     <sys:String x:Key="message_exported">匯出成功。</sys:String>
+    <sys:String x:Key="message_askSaveChange">是否將變更儲存到「{0}」？</sys:String>
     <sys:String x:Key="error_message">錯誤訊息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名稱不能為空白。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">網址不能為空白。</sys:String>

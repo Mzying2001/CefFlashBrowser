@@ -18,7 +18,7 @@
         Width="450"
         Height="450"
         WindowStartupLocation="CenterScreen"
-        Title="SOL Editor">
+        Title="{DynamicResource solEditor_title}">
 
     <d:Window.DataContext>
         <vm:SolEditorWindowViewModel/>
@@ -156,22 +156,22 @@
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="File">
-                <MenuItem Header="Save"
+            <MenuItem Header="{DynamicResource solEditor_file}">
+                <MenuItem Header="{DynamicResource solEditor_save}"
                           Command="{Binding SaveFileCommand}"/>
-                <MenuItem Header="Save as..."
+                <MenuItem Header="{DynamicResource solEditor_saveAs}"
                           Command="{Binding SaveAsFileCommand}"/>
                 <Separator/>
-                <MenuItem Header="Close"
+                <MenuItem Header="{DynamicResource solEditor_close}"
                           Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
             </MenuItem>
-            <MenuItem Header="Edit"
+            <MenuItem Header="{DynamicResource solEditor_edit}"
                       IsEnabled="{Binding ElementName=treeView, Path=SelectedValue, Converter={StaticResource NotNull}}">
-                <MenuItem Header="Add item"
+                <MenuItem Header="{DynamicResource solEditor_addItem}"
                           Command="{Binding AddChildCommand}"
                           CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
                           IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanAddChild}"/>
-                <MenuItem Header="Delete item"
+                <MenuItem Header="{DynamicResource solEditor_removeItem}"
                           Command="{Binding RemoveItemCommand}"
                           CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
                           IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanRemove}"/>
@@ -182,20 +182,20 @@
             <TextBlock>
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
-                        <Setter Property="Text" Value="Unknown status"/>
+                        <Setter Property="Text" Value="{DynamicResource solEditor_statusUnknown}"/>
                         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Ready}">
-                                <Setter Property="Text" Value="Ready"/>
+                                <Setter Property="Text" Value="{DynamicResource solEditor_statusReady}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Error}">
-                                <Setter Property="Text" Value="Error"/>
+                                <Setter Property="Text" Value="{DynamicResource solEditor_statusError}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Modified}">
-                                <Setter Property="Text" Value="Modified"/>
+                                <Setter Property="Text" Value="{DynamicResource solEditor_statusModified}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Saved}">
-                                <Setter Property="Text" Value="Saved"/>
+                                <Setter Property="Text" Value="{DynamicResource solEditor_statusSaved}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
