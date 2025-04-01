@@ -9,6 +9,13 @@ namespace CefFlashBrowser::Sol
     using namespace System::Collections::Generic;
 
 
+    public enum class SolVersion
+    {
+        AMF0 = (int)sol::SolVersion::AMF0,
+        AMF3 = (int)sol::SolVersion::AMF3
+    };
+
+
     public ref class SolUndefined sealed
     {
     private:
@@ -99,7 +106,7 @@ namespace CefFlashBrowser::Sol
     public:
         property String^ Path { String^ get(); void set(String^ value); }
         property String^ SolName { String^ get(); void set(String^ value); }
-        property UInt32 Version { UInt32 get(); void set(UInt32 value); }
+        property SolVersion Version { SolVersion get(); void set(SolVersion value); }
         property Dictionary<String^, SolValueWrapper^>^ Data { Dictionary<String^, SolValueWrapper^>^ get(); }
 
         void Save();

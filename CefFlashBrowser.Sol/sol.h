@@ -41,6 +41,13 @@ namespace sol
     };
 
 
+    enum class SolVersion : uint32_t
+    {
+        AMF0 = 0,
+        AMF3 = 3,
+    };
+
+
     struct SolArray
     {
         std::map<std::string, SolValue> assoc;
@@ -126,7 +133,7 @@ namespace sol
         std::string path;
         std::string errmsg;
         std::string solname;
-        uint32_t version;
+        SolVersion version;
         std::map<std::string, SolValue> data;
 
         bool valid() const { return errmsg.empty(); }

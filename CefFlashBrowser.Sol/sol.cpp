@@ -156,7 +156,7 @@ bool sol::ReadSolFile(SolFile& file)
             ThrowFileEndedImproperly();
         }
 
-        file.version = utils::ReverseEndian(
+        file.version = (SolVersion)utils::ReverseEndian(
             *reinterpret_cast<uint32_t*>(data + index));
         index += 4;
 
@@ -488,7 +488,7 @@ bool sol::WriteSolFile(SolFile& file)
         buffer.insert(buffer.end(), file.solname.begin(), file.solname.end());
 
         // version
-        uint32_t version = utils::ReverseEndian(file.version);
+        uint32_t version = utils::ReverseEndian((uint32_t)file.version);
         buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&version), reinterpret_cast<uint8_t*>(&version) + 4);
 
         // ref table
