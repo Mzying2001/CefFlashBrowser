@@ -27,6 +27,10 @@
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+        <KeyBinding Gesture="Ctrl+S"
+                    Command="{Binding SaveFileCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+S"
+                    Command="{Binding SaveAsFileCommand}"/>
     </Window.InputBindings>
 
     <i:Interaction.Behaviors>
@@ -151,18 +155,26 @@
     </Window.Resources>
 
     <DockPanel>
-        <Menu DockPanel.Dock="Top"
-              DataContext="{Binding ElementName=window, Path=DataContext}">
+        <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Header="Save"/>
-                <MenuItem Header="Save as..."/>
+                <MenuItem Header="Save"
+                          Command="{Binding SaveFileCommand}"/>
+                <MenuItem Header="Save as..."
+                          Command="{Binding SaveAsFileCommand}"/>
                 <Separator/>
                 <MenuItem Header="Close"
                           Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
             </MenuItem>
-            <MenuItem Header="Edit">
-                <MenuItem Header="Add item"/>
-                <MenuItem Header="Delete item"/>
+            <MenuItem Header="Edit"
+                      IsEnabled="{Binding ElementName=treeView, Path=SelectedValue, Converter={StaticResource NotNull}}">
+                <MenuItem Header="Add item"
+                          Command="{Binding AddChildCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanAddChild}"/>
+                <MenuItem Header="Delete item"
+                          Command="{Binding RemoveItemCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanRemove}"/>
             </MenuItem>
         </Menu>
 

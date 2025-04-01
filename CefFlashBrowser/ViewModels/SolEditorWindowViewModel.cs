@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Sol;
+using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
@@ -7,6 +8,8 @@ namespace CefFlashBrowser.ViewModels
 {
     public class SolEditorWindowViewModel : ViewModelBase
     {
+        public DelegateCommand SaveFileCommand { get; set; }
+        public DelegateCommand SaveAsFileCommand { get; set; }
         public DelegateCommand RemoveItemCommand { get; set; }
         public DelegateCommand AddChildCommand { get; set; }
         public DelegateCommand EditTextCommand { get; set; }
@@ -44,11 +47,58 @@ namespace CefFlashBrowser.ViewModels
         protected override void Init()
         {
             base.Init();
+            SaveFileCommand = new DelegateCommand(SaveFile);
+            SaveAsFileCommand = new DelegateCommand(SaveAsFile);
             RemoveItemCommand = new DelegateCommand<SolNodeViewModel>(RemoveItem);
             AddChildCommand = new DelegateCommand<SolNodeViewModel>(AddChild);
             EditTextCommand = new DelegateCommand<SolNodeViewModel>(EditText);
             ImportBinaryCommand = new DelegateCommand<SolNodeViewModel>(ImportBinary);
             ExportBinaryCommand = new DelegateCommand<SolNodeViewModel>(ExportBinary);
+        }
+
+        private void UpdateSolData()
+        {
+            SolHelper.SetAllValues(_file, Root.GetAllValues());
+        }
+
+        private void SaveFile()
+        {
+            try
+            {
+                UpdateSolData();
+                _file.Save();
+            }
+            catch (Exception e)
+            {
+                WindowManager.ShowError(e.Message);
+            }
+        }
+
+        private void SaveAsFile()
+        {
+            string oldPath = _file.Path;
+
+            try
+            {
+                var sfd = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "Sol files|*.sol",
+                    FileName = _file.SolName
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    UpdateSolData();
+                    _file.Path = sfd.FileName;
+                    _file.Save();
+                    RaisePropertyChanged(nameof(FilePath));
+                }
+            }
+            catch (Exception e)
+            {
+                _file.Path = oldPath;
+                WindowManager.ShowError(e.Message);
+            }
         }
 
         private void RemoveItem(SolNodeViewModel target)
