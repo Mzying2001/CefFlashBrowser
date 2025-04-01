@@ -55,7 +55,7 @@ namespace CefFlashBrowser.ViewModels
         protected override void Init()
         {
             base.Init();
-            SaveFileCommand = new DelegateCommand(SaveFile);
+            SaveFileCommand = new DelegateCommand(SaveFileCmdImpl);
             SaveAsFileCommand = new DelegateCommand(SaveAsFile);
             RemoveItemCommand = new DelegateCommand<SolNodeViewModel>(RemoveItem);
             AddChildCommand = new DelegateCommand<SolNodeViewModel>(AddChild);
@@ -69,13 +69,18 @@ namespace CefFlashBrowser.ViewModels
             SolHelper.SetAllValues(_file, Root.GetAllValues());
         }
 
-        private void SaveFile()
+        public void SaveFile()
+        {
+            UpdateSolData();
+            _file.Save();
+            Status = SolEditorStatus.Saved;
+        }
+
+        private void SaveFileCmdImpl()
         {
             try
             {
-                UpdateSolData();
-                _file.Save();
-                Status = SolEditorStatus.Saved;
+                SaveFile();
             }
             catch (Exception e)
             {
@@ -113,7 +118,16 @@ namespace CefFlashBrowser.ViewModels
 
         private void RemoveItem(SolNodeViewModel target)
         {
-            target.Remove();
+            var msg = string.Format(LanguageManager.GetString("message_removeItem"), target.DisplayName);
+
+            WindowManager.Confirm(msg, callback: result =>
+            {
+                if (result == true)
+                {
+                    target.Remove();
+                    Status = SolEditorStatus.Modified;
+                }
+            });
         }
 
         private void AddChild(SolNodeViewModel target)

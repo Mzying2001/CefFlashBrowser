@@ -1,27 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Utils;
+using CefFlashBrowser.ViewModels;
+using System;
+using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CefFlashBrowser.Views
 {
-    /// <summary>
-    /// SolEditorWindow.xaml 的交互逻辑
-    /// </summary>
     public partial class SolEditorWindow : Window
     {
         public SolEditorWindow()
         {
             InitializeComponent();
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            if (e.Cancel) return;
+
+            if (DataContext is SolEditorWindowViewModel vm)
+            {
+                if (vm.Status != SolEditorStatus.Modified)
+                {
+                    return;
+                }
+
+                var message = string.Format(LanguageManager.GetString("message_askSaveChange"), vm.FilePath);
+                var result = MessageBox.Show(message, Title, MessageBoxButton.YesNoCancel);
+
+                if (result == MessageBoxResult.Cancel)
+                {
+                    e.Cancel = true;
+                }
+                else if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        vm.SaveFile();
+                    }
+                    catch (Exception ex)
+                    {
+                        WindowManager.ShowError(ex.Message);
+                        e.Cancel = true;
+                    }
+                }
+            }
         }
     }
 }
