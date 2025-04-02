@@ -14,7 +14,7 @@
         Height="450"
         MinWidth="300"
         MinHeight="300"
-        Title="{DynamicResource menu_settings}"
+        Title="{DynamicResource common_settings}"
         DataContext="{Binding Source={StaticResource Locator}, Path=SettingsWindowViewModel}"
         WindowStartupLocation="CenterScreen">
 

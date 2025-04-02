@@ -3,19 +3,23 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="locale">zh-CN</sys:String>
     <sys:String x:Key="language_name">中文</sys:String>
+    
+    <!--共用字段-->
+    <sys:String x:Key="common_swfFile">SWF文件</sys:String>
+    <sys:String x:Key="common_solFile">SOL文件</sys:String>
+    <sys:String x:Key="common_shortcut">快捷方式</sys:String>
+    <sys:String x:Key="common_favorites">收藏夹</sys:String>
+    <sys:String x:Key="common_settings">设置</sys:String>
 
     <!--主界面-->
-    <sys:String x:Key="title_mainWindow">欢迎</sys:String>
-    <sys:String x:Key="button_go">跳转</sys:String>
-    <sys:String x:Key="menu_favorites">收藏夹</sys:String>
-    <sys:String x:Key="menu_manageFavorites">管理收藏夹</sys:String>
-    <sys:String x:Key="menu_manageSolSaveFiles">管理SOL存档</sys:String>
-    <sys:String x:Key="menu_languages">语言</sys:String>
-    <sys:String x:Key="menu_options">选项</sys:String>
-    <sys:String x:Key="menu_settings">设置</sys:String>
-    <sys:String x:Key="menu_loadSwf">加载本地SWF文件...</sys:String>
-    <sys:String x:Key="filter_swf">SWF文件</sys:String>
-    <sys:String x:Key="toolTip_viewGithub">在GitHub中查看</sys:String>
+    <sys:String x:Key="mainWindow_title">欢迎</sys:String>
+    <sys:String x:Key="mainWindow_go">跳转</sys:String>
+    <sys:String x:Key="mainWindow_manageFavorites">管理收藏夹</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存档</sys:String>
+    <sys:String x:Key="mainWindow_languages">语言</sys:String>
+    <sys:String x:Key="mainWindow_options">选项</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">加载本地SWF文件...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">在GitHub中查看</sys:String>
 
     <!--设置窗口-->
     <sys:String x:Key="tabItem_mainWindow">主窗口</sys:String>
@@ -117,7 +121,6 @@
     <sys:String x:Key="toolTip_blockedSwfs">被屏蔽的Flash内容</sys:String>
     <sys:String x:Key="toolTip_zoomIn">放大（Ctrl+加号键）</sys:String>
     <sys:String x:Key="toolTip_zoomOut">缩小（Ctrl+减号键）</sys:String>
-    <sys:String x:Key="filter_shortcut">快捷方式</sys:String>
     <sys:String x:Key="label_loading">加载中...</sys:String>
 
     <!--存档管理器-->
@@ -130,7 +133,6 @@
     <sys:String x:Key="solSaveManager_toolTipExport">导出</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">删除</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">编辑</sys:String>
-    <sys:String x:Key="solSaveManager_filterSol">SOL文件</sys:String>
 
     <!--存档编辑器-->
     <sys:String x:Key="solEditor_title">SOL编辑器</sys:String>
@@ -148,13 +150,13 @@
     <sys:String x:Key="solEditor_statusUnknown">未知状态</sys:String>
 
     <!--对话框-->
-    <sys:String x:Key="button_ok">确定</sys:String>
-    <sys:String x:Key="button_cancel">取消</sys:String>
-    <sys:String x:Key="button_yes">是</sys:String>
-    <sys:String x:Key="button_no">否</sys:String>
-    <sys:String x:Key="title_error">错误</sys:String>
-    <sys:String x:Key="title_addFavorite">添加收藏夹</sys:String>
-    <sys:String x:Key="tips_selectLanguage">请选择语言</sys:String>
+    <sys:String x:Key="dialog_ok">确定</sys:String>
+    <sys:String x:Key="dialog_cancel">取消</sys:String>
+    <sys:String x:Key="dialog_yes">是</sys:String>
+    <sys:String x:Key="dialog_no">否</sys:String>
+    <sys:String x:Key="dialog_error">错误</sys:String>
+    <sys:String x:Key="dialog_addFavorite">添加收藏夹</sys:String>
+    <sys:String x:Key="dialog_selectLanguage">请选择语言</sys:String>
 
     <!--提示信息-->
     <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>

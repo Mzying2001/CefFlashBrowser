@@ -4,18 +4,22 @@
     <sys:String x:Key="locale">zh-TW</sys:String>
     <sys:String x:Key="language_name">中文（繁體）</sys:String>
 
+    <!-- 共用欄位 -->
+    <sys:String x:Key="common_swfFile">SWF檔案</sys:String>
+    <sys:String x:Key="common_solFile">SOL檔案</sys:String>
+    <sys:String x:Key="common_shortcut">捷徑</sys:String>
+    <sys:String x:Key="common_favorites">我的最愛</sys:String>
+    <sys:String x:Key="common_settings">設定</sys:String>
+
     <!--主介面-->
-    <sys:String x:Key="title_mainWindow">歡迎</sys:String>
-    <sys:String x:Key="button_go">前往</sys:String>
-    <sys:String x:Key="menu_favorites">我的最愛</sys:String>
-    <sys:String x:Key="menu_manageFavorites">管理我的最愛</sys:String>
-    <sys:String x:Key="menu_manageSolSaveFiles">管理SOL存檔</sys:String>
-    <sys:String x:Key="menu_languages">語言</sys:String>
-    <sys:String x:Key="menu_options">選項</sys:String>
-    <sys:String x:Key="menu_settings">設定</sys:String>
-    <sys:String x:Key="menu_loadSwf">載入本機SWF檔案...</sys:String>
-    <sys:String x:Key="filter_swf">SWF檔案</sys:String>
-    <sys:String x:Key="toolTip_viewGithub">在GitHub檢視</sys:String>
+    <sys:String x:Key="mainWindow_title">歡迎</sys:String>
+    <sys:String x:Key="mainWindow_go">前往</sys:String>
+    <sys:String x:Key="mainWindow_manageFavorites">管理我的最愛</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存檔</sys:String>
+    <sys:String x:Key="mainWindow_languages">語言</sys:String>
+    <sys:String x:Key="mainWindow_options">選項</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">載入本機SWF檔案...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">在GitHub檢視</sys:String>
 
     <!--設定視窗-->
     <sys:String x:Key="tabItem_mainWindow">主視窗</sys:String>
@@ -117,7 +121,6 @@
     <sys:String x:Key="toolTip_blockedSwfs">被封鎖的Flash內容</sys:String>
     <sys:String x:Key="toolTip_zoomIn">放大（Ctrl+加號鍵）</sys:String>
     <sys:String x:Key="toolTip_zoomOut">縮小（Ctrl+減號鍵）</sys:String>
-    <sys:String x:Key="filter_shortcut">捷徑</sys:String>
     <sys:String x:Key="label_loading">載入中...</sys:String>
 
     <!--存檔管理器-->
@@ -130,7 +133,6 @@
     <sys:String x:Key="solSaveManager_toolTipExport">匯出</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">刪除</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">編輯</sys:String>
-    <sys:String x:Key="solSaveManager_filterSol">SOL檔案</sys:String>
 
     <!--存檔編輯器-->
     <sys:String x:Key="solEditor_title">SOL編輯器</sys:String>
@@ -148,13 +150,13 @@
     <sys:String x:Key="solEditor_statusUnknown">未知狀態</sys:String>
 
     <!--對話框-->
-    <sys:String x:Key="button_ok">確定</sys:String>
-    <sys:String x:Key="button_cancel">取消</sys:String>
-    <sys:String x:Key="button_yes">是</sys:String>
-    <sys:String x:Key="button_no">否</sys:String>
-    <sys:String x:Key="title_error">錯誤</sys:String>
-    <sys:String x:Key="title_addFavorite">新增我的最愛</sys:String>
-    <sys:String x:Key="tips_selectLanguage">請選擇語言</sys:String>
+    <sys:String x:Key="dialog_ok">確定</sys:String>
+    <sys:String x:Key="dialog_cancel">取消</sys:String>
+    <sys:String x:Key="dialog_yes">是</sys:String>
+    <sys:String x:Key="dialog_no">否</sys:String>
+    <sys:String x:Key="dialog_error">錯誤</sys:String>
+    <sys:String x:Key="dialog_addFavorite">新增我的最愛</sys:String>
+    <sys:String x:Key="dialog_selectLanguage">請選擇語言</sys:String>
 
     <!--提示訊息-->
     <sys:String x:Key="message_emptyUrl">請輸入網址。</sys:String>

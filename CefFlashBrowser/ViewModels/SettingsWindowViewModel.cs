@@ -222,7 +222,7 @@ namespace CefFlashBrowser.ViewModels
                                 LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message);
 
                             bool retry = false;
-                            WindowManager.Confirm(msg, LanguageManager.GetString("title_error"), tmp => retry = tmp ?? false);
+                            WindowManager.Confirm(msg, LanguageManager.GetString("dialog_error"), tmp => retry = tmp ?? false);
 
                             if (!retry) { break; }
                         }

@@ -24,7 +24,7 @@ namespace CefFlashBrowser.ViewModels
         public string WelcomeText
         {
             get => string.Format("{0}  {1}",
-                LanguageManager.GetString("title_mainWindow"), EmoticonsHelper.GetNextEmoticon());
+                LanguageManager.GetString("mainWindow_title"), EmoticonsHelper.GetNextEmoticon());
         }
 
         private void ShowBrowser(string address)
@@ -89,7 +89,7 @@ namespace CefFlashBrowser.ViewModels
         {
             var ofd = new Microsoft.Win32.OpenFileDialog()
             {
-                Filter = $"{LanguageManager.GetString("filter_swf")}|*.swf"
+                Filter = $"{LanguageManager.GetString("common_swfFile")}|*.swf"
             };
             if (ofd.ShowDialog() == true)
             {

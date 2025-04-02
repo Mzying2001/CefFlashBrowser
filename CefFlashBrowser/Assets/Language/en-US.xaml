@@ -4,18 +4,22 @@
     <sys:String x:Key="locale">en-US</sys:String>
     <sys:String x:Key="language_name">English</sys:String>
 
+    <!-- Common Fields -->
+    <sys:String x:Key="common_swfFile">SWF File</sys:String>
+    <sys:String x:Key="common_solFile">SOL File</sys:String>
+    <sys:String x:Key="common_shortcut">Shortcut</sys:String>
+    <sys:String x:Key="common_favorites">Favorites</sys:String>
+    <sys:String x:Key="common_settings">Settings</sys:String>
+
     <!--Main Window-->
-    <sys:String x:Key="title_mainWindow">Welcome</sys:String>
-    <sys:String x:Key="button_go">Go</sys:String>
-    <sys:String x:Key="menu_favorites">Favorites</sys:String>
-    <sys:String x:Key="menu_manageFavorites">Manage Favorites</sys:String>
-    <sys:String x:Key="menu_manageSolSaveFiles">Manage SOL Save Files</sys:String>
-    <sys:String x:Key="menu_languages">Language</sys:String>
-    <sys:String x:Key="menu_options">Options</sys:String>
-    <sys:String x:Key="menu_settings">Settings</sys:String>
-    <sys:String x:Key="menu_loadSwf">Load local SWF file...</sys:String>
-    <sys:String x:Key="filter_swf">SWF file</sys:String>
-    <sys:String x:Key="toolTip_viewGithub">View in GitHub</sys:String>
+    <sys:String x:Key="mainWindow_title">Welcome</sys:String>
+    <sys:String x:Key="mainWindow_go">Go</sys:String>
+    <sys:String x:Key="mainWindow_manageFavorites">Manage Favorites</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">Manage SOL Save Files</sys:String>
+    <sys:String x:Key="mainWindow_languages">Language</sys:String>
+    <sys:String x:Key="mainWindow_options">Options</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">Load local SWF file...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">View in GitHub</sys:String>
 
     <!--Settings Window-->
     <sys:String x:Key="tabItem_mainWindow">Main Window</sys:String>
@@ -117,7 +121,6 @@
     <sys:String x:Key="toolTip_blockedSwfs">Blocked Flash content</sys:String>
     <sys:String x:Key="toolTip_zoomIn">Zoom in (Ctrl+Plus)</sys:String>
     <sys:String x:Key="toolTip_zoomOut">Zoom out (Ctrl+Minus)</sys:String>
-    <sys:String x:Key="filter_shortcut">shortcut</sys:String>
     <sys:String x:Key="label_loading">Loading...</sys:String>
 
     <!--Save Manager-->
@@ -130,7 +133,6 @@
     <sys:String x:Key="solSaveManager_toolTipExport">Export</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">Delete</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">Edit</sys:String>
-    <sys:String x:Key="solSaveManager_filterSol">SOL file</sys:String>
 
     <!--SOL Editor-->
     <sys:String x:Key="solEditor_title">SOL Editor</sys:String>
@@ -148,13 +150,13 @@
     <sys:String x:Key="solEditor_statusUnknown">Unknown Status</sys:String>
 
     <!--Dialogs-->
-    <sys:String x:Key="button_ok">OK</sys:String>
-    <sys:String x:Key="button_cancel">Cancel</sys:String>
-    <sys:String x:Key="button_yes">Yes</sys:String>
-    <sys:String x:Key="button_no">No</sys:String>
-    <sys:String x:Key="title_error">Error</sys:String>
-    <sys:String x:Key="title_addFavorite">Add Favorite</sys:String>
-    <sys:String x:Key="tips_selectLanguage">Select language</sys:String>
+    <sys:String x:Key="dialog_ok">OK</sys:String>
+    <sys:String x:Key="dialog_cancel">Cancel</sys:String>
+    <sys:String x:Key="dialog_yes">Yes</sys:String>
+    <sys:String x:Key="dialog_no">No</sys:String>
+    <sys:String x:Key="dialog_error">Error</sys:String>
+    <sys:String x:Key="dialog_addFavorite">Add Favorite</sys:String>
+    <sys:String x:Key="dialog_selectLanguage">Select language</sys:String>
 
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>

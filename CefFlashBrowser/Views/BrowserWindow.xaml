@@ -92,7 +92,7 @@
 
             <Separator/>
 
-            <MenuItem Header="{DynamicResource menu_favorites}"
+            <MenuItem Header="{DynamicResource common_favorites}"
                       ItemsSource="{Binding Source={x:Static data:GlobalData.Favorites}}"
                       Visibility="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count, Converter={StaticResource VisiableIfNotZero}}">
                 <MenuItem.ItemContainerStyle>

@@ -108,7 +108,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 var sfd = new Microsoft.Win32.SaveFileDialog
                 {
-                    Filter = $"{LanguageManager.GetString("solSaveManager_filterSol")}|*.sol",
+                    Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol",
                     FileName = SolName
                 };
 
