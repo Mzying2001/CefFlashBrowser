@@ -9,6 +9,13 @@ namespace CefFlashBrowser::Sol
     using namespace System::Collections::Generic;
 
 
+    public enum class SolVersion
+    {
+        AMF0 = (int)sol::SolVersion::AMF0,
+        AMF3 = (int)sol::SolVersion::AMF3
+    };
+
+
     public ref class SolUndefined sealed
     {
     private:
@@ -19,6 +26,7 @@ namespace CefFlashBrowser::Sol
         static property SolUndefined^ Value { SolUndefined^ get() { return _value; } }
         virtual bool Equals(Object^ obj) override { return obj != nullptr && obj->GetType() == SolUndefined::typeid; }
         virtual int GetHashCode() override { return 0; }
+        virtual String^ ToString() override { return "undefined"; }
         static bool operator ==(SolUndefined^ left, SolUndefined^ right) { return true; }
         static bool operator !=(SolUndefined^ left, SolUndefined^ right) { return false; }
     };
@@ -96,9 +104,9 @@ namespace CefFlashBrowser::Sol
         ~SolFileWrapper();
 
     public:
-        property String^ Path { String^ get(); }
+        property String^ Path { String^ get(); void set(String^ value); }
         property String^ SolName { String^ get(); void set(String^ value); }
-        property UInt32 Version { UInt32 get(); void set(UInt32 value); }
+        property SolVersion Version { SolVersion get(); void set(SolVersion value); }
         property Dictionary<String^, SolValueWrapper^>^ Data { Dictionary<String^, SolValueWrapper^>^ get(); }
 
         void Save();

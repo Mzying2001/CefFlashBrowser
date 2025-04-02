@@ -36,7 +36,7 @@
             <TextBlock Margin="15"
                        FontSize="20"
                        HorizontalAlignment="Center"
-                       Text="{DynamicResource tips_selectLanguage}"
+                       Text="{DynamicResource dialog_selectLanguage}"
                        Foreground="{DynamicResource PrimaryTextBrush}"/>
         </Grid>
         <Grid Grid.Row="1">
@@ -66,7 +66,7 @@
                 <Button Margin="15"
                         MinWidth="70"
                         Style="{StaticResource ButtonPrimary}"
-                        Content="{DynamicResource button_ok}"
+                        Content="{DynamicResource dialog_ok}"
                         Click="OnConfirmButtonClick"/>
             </StackPanel>
         </Grid>

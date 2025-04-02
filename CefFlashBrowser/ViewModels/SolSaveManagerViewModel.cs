@@ -106,7 +106,7 @@ namespace CefFlashBrowser.ViewModels
                 var sfd = new Microsoft.Win32.SaveFileDialog
                 {
                     FileName = solFile.FileName,
-                    Filter = $"{LanguageManager.GetString("solSaveManager_filterSol")}|*.sol",
+                    Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol",
                 };
 
                 if (sfd.ShowDialog() == true)
@@ -127,7 +127,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 var ofd = new Microsoft.Win32.OpenFileDialog
                 {
-                    Filter = $"{LanguageManager.GetString("solSaveManager_filterSol")}|*.sol",
+                    Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol",
                 };
 
                 if (ofd.ShowDialog() == true)
@@ -169,7 +169,7 @@ namespace CefFlashBrowser.ViewModels
             try
             {
                 var file = SolFileWrapper.ReadFile(solFile.FilePath);
-                WindowManager.Alert("Coming soon...");
+                WindowManager.ShowSolEditorWindow(file);
             }
             catch (Exception e)
             {

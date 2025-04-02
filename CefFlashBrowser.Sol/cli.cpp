@@ -255,13 +255,18 @@ CefFlashBrowser::Sol::SolFileWrapper^ CefFlashBrowser::Sol::SolFileWrapper::Crea
     auto pfile = new SolFile;
     pfile->path = utils::ToStdString(path, false);
     pfile->solname = utils::ToStdString(System::IO::Path::GetFileNameWithoutExtension(path));
-    pfile->version = 3;
+    pfile->version = sol::SolVersion::AMF3;
     return gcnew SolFileWrapper(pfile);
 }
 
 System::String^ CefFlashBrowser::Sol::SolFileWrapper::Path::get()
 {
     return utils::ToSystemString(_pfile->path, false);
+}
+
+void CefFlashBrowser::Sol::SolFileWrapper::Path::set(String^ value)
+{
+    _pfile->path = utils::ToStdString(value, false);
 }
 
 System::String^ CefFlashBrowser::Sol::SolFileWrapper::SolName::get()
@@ -274,14 +279,14 @@ void CefFlashBrowser::Sol::SolFileWrapper::SolName::set(String^ value)
     _pfile->solname = utils::ToStdString(value);
 }
 
-System::UInt32 CefFlashBrowser::Sol::SolFileWrapper::Version::get()
+CefFlashBrowser::Sol::SolVersion CefFlashBrowser::Sol::SolFileWrapper::Version::get()
 {
-    return _pfile->version;
+    return (SolVersion)_pfile->version;
 }
 
-void CefFlashBrowser::Sol::SolFileWrapper::Version::set(UInt32 value)
+void CefFlashBrowser::Sol::SolFileWrapper::Version::set(SolVersion value)
 {
-    _pfile->version = value;
+    _pfile->version = (sol::SolVersion)value;
 }
 
 System::Collections::Generic::Dictionary<System::String^, CefFlashBrowser::Sol::SolValueWrapper^>^

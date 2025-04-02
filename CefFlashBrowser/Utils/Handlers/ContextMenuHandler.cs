@@ -24,20 +24,20 @@ namespace CefFlashBrowser.Utils.Handlers
                 var selectionText = parameters.SelectionText;
                 var truncatedText = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
 
-                var header = string.Format(LanguageManager.GetString("menu_search"), truncatedText.Replace('\n', ' '));
+                var header = string.Format(LanguageManager.GetString("browser_searchFor"), truncatedText.Replace('\n', ' '));
                 model.InsertItemAt(0, Search, header);
                 count++;
 
                 if (UrlHelper.IsHttpUrl(selectionText))
                 {
-                    header = string.Format(LanguageManager.GetString("menu_openSelectedUrl"), truncatedText);
+                    header = string.Format(LanguageManager.GetString("browser_openSelectedUrl"), truncatedText);
                     model.InsertCheckItemAt(0, OpenSelectedUrl, header);
                     count++;
                 }
             }
             if (!string.IsNullOrWhiteSpace(parameters.LinkUrl))
             {
-                var header = LanguageManager.GetString("menu_openInNewWindow");
+                var header = LanguageManager.GetString("browser_openInNewWindow");
                 model.InsertCheckItemAt(0, OpenInNewWindow, header);
                 count++;
             }
@@ -161,77 +161,77 @@ namespace CefFlashBrowser.Utils.Handlers
             {
                 case CefMenuCommand.Back:
                     {
-                        header = LanguageManager.GetString("menu_back");
+                        header = LanguageManager.GetString("browser_back");
                         break;
                     }
                 case CefMenuCommand.Forward:
                     {
-                        header = LanguageManager.GetString("menu_forward");
+                        header = LanguageManager.GetString("browser_forward");
                         break;
                     }
                 case CefMenuCommand.Cut:
                     {
-                        header = LanguageManager.GetString("menu_cut");
+                        header = LanguageManager.GetString("browser_cut");
                         break;
                     }
                 case CefMenuCommand.Copy:
                     {
-                        header = LanguageManager.GetString("menu_copy");
+                        header = LanguageManager.GetString("browser_copy");
                         break;
                     }
                 case CefMenuCommand.Paste:
                     {
-                        header = LanguageManager.GetString("menu_paste");
+                        header = LanguageManager.GetString("browser_paste");
                         break;
                     }
                 case CefMenuCommand.Print:
                     {
-                        header = LanguageManager.GetString("menu_print");
+                        header = LanguageManager.GetString("browser_print");
                         break;
                     }
                 case CefMenuCommand.ViewSource:
                     {
-                        header = LanguageManager.GetString("menu_viewSource");
+                        header = LanguageManager.GetString("browser_viewSource");
                         break;
                     }
                 case CefMenuCommand.Undo:
                     {
-                        header = LanguageManager.GetString("menu_undo");
+                        header = LanguageManager.GetString("browser_undo");
                         break;
                     }
                 case CefMenuCommand.StopLoad:
                     {
-                        header = LanguageManager.GetString("menu_stop");
+                        header = LanguageManager.GetString("browser_stop");
                         break;
                     }
                 case CefMenuCommand.SelectAll:
                     {
-                        header = LanguageManager.GetString("menu_selectAll");
+                        header = LanguageManager.GetString("browser_selectAll");
                         break;
                     }
                 case CefMenuCommand.Redo:
                     {
-                        header = LanguageManager.GetString("menu_redo");
+                        header = LanguageManager.GetString("browser_redo");
                         break;
                     }
                 case CefMenuCommand.Find:
                     {
-                        header = LanguageManager.GetString("menu_find");
+                        header = LanguageManager.GetString("browser_find");
                         break;
                     }
                 case CefMenuCommand.AddToDictionary:
                     {
-                        header = LanguageManager.GetString("menu_addToDictionary");
+                        header = LanguageManager.GetString("browser_addToDictionary");
                         break;
                     }
                 case CefMenuCommand.Reload:
                     {
-                        header = LanguageManager.GetString("menu_reload");
+                        header = LanguageManager.GetString("browser_reload");
                         break;
                     }
                 case CefMenuCommand.ReloadNoCache:
                     {
-                        header = LanguageManager.GetString("menu_reloadNoCache");
+                        header = LanguageManager.GetString("browser_reloadNoCache");
                         break;
                     }
                 default:
