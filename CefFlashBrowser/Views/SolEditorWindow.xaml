@@ -245,21 +245,18 @@
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock"
                                            BasedOn="{StaticResource {x:Type TextBlock}}">
-                                        <Setter Property="Foreground"
-                                                Value="{DynamicResource SecondaryTextBrush}"/>
+                                        <Setter Property="Text" Value="{Binding TypeString, Mode=OneWay, StringFormat=: \{0\}}"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding TypeString}" Value="">
-                                                <Setter Property="Visibility"
-                                                        Value="Collapsed"/>
+                                                <Setter Property="Visibility" Value="Collapsed"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsSelected}" Value="True">
-                                                <Setter Property="Foreground"
-                                                        Value="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=Foreground}"/>
+                                                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=Foreground}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
-                                <Run Text=": "/><Run Text="{Binding TypeString, Mode=OneWay}"/>
                             </TextBlock>
                         </StackPanel>
                     </DockPanel>
