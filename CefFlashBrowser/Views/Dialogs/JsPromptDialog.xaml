@@ -55,13 +55,13 @@
                         HorizontalAlignment="Right">
                 <Button x:Name="cancelButton"
                         MinWidth="70"
-                        Content="{StaticResource button_cancel}"
+                        Content="{StaticResource dialog_cancel}"
                         Click="OnCancelButtonClick"/>
                 <Button x:Name="okButton"
                         Margin="10,0,0,0"
                         MinWidth="70"
                         Style="{StaticResource ButtonPrimary}"
-                        Content="{StaticResource button_ok}"
+                        Content="{StaticResource dialog_ok}"
                         Click="OnOkButtonClick"/>
             </StackPanel>
         </Grid>

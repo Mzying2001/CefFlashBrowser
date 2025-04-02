@@ -39,7 +39,7 @@
 
         <Menu>
             <!--Favorites Menu-->
-            <MenuItem Header="{DynamicResource menu_favorites}">
+            <MenuItem Header="{DynamicResource common_favorites}">
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem">
                         <Setter Property="Template">
@@ -55,7 +55,7 @@
                     <x:Array Type="{x:Type sys:Object}">
                         <MenuItem Padding="10,7"
                                   Style="{StaticResource MenuItemBaseStyle}"
-                                  Header="{DynamicResource menu_manageFavorites}"
+                                  Header="{DynamicResource mainWindow_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
                         <Separator Visibility="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count, Converter={StaticResource VisiableIfNotZero}}"/>
                         <ItemsControl ItemsSource="{x:Static data:GlobalData.Favorites}">
@@ -86,23 +86,23 @@
             </MenuItem>
 
             <!--Options Menu-->
-            <MenuItem Header="{DynamicResource menu_options}">
+            <MenuItem Header="{DynamicResource mainWindow_options}">
 
                 <!--Load Swf Option-->
-                <MenuItem Header="{DynamicResource menu_loadSwf}"
+                <MenuItem Header="{DynamicResource mainWindow_loadSwf}"
                           Command="{Binding LoadSwfCommand}"/>
 
                 <Separator/>
                 
                 <!--SolSaveManager-->
-                <MenuItem Header="{DynamicResource menu_manageSolSaveFiles}"
+                <MenuItem Header="{DynamicResource mainWindow_manageSolSaveFiles}"
                           Command="{Binding OpenSolSaveManagerCommand}"/>
 
                 <Separator/>
 
                 <!--Languages Option-->
                 <MenuItem x:Name="languageMenu"
-                          Header="{DynamicResource menu_languages}"
+                          Header="{DynamicResource mainWindow_languages}"
                           ItemsSource="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel.LanguageList}">
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem"
@@ -120,7 +120,7 @@
                 </MenuItem>
 
                 <!--Settings Option-->
-                <MenuItem Header="{DynamicResource menu_settings}"
+                <MenuItem Header="{DynamicResource common_settings}"
                           Command="{Binding OpenSettingsWindowCommand}"/>
             </MenuItem>
         </Menu>
@@ -136,7 +136,7 @@
                 <Hyperlink Foreground="{DynamicResource PrimaryTextBrush}"
                            FontSize="30"
                            TextDecorations="None"
-                           ToolTip="{DynamicResource toolTip_viewGithub}"
+                           ToolTip="{DynamicResource mainWindow_viewGithub}"
                            Command="{Binding ViewGithubCommand}">
                     <TextBlock Text="Flash Browser"/>
                 </Hyperlink>

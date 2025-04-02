@@ -4,53 +4,57 @@
     <sys:String x:Key="locale">it</sys:String>
     <sys:String x:Key="language_name">Italiano</sys:String>
 
+    <!-- Campi comuni -->
+    <sys:String x:Key="common_swfFile">File SWF</sys:String>
+    <sys:String x:Key="common_solFile">File SOL</sys:String>
+    <sys:String x:Key="common_shortcut">Scorciatoia</sys:String>
+    <sys:String x:Key="common_favorites">Preferiti</sys:String>
+    <sys:String x:Key="common_settings">Impostazioni</sys:String>
+
     <!--Finestra Principale-->
-    <sys:String x:Key="title_mainWindow">Benvenuto</sys:String>
-    <sys:String x:Key="button_go">Vai</sys:String>
-    <sys:String x:Key="menu_favorites">Preferiti</sys:String>
-    <sys:String x:Key="menu_manageFavorites">Gestisci Preferiti</sys:String>
-    <sys:String x:Key="menu_manageSolSaveFiles">Gestisci i file di salvataggio SOL</sys:String>
-    <sys:String x:Key="menu_languages">Lingue</sys:String>
-    <sys:String x:Key="menu_options">Opzioni</sys:String>
-    <sys:String x:Key="menu_settings">Impostazioni</sys:String>
-    <sys:String x:Key="menu_loadSwf">Carica file SWF locale...</sys:String>
-    <sys:String x:Key="filter_swf">SWF file</sys:String>
-    <sys:String x:Key="toolTip_viewGithub">Vedi su GitHub</sys:String>
+    <sys:String x:Key="mainWindow_title">Benvenuto</sys:String>
+    <sys:String x:Key="mainWindow_go">Vai</sys:String>
+    <sys:String x:Key="mainWindow_manageFavorites">Gestisci Preferiti</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">Gestisci i file di salvataggio SOL</sys:String>
+    <sys:String x:Key="mainWindow_languages">Lingue</sys:String>
+    <sys:String x:Key="mainWindow_options">Opzioni</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">Carica file SWF locale...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">Vedi su GitHub</sys:String>
 
     <!--Impostazioni Finestra-->
-    <sys:String x:Key="tabItem_mainWindow">Finestra Principale</sys:String>
-    <sys:String x:Key="tabItem_browser">Browser</sys:String>
-    <sys:String x:Key="settingHeader_addressBar">Barra degli indirizzi e Ricerca</sys:String>
-    <sys:String x:Key="settingHeader_theme">Tema</sys:String>
-    <sys:String x:Key="settingHeader_other">Altro</sys:String>
-    <sys:String x:Key="settingHeader_browserData">Browser Cache</sys:String>
-    <sys:String x:Key="settingHeader_websiteBehavior">Funzionamento siti web</sys:String>
-    <sys:String x:Key="settingHeader_advanced">Avanzate</sys:String>
-    <sys:String x:Key="settingHeader_aboutCef">Circa CEF</sys:String>
-    <sys:String x:Key="settingItem_useSearchEngine">Usa i motori di ricerca nella barra degli indirizzi</sys:String>
-    <sys:String x:Key="settingItem_searchEngine">Motore di ricerca</sys:String>
-    <sys:String x:Key="settingItem_currentTheme">Tema attuale</sys:String>
-    <sys:String x:Key="settingItem_followSystemTheme">Segui il tema di sistema</sys:String>
-    <sys:String x:Key="settingItem_hideMainWindowOnBrowsing">Nascondi la finestra principale quando navighi</sys:String>
-    <sys:String x:Key="settingItem_deleteCache">Elimina la cache</sys:String>
-    <sys:String x:Key="settingItem_openNewPage">Apri nuova pagina in ...</sys:String>
-    <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">Disabilita pop up sulla pagina ricarica/chiudi</sys:String>
-    <sys:String x:Key="settingItem_enableProxy">Abilita proxy</sys:String>
-    <sys:String x:Key="settingItem_enableCustomUserAgent">Personalizza User Agent</sys:String>
-    <sys:String x:Key="settingItem_enableFakeFlashVersion">Falsa versione Flash</sys:String>
-    <sys:String x:Key="settingItem_cefVersion">Versione CefSharp</sys:String>
-    <sys:String x:Key="setting_server">Server</sys:String>
-    <sys:String x:Key="setting_username">Nome Utente</sys:String>
-    <sys:String x:Key="setting_password">Password</sys:String>
-    <sys:String x:Key="setting_userAgent">User Agent</sys:String>
-    <sys:String x:Key="setting_flashVersion">Versione Flash</sys:String>
-    <sys:String x:Key="button_deleteCache">Elimina</sys:String>
-    <sys:String x:Key="button_viewDetails">Dettagli</sys:String>
-    <sys:String x:Key="button_restart">Riavvia</sys:String>
-    <sys:String x:Key="tips_needRestar">Le modifiche delle impostazioni si attiveranno dopo il riavvio.</sys:String>
-    <sys:String x:Key="placeholder_ip">IP</sys:String>
-    <sys:String x:Key="placeholder_port">Porta</sys:String>
-    <sys:String x:Key="placeholder_optional">(Opzionale)</sys:String>
+    <sys:String x:Key="settings_tabMainWindow">Finestra Principale</sys:String>
+    <sys:String x:Key="settings_tabBrowser">Browser</sys:String>
+    <sys:String x:Key="settings_headerAddressBar">Barra degli indirizzi e Ricerca</sys:String>
+    <sys:String x:Key="settings_headerTheme">Tema</sys:String>
+    <sys:String x:Key="settings_headerOther">Altro</sys:String>
+    <sys:String x:Key="settings_headerBrowserData">Browser Cache</sys:String>
+    <sys:String x:Key="settings_headerWebsiteBehavior">Funzionamento siti web</sys:String>
+    <sys:String x:Key="settings_headerAdvanced">Avanzate</sys:String>
+    <sys:String x:Key="settings_headerAboutCef">Circa CEF</sys:String>
+    <sys:String x:Key="settings_useSearchEngine">Usa i motori di ricerca nella barra degli indirizzi</sys:String>
+    <sys:String x:Key="settings_searchEngine">Motore di ricerca</sys:String>
+    <sys:String x:Key="settings_currentTheme">Tema attuale</sys:String>
+    <sys:String x:Key="settings_followSystemTheme">Segui il tema di sistema</sys:String>
+    <sys:String x:Key="settings_hideMainWindowOnBrowsing">Nascondi la finestra principale quando navighi</sys:String>
+    <sys:String x:Key="settings_deleteCache">Elimina la cache</sys:String>
+    <sys:String x:Key="settings_openNewPage">Apri nuova pagina in ...</sys:String>
+    <sys:String x:Key="settings_disableOnBeforeUnloadDialog">Disabilita pop up sulla pagina ricarica/chiudi</sys:String>
+    <sys:String x:Key="settings_enableProxy">Abilita proxy</sys:String>
+    <sys:String x:Key="settings_enableCustomUserAgent">Personalizza User Agent</sys:String>
+    <sys:String x:Key="settings_enableFakeFlashVersion">Falsa versione Flash</sys:String>
+    <sys:String x:Key="settings_cefVersion">Versione CefSharp</sys:String>
+    <sys:String x:Key="settings_server">Server</sys:String>
+    <sys:String x:Key="settings_username">Nome Utente</sys:String>
+    <sys:String x:Key="settings_password">Password</sys:String>
+    <sys:String x:Key="settings_userAgent">User Agent</sys:String>
+    <sys:String x:Key="settings_flashVersion">Versione Flash</sys:String>
+    <sys:String x:Key="settings_buttonDeleteCache">Elimina</sys:String>
+    <sys:String x:Key="settings_buttonViewDetails">Dettagli</sys:String>
+    <sys:String x:Key="settings_buttonRestart">Riavvia</sys:String>
+    <sys:String x:Key="settings_needRestart">Le modifiche delle impostazioni si attiveranno dopo il riavvio.</sys:String>
+    <sys:String x:Key="settings_ip">IP</sys:String>
+    <sys:String x:Key="settings_port">Porta</sys:String>
+    <sys:String x:Key="settings_optional">(Opzionale)</sys:String>
 
     <!--Barra di navigazione dell'interfaccia principale-->
     <sys:String x:Key="navigationType_auto">Automatico</sys:String>
@@ -87,40 +91,39 @@
     <sys:String x:Key="favorites_defaultName">Nuovo prefeito</sys:String>
 
     <!--Finestra Browser-->
-    <sys:String x:Key="menu_back">Indietro</sys:String>
-    <sys:String x:Key="menu_forward">Avanti</sys:String>
-    <sys:String x:Key="menu_reload">Ricarica</sys:String>
-    <sys:String x:Key="menu_stop">Stop</sys:String>
-    <sys:String x:Key="menu_cut">Taglia</sys:String>
-    <sys:String x:Key="menu_copy">Copia</sys:String>
-    <sys:String x:Key="menu_paste">Incolla</sys:String>
-    <sys:String x:Key="menu_selectAll">Seleziona tutto</sys:String>
-    <sys:String x:Key="menu_print">Stampa</sys:String>
-    <sys:String x:Key="menu_redo">Rifai</sys:String>
-    <sys:String x:Key="menu_undo">Annulla</sys:String>
-    <sys:String x:Key="menu_find">Trova</sys:String>
-    <sys:String x:Key="menu_search">Cerca "{0}"</sys:String>
-    <sys:String x:Key="menu_openInNewWindow">Apri in una nuova finestra</sys:String>
-    <sys:String x:Key="menu_openSelectedUrl">Vai a "{0}"</sys:String>
-    <sys:String x:Key="menu_addToDictionary">Aggiungi al dizionario</sys:String>
-    <sys:String x:Key="menu_reloadNoCache">Ricarica ignorando la cache</sys:String>
-    <sys:String x:Key="menu_openDevTool">Apri devtools</sys:String>
-    <sys:String x:Key="menu_viewSource">Vedi Sorgente</sys:String>
-    <sys:String x:Key="menu_zoom">Zoom</sys:String>
-    <sys:String x:Key="menu_openInDefaultBrowser">Apri nel browser predefinito</sys:String>
-    <sys:String x:Key="menu_createShortcut">Crea scorciatoia</sys:String>
-    <sys:String x:Key="menu_addFavorite">Aggiungi a Preferiti</sys:String>
-    <sys:String x:Key="menu_blockedSwfsTips">Alcuni contenuti Flash sembrano bloccati dal kernel Chromium, puoi avviarli in SWF player:</sys:String>
-    <sys:String x:Key="toolTip_back">Indietro (Alt+Left)</sys:String>
-    <sys:String x:Key="toolTip_forward">Avanti (Alt+Right)</sys:String>
-    <sys:String x:Key="toolTip_reload">Ricarica (F5)</sys:String>
-    <sys:String x:Key="toolTip_stop">Stop (Esc)</sys:String>
-    <sys:String x:Key="toolTip_more">Altro</sys:String>
-    <sys:String x:Key="toolTip_blockedSwfs">Contenuti Flash bloccati</sys:String>
-    <sys:String x:Key="toolTip_zoomIn">Ingrandisci (Ctrl+Plus)</sys:String>
-    <sys:String x:Key="toolTip_zoomOut">Riduci (Ctrl+Minus)</sys:String>
-    <sys:String x:Key="filter_shortcut">Scorciatoia</sys:String>
-    <sys:String x:Key="label_loading">Caricamento...</sys:String>
+    <sys:String x:Key="browser_back">Indietro</sys:String>
+    <sys:String x:Key="browser_forward">Avanti</sys:String>
+    <sys:String x:Key="browser_reload">Ricarica</sys:String>
+    <sys:String x:Key="browser_stop">Stop</sys:String>
+    <sys:String x:Key="browser_cut">Taglia</sys:String>
+    <sys:String x:Key="browser_copy">Copia</sys:String>
+    <sys:String x:Key="browser_paste">Incolla</sys:String>
+    <sys:String x:Key="browser_selectAll">Seleziona tutto</sys:String>
+    <sys:String x:Key="browser_print">Stampa</sys:String>
+    <sys:String x:Key="browser_redo">Rifai</sys:String>
+    <sys:String x:Key="browser_undo">Annulla</sys:String>
+    <sys:String x:Key="browser_find">Trova</sys:String>
+    <sys:String x:Key="browser_searchFor">Cerca "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewWindow">Apri in una nuova finestra</sys:String>
+    <sys:String x:Key="browser_openSelectedUrl">Vai a "{0}"</sys:String>
+    <sys:String x:Key="browser_addToDictionary">Aggiungi al dizionario</sys:String>
+    <sys:String x:Key="browser_reloadNoCache">Ricarica ignorando la cache</sys:String>
+    <sys:String x:Key="browser_openDevTool">Apri devtools</sys:String>
+    <sys:String x:Key="browser_viewSource">Vedi Sorgente</sys:String>
+    <sys:String x:Key="browser_zoom">Zoom</sys:String>
+    <sys:String x:Key="browser_openInDefaultBrowser">Apri nel browser predefinito</sys:String>
+    <sys:String x:Key="browser_createShortcut">Crea scorciatoia</sys:String>
+    <sys:String x:Key="browser_addFavorite">Aggiungi a Preferiti</sys:String>
+    <sys:String x:Key="browser_tipsBlockedSwfs">Alcuni contenuti Flash sembrano bloccati dal kernel Chromium, puoi avviarli in SWF player:</sys:String>
+    <sys:String x:Key="browser_toolTipBack">Indietro (Alt+Left)</sys:String>
+    <sys:String x:Key="browser_toolTipForward">Avanti (Alt+Right)</sys:String>
+    <sys:String x:Key="browser_toolTipReload">Ricarica (F5)</sys:String>
+    <sys:String x:Key="browser_toolTipStop">Stop (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipMore">Altro</sys:String>
+    <sys:String x:Key="browser_toolTipBlockedSwfs">Contenuti Flash bloccati</sys:String>
+    <sys:String x:Key="browser_toolTipZoomIn">Ingrandisci (Ctrl+Plus)</sys:String>
+    <sys:String x:Key="browser_toolTipZoomOut">Riduci (Ctrl+Minus)</sys:String>
+    <sys:String x:Key="browser_loading">Caricamento...</sys:String>
 
     <!--Gestore dei salvataggi-->
     <sys:String x:Key="solSaveManager_title">Gestore dei salvataggi SOL</sys:String>
@@ -132,16 +135,30 @@
     <sys:String x:Key="solSaveManager_toolTipExport">Esporta</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">Elimina</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">Modifica</sys:String>
-    <sys:String x:Key="solSaveManager_filterSol">SOL file</sys:String>
+
+    <!--Editor SOL-->
+    <sys:String x:Key="solEditor_title">Editor SOL</sys:String>
+    <sys:String x:Key="solEditor_file">File</sys:String>
+    <sys:String x:Key="solEditor_save">Salva</sys:String>
+    <sys:String x:Key="solEditor_saveAs">Salva come...</sys:String>
+    <sys:String x:Key="solEditor_close">Chiudi</sys:String>
+    <sys:String x:Key="solEditor_edit">Modifica</sys:String>
+    <sys:String x:Key="solEditor_addItem">Aggiungi elemento</sys:String>
+    <sys:String x:Key="solEditor_removeItem">Rimuovi elemento</sys:String>
+    <sys:String x:Key="solEditor_statusReady">Pronto</sys:String>
+    <sys:String x:Key="solEditor_statusError">Errore</sys:String>
+    <sys:String x:Key="solEditor_statusModified">Modificato</sys:String>
+    <sys:String x:Key="solEditor_statusSaved">Salvato</sys:String>
+    <sys:String x:Key="solEditor_statusUnknown">Stato sconosciuto</sys:String>
 
     <!--Dialoghi-->
-    <sys:String x:Key="button_ok">OK</sys:String>
-    <sys:String x:Key="button_cancel">Annulla</sys:String>
-    <sys:String x:Key="button_yes">Si</sys:String>
-    <sys:String x:Key="button_no">No</sys:String>
-    <sys:String x:Key="title_error">Errore</sys:String>
-    <sys:String x:Key="title_addFavorite">Aggiungi a Preferiti</sys:String>
-    <sys:String x:Key="tips_selectLanguage">Seleziona lingua</sys:String>
+    <sys:String x:Key="dialog_ok">OK</sys:String>
+    <sys:String x:Key="dialog_cancel">Annulla</sys:String>
+    <sys:String x:Key="dialog_yes">Si</sys:String>
+    <sys:String x:Key="dialog_no">No</sys:String>
+    <sys:String x:Key="dialog_error">Errore</sys:String>
+    <sys:String x:Key="dialog_addFavorite">Aggiungi a Preferiti</sys:String>
+    <sys:String x:Key="dialog_selectLanguage">Seleziona lingua</sys:String>
 
     <!--Messaggi-->
     <sys:String x:Key="message_emptyUrl">Prego, inserisci l'url.</sys:String>
@@ -154,6 +171,7 @@
     <sys:String x:Key="message_deleted">Eliminazione riuscita.</sys:String>
     <sys:String x:Key="message_imported">Importazione riuscita.</sys:String>
     <sys:String x:Key="message_exported">Esportazione riuscita.</sys:String>
+    <sys:String x:Key="message_askSaveChange">Vuoi salvare le modifiche a "{0}"?</sys:String>
     <sys:String x:Key="error_message">Messaggio di Errore</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Il nome non può essere vuoto.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">L'URL non può essere vuoto.</sys:String>

@@ -15,7 +15,7 @@
         SizeToContent="Height"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Title="{DynamicResource title_addFavorite}"
+        Title="{DynamicResource dialog_addFavorite}"
         FocusManager.FocusedElement="{Binding ElementName=NameTextBox}">
 
     <Window.InputBindings>
@@ -70,11 +70,11 @@
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <Button MinWidth="70"
-                        Content="{DynamicResource button_cancel}"
+                        Content="{DynamicResource dialog_cancel}"
                         Click="OnCancelButtonClick"/>
                 <Button MinWidth="70"
                         Margin="10,0,0,0"
-                        Content="{DynamicResource button_ok}"
+                        Content="{DynamicResource dialog_ok}"
                         Style="{StaticResource ButtonPrimary}"
                         Click="OnConfirmButtonClick">
                     <Button.IsEnabled>

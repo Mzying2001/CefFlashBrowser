@@ -41,6 +41,13 @@ namespace sol
     };
 
 
+    enum class SolVersion : uint32_t
+    {
+        AMF0 = 0,
+        AMF3 = 3,
+    };
+
+
     struct SolArray
     {
         std::map<std::string, SolValue> assoc;
@@ -83,6 +90,12 @@ namespace sol
         SolValue(SolType t, const T& v) : type(t), value(v) {}
 
         template <typename T>
+        const T& get() const { return std::get<T>(value); }
+
+        template <typename T>
+        T& get() { return std::get<T>(value); }
+
+        template <typename T>
         bool is() const
         {
             switch (type)
@@ -112,12 +125,6 @@ namespace sol
                 return false;
             }
         }
-
-        template <typename T>
-        T get() const
-        {
-            return std::get<T>(value);
-        }
     };
 
 
@@ -126,7 +133,7 @@ namespace sol
         std::string path;
         std::string errmsg;
         std::string solname;
-        uint32_t version;
+        SolVersion version;
         std::map<std::string, SolValue> data;
 
         bool valid() const { return errmsg.empty(); }

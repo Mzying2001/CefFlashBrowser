@@ -1,0 +1,291 @@
+﻿<Window x:Class="CefFlashBrowser.Views.SolEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CefFlashBrowser.Views"
+        xmlns:m="clr-namespace:CefFlashBrowser.Models"
+        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
+        xmlns:utils="clr-namespace:CefFlashBrowser.Utils"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        mc:Ignorable="d"
+        
+        x:Name="window"
+        Width="450"
+        Height="450"
+        WindowStartupLocation="CenterScreen"
+        Title="{DynamicResource solEditor_title}">
+
+    <d:Window.DataContext>
+        <vm:SolEditorWindowViewModel/>
+    </d:Window.DataContext>
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+        <KeyBinding Gesture="Ctrl+S"
+                    Command="{Binding SaveFileCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+S"
+                    Command="{Binding SaveAsFileCommand}"/>
+    </Window.InputBindings>
+
+    <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior x:Name="windowBehavior"/>
+    </i:Interaction.Behaviors>
+
+    <Window.Resources>
+        <!--The default template for displaying nothing-->
+        <DataTemplate x:Key="DisplayNothingTemplate">
+        </DataTemplate>
+
+        <!--Bool Editor-->
+        <DataTemplate x:Key="BoolNodeTemplate"
+                      DataType="{x:Type vm:SolNodeViewModel}">
+            <CheckBox Style="{StaticResource ToggleButtonSwitch}"
+                      IsChecked="{Binding Value}">
+                <CheckBox.Effect>
+                    <DropShadowEffect Color="White"
+                                      Opacity="0.5"
+                                      Direction="0"
+                                      ShadowDepth="0"/>
+                </CheckBox.Effect>
+            </CheckBox>
+        </DataTemplate>
+
+        <!--Int Editor-->
+        <DataTemplate x:Key="IntNodeTemplate"
+                      DataType="{x:Type vm:SolNodeViewModel}">
+            <hc:NumericUpDown Width="100"
+                              DecimalPlaces="0"
+                              Value="{Binding Value, Converter={StaticResource IntToDouble}}"/>
+        </DataTemplate>
+
+        <!--Double Editor-->
+        <DataTemplate x:Key="DoubleNodeTemplate"
+                      DataType="{x:Type vm:SolNodeViewModel}">
+            <hc:NumericUpDown Width="100"
+                              Value="{Binding Value}"/>
+        </DataTemplate>
+
+        <!--DateTime Editor-->
+        <DataTemplate x:Key="DateTimeNodeTemplate"
+                      DataType="{x:Type vm:SolNodeViewModel}">
+            <hc:DateTimePicker Width="100"
+                               SelectedDateTime="{Binding Value}"/>
+        </DataTemplate>
+
+        <!--Add Item Button-->
+        <DataTemplate x:Key="AddItemTemplate"
+                      DataType="{x:Type vm:SolNodeViewModel}">
+            <Grid>
+                <Grid.Resources>
+                    <Style TargetType="Button"
+                           BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Width" Value="28"/>
+                        <Setter Property="Height" Value="28"/>
+                        <Setter Property="Padding" Value="0"/>
+                    </Style>
+                </Grid.Resources>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Hidden"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=DockPanel}, Path=IsMouseOver}">
+                                <DataTrigger.Value>
+                                    <sys:Boolean>True</sys:Boolean>
+                                </DataTrigger.Value>
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Button Command="{Binding Editor.AddChildCommand}"
+                        CommandParameter="{Binding}">
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="/Assets/Svgs/add.svg"/>
+                </Button>
+            </Grid>
+        </DataTemplate>
+
+        <!--Open editor button-->
+        <DataTemplate x:Key="OpenTextEditorTemplate"
+                      DataType="{x:Type vm:SolNodeViewModel}">
+            <Button Width="100"
+                    Padding="0"
+                    Command="{Binding Editor.EditTextCommand}"
+                    CommandParameter="{Binding}"
+                    ToolTip="{Binding Value, Mode=OneWay}">
+                <TextBlock Width="80"
+                           TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis"
+                           Text="{Binding Value, Mode=OneWay}"/>
+            </Button>
+        </DataTemplate>
+
+        <!--Import/Export button-->
+        <DataTemplate x:Key="ImportExportTemplate"
+                      DataType="{x:Type vm:SolNodeViewModel}">
+            <StackPanel Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="Button"
+                           BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Width" Value="28"/>
+                        <Setter Property="Height" Value="28"/>
+                        <Setter Property="Padding" Value="0"/>
+                    </Style>
+                </StackPanel.Resources>
+                <Button Command="{Binding Editor.ExportBinaryCommand}"
+                        CommandParameter="{Binding}">
+                    <svgc:SvgIcon Width="12.5"
+                                  Height="12.5"
+                                  UriSource="/Assets/Svgs/export.svg"/>
+                </Button>
+                <Button Margin="1,0,0,0"
+                        Command="{Binding Editor.ImportBinaryCommand}"
+                        CommandParameter="{Binding}">
+                    <svgc:SvgIcon Width="13"
+                                  Height="13"
+                                  UriSource="/Assets/Svgs/import.svg"/>
+                </Button>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="{DynamicResource solEditor_file}">
+                <MenuItem Header="{DynamicResource solEditor_save}"
+                          Command="{Binding SaveFileCommand}"/>
+                <MenuItem Header="{DynamicResource solEditor_saveAs}"
+                          Command="{Binding SaveAsFileCommand}"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource solEditor_close}"
+                          Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+            </MenuItem>
+            <MenuItem Header="{DynamicResource solEditor_edit}"
+                      IsEnabled="{Binding ElementName=treeView, Path=SelectedValue, Converter={StaticResource NotNull}}">
+                <MenuItem Header="{DynamicResource solEditor_addItem}"
+                          Command="{Binding AddChildCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanAddChild}"/>
+                <MenuItem Header="{DynamicResource solEditor_removeItem}"
+                          Command="{Binding RemoveItemCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanRemove}"/>
+            </MenuItem>
+        </Menu>
+
+        <StatusBar DockPanel.Dock="Bottom">
+            <TextBlock>
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="{DynamicResource solEditor_statusUnknown}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Ready}">
+                                <Setter Property="Text" Value="{DynamicResource solEditor_statusReady}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Error}">
+                                <Setter Property="Text" Value="{DynamicResource solEditor_statusError}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Modified}">
+                                <Setter Property="Text" Value="{DynamicResource solEditor_statusModified}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Saved}">
+                                <Setter Property="Text" Value="{DynamicResource solEditor_statusSaved}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <Separator/>
+            <TextBlock Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="{Binding FileFormat, Mode=OneWay}"/>
+            <Separator/>
+            <TextBlock TextTrimming="CharacterEllipsis"
+                       Foreground="{DynamicResource SecondaryTextBrush}"
+                       Text="{Binding FilePath, Mode=OneWay}"
+                       ToolTip="{Binding FilePath, Mode=OneWay}"/>
+        </StatusBar>
+
+        <TreeView x:Name="treeView"
+                  BorderThickness="0"
+                  ItemsSource="{Binding RootNodes}">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <DockPanel Background="Transparent">
+                        <ContentControl DockPanel.Dock="Right"
+                                        Margin="10,5"
+                                        Content="{Binding}">
+                            <ContentControl.ContentTemplateSelector>
+                                <utils:SolNodeTemplateSelector RootTemplate="{StaticResource AddItemTemplate}"
+                                                               ArrayTemplate="{StaticResource AddItemTemplate}"
+                                                               ObjectTemplate="{StaticResource AddItemTemplate}"
+                                                               BoolTemplate="{StaticResource BoolNodeTemplate}"
+                                                               IntTemplate="{StaticResource IntNodeTemplate}"
+                                                               DoubleTemplate="{StaticResource DoubleNodeTemplate}"
+                                                               DateTemplate="{StaticResource DateTimeNodeTemplate}"
+                                                               StringTemplate="{StaticResource OpenTextEditorTemplate}"
+                                                               XmlDocTemplate="{StaticResource OpenTextEditorTemplate}"
+                                                               XmlTemplate="{StaticResource OpenTextEditorTemplate}"
+                                                               BinaryTemplate="{StaticResource ImportExportTemplate}"
+                                                               DefaultTemplate="{StaticResource DisplayNothingTemplate}"/>
+                            </ContentControl.ContentTemplateSelector>
+                        </ContentControl>
+
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DisplayName}"/>
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock"
+                                           BasedOn="{StaticResource {x:Type TextBlock}}">
+                                        <Setter Property="Foreground"
+                                                Value="{DynamicResource SecondaryTextBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TypeString}" Value="">
+                                                <Setter Property="Visibility"
+                                                        Value="Collapsed"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsSelected}" Value="True">
+                                                <Setter Property="Foreground"
+                                                        Value="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=Foreground}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                                <Run Text=": "/><Run Text="{Binding TypeString, Mode=OneWay}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </DockPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}"
+                       BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                    <Setter Property="IsExpanded" Value="True"/>
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="{DynamicResource solEditor_addItem}"
+                                          IsEnabled="{Binding CanAddChild}"
+                                          Command="{Binding Editor.AddChildCommand}"
+                                          CommandParameter="{Binding}"/>
+                                <MenuItem Header="{DynamicResource solEditor_removeItem}"
+                                          IsEnabled="{Binding CanRemove}"
+                                          Command="{Binding Editor.RemoveItemCommand}"
+                                          CommandParameter="{Binding}"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TreeView.ItemContainerStyle>
+        </TreeView>
+    </DockPanel>
+</Window>

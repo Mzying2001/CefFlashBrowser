@@ -18,4 +18,6 @@
 
     <local:TwoThird x:Key="TwoThird"/>
 
+    <local:IntToDouble x:Key="IntToDouble"/>
+
 </ResourceDictionary>

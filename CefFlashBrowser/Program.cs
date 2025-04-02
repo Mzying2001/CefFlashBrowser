@@ -34,7 +34,7 @@ namespace CefFlashBrowser
             }
             catch (Exception e)
             {
-                WindowManager.Alert(e.ToString(), LanguageManager.GetString("title_error"));
+                WindowManager.Alert(e.ToString(), LanguageManager.GetString("dialog_error"));
             }
             finally
             {

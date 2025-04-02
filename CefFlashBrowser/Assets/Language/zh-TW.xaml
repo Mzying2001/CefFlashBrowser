@@ -4,53 +4,57 @@
     <sys:String x:Key="locale">zh-TW</sys:String>
     <sys:String x:Key="language_name">中文（繁體）</sys:String>
 
+    <!-- 共用欄位 -->
+    <sys:String x:Key="common_swfFile">SWF檔案</sys:String>
+    <sys:String x:Key="common_solFile">SOL檔案</sys:String>
+    <sys:String x:Key="common_shortcut">捷徑</sys:String>
+    <sys:String x:Key="common_favorites">我的最愛</sys:String>
+    <sys:String x:Key="common_settings">設定</sys:String>
+
     <!--主介面-->
-    <sys:String x:Key="title_mainWindow">歡迎</sys:String>
-    <sys:String x:Key="button_go">前往</sys:String>
-    <sys:String x:Key="menu_favorites">我的最愛</sys:String>
-    <sys:String x:Key="menu_manageFavorites">管理我的最愛</sys:String>
-    <sys:String x:Key="menu_manageSolSaveFiles">管理SOL存檔</sys:String>
-    <sys:String x:Key="menu_languages">語言</sys:String>
-    <sys:String x:Key="menu_options">選項</sys:String>
-    <sys:String x:Key="menu_settings">設定</sys:String>
-    <sys:String x:Key="menu_loadSwf">載入本機SWF檔案...</sys:String>
-    <sys:String x:Key="filter_swf">SWF檔案</sys:String>
-    <sys:String x:Key="toolTip_viewGithub">在GitHub檢視</sys:String>
+    <sys:String x:Key="mainWindow_title">歡迎</sys:String>
+    <sys:String x:Key="mainWindow_go">前往</sys:String>
+    <sys:String x:Key="mainWindow_manageFavorites">管理我的最愛</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存檔</sys:String>
+    <sys:String x:Key="mainWindow_languages">語言</sys:String>
+    <sys:String x:Key="mainWindow_options">選項</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">載入本機SWF檔案...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">在GitHub檢視</sys:String>
 
     <!--設定視窗-->
-    <sys:String x:Key="tabItem_mainWindow">主視窗</sys:String>
-    <sys:String x:Key="tabItem_browser">瀏覽器</sys:String>
-    <sys:String x:Key="settingHeader_addressBar">網址列與搜尋</sys:String>
-    <sys:String x:Key="settingHeader_theme">主題</sys:String>
-    <sys:String x:Key="settingHeader_other">其他</sys:String>
-    <sys:String x:Key="settingHeader_browserData">瀏覽器快取</sys:String>
-    <sys:String x:Key="settingHeader_websiteBehavior">網站行為</sys:String>
-    <sys:String x:Key="settingHeader_advanced">進階</sys:String>
-    <sys:String x:Key="settingHeader_aboutCef">關於 CEF</sys:String>
-    <sys:String x:Key="settingItem_useSearchEngine">在網址列使用搜尋引擎</sys:String>
-    <sys:String x:Key="settingItem_searchEngine">搜尋引擎</sys:String>
-    <sys:String x:Key="settingItem_currentTheme">目前的主題</sys:String>
-    <sys:String x:Key="settingItem_followSystemTheme">跟隨系統主題</sys:String>
-    <sys:String x:Key="settingItem_hideMainWindowOnBrowsing">瀏覽網頁時隱藏主視窗</sys:String>
-    <sys:String x:Key="settingItem_deleteCache">清除所有快取</sys:String>
-    <sys:String x:Key="settingItem_openNewPage">開啟新分頁方式</sys:String>
-    <sys:String x:Key="settingItem_disableOnBeforeUnloadDialog">阻止網頁重新整理/關閉時的確認對話框</sys:String>
-    <sys:String x:Key="settingItem_enableProxy">使用代理伺服器</sys:String>
-    <sys:String x:Key="settingItem_enableCustomUserAgent">自訂使用者代理（UA）</sys:String>
-    <sys:String x:Key="settingItem_enableFakeFlashVersion">偽造Flash版本</sys:String>
-    <sys:String x:Key="settingItem_cefVersion">CefSharp版本</sys:String>
-    <sys:String x:Key="setting_server">伺服器</sys:String>
-    <sys:String x:Key="setting_username">使用者名稱</sys:String>
-    <sys:String x:Key="setting_password">密碼</sys:String>
-    <sys:String x:Key="setting_userAgent">使用者代理</sys:String>
-    <sys:String x:Key="setting_flashVersion">Flash版本</sys:String>
-    <sys:String x:Key="button_deleteCache">清除</sys:String>
-    <sys:String x:Key="button_viewDetails">詳細資料</sys:String>
-    <sys:String x:Key="button_restart">重新啟動</sys:String>
-    <sys:String x:Key="tips_needRestar">此部分設定需重新啟動程式後生效。</sys:String>
-    <sys:String x:Key="placeholder_ip">IP位址</sys:String>
-    <sys:String x:Key="placeholder_port">通訊埠</sys:String>
-    <sys:String x:Key="placeholder_optional">（選填）</sys:String>
+    <sys:String x:Key="settings_tabMainWindow">主視窗</sys:String>
+    <sys:String x:Key="settings_tabBrowser">瀏覽器</sys:String>
+    <sys:String x:Key="settings_headerAddressBar">網址列與搜尋</sys:String>
+    <sys:String x:Key="settings_headerTheme">主題</sys:String>
+    <sys:String x:Key="settings_headerOther">其他</sys:String>
+    <sys:String x:Key="settings_headerBrowserData">瀏覽器快取</sys:String>
+    <sys:String x:Key="settings_headerWebsiteBehavior">網站行為</sys:String>
+    <sys:String x:Key="settings_headerAdvanced">進階</sys:String>
+    <sys:String x:Key="settings_headerAboutCef">關於 CEF</sys:String>
+    <sys:String x:Key="settings_useSearchEngine">在網址列使用搜尋引擎</sys:String>
+    <sys:String x:Key="settings_searchEngine">搜尋引擎</sys:String>
+    <sys:String x:Key="settings_currentTheme">目前的主題</sys:String>
+    <sys:String x:Key="settings_followSystemTheme">跟隨系統主題</sys:String>
+    <sys:String x:Key="settings_hideMainWindowOnBrowsing">瀏覽網頁時隱藏主視窗</sys:String>
+    <sys:String x:Key="settings_deleteCache">清除所有快取</sys:String>
+    <sys:String x:Key="settings_openNewPage">開啟新分頁方式</sys:String>
+    <sys:String x:Key="settings_disableOnBeforeUnloadDialog">阻止網頁重新整理/關閉時的確認對話框</sys:String>
+    <sys:String x:Key="settings_enableProxy">使用代理伺服器</sys:String>
+    <sys:String x:Key="settings_enableCustomUserAgent">自訂使用者代理（UA）</sys:String>
+    <sys:String x:Key="settings_enableFakeFlashVersion">偽造Flash版本</sys:String>
+    <sys:String x:Key="settings_cefVersion">CefSharp版本</sys:String>
+    <sys:String x:Key="settings_server">伺服器</sys:String>
+    <sys:String x:Key="settings_username">使用者名稱</sys:String>
+    <sys:String x:Key="settings_password">密碼</sys:String>
+    <sys:String x:Key="settings_userAgent">使用者代理</sys:String>
+    <sys:String x:Key="settings_flashVersion">Flash版本</sys:String>
+    <sys:String x:Key="settings_buttonDeleteCache">清除</sys:String>
+    <sys:String x:Key="settings_buttonViewDetails">詳細資料</sys:String>
+    <sys:String x:Key="settings_buttonRestart">重新啟動</sys:String>
+    <sys:String x:Key="settings_needRestart">此部分設定需重新啟動程式後生效。</sys:String>
+    <sys:String x:Key="settings_ip">IP位址</sys:String>
+    <sys:String x:Key="settings_port">通訊埠</sys:String>
+    <sys:String x:Key="settings_optional">（選填）</sys:String>
 
     <!--主介面導覽列-->
     <sys:String x:Key="navigationType_auto">自動</sys:String>
@@ -87,40 +91,39 @@
     <sys:String x:Key="favorites_defaultName">新我的最愛項目</sys:String>
 
     <!--瀏覽器視窗-->
-    <sys:String x:Key="menu_back">上一頁</sys:String>
-    <sys:String x:Key="menu_forward">下一頁</sys:String>
-    <sys:String x:Key="menu_reload">重新整理</sys:String>
-    <sys:String x:Key="menu_stop">停止</sys:String>
-    <sys:String x:Key="menu_cut">剪下</sys:String>
-    <sys:String x:Key="menu_copy">複製</sys:String>
-    <sys:String x:Key="menu_paste">貼上</sys:String>
-    <sys:String x:Key="menu_selectAll">全選</sys:String>
-    <sys:String x:Key="menu_print">列印</sys:String>
-    <sys:String x:Key="menu_redo">重做</sys:String>
-    <sys:String x:Key="menu_undo">復原</sys:String>
-    <sys:String x:Key="menu_find">尋找</sys:String>
-    <sys:String x:Key="menu_search">搜尋「{0}」</sys:String>
-    <sys:String x:Key="menu_openInNewWindow">在新視窗開啟</sys:String>
-    <sys:String x:Key="menu_openSelectedUrl">前往「{0}」</sys:String>
-    <sys:String x:Key="menu_addToDictionary">新增到字典</sys:String>
-    <sys:String x:Key="menu_reloadNoCache">重新整理（忽略快取）</sys:String>
-    <sys:String x:Key="menu_openDevTool">開啟開發者工具</sys:String>
-    <sys:String x:Key="menu_viewSource">檢視網頁原始碼</sys:String>
-    <sys:String x:Key="menu_zoom">縮放</sys:String>
-    <sys:String x:Key="menu_openInDefaultBrowser">在預設瀏覽器開啟</sys:String>
-    <sys:String x:Key="menu_createShortcut">建立網頁捷徑</sys:String>
-    <sys:String x:Key="menu_addFavorite">將此網站加入我的最愛</sys:String>
-    <sys:String x:Key="menu_blockedSwfsTips">部分Flash內容可能被Chromium核心封鎖，您可以在SWF播放器中播放：</sys:String>
-    <sys:String x:Key="toolTip_back">上一頁（Alt+向左鍵）</sys:String>
-    <sys:String x:Key="toolTip_forward">下一頁（Alt+向右鍵）</sys:String>
-    <sys:String x:Key="toolTip_reload">重新整理（F5）</sys:String>
-    <sys:String x:Key="toolTip_stop">停止（Esc）</sys:String>
-    <sys:String x:Key="toolTip_more">更多功能</sys:String>
-    <sys:String x:Key="toolTip_blockedSwfs">被封鎖的Flash內容</sys:String>
-    <sys:String x:Key="toolTip_zoomIn">放大（Ctrl+加號鍵）</sys:String>
-    <sys:String x:Key="toolTip_zoomOut">縮小（Ctrl+減號鍵）</sys:String>
-    <sys:String x:Key="filter_shortcut">捷徑</sys:String>
-    <sys:String x:Key="label_loading">載入中...</sys:String>
+    <sys:String x:Key="browser_back">上一頁</sys:String>
+    <sys:String x:Key="browser_forward">下一頁</sys:String>
+    <sys:String x:Key="browser_reload">重新整理</sys:String>
+    <sys:String x:Key="browser_stop">停止</sys:String>
+    <sys:String x:Key="browser_cut">剪下</sys:String>
+    <sys:String x:Key="browser_copy">複製</sys:String>
+    <sys:String x:Key="browser_paste">貼上</sys:String>
+    <sys:String x:Key="browser_selectAll">全選</sys:String>
+    <sys:String x:Key="browser_print">列印</sys:String>
+    <sys:String x:Key="browser_redo">重做</sys:String>
+    <sys:String x:Key="browser_undo">復原</sys:String>
+    <sys:String x:Key="browser_find">尋找</sys:String>
+    <sys:String x:Key="browser_searchFor">搜尋「{0}」</sys:String>
+    <sys:String x:Key="browser_openInNewWindow">在新視窗開啟</sys:String>
+    <sys:String x:Key="browser_openSelectedUrl">前往「{0}」</sys:String>
+    <sys:String x:Key="browser_addToDictionary">新增到字典</sys:String>
+    <sys:String x:Key="browser_reloadNoCache">重新整理（忽略快取）</sys:String>
+    <sys:String x:Key="browser_openDevTool">開啟開發者工具</sys:String>
+    <sys:String x:Key="browser_viewSource">檢視網頁原始碼</sys:String>
+    <sys:String x:Key="browser_zoom">縮放</sys:String>
+    <sys:String x:Key="browser_openInDefaultBrowser">在預設瀏覽器開啟</sys:String>
+    <sys:String x:Key="browser_createShortcut">建立網頁捷徑</sys:String>
+    <sys:String x:Key="browser_addFavorite">將此網站加入我的最愛</sys:String>
+    <sys:String x:Key="browser_tipsBlockedSwfs">部分Flash內容可能被Chromium核心封鎖，您可以在SWF播放器中播放：</sys:String>
+    <sys:String x:Key="browser_toolTipBack">上一頁（Alt+向左鍵）</sys:String>
+    <sys:String x:Key="browser_toolTipForward">下一頁（Alt+向右鍵）</sys:String>
+    <sys:String x:Key="browser_toolTipReload">重新整理（F5）</sys:String>
+    <sys:String x:Key="browser_toolTipStop">停止（Esc）</sys:String>
+    <sys:String x:Key="browser_toolTipMore">更多功能</sys:String>
+    <sys:String x:Key="browser_toolTipBlockedSwfs">被封鎖的Flash內容</sys:String>
+    <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加號鍵）</sys:String>
+    <sys:String x:Key="browser_toolTipZoomOut">縮小（Ctrl+減號鍵）</sys:String>
+    <sys:String x:Key="browser_loading">載入中...</sys:String>
 
     <!--存檔管理器-->
     <sys:String x:Key="solSaveManager_title">SOL存檔管理器</sys:String>
@@ -132,16 +135,30 @@
     <sys:String x:Key="solSaveManager_toolTipExport">匯出</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">刪除</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">編輯</sys:String>
-    <sys:String x:Key="solSaveManager_filterSol">SOL檔案</sys:String>
+
+    <!--存檔編輯器-->
+    <sys:String x:Key="solEditor_title">SOL編輯器</sys:String>
+    <sys:String x:Key="solEditor_file">檔案</sys:String>
+    <sys:String x:Key="solEditor_save">儲存</sys:String>
+    <sys:String x:Key="solEditor_saveAs">另存新檔...</sys:String>
+    <sys:String x:Key="solEditor_close">關閉</sys:String>
+    <sys:String x:Key="solEditor_edit">編輯</sys:String>
+    <sys:String x:Key="solEditor_addItem">新增項目</sys:String>
+    <sys:String x:Key="solEditor_removeItem">移除項目</sys:String>
+    <sys:String x:Key="solEditor_statusReady">就緒</sys:String>
+    <sys:String x:Key="solEditor_statusError">錯誤</sys:String>
+    <sys:String x:Key="solEditor_statusModified">已修改</sys:String>
+    <sys:String x:Key="solEditor_statusSaved">已儲存</sys:String>
+    <sys:String x:Key="solEditor_statusUnknown">未知狀態</sys:String>
 
     <!--對話框-->
-    <sys:String x:Key="button_ok">確定</sys:String>
-    <sys:String x:Key="button_cancel">取消</sys:String>
-    <sys:String x:Key="button_yes">是</sys:String>
-    <sys:String x:Key="button_no">否</sys:String>
-    <sys:String x:Key="title_error">錯誤</sys:String>
-    <sys:String x:Key="title_addFavorite">新增我的最愛</sys:String>
-    <sys:String x:Key="tips_selectLanguage">請選擇語言</sys:String>
+    <sys:String x:Key="dialog_ok">確定</sys:String>
+    <sys:String x:Key="dialog_cancel">取消</sys:String>
+    <sys:String x:Key="dialog_yes">是</sys:String>
+    <sys:String x:Key="dialog_no">否</sys:String>
+    <sys:String x:Key="dialog_error">錯誤</sys:String>
+    <sys:String x:Key="dialog_addFavorite">新增我的最愛</sys:String>
+    <sys:String x:Key="dialog_selectLanguage">請選擇語言</sys:String>
 
     <!--提示訊息-->
     <sys:String x:Key="message_emptyUrl">請輸入網址。</sys:String>
@@ -154,6 +171,7 @@
     <sys:String x:Key="message_deleted">刪除成功。</sys:String>
     <sys:String x:Key="message_imported">匯入成功。</sys:String>
     <sys:String x:Key="message_exported">匯出成功。</sys:String>
+    <sys:String x:Key="message_askSaveChange">是否將變更儲存到「{0}」？</sys:String>
     <sys:String x:Key="error_message">錯誤訊息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名稱不能為空白。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">網址不能為空白。</sys:String>

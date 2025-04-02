@@ -58,13 +58,13 @@
                         HorizontalAlignment="Right">
                 <Button x:Name="noButton"
                         MinWidth="70"
-                        Content="{StaticResource button_no}"
+                        Content="{StaticResource dialog_no}"
                         Click="OnNoButtonClick"/>
                 <Button x:Name="yesButton"
                         Margin="10,0,0,0"
                         MinWidth="70"
                         Style="{StaticResource ButtonPrimary}"
-                        Content="{StaticResource button_yes}"
+                        Content="{StaticResource dialog_yes}"
                         Click="OnYesButtonClick"/>
             </StackPanel>
         </Grid>

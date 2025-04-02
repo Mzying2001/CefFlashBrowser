@@ -63,7 +63,7 @@ namespace CefFlashBrowser.ViewModels
             var sfd = new Microsoft.Win32.SaveFileDialog()
             {
                 FileName = title,
-                Filter = $"{LanguageManager.GetString("filter_shortcut")}|*.lnk",
+                Filter = $"{LanguageManager.GetString("common_shortcut")}|*.lnk",
             };
 
             if (sfd.ShowDialog() == true)

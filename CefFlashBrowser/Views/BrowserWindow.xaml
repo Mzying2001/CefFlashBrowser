@@ -51,7 +51,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    VerticalAlignment="Center">
-                            <Run Text="{DynamicResource menu_zoom}"/>
+                            <Run Text="{DynamicResource browser_zoom}"/>
                             <Run Text=": "/>
                             <Run Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
                         </TextBlock>
@@ -61,7 +61,7 @@
                             <Button Width="30"
                                     Height="30"
                                     Padding="0"
-                                    ToolTip="{DynamicResource toolTip_zoomOut}"
+                                    ToolTip="{DynamicResource browser_toolTipZoomOut}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
                                 <Button.Content>
                                     <svgc:SvgIcon Width="10"
@@ -77,7 +77,7 @@
                             <Button Width="30"
                                     Height="30"
                                     Padding="0"
-                                    ToolTip="{DynamicResource toolTip_zoomIn}"
+                                    ToolTip="{DynamicResource browser_toolTipZoomIn}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
                                 <Button.Content>
                                     <svgc:SvgIcon Width="10"
@@ -92,7 +92,7 @@
 
             <Separator/>
 
-            <MenuItem Header="{DynamicResource menu_favorites}"
+            <MenuItem Header="{DynamicResource common_favorites}"
                       ItemsSource="{Binding Source={x:Static data:GlobalData.Favorites}}"
                       Visibility="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count, Converter={StaticResource VisiableIfNotZero}}">
                 <MenuItem.ItemContainerStyle>
@@ -115,29 +115,29 @@
                 </MenuItem.ItemTemplate>
             </MenuItem>
 
-            <MenuItem Header="{DynamicResource menu_addFavorite}"
+            <MenuItem Header="{DynamicResource browser_addFavorite}"
                       Command="{Binding AddFavoriteCommand}"
                       CommandParameter="{x:Reference Name=browser}"
                       InputGestureText="Ctrl+D"/>
 
             <Separator/>
 
-            <MenuItem Header="{DynamicResource menu_createShortcut}"
+            <MenuItem Header="{DynamicResource browser_createShortcut}"
                       Command="{Binding CreateShortcutCommand}"
                       CommandParameter="{x:Reference Name=browser}"
                       InputGestureText="Ctrl+S"/>
 
-            <MenuItem Header="{DynamicResource menu_openInDefaultBrowser}"
+            <MenuItem Header="{DynamicResource browser_openInDefaultBrowser}"
                       Command="{Binding OpenInDefaultBrowserCommand}"
                       CommandParameter="{Binding Source={x:Reference Name=browser}, Path=Address}"
                       InputGestureText="Ctrl+O"/>
 
             <Separator/>
 
-            <MenuItem Header="{DynamicResource menu_openDevTool}"
+            <MenuItem Header="{DynamicResource browser_openDevTool}"
                       Command="{Binding Source={x:Reference Name=browser}, Path=ShowDevToolsCommand}"
                       InputGestureText="F12"/>
-            <MenuItem Header="{DynamicResource menu_viewSource}"
+            <MenuItem Header="{DynamicResource browser_viewSource}"
                       Command="{Binding ViewSourceCommand}"
                       CommandParameter="{Binding Source={x:Reference Name=browser}, Path=Address}"
                       InputGestureText="Ctrl+U"/>
@@ -165,7 +165,7 @@
                                TextWrapping="Wrap"
                                FontWeight="Bold"
                                Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="{DynamicResource menu_blockedSwfsTips}"/>
+                               Text="{DynamicResource browser_tipsBlockedSwfs}"/>
                     <ItemsControl ItemsSource="{Binding Source={x:Reference Name=browser}, Path=BlockedSwfs}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type sys:String}">
@@ -252,7 +252,7 @@
 
             <StackPanel DockPanel.Dock="Left"
                         Orientation="Horizontal">
-                <Button ToolTip="{DynamicResource toolTip_back}"
+                <Button ToolTip="{DynamicResource browser_toolTipBack}"
                         Command="{Binding ElementName=browser, Path=BackCommand}">
                     <Button.Content>
                         <svgc:SvgIcon Width="12"
@@ -261,7 +261,7 @@
                     </Button.Content>
                 </Button>
 
-                <Button ToolTip="{DynamicResource toolTip_forward}"
+                <Button ToolTip="{DynamicResource browser_toolTipForward}"
                         Command="{Binding ElementName=browser, Path=ForwardCommand}">
                     <Button.Content>
                         <svgc:SvgIcon Width="12"
@@ -298,10 +298,10 @@
                             <Binding.Converter>
                                 <converter:BoolToObject>
                                     <converter:BoolToObject.TrueObject>
-                                        <TextBlock Text="{DynamicResource toolTip_stop}"/>
+                                        <TextBlock Text="{DynamicResource browser_toolTipStop}"/>
                                     </converter:BoolToObject.TrueObject>
                                     <converter:BoolToObject.FalseObject>
-                                        <TextBlock Text="{DynamicResource toolTip_reload}"/>
+                                        <TextBlock Text="{DynamicResource browser_toolTipReload}"/>
                                     </converter:BoolToObject.FalseObject>
                                 </converter:BoolToObject>
                             </Binding.Converter>
@@ -314,7 +314,7 @@
                         Orientation="Horizontal">
                 <Button Click="ShowBlockedSwfsButtonClicked"
                         Margin="0,0,10,0"
-                        ToolTip="{DynamicResource toolTip_blockedSwfs}"
+                        ToolTip="{DynamicResource browser_toolTipBlockedSwfs}"
                         Visibility="{Binding ElementName=browser, Path=HasBlockedSwfs, Converter={StaticResource Boolean2VisibilityConverter}}">
                     <svgc:SvgIcon Width="14"
                                   Height="14"
@@ -322,7 +322,7 @@
                 </Button>
 
                 <Button Click="MenuButtonClicked"
-                        ToolTip="{DynamicResource toolTip_more}">
+                        ToolTip="{DynamicResource browser_toolTipMore}">
                     <svgc:SvgIcon Width="10"
                                   Height="10"
                                   UriSource="/Assets/Svgs/more.svg"/>
@@ -393,7 +393,7 @@
                                 <Label Padding="5,0"
                                        Height="{StaticResource ContentHeight}">
                                     <TextBlock>
-                                        <Run Text="{DynamicResource label_loading}"/> (<Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat=p0}"/>)
+                                        <Run Text="{DynamicResource browser_loading}"/> (<Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat=p0}"/>)
                                     </TextBlock>
                                 </Label>
                             </converter:BoolToObject.TrueObject>
