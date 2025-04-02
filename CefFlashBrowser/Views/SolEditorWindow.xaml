@@ -128,11 +128,12 @@
         </DataTemplate>
 
         <!--Import/Export button-->
-        <DataTemplate x:Key="ImportExportTemplate">
+        <DataTemplate x:Key="ImportExportTemplate"
+                      DataType="{x:Type vm:SolNodeViewModel}">
             <StackPanel Orientation="Horizontal">
                 <StackPanel.Resources>
                     <Style TargetType="Button"
-                           BasedOn="{StaticResource {x:Type vm:SolNodeViewModel}}">
+                           BasedOn="{StaticResource {x:Type Button}}">
                         <Setter Property="Width" Value="28"/>
                         <Setter Property="Height" Value="28"/>
                         <Setter Property="Padding" Value="0"/>
@@ -140,14 +141,15 @@
                 </StackPanel.Resources>
                 <Button Command="{Binding Editor.ExportBinaryCommand}"
                         CommandParameter="{Binding}">
-                    <svgc:SvgIcon Width="12"
-                                  Height="12"
+                    <svgc:SvgIcon Width="12.5"
+                                  Height="12.5"
                                   UriSource="/Assets/Svgs/export.svg"/>
                 </Button>
-                <Button Command="{Binding Editor.ImportBinaryCommand}"
+                <Button Margin="1,0,0,0"
+                        Command="{Binding Editor.ImportBinaryCommand}"
                         CommandParameter="{Binding}">
-                    <svgc:SvgIcon Width="12"
-                                  Height="12"
+                    <svgc:SvgIcon Width="13"
+                                  Height="13"
                                   UriSource="/Assets/Svgs/import.svg"/>
                 </Button>
             </StackPanel>
@@ -202,7 +204,8 @@
                 </TextBlock.Style>
             </TextBlock>
             <Separator/>
-            <TextBlock Text="{Binding FileFormat, Mode=OneWay}"/>
+            <TextBlock Foreground="{DynamicResource PrimaryTextBrush}"
+                       Text="{Binding FileFormat, Mode=OneWay}"/>
             <Separator/>
             <TextBlock TextTrimming="CharacterEllipsis"
                        Foreground="{DynamicResource SecondaryTextBrush}"
@@ -211,7 +214,7 @@
         </StatusBar>
 
         <TreeView x:Name="treeView"
-                  Margin="10"
+                  BorderThickness="0"
                   ItemsSource="{Binding RootNodes}">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
