@@ -13,19 +13,25 @@ namespace CefFlashBrowser.Utils
             switch (engine)
             {
                 case SearchEngine.Baidu:
-                    return $"www.baidu.com/s?wd={str}";
+                    return $"https://www.baidu.com/s?wd={str}";
 
                 case SearchEngine.Google:
-                    return $"www.google.com/search?q={str}";
+                    return $"https://www.google.com/search?q={str}";
 
                 case SearchEngine.Bing:
-                    return $"www.bing.com/search?q={str}";
+                    return $"https://www.bing.com/search?q={str}";
 
                 case SearchEngine.Sogou:
-                    return $"www.sogou.com/web?query={str}";
+                    return $"https://www.sogou.com/web?query={str}";
 
                 case SearchEngine.So360:
-                    return $"www.so.com/s?&q={str}";
+                    return $"https://www.so.com/s?&q={str}";
+
+                case SearchEngine.DuckDuckGo:
+                    return $"https://duckduckgo.com/?q={str}";
+
+                case SearchEngine.Yandex:
+                    return $"https://yandex.com/search/?text={str}";
 
                 default:
                     throw new ArgumentException("Unknown search engine.", nameof(engine));

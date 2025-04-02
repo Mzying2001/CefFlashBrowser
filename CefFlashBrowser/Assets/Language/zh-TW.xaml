@@ -67,6 +67,8 @@
     <sys:String x:Key="searchEngine_bing">Bing</sys:String>
     <sys:String x:Key="searchEngine_sogou">搜狗</sys:String>
     <sys:String x:Key="searchEngine_so360">360</sys:String>
+    <sys:String x:Key="searchEngine_duckDuckGo">DuckDuckGo</sys:String>
+    <sys:String x:Key="searchEngine_yandex">Yandex</sys:String>
 
     <!--主題-->
     <sys:String x:Key="theme_light">淺色</sys:String>
