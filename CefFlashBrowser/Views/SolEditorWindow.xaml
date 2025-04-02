@@ -270,6 +270,20 @@
                 <Style TargetType="{x:Type TreeViewItem}"
                        BasedOn="{StaticResource {x:Type TreeViewItem}}">
                     <Setter Property="IsExpanded" Value="True"/>
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="{DynamicResource solEditor_addItem}"
+                                          IsEnabled="{Binding CanAddChild}"
+                                          Command="{Binding Editor.AddChildCommand}"
+                                          CommandParameter="{Binding}"/>
+                                <MenuItem Header="{DynamicResource solEditor_removeItem}"
+                                          IsEnabled="{Binding CanRemove}"
+                                          Command="{Binding Editor.RemoveItemCommand}"
+                                          CommandParameter="{Binding}"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </TreeView.ItemContainerStyle>
         </TreeView>
