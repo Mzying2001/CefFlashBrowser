@@ -138,8 +138,8 @@
                                     <Button ToolTip="{DynamicResource solSaveManager_toolTipExport}"
                                             Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.ExportSolCommand}"
                                             CommandParameter="{Binding}">
-                                        <svgc:SvgIcon Width="14"
-                                                      Height="14"
+                                        <svgc:SvgIcon Width="13.5"
+                                                      Height="13.5"
                                                       UriSource="/Assets/Svgs/export.svg"/>
                                     </Button>
                                     <Button Margin="5,0,0,0"
