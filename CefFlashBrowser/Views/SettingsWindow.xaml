@@ -31,13 +31,13 @@
         <TabControl Margin="10"
                     SelectedIndex="0"
                     Style="{StaticResource TabControlCapsuleSolid}">
-            <TabItem Header="{DynamicResource tabItem_mainWindow}">
+            <TabItem Header="{DynamicResource settings_tabMainWindow}">
                 <ScrollViewer Padding="10">
                     <StackPanel>
                         <!--address bar and search-->
-                        <c:SettingGroup Header="{DynamicResource settingHeader_addressBar}">
+                        <c:SettingGroup Header="{DynamicResource settings_headerAddressBar}">
                             <!--navigation type-->
-                            <c:SettingItem Description="{DynamicResource settingItem_useSearchEngine}">
+                            <c:SettingItem Description="{DynamicResource settings_useSearchEngine}">
                                 <ComboBox MinWidth="80"
                                           ItemsSource="{Binding NavigationTypes}"
                                           SelectedIndex="{Binding CurrentNavigationTypeIndex, Mode=OneWay}"
@@ -53,7 +53,7 @@
                             </c:SettingItem>
 
                             <!--search engine-->
-                            <c:SettingItem Description="{DynamicResource settingItem_searchEngine}">
+                            <c:SettingItem Description="{DynamicResource settings_searchEngine}">
                                 <ComboBox MinWidth="80"
                                           ItemsSource="{Binding SearchEngines}"
                                           SelectedIndex="{Binding CurrentSearchEngineIndex, Mode=OneWay}"
@@ -70,8 +70,8 @@
                         </c:SettingGroup>
 
                         <!--theme-->
-                        <c:SettingGroup Header="{DynamicResource settingHeader_theme}">
-                            <c:SettingItem Description="{DynamicResource settingItem_currentTheme}">
+                        <c:SettingGroup Header="{DynamicResource settings_headerTheme}">
+                            <c:SettingItem Description="{DynamicResource settings_currentTheme}">
                                 <ComboBox MinWidth="80"
                                           ItemsSource="{Binding Themes}"
                                           SelectedIndex="{Binding CurrentThemeIndex, Mode=OneWay}"
@@ -85,8 +85,8 @@
                                     </i:Interaction.Triggers>
                                 </ComboBox>
                             </c:SettingItem>
-                            
-                            <c:SettingItem Description="{DynamicResource settingItem_followSystemTheme}">
+
+                            <c:SettingItem Description="{DynamicResource settings_followSystemTheme}">
                                 <CheckBox Margin="5,0"
                                           IsChecked="{Binding FollowSystemTheme}"
                                           Style="{StaticResource ToggleButtonSwitch}"/>
@@ -94,8 +94,8 @@
                         </c:SettingGroup>
 
                         <!--other-->
-                        <c:SettingGroup Header="{DynamicResource settingHeader_other}">
-                            <c:SettingItem Description="{DynamicResource settingItem_hideMainWindowOnBrowsing}">
+                        <c:SettingGroup Header="{DynamicResource settings_headerOther}">
+                            <c:SettingItem Description="{DynamicResource settings_hideMainWindowOnBrowsing}">
                                 <CheckBox Margin="5,0"
                                           IsChecked="{Binding HideMainWindowOnBrowsing}"
                                           Style="{StaticResource ToggleButtonSwitch}"/>
@@ -105,22 +105,22 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="{DynamicResource tabItem_browser}">
+            <TabItem Header="{DynamicResource settings_tabBrowser}">
                 <ScrollViewer Padding="10">
                     <StackPanel>
                         <!--browser data-->
-                        <c:SettingGroup Header="{DynamicResource settingHeader_browserData}">
+                        <c:SettingGroup Header="{DynamicResource settings_headerBrowserData}">
                             <!--clear caches-->
-                            <c:SettingItem Description="{DynamicResource settingItem_deleteCache}">
+                            <c:SettingItem Description="{DynamicResource settings_deleteCache}">
                                 <Button MinWidth="80"
-                                        Content="{DynamicResource button_deleteCache}"
+                                        Content="{DynamicResource settings_buttonDeleteCache}"
                                         Command="{Binding DeleteCacheCommand}"/>
                             </c:SettingItem>
                         </c:SettingGroup>
 
                         <!--website behavior-->
-                        <c:SettingGroup Header="{DynamicResource settingHeader_websiteBehavior}">
-                            <c:SettingItem Description="{DynamicResource settingItem_openNewPage}">
+                        <c:SettingGroup Header="{DynamicResource settings_headerWebsiteBehavior}">
+                            <c:SettingItem Description="{DynamicResource settings_openNewPage}">
                                 <ComboBox MinWidth="80"
                                           ItemsSource="{Binding NewPageBehaviors}"
                                           SelectedIndex="{Binding CurrentNewPageBehaviorIndex, Mode=OneWay}"
@@ -135,7 +135,7 @@
                                 </ComboBox>
                             </c:SettingItem>
 
-                            <c:SettingItem Description="{DynamicResource settingItem_disableOnBeforeUnloadDialog}">
+                            <c:SettingItem Description="{DynamicResource settings_disableOnBeforeUnloadDialog}">
                                 <CheckBox Margin="5,0"
                                           IsChecked="{Binding DisableOnBeforeUnloadDialog}"
                                           Style="{StaticResource ToggleButtonSwitch}"/>
@@ -143,9 +143,9 @@
                         </c:SettingGroup>
 
                         <!--advance-->
-                        <c:SettingGroup Header="{DynamicResource settingHeader_advanced}">
+                        <c:SettingGroup Header="{DynamicResource settings_headerAdvanced}">
                             <!--proxy-->
-                            <c:SettingItem Description="{DynamicResource settingItem_enableProxy}">
+                            <c:SettingItem Description="{DynamicResource settings_enableProxy}">
                                 <CheckBox Margin="5,0"
                                           IsChecked="{Binding EnableProxy}"
                                           Style="{StaticResource ToggleButtonSwitch}"/>
@@ -173,7 +173,7 @@
                                     </Grid.Resources>
                                     <TextBlock Grid.Row="0"
                                                Grid.Column="0"
-                                               Text="{DynamicResource setting_server}"/>
+                                               Text="{DynamicResource settings_server}"/>
                                     <Grid Grid.Row="0" Grid.Column="1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -183,35 +183,35 @@
                                         <hc:TextBox Grid.Column="0"
                                                     Margin="5"
                                                     Text="{Binding ProxyIP, UpdateSourceTrigger=PropertyChanged}"
-                                                    hc:InfoElement.Placeholder="{DynamicResource placeholder_ip}"/>
+                                                    hc:InfoElement.Placeholder="{DynamicResource settings_ip}"/>
                                         <TextBlock Grid.Column="1" Text=":"/>
                                         <hc:TextBox Grid.Column="2"
                                                     Margin="5"
                                                     Width="70"
                                                     Text="{Binding ProxyPort, UpdateSourceTrigger=PropertyChanged}"
-                                                    hc:InfoElement.Placeholder="{DynamicResource placeholder_port}"/>
+                                                    hc:InfoElement.Placeholder="{DynamicResource settings_port}"/>
                                     </Grid>
                                     <TextBlock Grid.Row="1"
                                                Grid.Column="0"
-                                               Text="{DynamicResource setting_username}"/>
+                                               Text="{DynamicResource settings_username}"/>
                                     <hc:TextBox Grid.Row="1"
                                                 Grid.Column="2"
                                                 Margin="5"
                                                 Text="{Binding ProxyUserName, UpdateSourceTrigger=PropertyChanged}"
-                                                hc:InfoElement.Placeholder="{DynamicResource placeholder_optional}"/>
+                                                hc:InfoElement.Placeholder="{DynamicResource settings_optional}"/>
                                     <TextBlock Grid.Row="2"
                                                Grid.Column="0"
-                                               Text="{DynamicResource setting_password}"/>
+                                               Text="{DynamicResource settings_password}"/>
                                     <hc:TextBox Grid.Row="2"
                                                 Grid.Column="2"
                                                 Margin="5"
                                                 Text="{Binding ProxyPassword, UpdateSourceTrigger=PropertyChanged}"
-                                                hc:InfoElement.Placeholder="{DynamicResource placeholder_optional}"/>
+                                                hc:InfoElement.Placeholder="{DynamicResource settings_optional}"/>
                                 </Grid>
                             </Border>
 
                             <!--useragent-->
-                            <c:SettingItem Description="{DynamicResource settingItem_enableCustomUserAgent}">
+                            <c:SettingItem Description="{DynamicResource settings_enableCustomUserAgent}">
                                 <CheckBox Margin="5,0"
                                           IsChecked="{Binding EnableCustomUserAgent}"
                                           Style="{StaticResource ToggleButtonSwitch}"/>
@@ -228,7 +228,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0"
                                                Margin="5"
-                                               Text="{DynamicResource setting_userAgent}"
+                                               Text="{DynamicResource settings_userAgent}"
                                                VerticalAlignment="Center"/>
                                     <TextBox Grid.Column="1"
                                              Margin="5"
@@ -237,7 +237,7 @@
                             </Border>
 
                             <!--fake flash version-->
-                            <c:SettingItem Description="{DynamicResource settingItem_enableFakeFlashVersion}">
+                            <c:SettingItem Description="{DynamicResource settings_enableFakeFlashVersion}">
                                 <CheckBox Margin="5,0"
                                           IsChecked="{Binding EnableFakeFlashVersion}"
                                           Style="{StaticResource ToggleButtonSwitch}"/>
@@ -254,7 +254,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0"
                                                Margin="5"
-                                               Text="{DynamicResource setting_flashVersion}"
+                                               Text="{DynamicResource settings_flashVersion}"
                                                VerticalAlignment="Center"/>
                                     <TextBox Grid.Column="1"
                                              Margin="5"
@@ -265,20 +265,20 @@
                             <TextBlock Margin="5,10"
                                        TextWrapping="Wrap"
                                        Foreground="{DynamicResource SecondaryTextBrush}">
-                                <Run Text="{DynamicResource tips_needRestar}"/>
+                                <Run Text="{DynamicResource settings_needRestart}"/>
                                 <Run Text=" "/>
                                 <Hyperlink Command="{Binding AskRestartAppCommand}">
-                                    <Run Text="{DynamicResource button_restart}"/>
+                                    <Run Text="{DynamicResource settings_buttonRestart}"/>
                                 </Hyperlink>
                             </TextBlock>
                         </c:SettingGroup>
 
                         <!--about CEF-->
-                        <c:SettingGroup Header="{DynamicResource settingHeader_aboutCef}">
+                        <c:SettingGroup Header="{DynamicResource settings_headerAboutCef}">
                             <!--cefsharp version-->
-                            <c:SettingItem Description="{DynamicResource settingItem_cefVersion}">
+                            <c:SettingItem Description="{DynamicResource settings_cefVersion}">
                                 <Button MinWidth="80"
-                                        Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource button_viewDetails}}"
+                                        Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource settings_buttonViewDetails}}"
                                         Command="{Binding PopupAboutCefCommand}"/>
                             </c:SettingItem>
                         </c:SettingGroup>
