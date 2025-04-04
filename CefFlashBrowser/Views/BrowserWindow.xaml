@@ -125,7 +125,7 @@
             <MenuItem Header="{DynamicResource browser_createShortcut}"
                       Command="{Binding CreateShortcutCommand}"
                       CommandParameter="{x:Reference Name=browser}"
-                      InputGestureText="Ctrl+S"/>
+                      InputGestureText="Ctrl+Shift+S"/>
 
             <MenuItem Header="{DynamicResource browser_openInDefaultBrowser}"
                       Command="{Binding OpenInDefaultBrowserCommand}"
@@ -215,7 +215,7 @@
         <KeyBinding Gesture="Ctrl+U"
                     Command="{Binding ViewSourceCommand}"
                     CommandParameter="{Binding ElementName=browser, Path=Address}"/>
-        <KeyBinding Gesture="Ctrl+S"
+        <KeyBinding Gesture="Ctrl+Shift+S"
                     Command="{Binding CreateShortcutCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+W"
