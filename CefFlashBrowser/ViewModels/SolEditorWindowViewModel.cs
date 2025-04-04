@@ -149,7 +149,22 @@ namespace CefFlashBrowser.ViewModels
 
         private void EditText(SolNodeViewModel target)
         {
-            // TODO: Implement
+            if (target.Value is string str)
+            {
+                WindowManager.ShowTextEditor(target.DisplayName, str,
+                    verifyText: text =>
+                    {
+                        return true;
+                    },
+                    callback: (result, text) =>
+                    {
+                        if (result == true && str != text)
+                        {
+                            target.Value = text;
+                            Status = SolEditorStatus.Modified;
+                        }
+                    });
+            }
         }
 
         private void ImportBinary(SolNodeViewModel target)
