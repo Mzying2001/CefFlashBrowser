@@ -8,6 +8,7 @@
     <sys:String x:Key="common_swfFile">SWF檔案</sys:String>
     <sys:String x:Key="common_solFile">SOL檔案</sys:String>
     <sys:String x:Key="common_shortcut">捷徑</sys:String>
+    <sys:String x:Key="common_allFiles">所有檔案</sys:String>
     <sys:String x:Key="common_favorites">我的最愛</sys:String>
     <sys:String x:Key="common_settings">設定</sys:String>
 

@@ -7,6 +7,7 @@
     <!-- Common Fields -->
     <sys:String x:Key="common_swfFile">SWF File</sys:String>
     <sys:String x:Key="common_solFile">SOL File</sys:String>
+    <sys:String x:Key="common_allFiles">All Files</sys:String>
     <sys:String x:Key="common_shortcut">Shortcut</sys:String>
     <sys:String x:Key="common_favorites">Favorites</sys:String>
     <sys:String x:Key="common_settings">Settings</sys:String>

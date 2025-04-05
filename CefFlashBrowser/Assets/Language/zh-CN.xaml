@@ -3,10 +3,11 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="locale">zh-CN</sys:String>
     <sys:String x:Key="language_name">中文</sys:String>
-    
+
     <!--共用字段-->
     <sys:String x:Key="common_swfFile">SWF文件</sys:String>
     <sys:String x:Key="common_solFile">SOL文件</sys:String>
+    <sys:String x:Key="common_allFiles">所有文件</sys:String>
     <sys:String x:Key="common_shortcut">快捷方式</sys:String>
     <sys:String x:Key="common_favorites">收藏夹</sys:String>
     <sys:String x:Key="common_settings">设置</sys:String>

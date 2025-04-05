@@ -4,6 +4,7 @@ using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
+using System.IO;
 using System.Xml;
 
 namespace CefFlashBrowser.ViewModels
@@ -211,12 +212,55 @@ namespace CefFlashBrowser.ViewModels
 
         private void ImportBinary(SolNodeViewModel target)
         {
-            // TODO: Implement
+            if (!(target.Value is byte[]))
+            {
+                return;
+            }
+
+            try
+            {
+                var ofd = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = $"{LanguageManager.GetString("common_allFiles")}|*.*"
+                };
+
+                if (ofd.ShowDialog() == true)
+                {
+                    target.Value = File.ReadAllBytes(ofd.FileName);
+                    Status = SolEditorStatus.Modified;
+                }
+            }
+            catch (Exception e)
+            {
+                WindowManager.ShowError(e.Message);
+            }
         }
 
         private void ExportBinary(SolNodeViewModel target)
         {
-            // TODO: Implement
+            if (!(target.Value is byte[]))
+            {
+                return;
+            }
+
+            try
+            {
+                var sfd = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = $"{LanguageManager.GetString("common_allFiles")}|*.*",
+                    FileName = target.DisplayName
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    var data = target.Value as byte[];
+                    File.WriteAllBytes(sfd.FileName, data);
+                }
+            }
+            catch (Exception e)
+            {
+                WindowManager.ShowError(e.Message);
+            }
         }
 
         internal void OnNodeChanged(SolNodeViewModel node)

@@ -7,6 +7,7 @@
     <!-- Campi comuni -->
     <sys:String x:Key="common_swfFile">File SWF</sys:String>
     <sys:String x:Key="common_solFile">File SOL</sys:String>
+    <sys:String x:Key="common_allFiles">Tutti i file</sys:String>
     <sys:String x:Key="common_shortcut">Scorciatoia</sys:String>
     <sys:String x:Key="common_favorites">Preferiti</sys:String>
     <sys:String x:Key="common_settings">Impostazioni</sys:String>
