@@ -4,6 +4,7 @@ using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
+using System.Xml;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -161,6 +162,47 @@ namespace CefFlashBrowser.ViewModels
                         if (result == true && str != text)
                         {
                             target.Value = text;
+                            Status = SolEditorStatus.Modified;
+                        }
+                    });
+                return;
+            }
+
+            var xmlVerfier = new Func<string, bool>(text =>
+            {
+                bool result = true;
+                try
+                {
+                    new XmlDocument().LoadXml(text);
+                }
+                catch (XmlException e)
+                {
+                    WindowManager.ShowError(e.Message);
+                    result = false;
+                }
+                return result;
+            });
+
+            if (target.Value is SolXmlDoc xmlDoc)
+            {
+                WindowManager.ShowTextEditor(target.DisplayName, xmlDoc.Data, xmlVerfier,
+                    callback: (result, text) =>
+                    {
+                        if (result == true && xmlDoc.Data != text)
+                        {
+                            target.Value = new SolXmlDoc(text);
+                            Status = SolEditorStatus.Modified;
+                        }
+                    });
+            }
+            else if (target.Value is SolXml xml)
+            {
+                WindowManager.ShowTextEditor(target.DisplayName, xml.Data, xmlVerfier,
+                    callback: (result, text) =>
+                    {
+                        if (result == true && xml.Data != text)
+                        {
+                            target.Value = new SolXml(text);
                             Status = SolEditorStatus.Modified;
                         }
                     });
