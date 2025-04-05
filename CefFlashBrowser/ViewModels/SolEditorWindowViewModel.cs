@@ -76,6 +76,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void UpdateSolData()
         {
+            _file.SolName = Root.Name?.ToString() ?? string.Empty;
             SolHelper.SetAllValues(_file, Root.GetAllValues());
         }
 
