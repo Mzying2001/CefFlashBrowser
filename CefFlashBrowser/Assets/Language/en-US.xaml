@@ -11,6 +11,8 @@
     <sys:String x:Key="common_shortcut">Shortcut</sys:String>
     <sys:String x:Key="common_favorites">Favorites</sys:String>
     <sys:String x:Key="common_settings">Settings</sys:String>
+    <sys:String x:Key="common_export">Export</sys:String>
+    <sys:String x:Key="common_import">Import</sys:String>
 
     <!--Main Window-->
     <sys:String x:Key="mainWindow_title">Welcome</sys:String>
@@ -130,8 +132,6 @@
     <sys:String x:Key="solSaveManager_headerFileDir">File Path</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">Operations</sys:String>
     <sys:String x:Key="solSaveManager_toolTipReload">Refresh</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipImport">Import</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipExport">Export</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">Delete</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">Edit</sys:String>
 

@@ -139,13 +139,14 @@
                         <Setter Property="Padding" Value="0"/>
                     </Style>
                 </StackPanel.Resources>
-                <Button Command="{Binding Editor.ExportBinaryCommand}"
+                <Button ToolTip="{DynamicResource common_export}"
+                        Command="{Binding Editor.ExportBinaryCommand}"
                         CommandParameter="{Binding}">
                     <svgc:SvgIcon Width="12.5"
                                   Height="12.5"
                                   UriSource="/Assets/Svgs/export.svg"/>
                 </Button>
-                <Button Margin="1,0,0,0"
+                <Button ToolTip="{DynamicResource common_import}"
                         Command="{Binding Editor.ImportBinaryCommand}"
                         CommandParameter="{Binding}">
                     <svgc:SvgIcon Width="13"
