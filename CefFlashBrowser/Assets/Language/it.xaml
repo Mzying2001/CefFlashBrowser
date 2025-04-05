@@ -7,9 +7,12 @@
     <!-- Campi comuni -->
     <sys:String x:Key="common_swfFile">File SWF</sys:String>
     <sys:String x:Key="common_solFile">File SOL</sys:String>
+    <sys:String x:Key="common_allFiles">Tutti i file</sys:String>
     <sys:String x:Key="common_shortcut">Scorciatoia</sys:String>
     <sys:String x:Key="common_favorites">Preferiti</sys:String>
     <sys:String x:Key="common_settings">Impostazioni</sys:String>
+    <sys:String x:Key="common_export">Esporta</sys:String>
+    <sys:String x:Key="common_import">Importa</sys:String>
 
     <!--Finestra Principale-->
     <sys:String x:Key="mainWindow_title">Benvenuto</sys:String>
@@ -129,8 +132,6 @@
     <sys:String x:Key="solSaveManager_headerFileDir">Percorso file</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">Operazioni</sys:String>
     <sys:String x:Key="solSaveManager_toolTipReload">Aggiorna</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipImport">Importa</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipExport">Esporta</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">Elimina</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">Modifica</sys:String>
 

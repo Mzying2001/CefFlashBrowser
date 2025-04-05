@@ -135,7 +135,7 @@
                                             <Setter Property="Padding" Value="0"/>
                                         </Style>
                                     </StackPanel.Resources>
-                                    <Button ToolTip="{DynamicResource solSaveManager_toolTipExport}"
+                                    <Button ToolTip="{DynamicResource common_export}"
                                             Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.ExportSolCommand}"
                                             CommandParameter="{Binding}">
                                         <svgc:SvgIcon Width="13.5"
@@ -143,7 +143,7 @@
                                                       UriSource="/Assets/Svgs/export.svg"/>
                                     </Button>
                                     <Button Margin="5,0,0,0"
-                                            ToolTip="{DynamicResource solSaveManager_toolTipImport}"
+                                            ToolTip="{DynamicResource common_import}"
                                             Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.ImportSolCommand}"
                                             CommandParameter="{Binding}">
                                         <svgc:SvgIcon Width="14"

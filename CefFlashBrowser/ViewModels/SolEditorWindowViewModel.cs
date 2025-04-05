@@ -4,6 +4,8 @@ using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
+using System.IO;
+using System.Xml;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -149,17 +151,116 @@ namespace CefFlashBrowser.ViewModels
 
         private void EditText(SolNodeViewModel target)
         {
-            // TODO: Implement
+            if (target.Value is string str)
+            {
+                WindowManager.ShowTextEditor(target.DisplayName, str,
+                    verifyText: text =>
+                    {
+                        return true;
+                    },
+                    callback: (result, text) =>
+                    {
+                        if (result == true && str != text)
+                        {
+                            target.Value = text;
+                            Status = SolEditorStatus.Modified;
+                        }
+                    });
+                return;
+            }
+
+            var xmlVerfier = new Func<string, bool>(text =>
+            {
+                bool result = true;
+                try
+                {
+                    new XmlDocument().LoadXml(text);
+                }
+                catch (XmlException e)
+                {
+                    WindowManager.ShowError(e.Message);
+                    result = false;
+                }
+                return result;
+            });
+
+            if (target.Value is SolXmlDoc xmlDoc)
+            {
+                WindowManager.ShowTextEditor(target.DisplayName, xmlDoc.Data, xmlVerfier,
+                    callback: (result, text) =>
+                    {
+                        if (result == true && xmlDoc.Data != text)
+                        {
+                            target.Value = new SolXmlDoc(text);
+                            Status = SolEditorStatus.Modified;
+                        }
+                    });
+            }
+            else if (target.Value is SolXml xml)
+            {
+                WindowManager.ShowTextEditor(target.DisplayName, xml.Data, xmlVerfier,
+                    callback: (result, text) =>
+                    {
+                        if (result == true && xml.Data != text)
+                        {
+                            target.Value = new SolXml(text);
+                            Status = SolEditorStatus.Modified;
+                        }
+                    });
+            }
         }
 
         private void ImportBinary(SolNodeViewModel target)
         {
-            // TODO: Implement
+            if (!(target.Value is byte[]))
+            {
+                return;
+            }
+
+            try
+            {
+                var ofd = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = $"{LanguageManager.GetString("common_allFiles")}|*.*"
+                };
+
+                if (ofd.ShowDialog() == true)
+                {
+                    target.Value = File.ReadAllBytes(ofd.FileName);
+                    Status = SolEditorStatus.Modified;
+                }
+            }
+            catch (Exception e)
+            {
+                WindowManager.ShowError(e.Message);
+            }
         }
 
         private void ExportBinary(SolNodeViewModel target)
         {
-            // TODO: Implement
+            if (!(target.Value is byte[]))
+            {
+                return;
+            }
+
+            try
+            {
+                var sfd = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = $"{LanguageManager.GetString("common_allFiles")}|*.*",
+                    FileName = target.DisplayName
+                };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    var data = target.Value as byte[];
+                    File.WriteAllBytes(sfd.FileName, data);
+                }
+            }
+            catch (Exception e)
+            {
+                WindowManager.ShowError(e.Message);
+            }
         }
 
         internal void OnNodeChanged(SolNodeViewModel node)

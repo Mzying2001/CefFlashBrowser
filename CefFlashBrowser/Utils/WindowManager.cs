@@ -214,5 +214,16 @@ namespace CefFlashBrowser.Utils
                 window.DataContext = new SolEditorWindowViewModel(file);
             });
         }
+
+        public static void ShowTextEditor(string title = "", string defaultText = "", Func<string, bool> verifyText = null, Action<bool?, string> callback = null)
+        {
+            var dialog = ShowWindow<TextEditorDialog>(true, initializer: window =>
+            {
+                window.Title = title;
+                window.Text = defaultText;
+                window.VerifyText = verifyText;
+            });
+            callback?.Invoke(dialog.DialogResult, dialog.Text);
+        }
     }
 }
