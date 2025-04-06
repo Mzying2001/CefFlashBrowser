@@ -53,35 +53,9 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _children, value);
         }
 
-        private static Dictionary<Type, string> TypeStringDic { get; } = new Dictionary<Type, string>
-        {
-            [typeof(int)] = "int",
-            [typeof(double)] = "double",
-            [typeof(string)] = "string",
-            [typeof(bool)] = "bool",
-            [typeof(DateTime)] = "DateTime",
-            [typeof(byte[])] = "byte[]",
-            [typeof(SolArray)] = "Array",
-            [typeof(SolObject)] = "Object",
-            [typeof(SolUndefined)] = "undefined",
-            [typeof(SolXmlDoc)] = "XmlDoc",
-            [typeof(SolXml)] = "Xml"
-        };
-
         public string TypeString
         {
-            get
-            {
-                if (Value == null)
-                {
-                    return "null";
-                }
-                else
-                {
-                    var type = Value.GetType();
-                    return TypeStringDic.ContainsKey(type) ? TypeStringDic[type] : string.Empty;
-                }
-            }
+            get => SolHelper.GetTypeString(Value);
         }
 
         public bool IsArrayItem

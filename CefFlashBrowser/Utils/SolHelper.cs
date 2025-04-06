@@ -1,11 +1,28 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Sol;
+using System;
 using System.Collections.Generic;
 
 namespace CefFlashBrowser.Utils
 {
     public static class SolHelper
     {
+        private static Dictionary<Type, string> TypeStringDic { get; } = new Dictionary<Type, string>
+        {
+            [typeof(int)] = "int",
+            [typeof(double)] = "double",
+            [typeof(bool)] = "bool",
+            [typeof(string)] = "string",
+            [typeof(DateTime)] = "DateTime",
+            [typeof(SolArray)] = "Array",
+            [typeof(SolObject)] = "Object",
+            [typeof(byte[])] = "Binary",
+            [typeof(SolXml)] = "Xml",
+            [typeof(SolXmlDoc)] = "XmlDocument",
+            [typeof(SolUndefined)] = "undefined"
+        };
+
+
         public static Dictionary<string, object> GetAllValues(SolFileWrapper file)
         {
             return GetAllValues(file.Data);
@@ -65,6 +82,17 @@ namespace CefFlashBrowser.Utils
             }
 
             return res;
+        }
+
+        public static string GetTypeString(object value)
+        {
+            if (value == null)
+                return "null";
+
+            if (TypeStringDic.TryGetValue(value.GetType(), out var typeStr))
+                return typeStr;
+
+            return string.Empty;
         }
     }
 }
