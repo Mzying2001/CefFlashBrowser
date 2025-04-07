@@ -2,7 +2,6 @@
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -25,6 +24,7 @@ namespace CefFlashBrowser.ViewModels
                     _name = value;
                     RaisePropertyChanged();
                     RaisePropertyChanged(nameof(DisplayName));
+                    Parent?.OnChildrenNameChanged(this);
                 }
             }
         }
@@ -41,7 +41,6 @@ namespace CefFlashBrowser.ViewModels
                     RaisePropertyChanged(nameof(TypeString));
                     UpdateChildren();
                     Parent?.OnChildrenValueChanged(this);
-                    Editor?.OnNodeChanged(this);
                 }
             }
         }
@@ -53,35 +52,9 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _children, value);
         }
 
-        private static Dictionary<Type, string> TypeStringDic { get; } = new Dictionary<Type, string>
-        {
-            [typeof(int)] = "int",
-            [typeof(double)] = "double",
-            [typeof(string)] = "string",
-            [typeof(bool)] = "bool",
-            [typeof(DateTime)] = "DateTime",
-            [typeof(byte[])] = "byte[]",
-            [typeof(SolArray)] = "Array",
-            [typeof(SolObject)] = "Object",
-            [typeof(SolUndefined)] = "undefined",
-            [typeof(SolXmlDoc)] = "XmlDoc",
-            [typeof(SolXml)] = "Xml"
-        };
-
         public string TypeString
         {
-            get
-            {
-                if (Value == null)
-                {
-                    return "null";
-                }
-                else
-                {
-                    var type = Value.GetType();
-                    return TypeStringDic.ContainsKey(type) ? TypeStringDic[type] : string.Empty;
-                }
-            }
+            get => SolHelper.GetTypeString(Value);
         }
 
         public bool IsArrayItem
@@ -109,7 +82,7 @@ namespace CefFlashBrowser.ViewModels
         }
 
 
-        private void UpdateChildren()
+        public void UpdateChildren()
         {
             var children = new ObservableCollection<SolNodeViewModel>();
 
@@ -142,7 +115,7 @@ namespace CefFlashBrowser.ViewModels
             Children = children;
         }
 
-        private void OnChildrenValueChanged(SolNodeViewModel node)
+        protected virtual void OnChildrenValueChanged(SolNodeViewModel node)
         {
             if (Value is SolArray arr)
             {
@@ -159,6 +132,13 @@ namespace CefFlashBrowser.ViewModels
             {
                 obj.Properties[node.Name.ToString()] = node.Value;
             }
+
+            Editor?.OnNodeChanged(node);
+        }
+
+        protected virtual void OnChildrenNameChanged(SolNodeViewModel node)
+        {
+            Editor?.OnNodeChanged(node);
         }
 
         public Dictionary<string, object> GetAllValues()
@@ -225,7 +205,7 @@ namespace CefFlashBrowser.ViewModels
         {
             Editor = editor;
             Parent = parent;
-            Name = name;
+            _name = name;
             _value = value;
             UpdateChildren();
         }
@@ -234,7 +214,7 @@ namespace CefFlashBrowser.ViewModels
         {
             Editor = editor;
             Parent = null;
-            Name = file.SolName;
+            _name = file.SolName;
             _value = file;
             UpdateChildren();
         }

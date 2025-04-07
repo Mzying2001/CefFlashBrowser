@@ -76,6 +76,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void UpdateSolData()
         {
+            _file.SolName = Root.Name?.ToString() ?? string.Empty;
             SolHelper.SetAllValues(_file, Root.GetAllValues());
         }
 
@@ -154,10 +155,6 @@ namespace CefFlashBrowser.ViewModels
             if (target.Value is string str)
             {
                 WindowManager.ShowTextEditor(target.DisplayName, str,
-                    verifyText: text =>
-                    {
-                        return true;
-                    },
                     callback: (result, text) =>
                     {
                         if (result == true && str != text)
@@ -169,7 +166,7 @@ namespace CefFlashBrowser.ViewModels
                 return;
             }
 
-            var xmlVerfier = new Func<string, bool>(text =>
+            var xmlVerifier = new Func<string, bool>(text =>
             {
                 bool result = true;
                 try
@@ -186,7 +183,7 @@ namespace CefFlashBrowser.ViewModels
 
             if (target.Value is SolXmlDoc xmlDoc)
             {
-                WindowManager.ShowTextEditor(target.DisplayName, xmlDoc.Data, xmlVerfier,
+                WindowManager.ShowTextEditor(target.DisplayName, xmlDoc.Data, xmlVerifier,
                     callback: (result, text) =>
                     {
                         if (result == true && xmlDoc.Data != text)
@@ -198,7 +195,7 @@ namespace CefFlashBrowser.ViewModels
             }
             else if (target.Value is SolXml xml)
             {
-                WindowManager.ShowTextEditor(target.DisplayName, xml.Data, xmlVerfier,
+                WindowManager.ShowTextEditor(target.DisplayName, xml.Data, xmlVerifier,
                     callback: (result, text) =>
                     {
                         if (result == true && xml.Data != text)

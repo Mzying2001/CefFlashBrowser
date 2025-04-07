@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace CefFlashBrowser.Utils
@@ -15,7 +16,12 @@ namespace CefFlashBrowser.Utils
 
         public static bool IsLocalSwfFile(string url)
         {
-            return url.ToLower().EndsWith(".swf") && File.Exists(url);
+            return Path.GetExtension(url).Equals(".swf", StringComparison.OrdinalIgnoreCase) && File.Exists(url);
+        }
+
+        public static bool IsLocalSolFile(string url)
+        {
+            return Path.GetExtension(url).Equals(".sol", StringComparison.OrdinalIgnoreCase) && File.Exists(url);
         }
     }
 }

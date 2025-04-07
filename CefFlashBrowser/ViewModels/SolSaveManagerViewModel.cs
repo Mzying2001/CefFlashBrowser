@@ -166,15 +166,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void EditSolFile(SolFileInfo solFile)
         {
-            try
-            {
-                var file = SolFileWrapper.ReadFile(solFile.FilePath);
-                WindowManager.ShowSolEditorWindow(file);
-            }
-            catch (Exception e)
-            {
-                WindowManager.ShowError(e.Message);
-            }
+            WindowManager.ShowSolEditorWindow(solFile.FilePath);
         }
 
         public SolSaveManagerViewModel()

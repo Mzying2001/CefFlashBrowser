@@ -18,7 +18,8 @@
     <sys:String x:Key="mainWindow_title">Benvenuto</sys:String>
     <sys:String x:Key="mainWindow_go">Vai</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Gestisci Preferiti</sys:String>
-    <sys:String x:Key="mainWindow_manageSolSaveFiles">Gestisci i file di salvataggio SOL</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">Gestione degli archivi SOL</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">Apri file SOL...</sys:String>
     <sys:String x:Key="mainWindow_languages">Lingue</sys:String>
     <sys:String x:Key="mainWindow_options">Opzioni</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">Carica file SWF locale...</sys:String>

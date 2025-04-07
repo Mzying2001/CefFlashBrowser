@@ -19,6 +19,7 @@
     <sys:String x:Key="mainWindow_go">跳转</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理收藏夹</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存档</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">打开SOL文件...</sys:String>
     <sys:String x:Key="mainWindow_languages">语言</sys:String>
     <sys:String x:Key="mainWindow_options">选项</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">加载本地SWF文件...</sys:String>
