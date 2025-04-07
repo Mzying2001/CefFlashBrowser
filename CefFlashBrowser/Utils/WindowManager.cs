@@ -215,6 +215,19 @@ namespace CefFlashBrowser.Utils
             });
         }
 
+        public static void ShowSolEditorWindow(string fileName)
+        {
+            try
+            {
+                var file = new SolFileWrapper(fileName);
+                ShowSolEditorWindow(file);
+            }
+            catch (Exception e)
+            {
+                ShowError(e.Message);
+            }
+        }
+
         public static void ShowTextEditor(string title = "", string defaultText = "", Func<string, bool> verifyText = null, Action<bool?, string> callback = null)
         {
             var dialog = ShowWindow<TextEditorDialog>(true, initializer: window =>

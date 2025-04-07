@@ -19,6 +19,7 @@
     <sys:String x:Key="mainWindow_go">Go</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Manage Favorites</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">Manage SOL Save Files</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">Open SOL file...</sys:String>
     <sys:String x:Key="mainWindow_languages">Language</sys:String>
     <sys:String x:Key="mainWindow_options">Options</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">Load local SWF file...</sys:String>
