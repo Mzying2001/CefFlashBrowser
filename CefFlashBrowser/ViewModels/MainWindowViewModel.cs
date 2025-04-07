@@ -117,6 +117,10 @@ namespace CefFlashBrowser.ViewModels
                 {
                     WindowManager.ShowSwfPlayer(item);
                 }
+                else if (UrlHelper.IsLocalSolFile(item))
+                {
+                    WindowManager.ShowSolEditorWindow(item);
+                }
                 else
                 {
                     ShowBrowser(item);
