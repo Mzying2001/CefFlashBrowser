@@ -115,15 +115,37 @@
         <!--Open editor button-->
         <DataTemplate x:Key="OpenTextEditorTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <Button Width="100"
-                    Padding="0"
-                    Command="{Binding Editor.EditTextCommand}"
-                    CommandParameter="{Binding}"
-                    ToolTip="{Binding Value, Mode=OneWay}">
+            <Button Command="{Binding Editor.EditTextCommand}"
+                    CommandParameter="{Binding}">
+                <Button.Style>
+                    <Style TargetType="Button"
+                           BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Width" Value="100"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="ToolTip" Value="{Binding Value, Mode=OneWay}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Value}" Value="">
+                                <Setter Property="ToolTip" Value="{x:Null}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
                 <TextBlock Width="80"
                            TextWrapping="NoWrap"
-                           TextTrimming="CharacterEllipsis"
-                           Text="{Binding Value, Mode=OneWay}"/>
+                           TextTrimming="CharacterEllipsis">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding Value, Mode=OneWay}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Value}" Value="">
+                                    <Setter Property="Text" Value="{DynamicResource solEditor_emptyString}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Button>
         </DataTemplate>
 

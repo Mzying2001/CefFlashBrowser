@@ -150,6 +150,7 @@
     <sys:String x:Key="solEditor_statusModified">Modificato</sys:String>
     <sys:String x:Key="solEditor_statusSaved">Salvato</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">Stato sconosciuto</sys:String>
+    <sys:String x:Key="solEditor_emptyString">(Vuoto)</sys:String>
 
     <!--Dialoghi-->
     <sys:String x:Key="dialog_ok">OK</sys:String>

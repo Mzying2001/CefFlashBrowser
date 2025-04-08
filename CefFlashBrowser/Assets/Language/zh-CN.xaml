@@ -150,6 +150,7 @@
     <sys:String x:Key="solEditor_statusModified">已修改</sys:String>
     <sys:String x:Key="solEditor_statusSaved">已保存</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">未知状态</sys:String>
+    <sys:String x:Key="solEditor_emptyString">（空）</sys:String>
 
     <!--对话框-->
     <sys:String x:Key="dialog_ok">确定</sys:String>
