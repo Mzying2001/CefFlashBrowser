@@ -60,6 +60,8 @@
         <DataTemplate x:Key="IntNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
             <hc:NumericUpDown Width="100"
+                              Minimum="-268435456"
+                              Maximum="268435455"
                               DecimalPlaces="0"
                               Value="{Binding Value, Converter={StaticResource IntToDouble}}"/>
         </DataTemplate>
