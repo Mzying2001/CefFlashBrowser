@@ -207,7 +207,7 @@ sol::SolInteger sol::ReadSolInteger(uint8_t* data, int size, int& index, bool un
         if (!(data[index + i] & 0x80)) break;
     }
 
-    if (i == 4) {
+    if (i == 3) {
         if (index + i >= size) {
             ThrowFileEndedImproperlyOnReadingType(SolType::Integer);
         }
