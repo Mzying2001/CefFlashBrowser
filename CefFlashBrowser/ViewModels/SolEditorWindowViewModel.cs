@@ -260,7 +260,7 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        internal void OnNodeChanged(SolNodeViewModel node)
+        internal void OnNodeChanged(SolNodeChangeType type, SolNodeViewModel node)
         {
             Status = SolEditorStatus.Modified;
         }

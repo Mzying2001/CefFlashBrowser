@@ -133,12 +133,12 @@ namespace CefFlashBrowser.ViewModels
                 obj.Properties[node.Name.ToString()] = node.Value;
             }
 
-            Editor?.OnNodeChanged(node);
+            Editor?.OnNodeChanged(SolNodeChangeType.ValueChanged, node);
         }
 
         protected virtual void OnChildrenNameChanged(SolNodeViewModel node)
         {
-            Editor?.OnNodeChanged(node);
+            Editor?.OnNodeChanged(SolNodeChangeType.NameChanged, node);
         }
 
         public Dictionary<string, object> GetAllValues()
