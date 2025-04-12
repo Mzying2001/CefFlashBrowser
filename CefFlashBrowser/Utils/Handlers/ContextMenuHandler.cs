@@ -24,13 +24,13 @@ namespace CefFlashBrowser.Utils.Handlers
                 var selectionText = parameters.SelectionText;
                 var truncatedText = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
 
-                var header = string.Format(LanguageManager.GetString("browser_searchFor"), truncatedText.Replace('\n', ' '));
+                var header = LanguageManager.GetFormattedString("browser_searchFor", truncatedText.Replace('\n', ' '));
                 model.InsertItemAt(0, Search, header);
                 count++;
 
                 if (UrlHelper.IsHttpUrl(selectionText))
                 {
-                    header = string.Format(LanguageManager.GetString("browser_openSelectedUrl"), truncatedText);
+                    header = LanguageManager.GetFormattedString("browser_openSelectedUrl", truncatedText);
                     model.InsertCheckItemAt(0, OpenSelectedUrl, header);
                     count++;
                 }
