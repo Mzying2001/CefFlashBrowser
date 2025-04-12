@@ -133,7 +133,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void RemoveItem(SolNodeViewModel target)
         {
-            var msg = string.Format(LanguageManager.GetString("message_removeItem"), target.DisplayName);
+            var msg = LanguageManager.GetFormattedString("message_removeItem", target.DisplayName);
 
             WindowManager.Confirm(msg, callback: result =>
             {

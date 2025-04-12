@@ -26,7 +26,7 @@ namespace CefFlashBrowser.Views
                     return;
                 }
 
-                var message = string.Format(LanguageManager.GetString("message_askSaveChange"), vm.FilePath);
+                var message = LanguageManager.GetFormattedString("message_askSaveChange", vm.FilePath);
                 var result = MessageBox.Show(message, Title, MessageBoxButton.YesNoCancel);
 
                 if (result == MessageBoxResult.Cancel)
