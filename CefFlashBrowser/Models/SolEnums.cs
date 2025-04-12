@@ -7,4 +7,10 @@
         Modified,
         Saved
     }
+
+    public enum SolNodeChangeType
+    {
+        NameChanged,
+        ValueChanged
+    }
 }

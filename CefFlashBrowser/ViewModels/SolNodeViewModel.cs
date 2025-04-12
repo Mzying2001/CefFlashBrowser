@@ -2,6 +2,7 @@
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -21,10 +22,32 @@ namespace CefFlashBrowser.ViewModels
             {
                 if (!EqualityComparer<object>.Default.Equals(_name, value))
                 {
+                    if (Parent?.Value is SolArray arr)
+                    {
+                        if (value is string key)
+                        {
+                            if (arr.AssocPortion.ContainsKey(key))
+                                throw new ArgumentException(LanguageManager.GetFormattedString("error_arrKeyAreadyExists", key));
+                        }
+                        else if (value is int index)
+                        {
+                            if (index < 0 || index >= arr.DensePortion.Count)
+                                throw new IndexOutOfRangeException();
+                        }
+                    }
+                    else if (Parent?.Value is SolObject obj)
+                    {
+                        if (value is string key)
+                        {
+                            if (obj.Properties.ContainsKey(key))
+                                throw new ArgumentException(LanguageManager.GetFormattedString("error_objPropAreadyExists", key));
+                        }
+                    }
                     _name = value;
                     RaisePropertyChanged();
                     RaisePropertyChanged(nameof(DisplayName));
                     Parent?.OnChildrenNameChanged(this);
+                    Editor?.OnNodeChanged(SolNodeChangeType.NameChanged, this);
                 }
             }
         }
@@ -41,6 +64,7 @@ namespace CefFlashBrowser.ViewModels
                     RaisePropertyChanged(nameof(TypeString));
                     UpdateChildren();
                     Parent?.OnChildrenValueChanged(this);
+                    Editor?.OnNodeChanged(SolNodeChangeType.ValueChanged, this);
                 }
             }
         }
@@ -132,13 +156,51 @@ namespace CefFlashBrowser.ViewModels
             {
                 obj.Properties[node.Name.ToString()] = node.Value;
             }
-
-            Editor?.OnNodeChanged(node);
         }
 
         protected virtual void OnChildrenNameChanged(SolNodeViewModel node)
         {
-            Editor?.OnNodeChanged(node);
+            if (Value is SolArray arr)
+            {
+                string key = GetOldName(arr.AssocPortion, node.Value);
+
+                if (key != null)
+                {
+                    arr.AssocPortion.Remove(key);
+                    arr.AssocPortion[node.Name.ToString()] = node.Value;
+                }
+                else
+                {
+                    int index = arr.DensePortion.IndexOf(node.Value);
+                    int offset = (int)node.Name - index;
+
+                    arr.DensePortion.RemoveAt(index);
+                    arr.DensePortion.Insert(index + offset, node.Value);
+
+                    // make sure the order is correct
+                    int nodeIndex = Children.IndexOf(node);
+                    Children.RemoveAt(nodeIndex);
+                    Children.Insert(nodeIndex + offset, node);
+                }
+            }
+            else if (Value is SolObject obj)
+            {
+                string key = GetOldName(obj.Properties, node.Value);
+                obj.Properties.Remove(key);
+                obj.Properties[node.Name.ToString()] = node.Value;
+            }
+        }
+
+        private string GetOldName(Dictionary<string, object> dic, object value)
+        {
+            foreach (var item in dic)
+            {
+                if (item.Value == value)
+                {
+                    return item.Key;
+                }
+            }
+            return null;
         }
 
         public Dictionary<string, object> GetAllValues()

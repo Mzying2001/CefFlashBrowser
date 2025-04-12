@@ -146,7 +146,7 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                string msg = string.Format(LanguageManager.GetString("message_deleteFile"), solFile.FileName);
+                string msg = LanguageManager.GetFormattedString("message_deleteFile", solFile.FileName);
 
                 WindowManager.Confirm(msg, callback: result =>
                 {

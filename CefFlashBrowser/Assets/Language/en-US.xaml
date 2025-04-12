@@ -150,6 +150,7 @@
     <sys:String x:Key="solEditor_statusModified">Modified</sys:String>
     <sys:String x:Key="solEditor_statusSaved">Saved</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">Unknown Status</sys:String>
+    <sys:String x:Key="solEditor_emptyString">(Empty)</sys:String>
 
     <!--Dialogs-->
     <sys:String x:Key="dialog_ok">OK</sys:String>
@@ -176,4 +177,6 @@
     <sys:String x:Key="error_webSiteEmptyName">Name cannot be empty.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">The URL cannot be empty.</sys:String>
     <sys:String x:Key="error_deleteCachesRetry">An error occurred while clearing the cache. Do you want to try again?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">An array key named "{0}" already exists.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">An object property named "{0}" already exists.</sys:String>
 </ResourceDictionary>

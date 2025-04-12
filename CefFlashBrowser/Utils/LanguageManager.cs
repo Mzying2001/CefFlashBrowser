@@ -120,5 +120,11 @@ namespace CefFlashBrowser.Utils
         {
             return GetString(language, "locale");
         }
+
+        public static string GetFormattedString(string key, params object[] args)
+        {
+            var str = GetString(GlobalData.Settings.Language, key);
+            return string.IsNullOrEmpty(str) ? str : string.Format(str, args);
+        }
     }
 }

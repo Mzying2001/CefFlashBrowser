@@ -60,6 +60,8 @@
         <DataTemplate x:Key="IntNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
             <hc:NumericUpDown Width="100"
+                              Minimum="-268435456"
+                              Maximum="268435455"
                               DecimalPlaces="0"
                               Value="{Binding Value, Converter={StaticResource IntToDouble}}"/>
         </DataTemplate>
@@ -104,7 +106,8 @@
                     </Style>
                 </Grid.Style>
                 <Button Command="{Binding Editor.AddChildCommand}"
-                        CommandParameter="{Binding}">
+                        CommandParameter="{Binding}"
+                        ToolTip="{DynamicResource solEditor_addItem}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="/Assets/Svgs/add.svg"/>
@@ -115,15 +118,37 @@
         <!--Open editor button-->
         <DataTemplate x:Key="OpenTextEditorTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <Button Width="100"
-                    Padding="0"
-                    Command="{Binding Editor.EditTextCommand}"
-                    CommandParameter="{Binding}"
-                    ToolTip="{Binding Value, Mode=OneWay}">
+            <Button Command="{Binding Editor.EditTextCommand}"
+                    CommandParameter="{Binding}">
+                <Button.Style>
+                    <Style TargetType="Button"
+                           BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Width" Value="100"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="ToolTip" Value="{Binding Value, Mode=OneWay}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Value}" Value="">
+                                <Setter Property="ToolTip" Value="{x:Null}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
                 <TextBlock Width="80"
                            TextWrapping="NoWrap"
-                           TextTrimming="CharacterEllipsis"
-                           Text="{Binding Value, Mode=OneWay}"/>
+                           TextTrimming="CharacterEllipsis">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding Value, Mode=OneWay}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Value}" Value="">
+                                    <Setter Property="Text" Value="{DynamicResource solEditor_emptyString}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Button>
         </DataTemplate>
 
@@ -161,12 +186,15 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="{DynamicResource solEditor_file}">
                 <MenuItem Header="{DynamicResource solEditor_save}"
-                          Command="{Binding SaveFileCommand}"/>
+                          Command="{Binding SaveFileCommand}"
+                          InputGestureText="Ctrl+S"/>
                 <MenuItem Header="{DynamicResource solEditor_saveAs}"
-                          Command="{Binding SaveAsFileCommand}"/>
+                          Command="{Binding SaveAsFileCommand}"
+                          InputGestureText="Ctrl+Shift+S"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource solEditor_close}"
-                          Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+                          Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"
+                          InputGestureText="Ctrl+W"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource solEditor_edit}"
                       IsEnabled="{Binding ElementName=treeView, Path=SelectedValue, Converter={StaticResource NotNull}}">

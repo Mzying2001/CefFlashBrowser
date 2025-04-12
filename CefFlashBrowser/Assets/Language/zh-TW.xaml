@@ -150,6 +150,7 @@
     <sys:String x:Key="solEditor_statusModified">已修改</sys:String>
     <sys:String x:Key="solEditor_statusSaved">已儲存</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">未知狀態</sys:String>
+    <sys:String x:Key="solEditor_emptyString">（空）</sys:String>
 
     <!--對話框-->
     <sys:String x:Key="dialog_ok">確定</sys:String>
@@ -176,4 +177,6 @@
     <sys:String x:Key="error_webSiteEmptyName">名稱不能為空白。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">網址不能為空白。</sys:String>
     <sys:String x:Key="error_deleteCachesRetry">清除快取時發生錯誤，是否重試？</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">陣列中已經存在名稱為「{0}」的鍵值。</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">物件中已經存在名稱為「{0}」的屬性。</sys:String>
 </ResourceDictionary>

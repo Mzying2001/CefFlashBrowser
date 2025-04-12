@@ -73,12 +73,14 @@ namespace CefFlashBrowser.ViewModels
             if (WindowManager.ShowAddFavoriteDialog(LanguageManager.GetString("favorites_defaultName"), "about:blank"))
             {
                 SelectedIndex = GlobalData.Favorites.Count - 1;
-            };
+            }
         }
 
         private void RemoveItem(Website item)
         {
-            WindowManager.Confirm(string.Format(LanguageManager.GetString("message_removeItem"), GlobalData.Favorites[SelectedIndex].Name), "", result =>
+            var msg = LanguageManager.GetFormattedString("message_removeItem", GlobalData.Favorites[SelectedIndex].Name);
+
+            WindowManager.Confirm(msg, callback: result =>
             {
                 if (result == true)
                 {
