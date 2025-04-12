@@ -177,4 +177,6 @@
     <sys:String x:Key="error_webSiteEmptyName">Il nome non può essere vuoto.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">L'URL non può essere vuoto.</sys:String>
     <sys:String x:Key="error_deleteCachesRetry">Si è verificato un errore durante la cancellazione della cache. Vuoi provare di nuovo?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">Esiste già una chiave nell'array con il nome "{0}".</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">Esiste già una proprietà dell'oggetto con il nome "{0}".</sys:String>
 </ResourceDictionary>

@@ -27,7 +27,7 @@ namespace CefFlashBrowser.ViewModels
                         if (value is string key)
                         {
                             if (arr.AssocPortion.ContainsKey(key))
-                                throw new ArgumentException($"Key '{key}' already exists in the array.");
+                                throw new ArgumentException(LanguageManager.GetFormattedString("error_arrKeyAreadyExists", key));
                         }
                         else if (value is int index)
                         {
@@ -40,7 +40,7 @@ namespace CefFlashBrowser.ViewModels
                         if (value is string key)
                         {
                             if (obj.Properties.ContainsKey(key))
-                                throw new ArgumentException($"Property '{key}' already exists in the object.");
+                                throw new ArgumentException(LanguageManager.GetFormattedString("error_objPropAreadyExists", key));
                         }
                     }
                     _name = value;

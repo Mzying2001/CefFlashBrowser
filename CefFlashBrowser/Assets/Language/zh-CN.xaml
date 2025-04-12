@@ -177,4 +177,6 @@
     <sys:String x:Key="error_webSiteEmptyName">名称不能为空。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">网址不能为空。</sys:String>
     <sys:String x:Key="error_deleteCachesRetry">清除缓存时发生错误，是否重试？</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">数组已经存在名称为“{0}”的键值。</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">对象已经存在名称为“{0}”的属性。</sys:String>
 </ResourceDictionary>
