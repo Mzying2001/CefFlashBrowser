@@ -106,7 +106,8 @@
                     </Style>
                 </Grid.Style>
                 <Button Command="{Binding Editor.AddChildCommand}"
-                        CommandParameter="{Binding}">
+                        CommandParameter="{Binding}"
+                        ToolTip="{DynamicResource solEditor_addItem}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="/Assets/Svgs/add.svg"/>
@@ -185,12 +186,15 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="{DynamicResource solEditor_file}">
                 <MenuItem Header="{DynamicResource solEditor_save}"
-                          Command="{Binding SaveFileCommand}"/>
+                          Command="{Binding SaveFileCommand}"
+                          InputGestureText="Ctrl+S"/>
                 <MenuItem Header="{DynamicResource solEditor_saveAs}"
-                          Command="{Binding SaveAsFileCommand}"/>
+                          Command="{Binding SaveAsFileCommand}"
+                          InputGestureText="Ctrl+Shift+S"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource solEditor_close}"
-                          Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+                          Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"
+                          InputGestureText="Ctrl+W"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource solEditor_edit}"
                       IsEnabled="{Binding ElementName=treeView, Path=SelectedValue, Converter={StaticResource NotNull}}">
