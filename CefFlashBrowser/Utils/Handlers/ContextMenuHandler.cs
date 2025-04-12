@@ -156,91 +156,33 @@ namespace CefFlashBrowser.Utils.Handlers
 
         private static string GetHeader(CefMenuItemInfo menuItemInfo)
         {
-            string header;
-            switch (menuItemInfo.CommandID)
+            if (_menuItemHeaderKeys.TryGetValue(menuItemInfo.CommandID, out string key))
             {
-                case CefMenuCommand.Back:
-                    {
-                        header = LanguageManager.GetString("browser_back");
-                        break;
-                    }
-                case CefMenuCommand.Forward:
-                    {
-                        header = LanguageManager.GetString("browser_forward");
-                        break;
-                    }
-                case CefMenuCommand.Cut:
-                    {
-                        header = LanguageManager.GetString("browser_cut");
-                        break;
-                    }
-                case CefMenuCommand.Copy:
-                    {
-                        header = LanguageManager.GetString("browser_copy");
-                        break;
-                    }
-                case CefMenuCommand.Paste:
-                    {
-                        header = LanguageManager.GetString("browser_paste");
-                        break;
-                    }
-                case CefMenuCommand.Print:
-                    {
-                        header = LanguageManager.GetString("browser_print");
-                        break;
-                    }
-                case CefMenuCommand.ViewSource:
-                    {
-                        header = LanguageManager.GetString("browser_viewSource");
-                        break;
-                    }
-                case CefMenuCommand.Undo:
-                    {
-                        header = LanguageManager.GetString("browser_undo");
-                        break;
-                    }
-                case CefMenuCommand.StopLoad:
-                    {
-                        header = LanguageManager.GetString("browser_stop");
-                        break;
-                    }
-                case CefMenuCommand.SelectAll:
-                    {
-                        header = LanguageManager.GetString("browser_selectAll");
-                        break;
-                    }
-                case CefMenuCommand.Redo:
-                    {
-                        header = LanguageManager.GetString("browser_redo");
-                        break;
-                    }
-                case CefMenuCommand.Find:
-                    {
-                        header = LanguageManager.GetString("browser_find");
-                        break;
-                    }
-                case CefMenuCommand.AddToDictionary:
-                    {
-                        header = LanguageManager.GetString("browser_addToDictionary");
-                        break;
-                    }
-                case CefMenuCommand.Reload:
-                    {
-                        header = LanguageManager.GetString("browser_reload");
-                        break;
-                    }
-                case CefMenuCommand.ReloadNoCache:
-                    {
-                        header = LanguageManager.GetString("browser_reloadNoCache");
-                        break;
-                    }
-                default:
-                    {
-                        header = menuItemInfo.Header;
-                        break;
-                    }
+                return LanguageManager.GetString(key);
             }
-            return header;
+            else
+            {
+                return menuItemInfo.Header;
+            }
         }
+
+        private static readonly Dictionary<CefMenuCommand, string> _menuItemHeaderKeys = new Dictionary<CefMenuCommand, string>()
+        {
+            [CefMenuCommand.Back] = "browser_back",
+            [CefMenuCommand.Forward] = "browser_forward",
+            [CefMenuCommand.Cut] = "browser_cut",
+            [CefMenuCommand.Copy] = "browser_copy",
+            [CefMenuCommand.Paste] = "browser_paste",
+            [CefMenuCommand.Print] = "browser_print",
+            [CefMenuCommand.ViewSource] = "browser_viewSource",
+            [CefMenuCommand.Undo] = "browser_undo",
+            [CefMenuCommand.StopLoad] = "browser_stop",
+            [CefMenuCommand.SelectAll] = "browser_selectAll",
+            [CefMenuCommand.Redo] = "browser_redo",
+            [CefMenuCommand.Find] = "browser_find",
+            [CefMenuCommand.AddToDictionary] = "browser_addToDictionary",
+            [CefMenuCommand.Reload] = "browser_reload",
+            [CefMenuCommand.ReloadNoCache] = "browser_reloadNoCache",
+        };
     }
 }
