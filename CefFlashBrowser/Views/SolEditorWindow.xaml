@@ -168,6 +168,23 @@
                         <Setter Property="Padding" Value="0"/>
                     </Style>
                 </StackPanel.Resources>
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Margin" Value="0,0,10,0"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+                            <Setter Property="Text" Value="{Binding Value, Converter={StaticResource BinaryToReadableSizeString}}"/>
+                            <Setter Property="ToolTip" Value="{Binding Value, Converter={StaticResource BinaryToSizeString}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsSelected}"  Value="True">
+                                    <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=Foreground}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <Button ToolTip="{DynamicResource common_export}"
                         Command="{Binding Editor.ExportBinaryCommand}"
                         CommandParameter="{Binding}">
@@ -251,7 +268,8 @@
                   ItemsSource="{Binding RootNodes}">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                    <DockPanel Background="Transparent">
+                    <DockPanel MinHeight="35"
+                               Background="Transparent">
                         <ContentControl DockPanel.Dock="Right"
                                         Margin="10,5"
                                         Content="{Binding}">
