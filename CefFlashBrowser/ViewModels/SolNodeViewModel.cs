@@ -139,7 +139,7 @@ namespace CefFlashBrowser.ViewModels
             Children = children;
         }
 
-        public void UpdateDensePortionNodeName()
+        private void UpdateDensePortionNodeName()
         {
             if (Value is SolArray)
             {
@@ -226,6 +226,69 @@ namespace CefFlashBrowser.ViewModels
         public Dictionary<string, object> GetAllValues()
         {
             return Children.ToDictionary(x => x.Name.ToString(), x => x.Value);
+        }
+
+        /// <summary>
+        /// Adds a new item to the current node.<br/>
+        /// When the current node is Array, value with string key is added to the associative portion,
+        /// otherwise it is added to the end of the dense portion.
+        /// </summary>
+        public void AddChild(object name, object value)
+        {
+            if (Value is SolFileWrapper)
+            {
+                Children.Insert(0, new SolNodeViewModel(Editor, this, name, value));
+            }
+            else if (Value is SolArray arr)
+            {
+                if (name is string key)
+                {
+                    arr.AssocPortion.Add(key, value);
+                    Children.Insert(0, new SolNodeViewModel(Editor, this, key, value));
+                }
+                else
+                {
+                    // always insert at the end
+                    int index = arr.DensePortion.Count;
+                    arr.DensePortion.Insert(index, value);
+                    Children.Add(new SolNodeViewModel(Editor, this, index, value));
+                }
+            }
+            else if (Value is SolObject obj)
+            {
+                obj.Properties.Add(name.ToString(), value);
+                Children.Insert(0, new SolNodeViewModel(Editor, this, name, value));
+            }
+        }
+
+        public void Remove()
+        {
+            if (Parent == null)
+                return;
+
+            if (Parent.Value is SolFileWrapper)
+            {
+                Parent.Children.Remove(this);
+            }
+            else if (Parent.Value is SolArray arr)
+            {
+                if (Name is string key)
+                {
+                    arr.AssocPortion.Remove(key);
+                    Parent.Children.Remove(this);
+                }
+                else if (Name is int index)
+                {
+                    arr.DensePortion.RemoveAt(index);
+                    Parent.Children.Remove(this);
+                    Parent.UpdateDensePortionNodeName();
+                }
+            }
+            else if (Parent.Value is SolObject obj)
+            {
+                obj.Properties.Remove(Name.ToString());
+                Parent.Children.Remove(this);
+            }
         }
 
         public SolNodeViewModel(SolEditorWindowViewModel editor, SolNodeViewModel parent, object name, object value)
