@@ -138,11 +138,35 @@ namespace CefFlashBrowser.ViewModels
 
             WindowManager.Confirm(msg, callback: result =>
             {
-                if (result == true)
+                if (result != true)
+                    return;
+
+                var parent = target.Parent;
+
+                if (parent?.Value is SolFileWrapper)
                 {
-                    target.Remove();
-                    Status = SolEditorStatus.Modified;
+                    parent.Children.Remove(target);
                 }
+                else if (parent?.Value is SolArray arr)
+                {
+                    if (target.Name is string key)
+                    {
+                        arr.AssocPortion.Remove(key);
+                        parent.Children.Remove(target);
+                    }
+                    else if (target.Name is int index)
+                    {
+                        arr.DensePortion.RemoveAt(index);
+                        parent.Children.Remove(target);
+                    }
+                }
+                else if (parent?.Value is SolObject obj)
+                {
+                    obj.Properties.Remove(target.Name.ToString());
+                    parent.Children.Remove(target);
+                }
+
+                Status = SolEditorStatus.Modified;
             });
         }
 
