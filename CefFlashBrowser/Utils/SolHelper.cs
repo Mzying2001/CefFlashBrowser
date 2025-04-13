@@ -120,7 +120,11 @@ namespace CefFlashBrowser.Utils
         {
             if (type == null) return null;
 
-            if (type == typeof(byte[]))
+            if (type == typeof(string))
+            {
+                return string.Empty;
+            }
+            else if (type == typeof(byte[]))
             {
                 return new byte[0];
             }
