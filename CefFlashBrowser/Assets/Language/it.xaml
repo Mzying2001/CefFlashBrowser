@@ -160,6 +160,8 @@
     <sys:String x:Key="dialog_error">Errore</sys:String>
     <sys:String x:Key="dialog_addFavorite">Aggiungi a Preferiti</sys:String>
     <sys:String x:Key="dialog_selectLanguage">Seleziona lingua</sys:String>
+    <sys:String x:Key="dialog_addItem">Aggiungi voce</sys:String>
+    <sys:String x:Key="dialog_assocArray">Array associativo</sys:String>
 
     <!--Messaggi-->
     <sys:String x:Key="message_emptyUrl">Prego, inserisci l'url.</sys:String>
@@ -179,4 +181,6 @@
     <sys:String x:Key="error_deleteCachesRetry">Si è verificato un errore durante la cancellazione della cache. Vuoi provare di nuovo?</sys:String>
     <sys:String x:Key="error_arrKeyAreadyExists">Esiste già una chiave nell'array con il nome "{0}".</sys:String>
     <sys:String x:Key="error_objPropAreadyExists">Esiste già una proprietà dell'oggetto con il nome "{0}".</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Il nome della chiave/proprietà non può essere vuoto.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">Esiste già una chiave/proprietà con il nome "{0}".</sys:String>
 </ResourceDictionary>

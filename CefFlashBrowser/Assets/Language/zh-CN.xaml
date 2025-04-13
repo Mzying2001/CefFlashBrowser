@@ -160,6 +160,8 @@
     <sys:String x:Key="dialog_error">错误</sys:String>
     <sys:String x:Key="dialog_addFavorite">添加收藏夹</sys:String>
     <sys:String x:Key="dialog_selectLanguage">请选择语言</sys:String>
+    <sys:String x:Key="dialog_addItem">添加项</sys:String>
+    <sys:String x:Key="dialog_assocArray">关联数组</sys:String>
 
     <!--提示信息-->
     <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
@@ -179,4 +181,6 @@
     <sys:String x:Key="error_deleteCachesRetry">清除缓存时发生错误，是否重试？</sys:String>
     <sys:String x:Key="error_arrKeyAreadyExists">数组已经存在名称为“{0}”的键值。</sys:String>
     <sys:String x:Key="error_objPropAreadyExists">对象已经存在名称为“{0}”的属性。</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">键值/属性名不能为空。</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
 </ResourceDictionary>
