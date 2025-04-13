@@ -69,6 +69,13 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private bool _isRemoved = false;
+        public bool IsRemoved
+        {
+            get => _isRemoved;
+            private set => UpdateValue(ref _isRemoved, value);
+        }
+
         private ObservableCollection<SolNodeViewModel> _children;
         public ObservableCollection<SolNodeViewModel> Children
         {
@@ -289,6 +296,8 @@ namespace CefFlashBrowser.ViewModels
                 obj.Properties.Remove(Name.ToString());
                 Parent.Children.Remove(this);
             }
+
+            IsRemoved = true;
         }
 
         public SolNodeViewModel(SolEditorWindowViewModel editor, SolNodeViewModel parent, object name, object value)
