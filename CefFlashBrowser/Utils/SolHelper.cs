@@ -94,5 +94,31 @@ namespace CefFlashBrowser.Utils
 
             return string.Empty;
         }
+
+        public static object GetDefaultValueOfType(Type type)
+        {
+            if (type == null) return null;
+
+            if (type == typeof(byte[]))
+            {
+                return new byte[0];
+            }
+            else if (type == typeof(DateTime))
+            {
+                return DateTime.Now;
+            }
+            else if (type == typeof(SolUndefined))
+            {
+                return SolUndefined.Value;
+            }
+            else if (type == typeof(SolXml) || type == typeof(SolXmlDoc))
+            {
+                return Activator.CreateInstance(type, string.Empty);
+            }
+            else
+            {
+                return Activator.CreateInstance(type);
+            }
+        }
     }
 }
