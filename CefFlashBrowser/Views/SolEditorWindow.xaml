@@ -127,7 +127,7 @@
                         <Setter Property="Padding" Value="0"/>
                         <Setter Property="ToolTip" Value="{Binding Value, Mode=OneWay}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Value}" Value="">
+                            <DataTrigger Binding="{Binding Value, Converter={StaticResource ObjectToString}}" Value="">
                                 <Setter Property="ToolTip" Value="{x:Null}"/>
                             </DataTrigger>
                         </Style.Triggers>
@@ -141,7 +141,7 @@
                             <Setter Property="Text" Value="{Binding Value, Mode=OneWay}"/>
                             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Value}" Value="">
+                                <DataTrigger Binding="{Binding Value, Converter={StaticResource ObjectToString}}" Value="">
                                     <Setter Property="Text" Value="{DynamicResource solEditor_emptyString}"/>
                                     <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
                                 </DataTrigger>
