@@ -20,4 +20,6 @@
 
     <local:IntToDouble x:Key="IntToDouble"/>
 
+    <local:ObjectToString x:Key="ObjectToString"/>
+
 </ResourceDictionary>

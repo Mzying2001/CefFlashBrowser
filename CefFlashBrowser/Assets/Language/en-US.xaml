@@ -160,6 +160,8 @@
     <sys:String x:Key="dialog_error">Error</sys:String>
     <sys:String x:Key="dialog_addFavorite">Add Favorite</sys:String>
     <sys:String x:Key="dialog_selectLanguage">Select language</sys:String>
+    <sys:String x:Key="dialog_addItem">Add Item</sys:String>
+    <sys:String x:Key="dialog_assocArray">Associative Array</sys:String>
 
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>
@@ -179,4 +181,6 @@
     <sys:String x:Key="error_deleteCachesRetry">An error occurred while clearing the cache. Do you want to try again?</sys:String>
     <sys:String x:Key="error_arrKeyAreadyExists">An array key named "{0}" already exists.</sys:String>
     <sys:String x:Key="error_objPropAreadyExists">An object property named "{0}" already exists.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Key/Property name cannot be empty.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">A key/property named "{0}" already exists.</sys:String>
 </ResourceDictionary>

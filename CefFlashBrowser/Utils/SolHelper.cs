@@ -84,15 +84,66 @@ namespace CefFlashBrowser.Utils
             return res;
         }
 
-        public static string GetTypeString(object value)
+        public static string GetTypeString(Type type)
         {
-            if (value == null)
+            if (type == null)
                 return "null";
 
-            if (TypeStringDic.TryGetValue(value.GetType(), out var typeStr))
+            if (TypeStringDic.TryGetValue(type, out var typeStr))
                 return typeStr;
 
             return string.Empty;
+        }
+
+        public static string GetTypeString(object value)
+        {
+            return GetTypeString(value?.GetType());
+        }
+
+        public static IEnumerable<SolTypeDesc> GetSupportedTypes()
+        {
+            yield return new SolTypeDesc(typeof(int));
+            yield return new SolTypeDesc(typeof(double));
+            yield return new SolTypeDesc(typeof(bool));
+            yield return new SolTypeDesc(typeof(string));
+            yield return new SolTypeDesc(typeof(DateTime));
+            yield return new SolTypeDesc(typeof(SolArray));
+            yield return new SolTypeDesc(typeof(SolObject));
+            yield return new SolTypeDesc(typeof(byte[]));
+            yield return new SolTypeDesc(typeof(SolXml));
+            yield return new SolTypeDesc(typeof(SolXmlDoc));
+            yield return new SolTypeDesc(typeof(SolUndefined));
+            yield return new SolTypeDesc(null);
+        }
+
+        public static object GetDefaultValueOfType(Type type)
+        {
+            if (type == null) return null;
+
+            if (type == typeof(string))
+            {
+                return string.Empty;
+            }
+            else if (type == typeof(byte[]))
+            {
+                return new byte[0];
+            }
+            else if (type == typeof(DateTime))
+            {
+                return DateTime.Now;
+            }
+            else if (type == typeof(SolUndefined))
+            {
+                return SolUndefined.Value;
+            }
+            else if (type == typeof(SolXml) || type == typeof(SolXmlDoc))
+            {
+                return Activator.CreateInstance(type, string.Empty);
+            }
+            else
+            {
+                return Activator.CreateInstance(type);
+            }
         }
     }
 }

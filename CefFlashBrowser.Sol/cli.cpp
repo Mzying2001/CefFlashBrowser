@@ -60,7 +60,7 @@ System::Type^ CefFlashBrowser::Sol::SolValueWrapper::Type::get()
 
     case SolType::Null:
     default:
-        return Object::typeid;
+        return nullptr;
     }
 }
 

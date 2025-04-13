@@ -160,6 +160,8 @@
     <sys:String x:Key="dialog_error">錯誤</sys:String>
     <sys:String x:Key="dialog_addFavorite">新增我的最愛</sys:String>
     <sys:String x:Key="dialog_selectLanguage">請選擇語言</sys:String>
+    <sys:String x:Key="dialog_addItem">新增項目</sys:String>
+    <sys:String x:Key="dialog_assocArray">關聯陣列</sys:String>
 
     <!--提示訊息-->
     <sys:String x:Key="message_emptyUrl">請輸入網址。</sys:String>
@@ -179,4 +181,6 @@
     <sys:String x:Key="error_deleteCachesRetry">清除快取時發生錯誤，是否重試？</sys:String>
     <sys:String x:Key="error_arrKeyAreadyExists">陣列中已經存在名稱為「{0}」的鍵值。</sys:String>
     <sys:String x:Key="error_objPropAreadyExists">物件中已經存在名稱為「{0}」的屬性。</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">鍵值/屬性名稱不能為空。</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">已經存在名稱為「{0}」的鍵值/屬性。</sys:String>
 </ResourceDictionary>

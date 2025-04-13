@@ -5,6 +5,7 @@ using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
 using System.IO;
+using System.Linq;
 using System.Xml;
 
 namespace CefFlashBrowser.ViewModels
@@ -137,17 +138,158 @@ namespace CefFlashBrowser.ViewModels
 
             WindowManager.Confirm(msg, callback: result =>
             {
-                if (result == true)
+                if (result != true)
+                    return;
+
+                var parent = target.Parent;
+
+                if (parent?.Value is SolFileWrapper)
                 {
-                    target.Remove();
-                    Status = SolEditorStatus.Modified;
+                    parent.Children.Remove(target);
                 }
+                else if (parent?.Value is SolArray arr)
+                {
+                    if (target.Name is string key)
+                    {
+                        arr.AssocPortion.Remove(key);
+                        parent.Children.Remove(target);
+                    }
+                    else if (target.Name is int index)
+                    {
+                        arr.DensePortion.RemoveAt(index);
+                        parent.Children.Remove(target);
+                        parent.UpdateDensePortionNodeName();
+                    }
+                }
+                else if (parent?.Value is SolObject obj)
+                {
+                    obj.Properties.Remove(target.Name.ToString());
+                    parent.Children.Remove(target);
+                }
+
+                Status = SolEditorStatus.Modified;
             });
         }
 
         private void AddChild(SolNodeViewModel target)
         {
-            // TODO: Implement
+            var nameVerifier = new Func<string, bool>(name =>
+            {
+                if (string.IsNullOrEmpty(name))
+                {
+                    WindowManager.ShowError(LanguageManager.GetString("error_keyOrPropEmpty"));
+                    return false;
+                }
+                if (target.Children.Any(item => item.Name is string itemName && itemName == name))
+                {
+                    WindowManager.ShowError(LanguageManager.GetFormattedString("error_keyOrPropAreadyExists", name));
+                    return false;
+                }
+                return true;
+            });
+
+            if (target.Value is SolFileWrapper)
+            {
+                WindowManager.ShowAddSolItemDialog(
+                    verifyName: nameVerifier,
+                    callback: (result, name, typeDesc) =>
+                    {
+                        if (result == true)
+                        {
+                            target.Children.Insert(0, new SolNodeViewModel(this, target, name, typeDesc.CreateInstance()));
+                            Status = SolEditorStatus.Modified;
+                        }
+                    });
+            }
+            else if (target.Value is SolArray arr)
+            {
+                if (arr.AssocPortion.Count == 0 && arr.DensePortion.Count == 0) // empty array
+                {
+                    WindowManager.ShowAddSolArrayItem(
+                        canChangeArrayType: true,
+                        isAssocArrayItem: false,
+                        verifyName: name =>
+                        {
+                            if (name == null)
+                            {
+                                return true; // dense array item
+                            }
+                            else
+                            {
+                                return nameVerifier(name);
+                            }
+                        },
+                        callback: (result, name, typeDesc) =>
+                        {
+                            if (result == true)
+                            {
+                                if (name == null)
+                                {
+                                    var value = typeDesc.CreateInstance();
+                                    int index = arr.DensePortion.Count;
+                                    arr.DensePortion.Insert(index, value);
+                                    target.Children.Add(new SolNodeViewModel(this, target, index, value));
+                                }
+                                else
+                                {
+                                    var value = typeDesc.CreateInstance();
+                                    arr.AssocPortion.Add(name, value);
+                                    target.Children.Insert(0, new SolNodeViewModel(this, target, name, value));
+                                }
+                                Status = SolEditorStatus.Modified;
+                            }
+                        });
+                }
+                else if (arr.AssocPortion.Count != 0) // assoc array
+                {
+                    WindowManager.ShowAddSolArrayItem(
+                        canChangeArrayType: false,
+                        isAssocArrayItem: true,
+                        verifyName: nameVerifier,
+                        callback: (result, name, typeDesc) =>
+                        {
+                            if (result == true)
+                            {
+                                var value = typeDesc.CreateInstance();
+                                arr.AssocPortion.Add(name, value);
+                                target.Children.Insert(0, new SolNodeViewModel(this, target, name, value));
+                                Status = SolEditorStatus.Modified;
+                            }
+                        });
+                }
+                else // dense array
+                {
+                    WindowManager.ShowAddSolArrayItem(
+                        canChangeArrayType: false,
+                        isAssocArrayItem: false,
+                        callback: (result, _, typeDesc) =>
+                        {
+                            if (result == true)
+                            {
+                                var value = typeDesc.CreateInstance();
+                                int index = arr.DensePortion.Count;
+                                arr.DensePortion.Insert(index, value);
+                                target.Children.Add(new SolNodeViewModel(this, target, index, value));
+                                Status = SolEditorStatus.Modified;
+                            }
+                        });
+                }
+            }
+            else if (target.Value is SolObject obj)
+            {
+                WindowManager.ShowAddSolItemDialog(
+                    verifyName: nameVerifier,
+                    callback: (result, name, typeDesc) =>
+                    {
+                        if (result == true)
+                        {
+                            var value = typeDesc.CreateInstance();
+                            obj.Properties.Add(name, value);
+                            target.Children.Insert(0, new SolNodeViewModel(this, target, name, value));
+                            Status = SolEditorStatus.Modified;
+                        }
+                    });
+            }
         }
 
         private void EditText(SolNodeViewModel target)
