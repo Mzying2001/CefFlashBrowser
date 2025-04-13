@@ -139,6 +139,24 @@ namespace CefFlashBrowser.ViewModels
             Children = children;
         }
 
+        public void UpdateDensePortionNodeName()
+        {
+            if (Value is SolArray)
+            {
+                int index = 0;
+
+                foreach (var node in Children)
+                {
+                    if (node.Name is int)
+                    {
+                        node._name = index++;
+                        node.RaisePropertyChanged(nameof(Name));
+                        node.RaisePropertyChanged(nameof(DisplayName));
+                    }
+                }
+            }
+        }
+
         protected virtual void OnChildrenValueChanged(SolNodeViewModel node)
         {
             if (Value is SolArray arr)
@@ -181,6 +199,8 @@ namespace CefFlashBrowser.ViewModels
                     int nodeIndex = Children.IndexOf(node);
                     Children.RemoveAt(nodeIndex);
                     Children.Insert(nodeIndex + offset, node);
+
+                    UpdateDensePortionNodeName();
                 }
             }
             else if (Value is SolObject obj)

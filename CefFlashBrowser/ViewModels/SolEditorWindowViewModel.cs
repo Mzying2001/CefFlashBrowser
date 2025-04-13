@@ -158,6 +158,7 @@ namespace CefFlashBrowser.ViewModels
                     {
                         arr.DensePortion.RemoveAt(index);
                         parent.Children.Remove(target);
+                        parent.UpdateDensePortionNodeName();
                     }
                 }
                 else if (parent?.Value is SolObject obj)
