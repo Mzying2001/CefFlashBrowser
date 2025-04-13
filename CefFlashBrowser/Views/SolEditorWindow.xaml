@@ -77,7 +77,11 @@
         <DataTemplate x:Key="DateTimeNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
             <hc:DateTimePicker Width="100"
-                               SelectedDateTime="{Binding Value}"/>
+                               SelectedDateTime="{Binding Value}">
+                <hc:DateTimePicker.ToolTip>
+                    <TextBlock Text="{Binding Value, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"/>
+                </hc:DateTimePicker.ToolTip>
+            </hc:DateTimePicker>
         </DataTemplate>
 
         <!--Add Item Button-->
