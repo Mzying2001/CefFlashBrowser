@@ -45,15 +45,33 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" MinWidth="100"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="10"/>
-            <ColumnDefinition Width="Auto" MinWidth="100"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <ComboBox SelectedIndex="0"
+        <ComboBox MinWidth="100"
+                  SelectedIndex="0"
                   DisplayMemberPath="TypeName"
                   ItemsSource="{Binding ElementName=window, Path=Types}"
-                  SelectedValue="{Binding ElementName=window, Path=SelectedType}"/>
+                  SelectedValue="{Binding ElementName=window, Path=SelectedType}">
+            <ComboBox.Style>
+                <Style TargetType="ComboBox"
+                       BasedOn="{StaticResource {x:Type ComboBox}}">
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=window, Path=IsArrayItem}" Value="True"/>
+                                <Condition Binding="{Binding ElementName=window, Path=IsAssocArrayItem}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <MultiDataTrigger.Setters>
+                                <Setter Property="Grid.ColumnSpan" Value="3"/>
+                            </MultiDataTrigger.Setters>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ComboBox.Style>
+        </ComboBox>
 
         <CheckBox Grid.Row="2"
                   VerticalAlignment="Center"
@@ -86,7 +104,7 @@
                                 <Condition Binding="{Binding ElementName=window, Path=IsAssocArrayItem}" Value="False"/>
                             </MultiDataTrigger.Conditions>
                             <MultiDataTrigger.Setters>
-                                <Setter Property="IsEnabled" Value="False"/>
+                                <Setter Property="Visibility" Value="Collapsed"/>
                             </MultiDataTrigger.Setters>
                         </MultiDataTrigger>
                     </Style.Triggers>
