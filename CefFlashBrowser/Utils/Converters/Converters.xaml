@@ -22,4 +22,8 @@
 
     <local:ObjectToString x:Key="ObjectToString"/>
 
+    <local:BinaryToSizeString x:Key="BinaryToSizeString"/>
+
+    <local:BinaryToSizeString x:Key="BinaryToReadableSizeString" UseReadableSize="True"/>
+
 </ResourceDictionary>

@@ -10,6 +10,8 @@
 
     public enum SolNodeChangeType
     {
+        Added,
+        Removed,
         NameChanged,
         ValueChanged
     }
