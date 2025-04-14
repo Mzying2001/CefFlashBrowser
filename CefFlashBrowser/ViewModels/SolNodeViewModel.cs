@@ -109,7 +109,7 @@ namespace CefFlashBrowser.ViewModels
 
         public bool CanRemove
         {
-            get => Parent != null;
+            get => Parent != null && !IsRemoved;
         }
 
 
@@ -242,62 +242,81 @@ namespace CefFlashBrowser.ViewModels
         /// </summary>
         public void AddChild(object name, object value)
         {
+            if (!CanAddChild) // Value is not SolFileWrapper, SolArray or SolObject
+                return;
+
+            SolNodeViewModel node = null;
+            int insertIndex = 0;
+
             if (Value is SolFileWrapper)
             {
-                Children.Insert(0, new SolNodeViewModel(Editor, this, name, value));
+                node = new SolNodeViewModel(Editor, this, name, value);
             }
             else if (Value is SolArray arr)
             {
                 if (name is string key)
                 {
                     arr.AssocPortion.Add(key, value);
-                    Children.Insert(0, new SolNodeViewModel(Editor, this, key, value));
+                    node = new SolNodeViewModel(Editor, this, key, value);
                 }
                 else
                 {
                     // always insert at the end
                     int index = arr.DensePortion.Count;
                     arr.DensePortion.Insert(index, value);
-                    Children.Add(new SolNodeViewModel(Editor, this, index, value));
+
+                    insertIndex = Children.Count;
+                    node = new SolNodeViewModel(Editor, this, index, value);
                 }
             }
             else if (Value is SolObject obj)
             {
                 obj.Properties.Add(name.ToString(), value);
-                Children.Insert(0, new SolNodeViewModel(Editor, this, name, value));
+                node = new SolNodeViewModel(Editor, this, name, value);
+            }
+
+            if (node != null)
+            {
+                Children.Insert(insertIndex, node);
+                Editor?.OnNodeChanged(SolNodeChangeType.Added, node);
             }
         }
 
         public void Remove()
         {
-            if (Parent == null)
+            if (!CanRemove) // Parent is null or already removed
                 return;
+
+            bool updateSiblingNames = false;
 
             if (Parent.Value is SolFileWrapper)
             {
-                Parent.Children.Remove(this);
+                // do nothing
             }
             else if (Parent.Value is SolArray arr)
             {
                 if (Name is string key)
                 {
                     arr.AssocPortion.Remove(key);
-                    Parent.Children.Remove(this);
                 }
                 else if (Name is int index)
                 {
+                    updateSiblingNames = true;
                     arr.DensePortion.RemoveAt(index);
-                    Parent.Children.Remove(this);
-                    Parent.UpdateDensePortionNodeName();
                 }
             }
             else if (Parent.Value is SolObject obj)
             {
                 obj.Properties.Remove(Name.ToString());
-                Parent.Children.Remove(this);
             }
 
+            Parent.Children.Remove(this);
             IsRemoved = true;
+
+            if (updateSiblingNames)
+                Parent.UpdateDensePortionNodeName();
+
+            Editor?.OnNodeChanged(SolNodeChangeType.Removed, this);
         }
 
         public SolNodeViewModel(SolEditorWindowViewModel editor, SolNodeViewModel parent, object name, object value)

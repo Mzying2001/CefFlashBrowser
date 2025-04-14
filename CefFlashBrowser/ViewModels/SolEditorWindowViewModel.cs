@@ -139,10 +139,7 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.Confirm(msg, callback: result =>
             {
                 if (result == true)
-                {
                     target.Remove();
-                    Status = SolEditorStatus.Modified;
-                }
             });
         }
 
@@ -166,10 +163,7 @@ namespace CefFlashBrowser.ViewModels
             var addItemCallback = new Action<bool?, string, SolTypeDesc>((result, name, typeDesc) =>
             {
                 if (result == true)
-                {
                     target.AddChild(name, typeDesc.CreateInstance());
-                    Status = SolEditorStatus.Modified;
-                }
             });
 
             if (target.Value is SolFileWrapper || target.Value is SolObject)
