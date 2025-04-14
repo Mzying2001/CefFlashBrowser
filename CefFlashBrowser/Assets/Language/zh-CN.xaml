@@ -161,6 +161,7 @@
     <sys:String x:Key="dialog_addFavorite">添加收藏夹</sys:String>
     <sys:String x:Key="dialog_selectLanguage">请选择语言</sys:String>
     <sys:String x:Key="dialog_addItem">添加项</sys:String>
+    <sys:String x:Key="dialog_itemName">名称</sys:String>
     <sys:String x:Key="dialog_assocArray">关联数组</sys:String>
 
     <!--提示信息-->

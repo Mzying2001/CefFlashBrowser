@@ -161,6 +161,7 @@
     <sys:String x:Key="dialog_addFavorite">Add Favorite</sys:String>
     <sys:String x:Key="dialog_selectLanguage">Select language</sys:String>
     <sys:String x:Key="dialog_addItem">Add Item</sys:String>
+    <sys:String x:Key="dialog_itemName">Name</sys:String>
     <sys:String x:Key="dialog_assocArray">Associative Array</sys:String>
 
     <!--Message-->

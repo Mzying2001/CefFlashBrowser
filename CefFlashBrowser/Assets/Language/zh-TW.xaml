@@ -161,6 +161,7 @@
     <sys:String x:Key="dialog_addFavorite">新增我的最愛</sys:String>
     <sys:String x:Key="dialog_selectLanguage">請選擇語言</sys:String>
     <sys:String x:Key="dialog_addItem">新增項目</sys:String>
+    <sys:String x:Key="dialog_itemName">名稱</sys:String>
     <sys:String x:Key="dialog_assocArray">關聯陣列</sys:String>
 
     <!--提示訊息-->

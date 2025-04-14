@@ -8,6 +8,7 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         
         x:Name="window"
@@ -90,13 +91,14 @@
             </CheckBox.Style>
         </CheckBox>
 
-        <TextBox x:Name="nameTextBox"
-                 Grid.Column="2"
-                 MaxWidth="300"
-                 Text="{Binding ElementName=window, Path=ItemNameEdit, UpdateSourceTrigger=PropertyChanged}">
-            <TextBox.Style>
-                <Style TargetType="TextBox"
-                       BasedOn="{StaticResource {x:Type TextBox}}">
+        <hc:TextBox x:Name="nameTextBox"
+                    Grid.Column="2"
+                    MaxWidth="300"
+                    Text="{Binding ElementName=window, Path=ItemNameEdit, UpdateSourceTrigger=PropertyChanged}"
+                    hc:InfoElement.Placeholder="{DynamicResource dialog_itemName}">
+            <hc:TextBox.Style>
+                <Style TargetType="{x:Type hc:TextBox}"
+                       BasedOn="{StaticResource {x:Type hc:TextBox}}">
                     <Style.Triggers>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
@@ -109,8 +111,8 @@
                         </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
-            </TextBox.Style>
-        </TextBox>
+            </hc:TextBox.Style>
+        </hc:TextBox>
 
         <StackPanel Grid.Row="2"
                     Grid.Column="2"
