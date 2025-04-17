@@ -45,7 +45,8 @@
         <!--Bool Editor-->
         <DataTemplate x:Key="BoolNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <CheckBox Style="{StaticResource ToggleButtonSwitch}"
+            <CheckBox HorizontalAlignment="Right"
+                      Style="{StaticResource ToggleButtonSwitch}"
                       IsChecked="{Binding Value}">
                 <CheckBox.Effect>
                     <DropShadowEffect Color="White"
@@ -59,8 +60,7 @@
         <!--Int Editor-->
         <DataTemplate x:Key="IntNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <hc:NumericUpDown Width="100"
-                              Minimum="-268435456"
+            <hc:NumericUpDown Minimum="-268435456"
                               Maximum="268435455"
                               DecimalPlaces="0"
                               Value="{Binding Value, Converter={StaticResource IntToDouble}}"/>
@@ -69,14 +69,13 @@
         <!--Double Editor-->
         <DataTemplate x:Key="DoubleNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <hc:NumericUpDown Width="100"
-                              Value="{Binding Value}"/>
+            <hc:NumericUpDown Value="{Binding Value}"/>
         </DataTemplate>
 
         <!--DateTime Editor-->
         <DataTemplate x:Key="DateTimeNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <hc:DateTimePicker Width="100"
+            <hc:DateTimePicker DateTimeFormat="yyyy-MM-dd"
                                SelectedDateTime="{Binding Value}">
                 <hc:DateTimePicker.ToolTip>
                     <TextBlock Text="{Binding Value, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"/>
@@ -87,7 +86,7 @@
         <!--Add Item Button-->
         <DataTemplate x:Key="AddItemTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <Grid>
+            <Grid HorizontalAlignment="Right">
                 <Grid.Resources>
                     <Style TargetType="Button"
                            BasedOn="{StaticResource {x:Type Button}}">
@@ -127,8 +126,8 @@
                 <Button.Style>
                     <Style TargetType="Button"
                            BasedOn="{StaticResource {x:Type Button}}">
-                        <Setter Property="Width" Value="100"/>
                         <Setter Property="Padding" Value="0"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
                         <Setter Property="ToolTip" Value="{Binding Value, Mode=OneWay}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Value, Converter={StaticResource ObjectToString}}" Value="">
@@ -137,7 +136,7 @@
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
-                <TextBlock Width="80"
+                <TextBlock Width="100"
                            TextWrapping="NoWrap"
                            TextTrimming="CharacterEllipsis">
                     <TextBlock.Style>
@@ -159,7 +158,8 @@
         <!--Import/Export button-->
         <DataTemplate x:Key="ImportExportTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right">
                 <StackPanel.Resources>
                     <Style TargetType="Button"
                            BasedOn="{StaticResource {x:Type Button}}">
@@ -201,6 +201,21 @@
                 </Button>
             </StackPanel>
         </DataTemplate>
+
+        <!--Selector for the node editor templates-->
+        <utils:SolNodeTemplateSelector x:Key="NodeEditorSelector"
+                                       RootTemplate="{StaticResource AddItemTemplate}"
+                                       ArrayTemplate="{StaticResource AddItemTemplate}"
+                                       ObjectTemplate="{StaticResource AddItemTemplate}"
+                                       BoolTemplate="{StaticResource BoolNodeTemplate}"
+                                       IntTemplate="{StaticResource IntNodeTemplate}"
+                                       DoubleTemplate="{StaticResource DoubleNodeTemplate}"
+                                       DateTemplate="{StaticResource DateTimeNodeTemplate}"
+                                       StringTemplate="{StaticResource OpenTextEditorTemplate}"
+                                       XmlDocTemplate="{StaticResource OpenTextEditorTemplate}"
+                                       XmlTemplate="{StaticResource OpenTextEditorTemplate}"
+                                       BinaryTemplate="{StaticResource ImportExportTemplate}"
+                                       DefaultTemplate="{StaticResource DisplayNothingTemplate}"/>
     </Window.Resources>
 
     <DockPanel>
@@ -270,24 +285,11 @@
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                     <DockPanel MinHeight="35"
                                Background="Transparent">
-                        <ContentControl DockPanel.Dock="Right"
-                                        Margin="10,5"
-                                        Content="{Binding}">
-                            <ContentControl.ContentTemplateSelector>
-                                <utils:SolNodeTemplateSelector RootTemplate="{StaticResource AddItemTemplate}"
-                                                               ArrayTemplate="{StaticResource AddItemTemplate}"
-                                                               ObjectTemplate="{StaticResource AddItemTemplate}"
-                                                               BoolTemplate="{StaticResource BoolNodeTemplate}"
-                                                               IntTemplate="{StaticResource IntNodeTemplate}"
-                                                               DoubleTemplate="{StaticResource DoubleNodeTemplate}"
-                                                               DateTemplate="{StaticResource DateTimeNodeTemplate}"
-                                                               StringTemplate="{StaticResource OpenTextEditorTemplate}"
-                                                               XmlDocTemplate="{StaticResource OpenTextEditorTemplate}"
-                                                               XmlTemplate="{StaticResource OpenTextEditorTemplate}"
-                                                               BinaryTemplate="{StaticResource ImportExportTemplate}"
-                                                               DefaultTemplate="{StaticResource DisplayNothingTemplate}"/>
-                            </ContentControl.ContentTemplateSelector>
-                        </ContentControl>
+                        <Grid DockPanel.Dock="Right"
+                              Margin="10,5"
+                              MinWidth="120">
+                            <ContentPresenter ContentTemplateSelector="{StaticResource NodeEditorSelector}"/>
+                        </Grid>
 
                         <StackPanel Orientation="Horizontal"
                                     VerticalAlignment="Center">
