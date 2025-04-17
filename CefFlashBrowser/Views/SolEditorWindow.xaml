@@ -75,11 +75,20 @@
         <!--DateTime Editor-->
         <DataTemplate x:Key="DateTimeNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <hc:DateTimePicker DateTimeFormat="yyyy-MM-dd"
-                               SelectedDateTime="{Binding Value}">
+            <hc:DateTimePicker SelectedDateTime="{Binding Value}">
                 <hc:DateTimePicker.ToolTip>
                     <TextBlock Text="{Binding Value, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"/>
                 </hc:DateTimePicker.ToolTip>
+                <hc:DateTimePicker.Style>
+                    <Style TargetType="{x:Type hc:DateTimePicker}"
+                           BasedOn="{StaticResource {x:Type hc:DateTimePicker}}">
+                        <Style.Triggers>
+                            <Trigger Property="IsFocused" Value="False">
+                                <Setter Property="DateTimeFormat" Value="yyyy-MM-dd"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </hc:DateTimePicker.Style>
             </hc:DateTimePicker>
         </DataTemplate>
 
