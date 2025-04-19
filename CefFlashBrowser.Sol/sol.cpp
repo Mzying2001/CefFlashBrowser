@@ -117,10 +117,12 @@ namespace
             throw std::runtime_error(utils::FormatString(
                 "File ended improperly on reading %c%d", std::is_unsigned_v<T> ? 'u' : 'i', sizeof(T) * 8));
         }
-        T result = utils::ReverseEndian(
-            *reinterpret_cast<T*>(data + index));
-        index += sizeof(T);
-        return result;
+        else {
+            T result = utils::ReverseEndian(
+                *reinterpret_cast<T*>(data + index));
+            index += sizeof(T);
+            return result;
+        }
     }
 }
 
@@ -168,14 +170,13 @@ bool sol::ReadSolFile(SolFile& file)
         }
         index += 2;
 
-        uint32_t chunksize = utils::ReverseEndian(
-            *reinterpret_cast<uint32_t*>(data + index));
+        uint32_t chunksize =
+            ReadBigEndian<uint32_t>(data, size, index);
 
         if (chunksize != size - 6) {
             file.errmsg = "Chunk size mismatch";
             return false;
         }
-        index += 4;
 
         if (memcmp(data + index, SOL_CONSTANT, 10) != 0) {
             file.errmsg = "File constant mismatch";
@@ -187,9 +188,8 @@ bool sol::ReadSolFile(SolFile& file)
             ThrowFileEndedImproperly();
         }
 
-        uint16_t namesize = utils::ReverseEndian(
-            *reinterpret_cast<uint16_t*>(data + index));
-        index += 2;
+        uint16_t namesize =
+            ReadBigEndian<uint16_t>(data, size, index);
 
         if (index + namesize > size) {
             ThrowFileEndedImproperly();
@@ -202,9 +202,8 @@ bool sol::ReadSolFile(SolFile& file)
             ThrowFileEndedImproperly();
         }
 
-        file.version = (SolVersion)utils::ReverseEndian(
-            *reinterpret_cast<uint32_t*>(data + index));
-        index += 4;
+        file.version = static_cast<SolVersion>(
+            ReadBigEndian<uint32_t>(data, size, index));
 
         std::string key;
         SolRefTable reftable;
@@ -218,13 +217,9 @@ bool sol::ReadSolFile(SolFile& file)
                 AMF0Type type = ReadAMF0Type(data, size, index);
                 file.data[key] = ReadAMF0Value(data, size, index, reftable, type);
 
-                if (index >= size) {
-                    ThrowFileEndedImproperly();
+                if (ReadBigEndian<uint8_t>(data, size, index) != 0x00) {
+                    ThrowEndRequired(index, data[index - 1]);
                 }
-                if (data[index] != 0x00) {
-                    ThrowEndRequired(index, data[index]);
-                }
-                ++index;
             }
             return true;
         }
@@ -236,13 +231,9 @@ bool sol::ReadSolFile(SolFile& file)
                 SolType type = ReadSolType(data, size, index);
                 file.data[key] = ReadSolValue(data, size, index, reftable, type);
 
-                if (index >= size) {
-                    ThrowFileEndedImproperly();
+                if (ReadBigEndian<uint8_t>(data, size, index) != 0x00) {
+                    ThrowEndRequired(index, data[index - 1]);
                 }
-                if (data[index] != 0x00) {
-                    ThrowEndRequired(index, data[index]);
-                }
-                ++index;
             }
             return true;
         }
@@ -299,11 +290,7 @@ sol::SolDouble sol::ReadSolDouble(uint8_t* data, int size, int& index)
     if (index + 8 > size) {
         ThrowFileEndedImproperlyOnReadingType(SolType::Double);
     }
-
-    uint64_t tmp = utils::ReverseEndian(
-        *reinterpret_cast<uint64_t*>(data + index));
-
-    index += 8;
+    uint64_t tmp = ReadBigEndian<uint64_t>(data, size, index);
     return *reinterpret_cast<double*>(&tmp);
 }
 
