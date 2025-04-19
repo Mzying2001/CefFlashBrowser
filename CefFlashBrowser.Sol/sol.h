@@ -253,6 +253,31 @@ namespace sol
     SolValue ReadAMF0TypedObject(uint8_t* data, int size, int& index, SolRefTable& reftable);
 
     SolValue ReadAMF0Value(uint8_t* data, int size, int& index, SolRefTable& reftable, AMF0Type type);
+
+
+    void WriteAMF0Type(std::vector<uint8_t>& buffer, AMF0Type type);
+
+    void WriteAMF0Number(std::vector<uint8_t>& buffer, SolDouble value);
+
+    void WriteAMF0Boolean(std::vector<uint8_t>& buffer, SolBoolean value);
+
+    void WriteAMF0ShortString(std::vector<uint8_t>& buffer, const SolString& value);
+
+    void WriteAMF0LongString(std::vector<uint8_t>& buffer, const SolString& value);
+
+    void WriteAMF0XmlDoc(std::vector<uint8_t>& buffer, const SolString& value);
+
+    void WriteAMF0Date(std::vector<uint8_t>& buffer, SolDouble value);
+
+    void WriteAMF0EcmaArray(std::vector<uint8_t>& buffer, const SolArray& value, SolWriteRefTable& reftable);
+
+    void WriteAMF0StrictArray(std::vector<uint8_t>& buffer, const SolArray& value, SolWriteRefTable& reftable);
+
+    void WriteAMF0Object(std::vector<uint8_t>& buffer, const SolObject& value, SolWriteRefTable& reftable);
+
+    void WriteAMF0TypedObject(std::vector<uint8_t>& buffer, const SolObject& value, SolWriteRefTable& reftable);
+
+    void WriteAMF0Value(std::vector<uint8_t>& buffer, const SolValue& value, AMF0Type type, SolWriteRefTable& reftable);
 }
 
 #endif // !__SOL_H__

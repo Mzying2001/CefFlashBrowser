@@ -78,6 +78,12 @@ namespace
             "Unsupported version: %d", static_cast<int>(version)));
     }
 
+    [[noreturn]] void ThrowUnsupportedType(sol::AMF0Type type)
+    {
+        throw std::runtime_error(utils::FormatString(
+            "Unsupported AMF0 type: %d", static_cast<int>(type)));
+    }
+
     template <typename T>
     void CheckRefIndex(const std::vector<T>& pool, int index)
     {
@@ -130,6 +136,13 @@ namespace
             index += sizeof(T);
             return result;
         }
+    }
+
+    template <typename T>
+    std::enable_if_t<std::is_integral_v<T>, void> WriteBigEndian(std::vector<uint8_t>& buffer, T value)
+    {
+        T tmp = utils::ReverseEndian(value);
+        buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&tmp), reinterpret_cast<uint8_t*>(&tmp) + sizeof(T));
     }
 }
 
@@ -531,28 +544,33 @@ bool sol::WriteSolFile(SolFile& file)
         buffer.insert(buffer.end(), std::begin(SOL_CONSTANT), std::end(SOL_CONSTANT));
 
         // sol name
-        uint16_t namesize = utils::ReverseEndian((uint16_t)file.solname.size());
-        buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&namesize), reinterpret_cast<uint8_t*>(&namesize) + 2);
+        WriteBigEndian(buffer, (uint16_t)file.solname.size());
         buffer.insert(buffer.end(), file.solname.begin(), file.solname.end());
 
         // version
-        uint32_t version = utils::ReverseEndian((uint32_t)file.version);
-        buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&version), reinterpret_cast<uint8_t*>(&version) + 4);
+        WriteBigEndian(buffer, (uint32_t)file.version);
+
+        // ref table
+        SolWriteRefTable reftable;
 
         // encode data
         switch (file.version)
         {
         case SolVersion::AMF0: {
-            // TODO: AMF0 support
-            file.errmsg = "AMF0 is currently not supported";
-            return false;
+            for (auto& [key, value] : file.data) {
+                // key
+                WriteAMF0ShortString(buffer, key);
+                // value
+                AMF0Type type = GetAMF0Type(value);
+                WriteAMF0Type(buffer, type);
+                WriteAMF0Value(buffer, value, type, reftable);
+                // end
+                buffer.push_back(0x00);
+            }
+            break;
         }
 
         case SolVersion::AMF3: {
-            // ref table
-            SolWriteRefTable reftable;
-
-            // data
             for (auto& [key, value] : file.data) {
                 // key
                 WriteSolString(buffer, key, reftable);
@@ -802,7 +820,7 @@ sol::AMF0Type sol::GetAMF0Type(const SolValue& value)
 
     case SolType::String:
         return value.get<SolString>().size() > AMF0_SHORTSTRING_MAXLEN
-            ? AMF0Type::LongString : AMF0Type::String; \
+            ? AMF0Type::LongString : AMF0Type::String;
 
     case SolType::XmlDoc:
     case SolType::Xml:
@@ -1024,8 +1042,161 @@ sol::SolValue sol::ReadAMF0Value(uint8_t* data, int size, int& index, SolRefTabl
     case AMF0Type::ObjectEnd:
     case AMF0Type::Unsupported:
     case AMF0Type::Recordset:
-        throw std::runtime_error(utils::FormatString(
-            "Unsupported AMF0 type %d", static_cast<int>(type)));
+        ThrowUnsupportedType(type);
+
+    default:
+        ThrowUnknownType(type);
+    }
+}
+
+void sol::WriteAMF0Type(std::vector<uint8_t>& buffer, AMF0Type type)
+{
+    buffer.push_back(static_cast<uint8_t>(type));
+}
+
+void sol::WriteAMF0Number(std::vector<uint8_t>& buffer, SolDouble value)
+{
+    WriteSolDouble(buffer, value);
+}
+
+void sol::WriteAMF0Boolean(std::vector<uint8_t>& buffer, SolBoolean value)
+{
+    buffer.push_back(value ? 0x01 : 0x00);
+}
+
+void sol::WriteAMF0ShortString(std::vector<uint8_t>& buffer, const SolString& value)
+{
+    if (value.size() > AMF0_SHORTSTRING_MAXLEN) {
+        throw std::runtime_error("String too long for AMF0 short string");
+    }
+    WriteBigEndian(buffer, (uint16_t)value.size());
+    buffer.insert(buffer.end(), value.begin(), value.end());
+}
+
+void sol::WriteAMF0LongString(std::vector<uint8_t>& buffer, const SolString& value)
+{
+    WriteBigEndian(buffer, (uint32_t)value.size());
+    buffer.insert(buffer.end(), value.begin(), value.end());
+}
+
+void sol::WriteAMF0XmlDoc(std::vector<uint8_t>& buffer, const SolString& value)
+{
+    WriteAMF0LongString(buffer, value);
+}
+
+void sol::WriteAMF0Date(std::vector<uint8_t>& buffer, SolDouble value)
+{
+    WriteBigEndian(buffer, (int16_t)0); // timezone
+    WriteAMF0Number(buffer, value);
+}
+
+void sol::WriteAMF0EcmaArray(std::vector<uint8_t>& buffer, const SolArray& value, SolWriteRefTable& reftable)
+{
+    WriteBigEndian(buffer, (uint32_t)value.assoc.size());
+
+    for (auto& [key, val] : value.assoc) {
+        AMF0Type type = GetAMF0Type(val);
+        WriteAMF0ShortString(buffer, key);
+        WriteAMF0Type(buffer, type);
+        WriteAMF0Value(buffer, val, type, reftable);
+    }
+
+    buffer.insert(buffer.end(), std::begin(AMF0_OBJECT_ENDMARK), std::end(AMF0_OBJECT_ENDMARK));
+}
+
+void sol::WriteAMF0StrictArray(std::vector<uint8_t>& buffer, const SolArray& value, SolWriteRefTable& reftable)
+{
+    WriteBigEndian(buffer, (uint32_t)value.dense.size());
+
+    for (auto& val : value.dense) {
+        AMF0Type type = GetAMF0Type(val);
+        WriteAMF0Type(buffer, type);
+        WriteAMF0Value(buffer, val, type, reftable);
+    }
+}
+
+void sol::WriteAMF0Object(std::vector<uint8_t>& buffer, const SolObject& value, SolWriteRefTable& reftable)
+{
+    for (auto& [key, val] : value.props) {
+        AMF0Type type = GetAMF0Type(val);
+        WriteAMF0ShortString(buffer, key);
+        WriteAMF0Type(buffer, type);
+        WriteAMF0Value(buffer, val, type, reftable);
+    }
+
+    buffer.insert(buffer.end(), std::begin(AMF0_OBJECT_ENDMARK), std::end(AMF0_OBJECT_ENDMARK));
+}
+
+void sol::WriteAMF0TypedObject(std::vector<uint8_t>& buffer, const SolObject& value, SolWriteRefTable& reftable)
+{
+    WriteAMF0ShortString(buffer, value.classdef.name);
+
+    for (auto& [key, val] : value.props) {
+        AMF0Type type = GetAMF0Type(val);
+        WriteAMF0ShortString(buffer, key);
+        WriteAMF0Type(buffer, type);
+        WriteAMF0Value(buffer, val, type, reftable);
+    }
+
+    buffer.insert(buffer.end(), std::begin(AMF0_OBJECT_ENDMARK), std::end(AMF0_OBJECT_ENDMARK));
+}
+
+void sol::WriteAMF0Value(std::vector<uint8_t>& buffer, const SolValue& value, AMF0Type type, SolWriteRefTable& reftable)
+{
+    switch (type)
+    {
+    case AMF0Type::Number:
+        WriteAMF0Number(buffer, value.type == SolType::Integer
+            ? (SolDouble)value.get<SolInteger>() : value.get<SolDouble>());
+        break;
+
+    case AMF0Type::Boolean:
+        WriteAMF0Boolean(buffer, value.get<SolBoolean>());
+        break;
+
+    case AMF0Type::String:
+        WriteAMF0ShortString(buffer, value.get<SolString>());
+        break;
+
+    case AMF0Type::Object:
+        WriteAMF0Object(buffer, value.get<SolObject>(), reftable);
+        break;
+
+    case AMF0Type::Null:
+    case AMF0Type::Undefined:
+        // nothing to write
+        break;
+
+    case AMF0Type::EcmaArray:
+        WriteAMF0EcmaArray(buffer, value.get<SolArray>(), reftable);
+        break;
+
+    case AMF0Type::StrictArray:
+        WriteAMF0StrictArray(buffer, value.get<SolArray>(), reftable);
+        break;
+
+    case AMF0Type::Date:
+        WriteAMF0Date(buffer, value.get<SolDouble>());
+        break;
+
+    case AMF0Type::LongString:
+        WriteAMF0LongString(buffer, value.get<SolString>());
+        break;
+
+    case AMF0Type::XMLDoc:
+        WriteAMF0XmlDoc(buffer, value.get<SolString>());
+        break;
+
+    case AMF0Type::TypedObject:
+        WriteAMF0TypedObject(buffer, value.get<SolObject>(), reftable);
+        break;
+
+    case AMF0Type::MovieClip:
+    case AMF0Type::Reference:
+    case AMF0Type::ObjectEnd:
+    case AMF0Type::Unsupported:
+    case AMF0Type::Recordset:
+        ThrowUnsupportedType(type);
 
     default:
         ThrowUnknownType(type);
