@@ -8,14 +8,23 @@
     <sys:String x:Key="common_swfFile">SWF檔案</sys:String>
     <sys:String x:Key="common_solFile">SOL檔案</sys:String>
     <sys:String x:Key="common_shortcut">捷徑</sys:String>
+    <sys:String x:Key="common_allFiles">所有檔案</sys:String>
     <sys:String x:Key="common_favorites">我的最愛</sys:String>
     <sys:String x:Key="common_settings">設定</sys:String>
+    <sys:String x:Key="common_export">匯出</sys:String>
+    <sys:String x:Key="common_import">匯入</sys:String>
+    <sys:String x:Key="common_rename">重新命名</sys:String>
+    <sys:String x:Key="common_moveUp">上移</sys:String>
+    <sys:String x:Key="common_moveDown">下移</sys:String>
+    <sys:String x:Key="common_moveToTop">移至頂部</sys:String>
+    <sys:String x:Key="common_moveToBottom">移至底部</sys:String>
 
     <!--主介面-->
     <sys:String x:Key="mainWindow_title">歡迎</sys:String>
     <sys:String x:Key="mainWindow_go">前往</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理我的最愛</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存檔</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">開啟SOL檔案...</sys:String>
     <sys:String x:Key="mainWindow_languages">語言</sys:String>
     <sys:String x:Key="mainWindow_options">選項</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">載入本機SWF檔案...</sys:String>
@@ -82,8 +91,6 @@
     <sys:String x:Key="favorites_managerTitle">我的最愛管理員</sys:String>
     <sys:String x:Key="favorites_add">新增</sys:String>
     <sys:String x:Key="favorites_remove">移除</sys:String>
-    <sys:String x:Key="favorites_toTop">移至頂端</sys:String>
-    <sys:String x:Key="favorites_toBottom">移至底端</sys:String>
     <sys:String x:Key="favorites_edit">編輯</sys:String>
     <sys:String x:Key="favorites_name">名稱</sys:String>
     <sys:String x:Key="favorites_url">網址</sys:String>
@@ -131,8 +138,6 @@
     <sys:String x:Key="solSaveManager_headerFileDir">檔案路徑</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">操作</sys:String>
     <sys:String x:Key="solSaveManager_toolTipReload">重新整理</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipImport">匯入</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipExport">匯出</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">刪除</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">編輯</sys:String>
 
@@ -150,6 +155,7 @@
     <sys:String x:Key="solEditor_statusModified">已修改</sys:String>
     <sys:String x:Key="solEditor_statusSaved">已儲存</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">未知狀態</sys:String>
+    <sys:String x:Key="solEditor_emptyString">（空）</sys:String>
 
     <!--對話框-->
     <sys:String x:Key="dialog_ok">確定</sys:String>
@@ -159,6 +165,9 @@
     <sys:String x:Key="dialog_error">錯誤</sys:String>
     <sys:String x:Key="dialog_addFavorite">新增我的最愛</sys:String>
     <sys:String x:Key="dialog_selectLanguage">請選擇語言</sys:String>
+    <sys:String x:Key="dialog_addItem">新增項目</sys:String>
+    <sys:String x:Key="dialog_itemName">名稱</sys:String>
+    <sys:String x:Key="dialog_assocArray">關聯陣列</sys:String>
 
     <!--提示訊息-->
     <sys:String x:Key="message_emptyUrl">請輸入網址。</sys:String>
@@ -172,8 +181,13 @@
     <sys:String x:Key="message_imported">匯入成功。</sys:String>
     <sys:String x:Key="message_exported">匯出成功。</sys:String>
     <sys:String x:Key="message_askSaveChange">是否將變更儲存到「{0}」？</sys:String>
+    <sys:String x:Key="message_renameItem">重新命名「{0}」：</sys:String>
     <sys:String x:Key="error_message">錯誤訊息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名稱不能為空白。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">網址不能為空白。</sys:String>
     <sys:String x:Key="error_deleteCachesRetry">清除快取時發生錯誤，是否重試？</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">陣列中已經存在名稱為「{0}」的鍵值。</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">物件中已經存在名稱為「{0}」的屬性。</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">鍵值/屬性名稱不能為空。</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">已經存在名稱為「{0}」的鍵值/屬性。</sys:String>
 </ResourceDictionary>

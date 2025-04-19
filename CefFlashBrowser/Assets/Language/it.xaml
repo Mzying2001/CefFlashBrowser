@@ -7,15 +7,24 @@
     <!-- Campi comuni -->
     <sys:String x:Key="common_swfFile">File SWF</sys:String>
     <sys:String x:Key="common_solFile">File SOL</sys:String>
+    <sys:String x:Key="common_allFiles">Tutti i file</sys:String>
     <sys:String x:Key="common_shortcut">Scorciatoia</sys:String>
     <sys:String x:Key="common_favorites">Preferiti</sys:String>
     <sys:String x:Key="common_settings">Impostazioni</sys:String>
+    <sys:String x:Key="common_export">Esporta</sys:String>
+    <sys:String x:Key="common_import">Importa</sys:String>
+    <sys:String x:Key="common_rename">Rinomina</sys:String>
+    <sys:String x:Key="common_moveUp">Sposta su</sys:String>
+    <sys:String x:Key="common_moveDown">Sposta giù</sys:String>
+    <sys:String x:Key="common_moveToTop">Sposta in cima</sys:String>
+    <sys:String x:Key="common_moveToBottom">Sposta in fondo</sys:String>
 
     <!--Finestra Principale-->
     <sys:String x:Key="mainWindow_title">Benvenuto</sys:String>
     <sys:String x:Key="mainWindow_go">Vai</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Gestisci Preferiti</sys:String>
-    <sys:String x:Key="mainWindow_manageSolSaveFiles">Gestisci i file di salvataggio SOL</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">Gestione degli archivi SOL</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">Apri file SOL...</sys:String>
     <sys:String x:Key="mainWindow_languages">Lingue</sys:String>
     <sys:String x:Key="mainWindow_options">Opzioni</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">Carica file SWF locale...</sys:String>
@@ -82,8 +91,6 @@
     <sys:String x:Key="favorites_managerTitle">Gestione preferiti</sys:String>
     <sys:String x:Key="favorites_add">Aggiungi</sys:String>
     <sys:String x:Key="favorites_remove">Rimuovi</sys:String>
-    <sys:String x:Key="favorites_toTop">Sposta in cima</sys:String>
-    <sys:String x:Key="favorites_toBottom">Sposta in fondo</sys:String>
     <sys:String x:Key="favorites_edit">Modifica</sys:String>
     <sys:String x:Key="favorites_name">Nome</sys:String>
     <sys:String x:Key="favorites_url">Url</sys:String>
@@ -131,8 +138,6 @@
     <sys:String x:Key="solSaveManager_headerFileDir">Percorso file</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">Operazioni</sys:String>
     <sys:String x:Key="solSaveManager_toolTipReload">Aggiorna</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipImport">Importa</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipExport">Esporta</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">Elimina</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">Modifica</sys:String>
 
@@ -150,6 +155,7 @@
     <sys:String x:Key="solEditor_statusModified">Modificato</sys:String>
     <sys:String x:Key="solEditor_statusSaved">Salvato</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">Stato sconosciuto</sys:String>
+    <sys:String x:Key="solEditor_emptyString">(Vuoto)</sys:String>
 
     <!--Dialoghi-->
     <sys:String x:Key="dialog_ok">OK</sys:String>
@@ -159,6 +165,9 @@
     <sys:String x:Key="dialog_error">Errore</sys:String>
     <sys:String x:Key="dialog_addFavorite">Aggiungi a Preferiti</sys:String>
     <sys:String x:Key="dialog_selectLanguage">Seleziona lingua</sys:String>
+    <sys:String x:Key="dialog_addItem">Aggiungi voce</sys:String>
+    <sys:String x:Key="dialog_itemName">Nome</sys:String>
+    <sys:String x:Key="dialog_assocArray">Array associativo</sys:String>
 
     <!--Messaggi-->
     <sys:String x:Key="message_emptyUrl">Prego, inserisci l'url.</sys:String>
@@ -172,8 +181,13 @@
     <sys:String x:Key="message_imported">Importazione riuscita.</sys:String>
     <sys:String x:Key="message_exported">Esportazione riuscita.</sys:String>
     <sys:String x:Key="message_askSaveChange">Vuoi salvare le modifiche a "{0}"?</sys:String>
+    <sys:String x:Key="message_renameItem">Rinomina "{0}":</sys:String>
     <sys:String x:Key="error_message">Messaggio di Errore</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Il nome non può essere vuoto.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">L'URL non può essere vuoto.</sys:String>
     <sys:String x:Key="error_deleteCachesRetry">Si è verificato un errore durante la cancellazione della cache. Vuoi provare di nuovo?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">Esiste già una chiave nell'array con il nome "{0}".</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">Esiste già una proprietà dell'oggetto con il nome "{0}".</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Il nome della chiave/proprietà non può essere vuoto.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">Esiste già una chiave/proprietà con il nome "{0}".</sys:String>
 </ResourceDictionary>

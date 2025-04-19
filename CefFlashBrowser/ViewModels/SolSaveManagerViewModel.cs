@@ -146,7 +146,7 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                string msg = string.Format(LanguageManager.GetString("message_deleteFile"), solFile.FileName);
+                string msg = LanguageManager.GetFormattedString("message_deleteFile", solFile.FileName);
 
                 WindowManager.Confirm(msg, callback: result =>
                 {
@@ -166,15 +166,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void EditSolFile(SolFileInfo solFile)
         {
-            try
-            {
-                var file = SolFileWrapper.ReadFile(solFile.FilePath);
-                WindowManager.ShowSolEditorWindow(file);
-            }
-            catch (Exception e)
-            {
-                WindowManager.ShowError(e.Message);
-            }
+            WindowManager.ShowSolEditorWindow(solFile.FilePath);
         }
 
         public SolSaveManagerViewModel()

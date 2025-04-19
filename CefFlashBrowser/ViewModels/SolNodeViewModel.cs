@@ -22,9 +22,32 @@ namespace CefFlashBrowser.ViewModels
             {
                 if (!EqualityComparer<object>.Default.Equals(_name, value))
                 {
+                    if (Parent?.Value is SolArray arr)
+                    {
+                        if (value is string key)
+                        {
+                            if (arr.AssocPortion.ContainsKey(key))
+                                throw new ArgumentException(LanguageManager.GetFormattedString("error_arrKeyAreadyExists", key));
+                        }
+                        else if (value is int index)
+                        {
+                            if (index < 0 || index >= arr.DensePortion.Count)
+                                throw new IndexOutOfRangeException();
+                        }
+                    }
+                    else if (Parent?.Value is SolFileWrapper || Parent?.Value is SolObject)
+                    {
+                        if (value is string key)
+                        {
+                            if (Parent.Children.Any(node => key.Equals(node.Name)))
+                                throw new ArgumentException(LanguageManager.GetFormattedString("error_objPropAreadyExists", key));
+                        }
+                    }
                     _name = value;
                     RaisePropertyChanged();
                     RaisePropertyChanged(nameof(DisplayName));
+                    Parent?.OnChildrenNameChanged(this);
+                    Editor?.OnNodeChanged(SolNodeChangeType.NameChanged, this);
                 }
             }
         }
@@ -41,9 +64,16 @@ namespace CefFlashBrowser.ViewModels
                     RaisePropertyChanged(nameof(TypeString));
                     UpdateChildren();
                     Parent?.OnChildrenValueChanged(this);
-                    Editor?.OnNodeChanged(this);
+                    Editor?.OnNodeChanged(SolNodeChangeType.ValueChanged, this);
                 }
             }
+        }
+
+        private bool _isRemoved = false;
+        public bool IsRemoved
+        {
+            get => _isRemoved;
+            private set => UpdateValue(ref _isRemoved, value);
         }
 
         private ObservableCollection<SolNodeViewModel> _children;
@@ -53,35 +83,9 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _children, value);
         }
 
-        private static Dictionary<Type, string> TypeStringDic { get; } = new Dictionary<Type, string>
-        {
-            [typeof(int)] = "int",
-            [typeof(double)] = "double",
-            [typeof(string)] = "string",
-            [typeof(bool)] = "bool",
-            [typeof(DateTime)] = "DateTime",
-            [typeof(byte[])] = "byte[]",
-            [typeof(SolArray)] = "Array",
-            [typeof(SolObject)] = "Object",
-            [typeof(SolUndefined)] = "undefined",
-            [typeof(SolXmlDoc)] = "XmlDoc",
-            [typeof(SolXml)] = "Xml"
-        };
-
         public string TypeString
         {
-            get
-            {
-                if (Value == null)
-                {
-                    return "null";
-                }
-                else
-                {
-                    var type = Value.GetType();
-                    return TypeStringDic.ContainsKey(type) ? TypeStringDic[type] : string.Empty;
-                }
-            }
+            get => SolHelper.GetTypeString(Value);
         }
 
         public bool IsArrayItem
@@ -105,11 +109,21 @@ namespace CefFlashBrowser.ViewModels
 
         public bool CanRemove
         {
-            get => Parent != null;
+            get => Parent != null && !IsRemoved;
+        }
+
+        public bool CanRename
+        {
+            get => Name is string;
+        }
+
+        public bool CanMove
+        {
+            get => IsArrayItem && Name is int;
         }
 
 
-        private void UpdateChildren()
+        public void UpdateChildren()
         {
             var children = new ObservableCollection<SolNodeViewModel>();
 
@@ -142,7 +156,25 @@ namespace CefFlashBrowser.ViewModels
             Children = children;
         }
 
-        private void OnChildrenValueChanged(SolNodeViewModel node)
+        private void UpdateDensePortionNodeName()
+        {
+            if (Value is SolArray)
+            {
+                int index = 0;
+
+                foreach (var node in Children)
+                {
+                    if (node.Name is int)
+                    {
+                        node._name = index++;
+                        node.RaisePropertyChanged(nameof(Name));
+                        node.RaisePropertyChanged(nameof(DisplayName));
+                    }
+                }
+            }
+        }
+
+        protected virtual void OnChildrenValueChanged(SolNodeViewModel node)
         {
             if (Value is SolArray arr)
             {
@@ -161,19 +193,117 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        protected virtual void OnChildrenNameChanged(SolNodeViewModel node)
+        {
+            if (Value is SolArray arr)
+            {
+                string key = GetOldName(arr.AssocPortion, node.Value);
+
+                if (key != null)
+                {
+                    arr.AssocPortion.Remove(key);
+                    arr.AssocPortion[node.Name.ToString()] = node.Value;
+                }
+                else
+                {
+                    int index = arr.DensePortion.IndexOf(node.Value);
+                    int offset = (int)node.Name - index;
+
+                    arr.DensePortion.RemoveAt(index);
+                    arr.DensePortion.Insert(index + offset, node.Value);
+
+                    // make sure the order is correct
+                    int nodeIndex = Children.IndexOf(node);
+                    Children.RemoveAt(nodeIndex);
+                    Children.Insert(nodeIndex + offset, node);
+
+                    UpdateDensePortionNodeName();
+                }
+            }
+            else if (Value is SolObject obj)
+            {
+                string key = GetOldName(obj.Properties, node.Value);
+                obj.Properties.Remove(key);
+                obj.Properties[node.Name.ToString()] = node.Value;
+            }
+        }
+
+        private string GetOldName(Dictionary<string, object> dic, object value)
+        {
+            foreach (var item in dic)
+            {
+                if (item.Value == value)
+                {
+                    return item.Key;
+                }
+            }
+            return null;
+        }
+
         public Dictionary<string, object> GetAllValues()
         {
             return Children.ToDictionary(x => x.Name.ToString(), x => x.Value);
         }
 
-        public void Remove()
+        /// <summary>
+        /// Adds a new item to the current node.<br/>
+        /// When the current node is Array, value with string key is added to the associative portion,
+        /// otherwise it is added to the end of the dense portion.
+        /// </summary>
+        public void AddChild(object name, object value)
         {
-            if (Parent == null)
-            {
+            if (!CanAddChild) // Value is not SolFileWrapper, SolArray or SolObject
                 return;
+
+            SolNodeViewModel node = null;
+            int insertIndex = 0;
+
+            if (Value is SolFileWrapper)
+            {
+                node = new SolNodeViewModel(Editor, this, name, value);
+            }
+            else if (Value is SolArray arr)
+            {
+                if (name is string key)
+                {
+                    arr.AssocPortion.Add(key, value);
+                    node = new SolNodeViewModel(Editor, this, key, value);
+                }
+                else
+                {
+                    // always insert at the end
+                    int index = arr.DensePortion.Count;
+                    arr.DensePortion.Insert(index, value);
+
+                    insertIndex = Children.Count;
+                    node = new SolNodeViewModel(Editor, this, index, value);
+                }
+            }
+            else if (Value is SolObject obj)
+            {
+                obj.Properties.Add(name.ToString(), value);
+                node = new SolNodeViewModel(Editor, this, name, value);
             }
 
-            if (Parent.Value is SolArray arr)
+            if (node != null)
+            {
+                Children.Insert(insertIndex, node);
+                Editor?.OnNodeChanged(SolNodeChangeType.Added, node);
+            }
+        }
+
+        public void Remove()
+        {
+            if (!CanRemove) // Parent is null or already removed
+                return;
+
+            bool updateSiblingNames = false;
+
+            if (Parent.Value is SolFileWrapper)
+            {
+                // do nothing
+            }
+            else if (Parent.Value is SolArray arr)
             {
                 if (Name is string key)
                 {
@@ -181,6 +311,7 @@ namespace CefFlashBrowser.ViewModels
                 }
                 else if (Name is int index)
                 {
+                    updateSiblingNames = true;
                     arr.DensePortion.RemoveAt(index);
                 }
             }
@@ -190,42 +321,19 @@ namespace CefFlashBrowser.ViewModels
             }
 
             Parent.Children.Remove(this);
-        }
+            IsRemoved = true;
 
-        public void AddChild(object name, object value)
-        {
-            if (Value is SolFileWrapper)
-            {
-                // Do nothing
-            }
-            else if (Value is SolArray arr)
-            {
-                if (name is string key)
-                {
-                    arr.AssocPortion[key] = value;
-                }
-                else if (name is int index)
-                {
-                    arr.DensePortion.Insert(index, value);
-                }
-            }
-            else if (Value is SolObject obj)
-            {
-                obj.Properties[name.ToString()] = value;
-            }
-            else
-            {
-                return;
-            }
+            if (updateSiblingNames)
+                Parent.UpdateDensePortionNodeName();
 
-            Children.Add(new SolNodeViewModel(Editor, this, name, value));
+            Editor?.OnNodeChanged(SolNodeChangeType.Removed, this);
         }
 
         public SolNodeViewModel(SolEditorWindowViewModel editor, SolNodeViewModel parent, object name, object value)
         {
             Editor = editor;
             Parent = parent;
-            Name = name;
+            _name = name;
             _value = value;
             UpdateChildren();
         }
@@ -234,7 +342,7 @@ namespace CefFlashBrowser.ViewModels
         {
             Editor = editor;
             Parent = null;
-            Name = file.SolName;
+            _name = file.SolName;
             _value = file;
             UpdateChildren();
         }

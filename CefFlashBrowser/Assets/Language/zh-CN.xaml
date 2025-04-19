@@ -3,19 +3,28 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="locale">zh-CN</sys:String>
     <sys:String x:Key="language_name">中文</sys:String>
-    
+
     <!--共用字段-->
     <sys:String x:Key="common_swfFile">SWF文件</sys:String>
     <sys:String x:Key="common_solFile">SOL文件</sys:String>
+    <sys:String x:Key="common_allFiles">所有文件</sys:String>
     <sys:String x:Key="common_shortcut">快捷方式</sys:String>
     <sys:String x:Key="common_favorites">收藏夹</sys:String>
     <sys:String x:Key="common_settings">设置</sys:String>
+    <sys:String x:Key="common_export">导出</sys:String>
+    <sys:String x:Key="common_import">导入</sys:String>
+    <sys:String x:Key="common_rename">重命名</sys:String>
+    <sys:String x:Key="common_moveUp">上移</sys:String>
+    <sys:String x:Key="common_moveDown">下移</sys:String>
+    <sys:String x:Key="common_moveToTop">移到顶部</sys:String>
+    <sys:String x:Key="common_moveToBottom">移到底部</sys:String>
 
     <!--主界面-->
     <sys:String x:Key="mainWindow_title">欢迎</sys:String>
     <sys:String x:Key="mainWindow_go">跳转</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理收藏夹</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存档</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">打开SOL文件...</sys:String>
     <sys:String x:Key="mainWindow_languages">语言</sys:String>
     <sys:String x:Key="mainWindow_options">选项</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">加载本地SWF文件...</sys:String>
@@ -82,8 +91,6 @@
     <sys:String x:Key="favorites_managerTitle">收藏夹管理器</sys:String>
     <sys:String x:Key="favorites_add">添加</sys:String>
     <sys:String x:Key="favorites_remove">移除</sys:String>
-    <sys:String x:Key="favorites_toTop">移到顶部</sys:String>
-    <sys:String x:Key="favorites_toBottom">移到底部</sys:String>
     <sys:String x:Key="favorites_edit">编辑</sys:String>
     <sys:String x:Key="favorites_name">名称</sys:String>
     <sys:String x:Key="favorites_url">地址</sys:String>
@@ -131,8 +138,6 @@
     <sys:String x:Key="solSaveManager_headerFileDir">文件路径</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">操作</sys:String>
     <sys:String x:Key="solSaveManager_toolTipReload">刷新</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipImport">导入</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipExport">导出</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">删除</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">编辑</sys:String>
 
@@ -150,6 +155,7 @@
     <sys:String x:Key="solEditor_statusModified">已修改</sys:String>
     <sys:String x:Key="solEditor_statusSaved">已保存</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">未知状态</sys:String>
+    <sys:String x:Key="solEditor_emptyString">（空）</sys:String>
 
     <!--对话框-->
     <sys:String x:Key="dialog_ok">确定</sys:String>
@@ -159,6 +165,9 @@
     <sys:String x:Key="dialog_error">错误</sys:String>
     <sys:String x:Key="dialog_addFavorite">添加收藏夹</sys:String>
     <sys:String x:Key="dialog_selectLanguage">请选择语言</sys:String>
+    <sys:String x:Key="dialog_addItem">添加项</sys:String>
+    <sys:String x:Key="dialog_itemName">名称</sys:String>
+    <sys:String x:Key="dialog_assocArray">关联数组</sys:String>
 
     <!--提示信息-->
     <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
@@ -172,8 +181,13 @@
     <sys:String x:Key="message_imported">导入成功。</sys:String>
     <sys:String x:Key="message_exported">导出成功。</sys:String>
     <sys:String x:Key="message_askSaveChange">是否将更改保存到“{0}”？</sys:String>
+    <sys:String x:Key="message_renameItem">重命名“{0}”：</sys:String>
     <sys:String x:Key="error_message">错误信息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名称不能为空。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">网址不能为空。</sys:String>
     <sys:String x:Key="error_deleteCachesRetry">清除缓存时发生错误，是否重试？</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">数组已经存在名称为“{0}”的键值。</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">对象已经存在名称为“{0}”的属性。</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">键值/属性名不能为空。</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
 </ResourceDictionary>

@@ -1,0 +1,139 @@
+﻿<Window x:Class="CefFlashBrowser.Views.Dialogs.AddSolItemDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
+        xmlns:m="clr-namespace:CefFlashBrowser.Models"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        mc:Ignorable="d"
+        
+        x:Name="window"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterScreen"
+        Title="{DynamicResource dialog_addItem}"
+        FocusManager.FocusedElement="{Binding ElementName=nameTextBox}">
+
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+        <KeyBinding Gesture="Esc"
+                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
+            <KeyBinding.CommandParameter>
+                <sys:Boolean>False</sys:Boolean>
+            </KeyBinding.CommandParameter>
+        </KeyBinding>
+        <KeyBinding Gesture="Enter"
+                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
+            <KeyBinding.CommandParameter>
+                <sys:Boolean>True</sys:Boolean>
+            </KeyBinding.CommandParameter>
+        </KeyBinding>
+    </Window.InputBindings>
+
+    <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior x:Name="windowBehavior"/>
+    </i:Interaction.Behaviors>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <ComboBox MinWidth="100"
+                  SelectedIndex="0"
+                  DisplayMemberPath="TypeName"
+                  ItemsSource="{Binding ElementName=window, Path=Types}"
+                  SelectedValue="{Binding ElementName=window, Path=SelectedType}">
+            <ComboBox.Style>
+                <Style TargetType="ComboBox"
+                       BasedOn="{StaticResource {x:Type ComboBox}}">
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=window, Path=IsArrayItem}" Value="True"/>
+                                <Condition Binding="{Binding ElementName=window, Path=IsAssocArrayItem}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <MultiDataTrigger.Setters>
+                                <Setter Property="Grid.ColumnSpan" Value="3"/>
+                            </MultiDataTrigger.Setters>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ComboBox.Style>
+        </ComboBox>
+
+        <CheckBox Grid.Row="2"
+                  VerticalAlignment="Center"
+                  Content="{DynamicResource dialog_assocArray}"
+                  IsChecked="{Binding ElementName=window, Path=IsAssocArrayItem}"
+                  IsEnabled="{Binding ElementName=window, Path=CanChangeArrayType}">
+            <CheckBox.Style>
+                <Style TargetType="CheckBox"
+                       BasedOn="{StaticResource {x:Type CheckBox}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=window, Path=IsArrayItem}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </CheckBox.Style>
+        </CheckBox>
+
+        <hc:TextBox x:Name="nameTextBox"
+                    Grid.Column="2"
+                    MaxWidth="300"
+                    Text="{Binding ElementName=window, Path=ItemNameEdit, UpdateSourceTrigger=PropertyChanged}"
+                    hc:InfoElement.Placeholder="{DynamicResource dialog_itemName}">
+            <hc:TextBox.Style>
+                <Style TargetType="{x:Type hc:TextBox}"
+                       BasedOn="{StaticResource {x:Type hc:TextBox}}">
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=window, Path=IsArrayItem}" Value="True"/>
+                                <Condition Binding="{Binding ElementName=window, Path=IsAssocArrayItem}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <MultiDataTrigger.Setters>
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </MultiDataTrigger.Setters>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </hc:TextBox.Style>
+        </hc:TextBox>
+
+        <StackPanel Grid.Row="2"
+                    Grid.Column="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button MinWidth="70"
+                    Content="{StaticResource dialog_cancel}"
+                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
+                <Button.CommandParameter>
+                    <sys:Boolean>False</sys:Boolean>
+                </Button.CommandParameter>
+            </Button>
+            <Button Margin="10,0,0,0"
+                    MinWidth="70"
+                    Style="{StaticResource ButtonPrimary}"
+                    Content="{StaticResource dialog_ok}"
+                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
+                <Button.CommandParameter>
+                    <sys:Boolean>True</sys:Boolean>
+                </Button.CommandParameter>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

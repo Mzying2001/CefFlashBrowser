@@ -214,5 +214,52 @@ namespace CefFlashBrowser.Utils
                 window.DataContext = new SolEditorWindowViewModel(file);
             });
         }
+
+        public static void ShowSolEditorWindow(string fileName)
+        {
+            try
+            {
+                var file = new SolFileWrapper(fileName);
+                ShowSolEditorWindow(file);
+            }
+            catch (Exception e)
+            {
+                ShowError(e.Message);
+            }
+        }
+
+        public static void ShowTextEditor(string title = "", string defaultText = "", Func<string, bool> verifyText = null, Action<bool?, string> callback = null)
+        {
+            var dialog = ShowWindow<TextEditorDialog>(true, initializer: window =>
+            {
+                window.Title = title;
+                window.Text = defaultText;
+                window.VerifyText = verifyText;
+            });
+            callback?.Invoke(dialog.DialogResult, dialog.Text);
+        }
+
+        public static void ShowAddSolItemDialog(Func<string, bool> verifyName = null, Action<bool?, string, SolTypeDesc> callback = null)
+        {
+            var dialog = ShowWindow<AddSolItemDialog>(true, initializer: window =>
+            {
+                window.Types = SolHelper.GetSupportedTypes();
+                window.VerifyName = verifyName;
+            });
+            callback?.Invoke(dialog.DialogResult, dialog.ItemName, dialog.SelectedType);
+        }
+
+        public static void ShowAddSolArrayItem(bool canChangeArrayType = true, bool isAssocArrayItem = false, Func<string, bool> verifyName = null, Action<bool?, string, SolTypeDesc> callback = null)
+        {
+            var dialog = ShowWindow<AddSolItemDialog>(true, initializer: window =>
+            {
+                window.Types = SolHelper.GetSupportedTypes();
+                window.VerifyName = verifyName;
+                window.IsArrayItem = true;
+                window.IsAssocArrayItem = isAssocArrayItem;
+                window.CanChangeArrayType = canChangeArrayType;
+            });
+            callback?.Invoke(dialog.DialogResult, dialog.ItemName, dialog.SelectedType);
+        }
     }
 }

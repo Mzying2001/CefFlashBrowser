@@ -7,15 +7,24 @@
     <!-- Common Fields -->
     <sys:String x:Key="common_swfFile">SWF File</sys:String>
     <sys:String x:Key="common_solFile">SOL File</sys:String>
+    <sys:String x:Key="common_allFiles">All Files</sys:String>
     <sys:String x:Key="common_shortcut">Shortcut</sys:String>
     <sys:String x:Key="common_favorites">Favorites</sys:String>
     <sys:String x:Key="common_settings">Settings</sys:String>
+    <sys:String x:Key="common_export">Export</sys:String>
+    <sys:String x:Key="common_import">Import</sys:String>
+    <sys:String x:Key="common_rename">Rename</sys:String>
+    <sys:String x:Key="common_moveUp">Move Up</sys:String>
+    <sys:String x:Key="common_moveDown">Move Down</sys:String>
+    <sys:String x:Key="common_moveToTop">Move to Top</sys:String>
+    <sys:String x:Key="common_moveToBottom">Move to Bottom</sys:String>
 
     <!--Main Window-->
     <sys:String x:Key="mainWindow_title">Welcome</sys:String>
     <sys:String x:Key="mainWindow_go">Go</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Manage Favorites</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">Manage SOL Save Files</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">Open SOL file...</sys:String>
     <sys:String x:Key="mainWindow_languages">Language</sys:String>
     <sys:String x:Key="mainWindow_options">Options</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">Load local SWF file...</sys:String>
@@ -82,8 +91,6 @@
     <sys:String x:Key="favorites_managerTitle">Favorites Manager</sys:String>
     <sys:String x:Key="favorites_add">Add</sys:String>
     <sys:String x:Key="favorites_remove">Remove</sys:String>
-    <sys:String x:Key="favorites_toTop">Move to top</sys:String>
-    <sys:String x:Key="favorites_toBottom">Move to Bottom</sys:String>
     <sys:String x:Key="favorites_edit">Edit</sys:String>
     <sys:String x:Key="favorites_name">Name</sys:String>
     <sys:String x:Key="favorites_url">Url</sys:String>
@@ -131,8 +138,6 @@
     <sys:String x:Key="solSaveManager_headerFileDir">File Path</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">Operations</sys:String>
     <sys:String x:Key="solSaveManager_toolTipReload">Refresh</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipImport">Import</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipExport">Export</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">Delete</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">Edit</sys:String>
 
@@ -150,6 +155,7 @@
     <sys:String x:Key="solEditor_statusModified">Modified</sys:String>
     <sys:String x:Key="solEditor_statusSaved">Saved</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">Unknown Status</sys:String>
+    <sys:String x:Key="solEditor_emptyString">(Empty)</sys:String>
 
     <!--Dialogs-->
     <sys:String x:Key="dialog_ok">OK</sys:String>
@@ -159,6 +165,9 @@
     <sys:String x:Key="dialog_error">Error</sys:String>
     <sys:String x:Key="dialog_addFavorite">Add Favorite</sys:String>
     <sys:String x:Key="dialog_selectLanguage">Select language</sys:String>
+    <sys:String x:Key="dialog_addItem">Add Item</sys:String>
+    <sys:String x:Key="dialog_itemName">Name</sys:String>
+    <sys:String x:Key="dialog_assocArray">Associative Array</sys:String>
 
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>
@@ -172,8 +181,13 @@
     <sys:String x:Key="message_imported">Import successful.</sys:String>
     <sys:String x:Key="message_exported">Export successful.</sys:String>
     <sys:String x:Key="message_askSaveChange">Would you like to save changes to "{0}"?</sys:String>
+    <sys:String x:Key="message_renameItem">Rename "{0}":</sys:String>
     <sys:String x:Key="error_message">Error Message</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Name cannot be empty.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">The URL cannot be empty.</sys:String>
     <sys:String x:Key="error_deleteCachesRetry">An error occurred while clearing the cache. Do you want to try again?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">An array key named "{0}" already exists.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">An object property named "{0}" already exists.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Key/Property name cannot be empty.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">A key/property named "{0}" already exists.</sys:String>
 </ResourceDictionary>

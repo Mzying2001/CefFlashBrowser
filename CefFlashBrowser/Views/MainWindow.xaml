@@ -98,6 +98,10 @@
                 <MenuItem Header="{DynamicResource mainWindow_manageSolSaveFiles}"
                           Command="{Binding OpenSolSaveManagerCommand}"/>
 
+                <!--Open Sol File-->
+                <MenuItem Header="{DynamicResource mainWindow_openSolFile}"
+                          Command="{Binding OpenSolFileCommand}"/>
+
                 <Separator/>
 
                 <!--Languages Option-->

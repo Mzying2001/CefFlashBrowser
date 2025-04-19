@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
@@ -20,6 +21,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenWebsiteCommand { get; set; }
         public DelegateCommand DropFileCommand { get; set; }
         public DelegateCommand OpenSolSaveManagerCommand { get; set; }
+        public DelegateCommand OpenSolFileCommand { get; set; }
 
         public string WelcomeText
         {
@@ -115,6 +117,10 @@ namespace CefFlashBrowser.ViewModels
                 {
                     WindowManager.ShowSwfPlayer(item);
                 }
+                else if (UrlHelper.IsLocalSolFile(item))
+                {
+                    WindowManager.ShowSolEditorWindow(item);
+                }
                 else
                 {
                     ShowBrowser(item);
@@ -125,6 +131,19 @@ namespace CefFlashBrowser.ViewModels
         private void OpenSolSaveManager()
         {
             WindowManager.ShowSolSaveManager();
+        }
+
+        private void OpenSolFile()
+        {
+            var ofd = new Microsoft.Win32.OpenFileDialog()
+            {
+                Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol"
+            };
+
+            if (ofd.ShowDialog() == true)
+            {
+                WindowManager.ShowSolEditorWindow(ofd.FileName);
+            }
         }
 
         private void OnLanguageChanged(object _)
@@ -159,6 +178,7 @@ namespace CefFlashBrowser.ViewModels
             OpenWebsiteCommand = new DelegateCommand<Website>(OpenWebsite);
             DropFileCommand = new DelegateCommand<string[]>(DropFile);
             OpenSolSaveManagerCommand = new DelegateCommand(OpenSolSaveManager);
+            OpenSolFileCommand = new DelegateCommand(OpenSolFile);
 
             Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
         }
