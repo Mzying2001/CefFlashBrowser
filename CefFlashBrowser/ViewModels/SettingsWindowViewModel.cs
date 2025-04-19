@@ -33,10 +33,12 @@ namespace CefFlashBrowser.ViewModels
         public List<ItemViewModel<SearchEngine>> SearchEngines { get; } = new List<ItemViewModel<SearchEngine>>
         {
             new ItemViewModel<SearchEngine>(SearchEngine.Baidu, "searchEngine_baidu"),
+            new ItemViewModel<SearchEngine>(SearchEngine.DuckDuckGo, "searchEngine_duckDuckGo"),
             new ItemViewModel<SearchEngine>(SearchEngine.Google, "searchEngine_google"),
             new ItemViewModel<SearchEngine>(SearchEngine.Bing, "searchEngine_bing"),
             new ItemViewModel<SearchEngine>(SearchEngine.Sogou, "searchEngine_sogou"),
-            new ItemViewModel<SearchEngine>(SearchEngine.So360, "searchEngine_so360")
+            new ItemViewModel<SearchEngine>(SearchEngine.So360, "searchEngine_so360"),
+            new ItemViewModel<SearchEngine>(SearchEngine.Yandex, "searchEngine_yandex")
         };
 
         public int CurrentSearchEngineIndex
