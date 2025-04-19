@@ -112,6 +112,16 @@ namespace CefFlashBrowser.ViewModels
             get => Parent != null && !IsRemoved;
         }
 
+        public bool CanRename
+        {
+            get => Name is string;
+        }
+
+        public bool CanMove
+        {
+            get => IsArrayItem && Name is int;
+        }
+
 
         public void UpdateChildren()
         {

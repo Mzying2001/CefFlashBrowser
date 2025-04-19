@@ -45,7 +45,8 @@
         <!--Bool Editor-->
         <DataTemplate x:Key="BoolNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <CheckBox Style="{StaticResource ToggleButtonSwitch}"
+            <CheckBox HorizontalAlignment="Right"
+                      Style="{StaticResource ToggleButtonSwitch}"
                       IsChecked="{Binding Value}">
                 <CheckBox.Effect>
                     <DropShadowEffect Color="White"
@@ -59,8 +60,7 @@
         <!--Int Editor-->
         <DataTemplate x:Key="IntNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <hc:NumericUpDown Width="100"
-                              Minimum="-268435456"
+            <hc:NumericUpDown Minimum="-268435456"
                               Maximum="268435455"
                               DecimalPlaces="0"
                               Value="{Binding Value, Converter={StaticResource IntToDouble}}"/>
@@ -69,25 +69,33 @@
         <!--Double Editor-->
         <DataTemplate x:Key="DoubleNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <hc:NumericUpDown Width="100"
-                              Value="{Binding Value}"/>
+            <hc:NumericUpDown Value="{Binding Value}"/>
         </DataTemplate>
 
         <!--DateTime Editor-->
         <DataTemplate x:Key="DateTimeNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <hc:DateTimePicker Width="100"
-                               SelectedDateTime="{Binding Value}">
+            <hc:DateTimePicker SelectedDateTime="{Binding Value}">
                 <hc:DateTimePicker.ToolTip>
                     <TextBlock Text="{Binding Value, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"/>
                 </hc:DateTimePicker.ToolTip>
+                <hc:DateTimePicker.Style>
+                    <Style TargetType="{x:Type hc:DateTimePicker}"
+                           BasedOn="{StaticResource {x:Type hc:DateTimePicker}}">
+                        <Style.Triggers>
+                            <Trigger Property="IsFocused" Value="False">
+                                <Setter Property="DateTimeFormat" Value="yyyy-MM-dd"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </hc:DateTimePicker.Style>
             </hc:DateTimePicker>
         </DataTemplate>
 
         <!--Add Item Button-->
         <DataTemplate x:Key="AddItemTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <Grid>
+            <Grid HorizontalAlignment="Right">
                 <Grid.Resources>
                     <Style TargetType="Button"
                            BasedOn="{StaticResource {x:Type Button}}">
@@ -127,8 +135,8 @@
                 <Button.Style>
                     <Style TargetType="Button"
                            BasedOn="{StaticResource {x:Type Button}}">
-                        <Setter Property="Width" Value="100"/>
                         <Setter Property="Padding" Value="0"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
                         <Setter Property="ToolTip" Value="{Binding Value, Mode=OneWay}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Value, Converter={StaticResource ObjectToString}}" Value="">
@@ -137,7 +145,7 @@
                         </Style.Triggers>
                     </Style>
                 </Button.Style>
-                <TextBlock Width="80"
+                <TextBlock Width="100"
                            TextWrapping="NoWrap"
                            TextTrimming="CharacterEllipsis">
                     <TextBlock.Style>
@@ -159,7 +167,8 @@
         <!--Import/Export button-->
         <DataTemplate x:Key="ImportExportTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right">
                 <StackPanel.Resources>
                     <Style TargetType="Button"
                            BasedOn="{StaticResource {x:Type Button}}">
@@ -201,6 +210,21 @@
                 </Button>
             </StackPanel>
         </DataTemplate>
+
+        <!--Selector for the node editor templates-->
+        <utils:SolNodeTemplateSelector x:Key="NodeEditorSelector"
+                                       RootTemplate="{StaticResource AddItemTemplate}"
+                                       ArrayTemplate="{StaticResource AddItemTemplate}"
+                                       ObjectTemplate="{StaticResource AddItemTemplate}"
+                                       BoolTemplate="{StaticResource BoolNodeTemplate}"
+                                       IntTemplate="{StaticResource IntNodeTemplate}"
+                                       DoubleTemplate="{StaticResource DoubleNodeTemplate}"
+                                       DateTemplate="{StaticResource DateTimeNodeTemplate}"
+                                       StringTemplate="{StaticResource OpenTextEditorTemplate}"
+                                       XmlDocTemplate="{StaticResource OpenTextEditorTemplate}"
+                                       XmlTemplate="{StaticResource OpenTextEditorTemplate}"
+                                       BinaryTemplate="{StaticResource ImportExportTemplate}"
+                                       DefaultTemplate="{StaticResource DisplayNothingTemplate}"/>
     </Window.Resources>
 
     <DockPanel>
@@ -227,6 +251,27 @@
                           Command="{Binding RemoveItemCommand}"
                           CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
                           IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanRemove}"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource common_rename}"
+                          Command="{Binding RenameItemCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanRename, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                <MenuItem Header="{DynamicResource common_moveUp}"
+                          Command="{Binding MoveUpCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                <MenuItem Header="{DynamicResource common_moveDown}"
+                          Command="{Binding MoveDownCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                <MenuItem Header="{DynamicResource common_moveToTop}"
+                          Command="{Binding MoveToTopCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                <MenuItem Header="{DynamicResource common_moveToBottom}"
+                          Command="{Binding MoveToBottomCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
             </MenuItem>
         </Menu>
 
@@ -270,24 +315,11 @@
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                     <DockPanel MinHeight="35"
                                Background="Transparent">
-                        <ContentControl DockPanel.Dock="Right"
-                                        Margin="10,5"
-                                        Content="{Binding}">
-                            <ContentControl.ContentTemplateSelector>
-                                <utils:SolNodeTemplateSelector RootTemplate="{StaticResource AddItemTemplate}"
-                                                               ArrayTemplate="{StaticResource AddItemTemplate}"
-                                                               ObjectTemplate="{StaticResource AddItemTemplate}"
-                                                               BoolTemplate="{StaticResource BoolNodeTemplate}"
-                                                               IntTemplate="{StaticResource IntNodeTemplate}"
-                                                               DoubleTemplate="{StaticResource DoubleNodeTemplate}"
-                                                               DateTemplate="{StaticResource DateTimeNodeTemplate}"
-                                                               StringTemplate="{StaticResource OpenTextEditorTemplate}"
-                                                               XmlDocTemplate="{StaticResource OpenTextEditorTemplate}"
-                                                               XmlTemplate="{StaticResource OpenTextEditorTemplate}"
-                                                               BinaryTemplate="{StaticResource ImportExportTemplate}"
-                                                               DefaultTemplate="{StaticResource DisplayNothingTemplate}"/>
-                            </ContentControl.ContentTemplateSelector>
-                        </ContentControl>
+                        <Grid DockPanel.Dock="Right"
+                              Margin="10,5"
+                              MinWidth="120">
+                            <ContentPresenter ContentTemplateSelector="{StaticResource NodeEditorSelector}"/>
+                        </Grid>
 
                         <StackPanel Orientation="Horizontal"
                                     VerticalAlignment="Center">
@@ -329,6 +361,27 @@
                                           IsEnabled="{Binding CanRemove}"
                                           Command="{Binding Editor.RemoveItemCommand}"
                                           CommandParameter="{Binding}"/>
+                                <Separator/>
+                                <MenuItem Header="{DynamicResource common_rename}"
+                                          Command="{Binding Editor.RenameItemCommand}"
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanRename, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                                <MenuItem Header="{DynamicResource common_moveUp}"
+                                          Command="{Binding Editor.MoveUpCommand}"
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                                <MenuItem Header="{DynamicResource common_moveDown}"
+                                          Command="{Binding Editor.MoveDownCommand}"
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                                <MenuItem Header="{DynamicResource common_moveToTop}"
+                                          Command="{Binding Editor.MoveToTopCommand}"
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                                <MenuItem Header="{DynamicResource common_moveToBottom}"
+                                          Command="{Binding Editor.MoveToBottomCommand}"
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>

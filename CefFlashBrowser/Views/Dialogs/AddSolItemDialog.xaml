@@ -8,6 +8,7 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         
         x:Name="window"
@@ -45,15 +46,33 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" MinWidth="100"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="10"/>
-            <ColumnDefinition Width="Auto" MinWidth="100"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <ComboBox SelectedIndex="0"
+        <ComboBox MinWidth="100"
+                  SelectedIndex="0"
                   DisplayMemberPath="TypeName"
                   ItemsSource="{Binding ElementName=window, Path=Types}"
-                  SelectedValue="{Binding ElementName=window, Path=SelectedType}"/>
+                  SelectedValue="{Binding ElementName=window, Path=SelectedType}">
+            <ComboBox.Style>
+                <Style TargetType="ComboBox"
+                       BasedOn="{StaticResource {x:Type ComboBox}}">
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=window, Path=IsArrayItem}" Value="True"/>
+                                <Condition Binding="{Binding ElementName=window, Path=IsAssocArrayItem}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <MultiDataTrigger.Setters>
+                                <Setter Property="Grid.ColumnSpan" Value="3"/>
+                            </MultiDataTrigger.Setters>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ComboBox.Style>
+        </ComboBox>
 
         <CheckBox Grid.Row="2"
                   VerticalAlignment="Center"
@@ -72,13 +91,14 @@
             </CheckBox.Style>
         </CheckBox>
 
-        <TextBox x:Name="nameTextBox"
-                 Grid.Column="2"
-                 MaxWidth="300"
-                 Text="{Binding ElementName=window, Path=ItemNameEdit, UpdateSourceTrigger=PropertyChanged}">
-            <TextBox.Style>
-                <Style TargetType="TextBox"
-                       BasedOn="{StaticResource {x:Type TextBox}}">
+        <hc:TextBox x:Name="nameTextBox"
+                    Grid.Column="2"
+                    MaxWidth="300"
+                    Text="{Binding ElementName=window, Path=ItemNameEdit, UpdateSourceTrigger=PropertyChanged}"
+                    hc:InfoElement.Placeholder="{DynamicResource dialog_itemName}">
+            <hc:TextBox.Style>
+                <Style TargetType="{x:Type hc:TextBox}"
+                       BasedOn="{StaticResource {x:Type hc:TextBox}}">
                     <Style.Triggers>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
@@ -86,13 +106,13 @@
                                 <Condition Binding="{Binding ElementName=window, Path=IsAssocArrayItem}" Value="False"/>
                             </MultiDataTrigger.Conditions>
                             <MultiDataTrigger.Setters>
-                                <Setter Property="IsEnabled" Value="False"/>
+                                <Setter Property="Visibility" Value="Collapsed"/>
                             </MultiDataTrigger.Setters>
                         </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
-            </TextBox.Style>
-        </TextBox>
+            </hc:TextBox.Style>
+        </hc:TextBox>
 
         <StackPanel Grid.Row="2"
                     Grid.Column="2"

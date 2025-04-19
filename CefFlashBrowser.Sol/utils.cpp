@@ -86,7 +86,8 @@ std::vector<uint8_t> utils::ToByteVector(array<System::Byte>^ arr)
 
 System::DateTime utils::ToSystemDateTime(double timestamp)
 {
-    return DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc).AddMilliseconds(timestamp);
+    DateTime utc = DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc).AddMilliseconds(timestamp);
+    return utc.ToLocalTime();
 }
 
 double utils::ToTimestamp(System::DateTime datetime)
