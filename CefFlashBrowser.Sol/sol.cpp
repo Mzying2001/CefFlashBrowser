@@ -847,7 +847,11 @@ sol::AMF0Type sol::ReadAMF0Type(uint8_t* data, int size, int& index)
 
 sol::SolDouble sol::ReadAMF0Number(uint8_t* data, int size, int& index)
 {
-    return ReadSolDouble(data, size, index);
+    if (index + 8 > size) {
+        ThrowFileEndedImproperlyOnReadingType(AMF0Type::Number);
+    }
+    uint64_t tmp = ReadBigEndian<uint64_t>(data, size, index);
+    return *reinterpret_cast<double*>(&tmp);
 }
 
 sol::SolBoolean sol::ReadAMF0Boolean(uint8_t* data, int size, int& index)
@@ -898,7 +902,7 @@ sol::SolValue sol::ReadAMF0XmlDoc(uint8_t* data, int size, int& index)
 sol::SolValue sol::ReadAMF0Date(uint8_t* data, int size, int& index)
 {
     int16_t zone = ReadBigEndian<int16_t>(data, size, index); // unused
-    return SolValue(SolType::Date, ReadSolDouble(data, size, index));
+    return SolValue(SolType::Date, ReadAMF0Number(data, size, index));
 }
 
 sol::SolValue sol::ReadAMF0Reference(uint8_t* data, int size, int& index, SolRefTable& reftable)
