@@ -110,6 +110,13 @@ namespace
         }
     }
 
+    uint8_t ReadByte(uint8_t* data, int size, int& index)
+    {
+        return index >= size
+            ? throw std::runtime_error("File ended improperly on reading byte")
+            : data[index++];
+    }
+
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, T> ReadBigEndian(uint8_t* data, int size, int& index)
     {
@@ -217,7 +224,7 @@ bool sol::ReadSolFile(SolFile& file)
                 AMF0Type type = ReadAMF0Type(data, size, index);
                 file.data[key] = ReadAMF0Value(data, size, index, reftable, type);
 
-                if (ReadBigEndian<uint8_t>(data, size, index) != 0x00) {
+                if (ReadByte(data, size, index) != 0x00) {
                     ThrowEndRequired(index, data[index - 1]);
                 }
             }
@@ -231,7 +238,7 @@ bool sol::ReadSolFile(SolFile& file)
                 SolType type = ReadSolType(data, size, index);
                 file.data[key] = ReadSolValue(data, size, index, reftable, type);
 
-                if (ReadBigEndian<uint8_t>(data, size, index) != 0x00) {
+                if (ReadByte(data, size, index) != 0x00) {
                     ThrowEndRequired(index, data[index - 1]);
                 }
             }
@@ -251,10 +258,9 @@ bool sol::ReadSolFile(SolFile& file)
 
 sol::SolType sol::ReadSolType(uint8_t* data, int size, int& index)
 {
-    if (index >= size) {
-        throw std::runtime_error("File ended improperly, type expected");
-    }
-    return static_cast<SolType>(data[index++]);
+    return index >= size
+        ? throw std::runtime_error("File ended improperly, type expected")
+        : static_cast<SolType>(data[index++]);
 }
 
 sol::SolInteger sol::ReadSolInteger(uint8_t* data, int size, int& index, bool unsign)
@@ -611,8 +617,7 @@ void sol::WriteSolInteger(std::vector<uint8_t>& buffer, SolInteger value, bool u
 
 void sol::WriteSolDouble(std::vector<uint8_t>& buffer, SolDouble value)
 {
-    uint64_t tmp = *reinterpret_cast<uint64_t*>(&value);
-    tmp = utils::ReverseEndian(tmp);
+    uint64_t tmp = utils::ReverseEndian(*reinterpret_cast<uint64_t*>(&value));
     buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&tmp), reinterpret_cast<uint8_t*>(&tmp) + 8);
 }
 
@@ -822,10 +827,9 @@ sol::AMF0Type sol::GetAMF0Type(const SolValue& value)
 
 sol::AMF0Type sol::ReadAMF0Type(uint8_t* data, int size, int& index)
 {
-    if (index >= size) {
-        throw std::runtime_error("File ended improperly, AMF0 type expected");
-    }
-    return static_cast<AMF0Type>(data[index++]);
+    return index >= size
+        ? throw std::runtime_error("File ended improperly, AMF0 type expected")
+        : static_cast<AMF0Type>(data[index++]);
 }
 
 sol::SolDouble sol::ReadAMF0Number(uint8_t* data, int size, int& index)
@@ -863,7 +867,7 @@ sol::SolString sol::ReadAMF0ShortString(uint8_t* data, int size, int& index)
 
 sol::SolString sol::ReadAMF0LongString(uint8_t* data, int size, int& index)
 {
-    uint32_t len = ReadBigEndian<uint32_t>(data, size, index);
+    int len = (int)ReadBigEndian<uint32_t>(data, size, index);
 
     if (index + len > size) {
         ThrowFileEndedImproperlyOnReadingType(AMF0Type::LongString);
@@ -909,7 +913,7 @@ sol::SolArray sol::ReadAMF0EcmaArray(uint8_t* data, int size, int& index, SolRef
     }
 
     for (int i = 0; i < sizeof(AMF0_OBJECT_ENDMARK); ++i) {
-        if (ReadBigEndian<uint8_t>(data, size, index) != AMF0_OBJECT_ENDMARK[i]) {
+        if (ReadByte(data, size, index) != AMF0_OBJECT_ENDMARK[i]) {
             ThrowBadFormatOfType(AMF0Type::EcmaArray, index - 1, data[index - 1], AMF0_OBJECT_ENDMARK[i]);
         }
     }
