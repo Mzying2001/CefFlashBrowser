@@ -41,6 +41,28 @@ namespace sol
     };
 
 
+    enum class AMF0Type : uint8_t
+    {
+        Number = 0x00,
+        Boolean = 0x01,
+        String = 0x02,
+        Object = 0x03,
+        MovieClip = 0x04,
+        Null = 0x05,
+        Undefined = 0x06,
+        Reference = 0x07,
+        EcmaArray = 0x08,
+        ObjectEnd = 0x09,
+        StrictArray = 0x0A,
+        Date = 0x0B,
+        LongString = 0x0C,
+        Unsupported = 0x0D,
+        Recordset = 0x0E,
+        XMLDoc = 0x0F,
+        TypedObject = 0x10
+    };
+
+
     enum class SolVersion : uint32_t
     {
         AMF0 = 0,
@@ -202,6 +224,35 @@ namespace sol
     void WriteSolObject(std::vector<uint8_t>& buffer, const SolObject& value, SolWriteRefTable& reftable);
 
     void WriteSolValue(std::vector<uint8_t>& buffer, const SolValue& value, SolWriteRefTable& reftable);
+
+
+    AMF0Type GetAMF0Type(const SolValue& value);
+
+    AMF0Type ReadAMF0Type(uint8_t* data, int size, int& index);
+
+    SolDouble ReadAMF0Number(uint8_t* data, int size, int& index);
+
+    SolBoolean ReadAMF0Boolean(uint8_t* data, int size, int& index);
+
+    SolString ReadAMF0ShortString(uint8_t* data, int size, int& index);
+
+    SolString ReadAMF0LongString(uint8_t* data, int size, int& index);
+
+    SolValue ReadAMF0XmlDoc(uint8_t* data, int size, int& index);
+
+    SolValue ReadAMF0Date(uint8_t* data, int size, int& index);
+
+    SolValue ReadAMF0Reference(uint8_t* data, int size, int& index, SolRefTable& reftable);
+
+    SolArray ReadAMF0EcmaArray(uint8_t* data, int size, int& index, SolRefTable& reftable);
+
+    SolArray ReadAMF0StrictArray(uint8_t* data, int size, int& index, SolRefTable& reftable);
+
+    SolObject ReadAMF0Object(uint8_t* data, int size, int& index, SolRefTable& reftable);
+
+    SolValue ReadAMF0TypedObject(uint8_t* data, int size, int& index, SolRefTable& reftable);
+
+    SolValue ReadAMF0Value(uint8_t* data, int size, int& index, SolRefTable& reftable, AMF0Type type);
 }
 
 #endif // !__SOL_H__

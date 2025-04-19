@@ -6,6 +6,9 @@
 constexpr uint8_t SOL_MAGIC[] = { 0x00, 0xBF };
 constexpr uint8_t SOL_CONSTANT[] = { 0x54, 0x43, 0x53, 0x4F, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 };
 
+constexpr uint16_t AMF0_SHORTSTRING_MAXLEN = 0xFFFF;
+constexpr uint16_t AMF0_LONGSTRING_MAXLEN = 0xFFFFFFFF;
+
 
 namespace
 {
@@ -21,6 +24,12 @@ namespace
             "File ended improperly on reading type %d", static_cast<int>(type)));
     }
 
+    [[noreturn]] void ThrowFileEndedImproperlyOnReadingType(sol::AMF0Type type)
+    {
+        throw std::runtime_error(utils::FormatString(
+            "File ended improperly on reading AMF0 type %d", static_cast<int>(type)));
+    }
+
     [[noreturn]] void ThrowUnknownType(sol::SolType type, int index = -1)
     {
         if (index < 0) {
@@ -33,10 +42,28 @@ namespace
         }
     }
 
+    [[noreturn]] void ThrowUnknownType(sol::AMF0Type type, int index = -1)
+    {
+        if (index < 0) {
+            throw std::runtime_error(utils::FormatString(
+                "Unknown AMF0 type %d", static_cast<int>(type)));
+        }
+        else {
+            throw std::runtime_error(utils::FormatString(
+                "Unknown AMF0 type %d at index %d", static_cast<int>(type), index));
+        }
+    }
+
     [[noreturn]] void ThrowBadFormatOfType(sol::SolType type, int index, int read, int desire)
     {
         throw std::runtime_error(utils::FormatString(
             "Bad format of type %d at index %d: read %d, desire %d", static_cast<int>(type), index, read, desire));
+    }
+
+    [[noreturn]] void ThrowBadFormatOfType(sol::AMF0Type type, int index, int read, int desire)
+    {
+        throw std::runtime_error(utils::FormatString(
+            "Bad format of AMF0 type %d at index %d: read %d, desire %d", static_cast<int>(type), index, read, desire));
     }
 
     [[noreturn]] void ThrowEndRequired(int index, int read, int desire = 0)
@@ -81,6 +108,19 @@ namespace
             pool[id] = static_cast<int>(pool.size());
             return -1;
         }
+    }
+
+    template <typename T>
+    std::enable_if_t<std::is_integral_v<T>, T> ReadBigEndian(uint8_t* data, int size, int& index)
+    {
+        if (index + sizeof(T) > size) {
+            throw std::runtime_error(utils::FormatString(
+                "File ended improperly on reading %c%d", std::is_unsigned_v<T> ? 'u' : 'i', sizeof(T) * 8));
+        }
+        T result = utils::ReverseEndian(
+            *reinterpret_cast<T*>(data + index));
+        index += sizeof(T);
+        return result;
     }
 }
 
@@ -166,17 +206,30 @@ bool sol::ReadSolFile(SolFile& file)
             *reinterpret_cast<uint32_t*>(data + index));
         index += 4;
 
+        std::string key;
+        SolRefTable reftable;
+
         switch (file.version)
         {
         case SolVersion::AMF0: {
-            file.errmsg = "AMF0 is currently not supported";
-            return false;
+            while (index < size) {
+                key = ReadAMF0ShortString(data, size, index);
+
+                AMF0Type type = ReadAMF0Type(data, size, index);
+                file.data[key] = ReadAMF0Value(data, size, index, reftable, type);
+
+                if (index >= size) {
+                    ThrowFileEndedImproperly();
+                }
+                if (data[index] != 0x00) {
+                    ThrowEndRequired(index, data[index]);
+                }
+                ++index;
+            }
+            return true;
         }
 
         case SolVersion::AMF3: {
-            std::string key;
-            SolRefTable reftable;
-
             while (index < size) {
                 key = ReadSolString(data, size, index, reftable);
 
@@ -514,6 +567,7 @@ bool sol::WriteSolFile(SolFile& file)
         switch (file.version)
         {
         case SolVersion::AMF0: {
+            // TODO: AMF0 support
             file.errmsg = "AMF0 is currently not supported";
             return false;
         }
@@ -750,5 +804,246 @@ void sol::WriteSolValue(std::vector<uint8_t>& buffer, const SolValue& value, Sol
 
     default:
         ThrowUnknownType(value.type);
+    }
+}
+
+sol::AMF0Type sol::GetAMF0Type(const SolValue& value)
+{
+    switch (value.type)
+    {
+    case SolType::Undefined:
+        return AMF0Type::Undefined;
+
+    case SolType::Null:
+        return AMF0Type::Null;
+
+    case SolType::BooleanFalse:
+    case SolType::BooleanTrue:
+        return AMF0Type::Boolean;
+
+    case SolType::Integer:
+    case SolType::Double:
+        return AMF0Type::Number;
+
+    case SolType::String:
+        return value.get<SolString>().size() > AMF0_SHORTSTRING_MAXLEN
+            ? AMF0Type::LongString : AMF0Type::String; \
+
+    case SolType::XmlDoc:
+    case SolType::Xml:
+        return AMF0Type::XMLDoc;
+
+    case SolType::Date:
+        return AMF0Type::Date;
+
+    case SolType::Array:
+        return value.get<SolArray>().assoc.empty()
+            ? AMF0Type::StrictArray : AMF0Type::EcmaArray;
+
+    case SolType::Object:
+        return value.get<SolObject>().classdef.name.empty()
+            ? AMF0Type::Object : AMF0Type::TypedObject;
+
+    default:
+        throw std::runtime_error(utils::FormatString(
+            "Unable to convert type %d to AMF0 type", static_cast<int>(value.type)));
+    }
+}
+
+sol::AMF0Type sol::ReadAMF0Type(uint8_t* data, int size, int& index)
+{
+    if (index >= size) {
+        throw std::runtime_error("File ended improperly, AMF0 type expected");
+    }
+    return static_cast<AMF0Type>(data[index++]);
+}
+
+sol::SolDouble sol::ReadAMF0Number(uint8_t* data, int size, int& index)
+{
+    return ReadSolDouble(data, size, index);
+}
+
+sol::SolBoolean sol::ReadAMF0Boolean(uint8_t* data, int size, int& index)
+{
+    if (index >= size) {
+        ThrowFileEndedImproperlyOnReadingType(AMF0Type::Boolean);
+    }
+    return data[index++] != 0x00;
+}
+
+sol::SolString sol::ReadAMF0ShortString(uint8_t* data, int size, int& index)
+{
+    uint16_t len = ReadBigEndian<uint16_t>(data, size, index);
+
+    if (index + len > size) {
+        ThrowFileEndedImproperlyOnReadingType(AMF0Type::String);
+    }
+    if (len == 0) {
+        return std::string();
+    }
+
+    std::string result(data + index, data + index + len);
+    index += len;
+    return result;
+}
+
+sol::SolString sol::ReadAMF0LongString(uint8_t* data, int size, int& index)
+{
+    uint32_t len = ReadBigEndian<uint32_t>(data, size, index);
+
+    if (index + len > size) {
+        ThrowFileEndedImproperlyOnReadingType(AMF0Type::LongString);
+    }
+    if (len == 0) {
+        return std::string();
+    }
+
+    std::string result(data + index, data + index + len);
+    index += len;
+    return result;
+}
+
+sol::SolValue sol::ReadAMF0XmlDoc(uint8_t* data, int size, int& index)
+{
+    return SolValue(SolType::XmlDoc, ReadAMF0LongString(data, size, index));
+}
+
+sol::SolValue sol::ReadAMF0Date(uint8_t* data, int size, int& index)
+{
+    int16_t zone = ReadBigEndian<int16_t>(data, size, index); // unused
+    return SolValue(SolType::Date, ReadSolDouble(data, size, index));
+}
+
+sol::SolValue sol::ReadAMF0Reference(uint8_t* data, int size, int& index, SolRefTable& reftable)
+{
+    uint16_t ref = ReadBigEndian<uint16_t>(data, size, index);
+    CheckRefIndex(reftable.objpool, ref);
+    return reftable.objpool[ref];
+}
+
+sol::SolArray sol::ReadAMF0EcmaArray(uint8_t* data, int size, int& index, SolRefTable& reftable)
+{
+    uint32_t len = ReadBigEndian<uint32_t>(data, size, index);
+
+    SolArray result;
+    std::string key;
+
+    for (uint32_t i = 0; i < len; ++i) {
+        key = ReadAMF0ShortString(data, size, index);
+        AMF0Type type = ReadAMF0Type(data, size, index);
+        result.assoc[key] = ReadAMF0Value(data, size, index, reftable, type);
+    }
+
+    reftable.objpool.push_back(result);
+    return result;
+}
+
+sol::SolArray sol::ReadAMF0StrictArray(uint8_t* data, int size, int& index, SolRefTable& reftable)
+{
+    uint32_t len = ReadBigEndian<uint32_t>(data, size, index);
+
+    SolArray result;
+    result.dense.reserve(len);
+
+    for (uint32_t i = 0; i < len; ++i) {
+        AMF0Type type = ReadAMF0Type(data, size, index);
+        result.dense.push_back(ReadAMF0Value(data, size, index, reftable, type));
+    }
+
+    reftable.objpool.push_back(result);
+    return result;
+}
+
+sol::SolObject sol::ReadAMF0Object(uint8_t* data, int size, int& index, SolRefTable& reftable)
+{
+    SolObject result;
+    std::string key;
+
+    while (!(key = ReadAMF0ShortString(data, size, index)).empty()) {
+        AMF0Type type = ReadAMF0Type(data, size, index);
+        result.props[key] = ReadAMF0Value(data, size, index, reftable, type);
+    }
+
+    if (ReadAMF0Type(data, size, index) != AMF0Type::ObjectEnd) {
+        ThrowBadFormatOfType(AMF0Type::Object, index - 1, data[index], (int)AMF0Type::ObjectEnd);
+    }
+
+    reftable.objpool.push_back(result);
+    return result;
+}
+
+sol::SolValue sol::ReadAMF0TypedObject(uint8_t* data, int size, int& index, SolRefTable& reftable)
+{
+    SolObject result;
+    std::string key;
+
+    std::string classname = ReadAMF0ShortString(data, size, index);
+    result.classdef.name = classname;
+
+    while (!(key = ReadAMF0ShortString(data, size, index)).empty()) {
+        AMF0Type type = ReadAMF0Type(data, size, index);
+        result.props[key] = ReadAMF0Value(data, size, index, reftable, type);
+    }
+
+    if (ReadAMF0Type(data, size, index) != AMF0Type::ObjectEnd) {
+        ThrowBadFormatOfType(AMF0Type::TypedObject, index - 1, data[index], static_cast<int>(AMF0Type::ObjectEnd));
+    }
+
+    reftable.objpool.push_back(result);
+    return result;
+}
+
+sol::SolValue sol::ReadAMF0Value(uint8_t* data, int size, int& index, SolRefTable& reftable, AMF0Type type)
+{
+    switch (type)
+    {
+    case AMF0Type::Number:
+        return ReadAMF0Number(data, size, index);
+
+    case AMF0Type::Boolean:
+        return ReadAMF0Boolean(data, size, index);
+
+    case AMF0Type::String:
+        return ReadAMF0ShortString(data, size, index);
+
+    case AMF0Type::Object:
+        return ReadAMF0Object(data, size, index, reftable);
+
+    case AMF0Type::Null:
+        return nullptr;
+
+    case AMF0Type::Undefined:
+        return SolValue(SolType::Undefined, nullptr);
+
+    case AMF0Type::Reference:
+        return ReadAMF0Reference(data, size, index, reftable);
+
+    case AMF0Type::EcmaArray:
+        return ReadAMF0EcmaArray(data, size, index, reftable);
+
+    case AMF0Type::StrictArray:
+        return ReadAMF0StrictArray(data, size, index, reftable);
+
+    case AMF0Type::Date:
+        return ReadAMF0Date(data, size, index);
+
+    case AMF0Type::LongString:
+        return ReadAMF0LongString(data, size, index);
+
+    case AMF0Type::XMLDoc:
+        return ReadAMF0XmlDoc(data, size, index);
+
+    case AMF0Type::TypedObject:
+        return ReadAMF0TypedObject(data, size, index, reftable);
+
+    case AMF0Type::MovieClip:
+    case AMF0Type::ObjectEnd:
+    case AMF0Type::Unsupported:
+    case AMF0Type::Recordset:
+        throw std::runtime_error(utils::FormatString(
+            "Unsupported AMF0 type %d", static_cast<int>(type)));
+
+    default:
+        ThrowUnknownType(type);
     }
 }
