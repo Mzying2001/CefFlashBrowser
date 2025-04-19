@@ -13,6 +13,7 @@
     <sys:String x:Key="common_settings">Settings</sys:String>
     <sys:String x:Key="common_export">Export</sys:String>
     <sys:String x:Key="common_import">Import</sys:String>
+    <sys:String x:Key="common_rename">Rename</sys:String>
 
     <!--Main Window-->
     <sys:String x:Key="mainWindow_title">Welcome</sys:String>
@@ -176,6 +177,7 @@
     <sys:String x:Key="message_imported">Import successful.</sys:String>
     <sys:String x:Key="message_exported">Export successful.</sys:String>
     <sys:String x:Key="message_askSaveChange">Would you like to save changes to "{0}"?</sys:String>
+    <sys:String x:Key="message_renameItem">Rename "{0}":</sys:String>
     <sys:String x:Key="error_message">Error Message</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Name cannot be empty.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">The URL cannot be empty.</sys:String>

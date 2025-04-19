@@ -13,6 +13,7 @@
     <sys:String x:Key="common_settings">设置</sys:String>
     <sys:String x:Key="common_export">导出</sys:String>
     <sys:String x:Key="common_import">导入</sys:String>
+    <sys:String x:Key="common_rename">重命名</sys:String>
 
     <!--主界面-->
     <sys:String x:Key="mainWindow_title">欢迎</sys:String>
@@ -176,6 +177,7 @@
     <sys:String x:Key="message_imported">导入成功。</sys:String>
     <sys:String x:Key="message_exported">导出成功。</sys:String>
     <sys:String x:Key="message_askSaveChange">是否将更改保存到“{0}”？</sys:String>
+    <sys:String x:Key="message_renameItem">重命名“{0}”：</sys:String>
     <sys:String x:Key="error_message">错误信息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名称不能为空。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">网址不能为空。</sys:String>

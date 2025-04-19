@@ -251,6 +251,11 @@
                           Command="{Binding RemoveItemCommand}"
                           CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
                           IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanRemove}"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource common_rename}"
+                          Command="{Binding RenameItemCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanRename}"/>
             </MenuItem>
         </Menu>
 
@@ -339,6 +344,11 @@
                                 <MenuItem Header="{DynamicResource solEditor_removeItem}"
                                           IsEnabled="{Binding CanRemove}"
                                           Command="{Binding Editor.RemoveItemCommand}"
+                                          CommandParameter="{Binding}"/>
+                                <Separator/>
+                                <MenuItem Header="{DynamicResource common_rename}"
+                                          IsEnabled="{Binding CanRename}"
+                                          Command="{Binding Editor.RenameItemCommand}"
                                           CommandParameter="{Binding}"/>
                             </ContextMenu>
                         </Setter.Value>

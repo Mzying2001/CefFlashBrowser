@@ -19,6 +19,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand EditTextCommand { get; set; }
         public DelegateCommand ImportBinaryCommand { get; set; }
         public DelegateCommand ExportBinaryCommand { get; set; }
+        public DelegateCommand RenameItemCommand { get; set; }
 
 
         private readonly SolFileWrapper _file;
@@ -73,6 +74,7 @@ namespace CefFlashBrowser.ViewModels
             EditTextCommand = new DelegateCommand<SolNodeViewModel>(EditText);
             ImportBinaryCommand = new DelegateCommand<SolNodeViewModel>(ImportBinary);
             ExportBinaryCommand = new DelegateCommand<SolNodeViewModel>(ExportBinary);
+            RenameItemCommand = new DelegateCommand<SolNodeViewModel>(RenameItem);
         }
 
         private void UpdateSolData()
@@ -307,6 +309,29 @@ namespace CefFlashBrowser.ViewModels
             catch (Exception e)
             {
                 WindowManager.ShowError(e.Message);
+            }
+        }
+
+        private void RenameItem(SolNodeViewModel target)
+        {
+            if (target.Name is string name)
+            {
+                var msg = LanguageManager.GetFormattedString("message_renameItem", target.DisplayName);
+
+                WindowManager.Prompt(message: msg, defaultInputText: name, callback: (result, newName) =>
+                {
+                    if (result != true || newName == name)
+                        return;
+
+                    if (target.Parent is SolNodeViewModel parent
+                        && parent.Children.Any(node => newName.Equals(node.Name)))
+                    {
+                        WindowManager.ShowError(LanguageManager.GetFormattedString("error_keyOrPropAreadyExists", newName));
+                        return;
+                    }
+
+                    target.Name = newName;
+                });
             }
         }
 
