@@ -7,7 +7,7 @@ constexpr uint8_t SOL_MAGIC[] = { 0x00, 0xBF };
 constexpr uint8_t SOL_CONSTANT[] = { 0x54, 0x43, 0x53, 0x4F, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00 };
 
 constexpr uint16_t AMF0_SHORTSTRING_MAXLEN = 0xFFFF;
-constexpr uint16_t AMF0_LONGSTRING_MAXLEN = 0xFFFFFFFF;
+constexpr uint8_t AMF0_OBJECT_ENDMARK[] = { 0x00, 0x00, 0x09 };
 
 
 namespace
@@ -906,6 +906,12 @@ sol::SolArray sol::ReadAMF0EcmaArray(uint8_t* data, int size, int& index, SolRef
         key = ReadAMF0ShortString(data, size, index);
         AMF0Type type = ReadAMF0Type(data, size, index);
         result.assoc[key] = ReadAMF0Value(data, size, index, reftable, type);
+    }
+
+    for (int i = 0; i < sizeof(AMF0_OBJECT_ENDMARK); ++i) {
+        if (ReadBigEndian<uint8_t>(data, size, index) != AMF0_OBJECT_ENDMARK[i]) {
+            ThrowBadFormatOfType(AMF0Type::EcmaArray, index - 1, data[index - 1], AMF0_OBJECT_ENDMARK[i]);
+        }
     }
 
     reftable.objpool.push_back(result);
