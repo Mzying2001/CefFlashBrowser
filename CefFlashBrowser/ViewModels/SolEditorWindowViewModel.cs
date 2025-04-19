@@ -328,17 +328,11 @@ namespace CefFlashBrowser.ViewModels
 
                 WindowManager.Prompt(message: msg, defaultInputText: name, callback: (result, newName) =>
                 {
-                    if (result != true || newName == name)
-                        return;
-
-                    if (target.Parent is SolNodeViewModel parent
-                        && parent.Children.Any(node => newName.Equals(node.Name)))
+                    if (result == true)
                     {
-                        WindowManager.ShowError(LanguageManager.GetFormattedString("error_keyOrPropAreadyExists", newName));
-                        return;
+                        try { target.Name = newName; }
+                        catch (Exception e) { WindowManager.ShowError(e.Message); }
                     }
-
-                    target.Name = newName;
                 });
             }
         }
