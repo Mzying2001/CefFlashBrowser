@@ -117,6 +117,11 @@ namespace CefFlashBrowser.ViewModels
             get => Name is string;
         }
 
+        public bool CanMove
+        {
+            get => IsArrayItem && Name is int;
+        }
+
 
         public void UpdateChildren()
         {

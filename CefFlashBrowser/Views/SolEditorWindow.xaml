@@ -255,7 +255,23 @@
                 <MenuItem Header="{DynamicResource common_rename}"
                           Command="{Binding RenameItemCommand}"
                           CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
-                          IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanRename}"/>
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanRename, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                <MenuItem Header="{DynamicResource common_moveUp}"
+                          Command="{Binding MoveUpCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                <MenuItem Header="{DynamicResource common_moveDown}"
+                          Command="{Binding MoveDownCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                <MenuItem Header="{DynamicResource common_moveToTop}"
+                          Command="{Binding MoveToTopCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                <MenuItem Header="{DynamicResource common_moveToBottom}"
+                          Command="{Binding MoveToBottomCommand}"
+                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
+                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
             </MenuItem>
         </Menu>
 
@@ -347,9 +363,25 @@
                                           CommandParameter="{Binding}"/>
                                 <Separator/>
                                 <MenuItem Header="{DynamicResource common_rename}"
-                                          IsEnabled="{Binding CanRename}"
                                           Command="{Binding Editor.RenameItemCommand}"
-                                          CommandParameter="{Binding}"/>
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanRename, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                                <MenuItem Header="{DynamicResource common_moveUp}"
+                                          Command="{Binding Editor.MoveUpCommand}"
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                                <MenuItem Header="{DynamicResource common_moveDown}"
+                                          Command="{Binding Editor.MoveDownCommand}"
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                                <MenuItem Header="{DynamicResource common_moveToTop}"
+                                          Command="{Binding Editor.MoveToTopCommand}"
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                                <MenuItem Header="{DynamicResource common_moveToBottom}"
+                                          Command="{Binding Editor.MoveToBottomCommand}"
+                                          CommandParameter="{Binding}"
+                                          Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>

@@ -20,6 +20,10 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ImportBinaryCommand { get; set; }
         public DelegateCommand ExportBinaryCommand { get; set; }
         public DelegateCommand RenameItemCommand { get; set; }
+        public DelegateCommand MoveUpCommand { get; set; }
+        public DelegateCommand MoveDownCommand { get; set; }
+        public DelegateCommand MoveToTopCommand { get; set; }
+        public DelegateCommand MoveToBottomCommand { get; set; }
 
 
         private readonly SolFileWrapper _file;
@@ -75,6 +79,10 @@ namespace CefFlashBrowser.ViewModels
             ImportBinaryCommand = new DelegateCommand<SolNodeViewModel>(ImportBinary);
             ExportBinaryCommand = new DelegateCommand<SolNodeViewModel>(ExportBinary);
             RenameItemCommand = new DelegateCommand<SolNodeViewModel>(RenameItem);
+            MoveUpCommand = new DelegateCommand<SolNodeViewModel>(MoveUp);
+            MoveDownCommand = new DelegateCommand<SolNodeViewModel>(MoveDown);
+            MoveToTopCommand = new DelegateCommand<SolNodeViewModel>(MoveToTop);
+            MoveToBottomCommand = new DelegateCommand<SolNodeViewModel>(MoveToBottom);
         }
 
         private void UpdateSolData()
@@ -332,6 +340,42 @@ namespace CefFlashBrowser.ViewModels
 
                     target.Name = newName;
                 });
+            }
+        }
+
+        private void MoveUp(SolNodeViewModel target)
+        {
+            if (target.Name is int index
+                && target.Parent?.Value is SolArray arr)
+            {
+                target.Name = Math.Max(0, index - 1);
+            }
+        }
+
+        private void MoveDown(SolNodeViewModel target)
+        {
+            if (target.Name is int index
+                && target.Parent?.Value is SolArray arr)
+            {
+                target.Name = Math.Min(arr.DensePortion.Count - 1, index + 1);
+            }
+        }
+
+        private void MoveToTop(SolNodeViewModel target)
+        {
+            if (target.Name is int index
+                && target.Parent?.Value is SolArray arr)
+            {
+                target.Name = 0;
+            }
+        }
+
+        private void MoveToBottom(SolNodeViewModel target)
+        {
+            if (target.Name is int index
+                && target.Parent?.Value is SolArray arr)
+            {
+                target.Name = arr.DensePortion.Count - 1;
             }
         }
 
