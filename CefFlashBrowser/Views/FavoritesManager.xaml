@@ -75,10 +75,10 @@
                         <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu>
-                                    <MenuItem Header="{DynamicResource favorites_toTop}"
+                                    <MenuItem Header="{DynamicResource common_moveToTop}"
                                               Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.MoveToTopCommand}"
                                               CommandParameter="{Binding}"/>
-                                    <MenuItem Header="{DynamicResource favorites_toBottom}"
+                                    <MenuItem Header="{DynamicResource common_moveToBottom}"
                                               Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.MoveToBottomCommand}"
                                               CommandParameter="{Binding}"/>
                                     <Separator/>
@@ -142,6 +142,7 @@
                                     Height="30"
                                     Padding="0"
                                     VerticalAlignment="Center"
+                                    ToolTip="{DynamicResource common_moveUp}"
                                     Command="{Binding MoveUpCommand}"
                                     CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
                                 <svgc:SvgIcon Width="12"
@@ -152,6 +153,7 @@
                                     Height="30"
                                     Padding="0"
                                     VerticalAlignment="Center"
+                                    ToolTip="{DynamicResource common_moveDown}"
                                     Command="{Binding MoveDownCommand}"
                                     CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
                                 <svgc:SvgIcon Width="12"

@@ -14,6 +14,10 @@
     <sys:String x:Key="common_export">匯出</sys:String>
     <sys:String x:Key="common_import">匯入</sys:String>
     <sys:String x:Key="common_rename">重新命名</sys:String>
+    <sys:String x:Key="common_moveUp">上移</sys:String>
+    <sys:String x:Key="common_moveDown">下移</sys:String>
+    <sys:String x:Key="common_moveToTop">移至頂部</sys:String>
+    <sys:String x:Key="common_moveToBottom">移至底部</sys:String>
 
     <!--主介面-->
     <sys:String x:Key="mainWindow_title">歡迎</sys:String>
@@ -85,8 +89,6 @@
     <sys:String x:Key="favorites_managerTitle">我的最愛管理員</sys:String>
     <sys:String x:Key="favorites_add">新增</sys:String>
     <sys:String x:Key="favorites_remove">移除</sys:String>
-    <sys:String x:Key="favorites_toTop">移至頂端</sys:String>
-    <sys:String x:Key="favorites_toBottom">移至底端</sys:String>
     <sys:String x:Key="favorites_edit">編輯</sys:String>
     <sys:String x:Key="favorites_name">名稱</sys:String>
     <sys:String x:Key="favorites_url">網址</sys:String>
