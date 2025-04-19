@@ -35,11 +35,11 @@ namespace CefFlashBrowser.ViewModels
                                 throw new IndexOutOfRangeException();
                         }
                     }
-                    else if (Parent?.Value is SolObject obj)
+                    else if (Parent?.Value is SolFileWrapper || Parent?.Value is SolObject)
                     {
                         if (value is string key)
                         {
-                            if (obj.Properties.ContainsKey(key))
+                            if (Parent.Children.Any(node => key.Equals(node.Name)))
                                 throw new ArgumentException(LanguageManager.GetFormattedString("error_objPropAreadyExists", key));
                         }
                     }
