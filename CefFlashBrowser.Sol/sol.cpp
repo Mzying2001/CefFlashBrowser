@@ -45,6 +45,12 @@ namespace
             "End required at index %d: read %d, desire %d", index, read, desire));
     }
 
+    [[noreturn]] void ThrowUnsupportedVersion(sol::SolVersion version)
+    {
+        throw std::runtime_error(utils::FormatString(
+            "Unsupported version: %d", static_cast<int>(version)));
+    }
+
     template <typename T>
     void CheckRefIndex(const std::vector<T>& pool, int index)
     {
@@ -160,25 +166,38 @@ bool sol::ReadSolFile(SolFile& file)
             *reinterpret_cast<uint32_t*>(data + index));
         index += 4;
 
-        std::string key;
-        SolRefTable reftable;
-
-        while (index < size) {
-            key = ReadSolString(data, size, index, reftable);
-
-            SolType type = ReadSolType(data, size, index);
-            file.data[key] = ReadSolValue(data, size, index, reftable, type);
-
-            if (index >= size) {
-                ThrowFileEndedImproperly();
-            }
-            if (data[index] != 0x00) {
-                ThrowEndRequired(index, data[index]);
-            }
-            ++index;
+        switch (file.version)
+        {
+        case SolVersion::AMF0: {
+            file.errmsg = "AMF0 is currently not supported";
+            return false;
         }
 
-        return true;
+        case SolVersion::AMF3: {
+            std::string key;
+            SolRefTable reftable;
+
+            while (index < size) {
+                key = ReadSolString(data, size, index, reftable);
+
+                SolType type = ReadSolType(data, size, index);
+                file.data[key] = ReadSolValue(data, size, index, reftable, type);
+
+                if (index >= size) {
+                    ThrowFileEndedImproperly();
+                }
+                if (data[index] != 0x00) {
+                    ThrowEndRequired(index, data[index]);
+                }
+                ++index;
+            }
+            return true;
+        }
+
+        default: {
+            ThrowUnsupportedVersion(file.version);
+        }
+        }
     }
     catch (const std::exception& e) {
         file.errmsg = e.what();
@@ -491,18 +510,34 @@ bool sol::WriteSolFile(SolFile& file)
         uint32_t version = utils::ReverseEndian((uint32_t)file.version);
         buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&version), reinterpret_cast<uint8_t*>(&version) + 4);
 
-        // ref table
-        SolWriteRefTable reftable;
+        // encode data
+        switch (file.version)
+        {
+        case SolVersion::AMF0: {
+            file.errmsg = "AMF0 is currently not supported";
+            return false;
+        }
 
-        // data
-        for (auto& [key, value] : file.data) {
-            // key
-            WriteSolString(buffer, key, reftable);
-            // value
-            WriteSolType(buffer, value.type);
-            WriteSolValue(buffer, value, reftable);
-            // end
-            buffer.push_back(0x00);
+        case SolVersion::AMF3: {
+            // ref table
+            SolWriteRefTable reftable;
+
+            // data
+            for (auto& [key, value] : file.data) {
+                // key
+                WriteSolString(buffer, key, reftable);
+                // value
+                WriteSolType(buffer, value.type);
+                WriteSolValue(buffer, value, reftable);
+                // end
+                buffer.push_back(0x00);
+            }
+            break;
+        }
+
+        default: {
+            ThrowUnsupportedVersion(file.version);
+        }
         }
 
         // fill chunk size
