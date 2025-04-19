@@ -463,67 +463,50 @@ sol::SolObject sol::ReadSolObject(uint8_t* data, int size, int& index, SolRefTab
 
 sol::SolValue sol::ReadSolValue(uint8_t* data, int size, int& index, SolRefTable& reftable, SolType type)
 {
-    SolValue result;
-
     switch (type)
     {
     case SolType::Undefined:
-        result.type = SolType::Undefined;
-        break;
+        return SolValue(SolType::Undefined, nullptr);
 
     case SolType::Null:
-        //result = nullptr;
-        break;
+        return nullptr;
 
     case SolType::BooleanFalse:
-        result = false;
-        break;
+        return false;
 
     case SolType::BooleanTrue:
-        result = true;
-        break;
+        return true;
 
     case SolType::Integer:
-        result = ReadSolInteger(data, size, index);
-        break;
+        return ReadSolInteger(data, size, index);
 
     case SolType::Double:
-        result = ReadSolDouble(data, size, index);
-        break;
+        return ReadSolDouble(data, size, index);
 
     case SolType::String:
-        result = ReadSolString(data, size, index, reftable);
-        break;
+        return ReadSolString(data, size, index, reftable);
 
     case SolType::XmlDoc:
-        result = ReadSolXml(data, size, index, reftable, sol::SolType::XmlDoc);
-        break;
+        return ReadSolXml(data, size, index, reftable, sol::SolType::XmlDoc);
 
     case SolType::Date:
-        result = ReadSolDate(data, size, index, reftable);
-        break;
+        return ReadSolDate(data, size, index, reftable);
 
     case SolType::Array:
-        result = ReadSolArray(data, size, index, reftable);
-        break;
+        return ReadSolArray(data, size, index, reftable);
 
     case SolType::Object:
-        result = ReadSolObject(data, size, index, reftable);
-        break;
+        return ReadSolObject(data, size, index, reftable);
 
     case SolType::Xml:
-        result = ReadSolXml(data, size, index, reftable, SolType::Xml);
-        break;
+        return ReadSolXml(data, size, index, reftable, SolType::Xml);
 
     case SolType::Binary:
-        result = ReadSolBinary(data, size, index, reftable);
-        break;
+        return ReadSolBinary(data, size, index, reftable);
 
     default:
         ThrowUnknownType(type, index - 1);
     }
-
-    return result;
 }
 
 bool sol::WriteSolFile(SolFile& file)
