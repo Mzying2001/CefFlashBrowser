@@ -526,8 +526,7 @@ bool sol::WriteSolFile(SolFile& file)
         buffer.insert(buffer.end(), std::begin(SOL_CONSTANT), std::end(SOL_CONSTANT));
 
         // sol name
-        WriteBigEndian(buffer, (uint16_t)file.solname.size());
-        buffer.insert(buffer.end(), file.solname.begin(), file.solname.end());
+        WriteAMF0ShortString(buffer, file.solname);
 
         // version
         WriteBigEndian(buffer, (uint32_t)file.version);
