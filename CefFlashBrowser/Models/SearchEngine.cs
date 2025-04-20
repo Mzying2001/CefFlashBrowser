@@ -6,6 +6,8 @@
         Google,
         Bing,
         Sogou,
-        So360
+        So360,
+        DuckDuckGo,
+        Yandex
     }
 }
