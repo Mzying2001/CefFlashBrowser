@@ -204,26 +204,8 @@ bool sol::ReadSolFile(SolFile& file)
         }
         index += 10;
 
-        if (index + 2 > size) {
-            ThrowFileEndedImproperly();
-        }
-
-        uint16_t namesize =
-            ReadBigEndian<uint16_t>(data, size, index);
-
-        if (index + namesize > size) {
-            ThrowFileEndedImproperly();
-        }
-
-        file.solname = std::string(data + index, data + index + namesize);
-        index += namesize;
-
-        if (index + 4 > size) {
-            ThrowFileEndedImproperly();
-        }
-
-        file.version = static_cast<SolVersion>(
-            ReadBigEndian<uint32_t>(data, size, index));
+        file.solname = ReadAMF0ShortString(data, size, index);
+        file.version = static_cast<SolVersion>(ReadBigEndian<uint32_t>(data, size, index));
 
         std::string key;
         SolRefTable reftable;
