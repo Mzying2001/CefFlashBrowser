@@ -5,6 +5,7 @@ using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -57,8 +58,11 @@ namespace CefFlashBrowser.ViewModels
         public void CreateShortcut(IWebBrowser browser)
         {
             var title = GetWebBrowserTitle(browser);
-            foreach (var item in "\\/:*?\"<>|.")
+
+            foreach (var item in Path.GetInvalidFileNameChars())
+            {
                 title = title.Replace(item, '_');
+            }
 
             var sfd = new Microsoft.Win32.SaveFileDialog()
             {
