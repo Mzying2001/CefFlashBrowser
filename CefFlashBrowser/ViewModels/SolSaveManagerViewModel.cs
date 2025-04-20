@@ -1,6 +1,5 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;

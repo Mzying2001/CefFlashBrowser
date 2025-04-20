@@ -7,7 +7,7 @@ namespace CefFlashBrowser.Utils
 {
     public static class SolHelper
     {
-        private static Dictionary<Type, string> TypeStringDic { get; } = new Dictionary<Type, string>
+        private static readonly Dictionary<Type, string> _typeStringDic = new Dictionary<Type, string>
         {
             [typeof(int)] = "int",
             [typeof(double)] = "double",
@@ -89,7 +89,7 @@ namespace CefFlashBrowser.Utils
             if (type == null)
                 return "null";
 
-            if (TypeStringDic.TryGetValue(type, out var typeStr))
+            if (_typeStringDic.TryGetValue(type, out var typeStr))
                 return typeStr;
 
             return string.Empty;
@@ -102,18 +102,21 @@ namespace CefFlashBrowser.Utils
 
         public static IEnumerable<SolTypeDesc> GetSupportedTypes()
         {
-            yield return new SolTypeDesc(typeof(int));
-            yield return new SolTypeDesc(typeof(double));
-            yield return new SolTypeDesc(typeof(bool));
-            yield return new SolTypeDesc(typeof(string));
-            yield return new SolTypeDesc(typeof(DateTime));
-            yield return new SolTypeDesc(typeof(SolArray));
-            yield return new SolTypeDesc(typeof(SolObject));
-            yield return new SolTypeDesc(typeof(byte[]));
-            yield return new SolTypeDesc(typeof(SolXml));
-            yield return new SolTypeDesc(typeof(SolXmlDoc));
-            yield return new SolTypeDesc(typeof(SolUndefined));
-            yield return new SolTypeDesc(null);
+            return new[]
+            {
+                new SolTypeDesc(typeof(int)),
+                new SolTypeDesc(typeof(double)),
+                new SolTypeDesc(typeof(bool)),
+                new SolTypeDesc(typeof(string)),
+                new SolTypeDesc(typeof(DateTime)),
+                new SolTypeDesc(typeof(SolArray)),
+                new SolTypeDesc(typeof(SolObject)),
+                new SolTypeDesc(typeof(byte[])),
+                new SolTypeDesc(typeof(SolXml)),
+                new SolTypeDesc(typeof(SolXmlDoc)),
+                new SolTypeDesc(typeof(SolUndefined)),
+                new SolTypeDesc(null)
+            };
         }
 
         public static object GetDefaultValueOfType(Type type)
