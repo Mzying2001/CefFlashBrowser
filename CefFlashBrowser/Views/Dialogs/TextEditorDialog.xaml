@@ -30,6 +30,12 @@
                 <sys:Boolean>True</sys:Boolean>
             </KeyBinding.CommandParameter>
         </KeyBinding>
+        <KeyBinding Gesture="Ctrl+Enter"
+                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
+            <KeyBinding.CommandParameter>
+                <sys:Boolean>True</sys:Boolean>
+            </KeyBinding.CommandParameter>
+        </KeyBinding>
     </Window.InputBindings>
 
     <i:Interaction.Behaviors>
