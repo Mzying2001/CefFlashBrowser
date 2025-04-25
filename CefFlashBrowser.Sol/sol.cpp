@@ -131,8 +131,7 @@ namespace
                 "File ended improperly on reading %c%d", std::is_unsigned_v<T> ? 'u' : 'i', sizeof(T) * 8));
         }
         else {
-            T result = utils::ReverseEndian(
-                *reinterpret_cast<T*>(data + index));
+            T result = utils::FromBigEndian(*reinterpret_cast<T*>(data + index));
             index += sizeof(T);
             return result;
         }
@@ -141,7 +140,7 @@ namespace
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, void> WriteBigEndian(std::vector<uint8_t>& buffer, T value)
     {
-        T tmp = utils::ReverseEndian(value);
+        T tmp = utils::ToBigEndian(value);
         buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&tmp), reinterpret_cast<uint8_t*>(&tmp) + sizeof(T));
     }
 }
@@ -570,7 +569,7 @@ bool sol::WriteSolFile(SolFile& file)
         }
 
         // fill chunk size
-        uint32_t chunksize = utils::ReverseEndian((uint32_t)buffer.size() - 6);
+        uint32_t chunksize = utils::ToBigEndian((uint32_t)buffer.size() - 6);
         std::copy_n(reinterpret_cast<uint8_t*>(&chunksize), 4, buffer.begin() + 2);
 
         // write to file
@@ -616,7 +615,7 @@ void sol::WriteSolInteger(std::vector<uint8_t>& buffer, SolInteger value, bool u
 
 void sol::WriteSolDouble(std::vector<uint8_t>& buffer, SolDouble value)
 {
-    uint64_t tmp = utils::ReverseEndian(*reinterpret_cast<uint64_t*>(&value));
+    uint64_t tmp = utils::ToBigEndian(*reinterpret_cast<uint64_t*>(&value));
     buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&tmp), reinterpret_cast<uint8_t*>(&tmp) + 8);
 }
 

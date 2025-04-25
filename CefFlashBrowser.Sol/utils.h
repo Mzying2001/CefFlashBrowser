@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <type_traits>
 
 namespace utils
 {
@@ -25,6 +26,8 @@ namespace utils
 
     double ToTimestamp(System::DateTime datetime);
 
+    bool IsBigEndian();
+
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, T> ReverseEndian(T value)
@@ -35,6 +38,18 @@ namespace utils
             value >>= 8;
         }
         return result;
+    }
+
+    template <typename T>
+    std::enable_if_t<std::is_integral_v<T>, T> FromBigEndian(T value)
+    {
+        return IsBigEndian() ? value : ReverseEndian(value);
+    }
+
+    template <typename T>
+    std::enable_if_t<std::is_integral_v<T>, T> ToBigEndian(T value)
+    {
+        return IsBigEndian() ? value : ReverseEndian(value);
     }
 
     template <typename... Args>

@@ -95,3 +95,9 @@ double utils::ToTimestamp(System::DateTime datetime)
     DateTime utc = datetime.ToUniversalTime();
     return (utc - DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind::Utc)).TotalMilliseconds;
 }
+
+bool utils::IsBigEndian()
+{
+    union { uint16_t a; uint8_t b[2]; } test = { 0x1234 };
+    return test.b[0] == 0x12;
+}
