@@ -64,7 +64,7 @@
     </PackageReference>
     <PackageReference Include="HandyControl" Version="3.5.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
-    <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.0.9" />
+    <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SharpVectors" Version="1.8.4.2" />
   </ItemGroup>

@@ -1,8 +1,8 @@
-﻿using SimpleMvvm.Locator;
+﻿using SimpleMvvm.Ioc;
 
 namespace CefFlashBrowser.ViewModels
 {
-    public class ViewModelLocator : ViewModelLocatorBase
+    public class ViewModelLocator : SimpleIoc
     {
         public ViewModelLocator()
         {
