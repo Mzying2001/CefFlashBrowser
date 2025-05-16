@@ -371,7 +371,8 @@
 
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
-                                    ZoomLevelIncrement="0.25"/>
+                                    ZoomLevelIncrement="0.25"
+                                    Address="{Binding Address, TargetNullValue='about:blank'}"/>
 
         <Popup x:Name="statusPopup"
                IsOpen="{Binding ElementName=window, Path=IsActive, Mode=OneWay}"
