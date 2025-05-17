@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SimpleMvvm.Messaging;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -53,6 +54,9 @@ namespace CefFlashBrowser.Models.Data
             DataPath = Path.Combine(UserDocumentPath, "CefFlashBrowser\\");
             FavoritesPath = Path.Combine(DataPath, "favorites.json");
             SettingsPath = Path.Combine(DataPath, "settings.json");
+
+            Messenger.Global.Register(MessageTokens.SAVE_SETTINGS, _ => SaveSettings());
+            Messenger.Global.Register(MessageTokens.SAVE_FAVORITES, _ => SaveFavorites());
         }
 
         private static void CreateDirIfNotExist(string path)
