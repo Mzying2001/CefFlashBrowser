@@ -4,7 +4,7 @@ namespace CefFlashBrowser.ViewModels
 {
     public class ViewModelLocator
     {
-        public ViewModelLocator()
+        static ViewModelLocator()
         {
             SimpleIoc.Global.Register<MainWindowViewModel>();
             SimpleIoc.Global.Register<BrowserWindowViewModel>(Lifetime.Transient);
