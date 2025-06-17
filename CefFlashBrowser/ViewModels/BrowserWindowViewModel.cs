@@ -19,6 +19,13 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ReloadOrStopCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
 
+        private string _address = "about:blank";
+        public string Address
+        {
+            get => _address;
+            set => UpdateValue(ref _address, value);
+        }
+
         public void ShowMainWindow()
         {
             WindowManager.ShowMainWindow();
@@ -38,7 +45,7 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                if (browser is WinformCefSharp4WPF.ChromiumWebBrowser b)
+                if (browser is WinformCefSharp4WPF.IWpfWebBrowser b)
                 {
                     return b.Title;
                 }

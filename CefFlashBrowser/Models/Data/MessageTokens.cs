@@ -5,5 +5,7 @@
         public const string THEME_CHANGED = "THEME_CHANGED";
         public const string LANGUAGE_CHANGED = "LANGUAGE_CHANGED";
         public const string CLOSE_MAINWINDOW = "CLOSE_MAINWINDOW";
+        public const string SAVE_SETTINGS = "SAVE_SETTINGS";
+        public const string SAVE_FAVORITES = "SAVE_FAVORITES";
     }
 }

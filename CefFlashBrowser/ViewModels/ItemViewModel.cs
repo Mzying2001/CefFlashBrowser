@@ -72,7 +72,7 @@ namespace CefFlashBrowser.ViewModels
     {
         public static int GetIndex<TValue>(IEnumerable<ItemViewModel<TValue>> list, TValue value)
         {
-            return list.ToList().FindIndex(item => item.Value.Equals(value));
+            return list.ToList().FindIndex(item => EqualityComparer<TValue>.Default.Equals(item.Value, value));
         }
     }
 }

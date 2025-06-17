@@ -12,6 +12,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
         
         x:Name="window"
@@ -51,13 +52,11 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    VerticalAlignment="Center">
-                            <Run Text="{DynamicResource browser_zoom}"/>
-                            <Run Text=": "/>
-                            <Run Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat=p0}"/>
+                            <Run Text="{DynamicResource browser_zoom}"/><Run Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, StringFormat={}: {0:p0}}"/>
                         </TextBlock>
-                        <StackPanel Grid.Column="1"
-                                    Margin="0,0,26,0"
-                                    Orientation="Horizontal">
+                        <hc:ButtonGroup Grid.Column="1"
+                                        Margin="0,0,43,0"
+                                        Orientation="Horizontal">
                             <Button Width="30"
                                     Height="30"
                                     Padding="0"
@@ -85,7 +84,7 @@
                                                   UriSource="/Assets/Svgs/add.svg"/>
                                 </Button.Content>
                             </Button>
-                        </StackPanel>
+                        </hc:ButtonGroup>
                     </Grid>
                 </MenuItem.Header>
             </MenuItem>
@@ -371,7 +370,8 @@
 
         <flash:ChromiumFlashBrowser x:Name="browser"
                                     Grid.Row="1"
-                                    ZoomLevelIncrement="0.25"/>
+                                    ZoomLevelIncrement="0.25"
+                                    Address="{Binding Address, TargetNullValue='about:blank'}"/>
 
         <Popup x:Name="statusPopup"
                IsOpen="{Binding ElementName=window, Path=IsActive, Mode=OneWay}"
@@ -393,7 +393,7 @@
                                 <Label Padding="5,0"
                                        Height="{StaticResource ContentHeight}">
                                     <TextBlock>
-                                        <Run Text="{DynamicResource browser_loading}"/> (<Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat=p0}"/>)
+                                        <Run Text="{DynamicResource browser_loading}"/><Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat={} ({0:p0})}"/>
                                     </TextBlock>
                                 </Label>
                             </converter:BoolToObject.TrueObject>

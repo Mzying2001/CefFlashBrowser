@@ -4,14 +4,14 @@
              xmlns:local="clr-namespace:CefFlashBrowser"
              xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
              xmlns:m="clr-namespace:CefFlashBrowser.Models"
-             xmlns:mv="clr-namespace:CefFlashBrowser.ViewModels"
+             xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
     <Application.Resources>
         <ResourceDictionary>
 
 
             <!--ViewModelLocator-->
-            <mv:ViewModelLocator x:Key="Locator"/>
+            <vm:ViewModelLocator x:Key="Locator"/>
 
 
             <!--Application Info-->

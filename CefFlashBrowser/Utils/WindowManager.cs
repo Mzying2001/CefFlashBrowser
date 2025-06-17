@@ -102,7 +102,7 @@ namespace CefFlashBrowser.Utils
             var browserWindow = ShowWindow<BrowserWindow>(initializer: window =>
             {
                 _browserWindows.Add(window);
-                window.browser.Address = address;
+                ((BrowserWindowViewModel)window.DataContext).Address = address;
             });
             browserWindow.Closing += (s, e) =>
             {

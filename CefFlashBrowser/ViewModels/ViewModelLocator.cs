@@ -1,47 +1,47 @@
-﻿using SimpleMvvm.Locator;
+﻿using SimpleMvvm.Ioc;
 
 namespace CefFlashBrowser.ViewModels
 {
-    public class ViewModelLocator : ViewModelLocatorBase
+    public class ViewModelLocator
     {
-        public ViewModelLocator()
+        static ViewModelLocator()
         {
-            Register<MainWindowViewModel>();
-            Register<BrowserWindowViewModel>();
-            Register<SettingsWindowViewModel>();
-            Register<FavoritesManagerViewModel>();
-            Register<LanguageSelectorViewModel>();
-            Register<SolSaveManagerViewModel>();
+            SimpleIoc.Global.Register<MainWindowViewModel>();
+            SimpleIoc.Global.Register<BrowserWindowViewModel>(Lifetime.Transient);
+            SimpleIoc.Global.Register<SettingsWindowViewModel>();
+            SimpleIoc.Global.Register<FavoritesManagerViewModel>();
+            SimpleIoc.Global.Register<LanguageSelectorViewModel>();
+            SimpleIoc.Global.Register<SolSaveManagerViewModel>();
         }
 
         public MainWindowViewModel MainWindowViewModel
         {
-            get => GetInstance<MainWindowViewModel>();
+            get => SimpleIoc.Global.GetInstance<MainWindowViewModel>();
         }
 
         public BrowserWindowViewModel BrowserWindowViewModel
         {
-            get => GetInstance<BrowserWindowViewModel>();
+            get => SimpleIoc.Global.GetInstance<BrowserWindowViewModel>();
         }
 
         public SettingsWindowViewModel SettingsWindowViewModel
         {
-            get => GetInstance<SettingsWindowViewModel>();
+            get => SimpleIoc.Global.GetInstance<SettingsWindowViewModel>();
         }
 
         public FavoritesManagerViewModel FavoritesManagerViewModel
         {
-            get => GetInstance<FavoritesManagerViewModel>();
+            get => SimpleIoc.Global.GetInstance<FavoritesManagerViewModel>();
         }
 
         public LanguageSelectorViewModel LanguageSelectorViewModel
         {
-            get => GetInstance<LanguageSelectorViewModel>();
+            get => SimpleIoc.Global.GetInstance<LanguageSelectorViewModel>();
         }
 
         public SolSaveManagerViewModel SolSaveManagerViewModel
         {
-            get => GetInstance<SolSaveManagerViewModel>();
+            get => SimpleIoc.Global.GetInstance<SolSaveManagerViewModel>();
         }
     }
 }
