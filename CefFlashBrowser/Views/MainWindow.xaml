@@ -77,6 +77,13 @@
                                                      Text="{Binding Url}"/>
                                             </TextBlock>
                                         </MenuItem.Header>
+                                        <MenuItem.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="{StaticResource favorites_remove}"
+                                                          Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.RemoveItemCommand}"
+                                                          CommandParameter="{Binding}"/>
+                                            </ContextMenu>
+                                        </MenuItem.ContextMenu>
                                     </MenuItem>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

@@ -78,7 +78,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void RemoveItem(Website item)
         {
-            var msg = LanguageManager.GetFormattedString("message_removeItem", GlobalData.Favorites[SelectedIndex].Name);
+            var msg = LanguageManager.GetFormattedString("message_removeItem", item.Name);
 
             WindowManager.Confirm(msg, callback: result =>
             {
