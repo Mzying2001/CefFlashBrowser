@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 
 namespace CefFlashBrowser
@@ -28,9 +29,19 @@ namespace CefFlashBrowser
                 GlobalData.InitData();
                 LanguageManager.InitLanguage();
 
+                var cts = new CancellationTokenSource();
+                var delLogsTask = LogHelper.DeleteExpiredLogsAsync(cts.Token);
+
                 InitCefFlash();
                 InitTheme();
                 app.Run();
+
+                try
+                {
+                    cts.Cancel();
+                    delLogsTask.Wait();
+                }
+                catch { }
             }
             catch (Exception e)
             {
