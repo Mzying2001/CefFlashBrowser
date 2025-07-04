@@ -39,6 +39,7 @@ namespace CefFlashBrowser
                 InitTheme();
 
                 LogHelper.LogInfo("Application started successfully");
+                LogHelper.LogInfo($"CefFlashBrowser Version: {Assembly.GetExecutingAssembly().GetName().Version}");
                 app.Run();
 
                 try
