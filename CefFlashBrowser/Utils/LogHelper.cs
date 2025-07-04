@@ -20,12 +20,12 @@ namespace CefFlashBrowser.Utils
 
         private static string[] GetDeleteFiles(string[] files)
         {
-            int reserveDays = 14; // Number of days to keep logs
+            int retainCount = GlobalData.RetainedLogCount;
 
-            if (files.Length <= reserveDays)
+            if (files.Length <= retainCount)
                 return Array.Empty<string>();
 
-            return files.OrderBy(item => File.GetCreationTime(item)).Take(files.Length - reserveDays).ToArray();
+            return files.OrderBy(item => File.GetCreationTime(item)).Take(files.Length - retainCount).ToArray();
         }
 
         private static async Task TryDeleteFilesAsync(IEnumerable<string> files, CancellationToken token)

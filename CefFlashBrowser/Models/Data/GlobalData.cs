@@ -32,6 +32,11 @@ namespace CefFlashBrowser.Models.Data
         public static string SettingsPath { get; }
 
         /// <summary>
+        /// Number of log files to keep
+        /// </summary>
+        public static int RetainedLogCount { get; } = 30;
+
+        /// <summary>
         /// true if the program is started with parameters
         /// </summary>
         public static bool IsStartWithoutMainWindow { get; set; } = false;
