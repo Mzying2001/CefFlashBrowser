@@ -8,12 +8,14 @@ namespace CefFlashBrowser.Log
     public class FileLogger : ILogger, IDisposable
     {
         private bool _disposed;
+        private readonly FileStream _stream;
         private readonly StreamWriter _writer;
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         public FileLogger(string fileName)
         {
-            _writer = new StreamWriter(fileName, append: true) { AutoFlush = true };
+            _stream = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.Write);
+            _writer = new StreamWriter(_stream);
         }
 
         ~FileLogger()
@@ -34,6 +36,7 @@ namespace CefFlashBrowser.Log
                 if (disposing)
                 {
                     _writer?.Dispose();
+                    _stream?.Dispose();
                     _semaphore?.Dispose();
                 }
                 _disposed = true;
