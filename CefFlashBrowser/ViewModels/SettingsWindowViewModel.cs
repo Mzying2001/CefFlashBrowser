@@ -220,6 +220,8 @@ namespace CefFlashBrowser.ViewModels
                         }
                         catch (Exception e)
                         {
+                            LogHelper.LogError("Delete cache failed", e);
+
                             string msg = string.Format("{0}\n\n{1}:\n{2}",
                                 LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message);
 

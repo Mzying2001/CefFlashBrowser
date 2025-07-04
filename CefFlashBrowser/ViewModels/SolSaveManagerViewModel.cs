@@ -55,9 +55,10 @@ namespace CefFlashBrowser.ViewModels
                 WorkSpaces = Directory.GetDirectories(GlobalData.SharedObjectsPath);
                 CurrentWorkSpace = WorkSpaces.FirstOrDefault();
             }
-            catch
+            catch (Exception e)
             {
-                WorkSpaces = new string[0];
+                LogHelper.LogError("Failed to load workspaces", e);
+                WorkSpaces = Array.Empty<string>();
                 CurrentWorkSpace = null;
             }
         }
@@ -94,6 +95,7 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
+                LogHelper.LogError("Failed to open explorer", e);
                 WindowManager.ShowError(e.Message);
             }
         }
@@ -116,6 +118,7 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
+                LogHelper.LogError("Failed to export sol file", e);
                 WindowManager.ShowError(e.Message);
             }
         }
@@ -137,6 +140,7 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
+                LogHelper.LogError("Failed to import sol file", e);
                 WindowManager.ShowError(e.Message);
             }
         }
@@ -159,6 +163,7 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
+                LogHelper.LogError("Failed to delete sol file", e);
                 WindowManager.ShowError(e.Message);
             }
         }
