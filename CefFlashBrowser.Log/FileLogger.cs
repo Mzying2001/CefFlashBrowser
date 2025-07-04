@@ -14,7 +14,7 @@ namespace CefFlashBrowser.Log
 
         public FileLogger(string fileName)
         {
-            _stream = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.Write);
+            _stream = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
             _writer = new StreamWriter(_stream);
         }
 
