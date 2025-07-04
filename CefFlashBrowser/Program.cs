@@ -1,7 +1,9 @@
 ﻿using CefFlashBrowser.FlashBrowser;
+using CefFlashBrowser.Log;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
+using SimpleMvvm.Ioc;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -26,6 +28,7 @@ namespace CefFlashBrowser
                 var app = new App();
                 app.InitializeComponent();
 
+                RegisterServices();
                 GlobalData.InitData();
                 LanguageManager.InitLanguage();
 
@@ -50,6 +53,7 @@ namespace CefFlashBrowser
             finally
             {
                 OnTerminate();
+                UnregisterServices();
             }
         }
 
@@ -133,6 +137,17 @@ namespace CefFlashBrowser
         {
             _restart = true;
             Application.Current.Shutdown();
+        }
+
+        private static void RegisterServices()
+        {
+            SimpleIoc.Global.Register<ILogger>(() => new FileLogger(GlobalData.BrowserLogPath));
+        }
+
+        private static void UnregisterServices()
+        {
+            if (SimpleIoc.Global.IsRegistered<ILogger>())
+                SimpleIoc.Global.Unregister<ILogger>();
         }
     }
 }
