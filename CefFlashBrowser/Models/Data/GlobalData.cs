@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CefFlashBrowser.Utils;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SimpleMvvm.Messaging;
 using System;
@@ -99,8 +100,9 @@ namespace CefFlashBrowser.Models.Data
                 var file = JsonConvert.DeserializeObject<FavoritesFile>(File.ReadAllText(FavoritesPath));
                 Favorites = new ObservableCollection<Website>(file.Favorites);
             }
-            catch
+            catch (Exception e)
             {
+                LogHelper.LogError("Failed to load favorites", e);
                 Favorites = new ObservableCollection<Website>();
             }
         }
@@ -111,10 +113,13 @@ namespace CefFlashBrowser.Models.Data
             {
                 var file = new FavoritesFile { Favorites = Favorites.ToArray() };
                 File.WriteAllText(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
+                LogHelper.LogInfo("Favorites saved successfully");
                 return true;
             }
-            catch
-            { }
+            catch (Exception e)
+            {
+                LogHelper.LogError("Failed to save favorites", e);
+            }
             return false;
         }
 
@@ -134,8 +139,9 @@ namespace CefFlashBrowser.Models.Data
                 Settings = JsonConvert.DeserializeObject<Settings>(file);
                 Settings.SetNullPropertiesToDefault();
             }
-            catch
+            catch (Exception e)
             {
+                LogHelper.LogError("Failed to load settings", e);
                 Settings = Settings.Default;
             }
         }
@@ -154,9 +160,13 @@ namespace CefFlashBrowser.Models.Data
                 {
                     File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
                 }
+                LogHelper.LogInfo("Settings saved successfully");
                 return true;
             }
-            catch { }
+            catch (Exception e)
+            {
+                LogHelper.LogError("Failed to save settings", e);
+            }
             return false;
         }
 

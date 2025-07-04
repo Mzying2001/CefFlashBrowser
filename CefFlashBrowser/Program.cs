@@ -37,6 +37,8 @@ namespace CefFlashBrowser
 
                 InitCefFlash();
                 InitTheme();
+
+                LogHelper.LogInfo("Application started successfully");
                 app.Run();
 
                 try
@@ -132,6 +134,10 @@ namespace CefFlashBrowser
             {
                 LogHelper.LogInfo("Restarting application...");
                 Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+            }
+            else
+            {
+                LogHelper.LogInfo("Application terminated");
             }
         }
 
