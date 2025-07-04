@@ -48,6 +48,7 @@ namespace CefFlashBrowser
             }
             catch (Exception e)
             {
+                LogHelper.LogError("Unhandled exception in Main method", e);
                 WindowManager.Alert(e.ToString(), LanguageManager.GetString("dialog_error"));
             }
             finally
@@ -129,6 +130,7 @@ namespace CefFlashBrowser
 
             if (_restart)
             {
+                LogHelper.LogInfo("Restarting application...");
                 Process.Start(Process.GetCurrentProcess().MainModule.FileName);
             }
         }
