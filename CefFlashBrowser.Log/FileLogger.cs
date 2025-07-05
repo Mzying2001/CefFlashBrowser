@@ -8,12 +8,14 @@ namespace CefFlashBrowser.Log
     public class FileLogger : ILogger, IDisposable
     {
         private bool _disposed;
+        private readonly string _newLine;
         private readonly FileStream _stream;
         private readonly StreamWriter _writer;
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         public FileLogger(string fileName)
         {
+            _newLine = Environment.NewLine;
             _stream = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
             _writer = new StreamWriter(_stream);
         }
@@ -90,12 +92,12 @@ namespace CefFlashBrowser.Log
 
         public void Log(LogLevel level, Exception exception)
         {
-            WriteLine($"{GetTimeString()} | {GetLogLevelString(level)} | \n{exception}");
+            WriteLine($"{GetTimeString()} | {GetLogLevelString(level)} | {_newLine}{exception}");
         }
 
         public void Log(LogLevel level, string message, Exception exception)
         {
-            WriteLine($"{GetTimeString()} | {GetLogLevelString(level)} | {message}\n{exception}");
+            WriteLine($"{GetTimeString()} | {GetLogLevelString(level)} | {message}{_newLine}{exception}");
         }
 
         public async Task LogAsync(LogLevel level, string message)
@@ -105,12 +107,12 @@ namespace CefFlashBrowser.Log
 
         public async Task LogAsync(LogLevel level, Exception exception)
         {
-            await WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | \n{exception}");
+            await WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {_newLine}{exception}");
         }
 
         public async Task LogAsync(LogLevel level, string message, Exception exception)
         {
-            await WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {message}\n{exception}");
+            await WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {message}{_newLine}{exception}");
         }
     }
 }
