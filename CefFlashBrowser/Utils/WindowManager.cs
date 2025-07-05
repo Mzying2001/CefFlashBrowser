@@ -224,6 +224,7 @@ namespace CefFlashBrowser.Utils
             }
             catch (Exception e)
             {
+                LogHelper.LogError($"Failed to open Sol file: {fileName}", e);
                 ShowError(e.Message);
             }
         }

@@ -1,4 +1,6 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Log;
+using CefFlashBrowser.Models.Data;
+using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,12 +20,12 @@ namespace CefFlashBrowser.Utils
 
         private static string[] GetDeleteFiles(string[] files)
         {
-            int reserveDays = 14; // Number of days to keep logs
+            int retainCount = GlobalData.RetainedLogCount;
 
-            if (files.Length <= reserveDays)
+            if (files.Length <= retainCount)
                 return Array.Empty<string>();
 
-            return files.OrderBy(item => File.GetCreationTime(item)).Take(files.Length - reserveDays).ToArray();
+            return files.OrderBy(item => File.GetCreationTime(item)).Take(files.Length - retainCount).ToArray();
         }
 
         private static async Task TryDeleteFilesAsync(IEnumerable<string> files, CancellationToken token)
@@ -38,10 +40,34 @@ namespace CefFlashBrowser.Utils
                         if (File.Exists(item))
                             File.Delete(item);
                     }
-                    catch
-                    { /*Ignore*/ }
+                    catch (Exception e)
+                    {
+                        LogError($"Failed to delete log file: {item}", e);
+                    }
                 });
             }, token);
+        }
+
+        private static ILogger GetLogger()
+        {
+            return SimpleIoc.Global.GetInstance<ILogger>();
+        }
+
+        public static void LogInfo(string message)
+        {
+            GetLogger().Log(LogLevel.Info, message);
+        }
+
+        public static void LogError(string message, Exception exception = null)
+        {
+            if (exception == null)
+            {
+                GetLogger().Log(LogLevel.Error, message);
+            }
+            else
+            {
+                GetLogger().Log(LogLevel.Error, message, exception);
+            }
         }
     }
 }

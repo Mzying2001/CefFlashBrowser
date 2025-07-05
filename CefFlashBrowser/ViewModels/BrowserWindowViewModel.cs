@@ -56,8 +56,9 @@ namespace CefFlashBrowser.ViewModels
                     return result.Result.ToString();
                 }
             }
-            catch
+            catch (Exception e)
             {
+                LogHelper.LogError("Failed to get web browser title", e);
                 return string.Empty;
             }
         }
@@ -92,6 +93,7 @@ namespace CefFlashBrowser.ViewModels
                 }
                 catch (Exception e)
                 {
+                    LogHelper.LogError($"Failed to create shortcut: {fileName}", e);
                     WindowManager.ShowError(e.Message);
                 }
             }

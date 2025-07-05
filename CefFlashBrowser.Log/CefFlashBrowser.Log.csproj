@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <Platforms>x86;x64</Platforms>
+  </PropertyGroup>
+
+</Project>

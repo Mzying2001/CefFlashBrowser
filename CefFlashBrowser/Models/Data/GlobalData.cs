@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CefFlashBrowser.Utils;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SimpleMvvm.Messaging;
 using System;
@@ -18,6 +19,7 @@ namespace CefFlashBrowser.Models.Data
         public static string PluginsPath { get; }
         public static string SharedObjectsPath { get; }
 
+        public static string AppLogPath { get; }
         public static string CefLogPath { get; }
         public static string FlashPath { get; }
         public static string EmptyExePath { get; }
@@ -28,6 +30,11 @@ namespace CefFlashBrowser.Models.Data
         public static string DataPath { get; }
         public static string FavoritesPath { get; }
         public static string SettingsPath { get; }
+
+        /// <summary>
+        /// Number of log files to keep
+        /// </summary>
+        public static int RetainedLogCount { get; } = 30;
 
         /// <summary>
         /// true if the program is started with parameters
@@ -44,6 +51,7 @@ namespace CefFlashBrowser.Models.Data
             PluginsPath = Path.Combine(AssetsPath, "Plugins\\");
             SharedObjectsPath = Path.Combine(CachesPath, "Pepper Data\\Shockwave Flash\\WritableRoot\\#SharedObjects\\");
 
+            AppLogPath = Path.Combine(LogsPath, $"app_{DateTime.Now:yyyyMMdd}.log");
             CefLogPath = Path.Combine(LogsPath, $"cef_{DateTime.Now:yyyyMMdd}.log");
             FlashPath = Path.Combine(PluginsPath, "pepflashplayer.dll");
             EmptyExePath = Path.Combine(AssetsPath, "EmptyExe\\CefFlashBrowser.EmptyExe.exe");
@@ -97,9 +105,10 @@ namespace CefFlashBrowser.Models.Data
                 var file = JsonConvert.DeserializeObject<FavoritesFile>(File.ReadAllText(FavoritesPath));
                 Favorites = new ObservableCollection<Website>(file.Favorites);
             }
-            catch
+            catch (Exception e)
             {
                 Favorites = new ObservableCollection<Website>();
+                LogHelper.LogError("Favorites file not found or invalid, using empty favorites", e);
             }
         }
 
@@ -109,11 +118,14 @@ namespace CefFlashBrowser.Models.Data
             {
                 var file = new FavoritesFile { Favorites = Favorites.ToArray() };
                 File.WriteAllText(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
+                LogHelper.LogInfo("Favorites saved successfully");
                 return true;
             }
-            catch
-            { }
-            return false;
+            catch (Exception e)
+            {
+                LogHelper.LogError("Failed to save favorites", e);
+                return false;
+            }
         }
 
         #endregion
@@ -132,9 +144,10 @@ namespace CefFlashBrowser.Models.Data
                 Settings = JsonConvert.DeserializeObject<Settings>(file);
                 Settings.SetNullPropertiesToDefault();
             }
-            catch
+            catch (Exception e)
             {
                 Settings = Settings.Default;
+                LogHelper.LogError("Settings file not found or invalid, using default settings", e);
             }
         }
 
@@ -147,15 +160,20 @@ namespace CefFlashBrowser.Models.Data
                     JObject settingsJson = JObject.Parse(File.ReadAllText(SettingsPath));
                     settingsJson.Merge(JToken.FromObject(Settings));
                     File.WriteAllText(SettingsPath, settingsJson.ToString(Formatting.Indented));
+                    LogHelper.LogInfo("Settings saved successfully, type: merge");
                 }
                 else
                 {
                     File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+                    LogHelper.LogInfo("Settings saved successfully, type: create");
                 }
                 return true;
             }
-            catch { }
-            return false;
+            catch (Exception e)
+            {
+                LogHelper.LogError("Failed to save settings", e);
+                return false;
+            }
         }
 
         #endregion

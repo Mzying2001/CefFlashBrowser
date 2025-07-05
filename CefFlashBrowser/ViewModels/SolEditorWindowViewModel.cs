@@ -110,6 +110,7 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
+                LogHelper.LogError("Error saving SOL file", e);
                 WindowManager.ShowError(e.Message);
             }
         }
@@ -137,6 +138,8 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
+                LogHelper.LogError($"Save SOL file failed: {_file.Path}", e);
+
                 _file.Path = oldPath;
                 WindowManager.ShowError(e.Message);
             }
@@ -289,6 +292,7 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
+                LogHelper.LogError("Import binary data failed", e);
                 WindowManager.ShowError(e.Message);
             }
         }
@@ -316,6 +320,7 @@ namespace CefFlashBrowser.ViewModels
             }
             catch (Exception e)
             {
+                LogHelper.LogError("Export binary data failed", e);
                 WindowManager.ShowError(e.Message);
             }
         }

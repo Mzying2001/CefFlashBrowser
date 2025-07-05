@@ -38,7 +38,10 @@ namespace CefFlashBrowser.Utils
                 int darkMode = theme == Theme.Dark ? 1 : 0;
                 Win32.DwmSetWindowAttribute(hwnd, Win32.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
             }
-            catch { }
+            catch (Exception e)
+            {
+                LogHelper.LogError("Error changing title bar color", e);
+            }
         }
 
         public static bool IsSystemDarkMode()

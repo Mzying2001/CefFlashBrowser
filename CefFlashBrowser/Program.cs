@@ -1,7 +1,9 @@
 ﻿using CefFlashBrowser.FlashBrowser;
+using CefFlashBrowser.Log;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
+using SimpleMvvm.Ioc;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -26,6 +28,7 @@ namespace CefFlashBrowser
                 var app = new App();
                 app.InitializeComponent();
 
+                RegisterServices();
                 GlobalData.InitData();
                 LanguageManager.InitLanguage();
 
@@ -34,6 +37,9 @@ namespace CefFlashBrowser
 
                 InitCefFlash();
                 InitTheme();
+
+                LogHelper.LogInfo("Application started successfully");
+                LogHelper.LogInfo($"CefFlashBrowser Version: {Assembly.GetExecutingAssembly().GetName().Version}");
                 app.Run();
 
                 try
@@ -45,11 +51,13 @@ namespace CefFlashBrowser
             }
             catch (Exception e)
             {
+                LogHelper.LogError("Unhandled exception in Main method", e);
                 WindowManager.Alert(e.ToString(), LanguageManager.GetString("dialog_error"));
             }
             finally
             {
                 OnTerminate();
+                UnregisterServices();
             }
         }
 
@@ -125,7 +133,12 @@ namespace CefFlashBrowser
 
             if (_restart)
             {
+                LogHelper.LogInfo("Restarting application...");
                 Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+            }
+            else
+            {
+                LogHelper.LogInfo("Application terminated");
             }
         }
 
@@ -133,6 +146,17 @@ namespace CefFlashBrowser
         {
             _restart = true;
             Application.Current.Shutdown();
+        }
+
+        private static void RegisterServices()
+        {
+            SimpleIoc.Global.Register<ILogger>(() => new FileLogger(GlobalData.AppLogPath));
+        }
+
+        private static void UnregisterServices()
+        {
+            if (SimpleIoc.Global.IsRegistered<ILogger>())
+                SimpleIoc.Global.Unregister<ILogger>();
         }
     }
 }
