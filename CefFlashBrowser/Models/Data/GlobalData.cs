@@ -107,8 +107,8 @@ namespace CefFlashBrowser.Models.Data
             }
             catch (Exception e)
             {
-                LogHelper.LogError("Failed to load favorites", e);
                 Favorites = new ObservableCollection<Website>();
+                LogHelper.LogError("Favorites file not found or invalid, using empty favorites", e);
             }
         }
 
@@ -124,8 +124,8 @@ namespace CefFlashBrowser.Models.Data
             catch (Exception e)
             {
                 LogHelper.LogError("Failed to save favorites", e);
+                return false;
             }
-            return false;
         }
 
         #endregion
@@ -146,8 +146,8 @@ namespace CefFlashBrowser.Models.Data
             }
             catch (Exception e)
             {
-                LogHelper.LogError("Failed to load settings", e);
                 Settings = Settings.Default;
+                LogHelper.LogError("Settings file not found or invalid, using default settings", e);
             }
         }
 
@@ -160,19 +160,20 @@ namespace CefFlashBrowser.Models.Data
                     JObject settingsJson = JObject.Parse(File.ReadAllText(SettingsPath));
                     settingsJson.Merge(JToken.FromObject(Settings));
                     File.WriteAllText(SettingsPath, settingsJson.ToString(Formatting.Indented));
+                    LogHelper.LogInfo("Settings saved successfully, type: merge");
                 }
                 else
                 {
                     File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+                    LogHelper.LogInfo("Settings saved successfully, type: create");
                 }
-                LogHelper.LogInfo("Settings saved successfully");
                 return true;
             }
             catch (Exception e)
             {
                 LogHelper.LogError("Failed to save settings", e);
+                return false;
             }
-            return false;
         }
 
         #endregion
