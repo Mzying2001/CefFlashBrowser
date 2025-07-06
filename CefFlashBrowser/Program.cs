@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace CefFlashBrowser
@@ -40,14 +41,10 @@ namespace CefFlashBrowser
 
                 LogHelper.LogInfo("Application started successfully");
                 LogHelper.LogInfo($"CefFlashBrowser Version: {Assembly.GetExecutingAssembly().GetName().Version}");
-                app.Run();
 
-                try
-                {
-                    cts.Cancel();
-                    delLogsTask.Wait();
-                }
-                catch { }
+                app.Run();
+                cts.Cancel();
+                WaitAllTask(delLogsTask);
             }
             catch (Exception e)
             {
@@ -59,6 +56,12 @@ namespace CefFlashBrowser
                 OnTerminate();
                 UnregisterServices();
             }
+        }
+
+        private static void WaitAllTask(params Task[] tasks)
+        {
+            try { Task.WaitAll(tasks); }
+            catch (Exception e) { LogHelper.LogError("Exception occurred while waiting for tasks", e); }
         }
 
         private static void InitTheme()
