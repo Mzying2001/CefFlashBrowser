@@ -8,6 +8,8 @@
     <img src="https://img.shields.io/github/downloads/Mzying2001/CefFlashBrowser/total" />
 </h1>
 
+**中文** | [English](./README.en.md)
+
 ![main](./Images/MainWindow.png)
 
 ## 软件介绍
