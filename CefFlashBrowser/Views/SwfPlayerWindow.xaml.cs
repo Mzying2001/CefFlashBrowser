@@ -101,7 +101,7 @@ namespace CefFlashBrowser.Views
         private void LoadSwf(string fileName)
         {
             try { browser.ExecuteScriptAsync("loadSwf", fileName); }
-            catch { }
+            catch (Exception e) { LogHelper.LogError($"Failed to load swf file: {fileName}", e); }
         }
 
         private void OnBrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
