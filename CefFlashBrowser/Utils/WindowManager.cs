@@ -105,15 +105,22 @@ namespace CefFlashBrowser.Utils
                 _browserWindows.Add(window);
                 ((BrowserWindowViewModel)window.DataContext).Address = address;
             });
+
             browserWindow.Closing += (s, e) =>
             {
-                if (e.Cancel)
-                    return;
+                if (e.Cancel) return;
+
                 var window = (BrowserWindow)s;
                 _browserWindows.Remove(window);
-                if (_browserWindows.Count == 0 && !GlobalData.IsStartWithoutMainWindow && GlobalData.Settings.HideMainWindowOnBrowsing)
+
+                if (_browserWindows.Count == 0
+                    && !GlobalData.IsStartWithoutMainWindow
+                    && GlobalData.Settings.HideMainWindowOnBrowsing)
+                {
                     ShowMainWindow();
+                }
             };
+
             return browserWindow;
         }
 
