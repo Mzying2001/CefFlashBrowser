@@ -206,6 +206,9 @@
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+M"
                     Command="{Binding ShowMainWindowCommand}"/>
+        <KeyBinding Gesture="Ctrl+N"
+                    Command="{Binding NewBrowserWindowCommand}"
+                    CommandParameter="{Binding ElementName=browser, Path=Address}"/>
         <KeyBinding Gesture="Ctrl+O"
                     Command="{Binding OpenInDefaultBrowserCommand}"
                     CommandParameter="{Binding ElementName=browser, Path=Address}"/>

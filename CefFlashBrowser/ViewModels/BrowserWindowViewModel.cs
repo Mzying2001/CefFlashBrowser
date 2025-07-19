@@ -18,6 +18,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand AddFavoriteCommand { get; set; }
         public DelegateCommand ReloadOrStopCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
+        public DelegateCommand NewBrowserWindowCommand { get; set; }
 
         private string _address = "about:blank";
         public string Address
@@ -121,6 +122,11 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowSwfPlayer(url);
         }
 
+        public void NewBrowserWindow(string url)
+        {
+            WindowManager.ShowBrowser(url ?? "about:blank");
+        }
+
         public BrowserWindowViewModel()
         {
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
@@ -130,6 +136,7 @@ namespace CefFlashBrowser.ViewModels
             AddFavoriteCommand = new DelegateCommand<IWebBrowser>(AddFavorite);
             ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
+            NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
         }
     }
 }
