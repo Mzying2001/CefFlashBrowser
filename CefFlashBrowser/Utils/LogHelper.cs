@@ -69,5 +69,17 @@ namespace CefFlashBrowser.Utils
                 GetLogger().Log(LogLevel.Error, message, exception);
             }
         }
+
+        public static void LogWtf(string message, Exception exception = null) // What a Terrible Failure
+        {
+            if (exception == null)
+            {
+                GetLogger().Log(LogLevel.Fatal, message);
+            }
+            else
+            {
+                GetLogger().Log(LogLevel.Fatal, message, exception);
+            }
+        }
     }
 }
