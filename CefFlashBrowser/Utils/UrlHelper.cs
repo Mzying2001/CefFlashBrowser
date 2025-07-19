@@ -7,7 +7,7 @@ namespace CefFlashBrowser.Utils
     public static class UrlHelper
     {
         private static readonly Regex _httpUrlRegex
-            = new Regex(@"^(https?://)?(\w|\d|-)+(\.(\w|\d|-)+)+(:\d+)?(/(\w|\d|-)+)*(/((\w|\d|-)+\.(\w|\d|-)+)?)?(\?[^?&=]+(=[^?&=]+)?(&[^?&=]+(=[^?&=]+)?)*)?$");
+            = new Regex(@"^(https?://)?[\w\-%]+(\.[\w\-%]+)+(:\d+)?(/[\w\-\.%]+)*/?(\?[^?&=]+(=[^?&=]+)?(&[^?&=]+(=[^?&=]+)?)*)?$");
 
         public static bool IsHttpUrl(string url)
         {

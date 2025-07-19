@@ -7,6 +7,8 @@ using CefFlashBrowser.Views.Dialogs;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Windows;
 
 namespace CefFlashBrowser.Utils
@@ -104,16 +106,28 @@ namespace CefFlashBrowser.Utils
                 _browserWindows.Add(window);
                 ((BrowserWindowViewModel)window.DataContext).Address = address;
             });
+
             browserWindow.Closing += (s, e) =>
             {
-                if (e.Cancel)
-                    return;
+                if (e.Cancel) return;
+
                 var window = (BrowserWindow)s;
                 _browserWindows.Remove(window);
-                if (_browserWindows.Count == 0 && !GlobalData.IsStartWithoutMainWindow && GlobalData.Settings.HideMainWindowOnBrowsing)
+
+                if (_browserWindows.Count == 0
+                    && !GlobalData.IsStartWithoutMainWindow
+                    && GlobalData.Settings.HideMainWindowOnBrowsing)
+                {
                     ShowMainWindow();
+                }
             };
+
             return browserWindow;
+        }
+
+        public static BrowserWindow GetLastBrowserWindow()
+        {
+            return _browserWindows.LastOrDefault();
         }
 
         public static SwfPlayerWindow ShowSwfPlayer(string fileName)
@@ -261,6 +275,51 @@ namespace CefFlashBrowser.Utils
                 window.CanChangeArrayType = canChangeArrayType;
             });
             callback?.Invoke(dialog.DialogResult, dialog.ItemName, dialog.SelectedType);
+        }
+
+        public static IntPtr GetOwnerHandle(IntPtr hwnd)
+        {
+            return Win32.GetWindowLongPtr(hwnd, Win32.GWLP_HWNDPARENT);
+        }
+
+        public static void SetOwnerHandle(IntPtr hwnd, IntPtr hOwner)
+        {
+            Win32.SetWindowLongPtr(hwnd, Win32.GWLP_HWNDPARENT, hOwner);
+        }
+
+        private static bool IsDevToolsWindow(IntPtr hwnd)
+        {
+            var clsname = new StringBuilder(256);
+            Win32.GetClassName(hwnd, clsname, clsname.Capacity);
+
+            var wndName = new StringBuilder(256);
+            Win32.GetWindowText(hwnd, wndName, wndName.Capacity);
+
+            return clsname.ToString().Equals("CefBrowserWindow", StringComparison.OrdinalIgnoreCase)
+                && wndName.ToString().StartsWith("devtools", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Find the devtools window that has no owner
+        /// </summary>
+        public static IntPtr FindDevTools(IntPtr pid)
+        {
+            IntPtr hDevTools = IntPtr.Zero;
+
+            Win32.EnumWindows((hWnd, lParam) =>
+            {
+                Win32.GetWindowThreadProcessId(hWnd, out IntPtr pidWnd);
+
+                if (pidWnd == pid && IsDevToolsWindow(hWnd)
+                    && GetOwnerHandle(hWnd) == IntPtr.Zero)
+                {
+                    hDevTools = hWnd;
+                    return false;
+                }
+                return true;
+            }, IntPtr.Zero);
+
+            return hDevTools;
         }
     }
 }

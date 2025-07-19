@@ -1,8 +1,10 @@
-﻿using CefFlashBrowser.Utils;
+﻿using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Utils;
 using CefSharp;
 using IWshRuntimeLibrary;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -18,6 +20,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand AddFavoriteCommand { get; set; }
         public DelegateCommand ReloadOrStopCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
+        public DelegateCommand NewBrowserWindowCommand { get; set; }
+        public DelegateCommand ShowDevToolsCommand { get; set; }
 
         private string _address = "about:blank";
         public string Address
@@ -121,6 +125,20 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowSwfPlayer(url);
         }
 
+        public void NewBrowserWindow(string url)
+        {
+            WindowManager.ShowBrowser(url ?? "about:blank");
+        }
+
+        public void ShowDevTools(IWebBrowser browser)
+        {
+            if (browser != null)
+            {
+                browser.ShowDevTools();
+                Messenger.Global.Send(MessageTokens.DEVTOOLS_SHOWN, browser);
+            }
+        }
+
         public BrowserWindowViewModel()
         {
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
@@ -130,6 +148,8 @@ namespace CefFlashBrowser.ViewModels
             AddFavoriteCommand = new DelegateCommand<IWebBrowser>(AddFavorite);
             ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
+            NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
+            ShowDevToolsCommand = new DelegateCommand<IWebBrowser>(ShowDevTools);
         }
     }
 }
