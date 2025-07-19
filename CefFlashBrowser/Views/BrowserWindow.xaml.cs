@@ -5,8 +5,10 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -139,6 +141,9 @@ namespace CefFlashBrowser.Views
 
             BindingOperations.SetBinding(this, FullScreenProperty, new Binding
             { Source = browser, Path = new PropertyPath("FullscreenMode"), Mode = BindingMode.OneWay });
+
+            Messenger.Global.Register(MessageTokens.DEVTOOLS_SHOWN, DevToolsShownHandler);
+            Closed += delegate { Messenger.Global.Unregister(MessageTokens.DEVTOOLS_SHOWN, DevToolsShownHandler); };
         }
 
         private WindowSizeInfo GetSizeInfo()
@@ -277,6 +282,48 @@ namespace CefFlashBrowser.Views
         private void ShowBlockedSwfsButtonClicked(object sender, RoutedEventArgs e)
         {
             OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["blockedSwfs"]);
+        }
+
+        private void DevToolsShownHandler(object obj)
+        {
+            if (obj is IWebBrowser b && b == browser)
+            {
+                OnDevToolsShown();
+            }
+        }
+
+        private void OnDevToolsShown()
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == null) return;
+
+            Win32.GetWindowThreadProcessId(hwnd, out IntPtr pid);
+            if (pid == IntPtr.Zero) return;
+
+            Task.Run(async () =>
+            {
+                IntPtr hDevTools = IntPtr.Zero;
+
+                int cnt;
+                for (cnt = 0; cnt < 5; cnt++)
+                {
+                    hDevTools = WindowManager.FindDevTools(pid);
+
+                    if (hDevTools == IntPtr.Zero)
+                        await Task.Delay(100);
+                    else break;
+                }
+
+                if (hDevTools != IntPtr.Zero)
+                {
+                    // Set current window as the owner of the DevTools window
+                    WindowManager.SetOwnerHandle(hDevTools, hwnd);
+                }
+                else
+                {
+                    LogHelper.LogInfo($"DevTools window not found after {cnt} attempts.");
+                }
+            });
         }
     }
 }

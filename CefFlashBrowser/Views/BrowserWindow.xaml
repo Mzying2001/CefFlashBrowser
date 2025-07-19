@@ -194,7 +194,8 @@
         <KeyBinding Key="F11"
                     Command="{Binding ElementName=window, Path=ToggleFullScreenCommand}"/>
         <KeyBinding Key="F12"
-                    Command="{Binding ElementName=browser, Path=ShowDevToolsCommand}"/>
+                    Command="{Binding ShowDevToolsCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+OemPlus"
                     Command="{Binding ElementName=browser, Path=ZoomInCommand}"/>
         <KeyBinding Gesture="Ctrl+OemMinus"
