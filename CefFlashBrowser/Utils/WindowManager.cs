@@ -7,6 +7,7 @@ using CefFlashBrowser.Views.Dialogs;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace CefFlashBrowser.Utils
@@ -114,6 +115,11 @@ namespace CefFlashBrowser.Utils
                     ShowMainWindow();
             };
             return browserWindow;
+        }
+
+        public static BrowserWindow GetLastBrowserWindow()
+        {
+            return _browserWindows.LastOrDefault();
         }
 
         public static SwfPlayerWindow ShowSwfPlayer(string fileName)

@@ -130,7 +130,7 @@ namespace CefFlashBrowser.Views
             ToggleFullScreenCommand = new DelegateCommand(ToggleFullScreen);
 
             InitializeComponent();
-            WindowSizeInfo.Apply(GlobalData.Settings.BrowserWindowSizeInfo, this);
+            WindowSizeInfo.Apply(GetSizeInfo(), this);
 
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
@@ -139,6 +139,20 @@ namespace CefFlashBrowser.Views
 
             BindingOperations.SetBinding(this, FullScreenProperty, new Binding
             { Source = browser, Path = new PropertyPath("FullscreenMode"), Mode = BindingMode.OneWay });
+        }
+
+        private WindowSizeInfo GetSizeInfo()
+        {
+            WindowSizeInfo info = null;
+
+            if (WindowManager.GetLastBrowserWindow() is Window window)
+            {
+                info = WindowSizeInfo.GetSizeInfo(window);
+                info.Left += 20;
+                info.Top += 20;
+            }
+
+            return info ?? GlobalData.Settings.BrowserWindowSizeInfo;
         }
 
         private void ToggleFullScreen()
