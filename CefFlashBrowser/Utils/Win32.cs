@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -6,13 +7,32 @@ namespace CefFlashBrowser.Utils
 {
     public static class Win32
     {
+        // window messages
         public const int WM_MOVE = 0x0003;
 
-        public const int GWLP_HWNDPARENT = -8;
+        // window styles
+        public const int WS_CHILD = 0x40000000;
+        public const int WS_VISIBLE = 0x10000000;
 
+        // get/set window long
+        public const int GWLP_HWNDPARENT = -8;
+        public const int GWL_STYLE = -16;
+
+        // dwm attributes
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
 
+        // enum windows callback
         public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        // rect structure
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+        }
 
 
         [DllImport("dwmapi.dll")]
@@ -38,5 +58,25 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr CreateWindowEx(
+            uint dwExStyle, string lpClassName, string lpWindowName, uint dwStyle, int X, int Y, int nWidth, int nHeight,
+            IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+
+        [DllImport("user32.dll")]
+        public static extern bool DestroyWindow(IntPtr hWnd);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
+        public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
     }
 }

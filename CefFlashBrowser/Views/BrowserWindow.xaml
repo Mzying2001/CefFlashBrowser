@@ -13,6 +13,7 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         mc:Ignorable="d"
         
         x:Name="window"
@@ -134,7 +135,8 @@
             <Separator/>
 
             <MenuItem Header="{DynamicResource browser_openDevTool}"
-                      Command="{Binding Source={x:Reference Name=browser}, Path=ShowDevToolsCommand}"
+                      Command="{Binding ToggleDevToolsCommand}"
+                      CommandParameter="{Binding Source={x:Reference Name=browser}}"
                       InputGestureText="F12"/>
             <MenuItem Header="{DynamicResource browser_viewSource}"
                       Command="{Binding ViewSourceCommand}"
@@ -194,7 +196,7 @@
         <KeyBinding Key="F11"
                     Command="{Binding ElementName=window, Path=ToggleFullScreenCommand}"/>
         <KeyBinding Key="F12"
-                    Command="{Binding ShowDevToolsCommand}"
+                    Command="{Binding ToggleDevToolsCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+OemPlus"
                     Command="{Binding ElementName=browser, Path=ZoomInCommand}"/>
@@ -372,10 +374,42 @@
             </Grid>
         </DockPanel>
 
-        <flash:ChromiumFlashBrowser x:Name="browser"
-                                    Grid.Row="1"
-                                    ZoomLevelIncrement="0.25"
-                                    Address="{Binding Address, TargetNullValue='about:blank'}"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition x:Name="devtoolsColumn" Width="Auto"
+                                  MinWidth="{Binding ElementName=devtoolsContainer, Path=MinWidth}"
+                                  MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth, Converter={StaticResource TwoThird}}"/>
+            </Grid.ColumnDefinitions>
+
+            <flash:ChromiumFlashBrowser x:Name="browser"
+                                        ZoomLevelIncrement="0.25"
+                                        Address="{Binding Address, TargetNullValue='about:blank'}"/>
+
+            <GridSplitter Grid.Column="1"
+                          Width="5"
+                          Background="Transparent"
+                          HorizontalAlignment="Stretch"
+                          Visibility="{Binding ElementName=devtoolsContainer, Path=Visibility}"/>
+
+            <c:HwndContainer x:Name="devtoolsContainer"
+                             Grid.Column="2"
+                             ContentHandle="{Binding DevToolsHandle}">
+                <c:HwndContainer.Style>
+                    <Style TargetType="{x:Type c:HwndContainer}">
+                        <Setter Property="MinWidth" Value="300"/>
+                        <Style.Triggers>
+                            <Trigger Property="ContentHandle"
+                                     Value="{x:Static sys:IntPtr.Zero}">
+                                <Setter Property="MinWidth" Value="0"/>
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </c:HwndContainer.Style>
+            </c:HwndContainer>
+        </Grid>
 
         <Popup x:Name="statusPopup"
                IsOpen="{Binding ElementName=window, Path=IsActive, Mode=OneWay}"
