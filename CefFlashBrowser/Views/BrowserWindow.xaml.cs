@@ -2,6 +2,7 @@
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
+using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
@@ -111,6 +112,7 @@ namespace CefFlashBrowser.Views
 
         private bool _doClose = false;
         private bool _isMaximizedBeforeFullScreen = false;
+        private GridLength _devToolsColumnWidth = new GridLength(0, GridUnitType.Auto);
 
         public ICommand ToggleFullScreenCommand { get; }
 
@@ -140,10 +142,16 @@ namespace CefFlashBrowser.Views
             browser.MenuHandler = new BrowserMenuHandler(this);
 
             BindingOperations.SetBinding(this, FullScreenProperty, new Binding
-            { Source = browser, Path = new PropertyPath("FullscreenMode"), Mode = BindingMode.OneWay });
+            { Source = browser, Path = new PropertyPath(nameof(browser.FullscreenMode)), Mode = BindingMode.OneWay });
 
-            Messenger.Global.Register(MessageTokens.DEVTOOLS_SHOWN, DevToolsShownHandler);
-            Closed += delegate { Messenger.Global.Unregister(MessageTokens.DEVTOOLS_SHOWN, DevToolsShownHandler); };
+            Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
+            Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
+
+            Closed += delegate
+            {
+                Messenger.Global.Unregister(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
+                Messenger.Global.Unregister(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
+            };
         }
 
         private WindowSizeInfo GetSizeInfo()
@@ -284,15 +292,23 @@ namespace CefFlashBrowser.Views
             OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["blockedSwfs"]);
         }
 
-        private void DevToolsShownHandler(object obj)
+        private void DevToolsOpenedHandler(object obj)
         {
-            if (obj is IWebBrowser b && b == browser)
+            if (obj == browser)
             {
-                OnDevToolsShown();
+                OnDevToolsOpened();
             }
         }
 
-        private void OnDevToolsShown()
+        private void DevToolsClosedHandler(object obj)
+        {
+            if (obj == browser)
+            {
+                OnDevToolsClosed();
+            }
+        }
+
+        private void OnDevToolsOpened()
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             if (hwnd == null) return;
@@ -305,25 +321,47 @@ namespace CefFlashBrowser.Views
                 IntPtr hDevTools = IntPtr.Zero;
 
                 int cnt;
-                for (cnt = 0; cnt < 5; cnt++)
+                for (cnt = 0; cnt < 8; cnt++)
                 {
-                    hDevTools = WindowManager.FindDevTools(pid);
+                    hDevTools = HwndHelper.FindDevTools(pid);
 
                     if (hDevTools == IntPtr.Zero)
                         await Task.Delay(100);
                     else break;
                 }
 
-                if (hDevTools != IntPtr.Zero)
+                Dispatcher.Invoke(() =>
                 {
-                    // Set current window as the owner of the DevTools window
-                    WindowManager.SetOwnerHandle(hDevTools, hwnd);
-                }
-                else
-                {
-                    LogHelper.LogInfo($"DevTools window not found after {cnt} attempts.");
-                }
+                    if (hDevTools != IntPtr.Zero)
+                    {
+                        // Set current window as the owner of the DevTools window
+                        HwndHelper.SetOwnerWindow(hDevTools, hwnd);
+
+                        if (DataContext is BrowserWindowViewModel vm
+                            && GlobalData.Settings.EnableIntegratedDevTools)
+                        {
+                            HwndHelper.SetWindowStyle(hDevTools, Win32.WS_CHILD | Win32.WS_VISIBLE);
+                            vm.DevToolsHandle = hDevTools;
+
+                            Activate();
+                            Keyboard.Focus(browser);
+                            devtoolsColumn.Width = _devToolsColumnWidth;
+                        }
+                    }
+                    else
+                    {
+                        LogHelper.LogError($"DevTools window not found after {cnt} attempts.");
+                    }
+                });
             });
+        }
+
+        private void OnDevToolsClosed()
+        {
+            Activate();
+            Keyboard.Focus(browser);
+            _devToolsColumnWidth = devtoolsColumn.Width;
+            devtoolsColumn.Width = new GridLength(0, GridUnitType.Auto);
         }
     }
 }

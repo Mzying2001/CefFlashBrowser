@@ -116,6 +116,7 @@
     <sys:String x:Key="browser_addToDictionary">Add to dictionary</sys:String>
     <sys:String x:Key="browser_reloadNoCache">Reload ignore cache</sys:String>
     <sys:String x:Key="browser_openDevTool">Open devtools</sys:String>
+    <sys:String x:Key="browser_toggleDevTool">Open/Close devtools</sys:String>
     <sys:String x:Key="browser_viewSource">View source</sys:String>
     <sys:String x:Key="browser_zoom">Zoom</sys:String>
     <sys:String x:Key="browser_openInDefaultBrowser">Open in default browser</sys:String>

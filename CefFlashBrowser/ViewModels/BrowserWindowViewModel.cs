@@ -21,13 +21,20 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ReloadOrStopCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
         public DelegateCommand NewBrowserWindowCommand { get; set; }
-        public DelegateCommand ShowDevToolsCommand { get; set; }
+        public DelegateCommand ToggleDevToolsCommand { get; set; }
 
         private string _address = "about:blank";
         public string Address
         {
             get => _address;
             set => UpdateValue(ref _address, value);
+        }
+
+        private IntPtr _devtoolsHandle = IntPtr.Zero;
+        public IntPtr DevToolsHandle
+        {
+            get => _devtoolsHandle;
+            set => UpdateValue(ref _devtoolsHandle, value);
         }
 
         public void ShowMainWindow()
@@ -130,12 +137,22 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowBrowser(url ?? "about:blank");
         }
 
-        public void ShowDevTools(IWebBrowser browser)
+        public void ToggleDevTools(IWebBrowser browser)
         {
             if (browser != null)
             {
-                browser.ShowDevTools();
-                Messenger.Global.Send(MessageTokens.DEVTOOLS_SHOWN, browser);
+                if (DevToolsHandle == IntPtr.Zero
+                    && HwndHelper.FindNotIntegratedDevTools(browser) == IntPtr.Zero)
+                {
+                    browser.ShowDevTools();
+                    Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);
+                }
+                else
+                {
+                    DevToolsHandle = IntPtr.Zero;
+                    browser.CloseDevTools();
+                    Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
+                }
             }
         }
 
@@ -149,7 +166,7 @@ namespace CefFlashBrowser.ViewModels
             ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
-            ShowDevToolsCommand = new DelegateCommand<IWebBrowser>(ShowDevTools);
+            ToggleDevToolsCommand = new DelegateCommand<IWebBrowser>(ToggleDevTools);
         }
     }
 }

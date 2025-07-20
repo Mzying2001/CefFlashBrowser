@@ -16,6 +16,7 @@
         public FakeFlashVersionSetting FakeFlashVersionSetting { get; set; }
         public bool HideMainWindowOnBrowsing { get; set; }
         public bool FollowSystemTheme { get; set; }
+        public bool EnableIntegratedDevTools { get; set; }
 
 
         public static Settings Default => new Settings();
@@ -38,6 +39,7 @@
             FakeFlashVersionSetting = new FakeFlashVersionSetting();
             HideMainWindowOnBrowsing = false;
             FollowSystemTheme = true;
+            EnableIntegratedDevTools = true;
         }
 
         public void SetNullPropertiesToDefault()
