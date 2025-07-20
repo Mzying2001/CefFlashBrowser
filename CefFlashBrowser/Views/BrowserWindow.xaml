@@ -134,7 +134,7 @@
 
             <Separator/>
 
-            <MenuItem Header="{DynamicResource browser_openDevTool}"
+            <MenuItem Header="{DynamicResource browser_toggleDevTool}"
                       Command="{Binding ToggleDevToolsCommand}"
                       CommandParameter="{Binding Source={x:Reference Name=browser}}"
                       InputGestureText="F12"/>

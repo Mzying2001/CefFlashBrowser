@@ -116,6 +116,7 @@
     <sys:String x:Key="browser_addToDictionary">新增到字典</sys:String>
     <sys:String x:Key="browser_reloadNoCache">重新整理（忽略快取）</sys:String>
     <sys:String x:Key="browser_openDevTool">開啟開發者工具</sys:String>
+    <sys:String x:Key="browser_toggleDevTool">開啟/關閉開發者工具</sys:String>
     <sys:String x:Key="browser_viewSource">檢視網頁原始碼</sys:String>
     <sys:String x:Key="browser_zoom">縮放</sys:String>
     <sys:String x:Key="browser_openInDefaultBrowser">在預設瀏覽器開啟</sys:String>
