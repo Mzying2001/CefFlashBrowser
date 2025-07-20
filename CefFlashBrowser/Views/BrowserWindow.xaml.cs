@@ -337,7 +337,8 @@ namespace CefFlashBrowser.Views
                         // Set current window as the owner of the DevTools window
                         HwndHelper.SetOwnerWindow(hDevTools, hwnd);
 
-                        if (DataContext is BrowserWindowViewModel vm)
+                        if (DataContext is BrowserWindowViewModel vm
+                            && GlobalData.Settings.EnableIntegratedDevTools)
                         {
                             HwndHelper.SetWindowStyle(hDevTools, Win32.WS_CHILD | Win32.WS_VISIBLE);
                             vm.DevToolsHandle = hDevTools;
