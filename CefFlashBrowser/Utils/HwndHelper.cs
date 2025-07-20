@@ -1,5 +1,8 @@
-﻿using System;
+﻿using CefSharp;
+using System;
 using System.Text;
+using System.Windows;
+using System.Windows.Interop;
 
 namespace CefFlashBrowser.Utils
 {
@@ -67,6 +70,28 @@ namespace CefFlashBrowser.Utils
         public static IntPtr FindDevTools(IntPtr pid)
         {
             return FindDevTools(pid, IntPtr.Zero);
+        }
+
+        /// <summary>
+        /// Find the top-level devtools window that owned by the specified browser
+        /// </summary>
+        public static IntPtr FindNotIntegratedDevTools(IWebBrowser browser)
+        {
+            var obj = browser as DependencyObject;
+
+            while (obj != null && !(obj is Window))
+            {
+                obj = LogicalTreeHelper.GetParent(obj);
+            }
+
+            if (obj is Window w)
+            {
+                IntPtr hwnd = new WindowInteropHelper(w).Handle;
+                Win32.GetWindowThreadProcessId(hwnd, out IntPtr pidWnd);
+                return FindDevTools(pidWnd, hwnd);
+            }
+
+            return IntPtr.Zero;
         }
     }
 }

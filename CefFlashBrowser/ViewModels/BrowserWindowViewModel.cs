@@ -141,7 +141,8 @@ namespace CefFlashBrowser.ViewModels
         {
             if (browser != null)
             {
-                if (DevToolsHandle == IntPtr.Zero)
+                if (DevToolsHandle == IntPtr.Zero
+                    && HwndHelper.FindNotIntegratedDevTools(browser) == IntPtr.Zero)
                 {
                     browser.ShowDevTools();
                     Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);
