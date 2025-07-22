@@ -3,9 +3,7 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
-using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
-using SimpleMvvm.Command;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
@@ -13,7 +11,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 
@@ -52,25 +49,11 @@ namespace CefFlashBrowser.Views
                 {
                     if (targetDisposition == WindowOpenDisposition.NewPopup)
                     {
-                        window.ViewModel.FullScreen = false;
-                        WindowManager.ShowPopupWebPage(targetUrl, popupFeatures);
+                        window.ViewModel.OnPopup(targetUrl, popupFeatures);
                     }
                     else
                     {
-                        switch (GlobalData.Settings.NewPageBehavior)
-                        {
-                            case NewPageBehavior.NewWindow:
-                                {
-                                    window.ViewModel.FullScreen = false;
-                                    WindowManager.ShowBrowser(targetUrl);
-                                    break;
-                                }
-                            case NewPageBehavior.OriginalWindow:
-                                {
-                                    chromiumWebBrowser.Load(targetUrl);
-                                    break;
-                                }
-                        }
+                        window.ViewModel.OnNewPage(targetUrl);
                     }
                 });
                 newBrowser = null;

@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using IWshRuntimeLibrary;
@@ -188,6 +189,30 @@ namespace CefFlashBrowser.ViewModels
                 //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
                 FullScreen = true;
             }
+        }
+
+        public void OnNewPage(string url)
+        {
+            switch (GlobalData.Settings.NewPageBehavior)
+            {
+                case NewPageBehavior.NewWindow:
+                    {
+                        FullScreen = false;
+                        WindowManager.ShowBrowser(url);
+                        break;
+                    }
+                case NewPageBehavior.OriginalWindow:
+                    {
+                        Address = url;
+                        break;
+                    }
+            }
+        }
+
+        public void OnPopup(string url, IPopupFeatures features)
+        {
+            FullScreen = false;
+            WindowManager.ShowPopupWebPage(url, features);
         }
 
         public BrowserWindowViewModel()
