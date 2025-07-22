@@ -7,7 +7,6 @@ using CefSharp;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -32,15 +31,36 @@ namespace CefFlashBrowser.Views
 
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
+                bool isPopup = browser.IsPopup;
                 bool hasDevTools = chromiumWebBrowser.GetBrowserHost()?.HasDevTools ?? false;
-                if (hasDevTools && browser.IsPopup) return false;
 
                 window.Dispatcher.Invoke(delegate
                 {
-                    window._doClose = true;
-                    window.Close();
+                    if (isPopup && hasDevTools)
+                    {
+                        window.ViewModel.OnDevToolsClosed(chromiumWebBrowser);
+                    }
+                    else
+                    {
+                        window._doClose = true;
+                        window.Close();
+                    }
                 });
                 return false;
+            }
+
+            public override void OnAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
+            {
+                var hwnd = browser.GetHost().GetWindowHandle();
+
+                if (HwndHelper.IsDevToolsWindow(hwnd))
+                {
+                    window.Dispatcher.Invoke(() =>
+                    {
+                        HwndHelper.SetOwnerWindow(hwnd, new WindowInteropHelper(window).Handle);
+                        window.ViewModel.OnDevToolsOpened(chromiumWebBrowser, hwnd);
+                    });
+                }
             }
 
             public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
@@ -224,17 +244,17 @@ namespace CefFlashBrowser.Views
             OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["blockedSwfs"]);
         }
 
-        private void DevToolsOpenedHandler(object obj)
+        private void DevToolsOpenedHandler(object msg)
         {
-            if (obj == browser)
+            if (msg == browser)
             {
                 OnDevToolsOpened();
             }
         }
 
-        private void DevToolsClosedHandler(object obj)
+        private void DevToolsClosedHandler(object msg)
         {
-            if (obj == browser)
+            if (msg == browser)
             {
                 OnDevToolsClosed();
             }
@@ -242,50 +262,15 @@ namespace CefFlashBrowser.Views
 
         private void OnDevToolsOpened()
         {
-            var hwnd = new WindowInteropHelper(this).Handle;
-            if (hwnd == null) return;
-
-            Win32.GetWindowThreadProcessId(hwnd, out IntPtr pid);
-            if (pid == IntPtr.Zero) return;
-
-            Task.Run(async () =>
+            if (GlobalData.Settings.EnableIntegratedDevTools)
             {
-                IntPtr hDevTools = IntPtr.Zero;
+                IntPtr hDevTools = ViewModel.DevToolsHandle;
+                HwndHelper.SetWindowStyle(hDevTools, Win32.WS_CHILD | Win32.WS_VISIBLE);
 
-                int cnt;
-                for (cnt = 0; cnt < 8; cnt++)
-                {
-                    hDevTools = HwndHelper.FindDevTools(pid);
-
-                    if (hDevTools == IntPtr.Zero)
-                        await Task.Delay(100);
-                    else break;
-                }
-
-                Dispatcher.Invoke(() =>
-                {
-                    if (hDevTools != IntPtr.Zero)
-                    {
-                        // Set current window as the owner of the DevTools window
-                        HwndHelper.SetOwnerWindow(hDevTools, hwnd);
-
-                        if (DataContext is BrowserWindowViewModel vm
-                            && GlobalData.Settings.EnableIntegratedDevTools)
-                        {
-                            HwndHelper.SetWindowStyle(hDevTools, Win32.WS_CHILD | Win32.WS_VISIBLE);
-                            vm.DevToolsHandle = hDevTools;
-
-                            Activate();
-                            Keyboard.Focus(browser);
-                            devtoolsColumn.Width = _devToolsColumnWidth;
-                        }
-                    }
-                    else
-                    {
-                        LogHelper.LogError($"DevTools window not found after {cnt} attempts.");
-                    }
-                });
-            });
+                Activate();
+                Keyboard.Focus(browser);
+                devtoolsColumn.Width = _devToolsColumnWidth;
+            }
         }
 
         private void OnDevToolsClosed()
@@ -298,17 +283,14 @@ namespace CefFlashBrowser.Views
 
         private void BrowserFullscreenModeChanged(object sender, EventArgs e)
         {
-            if (DataContext is BrowserWindowViewModel vm)
-            {
-                vm.FullScreen = browser.FullscreenMode;
-            }
+            ViewModel.FullScreen = browser.FullscreenMode;
         }
 
-        private void FullScreenChangedHandler(object obj)
+        private void FullScreenChangedHandler(object msg)
         {
-            if (obj == DataContext && obj is BrowserWindowViewModel vm)
+            if (msg == DataContext)
             {
-                OnFullScreenChanged(vm.FullScreen);
+                OnFullScreenChanged(ViewModel.FullScreen);
             }
         }
 

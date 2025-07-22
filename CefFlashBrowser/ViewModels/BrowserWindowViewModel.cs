@@ -165,13 +165,11 @@ namespace CefFlashBrowser.ViewModels
                     && HwndHelper.FindNotIntegratedDevTools(browser) == IntPtr.Zero)
                 {
                     browser.ShowDevTools();
-                    Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);
                 }
                 else
                 {
                     DevToolsHandle = IntPtr.Zero;
                     browser.CloseDevTools();
-                    Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
                 }
             }
         }
@@ -213,6 +211,17 @@ namespace CefFlashBrowser.ViewModels
         {
             FullScreen = false;
             WindowManager.ShowPopupWebPage(url, features);
+        }
+
+        public void OnDevToolsOpened(IWebBrowser browser, IntPtr hDevTools)
+        {
+            DevToolsHandle = hDevTools;
+            Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);
+        }
+
+        public void OnDevToolsClosed(IWebBrowser browser)
+        {
+            Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
         }
 
         public BrowserWindowViewModel()
