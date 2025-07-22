@@ -277,7 +277,7 @@
                 </Button>
 
                 <Button Margin="10,0,0,0"
-                        Command="{Binding ReloadOrStopCommand}"
+                        Command="{Binding ToggleLoadingStateCommand}"
                         CommandParameter="{Binding ElementName=browser}">
                     <Button.Content>
                         <Binding ElementName="browser"

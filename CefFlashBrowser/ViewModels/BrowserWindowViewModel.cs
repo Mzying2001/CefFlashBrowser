@@ -18,11 +18,13 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
         public DelegateCommand CreateShortcutCommand { get; set; }
         public DelegateCommand AddFavoriteCommand { get; set; }
-        public DelegateCommand ReloadOrStopCommand { get; set; }
+        public DelegateCommand ToggleLoadingStateCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
         public DelegateCommand NewBrowserWindowCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
         public DelegateCommand ToggleFullScreenCommand { get; set; }
+
+
 
         private string _address = "about:blank";
         public string Address
@@ -51,6 +53,8 @@ namespace CefFlashBrowser.ViewModels
                 }
             }
         }
+
+
 
         public void ShowMainWindow()
         {
@@ -130,7 +134,7 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowAddFavoriteDialog(GetWebBrowserTitle(browser), browser.Address);
         }
 
-        public void ReloadOrStop(IWebBrowser browser)
+        public void ToggleLoadingState(IWebBrowser browser)
         {
             if (browser.IsLoading)
             {
@@ -193,7 +197,7 @@ namespace CefFlashBrowser.ViewModels
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<IWebBrowser>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<IWebBrowser>(AddFavorite);
-            ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
+            ToggleLoadingStateCommand = new DelegateCommand<IWebBrowser>(ToggleLoadingState);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             ToggleDevToolsCommand = new DelegateCommand<IWebBrowser>(ToggleDevTools);
