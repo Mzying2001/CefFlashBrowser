@@ -22,6 +22,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
         public DelegateCommand NewBrowserWindowCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
+        public DelegateCommand ToggleFullScreenCommand { get; set; }
 
         private string _address = "about:blank";
         public string Address
@@ -35,6 +36,20 @@ namespace CefFlashBrowser.ViewModels
         {
             get => _devtoolsHandle;
             set => UpdateValue(ref _devtoolsHandle, value);
+        }
+
+        private bool _fullScreen = false;
+        public bool FullScreen
+        {
+            get => _fullScreen;
+            set
+            {
+                if (_fullScreen != value)
+                {
+                    UpdateValue(ref _fullScreen, value);
+                    Messenger.Global.Send(MessageTokens.FULLSCREEN_CHANGED, this);
+                }
+            }
         }
 
         public void ShowMainWindow()
@@ -156,6 +171,21 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public void ToggleFullScreen(IWebBrowser browser)
+        {
+            if (FullScreen)
+            {
+                if (browser.CanExecuteJavascriptInMainFrame)
+                    browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
+                FullScreen = false;
+            }
+            else
+            {
+                //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
+                FullScreen = true;
+            }
+        }
+
         public BrowserWindowViewModel()
         {
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
@@ -167,6 +197,7 @@ namespace CefFlashBrowser.ViewModels
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             ToggleDevToolsCommand = new DelegateCommand<IWebBrowser>(ToggleDevTools);
+            ToggleFullScreenCommand = new DelegateCommand<IWebBrowser>(ToggleFullScreen);
         }
     }
 }

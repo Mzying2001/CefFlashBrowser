@@ -36,12 +36,9 @@ namespace CefFlashBrowser.Views
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
                 bool hasDevTools = chromiumWebBrowser.GetBrowserHost()?.HasDevTools ?? false;
-                if (hasDevTools && browser.IsPopup)
-                {
-                    return false;
-                }
+                if (hasDevTools && browser.IsPopup) return false;
 
-                ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
+                window.Dispatcher.Invoke(delegate
                 {
                     window._doClose = true;
                     window.Close();
@@ -51,11 +48,11 @@ namespace CefFlashBrowser.Views
 
             public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
             {
-                ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(delegate
+                window.Dispatcher.Invoke(delegate
                 {
                     if (targetDisposition == WindowOpenDisposition.NewPopup)
                     {
-                        window.SetCurrentValue(FullScreenProperty, false);
+                        window.ViewModel.FullScreen = false;
                         WindowManager.ShowPopupWebPage(targetUrl, popupFeatures);
                     }
                     else
@@ -64,7 +61,7 @@ namespace CefFlashBrowser.Views
                         {
                             case NewPageBehavior.NewWindow:
                                 {
-                                    window.SetCurrentValue(FullScreenProperty, false);
+                                    window.ViewModel.FullScreen = false;
                                     WindowManager.ShowBrowser(targetUrl);
                                     break;
                                 }
@@ -99,8 +96,7 @@ namespace CefFlashBrowser.Views
                     case OpenSelectedUrl:
                     case CefMenuCommand.ViewSource:
                         {
-                            ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(
-                                () => window.SetCurrentValue(FullScreenProperty, false));
+                            window.Dispatcher.Invoke(() => window.ViewModel.FullScreen = false);
                             break;
                         }
                 }
@@ -114,25 +110,18 @@ namespace CefFlashBrowser.Views
         private bool _isMaximizedBeforeFullScreen = false;
         private GridLength _devToolsColumnWidth = new GridLength(0, GridUnitType.Auto);
 
-        public ICommand ToggleFullScreenCommand { get; }
 
 
-
-        public bool FullScreen
+        public BrowserWindowViewModel ViewModel
         {
-            get { return (bool)GetValue(FullScreenProperty); }
-            set { SetValue(FullScreenProperty, value); }
+            get => DataContext as BrowserWindowViewModel;
+            set => DataContext = value;
         }
-
-        public static readonly DependencyProperty FullScreenProperty =
-            DependencyProperty.Register(nameof(FullScreen), typeof(bool), typeof(BrowserWindow), new PropertyMetadata(false, OnFullScreenChange));
 
 
 
         public BrowserWindow()
         {
-            ToggleFullScreenCommand = new DelegateCommand(ToggleFullScreen);
-
             InitializeComponent();
             WindowSizeInfo.Apply(GetSizeInfo(), this);
 
@@ -141,20 +130,19 @@ namespace CefFlashBrowser.Views
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
 
-            BindingOperations.SetBinding(this, FullScreenProperty, new Binding
-            { Source = browser, Path = new PropertyPath(nameof(browser.FullscreenMode)), Mode = BindingMode.OneWay });
-
             Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
+            Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
 
             Closed += delegate
             {
                 Messenger.Global.Unregister(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
                 Messenger.Global.Unregister(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
+                Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
             };
         }
 
-        private WindowSizeInfo GetSizeInfo()
+        public WindowSizeInfo GetSizeInfo()
         {
             WindowSizeInfo info = null;
 
@@ -166,45 +154,6 @@ namespace CefFlashBrowser.Views
             }
 
             return info ?? GlobalData.Settings.BrowserWindowSizeInfo;
-        }
-
-        private void ToggleFullScreen()
-        {
-            if (FullScreen)
-            {
-                if (browser.CanExecuteJavascriptInMainFrame)
-                    browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
-                SetCurrentValue(FullScreenProperty, false);
-            }
-            else
-            {
-                //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
-                SetCurrentValue(FullScreenProperty, true);
-            }
-        }
-
-        private static void OnFullScreenChange(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            BrowserWindow window = (BrowserWindow)d;
-            if ((e.OldValue != e.NewValue) && (bool)e.NewValue)
-            {
-                window._isMaximizedBeforeFullScreen = window.WindowState == WindowState.Maximized;
-                if (window._isMaximizedBeforeFullScreen)
-                    window.WindowState = WindowState.Normal;
-
-                //window.Topmost = true;
-                window.WindowStyle = WindowStyle.None;
-                window.WindowState = WindowState.Maximized;
-            }
-            else
-            {
-                //window.Topmost = false;
-                window.WindowStyle = WindowStyle.SingleBorderWindow;
-                window.WindowState = WindowState.Normal;
-
-                if (window._isMaximizedBeforeFullScreen)
-                    window.WindowState = WindowState.Maximized;
-            }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -259,7 +208,7 @@ namespace CefFlashBrowser.Views
 
             if (browser.IsDisposed || _doClose)
             {
-                if (!FullScreen)
+                if (!ViewModel.FullScreen)
                     GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
             }
             else
@@ -362,6 +311,47 @@ namespace CefFlashBrowser.Views
             Keyboard.Focus(browser);
             _devToolsColumnWidth = devtoolsColumn.Width;
             devtoolsColumn.Width = new GridLength(0, GridUnitType.Auto);
+        }
+
+        private void BrowserFullscreenModeChanged(object sender, EventArgs e)
+        {
+            if (DataContext is BrowserWindowViewModel vm)
+            {
+                vm.FullScreen = browser.FullscreenMode;
+            }
+        }
+
+        private void FullScreenChangedHandler(object obj)
+        {
+            if (obj == DataContext && obj is BrowserWindowViewModel vm)
+            {
+                OnFullScreenChanged(vm.FullScreen);
+            }
+        }
+
+        private void OnFullScreenChanged(bool fullScreen)
+        {
+            if (fullScreen)
+            {
+                _isMaximizedBeforeFullScreen =
+                    WindowState == WindowState.Maximized;
+
+                if (_isMaximizedBeforeFullScreen)
+                    WindowState = WindowState.Normal;
+
+                //Topmost = true;
+                WindowStyle = WindowStyle.None;
+                WindowState = WindowState.Maximized;
+            }
+            else
+            {
+                //Topmost = false;
+                WindowStyle = WindowStyle.SingleBorderWindow;
+                WindowState = WindowState.Normal;
+
+                if (_isMaximizedBeforeFullScreen)
+                    WindowState = WindowState.Maximized;
+            }
         }
     }
 }
