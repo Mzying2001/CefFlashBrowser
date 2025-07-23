@@ -57,7 +57,7 @@ namespace CefFlashBrowser.Views
                 {
                     window.Dispatcher.Invoke(() =>
                     {
-                        HwndHelper.SetOwnerWindow(hwnd, new WindowInteropHelper(window).Handle);
+                        HwndHelper.SetOwnerWindow(hwnd, window._hwnd);
                         window.ViewModel.OnDevToolsOpened(chromiumWebBrowser, hwnd);
                     });
                 }
@@ -113,6 +113,9 @@ namespace CefFlashBrowser.Views
         private bool _isMaximizedBeforeFullScreen = false;
         private GridLength _devToolsColumnWidth = new GridLength(0, GridUnitType.Auto);
 
+        private IntPtr _hwnd;
+        private HwndSource _hwndSource;
+
 
 
         public BrowserWindowViewModel ViewModel
@@ -149,9 +152,9 @@ namespace CefFlashBrowser.Views
         {
             WindowSizeInfo info = null;
 
-            if (WindowManager.GetLastBrowserWindow() is Window window)
+            if (WindowManager.GetLastBrowserWindow() is Window w)
             {
-                info = WindowSizeInfo.GetSizeInfo(window);
+                info = WindowSizeInfo.GetSizeInfo(w);
                 info.Left += 20;
                 info.Top += 20;
             }
@@ -175,8 +178,9 @@ namespace CefFlashBrowser.Views
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            var hwnd = new WindowInteropHelper(this).Handle;
-            HwndSource.FromHwnd(hwnd).AddHook(new HwndSourceHook(WndProc));
+            _hwnd = new WindowInteropHelper(this).Handle;
+            _hwndSource = HwndSource.FromHwnd(_hwnd);
+            _hwndSource.AddHook(new HwndSourceHook(WndProc));
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
