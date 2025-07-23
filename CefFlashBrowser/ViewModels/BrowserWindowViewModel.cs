@@ -168,7 +168,6 @@ namespace CefFlashBrowser.ViewModels
                 }
                 else
                 {
-                    DevToolsHandle = IntPtr.Zero;
                     browser.CloseDevTools();
                 }
             }
@@ -215,12 +214,17 @@ namespace CefFlashBrowser.ViewModels
 
         public void OnDevToolsOpened(IWebBrowser browser, IntPtr hDevTools)
         {
-            DevToolsHandle = hDevTools;
+            if (GlobalData.Settings.EnableIntegratedDevTools)
+            {
+                HwndHelper.SetWindowStyle(hDevTools, Win32.WS_CHILD | Win32.WS_VISIBLE);
+                DevToolsHandle = hDevTools;
+            }
             Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);
         }
 
         public void OnDevToolsClosed(IWebBrowser browser)
         {
+            DevToolsHandle = IntPtr.Zero;
             Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
         }
 

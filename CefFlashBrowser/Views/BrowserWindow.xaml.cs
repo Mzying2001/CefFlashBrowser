@@ -264,9 +264,6 @@ namespace CefFlashBrowser.Views
         {
             if (GlobalData.Settings.EnableIntegratedDevTools)
             {
-                IntPtr hDevTools = ViewModel.DevToolsHandle;
-                HwndHelper.SetWindowStyle(hDevTools, Win32.WS_CHILD | Win32.WS_VISIBLE);
-
                 Activate();
                 Keyboard.Focus(browser);
                 devtoolsColumn.Width = _devToolsColumnWidth;
