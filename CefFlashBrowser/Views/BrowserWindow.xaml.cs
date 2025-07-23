@@ -51,15 +51,15 @@ namespace CefFlashBrowser.Views
 
             public override void OnAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
-                var hwnd = browser.GetHost().GetWindowHandle();
+                var hHost = browser.GetHost().GetWindowHandle();
 
-                if (HwndHelper.IsDevToolsWindow(hwnd))
+                if (HwndHelper.IsDevToolsWindow(hHost))
                 {
                     window.Dispatcher.Invoke(() =>
                     {
-                        HwndHelper.SetDevToolsFlag(hwnd);
-                        HwndHelper.SetOwnerWindow(hwnd, window._hwnd);
-                        window.ViewModel.OnDevToolsOpened(chromiumWebBrowser, hwnd);
+                        HwndHelper.SetDevToolsFlag(hHost);
+                        HwndHelper.SetOwnerWindow(hHost, window._hwnd);
+                        window.ViewModel.OnDevToolsOpened(chromiumWebBrowser, hHost);
                     });
                 }
             }
@@ -100,7 +100,7 @@ namespace CefFlashBrowser.Views
                     case OpenSelectedUrl:
                     case CefMenuCommand.ViewSource:
                         {
-                            window.Dispatcher.Invoke(() => window.ViewModel.FullScreen = false);
+                            window.Dispatcher.Invoke(() => window.ExitFullScreen());
                             break;
                         }
                 }
@@ -319,6 +319,11 @@ namespace CefFlashBrowser.Views
                 if (_isMaximizedBeforeFullScreen)
                     WindowState = WindowState.Maximized;
             }
+        }
+
+        public void ExitFullScreen()
+        {
+            ViewModel.FullScreen = false;
         }
     }
 }
