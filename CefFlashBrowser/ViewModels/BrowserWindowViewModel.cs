@@ -34,11 +34,11 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _address, value);
         }
 
-        private IntPtr _devtoolsHandle = IntPtr.Zero;
-        public IntPtr DevToolsHandle
+        private IntPtr _integratedDevToolsHandle = IntPtr.Zero;
+        public IntPtr IntegratedDevToolsHandle
         {
-            get => _devtoolsHandle;
-            set => UpdateValue(ref _devtoolsHandle, value);
+            get => _integratedDevToolsHandle;
+            set => UpdateValue(ref _integratedDevToolsHandle, value);
         }
 
         private bool _fullScreen = false;
@@ -161,7 +161,7 @@ namespace CefFlashBrowser.ViewModels
         {
             if (browser != null)
             {
-                if (DevToolsHandle == IntPtr.Zero
+                if (IntegratedDevToolsHandle == IntPtr.Zero
                     && HwndHelper.FindNotIntegratedDevTools(browser) == IntPtr.Zero)
                 {
                     browser.ShowDevTools();
@@ -217,14 +217,14 @@ namespace CefFlashBrowser.ViewModels
             if (GlobalData.Settings.EnableIntegratedDevTools)
             {
                 HwndHelper.SetWindowStyle(hDevTools, Win32.WS_CHILD | Win32.WS_VISIBLE);
-                DevToolsHandle = hDevTools;
+                IntegratedDevToolsHandle = hDevTools;
             }
             Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);
         }
 
         public void OnDevToolsClosed(IWebBrowser browser)
         {
-            DevToolsHandle = IntPtr.Zero;
+            IntegratedDevToolsHandle = IntPtr.Zero;
             Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
         }
 

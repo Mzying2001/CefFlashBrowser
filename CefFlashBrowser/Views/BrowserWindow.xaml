@@ -397,7 +397,7 @@
 
             <c:HwndContainer x:Name="devtoolsContainer"
                              Grid.Column="2"
-                             ContentHandle="{Binding DevToolsHandle}">
+                             ContentHandle="{Binding IntegratedDevToolsHandle}">
                 <c:HwndContainer.Style>
                     <Style TargetType="{x:Type c:HwndContainer}">
                         <Setter Property="MinWidth" Value="300"/>
