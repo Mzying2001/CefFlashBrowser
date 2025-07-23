@@ -32,15 +32,15 @@ namespace CefFlashBrowser.Views
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
                 bool isPopup = browser.IsPopup;
-                bool hasDevTools = chromiumWebBrowser.GetBrowserHost()?.HasDevTools ?? false;
+                IntPtr hHost = browser.GetHost().GetWindowHandle();
 
                 window.Dispatcher.Invoke(delegate
                 {
-                    if (isPopup && hasDevTools)
+                    if (HwndHelper.IsDevToolsWindow(hHost))
                     {
                         window.ViewModel.OnDevToolsClosed(chromiumWebBrowser);
                     }
-                    else
+                    else if (!isPopup)
                     {
                         window._doClose = true;
                         window.Close();
@@ -57,6 +57,7 @@ namespace CefFlashBrowser.Views
                 {
                     window.Dispatcher.Invoke(() =>
                     {
+                        HwndHelper.SetDevToolsFlag(hwnd);
                         HwndHelper.SetOwnerWindow(hwnd, window._hwnd);
                         window.ViewModel.OnDevToolsOpened(chromiumWebBrowser, hwnd);
                     });

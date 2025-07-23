@@ -8,6 +8,9 @@ namespace CefFlashBrowser.Utils
 {
     public static class HwndHelper
     {
+        private const int DEVTOOLSFLAG = 0x00000001;
+        private const string PROP_DEVTOOLSFLAG = "CefFlashBrowser.DevToolsFlag";
+
         public static int GetWindowStyle(IntPtr hwnd)
         {
             return (int)Win32.GetWindowLongPtr(hwnd, Win32.GWL_STYLE);
@@ -28,16 +31,33 @@ namespace CefFlashBrowser.Utils
             return Win32.SetWindowLongPtr(hwnd, Win32.GWLP_HWNDPARENT, hOwner);
         }
 
+        public static void SetDevToolsFlag(IntPtr hwnd)
+        {
+            Win32.SetProp(hwnd, PROP_DEVTOOLSFLAG, new IntPtr(DEVTOOLSFLAG));
+        }
+
+        public static bool CheckDevToolsFlag(IntPtr hwnd)
+        {
+            return Win32.GetProp(hwnd, PROP_DEVTOOLSFLAG) == new IntPtr(DEVTOOLSFLAG);
+        }
+
         public static bool IsDevToolsWindow(IntPtr hwnd)
         {
-            var clsname = new StringBuilder(256);
-            Win32.GetClassName(hwnd, clsname, clsname.Capacity);
+            if (CheckDevToolsFlag(hwnd))
+            {
+                return true;
+            }
+            else
+            {
+                var clsname = new StringBuilder(256);
+                Win32.GetClassName(hwnd, clsname, clsname.Capacity);
 
-            var wndName = new StringBuilder(256);
-            Win32.GetWindowText(hwnd, wndName, wndName.Capacity);
+                var wndName = new StringBuilder(256);
+                Win32.GetWindowText(hwnd, wndName, wndName.Capacity);
 
-            return clsname.ToString().Equals("CefBrowserWindow", StringComparison.OrdinalIgnoreCase)
-                && wndName.ToString().StartsWith("devtools", StringComparison.OrdinalIgnoreCase);
+                return clsname.ToString().Equals("CefBrowserWindow", StringComparison.OrdinalIgnoreCase)
+                    && wndName.ToString().StartsWith("devtools", StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>
