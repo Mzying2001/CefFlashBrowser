@@ -464,6 +464,18 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             base.Dispose(disposing);
         }
 
+        protected override bool TabIntoCore(TraversalRequest request)
+        {
+            if (browser.IsBrowserInitialized)
+            {
+                var host = browser.GetBrowserHost();
+                host?.SetFocus(true);
+                return true;
+            }
+
+            return base.TabIntoCore(request);
+        }
+
         protected override void OnGotKeyboardFocus(KeyboardFocusChangedEventArgs e)
         {
             if (!e.Handled)
