@@ -405,6 +405,10 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             browser.CreateControl();
 #pragma warning restore CS0618 // type or member is obsolete
 
+            Cef.AddDisposable(this);
+            Focusable = true;
+            FocusVisualStyle = null;
+
             BackCommand = new DelegateCommand(this.Back) { CanExecute = false };
             ForwardCommand = new DelegateCommand(this.Forward) { CanExecute = false };
             ReloadCommand = new DelegateCommand(this.Reload) { CanExecute = false };
@@ -443,13 +447,69 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected override void DestroyWindowCore(HandleRef hwnd)
         {
-            browser.Dispose();
+            if (!browser.IsDisposed)
+            {
+                browser.Dispose();
+            }
         }
 
-        protected override void OnGotFocus(RoutedEventArgs e)
+        protected override void Dispose(bool disposing)
         {
-            base.OnGotFocus(e);
-            browser.Focus();
+            if (!browser.IsDisposed)
+            {
+                browser.Dispose();
+            }
+
+            Cef.RemoveDisposable(this);
+            base.Dispose(disposing);
+        }
+
+        protected override void OnGotKeyboardFocus(KeyboardFocusChangedEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                if (browser.IsBrowserInitialized)
+                {
+                    var host = browser.GetBrowserHost();
+                    host?.SetFocus(true);
+                }
+            }
+
+            base.OnGotKeyboardFocus(e);
+        }
+
+        protected override void OnLostFocus(RoutedEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                if (browser.IsBrowserInitialized)
+                {
+                    var host = browser.GetBrowserHost();
+                    host?.SetFocus(false);
+                }
+            }
+
+            base.OnLostFocus(e);
+        }
+
+        protected override IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            switch (msg)
+            {
+                case 0x0007: // WM_SETFOCUS
+                case 0x0021: // WM_MOUSEACTIVATE
+                    {
+                        if (browser.IsBrowserInitialized)
+                        {
+                            var host = browser.GetBrowserHost();
+                            host?.SetFocus(true);
+                            handled = true;
+                            return IntPtr.Zero;
+                        }
+                        break;
+                    }
+            }
+            return base.WndProc(hwnd, msg, wParam, lParam, ref handled);
         }
 
 
