@@ -31,6 +31,11 @@ namespace CefFlashBrowser.Views
 
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
+                if (window._isClosed)
+                {
+                    return false;
+                }
+
                 bool isPopup = browser.IsPopup;
                 IntPtr hHost = browser.GetHost().GetWindowHandle();
 
@@ -111,6 +116,7 @@ namespace CefFlashBrowser.Views
 
 
         private bool _doClose = false;
+        private bool _isClosed = false;
         private bool _isMaximizedBeforeFullScreen = false;
         private GridLength _devToolsColumnWidth = new GridLength(0, GridUnitType.Auto);
 
@@ -225,6 +231,12 @@ namespace CefFlashBrowser.Views
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _isClosed = true;
         }
 
         private void OpenBottomContextMenu(UIElement target, ContextMenu menu)
