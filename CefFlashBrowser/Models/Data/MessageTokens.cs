@@ -10,5 +10,6 @@
         public const string DEVTOOLS_OPENED = "DEVTOOLS_OPENED";
         public const string DEVTOOLS_CLOSED = "DEVTOOLS_CLOSED";
         public const string FULLSCREEN_CHANGED = "FULLSCREEN_CHANGED";
+        public const string CLOSE_ALL_BROWSERS = "CLOSE_ALL_BROWSERS";
     }
 }

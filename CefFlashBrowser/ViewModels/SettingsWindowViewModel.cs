@@ -3,6 +3,7 @@ using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
 
@@ -214,6 +215,7 @@ namespace CefFlashBrowser.ViewModels
                     {
                         try
                         {
+                            Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
                             CefSharp.Cef.Shutdown();
                             DeleteDirectory(GlobalData.CachesPath);
                             break;
@@ -253,7 +255,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 if (result == true)
                 {
-                    CefSharp.Cef.Shutdown();
+                    Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
                     Program.Restart();
                 }
             });
