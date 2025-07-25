@@ -91,6 +91,13 @@ namespace CefFlashBrowser.Models.Data
             SaveSettings();
         }
 
+        private static void SafeWriteFile(string path, string contents)
+        {
+            var tmpPath = path + ".tmp";
+            File.WriteAllText(tmpPath, contents);
+            File.Copy(tmpPath, path, true);
+            File.Delete(tmpPath);
+        }
 
 
 
@@ -117,7 +124,7 @@ namespace CefFlashBrowser.Models.Data
             try
             {
                 var file = new FavoritesFile { Favorites = Favorites.ToArray() };
-                File.WriteAllText(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
+                SafeWriteFile(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
                 LogHelper.LogInfo("Favorites saved successfully");
                 return true;
             }
@@ -159,12 +166,12 @@ namespace CefFlashBrowser.Models.Data
                 {
                     JObject settingsJson = JObject.Parse(File.ReadAllText(SettingsPath));
                     settingsJson.Merge(JToken.FromObject(Settings));
-                    File.WriteAllText(SettingsPath, settingsJson.ToString(Formatting.Indented));
+                    SafeWriteFile(SettingsPath, settingsJson.ToString(Formatting.Indented));
                     LogHelper.LogInfo("Settings saved successfully, type: merge");
                 }
                 else
                 {
-                    File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+                    SafeWriteFile(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
                     LogHelper.LogInfo("Settings saved successfully, type: create");
                 }
                 return true;
