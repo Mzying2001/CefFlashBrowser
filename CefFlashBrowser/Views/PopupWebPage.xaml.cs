@@ -1,7 +1,10 @@
 ﻿using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using System;
+using System.ComponentModel;
 using System.Windows;
 
 namespace CefFlashBrowser.Views
@@ -22,17 +25,15 @@ namespace CefFlashBrowser.Views
 
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
-                bool hasDevTools = chromiumWebBrowser.GetBrowserHost()?.HasDevTools ?? false;
-                if (hasDevTools && browser.IsPopup)
+                if (!window._isClosed
+                    && (browser.IsDisposed || !browser.IsPopup))
                 {
-                    return false;
+                    window.Dispatcher.Invoke(delegate
+                    {
+                        window._doClose = true;
+                        window.Close();
+                    });
                 }
-
-                window.Dispatcher.Invoke(delegate
-                {
-                    window._doClose = true;
-                    window.Close();
-                });
                 return false;
             }
 
@@ -44,7 +45,8 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private bool _doClose;
+        private bool _doClose = false;
+        private bool _isClosed = false;
 
         public string Address
         {
@@ -57,7 +59,7 @@ namespace CefFlashBrowser.Views
             DependencyProperty.Register("Address", typeof(string), typeof(PopupWebPage), new PropertyMetadata(null, (d, e) =>
             {
                 PopupWebPage window = (PopupWebPage)d;
-                window.browser.Address = (string)e.NewValue;
+                window.browser.SetCurrentValue(ChromiumWebBrowser.AddressProperty, e.NewValue);
             }));
 
 
@@ -71,14 +73,23 @@ namespace CefFlashBrowser.Views
             browser.LifeSpanHandler = new PopWebPageLifeSpanHandler(this);
         }
 
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
+            base.OnClosing(e);
+            if (e.Cancel) return;
+
             if (!browser.IsDisposed && !_doClose)
             {
                 bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _isClosed = true;
         }
     }
 }

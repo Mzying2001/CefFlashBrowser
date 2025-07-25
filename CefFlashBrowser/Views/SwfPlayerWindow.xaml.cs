@@ -4,6 +4,7 @@ using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using System;
+using System.ComponentModel;
 using System.Windows;
 
 namespace CefFlashBrowser.Views
@@ -24,17 +25,15 @@ namespace CefFlashBrowser.Views
 
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
-                bool hasDevTools = chromiumWebBrowser.GetBrowserHost()?.HasDevTools ?? false;
-                if (hasDevTools && browser.IsPopup)
+                if (!window._isClosed
+                    && (browser.IsDisposed || !browser.IsPopup))
                 {
-                    return false;
+                    window.Dispatcher.Invoke(delegate
+                    {
+                        window._doClose = true;
+                        window.Close();
+                    });
                 }
-
-                window.Dispatcher.Invoke(delegate
-                {
-                    window._doClose = true;
-                    window.Close();
-                });
                 return false;
             }
 
@@ -47,6 +46,7 @@ namespace CefFlashBrowser.Views
         }
 
         private bool _doClose = false;
+        private bool _isClosed = false;
 
 
         public string FileName
@@ -84,8 +84,11 @@ namespace CefFlashBrowser.Views
             browser.Address = GlobalData.SwfPlayerPath;
         }
 
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
+            base.OnClosing(e);
+            if (e.Cancel) return;
+
             if (browser.IsDisposed || _doClose)
             {
                 GlobalData.Settings.SwfWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
@@ -96,6 +99,12 @@ namespace CefFlashBrowser.Views
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _isClosed = true;
         }
 
         private void LoadSwf(string fileName)

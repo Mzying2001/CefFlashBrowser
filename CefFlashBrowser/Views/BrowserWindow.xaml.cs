@@ -36,6 +36,12 @@ namespace CefFlashBrowser.Views
                     return false;
                 }
 
+                if (browser.IsDisposed)
+                {
+                    window.Dispatcher.Invoke(ContinueClose);
+                    return false;
+                }
+
                 bool isPopup = browser.IsPopup;
                 IntPtr hHost = browser.GetHost().GetWindowHandle();
 
@@ -47,11 +53,16 @@ namespace CefFlashBrowser.Views
                     }
                     else if (!isPopup)
                     {
-                        window._doClose = true;
-                        window.Close();
+                        ContinueClose();
                     }
                 });
                 return false;
+            }
+
+            private void ContinueClose()
+            {
+                window._doClose = true;
+                window.Close();
             }
 
             public override void OnAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)

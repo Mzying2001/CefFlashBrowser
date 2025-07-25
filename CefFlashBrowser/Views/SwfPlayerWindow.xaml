@@ -13,8 +13,7 @@
         Width="Auto"
         Height="Auto"
         MinWidth="400"
-        MinHeight="300"
-        Closing="WindowClosing">
+        MinHeight="300">
 
     <Window.InputBindings>
         <KeyBinding Key="W"
