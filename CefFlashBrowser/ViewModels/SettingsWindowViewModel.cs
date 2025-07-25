@@ -239,7 +239,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void PopupAboutCef()
         {
-            WindowManager.ShowBrowser("chrome://version/");
+            WindowManager.ShowPopupWebPage("chrome://version/");
         }
 
         private void SetNewPageBehavior(NewPageBehavior newPageBehavior)
@@ -252,7 +252,10 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.Confirm(LanguageManager.GetString("message_restart"), callback: result =>
             {
                 if (result == true)
+                {
+                    CefSharp.Cef.Shutdown();
                     Program.Restart();
+                }
             });
         }
 
