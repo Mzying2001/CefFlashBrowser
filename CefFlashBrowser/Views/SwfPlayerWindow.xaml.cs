@@ -3,6 +3,7 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
+using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -72,7 +73,6 @@ namespace CefFlashBrowser.Views
         public SwfPlayerWindow()
         {
             InitializeComponent();
-
             WindowSizeInfo.Apply(GlobalData.Settings.SwfWindowSizeInfo, this);
 
             browser.DragHandler = new Utils.Handlers.DisableDragHandler();
@@ -82,6 +82,9 @@ namespace CefFlashBrowser.Views
             browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
 
             browser.Address = GlobalData.SwfPlayerPath;
+
+            Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+            Closed += delegate { Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler); };
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -116,6 +119,22 @@ namespace CefFlashBrowser.Views
         private void OnBrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
             LoadSwf(FileName);
+        }
+
+        private void CloseBrowserHandler(object msg)
+        {
+            ForceCloseWindow();
+        }
+
+        public void ForceCloseWindow()
+        {
+            if (!browser.IsDisposed)
+            {
+                browser.LifeSpanHandler = null;
+                browser.CloseBrowser(true);
+            }
+            _doClose = true;
+            Close();
         }
     }
 }
