@@ -79,15 +79,13 @@ namespace CefFlashBrowser.Views
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            base.OnClosing(e);
-            if (e.Cancel) return;
-
             if (!browser.IsDisposed && !_doClose)
             {
                 bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
+            base.OnClosing(e);
         }
 
         protected override void OnClosed(EventArgs e)

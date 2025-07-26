@@ -1,6 +1,9 @@
 ﻿using CefFlashBrowser.FlashBrowser.Handlers;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
+using SimpleMvvm.Messaging;
+using System.ComponentModel;
 using System.Windows;
 
 namespace CefFlashBrowser.Views
@@ -45,10 +48,22 @@ namespace CefFlashBrowser.Views
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.LifeSpanHandler = new ViewSourceBrowserLifeSpanHandler();
 
-            Closing += (s, e) =>
+            Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+            Closed += delegate { Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler); };
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (!browser.IsDisposed)
             {
-                browser.GetBrowser().CloseBrowser(true);
-            };
+                browser.CloseBrowser(true);
+            }
+            base.OnClosing(e);
+        }
+
+        private void CloseBrowserHandler(object msg)
+        {
+            Close();
         }
     }
 }
