@@ -14,6 +14,7 @@ namespace CefFlashBrowser.FlashBrowser
         public event EventHandler FullscreenModeChanged;
         public event EventHandler FaviconUrlChanged;
         public event EventHandler LoadingProgressChanged;
+        public event EventHandler StatusTextChanged;
         public event EventHandler<JsContextEventArgs> JsContextCreated;
         public event EventHandler<JsContextEventArgs> JsContextReleased;
 
@@ -155,6 +156,12 @@ namespace CefFlashBrowser.FlashBrowser
         {
             SetCurrentValue(LoadingProgressProperty, progress);
             LoadingProgressChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected override void OnStatusMessage(StatusMessageEventArgs e)
+        {
+            base.OnStatusMessage(e);
+            StatusTextChanged?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual void OnJsContextCreated(IBrowser browser, IFrame frame)
