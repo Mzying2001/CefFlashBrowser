@@ -33,6 +33,14 @@ namespace CefFlashBrowser.Utils
             public int bottom;
         }
 
+        // point structure
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int x;
+            public int y;
+        }
+
 
         [DllImport("dwmapi.dll")]
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
@@ -83,5 +91,8 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern bool SetProp(IntPtr hWnd, string lpString, IntPtr hData);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetCursorPos(out POINT lpPoint);
     }
 }

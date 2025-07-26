@@ -364,5 +364,33 @@ namespace CefFlashBrowser.Views
             _doClose = true;
             Close();
         }
+
+        private void StatusPopupMouseEnter(object sender, MouseEventArgs e)
+        {
+            UpdateStatusPopupOffset();
+        }
+
+        private void BrowserLoadingProgressChanged(object sender, EventArgs e)
+        {
+            UpdateStatusPopupOffset();
+        }
+
+        private void BrowserStatusTextChanged(object sender, EventArgs e)
+        {
+            UpdateStatusPopupOffset();
+        }
+
+        private void UpdateStatusPopupOffset()
+        {
+            if (!statusPopupContent.IsLoaded)
+                return;
+
+            Rect popupRect = new Rect(
+                statusPopupContent.PointToScreen(new Point(0, -statusPopup.VerticalOffset)),
+                statusPopupContent.PointToScreen(new Point(statusPopupContent.ActualWidth, statusPopupContent.ActualHeight)));
+
+            Win32.GetCursorPos(out var cursorPos);
+            statusPopup.VerticalOffset = (cursorPos.y >= popupRect.Y && cursorPos.y <= popupRect.Bottom) ? -30 : 0;
+        }
     }
 }
