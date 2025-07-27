@@ -1,10 +1,11 @@
 ﻿using CefSharp;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace CefFlashBrowser.WinformCefSharp4WPF
 {
-    public interface IWpfWebBrowser : IWebBrowser
+    public interface IWpfWebBrowser : IWebBrowser, IInputElement
     {
         ICommand BackCommand { get; }
 

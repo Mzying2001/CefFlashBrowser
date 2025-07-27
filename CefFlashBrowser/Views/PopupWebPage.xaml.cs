@@ -1,7 +1,11 @@
 ﻿using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using SimpleMvvm.Messaging;
+using System;
+using System.ComponentModel;
 using System.Windows;
 
 namespace CefFlashBrowser.Views
@@ -22,17 +26,15 @@ namespace CefFlashBrowser.Views
 
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
-                bool hasDevTools = chromiumWebBrowser.GetBrowserHost()?.HasDevTools ?? false;
-                if (hasDevTools && browser.IsPopup)
+                if (!window._isClosed
+                    && (browser.IsDisposed || !browser.IsPopup))
                 {
-                    return false;
+                    window.Dispatcher.Invoke(delegate
+                    {
+                        window._doClose = true;
+                        window.Close();
+                    });
                 }
-
-                window.Dispatcher.Invoke(delegate
-                {
-                    window._doClose = true;
-                    window.Close();
-                });
                 return false;
             }
 
@@ -44,7 +46,8 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private bool _doClose;
+        private bool _doClose = false;
+        private bool _isClosed = false;
 
         public string Address
         {
@@ -57,7 +60,7 @@ namespace CefFlashBrowser.Views
             DependencyProperty.Register("Address", typeof(string), typeof(PopupWebPage), new PropertyMetadata(null, (d, e) =>
             {
                 PopupWebPage window = (PopupWebPage)d;
-                window.browser.Address = (string)e.NewValue;
+                window.browser.SetCurrentValue(ChromiumWebBrowser.AddressProperty, e.NewValue);
             }));
 
 
@@ -69,9 +72,12 @@ namespace CefFlashBrowser.Views
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
             browser.LifeSpanHandler = new PopWebPageLifeSpanHandler(this);
+
+            Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+            Closed += delegate { Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler); };
         }
 
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
             if (!browser.IsDisposed && !_doClose)
             {
@@ -79,6 +85,29 @@ namespace CefFlashBrowser.Views
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
+            base.OnClosing(e);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _isClosed = true;
+        }
+
+        private void CloseBrowserHandler(object msg)
+        {
+            ForceCloseWindow();
+        }
+
+        public void ForceCloseWindow()
+        {
+            if (!browser.IsDisposed)
+            {
+                browser.LifeSpanHandler = null;
+                browser.CloseBrowser(true);
+            }
+            _doClose = true;
+            Close();
         }
     }
 }

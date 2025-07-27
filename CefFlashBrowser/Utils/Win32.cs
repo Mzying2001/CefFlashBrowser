@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -32,6 +31,14 @@ namespace CefFlashBrowser.Utils
             public int top;
             public int right;
             public int bottom;
+        }
+
+        // point structure
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int x;
+            public int y;
         }
 
 
@@ -78,5 +85,14 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("user32.dll")]
         public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr GetProp(IntPtr hWnd, string lpString);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool SetProp(IntPtr hWnd, string lpString, IntPtr hData);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetCursorPos(out POINT lpPoint);
     }
 }

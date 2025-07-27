@@ -3,7 +3,9 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
+using SimpleMvvm.Messaging;
 using System;
+using System.ComponentModel;
 using System.Windows;
 
 namespace CefFlashBrowser.Views
@@ -24,17 +26,15 @@ namespace CefFlashBrowser.Views
 
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
-                bool hasDevTools = chromiumWebBrowser.GetBrowserHost()?.HasDevTools ?? false;
-                if (hasDevTools && browser.IsPopup)
+                if (!window._isClosed
+                    && (browser.IsDisposed || !browser.IsPopup))
                 {
-                    return false;
+                    window.Dispatcher.Invoke(delegate
+                    {
+                        window._doClose = true;
+                        window.Close();
+                    });
                 }
-
-                window.Dispatcher.Invoke(delegate
-                {
-                    window._doClose = true;
-                    window.Close();
-                });
                 return false;
             }
 
@@ -47,6 +47,7 @@ namespace CefFlashBrowser.Views
         }
 
         private bool _doClose = false;
+        private bool _isClosed = false;
 
 
         public string FileName
@@ -72,7 +73,6 @@ namespace CefFlashBrowser.Views
         public SwfPlayerWindow()
         {
             InitializeComponent();
-
             WindowSizeInfo.Apply(GlobalData.Settings.SwfWindowSizeInfo, this);
 
             browser.DragHandler = new Utils.Handlers.DisableDragHandler();
@@ -82,9 +82,12 @@ namespace CefFlashBrowser.Views
             browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
 
             browser.Address = GlobalData.SwfPlayerPath;
+
+            Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+            Closed += delegate { Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler); };
         }
 
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
             if (browser.IsDisposed || _doClose)
             {
@@ -96,6 +99,13 @@ namespace CefFlashBrowser.Views
                 browser.GetBrowser().CloseBrowser(forceClose);
                 e.Cancel = true;
             }
+            base.OnClosing(e);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            _isClosed = true;
         }
 
         private void LoadSwf(string fileName)
@@ -107,6 +117,22 @@ namespace CefFlashBrowser.Views
         private void OnBrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
             LoadSwf(FileName);
+        }
+
+        private void CloseBrowserHandler(object msg)
+        {
+            ForceCloseWindow();
+        }
+
+        public void ForceCloseWindow()
+        {
+            if (!browser.IsDisposed)
+            {
+                browser.LifeSpanHandler = null;
+                browser.CloseBrowser(true);
+            }
+            _doClose = true;
+            Close();
         }
     }
 }

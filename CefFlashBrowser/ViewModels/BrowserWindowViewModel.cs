@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using IWshRuntimeLibrary;
@@ -18,10 +19,13 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
         public DelegateCommand CreateShortcutCommand { get; set; }
         public DelegateCommand AddFavoriteCommand { get; set; }
-        public DelegateCommand ReloadOrStopCommand { get; set; }
+        public DelegateCommand ToggleLoadingStateCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
         public DelegateCommand NewBrowserWindowCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
+        public DelegateCommand ToggleFullScreenCommand { get; set; }
+
+
 
         private string _address = "about:blank";
         public string Address
@@ -30,12 +34,28 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _address, value);
         }
 
-        private IntPtr _devtoolsHandle = IntPtr.Zero;
-        public IntPtr DevToolsHandle
+        private IntPtr _integratedDevToolsHandle = IntPtr.Zero;
+        public IntPtr IntegratedDevToolsHandle
         {
-            get => _devtoolsHandle;
-            set => UpdateValue(ref _devtoolsHandle, value);
+            get => _integratedDevToolsHandle;
+            set => UpdateValue(ref _integratedDevToolsHandle, value);
         }
+
+        private bool _fullScreen = false;
+        public bool FullScreen
+        {
+            get => _fullScreen;
+            set
+            {
+                if (_fullScreen != value)
+                {
+                    UpdateValue(ref _fullScreen, value);
+                    Messenger.Global.Send(MessageTokens.FULLSCREEN_CHANGED, this);
+                }
+            }
+        }
+
+
 
         public void ShowMainWindow()
         {
@@ -115,7 +135,7 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowAddFavoriteDialog(GetWebBrowserTitle(browser), browser.Address);
         }
 
-        public void ReloadOrStop(IWebBrowser browser)
+        public void ToggleLoadingState(IWebBrowser browser)
         {
             if (browser.IsLoading)
             {
@@ -141,19 +161,71 @@ namespace CefFlashBrowser.ViewModels
         {
             if (browser != null)
             {
-                if (DevToolsHandle == IntPtr.Zero
+                if (IntegratedDevToolsHandle == IntPtr.Zero
                     && HwndHelper.FindNotIntegratedDevTools(browser) == IntPtr.Zero)
                 {
                     browser.ShowDevTools();
-                    Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);
                 }
                 else
                 {
-                    DevToolsHandle = IntPtr.Zero;
                     browser.CloseDevTools();
-                    Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
                 }
             }
+        }
+
+        public void ToggleFullScreen(IWebBrowser browser)
+        {
+            if (FullScreen)
+            {
+                if (browser.CanExecuteJavascriptInMainFrame)
+                    browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
+                FullScreen = false;
+            }
+            else
+            {
+                //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
+                FullScreen = true;
+            }
+        }
+
+        public void OnNewPage(string url)
+        {
+            switch (GlobalData.Settings.NewPageBehavior)
+            {
+                case NewPageBehavior.NewWindow:
+                    {
+                        FullScreen = false;
+                        WindowManager.ShowBrowser(url);
+                        break;
+                    }
+                case NewPageBehavior.OriginalWindow:
+                    {
+                        Address = url;
+                        break;
+                    }
+            }
+        }
+
+        public void OnPopup(string url, IPopupFeatures features)
+        {
+            FullScreen = false;
+            WindowManager.ShowPopupWebPage(url, features);
+        }
+
+        public void OnDevToolsOpened(IWebBrowser browser, IntPtr hDevTools)
+        {
+            if (GlobalData.Settings.EnableIntegratedDevTools)
+            {
+                HwndHelper.ApplyEmbeddedChildStyle(hDevTools);
+                IntegratedDevToolsHandle = hDevTools;
+            }
+            Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);
+        }
+
+        public void OnDevToolsClosed(IWebBrowser browser)
+        {
+            IntegratedDevToolsHandle = IntPtr.Zero;
+            Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
         }
 
         public BrowserWindowViewModel()
@@ -163,10 +235,11 @@ namespace CefFlashBrowser.ViewModels
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<IWebBrowser>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<IWebBrowser>(AddFavorite);
-            ReloadOrStopCommand = new DelegateCommand<IWebBrowser>(ReloadOrStop);
+            ToggleLoadingStateCommand = new DelegateCommand<IWebBrowser>(ToggleLoadingState);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             ToggleDevToolsCommand = new DelegateCommand<IWebBrowser>(ToggleDevTools);
+            ToggleFullScreenCommand = new DelegateCommand<IWebBrowser>(ToggleFullScreen);
         }
     }
 }

@@ -194,7 +194,8 @@
         <KeyBinding Key="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
         <KeyBinding Key="F11"
-                    Command="{Binding ElementName=window, Path=ToggleFullScreenCommand}"/>
+                    Command="{Binding ToggleFullScreenCommand}"
+                    CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Key="F12"
                     Command="{Binding ToggleDevToolsCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
@@ -241,7 +242,7 @@
 
         <DockPanel Grid.Row="0"
                    Margin="10"
-                   Visibility="{Binding ElementName=window,Path=FullScreen, Converter={StaticResource Boolean2VisibilityReConverter}}">
+                   Visibility="{Binding FullScreen, Converter={StaticResource Boolean2VisibilityReConverter}}">
 
             <DockPanel.Resources>
                 <Style TargetType="Button"
@@ -276,7 +277,7 @@
                 </Button>
 
                 <Button Margin="10,0,0,0"
-                        Command="{Binding ReloadOrStopCommand}"
+                        Command="{Binding ToggleLoadingStateCommand}"
                         CommandParameter="{Binding ElementName=browser}">
                     <Button.Content>
                         <Binding ElementName="browser"
@@ -385,7 +386,10 @@
 
             <flash:ChromiumFlashBrowser x:Name="browser"
                                         ZoomLevelIncrement="0.25"
-                                        Address="{Binding Address, TargetNullValue='about:blank'}"/>
+                                        Address="{Binding Address, TargetNullValue='about:blank'}"
+                                        FullscreenModeChanged="BrowserFullscreenModeChanged"
+                                        LoadingProgressChanged="BrowserLoadingProgressChanged"
+                                        StatusTextChanged="BrowserStatusTextChanged"/>
 
             <GridSplitter Grid.Column="1"
                           Width="5"
@@ -395,7 +399,7 @@
 
             <c:HwndContainer x:Name="devtoolsContainer"
                              Grid.Column="2"
-                             ContentHandle="{Binding DevToolsHandle}">
+                             ContentHandle="{Binding IntegratedDevToolsHandle}">
                 <c:HwndContainer.Style>
                     <Style TargetType="{x:Type c:HwndContainer}">
                         <Setter Property="MinWidth" Value="300"/>
@@ -415,7 +419,8 @@
                IsOpen="{Binding ElementName=window, Path=IsActive, Mode=OneWay}"
                StaysOpen="True"
                Placement="Absolute"
-               AllowsTransparency="True">
+               AllowsTransparency="True"
+               MouseEnter="StatusPopupMouseEnter">
             <Popup.Resources>
                 <sys:Double x:Key="ContentHeight">22</sys:Double>
             </Popup.Resources>

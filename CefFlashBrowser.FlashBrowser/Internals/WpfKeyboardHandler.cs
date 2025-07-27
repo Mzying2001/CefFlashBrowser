@@ -23,7 +23,7 @@ namespace CefFlashBrowser.FlashBrowser.Internals
             bool handled = InnerHandler?.OnPreKeyEvent(chromiumWebBrowser, browser, type, windowsKeyCode, nativeKeyCode, modifiers, isSystemKey, ref isKeyboardShortcut) ?? false;
             if (!handled && type == KeyType.RawKeyDown && chromiumWebBrowser is UIElement element)
             {
-                element.Dispatcher.InvokeAsync(() =>
+                element.Dispatcher.Invoke(() =>
                 {
                     PresentationSource source = PresentationSource.FromVisual(element);
 

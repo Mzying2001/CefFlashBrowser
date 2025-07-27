@@ -3,6 +3,7 @@ using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
 
@@ -214,6 +215,7 @@ namespace CefFlashBrowser.ViewModels
                     {
                         try
                         {
+                            Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
                             CefSharp.Cef.Shutdown();
                             DeleteDirectory(GlobalData.CachesPath);
                             break;
@@ -239,7 +241,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void PopupAboutCef()
         {
-            WindowManager.ShowBrowser("chrome://version/");
+            WindowManager.ShowPopupWebPage("chrome://version/");
         }
 
         private void SetNewPageBehavior(NewPageBehavior newPageBehavior)
@@ -252,7 +254,10 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.Confirm(LanguageManager.GetString("message_restart"), callback: result =>
             {
                 if (result == true)
+                {
+                    Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
                     Program.Restart();
+                }
             });
         }
 

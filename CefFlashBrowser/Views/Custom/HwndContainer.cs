@@ -45,6 +45,7 @@ namespace CefFlashBrowser.Views.Custom
 
         protected override void DestroyWindowCore(HandleRef hwnd)
         {
+            SetCurrentValue(ContentHandleProperty, IntPtr.Zero);
             Win32.DestroyWindow(hwnd.Handle);
             _hSelf = new HandleRef();
         }
