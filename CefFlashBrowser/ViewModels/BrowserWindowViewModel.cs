@@ -216,7 +216,7 @@ namespace CefFlashBrowser.ViewModels
         {
             if (GlobalData.Settings.EnableIntegratedDevTools)
             {
-                HwndHelper.SetWindowStyle(hDevTools, Win32.WS_CHILD | Win32.WS_VISIBLE);
+                HwndHelper.ApplyEmbeddedChildStyle(hDevTools);
                 IntegratedDevToolsHandle = hDevTools;
             }
             Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);

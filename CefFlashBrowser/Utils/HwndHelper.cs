@@ -31,6 +31,11 @@ namespace CefFlashBrowser.Utils
             return Win32.SetWindowLongPtr(hwnd, Win32.GWLP_HWNDPARENT, hOwner);
         }
 
+        public static void ApplyEmbeddedChildStyle(IntPtr hwnd, bool visible = true)
+        {
+            SetWindowStyle(hwnd, Win32.WS_CHILD | (visible ? Win32.WS_VISIBLE : 0));
+        }
+
         public static void SetDevToolsFlag(IntPtr hwnd)
         {
             Win32.SetProp(hwnd, PROP_DEVTOOLSFLAG, new IntPtr(DEVTOOLSFLAG));
