@@ -28,6 +28,13 @@ namespace CefFlashBrowser.ViewModels
                 LanguageManager.GetString("mainWindow_title"), EmoticonsHelper.GetNextEmoticon());
         }
 
+        private string _inputText = string.Empty;
+        public string InputText
+        {
+            get => _inputText;
+            set => UpdateValue(ref _inputText, value);
+        }
+
         private void ShowBrowser(string address)
         {
             WindowManager.ShowBrowser(address);
