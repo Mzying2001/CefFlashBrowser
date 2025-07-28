@@ -35,6 +35,7 @@ namespace CefFlashBrowser.Utils.Handlers
                     count++;
                 }
             }
+
             if (!string.IsNullOrWhiteSpace(parameters.LinkUrl))
             {
                 var header = LanguageManager.GetString("browser_openInNewWindow");
@@ -112,11 +113,10 @@ namespace CefFlashBrowser.Utils.Handlers
                 void menuClosedHandler(object s, RoutedEventArgs e)
                 {
                     menu.Closed -= menuClosedHandler;
-                    if (!callback.IsDisposed)
-                        callback.Cancel();
+                    if (!callback.IsDisposed) callback.Cancel();
                 }
-                menu.Closed += menuClosedHandler;
 
+                menu.Closed += menuClosedHandler;
                 ((FrameworkElement)chromiumWebBrowser).ContextMenu = menu;
             });
 
