@@ -1,5 +1,7 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
 using SimpleMvvm.Messaging;
+using System.ComponentModel;
 using System.Windows;
 
 namespace CefFlashBrowser.Views
@@ -12,14 +14,25 @@ namespace CefFlashBrowser.Views
         public MainWindow()
         {
             InitializeComponent();
+            WindowSizeInfo.Apply(GlobalData.Settings.MainWindowSizeInfo, this);
 
             Messenger.Global.Register(MessageTokens.CLOSE_MAINWINDOW, CloseMainWindowHandler);
             Closed += delegate { Messenger.Global.Unregister(MessageTokens.CLOSE_MAINWINDOW, CloseMainWindowHandler); };
         }
 
-        private void CloseMainWindowHandler(object obj)
+        private void CloseMainWindowHandler(object msg)
         {
             Close();
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            if (!e.Cancel)
+            {
+                GlobalData.Settings.MainWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+            }
         }
     }
 }

@@ -18,7 +18,6 @@
         Height="450"
         MinWidth="400"
         MinHeight="300"
-        WindowStartupLocation="CenterScreen"
         FocusManager.FocusedElement="{Binding ElementName=inputTextBox}">
 
     <Window.InputBindings>
