@@ -78,7 +78,7 @@ namespace CefFlashBrowser.Views
             browser.DragHandler = new Utils.Handlers.DisableDragHandler();
             browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
-            browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
+            browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
             browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
 
             browser.Address = GlobalData.SwfPlayerPath;
