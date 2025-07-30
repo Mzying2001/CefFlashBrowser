@@ -352,18 +352,12 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private static void OnZoomLevelPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            ChromiumWebBrowser chromiumWebBrowser = (ChromiumWebBrowser)sender;
-            chromiumWebBrowser.browser.SetZoomLevel((double)e.NewValue);
+            (sender as ChromiumWebBrowser)?.OnZoomLevelChanged(e);
         }
 
         private static void OnAddressPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            ChromiumWebBrowser chromiumWebBrowser = (ChromiumWebBrowser)sender;
-
-            if (!chromiumWebBrowser.onNotifyAddressChanged)
-            {
-                chromiumWebBrowser.browser.Load((string)e.NewValue);
-            }
+            (sender as ChromiumWebBrowser)?.OnAddressChanged(e);
         }
 
 
@@ -545,6 +539,19 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 {
                     Dispatcher.Invoke(action);
                 }
+            }
+        }
+
+        protected virtual void OnZoomLevelChanged(DependencyPropertyChangedEventArgs e)
+        {
+            browser.SetZoomLevel((double)e.NewValue);
+        }
+
+        protected virtual void OnAddressChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (!onNotifyAddressChanged)
+            {
+                browser.Load((string)e.NewValue);
             }
         }
 
