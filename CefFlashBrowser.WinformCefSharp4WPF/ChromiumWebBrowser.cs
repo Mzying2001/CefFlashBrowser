@@ -25,8 +25,8 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
-        private const double ZOOMLEVELMAX = 7d;
-        private const double ZOOMLEVELMIN = -7d;
+        private const double ZOOMLEVELMAX = 4d; // 500%
+        private const double ZOOMLEVELMIN = -4d; // 20%
         private const double ZOOMLEVELDEFAULT = 0d;
         private const double ZOOMLEVELINCREMENTDEFAULT = 0.1d;
 
