@@ -26,4 +26,6 @@
 
     <local:BinaryToSizeString x:Key="BinaryToReadableSizeString" UseReadableSize="True"/>
 
+    <local:ZoomLevelToScale x:Key="ZoomLevelToScale"/>
+
 </ResourceDictionary>
