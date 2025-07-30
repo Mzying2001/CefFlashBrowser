@@ -588,7 +588,16 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnFrameLoadStart(object sender, FrameLoadStartEventArgs e)
         {
-            InvokeOnUIThread(delegate { OnFrameLoadStart(e); }, invokeAsync: false);
+            double zoomLevel = 0;
+
+            InvokeOnUIThread(delegate
+            {
+                OnFrameLoadStart(e);
+                zoomLevel = ZoomLevel;
+            }, invokeAsync: false);
+
+            // sync the zoom level when the frame starts loading
+            browser.SetZoomLevel(zoomLevel);
         }
 
         protected virtual void OnFrameLoadStart(FrameLoadStartEventArgs e)
