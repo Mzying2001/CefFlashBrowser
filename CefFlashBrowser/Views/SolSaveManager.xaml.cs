@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Data;
+using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CefFlashBrowser.Views
 {
@@ -22,6 +13,17 @@ namespace CefFlashBrowser.Views
         public SolSaveManager()
         {
             InitializeComponent();
+            WindowSizeInfo.Apply(GlobalData.Settings.SolSaveManagerSizeInfo, this);
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            if (!e.Cancel)
+            {
+                GlobalData.Settings.SolSaveManagerSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+            }
         }
     }
 }
