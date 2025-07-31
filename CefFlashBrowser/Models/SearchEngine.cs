@@ -8,6 +8,8 @@
         Sogou,
         So360,
         DuckDuckGo,
-        Yandex
+        Yandex,
+        Bilibili,
+        Game4399
     }
 }

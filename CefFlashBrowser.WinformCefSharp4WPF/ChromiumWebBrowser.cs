@@ -25,8 +25,8 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
 
 
-        private const double ZOOMLEVELMAX = 7d;
-        private const double ZOOMLEVELMIN = -7d;
+        private const double ZOOMLEVELMAX = 4d; // 500%
+        private const double ZOOMLEVELMIN = -4d; // 20%
         private const double ZOOMLEVELDEFAULT = 0d;
         private const double ZOOMLEVELINCREMENTDEFAULT = 0.1d;
 
@@ -352,18 +352,12 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private static void OnZoomLevelPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            ChromiumWebBrowser chromiumWebBrowser = (ChromiumWebBrowser)sender;
-            chromiumWebBrowser.browser.SetZoomLevel((double)e.NewValue);
+            (sender as ChromiumWebBrowser)?.OnZoomLevelChanged(e);
         }
 
         private static void OnAddressPropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            ChromiumWebBrowser chromiumWebBrowser = (ChromiumWebBrowser)sender;
-
-            if (!chromiumWebBrowser.onNotifyAddressChanged)
-            {
-                chromiumWebBrowser.browser.Load((string)e.NewValue);
-            }
+            (sender as ChromiumWebBrowser)?.OnAddressChanged(e);
         }
 
 
@@ -548,6 +542,19 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             }
         }
 
+        protected virtual void OnZoomLevelChanged(DependencyPropertyChangedEventArgs e)
+        {
+            browser.SetZoomLevel((double)e.NewValue);
+        }
+
+        protected virtual void OnAddressChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (!onNotifyAddressChanged)
+            {
+                browser.Load((string)e.NewValue);
+            }
+        }
+
         private void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
             InvokeOnUIThread(delegate { OnJavascriptMessageReceived(e); });
@@ -581,7 +588,16 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnFrameLoadStart(object sender, FrameLoadStartEventArgs e)
         {
-            InvokeOnUIThread(delegate { OnFrameLoadStart(e); }, invokeAsync: false);
+            double zoomLevel = 0;
+
+            InvokeOnUIThread(delegate
+            {
+                OnFrameLoadStart(e);
+                zoomLevel = ZoomLevel;
+            }, invokeAsync: false);
+
+            // sync the zoom level when the frame starts loading
+            browser.SetZoomLevel(zoomLevel);
         }
 
         protected virtual void OnFrameLoadStart(FrameLoadStartEventArgs e)

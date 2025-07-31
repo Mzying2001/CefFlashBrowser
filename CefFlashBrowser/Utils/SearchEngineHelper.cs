@@ -33,6 +33,12 @@ namespace CefFlashBrowser.Utils
                 case SearchEngine.Yandex:
                     return $"https://yandex.com/search/?text={str}";
 
+                case SearchEngine.Bilibili:
+                    return $"https://search.bilibili.com/all?keyword={str}";
+
+                case SearchEngine.Game4399:
+                    return $"https://so2.4399.com/search/search.php?k={str}";
+
                 default:
                     throw new ArgumentException("Unknown search engine.", nameof(engine));
             }

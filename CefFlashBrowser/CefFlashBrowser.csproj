@@ -93,6 +93,9 @@
     <None Update="Assets\Plugins\pepflashplayer_x86.tar.gz">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Plugins\readme.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\SwfPlayer\swfplayer.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

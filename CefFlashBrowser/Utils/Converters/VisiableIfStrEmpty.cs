@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace CefFlashBrowser.Utils.Converters
 {
-    class VisiableIfStrEmpty : ValueConverterBase<string, Visibility>
+    public class VisiableIfStrEmpty : ValueConverterBase<string, Visibility>
     {
         public override Visibility Convert(string value, object parameter, CultureInfo culture)
         {

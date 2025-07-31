@@ -150,7 +150,7 @@ namespace CefFlashBrowser.Views
             WindowSizeInfo.Apply(GetSizeInfo(), this);
 
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
-            browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
+            browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
 

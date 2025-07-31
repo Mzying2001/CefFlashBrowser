@@ -13,7 +13,6 @@
         
         Width="800"
         Height="500"
-        WindowStartupLocation="CenterScreen"
         Title="{DynamicResource solSaveManager_title}"
         DataContext="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel}">
 

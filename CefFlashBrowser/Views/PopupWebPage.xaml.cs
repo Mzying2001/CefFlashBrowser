@@ -70,7 +70,7 @@ namespace CefFlashBrowser.Views
 
             browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
-            browser.DownloadHandler = new Utils.Handlers.IEDownloadHandler();
+            browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
             browser.LifeSpanHandler = new PopWebPageLifeSpanHandler(this);
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);

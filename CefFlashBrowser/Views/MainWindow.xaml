@@ -18,7 +18,7 @@
         Height="450"
         MinWidth="400"
         MinHeight="300"
-        WindowStartupLocation="CenterScreen">
+        FocusManager.FocusedElement="{Binding ElementName=inputTextBox}">
 
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+W"
@@ -100,7 +100,7 @@
                           Command="{Binding LoadSwfCommand}"/>
 
                 <Separator/>
-                
+
                 <!--SolSaveManager-->
                 <MenuItem Header="{DynamicResource mainWindow_manageSolSaveFiles}"
                           Command="{Binding OpenSolSaveManagerCommand}"/>
@@ -154,14 +154,15 @@
             </TextBlock>
 
             <!--The url textBox-->
-            <TextBox>
+            <TextBox x:Name="inputTextBox"
+                     Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}">
                 <i:Interaction.Behaviors>
                     <behaviors:TextBoxSelectAllOnFocus/>
                 </i:Interaction.Behaviors>
                 <TextBox.InputBindings>
                     <KeyBinding Key="Enter"
                                 Command="{Binding OpenUrlCommand}"
-                                CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=TextBox}, Path=Text}"/>
+                                CommandParameter="{Binding InputText}"/>
                 </TextBox.InputBindings>
             </TextBox>
 

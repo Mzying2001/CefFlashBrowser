@@ -9,8 +9,10 @@
         public NavigationType NavigationType { get; set; }
         public NewPageBehavior NewPageBehavior { get; set; }
         public bool DisableOnBeforeUnloadDialog { get; set; }
+        public WindowSizeInfo MainWindowSizeInfo { get; set; }
         public WindowSizeInfo BrowserWindowSizeInfo { get; set; }
         public WindowSizeInfo SwfWindowSizeInfo { get; set; }
+        public WindowSizeInfo SolSaveManagerSizeInfo { get; set; }
         public ProxySettings ProxySettings { get; set; }
         public UserAgentSetting UserAgentSetting { get; set; }
         public FakeFlashVersionSetting FakeFlashVersionSetting { get; set; }
@@ -32,8 +34,10 @@
             NavigationType = NavigationType.Automatic;
             NewPageBehavior = NewPageBehavior.OriginalWindow;
             DisableOnBeforeUnloadDialog = false;
+            MainWindowSizeInfo = null;
             BrowserWindowSizeInfo = null;
             SwfWindowSizeInfo = null;
+            SolSaveManagerSizeInfo = null;
             ProxySettings = new ProxySettings();
             UserAgentSetting = new UserAgentSetting();
             FakeFlashVersionSetting = new FakeFlashVersionSetting();
