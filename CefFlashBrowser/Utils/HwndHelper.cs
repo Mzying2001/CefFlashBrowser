@@ -11,24 +11,48 @@ namespace CefFlashBrowser.Utils
         private const int DEVTOOLSFLAG = 0x00000001;
         private const string PROP_DEVTOOLSFLAG = "CefFlashBrowser.DevToolsFlag";
 
+        public static long GetWindowLong(IntPtr hWnd, int nIndex)
+        {
+            if (IntPtr.Size == 4)
+            {
+                return (long)Win32.GetWindowLong(hWnd, nIndex);
+            }
+            else
+            {
+                return (long)Win32.GetWindowLongPtr(hWnd, nIndex);
+            }
+        }
+
+        public static long SetWindowLong(IntPtr hWnd, int nIndex, long dwNewLong)
+        {
+            if (IntPtr.Size == 4)
+            {
+                return (long)Win32.SetWindowLong(hWnd, nIndex, (IntPtr)dwNewLong);
+            }
+            else
+            {
+                return (long)Win32.SetWindowLongPtr(hWnd, nIndex, (IntPtr)dwNewLong);
+            }
+        }
+
         public static int GetWindowStyle(IntPtr hwnd)
         {
-            return (int)Win32.GetWindowLongPtr(hwnd, Win32.GWL_STYLE);
+            return (int)GetWindowLong(hwnd, Win32.GWL_STYLE);
         }
 
         public static int SetWindowStyle(IntPtr hwnd, int style)
         {
-            return (int)Win32.SetWindowLongPtr(hwnd, Win32.GWL_STYLE, (IntPtr)style);
+            return (int)SetWindowLong(hwnd, Win32.GWL_STYLE, style);
         }
 
         public static IntPtr GetOwnerWindow(IntPtr hwnd)
         {
-            return Win32.GetWindowLongPtr(hwnd, Win32.GWLP_HWNDPARENT);
+            return (IntPtr)GetWindowLong(hwnd, Win32.GWLP_HWNDPARENT);
         }
 
         public static IntPtr SetOwnerWindow(IntPtr hwnd, IntPtr hOwner)
         {
-            return Win32.SetWindowLongPtr(hwnd, Win32.GWLP_HWNDPARENT, hOwner);
+            return (IntPtr)SetWindowLong(hwnd, Win32.GWLP_HWNDPARENT, (long)hOwner);
         }
 
         public static void ApplyEmbeddedChildStyle(IntPtr hwnd, bool visible = true)
