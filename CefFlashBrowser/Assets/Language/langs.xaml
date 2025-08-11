@@ -7,4 +7,56 @@
     <ResourceDictionary x:Key="en-US" Source="en-US.xaml"/>
     <ResourceDictionary x:Key="it" Source="it.xaml"/>
 
+    <!--The following lists all locales supported by CefSharp,
+        if a new language is added, uncomment the corresponding line below.-->
+
+    <!--<ResourceDictionary x:Key="am" Source="am.xaml"/>
+    <ResourceDictionary x:Key="ar" Source="ar.xaml"/>
+    <ResourceDictionary x:Key="bg" Source="bg.xaml"/>
+    <ResourceDictionary x:Key="bn" Source="bn.xaml"/>
+    <ResourceDictionary x:Key="ca" Source="ca.xaml"/>
+    <ResourceDictionary x:Key="cs" Source="cs.xaml"/>
+    <ResourceDictionary x:Key="da" Source="da.xaml"/>
+    <ResourceDictionary x:Key="de" Source="de.xaml"/>
+    <ResourceDictionary x:Key="el" Source="el.xaml"/>
+    <ResourceDictionary x:Key="en-GB" Source="en-GB.xaml"/>
+    <ResourceDictionary x:Key="es" Source="es.xaml"/>
+    <ResourceDictionary x:Key="es-419" Source="es-419.xaml"/>
+    <ResourceDictionary x:Key="et" Source="et.xaml"/>
+    <ResourceDictionary x:Key="fa" Source="fa.xaml"/>
+    <ResourceDictionary x:Key="fi" Source="fi.xaml"/>
+    <ResourceDictionary x:Key="fil" Source="fil.xaml"/>
+    <ResourceDictionary x:Key="fr" Source="fr.xaml"/>
+    <ResourceDictionary x:Key="gu" Source="gu.xaml"/>
+    <ResourceDictionary x:Key="he" Source="he.xaml"/>
+    <ResourceDictionary x:Key="hi" Source="hi.xaml"/>
+    <ResourceDictionary x:Key="hr" Source="hr.xaml"/>
+    <ResourceDictionary x:Key="hu" Source="hu.xaml"/>
+    <ResourceDictionary x:Key="id" Source="id.xaml"/>
+    <ResourceDictionary x:Key="ja" Source="ja.xaml"/>
+    <ResourceDictionary x:Key="kn" Source="kn.xaml"/>
+    <ResourceDictionary x:Key="ko" Source="ko.xaml"/>
+    <ResourceDictionary x:Key="lt" Source="lt.xaml"/>
+    <ResourceDictionary x:Key="lv" Source="lv.xaml"/>
+    <ResourceDictionary x:Key="ml" Source="ml.xaml"/>
+    <ResourceDictionary x:Key="mr" Source="mr.xaml"/>
+    <ResourceDictionary x:Key="ms" Source="ms.xaml"/>
+    <ResourceDictionary x:Key="nb" Source="nb.xaml"/>
+    <ResourceDictionary x:Key="nl" Source="nl.xaml"/>
+    <ResourceDictionary x:Key="pl" Source="pl.xaml"/>
+    <ResourceDictionary x:Key="pt-BR" Source="pt-BR.xaml"/>
+    <ResourceDictionary x:Key="pt-PT" Source="pt-PT.xaml"/>
+    <ResourceDictionary x:Key="ro" Source="ro.xaml"/>
+    <ResourceDictionary x:Key="ru" Source="ru.xaml"/>
+    <ResourceDictionary x:Key="sk" Source="sk.xaml"/>
+    <ResourceDictionary x:Key="sl" Source="sl.xaml"/>
+    <ResourceDictionary x:Key="sr" Source="sr.xaml"/>
+    <ResourceDictionary x:Key="sv" Source="sv.xaml"/>
+    <ResourceDictionary x:Key="sw" Source="sw.xaml"/>
+    <ResourceDictionary x:Key="ta" Source="ta.xaml"/>
+    <ResourceDictionary x:Key="te" Source="te.xaml"/>
+    <ResourceDictionary x:Key="th" Source="th.xaml"/>
+    <ResourceDictionary x:Key="tr" Source="tr.xaml"/>
+    <ResourceDictionary x:Key="uk" Source="uk.xaml"/>
+    <ResourceDictionary x:Key="vi" Source="vi.xaml"/>-->
 </ResourceDictionary>
