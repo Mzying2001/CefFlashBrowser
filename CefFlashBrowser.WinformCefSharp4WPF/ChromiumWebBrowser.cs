@@ -596,8 +596,11 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 zoomLevel = ZoomLevel;
             }, invokeAsync: false);
 
-            // sync the zoom level when the frame starts loading
-            browser.SetZoomLevel(zoomLevel);
+            if (e.Frame.IsMain)
+            {
+                // sync the zoom level when the main frame starts loading
+                browser.SetZoomLevel(zoomLevel);
+            }
         }
 
         protected virtual void OnFrameLoadStart(FrameLoadStartEventArgs e)

@@ -2,9 +2,5 @@
 {
     public class CefSettings : CefSharp.CefSettingsBase
     {
-        public CefSettings()
-        {
-
-        }
     }
 }
