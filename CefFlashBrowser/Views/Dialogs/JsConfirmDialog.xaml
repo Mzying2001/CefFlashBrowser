@@ -13,7 +13,7 @@
         Width="420"
         Height="200"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         FocusManager.FocusedElement="{Binding ElementName=yesButton}">
 
     <Window.InputBindings>

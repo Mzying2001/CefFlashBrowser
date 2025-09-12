@@ -12,7 +12,7 @@
         x:Name="window"
         Height="250"
         Width="400"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         FocusManager.FocusedElement="{Binding ElementName=inputTextBox}">
 
     <Window.InputBindings>

@@ -14,7 +14,7 @@
         Width="350"
         SizeToContent="Height"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         Title="{DynamicResource dialog_addFavorite}"
         FocusManager.FocusedElement="{Binding ElementName=NameTextBox}">
 
