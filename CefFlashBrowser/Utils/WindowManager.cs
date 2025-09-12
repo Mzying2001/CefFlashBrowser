@@ -73,41 +73,6 @@ namespace CefFlashBrowser.Utils
             return window;
         }
 
-        public static void ShowModal(Window window)
-        {
-            Window owner = null;
-
-            foreach (Window w in Application.Current.Windows)
-            {
-                if (w.IsActive)
-                {
-                    owner = w;
-                    break;
-                }
-            }
-
-            if (owner == null || owner == window)
-            {
-                window.ShowDialog();
-                return;
-            }
-
-            var frame = new DispatcherFrame();
-            var hOwner = new WindowInteropHelper(owner).Handle;
-            bool storeEnabled = Win32.IsWindowEnabled(hOwner);
-
-            window.Closed += (s, e) =>
-            {
-                Win32.EnableWindow(hOwner, storeEnabled);
-                owner.Activate();
-                frame.Continue = false;
-            };
-
-            window.Owner = owner;
-            window.Show();
-            Win32.EnableWindow(hOwner, false);
-            Dispatcher.PushFrame(frame);
-        }
 
         public static TWindow NewWindow<TWindow>() where TWindow : Window, new()
         {
