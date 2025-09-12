@@ -21,7 +21,7 @@ namespace CefFlashBrowser.Utils.Behaviors
         {
             base.OnAttached();
             _closeWindowCommand = new DelegateCommand(AssociatedObject.Close);
-            _setDialogResultCommand = new DelegateCommand<bool?>(res => AssociatedObject.DialogResult = res);
+            _setDialogResultCommand = new DelegateCommand<bool?>(res => DialogHelper.SetDialogResult(AssociatedObject, res));
         }
 
         protected override void OnDetaching()

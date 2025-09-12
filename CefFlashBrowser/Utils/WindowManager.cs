@@ -9,8 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using System.Windows.Interop;
-using System.Windows.Threading;
 
 namespace CefFlashBrowser.Utils
 {
@@ -62,8 +60,8 @@ namespace CefFlashBrowser.Utils
 
             if (modal)
             {
-                window.ShowDialog();
-                //ShowModal(window);
+                //window.ShowDialog();
+                DialogHelper.ShowModal(window);
             }
             else
             {
@@ -170,48 +168,48 @@ namespace CefFlashBrowser.Utils
 
         public static bool ShowSelectLanguageDialog()
         {
-            return ShowWindow<SelectLanguageDialog>(true).DialogResult == true;
+            return DialogHelper.GetDialogResult(ShowWindow<SelectLanguageDialog>(modal: true)) == true;
         }
 
         public static bool ShowAddFavoriteDialog(string name = "", string url = "")
         {
-            return ShowWindow<AddFavoriteDialog>(true, initializer: window =>
+            return DialogHelper.GetDialogResult(ShowWindow<AddFavoriteDialog>(modal: true, initializer: window =>
             {
                 window.ItemName = name;
                 window.ItemUrl = url;
                 window.NameTextBox.SelectAll();
-            }).DialogResult == true;
+            })) == true;
         }
 
         public static void Alert(string message = "", string title = "", Action<bool> callback = null)
         {
-            bool result = ShowWindow<JsAlertDialog>(true, initializer: window =>
+            bool result = DialogHelper.GetDialogResult(ShowWindow<JsAlertDialog>(modal: true, initializer: window =>
             {
                 window.Title = title;
                 window.Message = message;
-            }).DialogResult == true;
+            })) == true;
             callback?.Invoke(result);
         }
 
         public static void Confirm(string message = "", string title = "", Action<bool?> callback = null)
         {
-            bool? result = ShowWindow<JsConfirmDialog>(true, initializer: window =>
+            bool? result = DialogHelper.GetDialogResult(ShowWindow<JsConfirmDialog>(modal: true, initializer: window =>
             {
                 window.Title = title;
                 window.Message = message;
-            }).DialogResult;
+            }));
             callback?.Invoke(result);
         }
 
         public static void Prompt(string message = "", string title = "", string defaultInputText = "", Action<bool?, string> callback = null)
         {
-            JsPromptDialog dialog = ShowWindow<JsPromptDialog>(true, initializer: window =>
+            var dialog = ShowWindow<JsPromptDialog>(modal: true, initializer: window =>
             {
                 window.Title = title;
                 window.Message = message;
                 window.InputText = defaultInputText;
             });
-            callback?.Invoke(dialog.DialogResult, dialog.InputText);
+            callback?.Invoke(DialogHelper.GetDialogResult(dialog), dialog.InputText);
         }
 
         public static void ShowError(string errMsg)
@@ -254,7 +252,7 @@ namespace CefFlashBrowser.Utils
                 window.Text = defaultText;
                 window.VerifyText = verifyText;
             });
-            callback?.Invoke(dialog.DialogResult, dialog.Text);
+            callback?.Invoke(DialogHelper.GetDialogResult(dialog), dialog.Text);
         }
 
         public static void ShowAddSolItemDialog(Func<string, bool> verifyName = null, Action<bool?, string, SolTypeDesc> callback = null)
@@ -264,7 +262,7 @@ namespace CefFlashBrowser.Utils
                 window.Types = SolHelper.GetSupportedTypes();
                 window.VerifyName = verifyName;
             });
-            callback?.Invoke(dialog.DialogResult, dialog.ItemName, dialog.SelectedType);
+            callback?.Invoke(DialogHelper.GetDialogResult(dialog), dialog.ItemName, dialog.SelectedType);
         }
 
         public static void ShowAddSolArrayItem(bool canChangeArrayType = true, bool isAssocArrayItem = false, Func<string, bool> verifyName = null, Action<bool?, string, SolTypeDesc> callback = null)
@@ -277,7 +275,7 @@ namespace CefFlashBrowser.Utils
                 window.IsAssocArrayItem = isAssocArrayItem;
                 window.CanChangeArrayType = canChangeArrayType;
             });
-            callback?.Invoke(dialog.DialogResult, dialog.ItemName, dialog.SelectedType);
+            callback?.Invoke(DialogHelper.GetDialogResult(dialog), dialog.ItemName, dialog.SelectedType);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -110,7 +111,7 @@ namespace CefFlashBrowser.Views.Dialogs
             base.OnClosing(e);
             if (e.Cancel) return;
 
-            if (DialogResult == true)
+            if (DialogHelper.GetDialogResult(this) == true)
             {
                 if (VerifyName?.Invoke(ItemName) == false)
                 {
