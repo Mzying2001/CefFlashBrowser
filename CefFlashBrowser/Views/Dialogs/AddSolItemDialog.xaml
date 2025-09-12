@@ -14,7 +14,7 @@
         x:Name="window"
         ResizeMode="NoResize"
         SizeToContent="WidthAndHeight"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         Title="{DynamicResource dialog_addItem}"
         FocusManager.FocusedElement="{Binding ElementName=nameTextBox}">
 

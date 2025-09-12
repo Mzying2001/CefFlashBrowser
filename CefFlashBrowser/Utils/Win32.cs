@@ -100,5 +100,11 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("user32.dll")]
         public static extern bool GetCursorPos(out POINT lpPoint);
+
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowEnabled(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
     }
 }

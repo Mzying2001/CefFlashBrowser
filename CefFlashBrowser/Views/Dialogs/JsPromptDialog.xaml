@@ -14,7 +14,7 @@
         Width="420"
         SizeToContent="Height"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         FocusManager.FocusedElement="{Binding ElementName=inputTextBox}">
 
     <Window.InputBindings>
