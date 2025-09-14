@@ -23,7 +23,23 @@ namespace CefFlashBrowser.Utils
             _browserWindows = new List<BrowserWindow>();
         }
 
+        /// <summary>
+        /// Display a window.
+        /// </summary>
         public static TWindow ShowWindow<TWindow>(bool modal = false, bool singleton = false, Action<TWindow> initializer = null) where TWindow : Window, new()
+        {
+            var window = CreateWindow(singleton, initializer);
+
+            if (modal) { DialogHelper.ShowModal(window); }
+            else { window.Show(); }
+
+            return window;
+        }
+
+        /// <summary>
+        /// Create a new window instance, supporting singleton windows and initializer actions.
+        /// </summary>
+        public static TWindow CreateWindow<TWindow>(bool singleton = false, Action<TWindow> initializer = null) where TWindow : Window, new()
         {
             TWindow window = null;
 
@@ -50,34 +66,26 @@ namespace CefFlashBrowser.Utils
 
             if (initializer != null)
             {
-                window.SourceInitialized += WindowSourceInitializedHandler;
-                void WindowSourceInitializedHandler(object sender, EventArgs e)
+                window.SourceInitialized += windowSourceInitializedHandler;
+                void windowSourceInitializedHandler(object sender, EventArgs e)
                 {
                     initializer((TWindow)sender);
-                    ((TWindow)sender).SourceInitialized -= WindowSourceInitializedHandler;
+                    ((TWindow)sender).SourceInitialized -= windowSourceInitializedHandler;
                 }
-            }
-
-            if (modal)
-            {
-                //window.ShowDialog();
-                DialogHelper.ShowModal(window);
-            }
-            else
-            {
-                window.Show();
             }
 
             return window;
         }
 
-
-        public static TWindow NewWindow<TWindow>() where TWindow : Window, new()
+        /// <summary>
+        /// Create a new window instance with theme support.
+        /// </summary>
+        private static TWindow NewWindow<TWindow>() where TWindow : Window, new()
         {
             var window = new TWindow()
             { Style = (Style)Application.Current.Resources["CustomWindowStyle"] };
 
-            void ThemeChangedHandler(object theme)
+            void themeChangedHandler(object theme)
             {
                 ThemeManager.ChangeTitleBarColor(window, (Theme)theme);
             }
@@ -86,14 +94,17 @@ namespace CefFlashBrowser.Utils
             {
                 var theme = GlobalData.Settings.FollowSystemTheme ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme;
                 ThemeManager.ChangeTitleBarColor((Window)sender, theme);
-                Messenger.Global.Register(MessageTokens.THEME_CHANGED, ThemeChangedHandler);
+                Messenger.Global.Register(MessageTokens.THEME_CHANGED, themeChangedHandler);
             };
+
             window.Closed += (sender, e) =>
             {
-                Messenger.Global.Unregister(MessageTokens.THEME_CHANGED, ThemeChangedHandler);
+                Messenger.Global.Unregister(MessageTokens.THEME_CHANGED, themeChangedHandler);
             };
+
             return window;
         }
+
 
         public static void ShowMainWindow()
         {
