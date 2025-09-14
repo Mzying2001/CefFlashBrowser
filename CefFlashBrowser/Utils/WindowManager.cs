@@ -168,37 +168,39 @@ namespace CefFlashBrowser.Utils
 
         public static bool ShowSelectLanguageDialog()
         {
-            return DialogHelper.GetDialogResult(ShowWindow<SelectLanguageDialog>(modal: true)) == true;
+            var dialog = ShowWindow<SelectLanguageDialog>(modal: true);
+            return DialogHelper.GetDialogResult(dialog) == true;
         }
 
         public static bool ShowAddFavoriteDialog(string name = "", string url = "")
         {
-            return DialogHelper.GetDialogResult(ShowWindow<AddFavoriteDialog>(modal: true, initializer: window =>
+            var dialog = ShowWindow<AddFavoriteDialog>(modal: true, initializer: window =>
             {
                 window.ItemName = name;
                 window.ItemUrl = url;
                 window.NameTextBox.SelectAll();
-            })) == true;
+            });
+            return DialogHelper.GetDialogResult(dialog) == true;
         }
 
         public static void Alert(string message = "", string title = "", Action<bool> callback = null)
         {
-            bool result = DialogHelper.GetDialogResult(ShowWindow<JsAlertDialog>(modal: true, initializer: window =>
+            var dialog = ShowWindow<JsAlertDialog>(modal: true, initializer: window =>
             {
                 window.Title = title;
                 window.Message = message;
-            })) == true;
-            callback?.Invoke(result);
+            });
+            callback?.Invoke(DialogHelper.GetDialogResult(dialog) == true);
         }
 
         public static void Confirm(string message = "", string title = "", Action<bool?> callback = null)
         {
-            bool? result = DialogHelper.GetDialogResult(ShowWindow<JsConfirmDialog>(modal: true, initializer: window =>
+            var dialog = ShowWindow<JsConfirmDialog>(modal: true, initializer: window =>
             {
                 window.Title = title;
                 window.Message = message;
-            }));
-            callback?.Invoke(result);
+            });
+            callback?.Invoke(DialogHelper.GetDialogResult(dialog));
         }
 
         public static void Prompt(string message = "", string title = "", string defaultInputText = "", Action<bool?, string> callback = null)
