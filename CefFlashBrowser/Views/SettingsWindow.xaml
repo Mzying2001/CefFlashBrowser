@@ -77,6 +77,16 @@
                                           SelectedIndex="{Binding CurrentThemeIndex, Mode=OneWay}"
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Value">
+                                    <ComboBox.Style>
+                                        <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding FollowSystemTheme}"
+                                                             Value="True">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ComboBox.Style>
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="SelectionChanged">
                                             <i:InvokeCommandAction Command="{Binding SetThemeCommand}"
