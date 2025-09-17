@@ -11,27 +11,27 @@ namespace CefFlashBrowser.Utils
         private const int DEVTOOLSFLAG = 0x00000001;
         private const string PROP_DEVTOOLSFLAG = "CefFlashBrowser.DevToolsFlag";
 
-        public static long GetWindowLong(IntPtr hWnd, int nIndex)
+        public static IntPtr GetWindowLong(IntPtr hWnd, int nIndex)
         {
             if (IntPtr.Size == 4)
             {
-                return (long)Win32.GetWindowLong(hWnd, nIndex);
+                return Win32.GetWindowLong(hWnd, nIndex);
             }
             else
             {
-                return (long)Win32.GetWindowLongPtr(hWnd, nIndex);
+                return Win32.GetWindowLongPtr(hWnd, nIndex);
             }
         }
 
-        public static long SetWindowLong(IntPtr hWnd, int nIndex, long dwNewLong)
+        public static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
         {
             if (IntPtr.Size == 4)
             {
-                return (long)Win32.SetWindowLong(hWnd, nIndex, (IntPtr)dwNewLong);
+                return Win32.SetWindowLong(hWnd, nIndex, dwNewLong);
             }
             else
             {
-                return (long)Win32.SetWindowLongPtr(hWnd, nIndex, (IntPtr)dwNewLong);
+                return Win32.SetWindowLongPtr(hWnd, nIndex, dwNewLong);
             }
         }
 
@@ -42,17 +42,17 @@ namespace CefFlashBrowser.Utils
 
         public static int SetWindowStyle(IntPtr hwnd, int style)
         {
-            return (int)SetWindowLong(hwnd, Win32.GWL_STYLE, style);
+            return (int)SetWindowLong(hwnd, Win32.GWL_STYLE, (IntPtr)style);
         }
 
         public static IntPtr GetOwnerWindow(IntPtr hwnd)
         {
-            return (IntPtr)GetWindowLong(hwnd, Win32.GWLP_HWNDPARENT);
+            return GetWindowLong(hwnd, Win32.GWLP_HWNDPARENT);
         }
 
         public static IntPtr SetOwnerWindow(IntPtr hwnd, IntPtr hOwner)
         {
-            return (IntPtr)SetWindowLong(hwnd, Win32.GWLP_HWNDPARENT, (long)hOwner);
+            return SetWindowLong(hwnd, Win32.GWLP_HWNDPARENT, hOwner);
         }
 
         public static void ApplyEmbeddedChildStyle(IntPtr hwnd, bool visible = true)
