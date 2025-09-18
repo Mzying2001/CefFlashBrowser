@@ -187,9 +187,11 @@ namespace CefFlashBrowser.Utils
         {
             var dialog = ShowWindow<AddFavoriteDialog>(modal: true, initializer: window =>
             {
-                window.ItemName = name;
-                window.ItemUrl = url;
-                window.NameTextBox.SelectAll();
+                if (window.DataContext is AddFavoriteDialogViewModel vm)
+                {
+                    vm.Name = name;
+                    vm.Url = url;
+                }
             });
             return DialogHelper.GetDialogResult(dialog) == true;
         }

@@ -1,7 +1,7 @@
-﻿using CefFlashBrowser.Models.Data;
-using CefFlashBrowser.Utils;
-using System;
+﻿using System;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views.Dialogs
 {
@@ -10,53 +10,25 @@ namespace CefFlashBrowser.Views.Dialogs
     /// </summary>
     public partial class AddFavoriteDialog : Window
     {
-
-
-        public string ItemName
-        {
-            get { return (string)GetValue(ItemNameProperty); }
-            set { SetValue(ItemNameProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for ItemName.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty ItemNameProperty =
-            DependencyProperty.Register("ItemName", typeof(string), typeof(AddFavoriteDialog), new PropertyMetadata(string.Empty));
-
-
-        public string ItemUrl
-        {
-            get { return (string)GetValue(ItemUrlProperty); }
-            set { SetValue(ItemUrlProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for ItemUrl.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty ItemUrlProperty =
-            DependencyProperty.Register("ItemUrl", typeof(string), typeof(AddFavoriteDialog), new PropertyMetadata(string.Empty));
-
+        private bool _supressClose = true; // Prevent close on first binding
 
         public AddFavoriteDialog()
         {
             InitializeComponent();
         }
 
-        protected override void OnClosed(EventArgs e)
+        protected override void OnSourceInitialized(EventArgs e)
         {
-            base.OnClosed(e);
-
-            if (DialogHelper.GetDialogResult(this) == true)
-            {
-                GlobalData.Favorites.Add(new Models.Website(ItemName, ItemUrl));
-            }
+            base.OnSourceInitialized(e);
+            _supressClose = false;
+            FocusManager.SetFocusedElement(this, nameTextBox);
         }
 
-        private void OnCancelButtonClick(object sender, RoutedEventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
-            DialogHelper.SetDialogResult(this, false);
-        }
-
-        private void OnConfirmButtonClick(object sender, RoutedEventArgs e)
-        {
-            DialogHelper.SetDialogResult(this, true);
+            if (_supressClose)
+                e.Cancel = true;
+            base.OnClosing(e);
         }
     }
 }
