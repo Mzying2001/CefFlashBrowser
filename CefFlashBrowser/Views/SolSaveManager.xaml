@@ -30,7 +30,10 @@
     <Window.Resources>
         <DataTemplate x:Key="WorkspaceTemplate"
                       DataType="{x:Type vm:SaveMgrWorkspaceViewModel}">
-            <ListView>
+            <ListView VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingPanel.IsVirtualizingWhenGrouping="True"  
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True">
                 <ListView.Resources>
                     <CollectionViewSource x:Key="SolFilesView"
                                           Source="{Binding SolFiles}">
@@ -43,6 +46,12 @@
                 <ListView.ItemsSource>
                     <Binding Source="{StaticResource SolFilesView}"/>
                 </ListView.ItemsSource>
+
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
 
                 <ListView.GroupStyle>
                     <GroupStyle>
