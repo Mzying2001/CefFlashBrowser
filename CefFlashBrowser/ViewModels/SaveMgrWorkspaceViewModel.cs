@@ -33,8 +33,8 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _workspaceDir, value);
         }
 
-        private ObservableCollection<SolFileInfo> _solFiles;
-        public ObservableCollection<SolFileInfo> SolFiles
+        private RangeObservableCollection<SolFileInfo> _solFiles;
+        public RangeObservableCollection<SolFileInfo> SolFiles
         {
             get => _solFiles;
             set => UpdateValue(ref _solFiles, value);
@@ -49,7 +49,7 @@ namespace CefFlashBrowser.ViewModels
 
         private async Task ReloadSolFilesAsync(CancellationToken token)
         {
-            SolFiles = new ObservableCollection<SolFileInfo>();
+            SolFiles = new RangeObservableCollection<SolFileInfo>();
 
             await Task.Run(async () =>
             {
@@ -60,7 +60,7 @@ namespace CefFlashBrowser.ViewModels
                 {
                     if (buffer.Count > 0)
                     {
-                        InvokeOnUIThread(() => buffer.ForEach(item => SolFiles.Add(item)));
+                        InvokeOnUIThread(() => SolFiles.AddRange(buffer));
                         buffer.Clear();
                     }
                 }
@@ -75,9 +75,11 @@ namespace CefFlashBrowser.ViewModels
 
                         if (buffer.Count >= batch)
                             addToUI();
+
                         await Task.Yield();
                     }
                 }
+
                 addToUI();
             }, token);
         }
