@@ -26,11 +26,14 @@ namespace CefFlashBrowser.Utils
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
 
+            var list = items as IList<T> ?? new List<T>(items);
+            if (list.Count == 0) return;
+
             try
             {
                 _suppressNotification = true;
 
-                foreach (var item in items)
+                foreach (var item in list)
                 {
                     Items.Add(item);
                 }
