@@ -210,14 +210,25 @@
                               UriSource="/Assets/Svgs/reload.svg"/>
             </Button>
 
-            <TextBox DockPanel.Dock="Right"
-                     Width="200"
-                     Margin="10,0,0,0"
-                     Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}">
-                <i:Interaction.Behaviors>
-                    <behaviors:TextBoxSelectAllOnFocus/>
-                </i:Interaction.Behaviors>
-            </TextBox>
+            <Grid DockPanel.Dock="Right"
+                  Margin="10,0,0,0"
+                  Width="200">
+                <TextBox Padding="28,0,8,0"
+                         Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:TextBoxSelectAllOnFocus/>
+                    </i:Interaction.Behaviors>
+                </TextBox>
+
+                <Grid Margin="8,0,0,0"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Left"
+                      IsHitTestVisible="False">
+                    <svgc:SvgIcon Width="13"
+                                  Height="13"
+                                  UriSource="/Assets/Svgs/search.svg"/>
+                </Grid>
+            </Grid>
 
             <ComboBox ItemsSource="{Binding Workspaces}"
                       SelectedValue="{Binding CurrentWorkspace}"
