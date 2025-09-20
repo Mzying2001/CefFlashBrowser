@@ -7,8 +7,10 @@ using SimpleMvvm;
 using SimpleMvvm.Command;
 using SimpleMvvm.Messaging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -94,14 +96,29 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private static string ReplaceInvalidFileNameChars(string str, char replaceChar = '_')
+        {
+            if (string.IsNullOrEmpty(str))
+                return str;
+
+            var builder = new StringBuilder(str);
+            var invalidChars = new HashSet<char>(Path.GetInvalidFileNameChars());
+
+            if (invalidChars.Contains(replaceChar))
+                replaceChar = '_';
+
+            for (int i = 0; i < builder.Length; i++)
+            {
+                if (invalidChars.Contains(builder[i]))
+                    builder[i] = replaceChar;
+            }
+
+            return builder.ToString();
+        }
+
         public void CreateShortcut(IWebBrowser browser)
         {
-            var title = GetWebBrowserTitle(browser);
-
-            foreach (var item in Path.GetInvalidFileNameChars())
-            {
-                title = title.Replace(item, '_');
-            }
+            var title = ReplaceInvalidFileNameChars(GetWebBrowserTitle(browser));
 
             var sfd = new Microsoft.Win32.SaveFileDialog()
             {

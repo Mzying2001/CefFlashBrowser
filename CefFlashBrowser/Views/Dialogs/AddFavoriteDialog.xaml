@@ -8,31 +8,24 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:utils="clr-namespace:CefFlashBrowser.Utils"
         mc:Ignorable="d"
         
-        x:Name="window"
         Width="350"
         SizeToContent="Height"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         Title="{DynamicResource dialog_addFavorite}"
-        FocusManager.FocusedElement="{Binding ElementName=NameTextBox}">
+        DataContext="{Binding Source={StaticResource Locator}, Path=AddFavoriteDialogViewModel}"
+        utils:DialogHelper.DialogResult="{Binding DialogResult, Mode=OneWay}">
 
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
         <KeyBinding Gesture="Esc"
-                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
-            <KeyBinding.CommandParameter>
-                <sys:Boolean>False</sys:Boolean>
-            </KeyBinding.CommandParameter>
-        </KeyBinding>
+                    Command="{Binding CancelAddCommand}"/>
         <KeyBinding Gesture="Enter"
-                    Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
-            <KeyBinding.CommandParameter>
-                <sys:Boolean>True</sys:Boolean>
-            </KeyBinding.CommandParameter>
-        </KeyBinding>
+                    Command="{Binding AddFavoriteCommand}"/>
     </Window.InputBindings>
 
     <i:Interaction.Behaviors>
@@ -47,17 +40,16 @@
 
         <Grid Grid.Row="0">
             <StackPanel Margin="15">
-                <hc:TextBox x:Name="NameTextBox"
+                <hc:TextBox x:Name="nameTextBox"
                             hc:TitleElement.Title="{DynamicResource favorites_name}"
-                            Text="{Binding ElementName=window, Path=ItemName, UpdateSourceTrigger=PropertyChanged}">
+                            Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>
                 </hc:TextBox>
-                <hc:TextBox x:Name="UrlTextBox"
-                            Margin="0,5,0,0"
+                <hc:TextBox Margin="0,5,0,0"
                             hc:TitleElement.Title="{DynamicResource favorites_url}"
-                            Text="{Binding ElementName=window, Path=ItemUrl, UpdateSourceTrigger=PropertyChanged}">
+                            Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>
@@ -71,19 +63,12 @@
                         HorizontalAlignment="Right">
                 <Button MinWidth="70"
                         Content="{DynamicResource dialog_cancel}"
-                        Click="OnCancelButtonClick"/>
+                        Command="{Binding CancelAddCommand}"/>
                 <Button MinWidth="70"
                         Margin="10,0,0,0"
                         Content="{DynamicResource dialog_ok}"
                         Style="{StaticResource ButtonPrimary}"
-                        Click="OnConfirmButtonClick">
-                    <Button.IsEnabled>
-                        <MultiBinding Converter="{StaticResource StringArrNotAnyEmpty}">
-                            <Binding ElementName="window" Path="ItemName"/>
-                            <Binding ElementName="window" Path="ItemUrl"/>
-                        </MultiBinding>
-                    </Button.IsEnabled>
-                </Button>
+                        Command="{Binding AddFavoriteCommand}"/>
             </StackPanel>
         </Grid>
     </Grid>
