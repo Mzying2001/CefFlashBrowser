@@ -143,6 +143,7 @@
     <sys:String x:Key="solSaveManager_toolTipReload">Aggiorna</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">Elimina</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">Modifica</sys:String>
+    <sys:String x:Key="solSaveManager_filterPlaceholder">Filtra...</sys:String>
 
     <!--Editor SOL-->
     <sys:String x:Key="solEditor_title">Editor SOL</sys:String>

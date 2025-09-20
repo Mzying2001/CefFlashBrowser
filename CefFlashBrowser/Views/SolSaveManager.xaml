@@ -6,11 +6,13 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
+        x:Name="window"
         Width="800"
         Height="500"
         Title="{DynamicResource solSaveManager_title}"
@@ -74,6 +76,12 @@
                         <CollectionViewSource.GroupDescriptions>
                             <PropertyGroupDescription PropertyName="WebsiteFolderName"/>
                         </CollectionViewSource.GroupDescriptions>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Filter">
+                                <i:InvokeCommandAction PassEventArgsToCommand="True"
+                                                       Command="{Binding ElementName=window, Path=DataContext.FilterCommand}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
                     </CollectionViewSource>
                 </ListView.Resources>
 
@@ -202,6 +210,27 @@
                               Height="14"
                               UriSource="/Assets/Svgs/reload.svg"/>
             </Button>
+
+            <Grid DockPanel.Dock="Right"
+                  Margin="10,0,0,0"
+                  Width="200">
+                <hc:TextBox Padding="28,0,8,0"
+                            Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                            hc:InfoElement.Placeholder="{DynamicResource solSaveManager_filterPlaceholder}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:TextBoxSelectAllOnFocus/>
+                    </i:Interaction.Behaviors>
+                </hc:TextBox>
+
+                <Grid Margin="8,0,0,0"
+                      Width="13"
+                      Height="13"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Left"
+                      IsHitTestVisible="False">
+                    <svgc:SvgIcon UriSource="/Assets/Svgs/search.svg"/>
+                </Grid>
+            </Grid>
 
             <ComboBox ItemsSource="{Binding Workspaces}"
                       SelectedValue="{Binding CurrentWorkspace}"

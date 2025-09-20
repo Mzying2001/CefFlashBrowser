@@ -49,6 +49,7 @@
     <Resource Include="Assets\Svgs\more.svg" />
     <Resource Include="Assets\Svgs\page.svg" />
     <Resource Include="Assets\Svgs\reload.svg" />
+    <Resource Include="Assets\Svgs\search.svg" />
     <Resource Include="Assets\Svgs\stop.svg" />
     <Resource Include="Assets\Svgs\sub.svg" />
     <Resource Include="Assets\Svgs\trash.svg" />
