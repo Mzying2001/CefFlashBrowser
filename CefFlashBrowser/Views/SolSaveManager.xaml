@@ -102,20 +102,7 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="GroupItem">
-                                            <Expander>
-                                                <Expander.Style>
-                                                    <Style TargetType="Expander"
-                                                           BasedOn="{StaticResource {x:Type Expander}}">
-                                                        <Setter Property="IsExpanded" Value="True"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Name}"
-                                                                         Value="macromedia.com">
-                                                                <!--Collapse items of `macromedia.com` by default-->
-                                                                <Setter Property="IsExpanded" Value="False"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Expander.Style>
+                                            <Expander IsExpanded="True">
                                                 <Expander.Header>
                                                     <TextBlock FontWeight="Bold"
                                                                Text="{Binding Name}"/>
