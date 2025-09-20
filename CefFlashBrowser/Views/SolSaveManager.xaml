@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
@@ -213,20 +214,21 @@
             <Grid DockPanel.Dock="Right"
                   Margin="10,0,0,0"
                   Width="200">
-                <TextBox Padding="28,0,8,0"
-                         Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}">
+                <hc:TextBox Padding="28,0,8,0"
+                            Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                            hc:InfoElement.Placeholder="{DynamicResource solSaveManager_filterPlaceholder}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>
-                </TextBox>
+                </hc:TextBox>
 
                 <Grid Margin="8,0,0,0"
+                      Width="13"
+                      Height="13"
                       VerticalAlignment="Center"
                       HorizontalAlignment="Left"
                       IsHitTestVisible="False">
-                    <svgc:SvgIcon Width="13"
-                                  Height="13"
-                                  UriSource="/Assets/Svgs/search.svg"/>
+                    <svgc:SvgIcon UriSource="/Assets/Svgs/search.svg"/>
                 </Grid>
             </Grid>
 

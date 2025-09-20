@@ -143,6 +143,7 @@
     <sys:String x:Key="solSaveManager_toolTipReload">刷新</sys:String>
     <sys:String x:Key="solSaveManager_toolTipDelete">删除</sys:String>
     <sys:String x:Key="solSaveManager_toolTipEdit">编辑</sys:String>
+    <sys:String x:Key="solSaveManager_filterPlaceholder">筛选...</sys:String>
 
     <!--存档编辑器-->
     <sys:String x:Key="solEditor_title">SOL编辑器</sys:String>
