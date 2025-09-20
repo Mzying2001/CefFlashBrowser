@@ -20,7 +20,7 @@
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
         <KeyBinding Gesture="F5"
-                    Command="{Binding ReloadWorkSpacesCommand}"/>
+                    Command="{Binding ReloadWorkspacesCommand}"/>
     </Window.InputBindings>
 
     <i:Interaction.Behaviors>
@@ -28,12 +28,143 @@
     </i:Interaction.Behaviors>
 
     <Window.Resources>
-        <CollectionViewSource x:Key="SolFilesView"
-                              Source="{Binding SolFiles}">
-            <CollectionViewSource.GroupDescriptions>
-                <PropertyGroupDescription PropertyName="WebsiteFolder"/>
-            </CollectionViewSource.GroupDescriptions>
-        </CollectionViewSource>
+        <DataTemplate x:Key="WorkspaceTemplate"
+                      DataType="{x:Type vm:SaveMgrWorkspaceViewModel}">
+            <ListView VirtualizingStackPanel.IsVirtualizing="True"
+                      VirtualizingPanel.IsVirtualizingWhenGrouping="True"  
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      ScrollViewer.CanContentScroll="True">
+                <ListView.Resources>
+                    <CollectionViewSource x:Key="SolFilesView"
+                                          Source="{Binding SolFiles}">
+                        <CollectionViewSource.GroupDescriptions>
+                            <PropertyGroupDescription PropertyName="WebsiteFolderName"/>
+                        </CollectionViewSource.GroupDescriptions>
+                    </CollectionViewSource>
+                </ListView.Resources>
+
+                <ListView.ItemsSource>
+                    <Binding Source="{StaticResource SolFilesView}"/>
+                </ListView.ItemsSource>
+
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+
+                <ListView.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.ContainerStyle>
+                            <Style TargetType="GroupItem">
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="GroupItem">
+                                            <Expander>
+                                                <Expander.Style>
+                                                    <Style TargetType="Expander"
+                                                           BasedOn="{StaticResource {x:Type Expander}}">
+                                                        <Setter Property="IsExpanded" Value="True"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Name}"
+                                                                         Value="macromedia.com">
+                                                                <!--Collapse items of `macromedia.com` by default-->
+                                                                <Setter Property="IsExpanded" Value="False"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Expander.Style>
+                                                <Expander.Header>
+                                                    <TextBlock FontWeight="Bold"
+                                                               Text="{Binding Name}"/>
+                                                </Expander.Header>
+                                                <Expander.Content>
+                                                    <ItemsPresenter Margin="0,3,0,0"/>
+                                                </Expander.Content>
+                                            </Expander>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GroupStyle.ContainerStyle>
+                    </GroupStyle>
+                </ListView.GroupStyle>
+
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="150"
+                                        Header="{DynamicResource solSaveManager_headerFileName}"
+                                        DisplayMemberBinding="{Binding FileName}"/>
+
+                        <GridViewColumn Width="400"
+                                        Header="{DynamicResource solSaveManager_headerFileDir}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type m:SolFileInfo}">
+                                    <TextBlock TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding FilePath}">
+                                        <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ShowInExplorerCommand}"
+                                                   CommandParameter="{Binding}"
+                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=Foreground}">
+                                            <Run Text="{Binding PathInWebsiteFolder}"/>
+                                        </Hyperlink>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn Header="{DynamicResource solSaveManager_headerOperations}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type m:SolFileInfo}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <StackPanel.Resources>
+                                            <Style TargetType="Button"
+                                                   BasedOn="{StaticResource {x:Type Button}}">
+                                                <Setter Property="Width" Value="30"/>
+                                                <Setter Property="Height" Value="30"/>
+                                                <Setter Property="Padding" Value="0"/>
+                                            </Style>
+                                        </StackPanel.Resources>
+                                        <Button ToolTip="{DynamicResource common_export}"
+                                                Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ExportSolCommand}"
+                                                CommandParameter="{Binding}">
+                                            <svgc:SvgIcon Width="13.5"
+                                                          Height="13.5"
+                                                          UriSource="/Assets/Svgs/export.svg"/>
+                                        </Button>
+                                        <Button Margin="5,0,0,0"
+                                                ToolTip="{DynamicResource common_import}"
+                                                Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ImportSolCommand}"
+                                                CommandParameter="{Binding}">
+                                            <svgc:SvgIcon Width="14"
+                                                          Height="14"
+                                                          UriSource="/Assets/Svgs/import.svg"/>
+                                        </Button>
+                                        <Button Margin="5,0,0,0"
+                                                ToolTip="{DynamicResource solSaveManager_toolTipEdit}"
+                                                Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.EditSolCommand}"
+                                                CommandParameter="{Binding}">
+                                            <svgc:SvgIcon Width="13"
+                                                          Height="13"
+                                                          UriSource="/Assets/Svgs/edit.svg"/>
+                                        </Button>
+                                        <Button Margin="5,0,0,0"
+                                                ToolTip="{DynamicResource solSaveManager_toolTipDelete}"
+                                                Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.DeleteSolCommand}"
+                                                CommandParameter="{Binding}">
+                                            <svgc:SvgIcon Width="14"
+                                                          Height="14"
+                                                          UriSource="/Assets/Svgs/trash.svg"
+                                                          Fill="{DynamicResource DangerBrush}"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </DataTemplate>
     </Window.Resources>
 
     <DockPanel>
@@ -49,129 +180,21 @@
             </DockPanel.Resources>
 
             <Button Margin="0,0,10,0"
-                    Command="{Binding ReloadWorkSpacesCommand}"
+                    Command="{Binding CurrentWorkspace.ReloadSolFilesCommand}"
                     ToolTip="{DynamicResource solSaveManager_toolTipReload}">
                 <svgc:SvgIcon Width="14"
                               Height="14"
                               UriSource="/Assets/Svgs/reload.svg"/>
             </Button>
 
-            <ComboBox ItemsSource="{Binding WorkSpaces}"
-                      SelectedValue="{Binding CurrentWorkSpace}"/>
+            <ComboBox ItemsSource="{Binding Workspaces}"
+                      SelectedValue="{Binding CurrentWorkspace}"
+                      DisplayMemberPath="WorkspaceDir"/>
         </DockPanel>
 
-        <ListView Margin="10,0,10,10"
-                  ItemsSource="{Binding Source={StaticResource SolFilesView}}">
-            <ListView.GroupStyle>
-                <GroupStyle>
-                    <GroupStyle.ContainerStyle>
-                        <Style TargetType="GroupItem">
-                            <Setter Property="Margin" Value="0,0,0,5"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="GroupItem">
-                                        <Expander>
-                                            <Expander.Style>
-                                                <Style TargetType="Expander"
-                                                       BasedOn="{StaticResource {x:Type Expander}}">
-                                                    <Setter Property="IsExpanded" Value="True"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Name}"
-                                                                     Value="macromedia.com">
-                                                            <!--Collapse items of `macromedia.com` by default-->
-                                                            <Setter Property="IsExpanded" Value="False"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Expander.Style>
-                                            <Expander.Header>
-                                                <TextBlock FontWeight="Bold"
-                                                           Text="{Binding Name}"/>
-                                            </Expander.Header>
-                                            <Expander.Content>
-                                                <ItemsPresenter Margin="0,3,0,0"/>
-                                            </Expander.Content>
-                                        </Expander>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </GroupStyle.ContainerStyle>
-                </GroupStyle>
-            </ListView.GroupStyle>
-
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Width="150"
-                                    Header="{DynamicResource solSaveManager_headerFileName}"
-                                    DisplayMemberBinding="{Binding FileName}"/>
-
-                    <GridViewColumn Width="400"
-                                    Header="{DynamicResource solSaveManager_headerFileDir}">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="{x:Type m:SolFileInfo}">
-                                <TextBlock TextTrimming="CharacterEllipsis"
-                                           ToolTip="{Binding FilePath}">
-                                    <Hyperlink Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.ShowInExplorerCommand}"
-                                               CommandParameter="{Binding}"
-                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=Foreground}">
-                                        <Run Text="{Binding PathInWebsiteFolder}"/>
-                                    </Hyperlink>
-                                </TextBlock>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-
-                    <GridViewColumn Header="{DynamicResource solSaveManager_headerOperations}">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate DataType="{x:Type m:SolFileInfo}">
-                                <StackPanel Orientation="Horizontal">
-                                    <StackPanel.Resources>
-                                        <Style TargetType="Button"
-                                               BasedOn="{StaticResource {x:Type Button}}">
-                                            <Setter Property="Width" Value="30"/>
-                                            <Setter Property="Height" Value="30"/>
-                                            <Setter Property="Padding" Value="0"/>
-                                        </Style>
-                                    </StackPanel.Resources>
-                                    <Button ToolTip="{DynamicResource common_export}"
-                                            Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.ExportSolCommand}"
-                                            CommandParameter="{Binding}">
-                                        <svgc:SvgIcon Width="13.5"
-                                                      Height="13.5"
-                                                      UriSource="/Assets/Svgs/export.svg"/>
-                                    </Button>
-                                    <Button Margin="5,0,0,0"
-                                            ToolTip="{DynamicResource common_import}"
-                                            Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.ImportSolCommand}"
-                                            CommandParameter="{Binding}">
-                                        <svgc:SvgIcon Width="14"
-                                                      Height="14"
-                                                      UriSource="/Assets/Svgs/import.svg"/>
-                                    </Button>
-                                    <Button Margin="5,0,0,0"
-                                            ToolTip="{DynamicResource solSaveManager_toolTipEdit}"
-                                            Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.EditSolCommand}"
-                                            CommandParameter="{Binding}">
-                                        <svgc:SvgIcon Width="13"
-                                                      Height="13"
-                                                      UriSource="/Assets/Svgs/edit.svg"/>
-                                    </Button>
-                                    <Button Margin="5,0,0,0"
-                                            ToolTip="{DynamicResource solSaveManager_toolTipDelete}"
-                                            Command="{Binding Source={StaticResource Locator}, Path=SolSaveManagerViewModel.DeleteSolCommand}"
-                                            CommandParameter="{Binding}">
-                                        <svgc:SvgIcon Width="14"
-                                                      Height="14"
-                                                      UriSource="/Assets/Svgs/trash.svg"
-                                                      Fill="{DynamicResource DangerBrush}"/>
-                                    </Button>
-                                </StackPanel>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+        <Grid Margin="10,0,10,10">
+            <ContentControl Content="{Binding CurrentWorkspace}"
+                            ContentTemplate="{StaticResource WorkspaceTemplate}"/>
+        </Grid>
     </DockPanel>
 </Window>
