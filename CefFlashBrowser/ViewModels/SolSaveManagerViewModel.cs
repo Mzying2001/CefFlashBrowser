@@ -29,7 +29,11 @@ namespace CefFlashBrowser.ViewModels
         public SaveMgrWorkspaceViewModel CurrentWorkspace
         {
             get => _currentWorkspace;
-            set => UpdateValue(ref _currentWorkspace, value);
+            set
+            {
+                UpdateValue(ref _currentWorkspace, value);
+                value?.SolFiles.Refresh();
+            }
         }
 
         private string _filterText = string.Empty;
