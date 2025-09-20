@@ -19,8 +19,10 @@
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
-        <KeyBinding Gesture="F5"
+        <KeyBinding Gesture="Ctrl+R"
                     Command="{Binding ReloadWorkspacesCommand}"/>
+        <KeyBinding Gesture="F5"
+                    Command="{Binding CurrentWorkspace.ReloadSolFilesCommand}"/>
     </Window.InputBindings>
 
     <i:Interaction.Behaviors>
