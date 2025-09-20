@@ -39,16 +39,20 @@ namespace CefFlashBrowser.Utils
                 }
 
                 _suppressNotification = false;
-
-                OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
-                OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                Refresh();
             }
             catch
             {
                 _suppressNotification = false;
                 throw;
             }
+        }
+
+        public void Refresh()
+        {
+            OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
+            OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
