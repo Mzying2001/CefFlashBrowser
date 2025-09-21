@@ -36,7 +36,7 @@ namespace CefFlashBrowser.Views
 
         private void ListViewItemMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (e.Source is ListViewItem item)
+            if (sender is ListViewItem item)
             {
                 Dispatcher.InvokeAsync(() =>
                     ViewModel?.CurrentWorkspace?.EditSolCommand.Execute(item.DataContext));
