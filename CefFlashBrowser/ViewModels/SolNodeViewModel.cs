@@ -70,6 +70,13 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private bool _isSelected = false;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => UpdateValue(ref _isSelected, value);
+        }
+
         private bool _isRemoved = false;
         public bool IsRemoved
         {
