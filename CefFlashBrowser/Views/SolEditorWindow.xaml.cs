@@ -4,6 +4,8 @@ using CefFlashBrowser.ViewModels;
 using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views
 {
@@ -45,6 +47,14 @@ namespace CefFlashBrowser.Views
                         e.Cancel = true;
                     }
                 }
+            }
+        }
+
+        private void TreeViewItemPreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TreeViewItem item)
+            {
+                item.IsSelected = true;
             }
         }
     }
