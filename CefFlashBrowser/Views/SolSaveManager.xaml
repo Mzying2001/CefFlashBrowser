@@ -95,6 +95,14 @@
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
 
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem"
+                           BasedOn="{StaticResource ListViewItemBaseStyle}">
+                        <EventSetter Event="MouseDoubleClick"
+                                     Handler="ListViewItemMouseDoubleClick"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+
                 <ListView.GroupStyle>
                     <GroupStyle>
                         <GroupStyle.ContainerStyle>

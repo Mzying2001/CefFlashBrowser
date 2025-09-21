@@ -1,7 +1,10 @@
 ﻿using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.ViewModels;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views
 {
@@ -10,6 +13,11 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class SolSaveManager : Window
     {
+        public SolSaveManagerViewModel ViewModel
+        {
+            get => DataContext as SolSaveManagerViewModel;
+        }
+
         public SolSaveManager()
         {
             InitializeComponent();
@@ -23,6 +31,15 @@ namespace CefFlashBrowser.Views
             if (!e.Cancel)
             {
                 GlobalData.Settings.SolSaveManagerSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+            }
+        }
+
+        private void ListViewItemMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (e.Source is ListViewItem item)
+            {
+                Dispatcher.InvokeAsync(() =>
+                    ViewModel?.CurrentWorkspace?.EditSolCommand.Execute(item.DataContext));
             }
         }
     }
