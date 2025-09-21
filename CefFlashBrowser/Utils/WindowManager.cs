@@ -111,7 +111,7 @@ namespace CefFlashBrowser.Utils
             ShowWindow<MainWindow>(singleton: true);
         }
 
-        public static BrowserWindow ShowBrowser(string address)
+        public static void ShowBrowser(string address)
         {
             var browserWindow = ShowWindow<BrowserWindow>(initializer: window =>
             {
@@ -133,23 +133,21 @@ namespace CefFlashBrowser.Utils
                     ShowMainWindow();
                 }
             };
-
-            return browserWindow;
         }
 
-        public static BrowserWindow GetLastBrowserWindow()
+        public static BrowserWindow GetLatestBrowserWindow()
         {
             return _browserWindows.LastOrDefault();
         }
 
-        public static SwfPlayerWindow ShowSwfPlayer(string fileName)
+        public static void ShowSwfPlayer(string fileName)
         {
-            return ShowWindow<SwfPlayerWindow>(initializer: window => window.FileName = fileName);
+            ShowWindow<SwfPlayerWindow>(initializer: window => window.FileName = fileName);
         }
 
-        public static PopupWebPage ShowPopupWebPage(string address, CefSharp.IPopupFeatures popupFeatures = null)
+        public static void ShowPopupWebPage(string address, CefSharp.IPopupFeatures popupFeatures = null)
         {
-            return ShowWindow<PopupWebPage>(initializer: window =>
+            ShowWindow<PopupWebPage>(initializer: window =>
             {
                 window.Address = address;
                 if (popupFeatures != null)
@@ -162,9 +160,9 @@ namespace CefFlashBrowser.Utils
             });
         }
 
-        public static ViewSourceWindow ShowViewSourceWindow(string address)
+        public static void ShowViewSourceWindow(string address)
         {
-            return ShowWindow<ViewSourceWindow>(initializer: window => window.Address = address);
+            ShowWindow<ViewSourceWindow>(initializer: window => window.Address = address);
         }
 
         public static void ShowFavoritesManager()
