@@ -43,10 +43,11 @@ namespace CefFlashBrowser.ViewModels
                                 throw new ArgumentException(LanguageManager.GetFormattedString("error_objPropAreadyExists", key));
                         }
                     }
+                    var oldName = _name;
                     _name = value;
                     RaisePropertyChanged();
                     RaisePropertyChanged(nameof(DisplayName));
-                    Parent?.OnChildrenNameChanged(this);
+                    Parent?.OnChildrenNameChanged(this, oldName);
                     Editor?.OnNodeChanged(SolNodeChangeType.NameChanged, this);
                 }
             }
@@ -193,20 +194,18 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        protected virtual void OnChildrenNameChanged(SolNodeViewModel node)
+        protected virtual void OnChildrenNameChanged(SolNodeViewModel node, object oldName)
         {
             if (Value is SolArray arr)
             {
-                string key = GetOldName(arr.AssocPortion, node.Value);
-
-                if (key != null)
+                if (oldName is string key)
                 {
                     arr.AssocPortion.Remove(key);
                     arr.AssocPortion[node.Name.ToString()] = node.Value;
                 }
                 else
                 {
-                    int index = arr.DensePortion.IndexOf(node.Value);
+                    int index = (int)oldName;
                     int offset = (int)node.Name - index;
 
                     arr.DensePortion.RemoveAt(index);
@@ -222,22 +221,10 @@ namespace CefFlashBrowser.ViewModels
             }
             else if (Value is SolObject obj)
             {
-                string key = GetOldName(obj.Properties, node.Value);
+                string key = (string)oldName;
                 obj.Properties.Remove(key);
                 obj.Properties[node.Name.ToString()] = node.Value;
             }
-        }
-
-        private string GetOldName(Dictionary<string, object> dic, object value)
-        {
-            foreach (var item in dic)
-            {
-                if (item.Value == value)
-                {
-                    return item.Key;
-                }
-            }
-            return null;
         }
 
         public Dictionary<string, object> GetAllValues()
