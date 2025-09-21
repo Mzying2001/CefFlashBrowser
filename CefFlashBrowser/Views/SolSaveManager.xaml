@@ -6,11 +6,13 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
         
+        x:Name="window"
         Width="800"
         Height="500"
         Title="{DynamicResource solSaveManager_title}"
@@ -19,8 +21,10 @@
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
-        <KeyBinding Gesture="F5"
+        <KeyBinding Gesture="Ctrl+R"
                     Command="{Binding ReloadWorkspacesCommand}"/>
+        <KeyBinding Gesture="F5"
+                    Command="{Binding CurrentWorkspace.ReloadSolFilesCommand}"/>
     </Window.InputBindings>
 
     <i:Interaction.Behaviors>
@@ -28,6 +32,38 @@
     </i:Interaction.Behaviors>
 
     <Window.Resources>
+        <svgc:SvgIcon x:Key="ExportIcon"
+                      Width="13.5"
+                      Height="13.5"
+                      UriSource="/Assets/Svgs/export.svg"/>
+
+        <svgc:SvgIcon x:Key="ImportIcon"
+                      Width="14"
+                      Height="14"
+                      UriSource="/Assets/Svgs/import.svg"/>
+
+        <svgc:SvgIcon x:Key="EditIcon"
+                      Width="13"
+                      Height="13"
+                      UriSource="/Assets/Svgs/edit.svg"/>
+
+        <svgc:SvgIcon x:Key="TrashIcon"
+                      Width="14"
+                      Height="14"
+                      UriSource="/Assets/Svgs/trash.svg"
+                      Fill="{DynamicResource DangerBrush}"/>
+
+        <DataTemplate x:Key="SharedSvgIconTemplate"
+                      DataType="{x:Type svgc:SvgIcon}">
+            <Rectangle Width="{Binding Width}"
+                       Height="{Binding Height}">
+                <Rectangle.Fill>
+                    <VisualBrush Stretch="Uniform"
+                                 Visual="{Binding}"/>
+                </Rectangle.Fill>
+            </Rectangle>
+        </DataTemplate>
+
         <DataTemplate x:Key="WorkspaceTemplate"
                       DataType="{x:Type vm:SaveMgrWorkspaceViewModel}">
             <ListView VirtualizingStackPanel.IsVirtualizing="True"
@@ -40,6 +76,12 @@
                         <CollectionViewSource.GroupDescriptions>
                             <PropertyGroupDescription PropertyName="WebsiteFolderName"/>
                         </CollectionViewSource.GroupDescriptions>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Filter">
+                                <i:InvokeCommandAction PassEventArgsToCommand="True"
+                                                       Command="{Binding ElementName=window, Path=DataContext.FilterCommand}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
                     </CollectionViewSource>
                 </ListView.Resources>
 
@@ -61,20 +103,7 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="GroupItem">
-                                            <Expander>
-                                                <Expander.Style>
-                                                    <Style TargetType="Expander"
-                                                           BasedOn="{StaticResource {x:Type Expander}}">
-                                                        <Setter Property="IsExpanded" Value="True"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Name}"
-                                                                         Value="macromedia.com">
-                                                                <!--Collapse items of `macromedia.com` by default-->
-                                                                <Setter Property="IsExpanded" Value="False"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Expander.Style>
+                                            <Expander IsExpanded="True">
                                                 <Expander.Header>
                                                     <TextBlock FontWeight="Bold"
                                                                Text="{Binding Name}"/>
@@ -128,34 +157,29 @@
                                         <Button ToolTip="{DynamicResource common_export}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ExportSolCommand}"
                                                 CommandParameter="{Binding}">
-                                            <svgc:SvgIcon Width="13.5"
-                                                          Height="13.5"
-                                                          UriSource="/Assets/Svgs/export.svg"/>
+                                            <ContentPresenter Content="{StaticResource ExportIcon}"
+                                                              ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                         <Button Margin="5,0,0,0"
                                                 ToolTip="{DynamicResource common_import}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ImportSolCommand}"
                                                 CommandParameter="{Binding}">
-                                            <svgc:SvgIcon Width="14"
-                                                          Height="14"
-                                                          UriSource="/Assets/Svgs/import.svg"/>
+                                            <ContentPresenter Content="{StaticResource ImportIcon}"
+                                                              ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                         <Button Margin="5,0,0,0"
                                                 ToolTip="{DynamicResource solSaveManager_toolTipEdit}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.EditSolCommand}"
                                                 CommandParameter="{Binding}">
-                                            <svgc:SvgIcon Width="13"
-                                                          Height="13"
-                                                          UriSource="/Assets/Svgs/edit.svg"/>
+                                            <ContentPresenter Content="{StaticResource EditIcon}"
+                                                              ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                         <Button Margin="5,0,0,0"
                                                 ToolTip="{DynamicResource solSaveManager_toolTipDelete}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.DeleteSolCommand}"
                                                 CommandParameter="{Binding}">
-                                            <svgc:SvgIcon Width="14"
-                                                          Height="14"
-                                                          UriSource="/Assets/Svgs/trash.svg"
-                                                          Fill="{DynamicResource DangerBrush}"/>
+                                            <ContentPresenter Content="{StaticResource TrashIcon}"
+                                                              ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
@@ -186,6 +210,27 @@
                               Height="14"
                               UriSource="/Assets/Svgs/reload.svg"/>
             </Button>
+
+            <Grid DockPanel.Dock="Right"
+                  Margin="10,0,0,0"
+                  Width="200">
+                <hc:TextBox Padding="28,0,8,0"
+                            Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                            hc:InfoElement.Placeholder="{DynamicResource solSaveManager_filterPlaceholder}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:TextBoxSelectAllOnFocus/>
+                    </i:Interaction.Behaviors>
+                </hc:TextBox>
+
+                <Grid Margin="8,0,0,0"
+                      Width="13"
+                      Height="13"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Left"
+                      IsHitTestVisible="False">
+                    <svgc:SvgIcon UriSource="/Assets/Svgs/search.svg"/>
+                </Grid>
+            </Grid>
 
             <ComboBox ItemsSource="{Binding Workspaces}"
                       SelectedValue="{Binding CurrentWorkspace}"
