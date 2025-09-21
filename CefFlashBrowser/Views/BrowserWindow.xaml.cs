@@ -172,7 +172,7 @@ namespace CefFlashBrowser.Views
         {
             WindowSizeInfo info = null;
 
-            if (WindowManager.GetLastBrowserWindow() is Window w)
+            if (WindowManager.GetLatestBrowserWindow() is Window w)
             {
                 info = WindowSizeInfo.GetSizeInfo(w);
                 info.Left += 20;
