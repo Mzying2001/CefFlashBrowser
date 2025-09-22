@@ -186,6 +186,9 @@
     <sys:String x:Key="message_exported">Esportazione riuscita.</sys:String>
     <sys:String x:Key="message_askSaveChange">Vuoi salvare le modifiche a "{0}"?</sys:String>
     <sys:String x:Key="message_renameItem">Rinomina "{0}":</sys:String>
+    <sys:String x:Key="message_askImportFile">Vuoi importare il file "{0}" in "{1}"?</sys:String>
+
+    <!--Messaggi di errore-->
     <sys:String x:Key="error_message">Messaggio di Errore</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">Il nome non può essere vuoto.</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">L'URL non può essere vuoto.</sys:String>
@@ -194,4 +197,5 @@
     <sys:String x:Key="error_objPropAreadyExists">Esiste già una proprietà dell'oggetto con il nome "{0}".</sys:String>
     <sys:String x:Key="error_keyOrPropEmpty">Il nome della chiave/proprietà non può essere vuoto.</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">Esiste già una chiave/proprietà con il nome "{0}".</sys:String>
+    <sys:String x:Key="error_notSolFile">Il file "{0}" non è un file SOL.</sys:String>
 </ResourceDictionary>
