@@ -100,6 +100,10 @@
                            BasedOn="{StaticResource ListViewItemBaseStyle}">
                         <EventSetter Event="MouseDoubleClick"
                                      Handler="ListViewItemMouseDoubleClick"/>
+                        <EventSetter Event="PreviewMouseLeftButtonDown"
+                                     Handler="ListViewItemPreviewMouseLeftButtonDown"/>
+                        <EventSetter Event="MouseMove"
+                                     Handler="ListViewItemMouseMove"/>
                     </Style>
                 </ListView.ItemContainerStyle>
 
