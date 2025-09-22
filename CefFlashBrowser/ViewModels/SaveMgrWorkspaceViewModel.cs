@@ -160,6 +160,11 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
+                if (solFile.FilePath == importFile)
+                {
+                    return true;
+                }
+
                 if (!UrlHelper.IsLocalSolFile(importFile))
                 {
                     var errmsg = LanguageManager.GetFormattedString("error_notSolFile", importFile);
