@@ -19,6 +19,7 @@
         public bool HideMainWindowOnBrowsing { get; set; }
         public bool FollowSystemTheme { get; set; }
         public bool EnableIntegratedDevTools { get; set; }
+        public double IntegratedDevToolsWidth { get; set; }
 
 
         public static Settings Default => new Settings();
@@ -44,6 +45,7 @@
             HideMainWindowOnBrowsing = false;
             FollowSystemTheme = true;
             EnableIntegratedDevTools = true;
+            IntegratedDevToolsWidth = 300d;
         }
 
         public void SetNullPropertiesToDefault()

@@ -129,7 +129,7 @@ namespace CefFlashBrowser.Views
         private bool _doClose = false;
         private bool _isClosed = false;
         private bool _isMaximizedBeforeFullScreen = false;
-        private GridLength _devToolsColumnWidth = new GridLength(0, GridUnitType.Auto);
+        private GridLength _devToolsColumnWidth = default;
 
         private IntPtr _hwnd;
         private HwndSource _hwndSource;
@@ -147,7 +147,9 @@ namespace CefFlashBrowser.Views
         public BrowserWindow()
         {
             InitializeComponent();
+
             WindowSizeInfo.Apply(GetSizeInfo(), this);
+            _devToolsColumnWidth = new GridLength(GlobalData.Settings.IntegratedDevToolsWidth);
 
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
@@ -233,7 +235,13 @@ namespace CefFlashBrowser.Views
             if (browser.IsDisposed || _doClose)
             {
                 if (!ViewModel.FullScreen)
+                {
                     GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+
+                    GlobalData.Settings.IntegratedDevToolsWidth =
+                        devtoolsContainer.ContentHandle != IntPtr.Zero ?
+                        devtoolsContainer.ActualWidth : _devToolsColumnWidth.Value;
+                }
             }
             else
             {
