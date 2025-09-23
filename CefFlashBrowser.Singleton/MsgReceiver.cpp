@@ -6,8 +6,8 @@ using namespace CefFlashBrowser::Singleton;
 using namespace System::Runtime::InteropServices;
 
 
-constexpr const WCHAR MsgReceiverClassName[] = L"CefFlashBrowser.Singleton.MsgReceiver";
-constexpr const WCHAR MsgReceiverWindowName[] = L"MsgReceiver";
+constexpr WCHAR MsgReceiverClassName[] = L"CefFlashBrowser.Singleton.MsgReceiver";
+constexpr WCHAR MsgReceiverWindowName[] = L"MsgReceiver";
 
 
 struct CefFlashBrowser::Singleton::NativeWnd
