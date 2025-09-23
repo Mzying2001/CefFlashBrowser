@@ -59,8 +59,7 @@ namespace CefFlashBrowser.Utils
                 if (_singletonWindows.ContainsKey(typeof(TWindow)))
                 {
                     window = (TWindow)_singletonWindows[typeof(TWindow)];
-                    window.WindowState = window.WindowState == WindowState.Minimized ? WindowState.Normal : window.WindowState;
-                    window.Activate();
+                    BringWindowToFront(window);
                     return window;
                 }
                 else
@@ -114,6 +113,19 @@ namespace CefFlashBrowser.Utils
             };
 
             return window;
+        }
+
+        /// <summary>
+        /// Bring an existing window to the front.
+        /// </summary>
+        private static void BringWindowToFront(Window window)
+        {
+            window.Dispatcher.InvokeAsync(() =>
+            {
+                if (window.WindowState == WindowState.Minimized)
+                    window.WindowState = WindowState.Normal;
+                window.Activate();
+            });
         }
 
 
@@ -253,8 +265,7 @@ namespace CefFlashBrowser.Utils
                 if (_solEditorWindows.ContainsKey(fileName))
                 {
                     var window = _solEditorWindows[fileName];
-                    window.WindowState = window.WindowState == WindowState.Minimized ? WindowState.Normal : window.WindowState;
-                    window.Activate();
+                    BringWindowToFront(window);
                 }
                 else
                 {
