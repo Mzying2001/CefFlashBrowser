@@ -14,13 +14,24 @@ namespace CefFlashBrowser.Utils
 {
     public static class WindowManager
     {
+        // store singleton window instances
         private static readonly Dictionary<Type, Window> _singletonWindows;
+
+        // store all browser window instances
         private static readonly List<BrowserWindow> _browserWindows;
 
+        // store Sol editor windows by file path
+        private static readonly Dictionary<string, Window> _solEditorWindows;
+
+
+        /// <summary>
+        /// Initialize static members of the WindowManager class.
+        /// </summary>
         static WindowManager()
         {
             _singletonWindows = new Dictionary<Type, Window>();
             _browserWindows = new List<BrowserWindow>();
+            _solEditorWindows = new Dictionary<string, Window>();
         }
 
         /// <summary>
@@ -235,20 +246,27 @@ namespace CefFlashBrowser.Utils
             ShowWindow<SolSaveManager>(singleton: true);
         }
 
-        public static void ShowSolEditorWindow(SolFileWrapper file)
-        {
-            ShowWindow<SolEditorWindow>(initializer: window =>
-            {
-                window.DataContext = new SolEditorWindowViewModel(file);
-            });
-        }
-
         public static void ShowSolEditorWindow(string fileName)
         {
             try
             {
-                var file = new SolFileWrapper(fileName);
-                ShowSolEditorWindow(file);
+                if (_solEditorWindows.ContainsKey(fileName))
+                {
+                    var window = _solEditorWindows[fileName];
+                    window.WindowState = window.WindowState == WindowState.Minimized ? WindowState.Normal : window.WindowState;
+                    window.Activate();
+                }
+                else
+                {
+                    var file = new SolFileWrapper(fileName);
+
+                    ShowWindow<SolEditorWindow>(initializer: window =>
+                    {
+                        _solEditorWindows.Add(fileName, window);
+                        window.DataContext = new SolEditorWindowViewModel(file);
+                        window.Closed += (s, e) => _solEditorWindows.Remove(fileName);
+                    });
+                }
             }
             catch (Exception e)
             {
