@@ -35,7 +35,7 @@ struct CefFlashBrowser::Singleton::NativeWnd
         hWnd = CreateWindowExW(
             0,
             MsgReceiverClassName,
-            MsgReceiverWindowName,
+            MsgReceiverWindowName, //??not effective
             WS_POPUP,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
@@ -88,6 +88,14 @@ struct CefFlashBrowser::Singleton::NativeWnd
         case WM_COPYDATA: {
             auto pCopyData = reinterpret_cast<PCOPYDATASTRUCT>(lParam);
             OnCopyData(pCopyData);
+            return TRUE;
+        }
+
+        case WM_CREATE: {
+            return 0;
+        }
+
+        case WM_NCCREATE: {
             return TRUE;
         }
 
@@ -159,7 +167,7 @@ void CefFlashBrowser::Singleton::MsgReceiver::SendGlobalData(array<Byte>^ data)
 {
     HWND hWnd = FindWindowW(
         MsgReceiverClassName,
-        MsgReceiverWindowName);
+        /*MsgReceiverWindowName*/ NULL);
 
     if (hWnd != NULL) {
         NativeWnd::SendCopyData(hWnd, data);
