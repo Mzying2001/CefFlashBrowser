@@ -4,6 +4,7 @@ using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -118,21 +119,37 @@ namespace CefFlashBrowser.ViewModels
         private void SaveAsFile()
         {
             string oldPath = _file.Path;
+            SolVersion oldVersion = _file.Version;
 
             try
             {
+                const int INDEX_DEF = 1;
+                const int INDEX_AMF0 = 2;
+                const int INDEX_AMF3 = 3;
+
+                var dicIndexToVersion = new Dictionary<int, SolVersion>
+                {
+                    { INDEX_DEF, oldVersion },
+                    { INDEX_AMF0, SolVersion.AMF0 },
+                    { INDEX_AMF3, SolVersion.AMF3 },
+                };
+
                 var sfd = new Microsoft.Win32.SaveFileDialog
                 {
-                    Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol",
-                    FileName = SolName
+                    Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol|" +
+                             $"{LanguageManager.GetString("solEditor_amf0SolFile")}|*.sol|" +
+                             $"{LanguageManager.GetString("solEditor_amf3SolFile")}|*.sol",
+                    FileName = SolName,
                 };
 
                 if (sfd.ShowDialog() == true)
                 {
                     UpdateSolData();
                     _file.Path = sfd.FileName;
+                    _file.Version = dicIndexToVersion[sfd.FilterIndex];
                     _file.Save();
                     RaisePropertyChanged(nameof(FilePath));
+                    RaisePropertyChanged(nameof(FileFormat));
                     Status = SolEditorStatus.Saved;
                 }
             }
@@ -141,6 +158,7 @@ namespace CefFlashBrowser.ViewModels
                 LogHelper.LogError($"Save SOL file failed: {_file.Path}", e);
 
                 _file.Path = oldPath;
+                _file.Version = oldVersion;
                 WindowManager.ShowError(e.Message);
             }
         }

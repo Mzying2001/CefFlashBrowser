@@ -135,7 +135,7 @@
     <sys:String x:Key="browser_toolTipZoomOut">縮小（Ctrl+減號鍵）</sys:String>
     <sys:String x:Key="browser_loading">載入中...</sys:String>
 
-    <!--存檔管理器-->
+    <!--存檔管理員-->
     <sys:String x:Key="solSaveManager_title">SOL存檔管理員</sys:String>
     <sys:String x:Key="solSaveManager_headerFileName">檔案名稱</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">檔案路徑</sys:String>
@@ -160,6 +160,8 @@
     <sys:String x:Key="solEditor_statusSaved">已儲存</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">未知狀態</sys:String>
     <sys:String x:Key="solEditor_emptyString">（空）</sys:String>
+    <sys:String x:Key="solEditor_amf0SolFile">AMF0編碼的SOL檔案</sys:String>
+    <sys:String x:Key="solEditor_amf3SolFile">AMF3編碼的SOL檔案</sys:String>
 
     <!--對話框-->
     <sys:String x:Key="dialog_ok">確定</sys:String>
