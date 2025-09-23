@@ -73,6 +73,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
+    <ProjectReference Include="..\CefFlashBrowser.Singleton\CefFlashBrowser.Singleton.vcxproj" />
     <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
     <ProjectReference Include="..\CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj" />
   </ItemGroup>

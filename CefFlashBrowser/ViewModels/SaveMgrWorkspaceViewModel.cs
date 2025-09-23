@@ -145,23 +145,51 @@ namespace CefFlashBrowser.ViewModels
 
         private void ImportSol(SolFileInfo solFile)
         {
+            var ofd = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol",
+            };
+
+            if (ofd.ShowDialog() == true)
+            {
+                ImportSol(solFile, ofd.FileName);
+            }
+        }
+
+        public bool ImportSol(SolFileInfo solFile, string importFile)
+        {
             try
             {
-                var ofd = new Microsoft.Win32.OpenFileDialog
+                if (solFile.FilePath == importFile)
                 {
-                    Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol",
-                };
-
-                if (ofd.ShowDialog() == true)
-                {
-                    File.Copy(ofd.FileName, solFile.FilePath, true);
-                    WindowManager.Alert(LanguageManager.GetString("message_imported"));
+                    return true;
                 }
+
+                if (!UrlHelper.IsLocalSolFile(importFile))
+                {
+                    var errmsg = LanguageManager.GetFormattedString("error_notSolFile", importFile);
+                    throw new ArgumentException(errmsg, nameof(importFile));
+                }
+
+                var msg = LanguageManager.GetFormattedString(
+                        "message_askImportFile", importFile, solFile.FileName);
+
+                WindowManager.Confirm(msg, callback: result =>
+                {
+                    if (result == true)
+                    {
+                        File.Copy(importFile, solFile.FilePath, true);
+                        WindowManager.Alert(LanguageManager.GetString("message_imported"));
+                    }
+                });
+
+                return true;
             }
             catch (Exception e)
             {
                 LogHelper.LogError("Failed to import sol file", e);
                 WindowManager.ShowError(e.Message);
+                return false;
             }
         }
 

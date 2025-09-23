@@ -98,8 +98,17 @@
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem"
                            BasedOn="{StaticResource ListViewItemBaseStyle}">
+                        <Setter Property="AllowDrop" Value="True"/>
                         <EventSetter Event="MouseDoubleClick"
                                      Handler="ListViewItemMouseDoubleClick"/>
+                        <EventSetter Event="PreviewMouseLeftButtonDown"
+                                     Handler="ListViewItemPreviewMouseLeftButtonDown"/>
+                        <EventSetter Event="MouseMove"
+                                     Handler="ListViewItemMouseMove"/>
+                        <EventSetter Event="PreviewDragOver"
+                                     Handler="ListViewItemPreviewDragOver"/>
+                        <EventSetter Event="Drop"
+                                     Handler="ListViewItemDrop"/>
                     </Style>
                 </ListView.ItemContainerStyle>
 

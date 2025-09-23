@@ -75,7 +75,7 @@ namespace CefFlashBrowser.Models.Data
             }
         }
 
-        public static void InitData()
+        public static bool InitData()
         {
             CreateDirIfNotExist(DataPath);
             CreateDirIfNotExist(CachesPath);
@@ -83,6 +83,7 @@ namespace CefFlashBrowser.Models.Data
 
             InitFavorites();
             InitSettings();
+            return true;
         }
 
         public static void SaveData()

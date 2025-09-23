@@ -1,5 +1,8 @@
 ﻿<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
   <Costura>
-    <ExcludeAssemblies>CefFlashBrowser.Sol</ExcludeAssemblies>
+    <ExcludeAssemblies>
+      CefFlashBrowser.Singleton
+      CefFlashBrowser.Sol
+    </ExcludeAssemblies>
   </Costura>
 </Weavers>

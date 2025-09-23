@@ -136,7 +136,7 @@
     <sys:String x:Key="browser_loading">載入中...</sys:String>
 
     <!--存檔管理器-->
-    <sys:String x:Key="solSaveManager_title">SOL存檔管理器</sys:String>
+    <sys:String x:Key="solSaveManager_title">SOL存檔管理員</sys:String>
     <sys:String x:Key="solSaveManager_headerFileName">檔案名稱</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">檔案路徑</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">操作</sys:String>
@@ -186,6 +186,9 @@
     <sys:String x:Key="message_exported">匯出成功。</sys:String>
     <sys:String x:Key="message_askSaveChange">是否將變更儲存到「{0}」？</sys:String>
     <sys:String x:Key="message_renameItem">重新命名「{0}」：</sys:String>
+    <sys:String x:Key="message_askImportFile">是否要將檔案「{0}」匯入至「{1}」？</sys:String>
+
+    <!--錯誤訊息-->
     <sys:String x:Key="error_message">錯誤訊息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名稱不能為空白。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">網址不能為空白。</sys:String>
@@ -194,4 +197,5 @@
     <sys:String x:Key="error_objPropAreadyExists">物件中已經存在名稱為「{0}」的屬性。</sys:String>
     <sys:String x:Key="error_keyOrPropEmpty">鍵值/屬性名稱不能為空。</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">已經存在名稱為「{0}」的鍵值/屬性。</sys:String>
+    <sys:String x:Key="error_notSolFile">檔案「{0}」不是SOL檔案。</sys:String>
 </ResourceDictionary>

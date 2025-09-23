@@ -186,6 +186,9 @@
     <sys:String x:Key="message_exported">导出成功。</sys:String>
     <sys:String x:Key="message_askSaveChange">是否将更改保存到“{0}”？</sys:String>
     <sys:String x:Key="message_renameItem">重命名“{0}”：</sys:String>
+    <sys:String x:Key="message_askImportFile">是否导入文件“{0}”到“{1}”？</sys:String>
+
+    <!--错误信息-->
     <sys:String x:Key="error_message">错误信息</sys:String>
     <sys:String x:Key="error_webSiteEmptyName">名称不能为空。</sys:String>
     <sys:String x:Key="error_webSiteEmptyUrl">网址不能为空。</sys:String>
@@ -194,4 +197,5 @@
     <sys:String x:Key="error_objPropAreadyExists">对象已经存在名称为“{0}”的属性。</sys:String>
     <sys:String x:Key="error_keyOrPropEmpty">键值/属性名不能为空。</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
+    <sys:String x:Key="error_notSolFile">文件“{0}”不是SOL文件。</sys:String>
 </ResourceDictionary>

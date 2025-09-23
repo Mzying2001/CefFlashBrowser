@@ -350,6 +350,7 @@
                 <Style TargetType="{x:Type TreeViewItem}"
                        BasedOn="{StaticResource {x:Type TreeViewItem}}">
                     <Setter Property="IsExpanded" Value="True"/>
+                    <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
                     <Setter Property="ContextMenu">
                         <Setter.Value>
                             <ContextMenu>
