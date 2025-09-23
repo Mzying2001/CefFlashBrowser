@@ -1,13 +1,16 @@
 ﻿using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using CefSharp;
+using Newtonsoft.Json;
 using SimpleMvvm.Ioc;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,34 +20,48 @@ namespace CefFlashBrowser
     internal static class Program
     {
         private static bool _restart = false;
+        private static bool _dataInitialized = false;
+        private static Mutex _mutex = null;
+
 
         [STAThread]
-        private static void Main()
+        private static void Main(string[] args)
         {
             Win32.SetDllDirectory(GlobalData.CefDllPath);
             AppDomain.CurrentDomain.AssemblyResolve += ResolveCefSharpAssembly;
 
             try
             {
-                var app = new App();
-                app.InitializeComponent();
-
                 RegisterServices();
-                GlobalData.InitData();
-                LanguageManager.InitLanguage();
+                _mutex = new Mutex(true, "CefFlashBrowser", out bool isNewInstance);
 
-                var cts = new CancellationTokenSource();
-                var delLogsTask = LogHelper.DeleteExpiredLogsAsync(cts.Token);
+                if (isNewInstance)
+                {
+                    var app = new App();
+                    app.InitializeComponent();
 
-                InitCefFlash();
-                InitTheme();
+                    _dataInitialized = GlobalData.InitData();
+                    LanguageManager.InitLanguage();
 
-                LogHelper.LogInfo("Application started successfully");
-                LogHelper.LogInfo($"CefFlashBrowser Version: {Assembly.GetExecutingAssembly().GetName().Version}");
+                    var cts = new CancellationTokenSource();
+                    var delLogsTask = LogHelper.DeleteExpiredLogsAsync(cts.Token);
 
-                app.Run();
-                cts.Cancel();
-                WaitAllTask(delLogsTask);
+                    InitCefFlash();
+                    InitTheme();
+
+                    LogHelper.LogInfo("Application started successfully");
+                    LogHelper.LogInfo($"CefFlashBrowser Version: {Assembly.GetExecutingAssembly().GetName().Version}");
+
+                    app.Run();
+                    cts.Cancel();
+                    WaitAllTask(delLogsTask);
+                }
+                else
+                {
+                    string json = JsonConvert.SerializeObject(args);
+                    MsgReceiver.SendGlobalData(Encoding.UTF8.GetBytes(json));
+                    LogHelper.LogInfo($"Another instance is running, send args to it: {json}");
+                }
             }
             catch (Exception e)
             {
@@ -131,8 +148,17 @@ namespace CefFlashBrowser
 
         private static void OnTerminate()
         {
-            GlobalData.SaveData();
-            Cef.Shutdown();
+            _mutex?.Dispose();
+
+            if (_dataInitialized)
+            {
+                GlobalData.SaveData();
+            }
+
+            if (Cef.IsInitialized)
+            {
+                Cef.Shutdown();
+            }
 
             if (_restart)
             {
@@ -158,8 +184,7 @@ namespace CefFlashBrowser
 
         private static void UnregisterServices()
         {
-            if (SimpleIoc.Global.IsRegistered<ILogger>())
-                SimpleIoc.Global.Unregister<ILogger>();
+            SimpleIoc.Global.Unregister<ILogger>();
         }
     }
 }
