@@ -1,5 +1,8 @@
 ﻿using CefFlashBrowser.Models.Data;
+using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
+using Newtonsoft.Json;
+using System;
 using System.Windows;
 
 namespace CefFlashBrowser
@@ -9,6 +12,31 @@ namespace CefFlashBrowser
     /// </summary>
     public partial class App : Application
     {
+        private bool _started = false;
+        private readonly MsgReceiver _msgReceiver;
+
+        public App()
+        {
+            _msgReceiver = new MsgReceiver();
+            _msgReceiver.ReceivedData += ReceivedData;
+        }
+
+        private void ReceivedData(byte[] data)
+        {
+            try
+            {
+                string json = System.Text.Encoding.UTF8.GetString(data);
+                LogHelper.LogInfo($"Received data from another instance, data: {json}");
+
+                var args = JsonConvert.DeserializeObject<string[]>(json);
+                if (_started) ExecuteArguments(args);
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError("Failed to process received data", e);
+            }
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -33,9 +61,24 @@ namespace CefFlashBrowser
             }
             else
             {
+                ExecuteArguments(e.Args);
                 GlobalData.IsStartWithoutMainWindow = true;
+            }
 
-                foreach (var arg in e.Args)
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
+            _started = true;
+        }
+
+        private void ExecuteArguments(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                WindowManager.ShowMainWindow();
+                GlobalData.IsStartWithoutMainWindow = false;
+            }
+            else
+            {
+                foreach (var arg in args)
                 {
                     if (UrlHelper.IsLocalSwfFile(arg))
                     {
@@ -45,14 +88,12 @@ namespace CefFlashBrowser
                     {
                         WindowManager.ShowSolEditorWindow(arg);
                     }
-                    else
+                    else // open browser for other urls
                     {
                         WindowManager.ShowBrowser(arg);
                     }
                 }
             }
-
-            ShutdownMode = ShutdownMode.OnLastWindowClose;
         }
     }
 }
