@@ -14,13 +14,24 @@ namespace CefFlashBrowser.Utils
 {
     public static class WindowManager
     {
+        // store singleton window instances
         private static readonly Dictionary<Type, Window> _singletonWindows;
+
+        // store all browser window instances
         private static readonly List<BrowserWindow> _browserWindows;
 
+        // store Sol editor windows by file path
+        private static readonly Dictionary<string, Window> _solEditorWindows;
+
+
+        /// <summary>
+        /// Initialize static members of the WindowManager class.
+        /// </summary>
         static WindowManager()
         {
             _singletonWindows = new Dictionary<Type, Window>();
             _browserWindows = new List<BrowserWindow>();
+            _solEditorWindows = new Dictionary<string, Window>();
         }
 
         /// <summary>
@@ -48,8 +59,7 @@ namespace CefFlashBrowser.Utils
                 if (_singletonWindows.ContainsKey(typeof(TWindow)))
                 {
                     window = (TWindow)_singletonWindows[typeof(TWindow)];
-                    window.WindowState = window.WindowState == WindowState.Minimized ? WindowState.Normal : window.WindowState;
-                    window.Activate();
+                    BringWindowToFront(window);
                     return window;
                 }
                 else
@@ -103,6 +113,19 @@ namespace CefFlashBrowser.Utils
             };
 
             return window;
+        }
+
+        /// <summary>
+        /// Bring an existing window to the front.
+        /// </summary>
+        private static void BringWindowToFront(Window window)
+        {
+            window.Dispatcher.InvokeAsync(() =>
+            {
+                if (window.WindowState == WindowState.Minimized)
+                    window.WindowState = WindowState.Normal;
+                window.Activate();
+            });
         }
 
 
@@ -235,20 +258,26 @@ namespace CefFlashBrowser.Utils
             ShowWindow<SolSaveManager>(singleton: true);
         }
 
-        public static void ShowSolEditorWindow(SolFileWrapper file)
-        {
-            ShowWindow<SolEditorWindow>(initializer: window =>
-            {
-                window.DataContext = new SolEditorWindowViewModel(file);
-            });
-        }
-
         public static void ShowSolEditorWindow(string fileName)
         {
             try
             {
-                var file = new SolFileWrapper(fileName);
-                ShowSolEditorWindow(file);
+                if (_solEditorWindows.ContainsKey(fileName))
+                {
+                    var window = _solEditorWindows[fileName];
+                    BringWindowToFront(window);
+                }
+                else
+                {
+                    var file = new SolFileWrapper(fileName);
+
+                    ShowWindow<SolEditorWindow>(initializer: window =>
+                    {
+                        _solEditorWindows.Add(fileName, window);
+                        window.DataContext = new SolEditorWindowViewModel(file);
+                        window.Closed += (s, e) => _solEditorWindows.Remove(fileName);
+                    });
+                }
             }
             catch (Exception e)
             {

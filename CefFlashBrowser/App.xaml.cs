@@ -18,22 +18,25 @@ namespace CefFlashBrowser
         public App()
         {
             _msgReceiver = new MsgReceiver();
-            _msgReceiver.ReceivedData += ReceivedData;
+            _msgReceiver.ReceivedData += ReceivedDataHandler;
         }
 
-        private void ReceivedData(byte[] data)
+        private void ReceivedDataHandler(object sender, ReceivedDataEventArgs e)
         {
             try
             {
-                string json = System.Text.Encoding.UTF8.GetString(data);
+                string json = System.Text.Encoding.UTF8.GetString(e.Data);
                 LogHelper.LogInfo($"Received data from another instance, data: {json}");
 
-                var args = JsonConvert.DeserializeObject<string[]>(json);
-                if (_started) ExecuteArguments(args);
+                if (_started &&
+                    JsonConvert.DeserializeObject<string[]>(json) is string[] args)
+                {
+                    ExecuteArguments(args);
+                }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                LogHelper.LogError("Failed to process received data", e);
+                LogHelper.LogError("Failed to process received data", ex);
             }
         }
 

@@ -160,6 +160,8 @@
     <sys:String x:Key="solEditor_statusSaved">Saved</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">Unknown Status</sys:String>
     <sys:String x:Key="solEditor_emptyString">(Empty)</sys:String>
+    <sys:String x:Key="solEditor_amf0SolFile">SOL file encoded with AMF0</sys:String>
+    <sys:String x:Key="solEditor_amf3SolFile">SOL file encoded with AMF3</sys:String>
 
     <!--Dialogs-->
     <sys:String x:Key="dialog_ok">OK</sys:String>

@@ -6,9 +6,10 @@ namespace CefFlashBrowser.Utils
 {
     public static class EmoticonsHelper
     {
-        private static string[] Emoticons { get; }
+        [ThreadStatic]
+        private static int _next = 0;
 
-        private static int Next { get; set; }
+        private static string[] Emoticons { get; }
 
         static EmoticonsHelper()
         {
@@ -21,8 +22,8 @@ namespace CefFlashBrowser.Utils
 
         public static string GetNextEmoticon()
         {
-            Next %= Emoticons.Length;
-            return Emoticons[Next++];
+            _next %= Emoticons.Length;
+            return Emoticons[_next++];
         }
     }
 }

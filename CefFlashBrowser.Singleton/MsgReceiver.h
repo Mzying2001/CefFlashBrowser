@@ -8,13 +8,37 @@ namespace CefFlashBrowser::Singleton
     struct NativeWnd;
 
     /**
+     * @brief Event args for received data event.
+     */
+    public ref class ReceivedDataEventArgs : EventArgs
+    {
+    private:
+        array<Byte>^ _data;
+
+    public:
+        // Constructor
+        ReceivedDataEventArgs(array<Byte>^ data) : _data(data) {};
+
+    public:
+        // The data received
+        property array<Byte>^ Data {
+            array<Byte>^ get() {
+                return _data;
+            }
+            void set(array<Byte>^ value) {
+                _data = value;
+            }
+        }
+    };
+
+    /**
      * @brief MsgReceiver, user should ensure only one instance in the entire system.
      */
     public ref class MsgReceiver
     {
     private:
         NativeWnd* _pNativeWnd;
-        Action<array<Byte>^>^ _receivedData;
+        EventHandler<ReceivedDataEventArgs^>^ _receivedData;
 
     public:
         MsgReceiver();
@@ -30,17 +54,17 @@ namespace CefFlashBrowser::Singleton
 
     public:
         // Received data event
-        event Action<array<Byte>^>^ ReceivedData
+        event EventHandler<ReceivedDataEventArgs^>^ ReceivedData
         {
-            void add(Action<array<Byte>^>^ handler) {
+            void add(EventHandler<ReceivedDataEventArgs^>^ handler) {
                 _receivedData += handler;
             }
-            void remove(Action<array<Byte>^>^ handler) {
+            void remove(EventHandler<ReceivedDataEventArgs^>^ handler) {
                 _receivedData -= handler;
             }
-            void raise(array<Byte>^ data) {
+            void raise(Object^ sender, ReceivedDataEventArgs^ e) {
                 if (_receivedData != nullptr) {
-                    _receivedData->Invoke(data);
+                    _receivedData->Invoke(sender, e);
                 }
             }
         }

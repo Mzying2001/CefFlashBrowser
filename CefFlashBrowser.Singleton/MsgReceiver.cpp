@@ -1,13 +1,12 @@
 #include "MsgReceiver.h"
 #include <gcroot.h>
-#include <vector>
 
 using namespace CefFlashBrowser::Singleton;
 using namespace System::Runtime::InteropServices;
 
 
-constexpr const WCHAR MsgReceiverClassName[] = L"CefFlashBrowser.Singleton.MsgReceiver";
-constexpr const WCHAR MsgReceiverWindowName[] = L"MsgReceiver";
+constexpr WCHAR MsgReceiverClassName[] = L"CefFlashBrowser.Singleton.MsgReceiver";
+constexpr WCHAR MsgReceiverWindowName[] = L"MsgReceiver";
 
 
 struct CefFlashBrowser::Singleton::NativeWnd
@@ -176,5 +175,5 @@ void CefFlashBrowser::Singleton::MsgReceiver::SendGlobalData(array<Byte>^ data)
 
 void CefFlashBrowser::Singleton::MsgReceiver::OnReceivedData(array<Byte>^ data)
 {
-    ReceivedData::raise(data);
+    ReceivedData::raise(this, gcnew ReceivedDataEventArgs(data));
 }
