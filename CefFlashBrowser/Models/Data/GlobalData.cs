@@ -94,7 +94,7 @@ namespace CefFlashBrowser.Models.Data
 
         private static void SafeWriteFile(string path, string contents)
         {
-            var tmpPath = path + ".tmp";
+            var tmpPath = path + $".{Guid.NewGuid()}.tmp";
             File.WriteAllText(tmpPath, contents);
             File.Copy(tmpPath, path, true);
             File.Delete(tmpPath);
