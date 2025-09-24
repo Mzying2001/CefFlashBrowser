@@ -5,6 +5,7 @@ using SimpleMvvm;
 using SimpleMvvm.Command;
 using SimpleMvvm.Messaging;
 using System;
+using System.Diagnostics;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -38,6 +39,7 @@ namespace CefFlashBrowser.ViewModels
         private void ShowBrowser(string address)
         {
             WindowManager.ShowBrowser(address);
+
             if (GlobalData.Settings.HideMainWindowOnBrowsing)
                 Messenger.Global.Send(MessageTokens.CLOSE_MAINWINDOW, null);
         }
@@ -107,7 +109,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void ViewGithub()
         {
-            ShowBrowser("https://github.com/Mzying2001/CefFlashBrowser");
+            Process.Start("https://github.com/Mzying2001/CefFlashBrowser");
         }
 
         private void OpenWebsite(Website website)
@@ -127,7 +129,7 @@ namespace CefFlashBrowser.ViewModels
                 {
                     WindowManager.ShowSolEditorWindow(item);
                 }
-                else
+                else // Unknown file type, treat it as URL
                 {
                     ShowBrowser(item);
                 }
