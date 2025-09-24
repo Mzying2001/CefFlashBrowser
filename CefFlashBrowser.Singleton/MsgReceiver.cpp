@@ -1,6 +1,5 @@
 #include "MsgReceiver.h"
 #include <gcroot.h>
-#include <vector>
 
 using namespace CefFlashBrowser::Singleton;
 using namespace System::Runtime::InteropServices;
@@ -176,5 +175,5 @@ void CefFlashBrowser::Singleton::MsgReceiver::SendGlobalData(array<Byte>^ data)
 
 void CefFlashBrowser::Singleton::MsgReceiver::OnReceivedData(array<Byte>^ data)
 {
-    ReceivedData::raise(data);
+    ReceivedData::raise(this, gcnew ReceivedDataEventArgs(data));
 }
