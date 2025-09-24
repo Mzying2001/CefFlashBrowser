@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "CefFlashBrowser": {
-      "commandName": "Project",
-      "nativeDebugging": true
-    }
-  }
-}

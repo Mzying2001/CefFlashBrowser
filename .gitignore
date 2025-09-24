@@ -341,3 +341,6 @@ healthchecksdb
 
 # FodyWeavers
 FodyWeavers.xsd
+
+# VS launch settings
+**/Properties/launchSettings.json
