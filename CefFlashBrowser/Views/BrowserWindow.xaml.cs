@@ -129,7 +129,6 @@ namespace CefFlashBrowser.Views
         private bool _doClose = false;
         private bool _isClosed = false;
         private bool _isMaximizedBeforeFullScreen = false;
-        private GridLength _devToolsColumnWidth = default;
 
         private IntPtr _hwnd;
         private HwndSource _hwndSource;
@@ -147,9 +146,7 @@ namespace CefFlashBrowser.Views
         public BrowserWindow()
         {
             InitializeComponent();
-
             WindowSizeInfo.Apply(GetSizeInfo(), this);
-            _devToolsColumnWidth = new GridLength(GlobalData.Settings.IntegratedDevToolsWidth);
 
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
@@ -235,13 +232,10 @@ namespace CefFlashBrowser.Views
             if (browser.IsDisposed || _doClose)
             {
                 if (!ViewModel.FullScreen)
-                {
                     GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
 
-                    GlobalData.Settings.IntegratedDevToolsWidth =
-                        devtoolsContainer.ContentHandle != IntPtr.Zero ?
-                        devtoolsContainer.ActualWidth : _devToolsColumnWidth.Value;
-                }
+                if (devtoolsContainer.ContentHandle != IntPtr.Zero)
+                    GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
             }
             else
             {
@@ -302,7 +296,7 @@ namespace CefFlashBrowser.Views
             {
                 Activate();
                 Keyboard.Focus(browser);
-                devtoolsColumn.Width = _devToolsColumnWidth;
+                devtoolsColumn.Width = new GridLength(GlobalData.Settings.IntegratedDevToolsWidth);
             }
         }
 
@@ -310,8 +304,8 @@ namespace CefFlashBrowser.Views
         {
             Activate();
             Keyboard.Focus(browser);
-            _devToolsColumnWidth = devtoolsColumn.Width;
-            devtoolsColumn.Width = new GridLength(0, GridUnitType.Auto);
+            GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
+            devtoolsColumn.Width = new GridLength(0);
         }
 
         private void BrowserFullscreenModeChanged(object sender, EventArgs e)
