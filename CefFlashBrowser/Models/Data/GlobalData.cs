@@ -95,9 +95,31 @@ namespace CefFlashBrowser.Models.Data
         private static void SafeWriteFile(string path, string contents)
         {
             var tmpPath = path + $".{Guid.NewGuid()}.tmp";
-            File.WriteAllText(tmpPath, contents);
-            File.Copy(tmpPath, path, true);
-            File.Delete(tmpPath);
+
+            try
+            {
+                File.WriteAllText(tmpPath, contents);
+                File.Replace(tmpPath, path, null);
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError($"Failed to write file: {path}", e);
+                throw;
+            }
+            finally
+            {
+                if (File.Exists(tmpPath))
+                {
+                    try
+                    {
+                        File.Delete(tmpPath);
+                    }
+                    catch (Exception e)
+                    {
+                        LogHelper.LogError($"Failed to delete temp file: {tmpPath}", e);
+                    }
+                }
+            }
         }
 
 
