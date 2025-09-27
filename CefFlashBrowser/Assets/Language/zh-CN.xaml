@@ -19,7 +19,7 @@
     <sys:String x:Key="common_moveToTop">移到顶部</sys:String>
     <sys:String x:Key="common_moveToBottom">移到底部</sys:String>
 
-    <!--主界面-->
+    <!--主窗口-->
     <sys:String x:Key="mainWindow_title">欢迎</sys:String>
     <sys:String x:Key="mainWindow_go">跳转</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理收藏夹</sys:String>
@@ -65,7 +65,7 @@
     <sys:String x:Key="settings_port">端口</sys:String>
     <sys:String x:Key="settings_optional">（可选）</sys:String>
 
-    <!--主界面导航栏-->
+    <!--主窗口地址栏-->
     <sys:String x:Key="navigationType_auto">自动</sys:String>
     <sys:String x:Key="navigationType_searchOnly">仅搜索</sys:String>
     <sys:String x:Key="navigationType_navigateOnly">仅导航</sys:String>
@@ -134,6 +134,8 @@
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加号键）</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">缩小（Ctrl+减号键）</sys:String>
     <sys:String x:Key="browser_loading">加载中...</sys:String>
+    <sys:String x:Key="browser_showMainWindow">打开主窗口</sys:String>
+    <sys:String x:Key="browser_newBrowserWindow">新建浏览器窗口</sys:String>
 
     <!--存档管理器-->
     <sys:String x:Key="solSaveManager_title">SOL存档管理器</sys:String>
@@ -200,4 +202,5 @@
     <sys:String x:Key="error_keyOrPropEmpty">键值/属性名不能为空。</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
     <sys:String x:Key="error_notSolFile">文件“{0}”不是SOL文件。</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">未知的搜索引擎。</sys:String>
 </ResourceDictionary>

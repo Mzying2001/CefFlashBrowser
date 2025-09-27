@@ -40,7 +40,7 @@ namespace CefFlashBrowser.Utils
                     return $"https://so2.4399.com/search/search.php?k={str}";
 
                 default:
-                    throw new ArgumentException("Unknown search engine.", nameof(engine));
+                    throw new ArgumentException(LanguageManager.GetString("error_unknownSearchEngine"), nameof(engine));
             }
         }
     }

@@ -134,6 +134,8 @@
     <sys:String x:Key="browser_toolTipZoomIn">Ingrandisci (Ctrl+Plus)</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">Riduci (Ctrl+Minus)</sys:String>
     <sys:String x:Key="browser_loading">Caricamento...</sys:String>
+    <sys:String x:Key="browser_showMainWindow">Apri finestra principale</sys:String>
+    <sys:String x:Key="browser_newBrowserWindow">Nuova finestra del browser</sys:String>
 
     <!--Gestore dei salvataggi-->
     <sys:String x:Key="solSaveManager_title">Gestore dei salvataggi SOL</sys:String>
@@ -200,4 +202,5 @@
     <sys:String x:Key="error_keyOrPropEmpty">Il nome della chiave/proprietà non può essere vuoto.</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">Esiste già una chiave/proprietà con il nome "{0}".</sys:String>
     <sys:String x:Key="error_notSolFile">Il file "{0}" non è un file SOL.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">Motore di ricerca sconosciuto.</sys:String>
 </ResourceDictionary>

@@ -66,7 +66,7 @@ namespace CefFlashBrowser
             catch (Exception e)
             {
                 LogHelper.LogWtf("Unhandled exception in Main method", e);
-                WindowManager.Alert(e.Message, LanguageManager.GetString("dialog_error"));
+                WindowManager.ShowError(e.Message);
             }
             finally
             {
