@@ -202,4 +202,5 @@
     <sys:String x:Key="error_keyOrPropEmpty">键值/属性名不能为空。</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
     <sys:String x:Key="error_notSolFile">文件“{0}”不是SOL文件。</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">未知的搜索引擎。</sys:String>
 </ResourceDictionary>

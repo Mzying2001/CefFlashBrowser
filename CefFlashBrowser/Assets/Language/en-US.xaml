@@ -202,4 +202,5 @@
     <sys:String x:Key="error_keyOrPropEmpty">Key/Property name cannot be empty.</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">A key/property named "{0}" already exists.</sys:String>
     <sys:String x:Key="error_notSolFile">The file "{0}" is not a SOL file.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">Unknown search engine.</sys:String>
 </ResourceDictionary>
