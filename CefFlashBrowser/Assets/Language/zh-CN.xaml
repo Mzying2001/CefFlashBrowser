@@ -19,7 +19,7 @@
     <sys:String x:Key="common_moveToTop">移到顶部</sys:String>
     <sys:String x:Key="common_moveToBottom">移到底部</sys:String>
 
-    <!--主界面-->
+    <!--主窗口-->
     <sys:String x:Key="mainWindow_title">欢迎</sys:String>
     <sys:String x:Key="mainWindow_go">跳转</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理收藏夹</sys:String>
@@ -65,7 +65,7 @@
     <sys:String x:Key="settings_port">端口</sys:String>
     <sys:String x:Key="settings_optional">（可选）</sys:String>
 
-    <!--主界面导航栏-->
+    <!--主窗口地址栏-->
     <sys:String x:Key="navigationType_auto">自动</sys:String>
     <sys:String x:Key="navigationType_searchOnly">仅搜索</sys:String>
     <sys:String x:Key="navigationType_navigateOnly">仅导航</sys:String>
@@ -134,7 +134,7 @@
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加号键）</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">缩小（Ctrl+减号键）</sys:String>
     <sys:String x:Key="browser_loading">加载中...</sys:String>
-    <sys:String x:Key="browser_showMainWindow">打开主界面</sys:String>
+    <sys:String x:Key="browser_showMainWindow">打开主窗口</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">新建浏览器窗口</sys:String>
 
     <!--存档管理器-->

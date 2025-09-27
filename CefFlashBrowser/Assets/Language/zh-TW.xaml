@@ -19,7 +19,7 @@
     <sys:String x:Key="common_moveToTop">移至頂部</sys:String>
     <sys:String x:Key="common_moveToBottom">移至底部</sys:String>
 
-    <!--主介面-->
+    <!--主視窗-->
     <sys:String x:Key="mainWindow_title">歡迎</sys:String>
     <sys:String x:Key="mainWindow_go">前往</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理我的最愛</sys:String>
@@ -65,7 +65,7 @@
     <sys:String x:Key="settings_port">通訊埠</sys:String>
     <sys:String x:Key="settings_optional">（選填）</sys:String>
 
-    <!--主介面導覽列-->
+    <!--主視窗網址列-->
     <sys:String x:Key="navigationType_auto">自動</sys:String>
     <sys:String x:Key="navigationType_searchOnly">僅搜尋</sys:String>
     <sys:String x:Key="navigationType_navigateOnly">僅瀏覽</sys:String>
@@ -134,7 +134,7 @@
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加號鍵）</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">縮小（Ctrl+減號鍵）</sys:String>
     <sys:String x:Key="browser_loading">載入中...</sys:String>
-    <sys:String x:Key="browser_showMainWindow">開啟主介面</sys:String>
+    <sys:String x:Key="browser_showMainWindow">開啟主視窗</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">新建瀏覽器視窗</sys:String>
 
     <!--存檔管理員-->
