@@ -250,7 +250,13 @@ namespace CefFlashBrowser.Utils
 
         public static void ShowError(string errMsg)
         {
-            MessageBox.Show(errMsg, LanguageManager.GetString("dialog_error"), MessageBoxButton.OK, MessageBoxImage.Error);
+            string title = "Error";
+            try
+            {
+                title = LanguageManager.GetString("dialog_error");
+            }
+            catch { }
+            MessageBox.Show(errMsg, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         public static void ShowSolSaveManager()

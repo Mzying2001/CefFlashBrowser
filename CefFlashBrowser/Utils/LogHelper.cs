@@ -72,14 +72,18 @@ namespace CefFlashBrowser.Utils
 
         public static void LogWtf(string message, Exception exception = null) // What a Terrible Failure
         {
-            if (exception == null)
+            try
             {
-                GetLogger().Log(LogLevel.Fatal, message);
+                if (exception == null)
+                {
+                    GetLogger().Log(LogLevel.Fatal, message);
+                }
+                else
+                {
+                    GetLogger().Log(LogLevel.Fatal, message, exception);
+                }
             }
-            else
-            {
-                GetLogger().Log(LogLevel.Fatal, message, exception);
-            }
+            catch { }
         }
     }
 }
