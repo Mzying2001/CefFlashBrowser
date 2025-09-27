@@ -30,6 +30,17 @@
         <ContextMenu x:Key="more"
                      VerticalOffset="-8"
                      HorizontalOffset="8">
+            <MenuItem Header="{DynamicResource browser_showMainWindow}"
+                      Command="{Binding ShowMainWindowCommand}"
+                      InputGestureText="Ctrl+M"/>
+
+            <MenuItem Header="{DynamicResource browser_newBrowserWindow}"
+                      Command="{Binding NewBrowserWindowCommand}"
+                      CommandParameter="{Binding Address}"
+                      InputGestureText="Ctrl+N"/>
+
+            <Separator/>
+
             <MenuItem>
                 <MenuItem.Template>
                     <ControlTemplate TargetType="MenuItem">
@@ -129,7 +140,7 @@
 
             <MenuItem Header="{DynamicResource browser_openInDefaultBrowser}"
                       Command="{Binding OpenInDefaultBrowserCommand}"
-                      CommandParameter="{Binding Source={x:Reference Name=browser}, Path=Address}"
+                      CommandParameter="{Binding Address}"
                       InputGestureText="Ctrl+O"/>
 
             <Separator/>
@@ -138,9 +149,10 @@
                       Command="{Binding ToggleDevToolsCommand}"
                       CommandParameter="{Binding Source={x:Reference Name=browser}}"
                       InputGestureText="F12"/>
+
             <MenuItem Header="{DynamicResource browser_viewSource}"
                       Command="{Binding ViewSourceCommand}"
-                      CommandParameter="{Binding Source={x:Reference Name=browser}, Path=Address}"
+                      CommandParameter="{Binding Address}"
                       InputGestureText="Ctrl+U"/>
         </ContextMenu>
 
@@ -212,15 +224,15 @@
                     Command="{Binding ShowMainWindowCommand}"/>
         <KeyBinding Gesture="Ctrl+N"
                     Command="{Binding NewBrowserWindowCommand}"
-                    CommandParameter="{Binding ElementName=browser, Path=Address}"/>
+                    CommandParameter="{Binding Address}"/>
         <KeyBinding Gesture="Ctrl+O"
                     Command="{Binding OpenInDefaultBrowserCommand}"
-                    CommandParameter="{Binding ElementName=browser, Path=Address}"/>
+                    CommandParameter="{Binding Address}"/>
         <KeyBinding Gesture="Ctrl+P"
                     Command="{Binding ElementName=browser, Path=PrintCommand}"/>
         <KeyBinding Gesture="Ctrl+U"
                     Command="{Binding ViewSourceCommand}"
-                    CommandParameter="{Binding ElementName=browser, Path=Address}"/>
+                    CommandParameter="{Binding Address}"/>
         <KeyBinding Gesture="Ctrl+Shift+S"
                     Command="{Binding CreateShortcutCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>

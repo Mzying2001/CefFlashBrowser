@@ -134,6 +134,8 @@
     <sys:String x:Key="browser_toolTipZoomIn">Zoom in (Ctrl+Plus)</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">Zoom out (Ctrl+Minus)</sys:String>
     <sys:String x:Key="browser_loading">Loading...</sys:String>
+    <sys:String x:Key="browser_showMainWindow">Open main window</sys:String>
+    <sys:String x:Key="browser_newBrowserWindow">New browser window</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL Save Manager</sys:String>

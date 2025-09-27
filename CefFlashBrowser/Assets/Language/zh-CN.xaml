@@ -134,6 +134,8 @@
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加号键）</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">缩小（Ctrl+减号键）</sys:String>
     <sys:String x:Key="browser_loading">加载中...</sys:String>
+    <sys:String x:Key="browser_showMainWindow">打开主界面</sys:String>
+    <sys:String x:Key="browser_newBrowserWindow">新建浏览器窗口</sys:String>
 
     <!--存档管理器-->
     <sys:String x:Key="solSaveManager_title">SOL存档管理器</sys:String>
