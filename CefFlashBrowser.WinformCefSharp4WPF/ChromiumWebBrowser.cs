@@ -544,7 +544,10 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnZoomLevelChanged(DependencyPropertyChangedEventArgs e)
         {
-            browser.SetZoomLevel((double)e.NewValue);
+            if (browser.IsBrowserInitialized)
+            {
+                browser.SetZoomLevel((double)e.NewValue);
+            }
         }
 
         protected virtual void OnAddressChanged(DependencyPropertyChangedEventArgs e)
