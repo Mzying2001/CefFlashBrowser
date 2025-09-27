@@ -76,7 +76,7 @@ struct CefFlashBrowser::Singleton::NativeWnd
             return pWnd->WndProcW(uMsg, wParam, lParam);
         }
         else {
-            return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);
+            return DefWindowProcW(hWnd, uMsg, wParam, lParam);
         }
     }
 
