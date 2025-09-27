@@ -398,6 +398,7 @@
 
             <flash:ChromiumFlashBrowser x:Name="browser"
                                         ZoomLevelIncrement="0.25"
+                                        ZoomLevel="{Binding Source={x:Static data:GlobalData.Settings}, Path=BrowserZoomLevel, Mode=TwoWay}"
                                         Address="{Binding Address, TargetNullValue='about:blank'}"
                                         FullscreenModeChanged="BrowserFullscreenModeChanged"
                                         LoadingProgressChanged="BrowserLoadingProgressChanged"

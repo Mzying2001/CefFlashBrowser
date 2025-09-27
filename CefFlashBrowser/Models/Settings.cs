@@ -20,6 +20,7 @@
         public bool FollowSystemTheme { get; set; }
         public bool EnableIntegratedDevTools { get; set; }
         public double IntegratedDevToolsWidth { get; set; }
+        public double BrowserZoomLevel { get; set; }
 
 
         public static Settings Default => new Settings();
@@ -46,6 +47,7 @@
             FollowSystemTheme = true;
             EnableIntegratedDevTools = true;
             IntegratedDevToolsWidth = 300d;
+            BrowserZoomLevel = 0d;
         }
 
         public void SetNullPropertiesToDefault()
