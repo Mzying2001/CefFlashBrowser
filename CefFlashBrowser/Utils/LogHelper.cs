@@ -15,7 +15,7 @@ namespace CefFlashBrowser.Utils
         public static async Task DeleteExpiredLogsAsync(CancellationToken token)
         {
             var logFiles = Directory.GetFiles(GlobalData.LogsPath, "*.log");
-            await TryDeleteFilesAsync(GetDeleteFiles(logFiles), token);
+            await TryDeleteFilesAsync(GetDeleteFiles(logFiles), token).ConfigureAwait(false);
         }
 
         private static string[] GetDeleteFiles(string[] files)
@@ -28,9 +28,9 @@ namespace CefFlashBrowser.Utils
             return files.OrderBy(item => File.GetCreationTime(item)).Take(files.Length - retainCount).ToArray();
         }
 
-        private static async Task TryDeleteFilesAsync(IEnumerable<string> files, CancellationToken token)
+        private static Task TryDeleteFilesAsync(IEnumerable<string> files, CancellationToken token)
         {
-            await Task.Run(delegate
+            return Task.Run(delegate
             {
                 Parallel.ForEach(files, new ParallelOptions { CancellationToken = token }, item =>
                 {
