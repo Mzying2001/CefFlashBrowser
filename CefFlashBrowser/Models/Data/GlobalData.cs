@@ -99,7 +99,15 @@ namespace CefFlashBrowser.Models.Data
             try
             {
                 File.WriteAllText(tmpPath, contents);
-                File.Replace(tmpPath, path, null);
+
+                if (File.Exists(path))
+                {
+                    File.Replace(tmpPath, path, null);
+                }
+                else
+                {
+                    File.Move(tmpPath, path);
+                }
             }
             catch (Exception e)
             {
