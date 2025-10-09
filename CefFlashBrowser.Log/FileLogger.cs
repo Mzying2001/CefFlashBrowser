@@ -70,7 +70,12 @@ namespace CefFlashBrowser.Log
 
             _semaphore.Wait();
 
-            try { _writer.WriteLine(message); }
+            try
+            {
+                _stream.Seek(0, SeekOrigin.End);
+                _writer.WriteLine(message);
+                _writer.Flush();
+            }
             finally { _semaphore.Release(); }
         }
 
@@ -81,7 +86,12 @@ namespace CefFlashBrowser.Log
 
             await _semaphore.WaitAsync().ConfigureAwait(false);
 
-            try { await _writer.WriteLineAsync(message).ConfigureAwait(false); }
+            try
+            {
+                _stream.Seek(0, SeekOrigin.End);
+                await _writer.WriteLineAsync(message).ConfigureAwait(false);
+                await _writer.FlushAsync().ConfigureAwait(false);
+            }
             finally { _semaphore.Release(); }
         }
 
