@@ -3,6 +3,7 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Messaging;
 using System;
@@ -10,6 +11,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 
@@ -147,6 +149,16 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
             WindowSizeInfo.Apply(GetSizeInfo(), this);
+
+            if (GlobalData.Settings.SaveZoomLevel)
+            {
+                browser.SetBinding(ChromiumWebBrowser.ZoomLevelProperty,
+                    new Binding(nameof(GlobalData.Settings.BrowserZoomLevel))
+                    {
+                        Source = GlobalData.Settings,
+                        Mode = BindingMode.TwoWay
+                    });
+            }
 
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
