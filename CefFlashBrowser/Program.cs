@@ -27,13 +27,13 @@ namespace CefFlashBrowser
         [STAThread]
         private static void Main(string[] args)
         {
-            Win32.SetDllDirectory(GlobalData.CefDllPath);
-            AppDomain.CurrentDomain.AssemblyResolve += ResolveCefSharpAssembly;
-
             try
             {
                 RegisterServices();
                 _mutex = new Mutex(true, "CefFlashBrowser", out bool isNewInstance);
+
+                Win32.SetDllDirectory(GlobalData.CefDllPath);
+                AppDomain.CurrentDomain.AssemblyResolve += ResolveCefSharpAssembly;
 
                 if (isNewInstance)
                 {
