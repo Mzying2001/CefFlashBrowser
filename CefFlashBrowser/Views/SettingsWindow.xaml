@@ -283,8 +283,22 @@
                             </TextBlock>
                         </c:SettingGroup>
 
-                        <!--about CEF-->
-                        <c:SettingGroup Header="{DynamicResource settings_headerAboutCef}">
+                        <!--other-->
+                        <c:SettingGroup Header="{DynamicResource settings_headerOther}">
+                            <!--save zoom level-->
+                            <c:SettingItem Description="{DynamicResource settings_saveZoomLevel}">
+                                <CheckBox Margin="5,0"
+                                          IsChecked="{Binding SaveZoomLevel}"
+                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                            </c:SettingItem>
+                            
+                            <!--enable integrated devtools-->
+                            <c:SettingItem Description="{DynamicResource settings_enableIntegratedDevTools}">
+                                <CheckBox Margin="5,0"
+                                          IsChecked="{Binding EnableIntegratedDevTools}"
+                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                            </c:SettingItem>
+
                             <!--cefsharp version-->
                             <c:SettingItem Description="{DynamicResource settings_cefVersion}">
                                 <Button MinWidth="80"

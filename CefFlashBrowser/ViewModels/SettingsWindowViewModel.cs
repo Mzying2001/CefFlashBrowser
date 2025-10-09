@@ -192,6 +192,26 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool EnableIntegratedDevTools
+        {
+            get => GlobalData.Settings.EnableIntegratedDevTools;
+            set
+            {
+                GlobalData.Settings.EnableIntegratedDevTools = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool SaveZoomLevel
+        {
+            get => GlobalData.Settings.SaveZoomLevel;
+            set
+            {
+                GlobalData.Settings.SaveZoomLevel = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private void SetNavigationType(NavigationType type)
         {
             GlobalData.Settings.NavigationType = type;
