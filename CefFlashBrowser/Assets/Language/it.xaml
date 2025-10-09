@@ -64,6 +64,8 @@
     <sys:String x:Key="settings_ip">IP</sys:String>
     <sys:String x:Key="settings_port">Porta</sys:String>
     <sys:String x:Key="settings_optional">(Opzionale)</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">Salva livello di zoom</sys:String>
+    <sys:String x:Key="settings_enableIntegratedDevTools">Incorpora i devtools nella finestra del browser</sys:String>
 
     <!--Barra di navigazione dell'interfaccia principale-->
     <sys:String x:Key="navigationType_auto">Automatico</sys:String>

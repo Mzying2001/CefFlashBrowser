@@ -34,7 +34,7 @@ struct CefFlashBrowser::Singleton::NativeWnd
         hWnd = CreateWindowExW(
             0,
             MsgReceiverClassName,
-            MsgReceiverWindowName, //??not effective
+            MsgReceiverWindowName,
             WS_POPUP,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
@@ -61,14 +61,17 @@ struct CefFlashBrowser::Singleton::NativeWnd
         auto pWnd = reinterpret_cast<NativeWnd*>(
             GetPropW(hWnd, SelfProp));
 
-        if (pWnd == nullptr &&
-            (uMsg == WM_NCCREATE || uMsg == WM_CREATE))
+        if ((uMsg == WM_NCCREATE || uMsg == WM_CREATE) && lParam != 0)
         {
             auto pCreate = reinterpret_cast<LPCREATESTRUCT>(lParam);
-            pWnd = reinterpret_cast<NativeWnd*>(pCreate->lpCreateParams);
+
+            if (pWnd == nullptr) {
+                pWnd = reinterpret_cast<NativeWnd*>(pCreate->lpCreateParams);
+                SetPropW(hWnd, SelfProp, reinterpret_cast<HANDLE>(pWnd));
+            }
 
             if (pWnd) {
-                SetPropW(hWnd, SelfProp, reinterpret_cast<HANDLE>(pWnd));
+                pWnd->hWnd = hWnd;
             }
         }
 
@@ -76,7 +79,7 @@ struct CefFlashBrowser::Singleton::NativeWnd
             return pWnd->WndProcW(uMsg, wParam, lParam);
         }
         else {
-            return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);
+            return DefWindowProcW(hWnd, uMsg, wParam, lParam);
         }
     }
 
@@ -87,14 +90,6 @@ struct CefFlashBrowser::Singleton::NativeWnd
         case WM_COPYDATA: {
             auto pCopyData = reinterpret_cast<PCOPYDATASTRUCT>(lParam);
             OnCopyData(pCopyData);
-            return TRUE;
-        }
-
-        case WM_CREATE: {
-            return 0;
-        }
-
-        case WM_NCCREATE: {
             return TRUE;
         }
 
@@ -112,16 +107,6 @@ struct CefFlashBrowser::Singleton::NativeWnd
             return DefWindowProcW(hWnd, uMsg, wParam, lParam);
         }
         }
-    }
-
-    LRESULT SendMessageW(UINT uMsg, WPARAM wParam, LPARAM lParam)
-    {
-        return ::SendMessageW(hWnd, uMsg, wParam, lParam);
-    }
-
-    LRESULT PostMessageW(UINT uMsg, WPARAM wParam, LPARAM lParam)
-    {
-        return ::PostMessageW(hWnd, uMsg, wParam, lParam);
     }
 
     void OnCopyData(PCOPYDATASTRUCT pCopyData)
@@ -142,9 +127,7 @@ struct CefFlashBrowser::Singleton::NativeWnd
         COPYDATASTRUCT copyData{};
         copyData.cbData = data->Length;
         copyData.lpData = pinnedData;
-
-        ::SendMessageW(hWnd, WM_COPYDATA,
-            0, reinterpret_cast<LPARAM>(&copyData));
+        SendMessageW(hWnd, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&copyData));
     }
 };
 

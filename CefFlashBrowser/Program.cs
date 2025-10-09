@@ -27,13 +27,13 @@ namespace CefFlashBrowser
         [STAThread]
         private static void Main(string[] args)
         {
-            Win32.SetDllDirectory(GlobalData.CefDllPath);
-            AppDomain.CurrentDomain.AssemblyResolve += ResolveCefSharpAssembly;
-
             try
             {
                 RegisterServices();
                 _mutex = new Mutex(true, "CefFlashBrowser", out bool isNewInstance);
+
+                Win32.SetDllDirectory(GlobalData.CefDllPath);
+                AppDomain.CurrentDomain.AssemblyResolve += ResolveCefSharpAssembly;
 
                 if (isNewInstance)
                 {
@@ -59,8 +59,8 @@ namespace CefFlashBrowser
                 else
                 {
                     string json = JsonConvert.SerializeObject(args);
-                    MsgReceiver.SendGlobalData(Encoding.UTF8.GetBytes(json));
                     LogHelper.LogInfo($"Another instance is running, send args to it: {json}");
+                    MsgReceiver.SendGlobalData(Encoding.UTF8.GetBytes(json));
                 }
             }
             catch (Exception e)
