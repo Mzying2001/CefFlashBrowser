@@ -59,8 +59,8 @@ namespace CefFlashBrowser
                 else
                 {
                     string json = JsonConvert.SerializeObject(args);
-                    MsgReceiver.SendGlobalData(Encoding.UTF8.GetBytes(json));
                     LogHelper.LogInfo($"Another instance is running, send args to it: {json}");
+                    MsgReceiver.SendGlobalData(Encoding.UTF8.GetBytes(json));
                 }
             }
             catch (Exception e)
