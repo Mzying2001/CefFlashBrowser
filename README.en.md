@@ -31,7 +31,7 @@ Download the latest release from the [Release page](https://github.com/Mzying200
 With the **SOL Save Manager**, you can export, import, and edit Flash game save files.
 
 > [!TIP]
-> It’s recommended to back up your save files before making changes to avoid data loss.
+> It’s recommended to back up your saved files before making changes to avoid data loss.
 
 ![solmgr](./Images/SolSaveManager.png)
 ![soledit](./Images/SolEditor.png)
