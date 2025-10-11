@@ -105,7 +105,7 @@
         /// <summary>
         /// The browser window will not enter full screen mode if this is set to true
         /// </summary>
-        public bool DisableFullScreen { get; set; }
+        public bool DisableFullscreen { get; set; }
 
 
         /// <summary>
@@ -140,7 +140,7 @@
             IntegratedDevToolsWidth = 300d;
             SaveZoomLevel = true;
             BrowserZoomLevel = 0d;
-            DisableFullScreen = false;
+            DisableFullscreen = false;
         }
 
         /// <summary>
