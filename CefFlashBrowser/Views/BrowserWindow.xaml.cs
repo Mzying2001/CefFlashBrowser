@@ -336,7 +336,11 @@ namespace CefFlashBrowser.Views
         private void OnFullScreenChanged(bool fullScreen)
         {
             if (GlobalData.Settings.DisableFullscreen)
+            {
+                if (WindowStyle == WindowStyle.None)
+                    WindowStyle = WindowStyle.SingleBorderWindow;
                 return;
+            }
 
             if (fullScreen)
             {
