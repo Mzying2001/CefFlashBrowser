@@ -335,6 +335,9 @@ namespace CefFlashBrowser.Views
 
         private void OnFullScreenChanged(bool fullScreen)
         {
+            if (GlobalData.Settings.DisableFullScreen)
+                return;
+
             if (fullScreen)
             {
                 _isMaximizedBeforeFullScreen =
@@ -343,13 +346,11 @@ namespace CefFlashBrowser.Views
                 if (_isMaximizedBeforeFullScreen)
                     WindowState = WindowState.Normal;
 
-                //Topmost = true;
                 WindowStyle = WindowStyle.None;
                 WindowState = WindowState.Maximized;
             }
             else
             {
-                //Topmost = false;
                 WindowStyle = WindowStyle.SingleBorderWindow;
                 WindowState = WindowState.Normal;
 

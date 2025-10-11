@@ -102,6 +102,11 @@
         /// </summary>
         public double BrowserZoomLevel { get; set; }
 
+        /// <summary>
+        /// The browser window will not enter full screen mode if this is set to true
+        /// </summary>
+        public bool DisableFullScreen { get; set; }
+
 
         /// <summary>
         /// Default settings
@@ -135,6 +140,7 @@
             IntegratedDevToolsWidth = 300d;
             SaveZoomLevel = true;
             BrowserZoomLevel = 0d;
+            DisableFullScreen = false;
         }
 
         /// <summary>
