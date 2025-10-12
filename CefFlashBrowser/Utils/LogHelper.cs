@@ -25,7 +25,7 @@ namespace CefFlashBrowser.Utils
             if (files.Length <= retainCount)
                 return Array.Empty<string>();
 
-            return files.OrderBy(item => File.GetCreationTime(item)).Take(files.Length - retainCount).ToArray();
+            return files.OrderBy(item => File.GetLastWriteTime(item)).Take(files.Length - retainCount).ToArray();
         }
 
         private static Task TryDeleteFilesAsync(IEnumerable<string> files, CancellationToken token)
