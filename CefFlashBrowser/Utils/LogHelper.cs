@@ -38,7 +38,10 @@ namespace CefFlashBrowser.Utils
                     try
                     {
                         if (File.Exists(item))
+                        {
                             File.Delete(item);
+                            LogInfo($"Deleted log file: {item}");
+                        }
                     }
                     catch (Exception e)
                     {
