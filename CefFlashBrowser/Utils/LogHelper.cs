@@ -20,7 +20,7 @@ namespace CefFlashBrowser.Utils
 
         private static string[] GetDeleteFiles(string[] files)
         {
-            int retainCount = GlobalData.RetainedLogCount;
+            int retainCount = Math.Max(GlobalData.Settings.RetainedLogCount, 0);
 
             if (files.Length <= retainCount)
                 return Array.Empty<string>();

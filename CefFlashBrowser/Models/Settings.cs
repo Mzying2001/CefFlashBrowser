@@ -107,6 +107,11 @@
         /// </summary>
         public bool DisableFullscreen { get; set; }
 
+        /// <summary>
+        /// The number of log files to retain
+        /// </summary>
+        public int RetainedLogCount { get; set; }
+
 
         /// <summary>
         /// Default settings
@@ -141,6 +146,7 @@
             SaveZoomLevel = true;
             BrowserZoomLevel = 0d;
             DisableFullscreen = false;
+            RetainedLogCount = 30;
         }
 
         /// <summary>
