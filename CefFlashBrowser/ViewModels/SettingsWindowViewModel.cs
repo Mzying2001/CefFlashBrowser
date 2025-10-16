@@ -171,6 +171,16 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool DisableFullscreen
+        {
+            get => GlobalData.Settings.DisableFullscreen;
+            set
+            {
+                GlobalData.Settings.DisableFullscreen = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public bool HideMainWindowOnBrowsing
         {
             get => GlobalData.Settings.HideMainWindowOnBrowsing;

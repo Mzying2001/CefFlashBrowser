@@ -25,7 +25,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
         public DelegateCommand NewBrowserWindowCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
-        public DelegateCommand ToggleFullScreenCommand { get; set; }
+        public DelegateCommand ToggleFullscreenCommand { get; set; }
 
 
 
@@ -43,15 +43,15 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _integratedDevToolsHandle, value);
         }
 
-        private bool _fullScreen = false;
-        public bool FullScreen
+        private bool _fullscreen = false;
+        public bool Fullscreen
         {
-            get => _fullScreen;
+            get => _fullscreen;
             set
             {
-                if (_fullScreen != value)
+                if (_fullscreen != value)
                 {
-                    UpdateValue(ref _fullScreen, value);
+                    UpdateValue(ref _fullscreen, value);
                     Messenger.Global.Send(MessageTokens.FULLSCREEN_CHANGED, this);
                 }
             }
@@ -190,18 +190,18 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void ToggleFullScreen(IWebBrowser browser)
+        public void ToggleFullscreen(IWebBrowser browser)
         {
-            if (FullScreen)
+            if (Fullscreen)
             {
                 if (browser.CanExecuteJavascriptInMainFrame)
                     browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
-                FullScreen = false;
+                Fullscreen = false;
             }
             else
             {
                 //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
-                FullScreen = true;
+                Fullscreen = true;
             }
         }
 
@@ -211,7 +211,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 case NewPageBehavior.NewWindow:
                     {
-                        FullScreen = false;
+                        Fullscreen = false;
                         WindowManager.ShowBrowser(url);
                         break;
                     }
@@ -225,7 +225,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void OnPopup(string url, IPopupFeatures features)
         {
-            FullScreen = false;
+            Fullscreen = false;
             WindowManager.ShowPopupWebPage(url, features);
         }
 
@@ -256,7 +256,7 @@ namespace CefFlashBrowser.ViewModels
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             ToggleDevToolsCommand = new DelegateCommand<IWebBrowser>(ToggleDevTools);
-            ToggleFullScreenCommand = new DelegateCommand<IWebBrowser>(ToggleFullScreen);
+            ToggleFullscreenCommand = new DelegateCommand<IWebBrowser>(ToggleFullscreen);
         }
     }
 }

@@ -110,19 +110,19 @@ namespace CefFlashBrowser.Log
             WriteLine($"{GetTimeString()} | {GetLogLevelString(level)} | {message}{_newLine}{exception}");
         }
 
-        public async Task LogAsync(LogLevel level, string message)
+        public Task LogAsync(LogLevel level, string message)
         {
-            await WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {message}");
+            return WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {message}");
         }
 
-        public async Task LogAsync(LogLevel level, Exception exception)
+        public Task LogAsync(LogLevel level, Exception exception)
         {
-            await WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {_newLine}{exception}");
+            return WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {_newLine}{exception}");
         }
 
-        public async Task LogAsync(LogLevel level, string message, Exception exception)
+        public Task LogAsync(LogLevel level, string message, Exception exception)
         {
-            await WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {message}{_newLine}{exception}");
+            return WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {message}{_newLine}{exception}");
         }
     }
 }

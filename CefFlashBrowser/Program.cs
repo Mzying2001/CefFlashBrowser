@@ -49,7 +49,7 @@ namespace CefFlashBrowser
                     InitCefFlash();
                     InitTheme();
 
-                    LogHelper.LogInfo("Application started successfully");
+                    LogHelper.LogInfo($"Application started successfully, pid: {Process.GetCurrentProcess().Id}");
                     LogHelper.LogInfo($"CefFlashBrowser Version: {Assembly.GetExecutingAssembly().GetName().Version}");
 
                     app.Run();
@@ -167,7 +167,7 @@ namespace CefFlashBrowser
             }
             else
             {
-                LogHelper.LogInfo("Application terminated");
+                LogHelper.LogInfo($"Application terminated, pid: {Process.GetCurrentProcess().Id}");
             }
         }
 

@@ -206,7 +206,7 @@
         <KeyBinding Key="F5"
                     Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
         <KeyBinding Key="F11"
-                    Command="{Binding ToggleFullScreenCommand}"
+                    Command="{Binding ToggleFullscreenCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Key="F12"
                     Command="{Binding ToggleDevToolsCommand}"
@@ -254,7 +254,7 @@
 
         <DockPanel Grid.Row="0"
                    Margin="10"
-                   Visibility="{Binding FullScreen, Converter={StaticResource Boolean2VisibilityReConverter}}">
+                   Visibility="{Binding Fullscreen, Converter={StaticResource Boolean2VisibilityReConverter}}">
 
             <DockPanel.Resources>
                 <Style TargetType="Button"

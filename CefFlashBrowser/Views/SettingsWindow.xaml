@@ -150,6 +150,12 @@
                                           IsChecked="{Binding DisableOnBeforeUnloadDialog}"
                                           Style="{StaticResource ToggleButtonSwitch}"/>
                             </c:SettingItem>
+
+                            <c:SettingItem Description="{DynamicResource settings_disableFullscreen}">
+                                <CheckBox Margin="5,0"
+                                          IsChecked="{Binding DisableFullscreen}"
+                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                            </c:SettingItem>
                         </c:SettingGroup>
 
                         <!--advance-->
@@ -291,7 +297,7 @@
                                           IsChecked="{Binding SaveZoomLevel}"
                                           Style="{StaticResource ToggleButtonSwitch}"/>
                             </c:SettingItem>
-                            
+
                             <!--enable integrated devtools-->
                             <c:SettingItem Description="{DynamicResource settings_enableIntegratedDevTools}">
                                 <CheckBox Margin="5,0"

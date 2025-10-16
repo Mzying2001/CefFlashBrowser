@@ -243,7 +243,7 @@ namespace CefFlashBrowser.Views
         {
             if (browser.IsDisposed || _doClose)
             {
-                if (!ViewModel.FullScreen)
+                if (!ViewModel.Fullscreen)
                     GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
 
                 if (devtoolsContainer.ContentHandle != IntPtr.Zero)
@@ -322,19 +322,26 @@ namespace CefFlashBrowser.Views
 
         private void BrowserFullscreenModeChanged(object sender, EventArgs e)
         {
-            ViewModel.FullScreen = browser.FullscreenMode;
+            ViewModel.Fullscreen = browser.FullscreenMode;
         }
 
         private void FullScreenChangedHandler(object msg)
         {
             if (msg == DataContext)
             {
-                OnFullScreenChanged(ViewModel.FullScreen);
+                OnFullScreenChanged(ViewModel.Fullscreen);
             }
         }
 
         private void OnFullScreenChanged(bool fullScreen)
         {
+            if (GlobalData.Settings.DisableFullscreen)
+            {
+                if (WindowStyle == WindowStyle.None)
+                    WindowStyle = WindowStyle.SingleBorderWindow;
+                return;
+            }
+
             if (fullScreen)
             {
                 _isMaximizedBeforeFullScreen =
@@ -343,13 +350,11 @@ namespace CefFlashBrowser.Views
                 if (_isMaximizedBeforeFullScreen)
                     WindowState = WindowState.Normal;
 
-                //Topmost = true;
                 WindowStyle = WindowStyle.None;
                 WindowState = WindowState.Maximized;
             }
             else
             {
-                //Topmost = false;
                 WindowStyle = WindowStyle.SingleBorderWindow;
                 WindowState = WindowState.Normal;
 
@@ -360,7 +365,7 @@ namespace CefFlashBrowser.Views
 
         public void ExitFullScreen()
         {
-            ViewModel.FullScreen = false;
+            ViewModel.Fullscreen = false;
         }
 
         private void CloseBrowserHandler(object msg)

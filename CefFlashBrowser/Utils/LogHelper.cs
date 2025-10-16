@@ -20,12 +20,12 @@ namespace CefFlashBrowser.Utils
 
         private static string[] GetDeleteFiles(string[] files)
         {
-            int retainCount = GlobalData.RetainedLogCount;
+            int retainCount = Math.Max(GlobalData.Settings.RetainedLogCount, 0);
 
             if (files.Length <= retainCount)
                 return Array.Empty<string>();
 
-            return files.OrderBy(item => File.GetCreationTime(item)).Take(files.Length - retainCount).ToArray();
+            return files.OrderBy(item => File.GetLastWriteTime(item)).Take(files.Length - retainCount).ToArray();
         }
 
         private static Task TryDeleteFilesAsync(IEnumerable<string> files, CancellationToken token)
@@ -38,7 +38,10 @@ namespace CefFlashBrowser.Utils
                     try
                     {
                         if (File.Exists(item))
+                        {
                             File.Delete(item);
+                            LogInfo($"Deleted log file: {item}");
+                        }
                     }
                     catch (Exception e)
                     {
