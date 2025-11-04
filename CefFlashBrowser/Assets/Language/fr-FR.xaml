@@ -1,0 +1,209 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="locale">fr-FR</sys:String>
+    <sys:String x:Key="language_name">Français</sys:String>
+
+    <!-- Common Fields -->
+    <sys:String x:Key="common_swfFile">Fichier SWF</sys:String>
+    <sys:String x:Key="common_solFile">Fichier SOL</sys:String>
+    <sys:String x:Key="common_allFiles">Tout les fichiers</sys:String>
+    <sys:String x:Key="common_shortcut">Raccourci</sys:String>
+    <sys:String x:Key="common_favorites">Favoris</sys:String>
+    <sys:String x:Key="common_settings">Paramètres</sys:String>
+    <sys:String x:Key="common_export">Exporter</sys:String>
+    <sys:String x:Key="common_import">Importer</sys:String>
+    <sys:String x:Key="common_rename">Renommer</sys:String>
+    <sys:String x:Key="common_moveUp">Déplacer vers le haut</sys:String>
+    <sys:String x:Key="common_moveDown">Déplacer vers le haut</sys:String>
+    <sys:String x:Key="common_moveToTop">Déplacer tout en haut</sys:String>
+    <sys:String x:Key="common_moveToBottom">Déplacer tout en bas</sys:String>
+
+    <!--Main Window-->
+    <sys:String x:Key="mainWindow_title">Bienvenue</sys:String>
+    <sys:String x:Key="mainWindow_go">Go</sys:String>
+    <sys:String x:Key="mainWindow_manageFavorites">Gérer les favoris</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">Gérer les fichiers de sauvegarde SOL</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">Ouvrir un fichier SOL....</sys:String>
+    <sys:String x:Key="mainWindow_languages">Langue</sys:String>
+    <sys:String x:Key="mainWindow_options">Options</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">Charger un fichier SWF local...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">Ouvrir dans GitHub</sys:String>
+
+    <!--Settings Window-->
+    <sys:String x:Key="settings_tabMainWindow">Fenêtre principale</sys:String>
+    <sys:String x:Key="settings_tabBrowser">Navigateur</sys:String>
+    <sys:String x:Key="settings_headerAddressBar">Barre d'adresse et de recherche</sys:String>
+    <sys:String x:Key="settings_headerTheme">Thème</sys:String>
+    <sys:String x:Key="settings_headerOther">Autre</sys:String>
+    <sys:String x:Key="settings_headerBrowserData">Cache du navigateur</sys:String>
+    <sys:String x:Key="settings_headerWebsiteBehavior">Comportement des site Web</sys:String>
+    <sys:String x:Key="settings_headerAdvanced">Avancé</sys:String>
+    <sys:String x:Key="settings_headerAboutCef">À propos de CEF</sys:String>
+    <sys:String x:Key="settings_useSearchEngine">Utilisez le moteur de recherche dans la barre d'adresse</sys:String>
+    <sys:String x:Key="settings_searchEngine">Moteur de recherche</sys:String>
+    <sys:String x:Key="settings_currentTheme">Thème actuel</sys:String>
+    <sys:String x:Key="settings_followSystemTheme">Suivre le thème système</sys:String>
+    <sys:String x:Key="settings_hideMainWindowOnBrowsing">Masquer la fenêtre principale lors de la navigation sur des pages Web</sys:String>
+    <sys:String x:Key="settings_deleteCache">Vider les caches</sys:String>
+    <sys:String x:Key="settings_openNewPage">Ouvrir une nouvelle page dans...</sys:String>
+    <sys:String x:Key="settings_disableOnBeforeUnloadDialog">Désactiver les pop-up lors du rafraîchissement ou de la fermeture de la page</sys:String>
+    <sys:String x:Key="settings_enableProxy">Utiliser un proxy</sys:String>
+    <sys:String x:Key="settings_enableCustomUserAgent">Utiliser un Agent utilisateur personnalisé</sys:String>
+    <sys:String x:Key="settings_enableFakeFlashVersion">Utiliser une fausse version de Flash</sys:String>
+    <sys:String x:Key="settings_cefVersion">Version de CefSharp</sys:String>
+    <sys:String x:Key="settings_server">Serveur</sys:String>
+    <sys:String x:Key="settings_username">Nom d'utilisateur</sys:String>
+    <sys:String x:Key="settings_password">Mot de passe</sys:String>
+    <sys:String x:Key="settings_userAgent">Agent utilisateur</sys:String>
+    <sys:String x:Key="settings_flashVersion">Version Flash</sys:String>
+    <sys:String x:Key="settings_buttonDeleteCache">Supprimer</sys:String>
+    <sys:String x:Key="settings_buttonViewDetails">Détails</sys:String>
+    <sys:String x:Key="settings_buttonRestart">Redémarrer</sys:String>
+    <sys:String x:Key="settings_needRestart">Les modifications apportées à ces paramètres prendront effet après le redémarrage du logiciel.</sys:String>
+    <sys:String x:Key="settings_ip">IP</sys:String>
+    <sys:String x:Key="settings_port">Port</sys:String>
+    <sys:String x:Key="settings_optional">(Optionnel)</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">Mémoriser le niveau de zoom</sys:String>
+    <sys:String x:Key="settings_enableIntegratedDevTools">Intégrer les outils de développement dans la fenêtre du navigateur</sys:String>
+    <sys:String x:Key="settings_disableFullscreen">Désactiver le mode plein écran</sys:String>
+
+    <!--Navigation bar of main interface-->
+    <sys:String x:Key="navigationType_auto">Automatique</sys:String>
+    <sys:String x:Key="navigationType_searchOnly">Rechercher uniquement</sys:String>
+    <sys:String x:Key="navigationType_navigateOnly">Naviguer uniquement</sys:String>
+
+    <!--New web page behaviors-->
+    <sys:String x:Key="newPageBehavior_originalWindow">Fenêtre d'origine</sys:String>
+    <sys:String x:Key="newPageBehavior_newWindow">Nouvelle fenêtre</sys:String>
+
+    <!--Search Engine-->
+    <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
+    <sys:String x:Key="searchEngine_google">Google</sys:String>
+    <sys:String x:Key="searchEngine_bing">Bing</sys:String>
+    <sys:String x:Key="searchEngine_sogou">Sogou</sys:String>
+    <sys:String x:Key="searchEngine_so360">360</sys:String>
+    <sys:String x:Key="searchEngine_duckDuckGo">DuckDuckGo</sys:String>
+    <sys:String x:Key="searchEngine_yandex">Yandex</sys:String>
+    <sys:String x:Key="searchEngine_bilibili">Bilibili</sys:String>
+    <sys:String x:Key="searchEngine_game4399">4399</sys:String>
+
+    <!--Theme-->
+    <sys:String x:Key="theme_light">Clair</sys:String>
+    <sys:String x:Key="theme_dark">Sombre</sys:String>
+
+    <!--Favorites Manager-->
+    <sys:String x:Key="favorites_managerTitle">Gestionnaire des favoris</sys:String>
+    <sys:String x:Key="favorites_add">Ajouter</sys:String>
+    <sys:String x:Key="favorites_remove">Supprimer</sys:String>
+    <sys:String x:Key="favorites_edit">Modifier</sys:String>
+    <sys:String x:Key="favorites_name">Nom</sys:String>
+    <sys:String x:Key="favorites_url">Url</sys:String>
+    <sys:String x:Key="favorites_save">Sauvegarder</sys:String>
+    <sys:String x:Key="favorites_defaultName">Nouveau favori</sys:String>
+
+    <!--Browser Window-->
+    <sys:String x:Key="browser_back">Revenir en arrière</sys:String>
+    <sys:String x:Key="browser_forward">Avancer</sys:String>
+    <sys:String x:Key="browser_reload">Recharger</sys:String>
+    <sys:String x:Key="browser_stop">Arrêter</sys:String>
+    <sys:String x:Key="browser_cut">Couper</sys:String>
+    <sys:String x:Key="browser_copy">Copier</sys:String>
+    <sys:String x:Key="browser_paste">Coller</sys:String>
+    <sys:String x:Key="browser_selectAll">Tout sélectionner</sys:String>
+    <sys:String x:Key="browser_print">Imprimer</sys:String>
+    <sys:String x:Key="browser_redo">Refaire</sys:String>
+    <sys:String x:Key="browser_undo">Annuler</sys:String>
+    <sys:String x:Key="browser_find">Trouver</sys:String>
+    <sys:String x:Key="browser_searchFor">Chercher "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewWindow">Ouvrir dans une nouvelle fenêtre</sys:String>
+    <sys:String x:Key="browser_openSelectedUrl">Aller à "{0}"</sys:String>
+    <sys:String x:Key="browser_addToDictionary">Ajouter au dictionnaire</sys:String>
+    <sys:String x:Key="browser_reloadNoCache">Recharger sans cache</sys:String>
+    <sys:String x:Key="browser_openDevTool">Ouvrir les outils de développement</sys:String>
+    <sys:String x:Key="browser_toggleDevTool">Ouvrir/Fermer les outils de développement</sys:String>
+    <sys:String x:Key="browser_viewSource">Afficher le code source</sys:String>
+    <sys:String x:Key="browser_zoom">Zoom</sys:String>
+    <sys:String x:Key="browser_openInDefaultBrowser">Ouvrir dans le navigateur par défaut</sys:String>
+    <sys:String x:Key="browser_createShortcut">Créer un raccourci</sys:String>
+    <sys:String x:Key="browser_addFavorite">Ajouter ce site aux favoris</sys:String>
+    <sys:String x:Key="browser_tipsBlockedSwfs">Certains contenus Flash semblent être bloqués par le noyau Chromium, vous pouvez les lire dans le lecteur SWF :</sys:String>
+    <sys:String x:Key="browser_toolTipBack">Revenir en arrière (Alt+Left)</sys:String>
+    <sys:String x:Key="browser_toolTipForward">Avancer (Alt+Right)</sys:String>
+    <sys:String x:Key="browser_toolTipReload">Recharger (F5)</sys:String>
+    <sys:String x:Key="browser_toolTipStop">Arrêter (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipMore">Plus</sys:String>
+    <sys:String x:Key="browser_toolTipBlockedSwfs">Contenu Flash bloqué</sys:String>
+    <sys:String x:Key="browser_toolTipZoomIn">Augmente la taille du texte (Ctrl+Plus)</sys:String>
+    <sys:String x:Key="browser_toolTipZoomOut">Réduit la taille du texte (Ctrl+Minus)</sys:String>
+    <sys:String x:Key="browser_loading">Chargement...</sys:String>
+    <sys:String x:Key="browser_showMainWindow">Ouvrir la fenêtre principale</sys:String>
+    <sys:String x:Key="browser_newBrowserWindow">Nouvelle fenêtre de navigation</sys:String>
+
+    <!--Save Manager-->
+    <sys:String x:Key="solSaveManager_title">Gestionnaire de sauvegarde SOL</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileName">Nom du fichier</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileDir">Chemin du fichier</sys:String>
+    <sys:String x:Key="solSaveManager_headerOperations">Opérations</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipReload">Actualiser</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipDelete">Supprimer</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipEdit">Modifier</sys:String>
+    <sys:String x:Key="solSaveManager_filterPlaceholder">Filtrer...</sys:String>
+
+    <!--SOL Editor-->
+    <sys:String x:Key="solEditor_title">Éditeur SOL</sys:String>
+    <sys:String x:Key="solEditor_file">Fichier</sys:String>
+    <sys:String x:Key="solEditor_save">Enregistrer</sys:String>
+    <sys:String x:Key="solEditor_saveAs">Enregistrer sous...</sys:String>
+    <sys:String x:Key="solEditor_close">Fermer</sys:String>
+    <sys:String x:Key="solEditor_edit">Modifier</sys:String>
+    <sys:String x:Key="solEditor_addItem">Ajouter un élément</sys:String>
+    <sys:String x:Key="solEditor_removeItem">Supprimer l'élément</sys:String>
+    <sys:String x:Key="solEditor_statusReady">Prêt</sys:String>
+    <sys:String x:Key="solEditor_statusError">Erreur</sys:String>
+    <sys:String x:Key="solEditor_statusModified">Modifié</sys:String>
+    <sys:String x:Key="solEditor_statusSaved">Enregistré</sys:String>
+    <sys:String x:Key="solEditor_statusUnknown">Statut inconnu</sys:String>
+    <sys:String x:Key="solEditor_emptyString">(Vide)</sys:String>
+    <sys:String x:Key="solEditor_amf0SolFile">Fichier SOL encodé avec AMF0</sys:String>
+    <sys:String x:Key="solEditor_amf3SolFile">Fichier SOL encodé avec AMF3</sys:String>
+
+    <!--Dialogs-->
+    <sys:String x:Key="dialog_ok">OK</sys:String>
+    <sys:String x:Key="dialog_cancel">Annuler</sys:String>
+    <sys:String x:Key="dialog_yes">Oui</sys:String>
+    <sys:String x:Key="dialog_no">Non</sys:String>
+    <sys:String x:Key="dialog_error">Erreur</sys:String>
+    <sys:String x:Key="dialog_addFavorite">Ajouter aux favoris</sys:String>
+    <sys:String x:Key="dialog_selectLanguage">Sélectionner une langue</sys:String>
+    <sys:String x:Key="dialog_addItem">Ajouter un élément</sys:String>
+    <sys:String x:Key="dialog_itemName">Nom</sys:String>
+    <sys:String x:Key="dialog_assocArray">Tableau associatif</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">Veuillez saisir l'url.</sys:String>
+    <sys:String x:Key="message_deleteCache">Êtes-vous sûr de vouloir supprimer les caches ? Le navigateur devra redémarrer.</sys:String>
+    <sys:String x:Key="message_restart">Voulez-vous redémarrer le programme?</sys:String>
+    <sys:String x:Key="message_removeItem">Êtes-vous sûr de vouloir supprimer "{0}" ?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">Voulez-vous quitter cette page ?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">Voulez-vous recharger cette page ?</sys:String>
+    <sys:String x:Key="message_deleteFile">Voulez-vous supprimer le fichier "{0}" ?</sys:String>
+    <sys:String x:Key="message_deleted">Suppression réussie.</sys:String>
+    <sys:String x:Key="message_imported">Importation réussie.</sys:String>
+    <sys:String x:Key="message_exported">Exportation réussie.</sys:String>
+    <sys:String x:Key="message_askSaveChange">Souhaitez-vous enregistrer les modifications apportées à "{0}" ?</sys:String>
+    <sys:String x:Key="message_renameItem">Renommer "{0}":</sys:String>
+    <sys:String x:Key="message_askImportFile">Voulez-vous importer le fichier "{0}" dans "{1}"?</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">Message d'erreur</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">Le nom ne peut pas être vide.</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">L'URL ne peut pas être vide.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">Une erreur s'est produite lors de la suppression du cache. Voulez-vous réessayer ?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">La clé "{0}" existe déjà dans ce tableau.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">La propriété "{0}" existe déjà dans cette objet.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Le nom de la clé ou de la propriété ne peut pas être vide.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">La clé ou propriété "{0}" existe déjà.</sys:String>
+    <sys:String x:Key="error_notSolFile">Le fichier "{0}" n'est pas un fichier SOL.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">Moteur de recherche inconnu.</sys:String>
+</ResourceDictionary>

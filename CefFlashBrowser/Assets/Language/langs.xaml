@@ -5,6 +5,7 @@
     <ResourceDictionary x:Key="zh-CN" Source="zh-CN.xaml"/>
     <ResourceDictionary x:Key="zh-TW" Source="zh-TW.xaml"/>
     <ResourceDictionary x:Key="en-US" Source="en-US.xaml"/>
+    <ResourceDictionary x:Key="fr-FR" Source="fr-FR.xaml"/>
     <ResourceDictionary x:Key="it" Source="it.xaml"/>
 
     <!--The following lists all locales supported by CefSharp,
