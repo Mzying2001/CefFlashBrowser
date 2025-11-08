@@ -16,7 +16,7 @@
         
         x:Name="window"
         Width="450"
-        Height="450"
+        Height="500"
         WindowStartupLocation="CenterScreen"
         Title="{DynamicResource solEditor_title}">
 
