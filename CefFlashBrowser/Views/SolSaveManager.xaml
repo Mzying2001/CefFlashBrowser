@@ -232,6 +232,7 @@
                   Margin="10,0,0,0"
                   Width="200">
                 <hc:TextBox Padding="28,0,8,0"
+                            MaxLength="100"
                             Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
                             hc:InfoElement.Placeholder="{DynamicResource solSaveManager_filterPlaceholder}">
                     <i:Interaction.Behaviors>
