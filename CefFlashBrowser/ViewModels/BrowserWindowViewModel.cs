@@ -26,6 +26,10 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand NewBrowserWindowCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
         public DelegateCommand ToggleFullscreenCommand { get; set; }
+        public DelegateCommand ShowSearchPopupCommand { get; set; }
+        public DelegateCommand CloseSearchPopupCommand { get; set; }
+        public DelegateCommand FindNextTextCommand { get; set; }
+        public DelegateCommand FindPrevTextCommand { get; set; }
 
 
 
@@ -55,6 +59,20 @@ namespace CefFlashBrowser.ViewModels
                     Messenger.Global.Send(MessageTokens.FULLSCREEN_CHANGED, this);
                 }
             }
+        }
+
+        private bool _showSearch = false;
+        public bool ShowSearch
+        {
+            get => _showSearch;
+            set => UpdateValue(ref _showSearch, value);
+        }
+
+        private string _searchText = string.Empty;
+        public string SearchText
+        {
+            get => _searchText;
+            set => UpdateValue(ref _searchText, value);
         }
 
 
@@ -245,6 +263,26 @@ namespace CefFlashBrowser.ViewModels
             Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
         }
 
+        public void ShowSearchPopup()
+        {
+            ShowSearch = true;
+        }
+
+        public void CloseSearchPopup()
+        {
+            ShowSearch = false;
+        }
+
+        public void FindNextText(IWebBrowser browser)
+        {
+            browser.Find(0, SearchText, true, false, false);
+        }
+
+        public void FindPrevText(IWebBrowser browser)
+        {
+            browser.Find(0, SearchText, false, false, false);
+        }
+
         public BrowserWindowViewModel()
         {
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
@@ -257,6 +295,10 @@ namespace CefFlashBrowser.ViewModels
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             ToggleDevToolsCommand = new DelegateCommand<IWebBrowser>(ToggleDevTools);
             ToggleFullscreenCommand = new DelegateCommand<IWebBrowser>(ToggleFullscreen);
+            ShowSearchPopupCommand = new DelegateCommand(ShowSearchPopup);
+            CloseSearchPopupCommand = new DelegateCommand(CloseSearchPopup);
+            FindNextTextCommand = new DelegateCommand<IWebBrowser>(FindNextText);
+            FindPrevTextCommand = new DelegateCommand<IWebBrowser>(FindPrevText);
         }
     }
 }
