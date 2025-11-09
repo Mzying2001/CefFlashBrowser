@@ -45,6 +45,23 @@ namespace CefFlashBrowser.Utils
             return (int)SetWindowLong(hwnd, Win32.GWL_STYLE, (IntPtr)style);
         }
 
+        public static int GetWindowExStyle(IntPtr hwnd)
+        {
+            return (int)GetWindowLong(hwnd, Win32.GWL_EXSTYLE);
+        }
+
+        public static int SetWindowExStyle(IntPtr hwnd, int exStyle)
+        {
+            return (int)SetWindowLong(hwnd, Win32.GWL_EXSTYLE, (IntPtr)exStyle);
+        }
+
+        public static bool SetWindowTopmost(IntPtr hwnd, bool bTopmost)
+        {
+            return Win32.SetWindowPos(hwnd,
+                bTopmost ? Win32.HWND_TOPMOST : Win32.HWND_NOTOPMOST,
+                0, 0, 0, 0, Win32.SWP_NOSIZE | Win32.SWP_NOMOVE);
+        }
+
         public static IntPtr GetOwnerWindow(IntPtr hwnd)
         {
             return GetWindowLong(hwnd, Win32.GWLP_HWNDPARENT);

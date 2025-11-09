@@ -197,12 +197,19 @@ namespace CefFlashBrowser.Views
         {
             base.OnKeyDown(e);
 
-            if (e.Key == Key.Escape && browser.IsLoading)
+            if (e.Key == Key.Escape)
             {
                 // Why not use KeyBinding: The Esc key serves other purposes in many situations, 
                 // not just stopping loading. If KeyBinding is used, this would be considered as 
                 // the event being handled, thus intercepting the Esc key event.
-                browser.Stop();
+                if (ViewModel.ShowSearch)
+                {
+                    ViewModel.CloseSearchPopup();
+                }
+                else if (browser.IsLoading)
+                {
+                    browser.Stop();
+                }
             }
         }
 
@@ -221,6 +228,7 @@ namespace CefFlashBrowser.Views
                 case Win32.WM_MOVE:
                     {
                         UpdateStatusPopupPosition();
+                        UpdateSearchPopupPosition();
                         break;
                     }
             }
@@ -230,6 +238,7 @@ namespace CefFlashBrowser.Views
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
             base.OnRenderSizeChanged(sizeInfo);
+            UpdateSearchPopupPosition();
             UpdateStatusPopupPosition();
         }
 
@@ -269,6 +278,7 @@ namespace CefFlashBrowser.Views
             menu.IsOpen = true;
             menu.Placement = PlacementMode.Relative;
             menu.PlacementTarget = target;
+
             menu.PlacementRectangle = new Rect
             {
                 X = target.RenderSize.Width - menu.RenderSize.Width,
@@ -339,28 +349,30 @@ namespace CefFlashBrowser.Views
             {
                 if (WindowStyle == WindowStyle.None)
                     WindowStyle = WindowStyle.SingleBorderWindow;
-                return;
-            }
-
-            if (fullScreen)
-            {
-                _isMaximizedBeforeFullScreen =
-                    WindowState == WindowState.Maximized;
-
-                if (_isMaximizedBeforeFullScreen)
-                    WindowState = WindowState.Normal;
-
-                WindowStyle = WindowStyle.None;
-                WindowState = WindowState.Maximized;
             }
             else
             {
-                WindowStyle = WindowStyle.SingleBorderWindow;
-                WindowState = WindowState.Normal;
+                if (fullScreen)
+                {
+                    _isMaximizedBeforeFullScreen =
+                        WindowState == WindowState.Maximized;
 
-                if (_isMaximizedBeforeFullScreen)
+                    if (_isMaximizedBeforeFullScreen)
+                        WindowState = WindowState.Normal;
+
+                    WindowStyle = WindowStyle.None;
                     WindowState = WindowState.Maximized;
+                }
+                else
+                {
+                    WindowStyle = WindowStyle.SingleBorderWindow;
+                    WindowState = WindowState.Normal;
+
+                    if (_isMaximizedBeforeFullScreen)
+                        WindowState = WindowState.Maximized;
+                }
             }
+            UpdateSearchPopupPosition();
         }
 
         public void ExitFullScreen()
@@ -410,6 +422,49 @@ namespace CefFlashBrowser.Views
 
             Win32.GetCursorPos(out var cursorPos);
             statusPopup.VerticalOffset = (cursorPos.y >= popupRect.Y && cursorPos.y <= popupRect.Bottom) ? -30 : 0;
+        }
+
+        private void SearchPopupOpened(object sender, EventArgs e)
+        {
+            if (PresentationSource.FromVisual(searchPopup.Child) is HwndSource hwndSource)
+            {
+                var hPopup = hwndSource.Handle;
+                HwndHelper.SetOwnerWindow(hPopup, _hwnd);
+                HwndHelper.SetWindowTopmost(hPopup, false);
+
+                var exStyle = HwndHelper.GetWindowExStyle(hPopup);
+                HwndHelper.SetWindowExStyle(hPopup, exStyle & ~Win32.WS_EX_NOACTIVATE);
+            }
+            Keyboard.Focus(searchTextBox);
+            UpdateSearchPopupPosition();
+        }
+
+        private void SearchPopupClosed(object sender, EventArgs e)
+        {
+            browser.GetBrowser()?.StopFinding(true);
+        }
+
+        private void UpdateSearchPopupPosition()
+        {
+            Point pos;
+
+            if (searchButton.IsVisible)
+            {
+                pos = searchButton.PointToScreen(new Point
+                {
+                    X = searchButton.ActualWidth - searchPopup.Child.RenderSize.Width,
+                    Y = searchButton.ActualHeight
+                });
+            }
+            else
+            {
+                pos = mainGrid.PointToScreen(new Point
+                {
+                    X = mainGrid.ActualWidth - searchPopup.Child.RenderSize.Width - 20,
+                    Y = 20
+                });
+            }
+            searchPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
         }
     }
 }

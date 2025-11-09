@@ -220,6 +220,8 @@
         <KeyBinding Gesture="Ctrl+D"
                     Command="{Binding AddFavoriteCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
+        <KeyBinding Gesture="Ctrl+F"
+                    Command="{Binding ShowSearchPopupCommand}"/>
         <KeyBinding Gesture="Ctrl+M"
                     Command="{Binding ShowMainWindowCommand}"/>
         <KeyBinding Gesture="Ctrl+N"
@@ -330,6 +332,7 @@
 
             <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal">
+                <!--blocked swfs button-->
                 <Button Click="ShowBlockedSwfsButtonClicked"
                         Margin="0,0,10,0"
                         ToolTip="{DynamicResource browser_toolTipBlockedSwfs}"
@@ -339,12 +342,101 @@
                                   UriSource="/Assets/Svgs/warning.svg"/>
                 </Button>
 
+                <!--search button-->
+                <ToggleButton x:Name="searchButton"
+                              Margin="0,0,10,0"
+                              Width="30"
+                              Height="30"
+                              Padding="0"
+                              IsChecked="{Binding ShowSearch}"
+                              Visibility="{Binding ShowSearch, Converter={StaticResource Boolean2VisibilityConverter}}">
+                    <svgc:SvgIcon Width="13"
+                                  Height="13"
+                                  UriSource="/Assets/Svgs/search.svg"/>
+                </ToggleButton>
+
+                <!--menu button-->
                 <Button Click="MenuButtonClicked"
                         ToolTip="{DynamicResource browser_toolTipMore}">
                     <svgc:SvgIcon Width="10"
                                   Height="10"
                                   UriSource="/Assets/Svgs/more.svg"/>
                 </Button>
+
+                <!--search popup-->
+                <Popup x:Name="searchPopup"
+                       Opened="SearchPopupOpened"
+                       Closed="SearchPopupClosed"
+                       IsOpen="{Binding ShowSearch, Mode=TwoWay}"
+                       Placement="AbsolutePoint"
+                       AllowsTransparency="True">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Opened">
+                            <i:InvokeCommandAction Command="{Binding FindNextTextCommand}"
+                                                   CommandParameter="{Binding ElementName=browser}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <hc:Card>
+                        <StackPanel Margin="5"
+                                    Orientation="Horizontal">
+                            <StackPanel.Resources>
+                                <Style TargetType="Button"
+                                       BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                </Style>
+                            </StackPanel.Resources>
+
+                            <TextBox x:Name="searchTextBox"
+                                     Width="200"
+                                     MaxLength="100"
+                                     BorderThickness="0"
+                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+                                <i:Interaction.Behaviors>
+                                    <behaviors:TextBoxSelectAllOnFocus/>
+                                </i:Interaction.Behaviors>
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="TextChanged">
+                                        <i:InvokeCommandAction Command="{Binding FindNextTextCommand}"
+                                                               CommandParameter="{Binding ElementName=browser}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Esc"
+                                                Command="{Binding CloseSearchPopupCommand}"/>
+                                    <KeyBinding Key="Enter"
+                                                Command="{Binding FindNextTextCommand}"
+                                                CommandParameter="{Binding ElementName=browser}"/>
+                                    <KeyBinding Key="Up"
+                                                Command="{Binding FindPrevTextCommand}"
+                                                CommandParameter="{Binding ElementName=browser}"/>
+                                    <KeyBinding Key="Down"
+                                                Command="{Binding FindNextTextCommand}"
+                                                CommandParameter="{Binding ElementName=browser}"/>
+                                </TextBox.InputBindings>
+                            </TextBox>
+
+                            <Separator Margin="5,0">
+                                <Separator.LayoutTransform>
+                                    <RotateTransform Angle="90"/>
+                                </Separator.LayoutTransform>
+                            </Separator>
+
+                            <Button Command="{Binding FindPrevTextCommand}"
+                                    CommandParameter="{Binding ElementName=browser}">
+                                <svgc:SvgIcon Width="13"
+                                              Height="13"
+                                              UriSource="/Assets/Svgs/up.svg"/>
+                            </Button>
+
+                            <Button Command="{Binding FindNextTextCommand}"
+                                    CommandParameter="{Binding ElementName=browser}">
+                                <svgc:SvgIcon Width="13"
+                                              Height="13"
+                                              UriSource="/Assets/Svgs/down.svg"/>
+                            </Button>
+                        </StackPanel>
+                    </hc:Card>
+                </Popup>
             </StackPanel>
 
             <Grid Margin="10,0"
