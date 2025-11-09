@@ -12,10 +12,18 @@ namespace CefFlashBrowser.Utils
         // window styles
         public const int WS_CHILD = 0x40000000;
         public const int WS_VISIBLE = 0x10000000;
+        public const int WS_EX_NOACTIVATE = 0x08000000;
 
         // get/set window long
         public const int GWLP_HWNDPARENT = -8;
         public const int GWL_STYLE = -16;
+        public const int GWL_EXSTYLE = -20;
+
+        // set window pos
+        public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+        public const uint SWP_NOSIZE = 0x0001;
+        public const uint SWP_NOMOVE = 0x0002;
 
         // dwm attributes
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
@@ -106,5 +114,8 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("user32.dll")]
         public static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
+        [DllImport("user32.dll")]
+        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
     }
 }

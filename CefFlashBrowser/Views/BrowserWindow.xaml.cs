@@ -221,12 +221,6 @@ namespace CefFlashBrowser.Views
             _hwndSource.AddHook(new HwndSourceHook(WndProc));
         }
 
-        protected override void OnDeactivated(EventArgs e)
-        {
-            ViewModel.CloseSearchPopup();
-            base.OnDeactivated(e);
-        }
-
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             switch (msg)
@@ -430,7 +424,16 @@ namespace CefFlashBrowser.Views
 
         private void SearchPopupOpened(object sender, EventArgs e)
         {
-            searchTextBox.Focus();
+            if (PresentationSource.FromVisual(searchPopup.Child) is HwndSource hwndSource)
+            {
+                var hPopup = hwndSource.Handle;
+                HwndHelper.SetOwnerWindow(hPopup, _hwnd);
+                HwndHelper.SetWindowTopmost(hPopup, false);
+
+                var exStyle = HwndHelper.GetWindowExStyle(hPopup);
+                HwndHelper.SetWindowExStyle(hPopup, exStyle & ~Win32.WS_EX_NOACTIVATE);
+            }
+            Keyboard.Focus(searchTextBox);
             UpdateSearchPopupPosition();
         }
 
