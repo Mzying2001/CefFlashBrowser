@@ -391,6 +391,12 @@
                                     <KeyBinding Key="Enter"
                                                 Command="{Binding FindNextTextCommand}"
                                                 CommandParameter="{Binding ElementName=browser}"/>
+                                    <KeyBinding Key="Up"
+                                                Command="{Binding FindPrevTextCommand}"
+                                                CommandParameter="{Binding ElementName=browser}"/>
+                                    <KeyBinding Key="Down"
+                                                Command="{Binding FindNextTextCommand}"
+                                                CommandParameter="{Binding ElementName=browser}"/>
                                 </TextBox.InputBindings>
                             </TextBox>
 
