@@ -391,6 +391,9 @@
                                      MaxLength="100"
                                      BorderThickness="0"
                                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+                                <i:Interaction.Behaviors>
+                                    <behaviors:TextBoxSelectAllOnFocus/>
+                                </i:Interaction.Behaviors>
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="TextChanged">
                                         <i:InvokeCommandAction Command="{Binding FindNextTextCommand}"
