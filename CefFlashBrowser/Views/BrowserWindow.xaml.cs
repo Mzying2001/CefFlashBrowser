@@ -349,28 +349,30 @@ namespace CefFlashBrowser.Views
             {
                 if (WindowStyle == WindowStyle.None)
                     WindowStyle = WindowStyle.SingleBorderWindow;
-                return;
-            }
-
-            if (fullScreen)
-            {
-                _isMaximizedBeforeFullScreen =
-                    WindowState == WindowState.Maximized;
-
-                if (_isMaximizedBeforeFullScreen)
-                    WindowState = WindowState.Normal;
-
-                WindowStyle = WindowStyle.None;
-                WindowState = WindowState.Maximized;
             }
             else
             {
-                WindowStyle = WindowStyle.SingleBorderWindow;
-                WindowState = WindowState.Normal;
+                if (fullScreen)
+                {
+                    _isMaximizedBeforeFullScreen =
+                        WindowState == WindowState.Maximized;
 
-                if (_isMaximizedBeforeFullScreen)
+                    if (_isMaximizedBeforeFullScreen)
+                        WindowState = WindowState.Normal;
+
+                    WindowStyle = WindowStyle.None;
                     WindowState = WindowState.Maximized;
+                }
+                else
+                {
+                    WindowStyle = WindowStyle.SingleBorderWindow;
+                    WindowState = WindowState.Normal;
+
+                    if (_isMaximizedBeforeFullScreen)
+                        WindowState = WindowState.Maximized;
+                }
             }
+            UpdateSearchPopupPosition();
         }
 
         public void ExitFullScreen()
@@ -444,11 +446,24 @@ namespace CefFlashBrowser.Views
 
         private void UpdateSearchPopupPosition()
         {
-            var pos = searchPopup.PointToScreen(new Point
+            Point pos;
+
+            if (searchButton.IsVisible)
             {
-                X = searchButton.ActualWidth - searchPopup.Child.RenderSize.Width,
-                Y = searchButton.ActualHeight
-            });
+                pos = searchPopup.PointToScreen(new Point
+                {
+                    X = searchButton.ActualWidth - searchPopup.Child.RenderSize.Width,
+                    Y = searchButton.ActualHeight
+                });
+            }
+            else
+            {
+                pos = mainGrid.PointToScreen(new Point
+                {
+                    X = mainGrid.ActualWidth - searchPopup.Child.RenderSize.Width - 20,
+                    Y = 20
+                });
+            }
             searchPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
         }
     }
