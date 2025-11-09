@@ -450,7 +450,7 @@ namespace CefFlashBrowser.Views
 
             if (searchButton.IsVisible)
             {
-                pos = searchPopup.PointToScreen(new Point
+                pos = searchButton.PointToScreen(new Point
                 {
                     X = searchButton.ActualWidth - searchPopup.Child.RenderSize.Width,
                     Y = searchButton.ActualHeight
