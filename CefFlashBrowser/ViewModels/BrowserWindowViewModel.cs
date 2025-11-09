@@ -273,14 +273,26 @@ namespace CefFlashBrowser.ViewModels
             ShowSearch = false;
         }
 
+        public void FindText(IWebBrowser browser, bool forward)
+        {
+            if (string.IsNullOrEmpty(SearchText))
+            {
+                browser.GetBrowser()?.StopFinding(true);
+            }
+            else
+            {
+                browser.Find(0, SearchText, forward, false, false);
+            }
+        }
+
         public void FindNextText(IWebBrowser browser)
         {
-            browser.Find(0, SearchText, true, false, false);
+            FindText(browser, true);
         }
 
         public void FindPrevText(IWebBrowser browser)
         {
-            browser.Find(0, SearchText, false, false, false);
+            FindText(browser, false);
         }
 
         public BrowserWindowViewModel()

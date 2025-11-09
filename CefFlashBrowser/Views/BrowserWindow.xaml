@@ -370,6 +370,12 @@
                        IsOpen="{Binding ShowSearch, Mode=TwoWay}"
                        Placement="AbsolutePoint"
                        AllowsTransparency="True">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Opened">
+                            <i:InvokeCommandAction Command="{Binding FindNextTextCommand}"
+                                                   CommandParameter="{Binding ElementName=browser}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
                     <hc:Card>
                         <StackPanel Margin="5"
                                     Orientation="Horizontal">
@@ -385,6 +391,12 @@
                                      MaxLength="100"
                                      BorderThickness="0"
                                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="TextChanged">
+                                        <i:InvokeCommandAction Command="{Binding FindNextTextCommand}"
+                                                               CommandParameter="{Binding ElementName=browser}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
                                 <TextBox.InputBindings>
                                     <KeyBinding Key="Esc"
                                                 Command="{Binding CloseSearchPopupCommand}"/>
