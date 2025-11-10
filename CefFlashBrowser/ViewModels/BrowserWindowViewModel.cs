@@ -26,8 +26,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand NewBrowserWindowCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
         public DelegateCommand ToggleFullscreenCommand { get; set; }
-        public DelegateCommand ShowSearchPopupCommand { get; set; }
-        public DelegateCommand CloseSearchPopupCommand { get; set; }
+        public DelegateCommand OpenFindPopupCommand { get; set; }
+        public DelegateCommand CloseFindPopupCommand { get; set; }
         public DelegateCommand FindNextTextCommand { get; set; }
         public DelegateCommand FindPrevTextCommand { get; set; }
 
@@ -61,18 +61,18 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private bool _showSearch = false;
-        public bool ShowSearch
+        private bool _showFindPopup = false;
+        public bool ShowFindPopup
         {
-            get => _showSearch;
-            set => UpdateValue(ref _showSearch, value);
+            get => _showFindPopup;
+            set => UpdateValue(ref _showFindPopup, value);
         }
 
-        private string _searchText = string.Empty;
-        public string SearchText
+        private string _textToFind = string.Empty;
+        public string TextToFind
         {
-            get => _searchText;
-            set => UpdateValue(ref _searchText, value);
+            get => _textToFind;
+            set => UpdateValue(ref _textToFind, value);
         }
 
 
@@ -263,36 +263,16 @@ namespace CefFlashBrowser.ViewModels
             Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
         }
 
-        public void ShowSearchPopup()
-        {
-            ShowSearch = true;
-        }
-
-        public void CloseSearchPopup()
-        {
-            ShowSearch = false;
-        }
-
         public void FindText(IWebBrowser browser, bool forward)
         {
-            if (string.IsNullOrEmpty(SearchText))
+            if (string.IsNullOrEmpty(TextToFind))
             {
                 browser.GetBrowser()?.StopFinding(true);
             }
             else
             {
-                browser.Find(0, SearchText, forward, false, false);
+                browser.GetBrowser()?.Find(0, TextToFind, forward, false, false);
             }
-        }
-
-        public void FindNextText(IWebBrowser browser)
-        {
-            FindText(browser, true);
-        }
-
-        public void FindPrevText(IWebBrowser browser)
-        {
-            FindText(browser, false);
         }
 
         public BrowserWindowViewModel()
@@ -307,10 +287,10 @@ namespace CefFlashBrowser.ViewModels
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             ToggleDevToolsCommand = new DelegateCommand<IWebBrowser>(ToggleDevTools);
             ToggleFullscreenCommand = new DelegateCommand<IWebBrowser>(ToggleFullscreen);
-            ShowSearchPopupCommand = new DelegateCommand(ShowSearchPopup);
-            CloseSearchPopupCommand = new DelegateCommand(CloseSearchPopup);
-            FindNextTextCommand = new DelegateCommand<IWebBrowser>(FindNextText);
-            FindPrevTextCommand = new DelegateCommand<IWebBrowser>(FindPrevText);
+            OpenFindPopupCommand = new DelegateCommand(() => ShowFindPopup = true);
+            CloseFindPopupCommand = new DelegateCommand(() => ShowFindPopup = false);
+            FindNextTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, true));
+            FindPrevTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, false));
         }
     }
 }

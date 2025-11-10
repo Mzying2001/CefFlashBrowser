@@ -221,7 +221,7 @@
                     Command="{Binding AddFavoriteCommand}"
                     CommandParameter="{Binding ElementName=browser}"/>
         <KeyBinding Gesture="Ctrl+F"
-                    Command="{Binding ShowSearchPopupCommand}"/>
+                    Command="{Binding OpenFindPopupCommand}"/>
         <KeyBinding Gesture="Ctrl+M"
                     Command="{Binding ShowMainWindowCommand}"/>
         <KeyBinding Gesture="Ctrl+N"
@@ -342,14 +342,14 @@
                                   UriSource="/Assets/Svgs/warning.svg"/>
                 </Button>
 
-                <!--search button-->
-                <ToggleButton x:Name="searchButton"
+                <!--find button-->
+                <ToggleButton x:Name="findButton"
                               Margin="0,0,10,0"
                               Width="30"
                               Height="30"
                               Padding="0"
-                              IsChecked="{Binding ShowSearch}"
-                              Visibility="{Binding ShowSearch, Converter={StaticResource Boolean2VisibilityConverter}}">
+                              IsChecked="{Binding ShowFindPopup}"
+                              Visibility="{Binding ShowFindPopup, Converter={StaticResource Boolean2VisibilityConverter}}">
                     <svgc:SvgIcon Width="13"
                                   Height="13"
                                   UriSource="/Assets/Svgs/search.svg"/>
@@ -363,11 +363,11 @@
                                   UriSource="/Assets/Svgs/more.svg"/>
                 </Button>
 
-                <!--search popup-->
-                <Popup x:Name="searchPopup"
-                       Opened="SearchPopupOpened"
-                       Closed="SearchPopupClosed"
-                       IsOpen="{Binding ShowSearch, Mode=TwoWay}"
+                <!--find popup-->
+                <Popup x:Name="findPopup"
+                       Opened="FindPopupOpened"
+                       Closed="FindPopupClosed"
+                       IsOpen="{Binding ShowFindPopup, Mode=TwoWay}"
                        Placement="AbsolutePoint"
                        AllowsTransparency="True">
                     <i:Interaction.Triggers>
@@ -386,11 +386,11 @@
                                 </Style>
                             </StackPanel.Resources>
 
-                            <TextBox x:Name="searchTextBox"
+                            <TextBox x:Name="findTextBox"
                                      Width="200"
                                      MaxLength="100"
                                      BorderThickness="0"
-                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+                                     Text="{Binding TextToFind, UpdateSourceTrigger=PropertyChanged}">
                                 <i:Interaction.Behaviors>
                                     <behaviors:TextBoxSelectAllOnFocus/>
                                 </i:Interaction.Behaviors>
@@ -402,7 +402,7 @@
                                 </i:Interaction.Triggers>
                                 <TextBox.InputBindings>
                                     <KeyBinding Key="Esc"
-                                                Command="{Binding CloseSearchPopupCommand}"/>
+                                                Command="{Binding CloseFindPopupCommand}"/>
                                     <KeyBinding Key="Enter"
                                                 Command="{Binding FindNextTextCommand}"
                                                 CommandParameter="{Binding ElementName=browser}"/>
