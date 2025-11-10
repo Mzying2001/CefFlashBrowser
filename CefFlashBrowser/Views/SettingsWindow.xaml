@@ -167,10 +167,9 @@
                                           Style="{StaticResource ToggleButtonSwitch}"/>
                             </c:SettingItem>
 
-                            <Border Margin="5"
-                                    Background="{DynamicResource SecondaryRegionBrush}"
-                                    Effect="{StaticResource EffectShadow1}"
-                                    Visibility="{Binding EnableProxy, Converter={StaticResource Boolean2VisibilityConverter}}">
+                            <hc:Card Margin="5"
+                                     Background="{DynamicResource SecondaryRegionBrush}"
+                                     Visibility="{Binding EnableProxy, Converter={StaticResource Boolean2VisibilityConverter}}">
                                 <Grid Margin="10">
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
@@ -224,7 +223,7 @@
                                                 Text="{Binding ProxyPassword, UpdateSourceTrigger=PropertyChanged}"
                                                 hc:InfoElement.Placeholder="{DynamicResource settings_optional}"/>
                                 </Grid>
-                            </Border>
+                            </hc:Card>
 
                             <!--useragent-->
                             <c:SettingItem Description="{DynamicResource settings_enableCustomUserAgent}">
@@ -233,10 +232,9 @@
                                           Style="{StaticResource ToggleButtonSwitch}"/>
                             </c:SettingItem>
 
-                            <Border Margin="5"
-                                    Background="{DynamicResource SecondaryRegionBrush}"
-                                    Effect="{StaticResource EffectShadow1}"
-                                    Visibility="{Binding EnableCustomUserAgent, Converter={StaticResource Boolean2VisibilityConverter}}">
+                            <hc:Card Margin="5"
+                                     Background="{DynamicResource SecondaryRegionBrush}"
+                                     Visibility="{Binding EnableCustomUserAgent, Converter={StaticResource Boolean2VisibilityConverter}}">
                                 <Grid Margin="10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
@@ -250,7 +248,7 @@
                                              Margin="5"
                                              Text="{Binding UserAgent, UpdateSourceTrigger=PropertyChanged}"/>
                                 </Grid>
-                            </Border>
+                            </hc:Card>
 
                             <!--fake flash version-->
                             <c:SettingItem Description="{DynamicResource settings_enableFakeFlashVersion}">
@@ -259,10 +257,9 @@
                                           Style="{StaticResource ToggleButtonSwitch}"/>
                             </c:SettingItem>
 
-                            <Border Margin="5"
-                                    Background="{DynamicResource SecondaryRegionBrush}"
-                                    Effect="{StaticResource EffectShadow1}"
-                                    Visibility="{Binding EnableFakeFlashVersion, Converter={StaticResource Boolean2VisibilityConverter}}">
+                            <hc:Card Margin="5"
+                                     Background="{DynamicResource SecondaryRegionBrush}"
+                                     Visibility="{Binding EnableFakeFlashVersion, Converter={StaticResource Boolean2VisibilityConverter}}">
                                 <Grid Margin="10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
@@ -276,7 +273,7 @@
                                              Margin="5"
                                              Text="{Binding FakeFlashVersion, UpdateSourceTrigger=PropertyChanged}"/>
                                 </Grid>
-                            </Border>
+                            </hc:Card>
 
                             <TextBlock Margin="5,10"
                                        TextWrapping="Wrap"
