@@ -401,12 +401,7 @@ namespace CefFlashBrowser.Views
             UpdateStatusPopupOffset();
         }
 
-        private void BrowserLoadingProgressChanged(object sender, EventArgs e)
-        {
-            UpdateStatusPopupOffset();
-        }
-
-        private void BrowserStatusTextChanged(object sender, EventArgs e)
+        private void StatusPopupSizeChanged(object sender, SizeChangedEventArgs e)
         {
             UpdateStatusPopupOffset();
         }

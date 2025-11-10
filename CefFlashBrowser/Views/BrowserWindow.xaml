@@ -491,9 +491,7 @@
             <flash:ChromiumFlashBrowser x:Name="browser"
                                         ZoomLevelIncrement="0.25"
                                         Address="{Binding Address, Mode=TwoWay, TargetNullValue='about:blank'}"
-                                        FullscreenModeChanged="BrowserFullscreenModeChanged"
-                                        LoadingProgressChanged="BrowserLoadingProgressChanged"
-                                        StatusTextChanged="BrowserStatusTextChanged"/>
+                                        FullscreenModeChanged="BrowserFullscreenModeChanged"/>
 
             <GridSplitter Grid.Column="1"
                           Width="5"
@@ -524,7 +522,8 @@
                StaysOpen="True"
                Placement="Absolute"
                AllowsTransparency="True"
-               MouseEnter="StatusPopupMouseEnter">
+               MouseEnter="StatusPopupMouseEnter"
+               SizeChanged="StatusPopupSizeChanged">
             <Popup.Resources>
                 <sys:Double x:Key="ContentHeight">22</sys:Double>
             </Popup.Resources>
