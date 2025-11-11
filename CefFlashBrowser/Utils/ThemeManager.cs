@@ -36,7 +36,18 @@ namespace CefFlashBrowser.Utils
             {
                 var hwnd = new WindowInteropHelper(window).Handle;
                 int darkMode = theme == Theme.Dark ? 1 : 0;
-                Win32.DwmSetWindowAttribute(hwnd, Win32.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
+                //Win32.DwmSetWindowAttribute(hwnd, Win32.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
+
+                if (IsDarkModeSupported())
+                {
+                    int attribute = GetUseImmersiveDarkModeAttribute();
+                    Win32.DwmSetWindowAttribute(hwnd, attribute, ref darkMode, sizeof(int));
+                }
+                else
+                {
+                    throw new NotSupportedException(
+                        "Dark mode for title bars is not supported on this version of Windows.");
+                }
             }
             catch (Exception e)
             {
@@ -64,6 +75,27 @@ namespace CefFlashBrowser.Utils
         public static Theme GetSystemTheme()
         {
             return IsSystemDarkMode() ? Theme.Dark : Theme.Light;
+        }
+
+        private static int GetWindowsBuildNumber()
+        {
+            // Environment.OSVersion may not return the correct
+            // build number due to application manifest requirements,
+            // so we use RtlGetVersion for accurate information.
+            Win32.RtlGetVersion(out var version);
+            return version.dwBuildNumber;
+        }
+
+        private static bool IsDarkModeSupported()
+        {
+            // Windows 10 1809 (Build 17763) started supporting dark mode for title bars
+            return GetWindowsBuildNumber() >= 17763;
+        }
+
+        private static int GetUseImmersiveDarkModeAttribute()
+        {
+            // 1903 and later use 20 (DWMWA_USE_IMMERSIVE_DARK_MODE), older versions use 19
+            return GetWindowsBuildNumber() >= 18362 ? 20 : 19;
         }
     }
 }

@@ -49,6 +49,18 @@ namespace CefFlashBrowser.Utils
             public int y;
         }
 
+        // os version info structure
+        [StructLayout(LayoutKind.Sequential)]
+        public struct OSVERSIONINFO
+        {
+            public int dwOSVersionInfoSize;
+            public int dwMajorVersion;
+            public int dwMinorVersion;
+            public int dwBuildNumber;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string szCSDVersion;
+        }
+
 
         [DllImport("dwmapi.dll")]
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
@@ -117,5 +129,8 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("user32.dll")]
         public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        [DllImport("ntdll.dll", CharSet = CharSet.Auto)]
+        public static extern int RtlGetVersion(out OSVERSIONINFO versionInfo);
     }
 }
