@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 
@@ -83,6 +84,14 @@ namespace CefFlashBrowser.Utils
             {
                 owner = Application.Current.Windows
                     .OfType<Window>().FirstOrDefault(w => w.IsActive);
+            }
+
+            if (owner == null)
+            {
+                if (Keyboard.FocusedElement is DependencyObject obj)
+                {
+                    owner = Window.GetWindow(obj);
+                }
             }
 
             if (owner == null || owner == window)
