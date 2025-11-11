@@ -15,7 +15,7 @@
     <sys:String x:Key="common_import">Importer</sys:String>
     <sys:String x:Key="common_rename">Renommer</sys:String>
     <sys:String x:Key="common_moveUp">Déplacer vers le haut</sys:String>
-    <sys:String x:Key="common_moveDown">Déplacer vers le haut</sys:String>
+    <sys:String x:Key="common_moveDown">Déplacer vers le bas</sys:String>
     <sys:String x:Key="common_moveToTop">Déplacer tout en haut</sys:String>
     <sys:String x:Key="common_moveToBottom">Déplacer tout en bas</sys:String>
 
