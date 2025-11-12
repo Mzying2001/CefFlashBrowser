@@ -12,6 +12,7 @@ namespace CefFlashBrowser.Utils
         // window styles
         public const int WS_CHILD = 0x40000000;
         public const int WS_VISIBLE = 0x10000000;
+        public const int WS_CAPTION = 0x00C00000;
         public const int WS_EX_NOACTIVATE = 0x08000000;
 
         // get/set window long
@@ -24,6 +25,9 @@ namespace CefFlashBrowser.Utils
         public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
         public const uint SWP_NOSIZE = 0x0001;
         public const uint SWP_NOMOVE = 0x0002;
+        public const uint SWP_NOZORDER = 0x0004;
+        public const uint SWP_NOACTIVATE = 0x0010;
+        public const uint SWP_FRAMECHANGED = 0x0020;
 
         // dwm attributes
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;

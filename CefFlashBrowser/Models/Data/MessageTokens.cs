@@ -11,5 +11,6 @@
         public const string DEVTOOLS_CLOSED = "DEVTOOLS_CLOSED";
         public const string FULLSCREEN_CHANGED = "FULLSCREEN_CHANGED";
         public const string CLOSE_ALL_BROWSERS = "CLOSE_ALL_BROWSERS";
+        public const string REDRAW_ALL_FRAMES = "REDRAW_ALL_FRAMES";
     }
 }
