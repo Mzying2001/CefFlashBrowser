@@ -98,8 +98,9 @@ namespace CefFlashBrowser.Utils
 
         private static int GetUseImmersiveDarkModeAttribute()
         {
-            // 1903 and later use 20 (DWMWA_USE_IMMERSIVE_DARK_MODE), older versions use 19
-            return GetWindowsBuildNumber() >= 18362 ? 20 : 19;
+            return GetWindowsBuildNumber() >= 18985
+                ? Win32.DWMWA_USE_IMMERSIVE_DARK_MODE              // 20
+                : Win32.DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1; // 19
         }
     }
 }

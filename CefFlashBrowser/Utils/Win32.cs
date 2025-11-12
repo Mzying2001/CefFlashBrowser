@@ -27,6 +27,7 @@ namespace CefFlashBrowser.Utils
 
         // dwm attributes
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+        public const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
 
         // enum windows callback
         public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
