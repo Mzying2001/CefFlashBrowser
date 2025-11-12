@@ -58,8 +58,9 @@ namespace CefFlashBrowser.Utils
         public static bool SetWindowTopmost(IntPtr hwnd, bool bTopmost)
         {
             return Win32.SetWindowPos(hwnd,
-                bTopmost ? Win32.HWND_TOPMOST : Win32.HWND_NOTOPMOST,
-                0, 0, 0, 0, Win32.SWP_NOSIZE | Win32.SWP_NOMOVE);
+                bTopmost ? Win32.HWND_TOPMOST : Win32.HWND_NOTOPMOST, 0, 0, 0, 0,
+                Win32.SWP_NOSIZE | Win32.SWP_NOMOVE | Win32.SWP_NOACTIVATE);
+        }
         }
 
         public static IntPtr GetOwnerWindow(IntPtr hwnd)
