@@ -50,13 +50,14 @@ namespace CefFlashBrowser.Utils
         }
 
         // os version info structure
-        [StructLayout(LayoutKind.Sequential)]
-        public struct OSVERSIONINFO
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct OSVERSIONINFOW
         {
             public int dwOSVersionInfoSize;
             public int dwMajorVersion;
             public int dwMinorVersion;
             public int dwBuildNumber;
+            public int dwPlatformId;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
             public string szCSDVersion;
         }
@@ -130,7 +131,7 @@ namespace CefFlashBrowser.Utils
         [DllImport("user32.dll")]
         public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
-        [DllImport("ntdll.dll", CharSet = CharSet.Auto)]
-        public static extern int RtlGetVersion(out OSVERSIONINFO versionInfo);
+        [DllImport("ntdll.dll", CharSet = CharSet.Unicode)]
+        public static extern int RtlGetVersion(ref OSVERSIONINFOW lpVersionInformation);
     }
 }

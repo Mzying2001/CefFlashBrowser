@@ -3,6 +3,7 @@ using CefFlashBrowser.Models.Data;
 using Microsoft.Win32;
 using SimpleMvvm.Messaging;
 using System;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -79,10 +80,13 @@ namespace CefFlashBrowser.Utils
 
         private static int GetWindowsBuildNumber()
         {
+            var version = new Win32.OSVERSIONINFOW
+            { dwOSVersionInfoSize = Marshal.SizeOf<Win32.OSVERSIONINFOW>() };
+
             // Environment.OSVersion may not return the correct
             // build number due to application manifest requirements,
             // so we use RtlGetVersion for accurate information.
-            Win32.RtlGetVersion(out var version);
+            Win32.RtlGetVersion(ref version);
             return version.dwBuildNumber;
         }
 
