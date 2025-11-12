@@ -197,8 +197,9 @@ namespace CefFlashBrowser.ViewModels
             set
             {
                 GlobalData.Settings.FollowSystemTheme = value;
-                ThemeManager.ChangeTheme(value ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme);
                 RaisePropertyChanged();
+                ThemeManager.ChangeTheme(value ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme);
+                Messenger.Global.Send(MessageTokens.REDRAW_ALL_FRAMES, null);
             }
         }
 
@@ -297,6 +298,7 @@ namespace CefFlashBrowser.ViewModels
         {
             GlobalData.Settings.Theme = theme;
             ThemeManager.ChangeTheme(theme);
+            Messenger.Global.Send(MessageTokens.REDRAW_ALL_FRAMES, null);
         }
 
         public SettingsWindowViewModel()

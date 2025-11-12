@@ -202,9 +202,9 @@ namespace CefFlashBrowser.Views
                 // Why not use KeyBinding: The Esc key serves other purposes in many situations, 
                 // not just stopping loading. If KeyBinding is used, this would be considered as 
                 // the event being handled, thus intercepting the Esc key event.
-                if (ViewModel.ShowSearch)
+                if (ViewModel.ShowFindPopup)
                 {
-                    ViewModel.CloseSearchPopup();
+                    ViewModel.ShowFindPopup = false;
                 }
                 else if (browser.IsLoading)
                 {
@@ -228,7 +228,7 @@ namespace CefFlashBrowser.Views
                 case Win32.WM_MOVE:
                     {
                         UpdateStatusPopupPosition();
-                        UpdateSearchPopupPosition();
+                        UpdateFindPopupPosition();
                         break;
                     }
             }
@@ -238,8 +238,8 @@ namespace CefFlashBrowser.Views
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
             base.OnRenderSizeChanged(sizeInfo);
-            UpdateSearchPopupPosition();
             UpdateStatusPopupPosition();
+            UpdateFindPopupPosition();
         }
 
         private void UpdateStatusPopupPosition()
@@ -372,7 +372,7 @@ namespace CefFlashBrowser.Views
                         WindowState = WindowState.Maximized;
                 }
             }
-            UpdateSearchPopupPosition();
+            UpdateFindPopupPosition();
         }
 
         public void ExitFullScreen()
@@ -401,12 +401,7 @@ namespace CefFlashBrowser.Views
             UpdateStatusPopupOffset();
         }
 
-        private void BrowserLoadingProgressChanged(object sender, EventArgs e)
-        {
-            UpdateStatusPopupOffset();
-        }
-
-        private void BrowserStatusTextChanged(object sender, EventArgs e)
+        private void StatusPopupSizeChanged(object sender, SizeChangedEventArgs e)
         {
             UpdateStatusPopupOffset();
         }
@@ -424,9 +419,9 @@ namespace CefFlashBrowser.Views
             statusPopup.VerticalOffset = (cursorPos.y >= popupRect.Y && cursorPos.y <= popupRect.Bottom) ? -30 : 0;
         }
 
-        private void SearchPopupOpened(object sender, EventArgs e)
+        private void FindPopupOpened(object sender, EventArgs e)
         {
-            if (PresentationSource.FromVisual(searchPopup.Child) is HwndSource hwndSource)
+            if (PresentationSource.FromVisual(findPopup.Child) is HwndSource hwndSource)
             {
                 var hPopup = hwndSource.Handle;
                 HwndHelper.SetOwnerWindow(hPopup, _hwnd);
@@ -435,36 +430,36 @@ namespace CefFlashBrowser.Views
                 var exStyle = HwndHelper.GetWindowExStyle(hPopup);
                 HwndHelper.SetWindowExStyle(hPopup, exStyle & ~Win32.WS_EX_NOACTIVATE);
             }
-            Keyboard.Focus(searchTextBox);
-            UpdateSearchPopupPosition();
+            Keyboard.Focus(findTextBox);
+            UpdateFindPopupPosition();
         }
 
-        private void SearchPopupClosed(object sender, EventArgs e)
+        private void FindPopupClosed(object sender, EventArgs e)
         {
             browser.GetBrowser()?.StopFinding(true);
         }
 
-        private void UpdateSearchPopupPosition()
+        private void UpdateFindPopupPosition()
         {
             Point pos;
 
-            if (searchButton.IsVisible)
+            if (findButton.IsVisible)
             {
-                pos = searchButton.PointToScreen(new Point
+                pos = findButton.PointToScreen(new Point
                 {
-                    X = searchButton.ActualWidth - searchPopup.Child.RenderSize.Width,
-                    Y = searchButton.ActualHeight
+                    X = findButton.ActualWidth - findPopup.Child.RenderSize.Width,
+                    Y = findButton.ActualHeight
                 });
             }
             else
             {
                 pos = mainGrid.PointToScreen(new Point
                 {
-                    X = mainGrid.ActualWidth - searchPopup.Child.RenderSize.Width - 20,
+                    X = mainGrid.ActualWidth - findPopup.Child.RenderSize.Width - 20,
                     Y = 20
                 });
             }
-            searchPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
+            findPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
         }
     }
 }

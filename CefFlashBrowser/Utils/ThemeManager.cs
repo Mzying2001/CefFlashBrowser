@@ -3,6 +3,7 @@ using CefFlashBrowser.Models.Data;
 using Microsoft.Win32;
 using SimpleMvvm.Messaging;
 using System;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -36,7 +37,18 @@ namespace CefFlashBrowser.Utils
             {
                 var hwnd = new WindowInteropHelper(window).Handle;
                 int darkMode = theme == Theme.Dark ? 1 : 0;
-                Win32.DwmSetWindowAttribute(hwnd, Win32.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
+                //Win32.DwmSetWindowAttribute(hwnd, Win32.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof(int));
+
+                if (IsDarkModeSupported())
+                {
+                    int attribute = GetUseImmersiveDarkModeAttribute();
+                    Win32.DwmSetWindowAttribute(hwnd, attribute, ref darkMode, sizeof(int));
+                }
+                else
+                {
+                    throw new NotSupportedException(
+                        "Dark mode for title bars is not supported on this version of Windows.");
+                }
             }
             catch (Exception e)
             {
@@ -64,6 +76,31 @@ namespace CefFlashBrowser.Utils
         public static Theme GetSystemTheme()
         {
             return IsSystemDarkMode() ? Theme.Dark : Theme.Light;
+        }
+
+        private static int GetWindowsBuildNumber()
+        {
+            var version = new Win32.OSVERSIONINFOW
+            { dwOSVersionInfoSize = Marshal.SizeOf<Win32.OSVERSIONINFOW>() };
+
+            // Environment.OSVersion may not return the correct
+            // build number due to application manifest requirements,
+            // so we use RtlGetVersion for accurate information.
+            Win32.RtlGetVersion(ref version);
+            return version.dwBuildNumber;
+        }
+
+        private static bool IsDarkModeSupported()
+        {
+            // Windows 10 1809 (Build 17763) started supporting dark mode for title bars
+            return GetWindowsBuildNumber() >= 17763;
+        }
+
+        private static int GetUseImmersiveDarkModeAttribute()
+        {
+            return GetWindowsBuildNumber() >= 18985
+                ? Win32.DWMWA_USE_IMMERSIVE_DARK_MODE              // 20
+                : Win32.DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1; // 19
         }
     }
 }

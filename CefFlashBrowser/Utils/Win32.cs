@@ -12,6 +12,7 @@ namespace CefFlashBrowser.Utils
         // window styles
         public const int WS_CHILD = 0x40000000;
         public const int WS_VISIBLE = 0x10000000;
+        public const int WS_CAPTION = 0x00C00000;
         public const int WS_EX_NOACTIVATE = 0x08000000;
 
         // get/set window long
@@ -24,9 +25,13 @@ namespace CefFlashBrowser.Utils
         public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
         public const uint SWP_NOSIZE = 0x0001;
         public const uint SWP_NOMOVE = 0x0002;
+        public const uint SWP_NOZORDER = 0x0004;
+        public const uint SWP_NOACTIVATE = 0x0010;
+        public const uint SWP_FRAMECHANGED = 0x0020;
 
         // dwm attributes
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+        public const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
 
         // enum windows callback
         public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
@@ -47,6 +52,19 @@ namespace CefFlashBrowser.Utils
         {
             public int x;
             public int y;
+        }
+
+        // os version info structure
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct OSVERSIONINFOW
+        {
+            public int dwOSVersionInfoSize;
+            public int dwMajorVersion;
+            public int dwMinorVersion;
+            public int dwBuildNumber;
+            public int dwPlatformId;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string szCSDVersion;
         }
 
 
@@ -117,5 +135,8 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("user32.dll")]
         public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        [DllImport("ntdll.dll", CharSet = CharSet.Unicode)]
+        public static extern int RtlGetVersion(ref OSVERSIONINFOW lpVersionInformation);
     }
 }

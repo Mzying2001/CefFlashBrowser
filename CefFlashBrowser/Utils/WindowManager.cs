@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace CefFlashBrowser.Utils
 {
@@ -100,16 +101,32 @@ namespace CefFlashBrowser.Utils
                 ThemeManager.ChangeTitleBarColor(window, (Theme)theme);
             }
 
+            void redrawFrameHandler(object _)
+            {
+                var hwnd = new WindowInteropHelper(window).Handle;
+                var style = HwndHelper.GetWindowStyle(hwnd);
+
+                if ((style & Win32.WS_CAPTION) == Win32.WS_CAPTION)
+                {
+                    HwndHelper.SetWindowStyle(hwnd, style & ~Win32.WS_CAPTION);
+                    HwndHelper.RedrawWindowFrame(hwnd);
+                    HwndHelper.SetWindowStyle(hwnd, style);
+                    HwndHelper.RedrawWindowFrame(hwnd);
+                }
+            }
+
             window.SourceInitialized += (sender, e) =>
             {
                 var theme = GlobalData.Settings.FollowSystemTheme ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme;
                 ThemeManager.ChangeTitleBarColor((Window)sender, theme);
                 Messenger.Global.Register(MessageTokens.THEME_CHANGED, themeChangedHandler);
+                Messenger.Global.Register(MessageTokens.REDRAW_ALL_FRAMES, redrawFrameHandler);
             };
 
             window.Closed += (sender, e) =>
             {
                 Messenger.Global.Unregister(MessageTokens.THEME_CHANGED, themeChangedHandler);
+                Messenger.Global.Unregister(MessageTokens.REDRAW_ALL_FRAMES, redrawFrameHandler);
             };
 
             return window;

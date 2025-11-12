@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 
@@ -20,7 +21,7 @@ namespace CefFlashBrowser.Utils
                 "DialogResult",
                 typeof(bool?),
                 typeof(DialogHelper),
-                new PropertyMetadata(null, DialogResultPropertyChanged, DialogResultCoerceValue));
+                new PropertyMetadata(null, null, DialogResultCoerceValue));
 
         public static bool? GetDialogResult(DependencyObject obj)
         {
@@ -77,27 +78,20 @@ namespace CefFlashBrowser.Utils
             return result;
         }
 
-        private static void DialogResultPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            //if (d is Window w)
-            //{
-            //    try
-            //    {
-            //        w.DialogResult = e.NewValue as bool?;
-            //    }
-            //    catch (InvalidOperationException)
-            //    {
-            //        w.Close();
-            //    }
-            //}
-        }
-
         public static bool? ShowModal(Window window, Window owner = null)
         {
             if (owner == null)
             {
                 owner = Application.Current.Windows
                     .OfType<Window>().FirstOrDefault(w => w.IsActive);
+            }
+
+            if (owner == null)
+            {
+                if (Keyboard.FocusedElement is DependencyObject obj)
+                {
+                    owner = Window.GetWindow(obj);
+                }
             }
 
             if (owner == null || owner == window)
