@@ -160,6 +160,11 @@ namespace CefFlashBrowser.Views
                     });
             }
 
+            if (GlobalData.Settings.DisableBrowserShortcuts)
+            {
+                InputBindings.Clear();
+            }
+
             browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
