@@ -15,7 +15,10 @@ namespace CefFlashBrowser.ViewModels
 
         private void SetLanguage(string language)
         {
-            LanguageManager.CurrentLanguage = language;
+            if (language != null)
+            {
+                LanguageManager.CurrentLanguage = language;
+            }
         }
 
         public LanguageSelectorViewModel()
