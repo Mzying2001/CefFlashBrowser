@@ -117,6 +117,11 @@
         /// </summary>
         public bool DisableBrowserShortcuts { get; set; }
 
+        /// <summary>
+        /// Disable GPU acceleration if set to true
+        /// </summary>
+        public bool DisableGpuAcceleration { get; set; }
+
 
         /// <summary>
         /// Default settings
@@ -153,6 +158,7 @@
             DisableFullscreen = false;
             RetainedLogCount = 30;
             DisableBrowserShortcuts = false;
+            DisableGpuAcceleration = false;
         }
 
         /// <summary>

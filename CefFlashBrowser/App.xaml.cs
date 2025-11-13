@@ -4,6 +4,8 @@ using CefFlashBrowser.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
 
 namespace CefFlashBrowser
 {
@@ -44,6 +46,11 @@ namespace CefFlashBrowser
         {
             base.OnStartup(e);
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            if (GlobalData.Settings.DisableGpuAcceleration)
+            {
+                RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+            }
 
             if (GlobalData.Settings.FirstStart)
             {
