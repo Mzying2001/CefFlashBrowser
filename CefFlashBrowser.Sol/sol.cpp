@@ -1,5 +1,6 @@
 #include "sol.h"
 #include "utils.h"
+#include <set>
 #include <sstream>
 
 
@@ -172,6 +173,9 @@ bool sol::IsKnownType(SolType type)
 bool sol::ReadSolFile(SolFile& file)
 {
     try {
+        file.data.clear();
+        file.errmsg.clear();
+
         std::vector<uint8_t> filecontent = utils::ReadFile(file.path);
 
         uint8_t* data = filecontent.data();
@@ -704,27 +708,28 @@ void sol::WriteSolObject(std::vector<uint8_t>& buffer, const SolObject& value, S
         }
     }
 
-    std::map<std::string, const SolValue*> members;
-    std::map<std::string, const SolValue*> dynamicprops;
+    std::set<std::string> members;
 
     for (auto& member : value.classdef.members) {
-        members[member] = value.props.count(member) ? &value.props.at(member) : nullptr;
-    }
-    for (auto& [key, val] : value.props) {
-        if (!members.count(key)) {
-            dynamicprops[key] = &val;
+        if (value.props.count(member)) {
+            auto& val = value.props.at(member);
+            WriteSolType(buffer, val.type);
+            WriteSolValue(buffer, val, reftable);
         }
+        else {
+            WriteSolType(buffer, SolType::Undefined);
+            WriteSolValue(buffer, SolValue(SolType::Undefined, nullptr), reftable);
+        }
+        members.insert(member);
     }
 
-    for (auto& [member, val] : members) {
-        WriteSolType(buffer, val ? val->type : SolType::Undefined);
-        WriteSolValue(buffer, val ? *val : SolValue(SolType::Undefined, nullptr), reftable);
-    }
     if (value.classdef.dynamic) {
-        for (auto& [key, val] : dynamicprops) {
-            WriteSolString(buffer, key, reftable);
-            WriteSolType(buffer, val->type);
-            WriteSolValue(buffer, *val, reftable);
+        for (auto& [key, val] : value.props) {
+            if (!members.count(key)) {
+                WriteSolString(buffer, key, reftable);
+                WriteSolType(buffer, val.type);
+                WriteSolValue(buffer, val, reftable);
+            }
         }
     }
 
