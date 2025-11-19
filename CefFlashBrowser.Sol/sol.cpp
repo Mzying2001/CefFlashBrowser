@@ -172,6 +172,9 @@ bool sol::IsKnownType(SolType type)
 bool sol::ReadSolFile(SolFile& file)
 {
     try {
+        file.data.clear();
+        file.errmsg.clear();
+
         std::vector<uint8_t> filecontent = utils::ReadFile(file.path);
 
         uint8_t* data = filecontent.data();
