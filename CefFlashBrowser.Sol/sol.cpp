@@ -731,9 +731,8 @@ void sol::WriteSolObject(std::vector<uint8_t>& buffer, const SolObject& value, S
                 WriteSolValue(buffer, val, reftable);
             }
         }
+        WriteSolString(buffer, std::string(), reftable);
     }
-
-    WriteSolString(buffer, std::string(), reftable);
 }
 
 void sol::WriteSolValue(std::vector<uint8_t>& buffer, const SolValue& value, SolWriteRefTable& reftable)
