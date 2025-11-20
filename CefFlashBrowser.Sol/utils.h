@@ -14,18 +14,6 @@ namespace utils
 
     void WriteFile(const std::string& path, const std::vector<uint8_t>& data);
 
-    System::String^ ToSystemString(const std::string& str, bool utf8 = true);
-
-    std::string ToStdString(System::String^ str, bool utf8 = true);
-
-    array<System::Byte>^ ToByteArray(const std::vector<uint8_t>& vec);
-
-    std::vector<uint8_t> ToByteVector(array<System::Byte>^ arr);
-
-    System::DateTime ToSystemDateTime(double timestamp);
-
-    double ToTimestamp(System::DateTime datetime);
-
     bool IsBigEndian();
 
 

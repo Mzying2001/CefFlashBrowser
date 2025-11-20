@@ -20,6 +20,9 @@
     <ClInclude Include="utils.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="utilscli.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sol.cpp">
@@ -29,6 +32,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="utils.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="utilscli.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
