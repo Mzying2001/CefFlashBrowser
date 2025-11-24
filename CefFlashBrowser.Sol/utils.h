@@ -17,8 +17,11 @@ namespace utils
     bool IsBigEndian();
 
 
+    /*======================================================================*/
+
+
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, T> ReverseEndian(T value)
+    auto ReverseEndian(T value) -> std::enable_if_t<std::is_integral_v<T>, T>
     {
         T result = 0;
         for (size_t i = 0; i < sizeof(T); i++) {
@@ -29,13 +32,13 @@ namespace utils
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, T> FromBigEndian(T value)
+    auto FromBigEndian(T value) -> std::enable_if_t<std::is_integral_v<T>, T>
     {
         return IsBigEndian() ? value : ReverseEndian(value);
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, T> ToBigEndian(T value)
+    auto ToBigEndian(T value) -> std::enable_if_t<std::is_integral_v<T>, T>
     {
         return IsBigEndian() ? value : ReverseEndian(value);
     }
