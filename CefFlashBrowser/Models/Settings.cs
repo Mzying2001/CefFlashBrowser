@@ -122,6 +122,11 @@
         /// </summary>
         public bool DisableGpuAcceleration { get; set; }
 
+        /// <summary>
+        /// The emoticon on main window title, or null for random one
+        /// </summary>
+        public string CustomEmoticon { get; set; }
+
 
         /// <summary>
         /// Default settings
@@ -159,6 +164,7 @@
             RetainedLogCount = 30;
             DisableBrowserShortcuts = false;
             DisableGpuAcceleration = false;
+            CustomEmoticon = null;
         }
 
         /// <summary>
