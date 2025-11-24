@@ -44,10 +44,13 @@ namespace utils
     }
 
     template <typename... Args>
-    std::string FormatString(const std::string& fmt, Args... args)
+    std::string FormatString(const char* fmt, Args... args)
     {
-        std::string result(snprintf(nullptr, 0, fmt.c_str(), args...) + 1, '\0');
-        result.resize(snprintf(&result[0], result.size(), fmt.c_str(), args...));
+        static_assert(
+            ((std::is_arithmetic_v<Args> || std::is_pointer_v<Args>) && ...),
+            "FormatString only supports arithmetic and pointer types.");
+        std::string result(snprintf(nullptr, 0, fmt, args...) + 1, '\0');
+        result.resize(snprintf(&result[0], result.size(), fmt, args...));
         return result;
     }
 }
