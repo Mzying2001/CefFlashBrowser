@@ -35,6 +35,7 @@
         <Grid Grid.Row="0">
             <TextBlock Margin="15"
                        FontSize="20"
+                       TextWrapping="Wrap"
                        HorizontalAlignment="Center"
                        Text="{DynamicResource dialog_selectLanguage}"
                        Foreground="{DynamicResource PrimaryTextBrush}"/>
