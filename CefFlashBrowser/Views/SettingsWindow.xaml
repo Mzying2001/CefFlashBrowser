@@ -41,6 +41,7 @@
         <Style TargetType="Button"
                BasedOn="{StaticResource ButtonBaseStyle}">
             <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
         </Style>
     </Window.Resources>
 
