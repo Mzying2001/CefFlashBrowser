@@ -47,7 +47,7 @@ namespace CefFlashBrowser
             base.OnStartup(e);
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-            if (GlobalData.Settings.DisableGpuAcceleration)
+            if (GlobalData.Settings.DisableGpuAccelerationWPF)
             {
                 RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
             }
