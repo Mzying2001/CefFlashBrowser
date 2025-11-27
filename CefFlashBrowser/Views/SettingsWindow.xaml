@@ -27,6 +27,24 @@
         <behaviors:WindowBehavior x:Name="windowBehavior"/>
     </i:Interaction.Behaviors>
 
+    <Window.Resources>
+        <Style TargetType="CheckBox"
+               BasedOn="{StaticResource ToggleButtonSwitch}">
+            <Setter Property="Margin" Value="5,0"/>
+        </Style>
+
+        <Style TargetType="ComboBox"
+               BasedOn="{StaticResource ComboBoxBaseStyle}">
+            <Setter Property="MinWidth" Value="80"/>
+        </Style>
+
+        <Style TargetType="Button"
+               BasedOn="{StaticResource ButtonBaseStyle}">
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <TabControl Margin="10"
                     SelectedIndex="0"
@@ -38,8 +56,7 @@
                         <c:SettingGroup Header="{DynamicResource settings_headerAddressBar}">
                             <!--navigation type-->
                             <c:SettingItem Description="{DynamicResource settings_useSearchEngine}">
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding NavigationTypes}"
+                                <ComboBox ItemsSource="{Binding NavigationTypes}"
                                           SelectedIndex="{Binding CurrentNavigationTypeIndex, Mode=OneWay}"
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Value">
@@ -54,8 +71,7 @@
 
                             <!--search engine-->
                             <c:SettingItem Description="{DynamicResource settings_searchEngine}">
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding SearchEngines}"
+                                <ComboBox ItemsSource="{Binding SearchEngines}"
                                           SelectedIndex="{Binding CurrentSearchEngineIndex, Mode=OneWay}"
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Value">
@@ -72,8 +88,7 @@
                         <!--theme-->
                         <c:SettingGroup Header="{DynamicResource settings_headerTheme}">
                             <c:SettingItem Description="{DynamicResource settings_currentTheme}">
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding Themes}"
+                                <ComboBox ItemsSource="{Binding Themes}"
                                           SelectedIndex="{Binding CurrentThemeIndex, Mode=OneWay}"
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Value">
@@ -97,18 +112,14 @@
                             </c:SettingItem>
 
                             <c:SettingItem Description="{DynamicResource settings_followSystemTheme}">
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding FollowSystemTheme}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                                <CheckBox IsChecked="{Binding FollowSystemTheme}"/>
                             </c:SettingItem>
                         </c:SettingGroup>
 
                         <!--other-->
                         <c:SettingGroup Header="{DynamicResource settings_headerOther}">
                             <c:SettingItem Description="{DynamicResource settings_hideMainWindowOnBrowsing}">
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding HideMainWindowOnBrowsing}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                                <CheckBox IsChecked="{Binding HideMainWindowOnBrowsing}"/>
                             </c:SettingItem>
                         </c:SettingGroup>
                     </StackPanel>
@@ -122,8 +133,7 @@
                         <c:SettingGroup Header="{DynamicResource settings_headerBrowserData}">
                             <!--clear caches-->
                             <c:SettingItem Description="{DynamicResource settings_deleteCache}">
-                                <Button MinWidth="80"
-                                        Content="{DynamicResource settings_buttonDeleteCache}"
+                                <Button Content="{DynamicResource settings_buttonDeleteCache}"
                                         Command="{Binding DeleteCacheCommand}"/>
                             </c:SettingItem>
                         </c:SettingGroup>
@@ -131,8 +141,7 @@
                         <!--website behavior-->
                         <c:SettingGroup Header="{DynamicResource settings_headerWebsiteBehavior}">
                             <c:SettingItem Description="{DynamicResource settings_openNewPage}">
-                                <ComboBox MinWidth="80"
-                                          ItemsSource="{Binding NewPageBehaviors}"
+                                <ComboBox ItemsSource="{Binding NewPageBehaviors}"
                                           SelectedIndex="{Binding CurrentNewPageBehaviorIndex, Mode=OneWay}"
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Value">
@@ -146,25 +155,24 @@
                             </c:SettingItem>
 
                             <c:SettingItem Description="{DynamicResource settings_disableOnBeforeUnloadDialog}">
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding DisableOnBeforeUnloadDialog}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                                <CheckBox IsChecked="{Binding DisableOnBeforeUnloadDialog}"/>
                             </c:SettingItem>
 
                             <c:SettingItem Description="{DynamicResource settings_disableFullscreen}">
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding DisableFullscreen}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                                <CheckBox IsChecked="{Binding DisableFullscreen}"/>
                             </c:SettingItem>
                         </c:SettingGroup>
 
                         <!--advance-->
                         <c:SettingGroup Header="{DynamicResource settings_headerAdvanced}">
+                            <!--disable GPU acceleration-->
+                            <c:SettingItem Description="{DynamicResource settings_disableGpuAcceleration}">
+                                <CheckBox IsChecked="{Binding DisableGpuAcceleration}"/>
+                            </c:SettingItem>
+                            
                             <!--proxy-->
                             <c:SettingItem Description="{DynamicResource settings_enableProxy}">
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding EnableProxy}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                                <CheckBox IsChecked="{Binding EnableProxy}"/>
                             </c:SettingItem>
 
                             <hc:Card Margin="5"
@@ -227,9 +235,7 @@
 
                             <!--useragent-->
                             <c:SettingItem Description="{DynamicResource settings_enableCustomUserAgent}">
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding EnableCustomUserAgent}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                                <CheckBox IsChecked="{Binding EnableCustomUserAgent}"/>
                             </c:SettingItem>
 
                             <hc:Card Margin="5"
@@ -252,9 +258,7 @@
 
                             <!--fake flash version-->
                             <c:SettingItem Description="{DynamicResource settings_enableFakeFlashVersion}">
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding EnableFakeFlashVersion}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                                <CheckBox IsChecked="{Binding EnableFakeFlashVersion}"/>
                             </c:SettingItem>
 
                             <hc:Card Margin="5"
@@ -290,22 +294,18 @@
                         <c:SettingGroup Header="{DynamicResource settings_headerOther}">
                             <!--save zoom level-->
                             <c:SettingItem Description="{DynamicResource settings_saveZoomLevel}">
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding SaveZoomLevel}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                                <CheckBox IsChecked="{Binding SaveZoomLevel}"/>
                             </c:SettingItem>
 
                             <!--enable integrated devtools-->
                             <c:SettingItem Description="{DynamicResource settings_enableIntegratedDevTools}">
-                                <CheckBox Margin="5,0"
-                                          IsChecked="{Binding EnableIntegratedDevTools}"
-                                          Style="{StaticResource ToggleButtonSwitch}"/>
+                                <CheckBox IsChecked="{Binding EnableIntegratedDevTools}"/>
                             </c:SettingItem>
 
                             <!--cefsharp version-->
-                            <c:SettingItem Description="{DynamicResource settings_cefVersion}">
-                                <Button MinWidth="80"
-                                        Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource settings_buttonViewDetails}}"
+                            <c:SettingItem Description="{DynamicResource settings_cefVersion}"
+                                           Visibility="Collapsed">
+                                <Button Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource settings_buttonViewDetails}}"
                                         Command="{Binding PopupAboutCefCommand}"/>
                             </c:SettingItem>
                         </c:SettingGroup>

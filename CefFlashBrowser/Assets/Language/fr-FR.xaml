@@ -67,6 +67,7 @@
     <sys:String x:Key="settings_saveZoomLevel">Mémoriser le niveau de zoom</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Intégrer les outils de développement dans la fenêtre du navigateur</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Désactiver le mode plein écran</sys:String>
+    <sys:String x:Key="settings_disableGpuAcceleration">Désactiver l’accélération GPU</sys:String>
 
     <!--Navigation bar of main interface-->
     <sys:String x:Key="navigationType_auto">Automatique</sys:String>

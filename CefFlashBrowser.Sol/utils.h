@@ -14,23 +14,14 @@ namespace utils
 
     void WriteFile(const std::string& path, const std::vector<uint8_t>& data);
 
-    System::String^ ToSystemString(const std::string& str, bool utf8 = true);
-
-    std::string ToStdString(System::String^ str, bool utf8 = true);
-
-    array<System::Byte>^ ToByteArray(const std::vector<uint8_t>& vec);
-
-    std::vector<uint8_t> ToByteVector(array<System::Byte>^ arr);
-
-    System::DateTime ToSystemDateTime(double timestamp);
-
-    double ToTimestamp(System::DateTime datetime);
-
     bool IsBigEndian();
 
 
+    /*======================================================================*/
+
+
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, T> ReverseEndian(T value)
+    auto ReverseEndian(T value) -> std::enable_if_t<std::is_integral_v<T>, T>
     {
         T result = 0;
         for (size_t i = 0; i < sizeof(T); i++) {
@@ -41,22 +32,25 @@ namespace utils
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, T> FromBigEndian(T value)
+    auto FromBigEndian(T value) -> std::enable_if_t<std::is_integral_v<T>, T>
     {
         return IsBigEndian() ? value : ReverseEndian(value);
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, T> ToBigEndian(T value)
+    auto ToBigEndian(T value) -> std::enable_if_t<std::is_integral_v<T>, T>
     {
         return IsBigEndian() ? value : ReverseEndian(value);
     }
 
     template <typename... Args>
-    std::string FormatString(const std::string& fmt, Args... args)
+    std::string FormatString(const char* fmt, Args... args)
     {
-        std::string result(snprintf(nullptr, 0, fmt.c_str(), args...) + 1, '\0');
-        result.resize(snprintf(&result[0], result.size(), fmt.c_str(), args...));
+        static_assert(
+            ((std::is_arithmetic_v<Args> || std::is_pointer_v<Args>) && ...),
+            "FormatString only supports arithmetic and pointer types.");
+        std::string result(snprintf(nullptr, 0, fmt, args...) + 1, '\0');
+        result.resize(snprintf(&result[0], result.size(), fmt, args...));
         return result;
     }
 }

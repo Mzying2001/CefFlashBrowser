@@ -143,11 +143,13 @@
     <ClInclude Include="cli.h" />
     <ClInclude Include="sol.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="utilscli.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cli.cpp" />
     <ClCompile Include="sol.cpp" />
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="utilscli.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

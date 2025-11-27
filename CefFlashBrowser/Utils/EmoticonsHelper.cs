@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CefFlashBrowser.Models.Data;
+using System;
 using System.Linq;
 using System.Windows;
 
@@ -22,8 +23,15 @@ namespace CefFlashBrowser.Utils
 
         public static string GetNextEmoticon()
         {
-            _next %= Emoticons.Length;
-            return Emoticons[_next++];
+            if (GlobalData.Settings.CustomEmoticon is string custom)
+            {
+                return custom;
+            }
+            else
+            {
+                _next %= Emoticons.Length;
+                return Emoticons[_next++];
+            }
         }
     }
 }

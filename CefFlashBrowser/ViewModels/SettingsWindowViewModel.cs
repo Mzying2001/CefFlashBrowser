@@ -223,6 +223,16 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool DisableGpuAcceleration
+        {
+            get => GlobalData.Settings.DisableGpuAcceleration;
+            set
+            {
+                GlobalData.Settings.DisableGpuAcceleration = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private void SetNavigationType(NavigationType type)
         {
             GlobalData.Settings.NavigationType = type;

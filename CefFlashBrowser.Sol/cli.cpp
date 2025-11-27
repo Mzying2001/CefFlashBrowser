@@ -1,9 +1,8 @@
 #include "cli.h"
 #include "utils.h"
-
+#include "utilscli.h"
 
 using namespace sol;
-
 
 CefFlashBrowser::Sol::SolValueWrapper::SolValueWrapper(sol::SolValue* pval)
     : _pval(pval)

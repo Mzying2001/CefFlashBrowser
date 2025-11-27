@@ -122,6 +122,16 @@
         /// </summary>
         public bool DisableGpuAcceleration { get; set; }
 
+        /// <summary>
+        /// Use software rendering for WPF if set to true
+        /// </summary>
+        public bool DisableGpuAccelerationWPF { get; set; }
+
+        /// <summary>
+        /// The emoticon on main window title, or null for random one
+        /// </summary>
+        public string CustomEmoticon { get; set; }
+
 
         /// <summary>
         /// Default settings
@@ -159,6 +169,7 @@
             RetainedLogCount = 30;
             DisableBrowserShortcuts = false;
             DisableGpuAcceleration = false;
+            CustomEmoticon = null;
         }
 
         /// <summary>
