@@ -165,6 +165,11 @@
 
                         <!--advance-->
                         <c:SettingGroup Header="{DynamicResource settings_headerAdvanced}">
+                            <!--disable GPU acceleration-->
+                            <c:SettingItem Description="{DynamicResource settings_disableGpuAcceleration}">
+                                <CheckBox IsChecked="{Binding DisableGpuAcceleration}"/>
+                            </c:SettingItem>
+                            
                             <!--proxy-->
                             <c:SettingItem Description="{DynamicResource settings_enableProxy}">
                                 <CheckBox IsChecked="{Binding EnableProxy}"/>
