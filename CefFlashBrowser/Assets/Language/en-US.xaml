@@ -67,6 +67,7 @@
     <sys:String x:Key="settings_saveZoomLevel">Save zoom level</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Embed devtools into browser window</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Disable fullscreen mode</sys:String>
+    <sys:String x:Key="settings_disableGpuAcceleration">Disable GPU acceleration</sys:String>
 
     <!--Navigation bar of main interface-->
     <sys:String x:Key="navigationType_auto">Automatic</sys:String>

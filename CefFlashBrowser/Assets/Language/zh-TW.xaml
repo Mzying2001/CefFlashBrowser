@@ -67,6 +67,7 @@
     <sys:String x:Key="settings_saveZoomLevel">儲存縮放比例</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">將開發者工具嵌入至瀏覽器視窗</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止網頁進入全螢幕模式</sys:String>
+    <sys:String x:Key="settings_disableGpuAcceleration">停用GPU加速</sys:String>
 
     <!--主視窗網址列-->
     <sys:String x:Key="navigationType_auto">自動</sys:String>
