@@ -17,6 +17,12 @@ namespace CefFlashBrowser.Utils.Handlers
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
+            if (GlobalData.Settings.DisableBrowserContextMenu)
+            {
+                model.Clear();
+                return;
+            }
+
             int count = 0;
 
             if (!string.IsNullOrWhiteSpace(parameters.SelectionText))
