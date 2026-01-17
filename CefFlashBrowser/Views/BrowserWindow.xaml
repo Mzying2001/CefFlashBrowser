@@ -64,7 +64,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    VerticalAlignment="Center">
-                            <Run Text="{DynamicResource browser_zoom}"/><Run Text="{Binding Source={x:Reference Name=browser}, Path=ZoomLevel, Converter={StaticResource ZoomLevelToScale}, StringFormat={}: {0:p0}}"/>
+                            <Run Text="{DynamicResource browser_zoom}"/><Run Text="{Binding ZoomLevel, Converter={StaticResource ZoomLevelToScale}, StringFormat={}: {0:p0}}"/>
                         </TextBlock>
                         <hc:ButtonGroup Grid.Column="1"
                                         Margin="0,0,43,0"
@@ -108,7 +108,7 @@
                       Visibility="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count, Converter={StaticResource VisiableIfNotZero}}">
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem"
-                           BasedOn="{StaticResource MenuItemBaseStyle}">
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
                         <!--<Setter Property="Header"
                                 Value="{Binding Name}"/>-->
                         <Setter Property="Command"
@@ -267,13 +267,10 @@
 
             <DockPanel.Resources>
                 <Style TargetType="Button"
-                       BasedOn="{StaticResource ButtonDefault}">
-                    <Setter Property="Width"
-                            Value="30"/>
-                    <Setter Property="Height"
-                            Value="30"/>
-                    <Setter Property="Padding"
-                            Value="0"/>
+                       BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Width" Value="30"/>
+                    <Setter Property="Height" Value="30"/>
+                    <Setter Property="Padding" Value="0"/>
                 </Style>
             </DockPanel.Resources>
 
@@ -497,6 +494,7 @@
 
             <flash:ChromiumFlashBrowser x:Name="browser"
                                         ZoomLevelIncrement="0.25"
+                                        ZoomLevel="{Binding ZoomLevel, Mode=TwoWay}"
                                         Address="{Binding Address, Mode=TwoWay, TargetNullValue='about:blank'}"
                                         FullscreenModeChanged="BrowserFullscreenModeChanged"/>
 

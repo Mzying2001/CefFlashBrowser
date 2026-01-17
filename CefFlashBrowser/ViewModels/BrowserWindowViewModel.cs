@@ -53,9 +53,8 @@ namespace CefFlashBrowser.ViewModels
             get => _fullscreen;
             set
             {
-                if (_fullscreen != value)
+                if (UpdateValue(ref _fullscreen, value))
                 {
-                    UpdateValue(ref _fullscreen, value);
                     Messenger.Global.Send(MessageTokens.FULLSCREEN_CHANGED, this);
                 }
             }
@@ -75,6 +74,19 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _textToFind, value);
         }
 
+        private double _zoomLevel = 0.0;
+        public double ZoomLevel
+        {
+            get => _zoomLevel;
+            set
+            {
+                if (UpdateValue(ref _zoomLevel, value)
+                    && GlobalData.Settings.SaveZoomLevel)
+                {
+                    GlobalData.Settings.BrowserZoomLevel = value;
+                }
+            }
+        }
 
 
         public void ShowMainWindow()
@@ -291,6 +303,11 @@ namespace CefFlashBrowser.ViewModels
             CloseFindPopupCommand = new DelegateCommand(() => ShowFindPopup = false);
             FindNextTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, true));
             FindPrevTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, false));
+
+            if (GlobalData.Settings.SaveZoomLevel)
+            {
+                ZoomLevel = GlobalData.Settings.BrowserZoomLevel;
+            }
         }
     }
 }

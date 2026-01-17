@@ -150,16 +150,6 @@ namespace CefFlashBrowser.Views
             InitializeComponent();
             WindowSizeInfo.Apply(GetSizeInfo(), this);
 
-            if (GlobalData.Settings.SaveZoomLevel)
-            {
-                browser.SetBinding(ChromiumWebBrowser.ZoomLevelProperty,
-                    new Binding(nameof(GlobalData.Settings.BrowserZoomLevel))
-                    {
-                        Source = GlobalData.Settings,
-                        Mode = BindingMode.TwoWay
-                    });
-            }
-
             if (GlobalData.Settings.DisableBrowserShortcuts)
             {
                 InputBindings.Clear();
