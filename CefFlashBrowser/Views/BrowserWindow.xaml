@@ -529,37 +529,35 @@
                AllowsTransparency="True"
                MouseEnter="StatusPopupMouseEnter"
                SizeChanged="StatusPopupSizeChanged">
-            <Popup.Resources>
-                <sys:Double x:Key="ContentHeight">22</sys:Double>
-            </Popup.Resources>
-            <ContentControl x:Name="statusPopupContent"
-                            Opacity="0.85"
-                            Height="{StaticResource ContentHeight}"
-                            MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThird}}">
-                <Binding ElementName="browser"
-                         Path="IsLoading">
-                    <Binding.Converter>
-                        <converter:BoolToObject>
-                            <converter:BoolToObject.TrueObject>
-                                <Label Padding="5,0"
-                                       Height="{StaticResource ContentHeight}">
-                                    <TextBlock>
-                                        <Run Text="{DynamicResource browser_loading}"/><Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat={} ({0:p0})}"/>
-                                    </TextBlock>
-                                </Label>
-                            </converter:BoolToObject.TrueObject>
-                            <converter:BoolToObject.FalseObject>
-                                <Label Padding="5,0"
-                                       Height="{StaticResource ContentHeight}"
-                                       Visibility="{Binding ElementName=browser, Path=StatusText, Converter={StaticResource VisiableIfStrNotEmpty}}">
-                                    <TextBlock Text="{Binding ElementName=browser, Path=StatusText}"
-                                               TextTrimming="CharacterEllipsis"/>
-                                </Label>
-                            </converter:BoolToObject.FalseObject>
-                        </converter:BoolToObject>
-                    </Binding.Converter>
-                </Binding>
-            </ContentControl>
+            <Label x:Name="statusPopupContent"
+                   Height="22"
+                   Padding="5,0"
+                   Opacity="0.85"
+                   MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThird}}">
+                <Label.Style>
+                    <Style TargetType="Label"
+                           BasedOn="{StaticResource {x:Type Label}}">
+                        <Setter Property="Content">
+                            <Setter.Value>
+                                <TextBlock>
+                                    <Run Text="{DynamicResource browser_loading}"/><Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat={} ({0:p0})}"/>
+                                </TextBlock>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}" Value="False">
+                                <Setter Property="Visibility"
+                                        Value="{Binding ElementName=browser, Path=StatusText, Converter={StaticResource VisiableIfStrNotEmpty}}"/>
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <TextBlock Text="{Binding ElementName=browser, Path=StatusText}" TextTrimming="CharacterEllipsis"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
         </Popup>
     </Grid>
 </Window>
