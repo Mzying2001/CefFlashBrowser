@@ -180,9 +180,16 @@
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                Text="{DynamicResource browser_tipsBlockedSwfs}"/>
                     <ItemsControl ItemsSource="{Binding Source={x:Reference Name=browser}, Path=BlockedSwfs}">
+                        <ItemsControl.Resources>
+                            <Style TargetType="MenuItem"
+                                   BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="Tag"
+                                        Value="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
+                            </Style>
+                        </ItemsControl.Resources>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type sys:String}">
-                                <MenuItem Command="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel.OpenInSwfPlayerCommand}"
+                                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.OpenInSwfPlayerCommand}"
                                           CommandParameter="{Binding}">
                                     <MenuItem.Header>
                                         <TextBlock MaxWidth="250"
