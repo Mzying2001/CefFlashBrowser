@@ -15,6 +15,8 @@ namespace CefFlashBrowser.Log
 
         public FileLogger(string fileName)
         {
+            CreateDirIfNotExists(fileName);
+
             _newLine = Environment.NewLine;
             _stream = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
             _writer = new StreamWriter(_stream);
@@ -42,6 +44,17 @@ namespace CefFlashBrowser.Log
                     _semaphore?.Dispose();
                 }
                 _disposed = true;
+            }
+        }
+
+        private void CreateDirIfNotExists(string fileName)
+        {
+            string directory = Path.GetDirectoryName(fileName);
+
+            if (!string.IsNullOrEmpty(directory)
+                && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
             }
         }
 
