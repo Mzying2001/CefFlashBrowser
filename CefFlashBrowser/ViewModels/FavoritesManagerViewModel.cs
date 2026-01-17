@@ -91,54 +91,44 @@ namespace CefFlashBrowser.ViewModels
             });
         }
 
-        private void SwapItem(int i, int j)
-        {
-            if (i > j)
-            {
-                int tmp = i;
-                i = j;
-                j = tmp;
-            }
-            Website item1 = GlobalData.Favorites[i];
-            Website item2 = GlobalData.Favorites[j];
-            GlobalData.Favorites.Remove(item2);
-            GlobalData.Favorites.Remove(item1);
-            GlobalData.Favorites.Insert(i, item2);
-            GlobalData.Favorites.Insert(j, item1);
-        }
-
         private void MoveUp(Website item)
         {
             int index = GlobalData.Favorites.IndexOf(item);
+
             if (index > 0)
             {
-                SwapItem(index, index - 1);
-                SelectedIndex = index - 1;
+                GlobalData.Favorites.Move(index, index - 1);
             }
         }
 
         private void MoveDown(Website item)
         {
             int index = GlobalData.Favorites.IndexOf(item);
+
             if (index < GlobalData.Favorites.Count - 1)
             {
-                SwapItem(index, index + 1);
-                SelectedIndex = index + 1;
+                GlobalData.Favorites.Move(index, index + 1);
             }
         }
 
         private void MoveToTop(Website item)
         {
-            GlobalData.Favorites.Remove(item);
-            GlobalData.Favorites.Insert(0, item);
-            SelectedIndex = 0;
+            int index = GlobalData.Favorites.IndexOf(item);
+
+            if (index > 0)
+            {
+                GlobalData.Favorites.Move(index, 0);
+            }
         }
 
         private void MoveToBottom(Website item)
         {
-            GlobalData.Favorites.Remove(item);
-            GlobalData.Favorites.Add(item);
-            SelectedIndex = GlobalData.Favorites.Count - 1;
+            int index = GlobalData.Favorites.IndexOf(item);
+
+            if (index < GlobalData.Favorites.Count - 1)
+            {
+                GlobalData.Favorites.Move(index, GlobalData.Favorites.Count - 1);
+            }
         }
 
         protected override void Init()
