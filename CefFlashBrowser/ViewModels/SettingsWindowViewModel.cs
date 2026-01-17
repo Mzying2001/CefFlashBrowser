@@ -233,6 +233,16 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool DisableBrowserContextMenu
+        {
+            get => GlobalData.Settings.DisableBrowserContextMenu;
+            set
+            {
+                GlobalData.Settings.DisableBrowserContextMenu = value;
+                RaisePropertyChanged();
+            }
+        }
+
         private void SetNavigationType(NavigationType type)
         {
             GlobalData.Settings.NavigationType = type;
