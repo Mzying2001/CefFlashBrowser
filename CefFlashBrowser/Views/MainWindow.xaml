@@ -167,7 +167,6 @@
                                 CommandParameter="{Binding InputText}"/>
                 </TextBox.InputBindings>
             </TextBox>
-
         </StackPanel>
 
         <!--The app info shows on the bottom of the main window-->
@@ -175,7 +174,7 @@
                    Margin="5"
                    HorizontalAlignment="Center"
                    Foreground="{DynamicResource SecondaryTextBrush}"
-                   Text="{Binding Source={StaticResource AppInfo}, Path=Version, Mode=OneTime, StringFormat='version {0} | by Mzying2001'}">
+                   Text="{Binding Source={StaticResource AppInfo}, Path=DisplayVersion, Mode=OneTime}">
         </TextBlock>
     </Grid>
 </Window>

@@ -1,5 +1,4 @@
-﻿using CefSharp;
-using System;
+﻿using System.Reflection;
 using System.Windows;
 
 namespace CefFlashBrowser.Models
@@ -7,21 +6,38 @@ namespace CefFlashBrowser.Models
     public class AppInfo
     {
         public string Name { get; }
+        public string Company { get; }
         public string Version { get; }
-        public string BaseDirectory { get; }
 
-        public string CefSharpVersion { get; }
+        public string DisplayVersion
+        {
+#if DEBUG
+            get => $"version {Version} (Debug) | by {Company}";
+#else
+            get => $"version {Version} | by {Company}";
+#endif
+        }
 
         public AppInfo()
         {
-            Name = Application.ResourceAssembly.GetName().Name;
-            BaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            CefSharpVersion = Cef.CefSharpVersion;
-#if DEBUG
-            Version = Application.ResourceAssembly.GetName().Version.ToString() + " (Debug)";
-#else
-            Version = Application.ResourceAssembly.GetName().Version.ToString();
-#endif
+            var assembly = Application.ResourceAssembly;
+            var assemblyName = assembly.GetName();
+
+            Name = assemblyName.Name;
+            Company = GetCompanyName(assembly);
+            Version = assemblyName.Version.ToString();
+        }
+
+        private static string GetCompanyName(Assembly assembly)
+        {
+            string companyName = string.Empty;
+
+            if (assembly.GetCustomAttribute<AssemblyCompanyAttribute>()
+                is AssemblyCompanyAttribute companyAttribute)
+            {
+                companyName = companyAttribute.Company;
+            }
+            return companyName;
         }
     }
 }
