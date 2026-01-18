@@ -11,7 +11,7 @@
         mc:Ignorable="d"
         
         Width="450"
-        Height="450"
+        Height="500"
         MinWidth="300"
         MinHeight="300"
         Title="{DynamicResource common_settings}"
@@ -161,6 +161,10 @@
                             <c:SettingItem Description="{DynamicResource settings_disableFullscreen}">
                                 <CheckBox IsChecked="{Binding DisableFullscreen}"/>
                             </c:SettingItem>
+
+                            <c:SettingItem Description="{DynamicResource settings_disableBrowserContextMenu}">
+                                <CheckBox IsChecked="{Binding DisableBrowserContextMenu}"/>
+                            </c:SettingItem>
                         </c:SettingGroup>
 
                         <!--advance-->
@@ -169,7 +173,7 @@
                             <c:SettingItem Description="{DynamicResource settings_disableGpuAcceleration}">
                                 <CheckBox IsChecked="{Binding DisableGpuAcceleration}"/>
                             </c:SettingItem>
-                            
+
                             <!--proxy-->
                             <c:SettingItem Description="{DynamicResource settings_enableProxy}">
                                 <CheckBox IsChecked="{Binding EnableProxy}"/>

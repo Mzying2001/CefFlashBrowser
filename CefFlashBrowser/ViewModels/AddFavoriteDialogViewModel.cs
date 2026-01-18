@@ -40,7 +40,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void AddFavorite()
         {
-            GlobalData.Favorites.Add(new Models.Website(Name, Url));
+            GlobalData.Favorites.Add(new Models.Website(Name.Trim(), Url.Trim()));
             DialogResult = true;
         }
 

@@ -132,6 +132,11 @@
         /// </summary>
         public string CustomEmoticon { get; set; }
 
+        /// <summary>
+        /// The browser context menu will be disabled if set to true
+        /// </summary>
+        public bool DisableBrowserContextMenu { get; set; }
+
 
         /// <summary>
         /// Default settings
@@ -170,6 +175,7 @@
             DisableBrowserShortcuts = false;
             DisableGpuAcceleration = false;
             CustomEmoticon = null;
+            DisableBrowserContextMenu = false;
         }
 
         /// <summary>
