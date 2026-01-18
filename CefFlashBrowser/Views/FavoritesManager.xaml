@@ -30,9 +30,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"
-                              MinWidth="150"
-                              MaxWidth="400"/>
+            <ColumnDefinition Width="200" MinWidth="150" MaxWidth="400"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
@@ -61,40 +59,40 @@
                 </Button>
             </StackPanel>
 
-            <ListBox x:Name="favoritesListBox"
-                     Grid.Row="1"
-                     VerticalContentAlignment="Stretch"
-                     HorizontalContentAlignment="Stretch"
-                     SelectedIndex="{Binding SelectedIndex}"
-                     ItemsSource="{Binding Source={x:Static data:GlobalData.Favorites}}">
+            <ListBox Grid.Row="1"
+                     DisplayMemberPath="Name"
+                     ItemsSource="{Binding Favorites}"
+                     SelectedItem="{Binding SelectedWebsite}">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem"
                            BasedOn="{StaticResource ListBoxItemBaseStyle}">
-                        <Setter Property="Content"
-                                Value="{Binding Name}"/>
+                        <Setter Property="Tag"
+                                Value="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=DataContext}"/>
                         <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu>
+                                    <ContextMenu.Resources>
+                                        <Style TargetType="MenuItem"
+                                               BasedOn="{StaticResource MenuItemBaseStyle}">
+                                            <Setter Property="Tag"
+                                                    Value="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag}"/>
+                                        </Style>
+                                    </ContextMenu.Resources>
                                     <MenuItem Header="{DynamicResource common_moveToTop}"
-                                              Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.MoveToTopCommand}"
+                                              Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.MoveToTopCommand}"
                                               CommandParameter="{Binding}"/>
                                     <MenuItem Header="{DynamicResource common_moveToBottom}"
-                                              Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.MoveToBottomCommand}"
+                                              Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.MoveToBottomCommand}"
                                               CommandParameter="{Binding}"/>
                                     <Separator/>
                                     <MenuItem Header="{DynamicResource favorites_remove}"
-                                              Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.RemoveItemCommand}"
+                                              Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.RemoveItemCommand}"
                                               CommandParameter="{Binding}"/>
                                 </ContextMenu>
                             </Setter.Value>
                         </Setter>
                     </Style>
                 </ListBox.ItemContainerStyle>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="SelectionChanged">
-                        <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
             </ListBox>
         </Grid>
 
@@ -106,82 +104,94 @@
 
         <GroupBox Grid.Column="2"
                   Margin="0,10,10,10"
-                  Header="{DynamicResource favorites_edit}">
-            <Grid IsEnabled="{Binding ElementName=favoritesListBox, Path=SelectedItem, Converter={StaticResource NotNull}}">
+                  Header="{DynamicResource favorites_edit}"
+                  IsEnabled="{Binding SelectedWebsite, Converter={StaticResource NotNull}}">
+            <Grid>
+                <Grid.BindingGroup>
+                    <BindingGroup x:Name="itemEditingGroup"/>
+                </Grid.BindingGroup>
 
                 <StackPanel Width="300"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center">
-                    <hc:TextBox Text="{Binding SelectedName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    <hc:TextBox x:Name="nameTextBox"
+                                Text="{Binding SelectedWebsite.Name, UpdateSourceTrigger=Explicit}"
                                 hc:TitleElement.Title="{DynamicResource favorites_name}">
                         <i:Interaction.Behaviors>
                             <behaviors:TextBoxSelectAllOnFocus/>
                         </i:Interaction.Behaviors>
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter"
-                                        Command="{Binding SaveChangesCommand}"/>
+                                        Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CommitEditCommand}"/>
                         </TextBox.InputBindings>
                     </hc:TextBox>
 
-                    <hc:TextBox Margin="0,5,0,20"
-                                Text="{Binding SelectedUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    <hc:TextBox x:Name="urlTextBox"
+                                Margin="0,5,0,0"
+                                Text="{Binding SelectedWebsite.Url, UpdateSourceTrigger=Explicit}"
                                 hc:TitleElement.Title="{DynamicResource favorites_url}">
                         <i:Interaction.Behaviors>
                             <behaviors:TextBoxSelectAllOnFocus/>
                         </i:Interaction.Behaviors>
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter"
-                                        Command="{Binding SaveChangesCommand}"/>
+                                        Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CommitEditCommand}"/>
                         </TextBox.InputBindings>
                     </hc:TextBox>
 
-                    <Grid Margin="0,0,0,10">
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Left">
-                            <Button Width="30"
-                                    Height="30"
-                                    Padding="0"
-                                    VerticalAlignment="Center"
-                                    ToolTip="{DynamicResource common_moveUp}"
+                    <DockPanel Margin="0,20,0,10"
+                               LastChildFill="False">
+                        <StackPanel DockPanel.Dock="Left"
+                                    Orientation="Horizontal">
+                            <StackPanel.Resources>
+                                <Style TargetType="Button"
+                                       BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Width" Value="30"/>
+                                    <Setter Property="Height" Value="30"/>
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </StackPanel.Resources>
+                            <Button ToolTip="{DynamicResource common_moveUp}"
                                     Command="{Binding MoveUpCommand}"
-                                    CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
+                                    CommandParameter="{Binding SelectedWebsite}">
                                 <svgc:SvgIcon Width="12"
                                               Height="12"
                                               UriSource="/Assets/Svgs/up.svg"/>
                             </Button>
-                            <Button Width="30"
-                                    Height="30"
-                                    Padding="0"
-                                    VerticalAlignment="Center"
-                                    ToolTip="{DynamicResource common_moveDown}"
+                            <Button ToolTip="{DynamicResource common_moveDown}"
                                     Command="{Binding MoveDownCommand}"
-                                    CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}">
+                                    CommandParameter="{Binding SelectedWebsite}">
                                 <svgc:SvgIcon Width="12"
                                               Height="12"
                                               UriSource="/Assets/Svgs/down.svg"/>
                             </Button>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Right">
-                            <Button MinWidth="75"
-                                    Content="{DynamicResource favorites_remove}"
+
+                        <StackPanel DockPanel.Dock="Right"
+                                    Orientation="Horizontal">
+                            <StackPanel.Resources>
+                                <Style TargetType="Button"
+                                       BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="MinWidth" Value="75"/>
+                                </Style>
+                            </StackPanel.Resources>
+                            <Button Content="{DynamicResource favorites_remove}"
                                     Command="{Binding RemoveItemCommand}"
-                                    CommandParameter="{Binding ElementName=favoritesListBox, Path=SelectedItem}"/>
-                            <Button MinWidth="75"
-                                    Margin="5,0,0,0"
+                                    CommandParameter="{Binding SelectedWebsite}"/>
+                            <Button Margin="5,0,0,0"
                                     Content="{DynamicResource favorites_save}"
-                                    Command="{Binding SaveChangesCommand}">
+                                    Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CommitEditCommand}">
                                 <Button.IsEnabled>
                                     <MultiBinding Converter="{StaticResource StringArrNotAnyEmpty}">
-                                        <Binding Path="SelectedName"/>
-                                        <Binding Path="SelectedUrl"/>
+                                        <Binding Path="Text" ElementName="nameTextBox"/>
+                                        <Binding Path="Text" ElementName="urlTextBox"/>
                                     </MultiBinding>
                                 </Button.IsEnabled>
                             </Button>
                         </StackPanel>
-                    </Grid>
+                    </DockPanel>
                 </StackPanel>
-
             </Grid>
         </GroupBox>
     </Grid>
