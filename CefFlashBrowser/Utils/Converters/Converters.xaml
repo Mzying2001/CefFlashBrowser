@@ -22,6 +22,8 @@
 
     <local:ObjectToString x:Key="ObjectToString"/>
 
+    <local:ObjectGetType x:Key="ObjectGetType"/>
+
     <local:BinaryToSizeString x:Key="BinaryToSizeString"/>
 
     <local:BinaryToSizeString x:Key="BinaryToReadableSizeString" UseReadableSize="True"/>

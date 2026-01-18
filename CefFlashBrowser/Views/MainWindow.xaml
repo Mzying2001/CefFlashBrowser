@@ -40,57 +40,58 @@
         <Menu>
             <!--Favorites Menu-->
             <MenuItem Header="{DynamicResource common_favorites}">
+                <MenuItem.Resources>
+                    <DataTemplate DataType="{x:Type m:Website}">
+                        <StackPanel MaxWidth="225">
+                            <TextBlock Text="{Binding Name}"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock FontSize="10"
+                                       Text="{Binding Url}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </MenuItem.Resources>
+
                 <MenuItem.ItemContainerStyle>
-                    <Style TargetType="MenuItem">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="MenuItem">
-                                    <ContentPresenter Content="{TemplateBinding Header}"/>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="Tag"
+                                Value="{Binding RelativeSource={RelativeSource AncestorType=Menu}, Path=DataContext}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ., Converter={StaticResource ObjectGetType}}"
+                                         Value="{x:Type m:Website}">
+                                <Setter Property="Command"
+                                        Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.OpenWebsiteCommand}"/>
+                                <Setter Property="CommandParameter"
+                                        Value="{Binding}"/>
+                                <Setter Property="ContextMenu">
+                                    <Setter.Value>
+                                        <ContextMenu>
+                                            <MenuItem Header="{DynamicResource favorites_remove}"
+                                                      Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.RemoveItemCommand}"
+                                                      CommandParameter="{Binding}"/>
+                                        </ContextMenu>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
                     </Style>
                 </MenuItem.ItemContainerStyle>
+
                 <MenuItem.ItemsSource>
-                    <x:Array Type="{x:Type sys:Object}">
+                    <CompositeCollection>
+                        <!--Favorites Manager-->
                         <MenuItem Padding="10,7"
-                                  Style="{StaticResource MenuItemBaseStyle}"
                                   Header="{DynamicResource mainWindow_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
-                        <Separator Visibility="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count, Converter={StaticResource VisiableIfNotZero}}"/>
-                        <ItemsControl ItemsSource="{x:Static data:GlobalData.Favorites}">
-                            <ItemsControl.Resources>
-                                <Style TargetType="MenuItem"
-                                       BasedOn="{StaticResource {x:Type MenuItem}}">
-                                    <Setter Property="Tag"
-                                            Value="{Binding RelativeSource={RelativeSource AncestorType=Menu}, Path=DataContext}"/>
-                                </Style>
-                            </ItemsControl.Resources>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type m:Website}">
-                                    <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.OpenWebsiteCommand}"
-                                              CommandParameter="{Binding}">
-                                        <MenuItem.Header>
-                                            <TextBlock MaxWidth="225"
-                                                       TextTrimming="CharacterEllipsis">
-                                                <Run Text="{Binding Name}"/><LineBreak/>
-                                                <Run FontSize="10"
-                                                     Foreground="{DynamicResource SecondaryTextBrush}"
-                                                     Text="{Binding Url}"/>
-                                            </TextBlock>
-                                        </MenuItem.Header>
-                                        <MenuItem.ContextMenu>
-                                            <ContextMenu>
-                                                <MenuItem Header="{DynamicResource favorites_remove}"
-                                                          Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.RemoveItemCommand}"
-                                                          CommandParameter="{Binding}"/>
-                                            </ContextMenu>
-                                        </MenuItem.ContextMenu>
-                                    </MenuItem>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </x:Array>
+
+                        <Separator Visibility="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count,
+                                                        Converter={StaticResource VisiableIfNotZero}}"/>
+
+                        <!--Favorites Items-->
+                        <CollectionContainer Collection="{Binding Source={x:Static data:GlobalData.Favorites}}"/>
+                    </CompositeCollection>
                 </MenuItem.ItemsSource>
             </MenuItem>
 
