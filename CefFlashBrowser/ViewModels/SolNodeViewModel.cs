@@ -220,8 +220,7 @@ namespace CefFlashBrowser.ViewModels
 
                     // make sure the order is correct
                     int nodeIndex = Children.IndexOf(node);
-                    Children.RemoveAt(nodeIndex);
-                    Children.Insert(nodeIndex + offset, node);
+                    Children.Move(nodeIndex, nodeIndex + offset);
 
                     UpdateDensePortionNodeName();
                 }
