@@ -11,8 +11,6 @@
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         mc:Ignorable="d"
-        
-        x:Name="window"
         Width="800"
         Height="500"
         Title="{DynamicResource solSaveManager_title}"
@@ -79,7 +77,7 @@
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="Filter">
                                 <i:InvokeCommandAction PassEventArgsToCommand="True"
-                                                       Command="{Binding ElementName=window, Path=DataContext.FilterCommand}"/>
+                                                       Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.FilterCommand}"/>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                     </CollectionViewSource>
