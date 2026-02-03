@@ -188,18 +188,33 @@ namespace CefFlashBrowser.Models.Data
         {
             try
             {
-                if (File.Exists(SettingsPath))
+                bool fileExists = File.Exists(SettingsPath);
+
+                if (fileExists)
                 {
-                    JObject settingsJson = JObject.Parse(File.ReadAllText(SettingsPath));
-                    settingsJson.Merge(JToken.FromObject(Settings));
-                    SafeWriteFile(SettingsPath, settingsJson.ToString(Formatting.Indented));
-                    LogHelper.LogInfo("Settings saved successfully, type: merge");
+                    string oldSettingsContent = File.ReadAllText(SettingsPath);
+
+                    try
+                    {
+                        // Merge with existing settings
+                        JObject settingsJson = JObject.Parse(oldSettingsContent);
+                        settingsJson.Merge(JToken.FromObject(Settings));
+                        SafeWriteFile(SettingsPath, settingsJson.ToString(Formatting.Indented));
+
+                        LogHelper.LogInfo("Settings saved successfully, type: merge");
+                        return true;
+                    }
+                    catch (JsonReaderException e)
+                    {
+                        LogHelper.LogError("Settings merge failed, falling back to overwrite", e);
+                        LogHelper.LogInfo("Old settings content: " + oldSettingsContent);
+                    }
                 }
-                else
-                {
-                    SafeWriteFile(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
-                    LogHelper.LogInfo("Settings saved successfully, type: create");
-                }
+
+                // File does not exist or merge failed
+                SafeWriteFile(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+
+                LogHelper.LogInfo("Settings saved successfully, type: " + (fileExists ? "overwrite" : "create"));
                 return true;
             }
             catch (Exception e)
