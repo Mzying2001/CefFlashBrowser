@@ -307,11 +307,10 @@
                             </c:SettingItem>
 
                             <!--cefsharp version-->
-                            <c:SettingItem Description="{DynamicResource settings_cefVersion}"
-                                           Visibility="Collapsed">
+                            <!--<c:SettingItem Description="{DynamicResource settings_cefVersion}">
                                 <Button Content="{Binding Source={StaticResource AppInfo}, Path=CefSharpVersion, TargetNullValue={StaticResource settings_buttonViewDetails}}"
                                         Command="{Binding PopupAboutCefCommand}"/>
-                            </c:SettingItem>
+                            </c:SettingItem>-->
                         </c:SettingGroup>
                     </StackPanel>
                 </ScrollViewer>
