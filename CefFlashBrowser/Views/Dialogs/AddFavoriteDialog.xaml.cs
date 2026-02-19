@@ -20,8 +20,12 @@ namespace CefFlashBrowser.Views.Dialogs
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            _supressClose = false;
-            FocusManager.SetFocusedElement(this, nameTextBox);
+
+            Dispatcher.InvokeAsync(() =>
+            {
+                _supressClose = false;
+                FocusManager.SetFocusedElement(this, nameTextBox);
+            });
         }
 
         protected override void OnClosing(CancelEventArgs e)

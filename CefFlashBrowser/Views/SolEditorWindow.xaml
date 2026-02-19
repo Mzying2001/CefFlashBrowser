@@ -13,8 +13,6 @@
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
-        
-        x:Name="window"
         Width="450"
         Height="500"
         WindowStartupLocation="CenterScreen"
@@ -242,36 +240,36 @@
                           InputGestureText="Ctrl+W"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource solEditor_edit}"
-                      IsEnabled="{Binding ElementName=treeView, Path=SelectedValue, Converter={StaticResource NotNull}}">
+                      IsEnabled="{Binding SelectedNode, Converter={StaticResource NotNull}}">
                 <MenuItem Header="{DynamicResource solEditor_addItem}"
                           Command="{Binding AddChildCommand}"
-                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
-                          IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanAddChild}"/>
+                          CommandParameter="{Binding SelectedNode}"
+                          IsEnabled="{Binding SelectedNode.CanAddChild}"/>
                 <MenuItem Header="{DynamicResource solEditor_removeItem}"
                           Command="{Binding RemoveItemCommand}"
-                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
-                          IsEnabled="{Binding ElementName=treeView, Path=SelectedValue.CanRemove}"/>
+                          CommandParameter="{Binding SelectedNode}"
+                          IsEnabled="{Binding SelectedNode.CanRemove}"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource common_rename}"
                           Command="{Binding RenameItemCommand}"
-                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
-                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanRename, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                          CommandParameter="{Binding SelectedNode}"
+                          Visibility="{Binding SelectedNode.CanRename, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                 <MenuItem Header="{DynamicResource common_moveUp}"
                           Command="{Binding MoveUpCommand}"
-                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
-                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                          CommandParameter="{Binding SelectedNode}"
+                          Visibility="{Binding SelectedNode.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                 <MenuItem Header="{DynamicResource common_moveDown}"
                           Command="{Binding MoveDownCommand}"
-                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
-                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                          CommandParameter="{Binding SelectedNode}"
+                          Visibility="{Binding SelectedNode.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                 <MenuItem Header="{DynamicResource common_moveToTop}"
                           Command="{Binding MoveToTopCommand}"
-                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
-                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                          CommandParameter="{Binding SelectedNode}"
+                          Visibility="{Binding SelectedNode.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                 <MenuItem Header="{DynamicResource common_moveToBottom}"
                           Command="{Binding MoveToBottomCommand}"
-                          CommandParameter="{Binding ElementName=treeView, Path=SelectedValue}"
-                          Visibility="{Binding ElementName=treeView, Path=SelectedValue.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
+                          CommandParameter="{Binding SelectedNode}"
+                          Visibility="{Binding SelectedNode.CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
             </MenuItem>
         </Menu>
 
@@ -308,9 +306,14 @@
                        ToolTip="{Binding FilePath, Mode=OneWay}"/>
         </StatusBar>
 
-        <TreeView x:Name="treeView"
-                  BorderThickness="0"
+        <TreeView BorderThickness="0"
                   ItemsSource="{Binding RootNodes}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectedItemChanged">
+                    <i:InvokeCommandAction Command="{Binding SelectNodeCommand}"
+                                           CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TreeView}, Path=SelectedItem}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                     <DockPanel MinHeight="35"

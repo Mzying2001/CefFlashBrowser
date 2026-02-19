@@ -13,6 +13,7 @@ namespace CefFlashBrowser.ViewModels
 {
     public class SolEditorWindowViewModel : ViewModelBase
     {
+        public DelegateCommand SelectNodeCommand { get; set; }
         public DelegateCommand SaveFileCommand { get; set; }
         public DelegateCommand SaveAsFileCommand { get; set; }
         public DelegateCommand RemoveItemCommand { get; set; }
@@ -33,6 +34,13 @@ namespace CefFlashBrowser.ViewModels
         public SolNodeViewModel[] RootNodes
         {
             get => new SolNodeViewModel[] { Root };
+        }
+
+        private SolNodeViewModel _selectedNode;
+        public SolNodeViewModel SelectedNode
+        {
+            get => _selectedNode;
+            set => UpdateValue(ref _selectedNode, value);
         }
 
         public string SolName
@@ -72,6 +80,7 @@ namespace CefFlashBrowser.ViewModels
         protected override void Init()
         {
             base.Init();
+            SelectNodeCommand = new DelegateCommand<SolNodeViewModel>(UpdateSelectedNode);
             SaveFileCommand = new DelegateCommand(SaveFileCmdImpl);
             SaveAsFileCommand = new DelegateCommand(SaveAsFile);
             RemoveItemCommand = new DelegateCommand<SolNodeViewModel>(RemoveItem);
@@ -90,6 +99,11 @@ namespace CefFlashBrowser.ViewModels
         {
             _file.SolName = Root.Name?.ToString() ?? string.Empty;
             SolHelper.SetAllValues(_file, Root.GetAllValues());
+        }
+
+        private void UpdateSelectedNode(SolNodeViewModel node)
+        {
+            SelectedNode = node;
         }
 
         public void SaveFile()

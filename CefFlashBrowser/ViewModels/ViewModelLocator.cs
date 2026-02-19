@@ -12,7 +12,6 @@ namespace CefFlashBrowser.ViewModels
             SimpleIoc.Global.Register<FavoritesManagerViewModel>();
             SimpleIoc.Global.Register<LanguageSelectorViewModel>();
             SimpleIoc.Global.Register<SolSaveManagerViewModel>(Lifetime.Transient);
-            SimpleIoc.Global.Register<AddFavoriteDialogViewModel>(Lifetime.Transient);
         }
 
         public MainWindowViewModel MainWindowViewModel
@@ -43,11 +42,6 @@ namespace CefFlashBrowser.ViewModels
         public SolSaveManagerViewModel SolSaveManagerViewModel
         {
             get => SimpleIoc.Global.GetInstance<SolSaveManagerViewModel>();
-        }
-
-        public AddFavoriteDialogViewModel AddFavoriteDialogViewModel
-        {
-            get => SimpleIoc.Global.GetInstance<AddFavoriteDialogViewModel>();
         }
     }
 }
