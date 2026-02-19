@@ -33,10 +33,17 @@ namespace CefFlashBrowser.ViewModels
 
         private void AddItem()
         {
-            if (WindowManager.ShowAddFavoriteDialog(
-                LanguageManager.GetString("favorites_defaultName"), "about:blank"))
+            var vm = new AddFavoriteDialogViewModel
             {
-                SelectedWebsite = Favorites.LastOrDefault();
+                Name = LanguageManager.GetString("favorites_defaultName"),
+                Url = "about:blank",
+            };
+
+            if (WindowManager.ShowAddFavoriteDialog(vm))
+            {
+                var website = vm.Website.Clone();
+                Favorites.Add(website);
+                SelectedWebsite = website;
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Models;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 
@@ -6,8 +6,9 @@ namespace CefFlashBrowser.ViewModels
 {
     public class AddFavoriteDialogViewModel : ViewModelBase
     {
-        public DelegateCommand AddFavoriteCommand { get; set; }
-        public DelegateCommand CancelAddCommand { get; set; }
+        public DelegateCommand ConfirmCommand { get; set; }
+        public DelegateCommand CancelCommand { get; set; }
+
 
         private string _name = string.Empty;
         public string Name
@@ -16,7 +17,7 @@ namespace CefFlashBrowser.ViewModels
             set
             {
                 if (UpdateValue(ref _name, value))
-                    AddFavoriteCommand.RaiseCanExecuteChanged();
+                    ConfirmCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -27,7 +28,7 @@ namespace CefFlashBrowser.ViewModels
             set
             {
                 if (UpdateValue(ref _url, value))
-                    AddFavoriteCommand.RaiseCanExecuteChanged();
+                    ConfirmCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -38,27 +39,32 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _dialogResult, value);
         }
 
-        private void AddFavorite()
+        public Website Website
         {
-            GlobalData.Favorites.Add(new Models.Website(Name.Trim(), Url.Trim()));
+            get => new Website(Name, Url);
+        }
+
+
+        private void Confirm()
+        {
             DialogResult = true;
         }
 
-        private bool CanAddFavorite(object _)
+        private bool CanConfirm(object _)
         {
             return !string.IsNullOrWhiteSpace(Name)
                 && !string.IsNullOrWhiteSpace(Url);
         }
 
-        private void CancelAdd()
+        private void Cancel()
         {
             DialogResult = false;
         }
 
         public AddFavoriteDialogViewModel()
         {
-            AddFavoriteCommand = new DelegateCommand(AddFavorite) { CanExecuteFunc = CanAddFavorite };
-            CancelAddCommand = new DelegateCommand(CancelAdd);
+            ConfirmCommand = new DelegateCommand(Confirm) { CanExecuteFunc = CanConfirm };
+            CancelCommand = new DelegateCommand(Cancel);
         }
     }
 }
