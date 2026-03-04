@@ -63,7 +63,7 @@
                 <Rectangle.Style>
                     <Style TargetType="Rectangle">
                         <Setter Property="Tag"
-                                Value="{Binding RelativeSource={RelativeSource AncestorType=ContentPresenter}, Path=Tag}"/>
+                                Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Tag}"/>
                         <Setter Property="Fill"
                                 Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag}"/>
                         <Style.Triggers>
