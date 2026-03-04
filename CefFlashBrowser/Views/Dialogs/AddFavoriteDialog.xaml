@@ -9,6 +9,7 @@
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:utils="clr-namespace:CefFlashBrowser.Utils"
+        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         mc:Ignorable="d"
         
         Width="350"
@@ -16,16 +17,19 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         Title="{DynamicResource dialog_addFavorite}"
-        DataContext="{Binding Source={StaticResource Locator}, Path=AddFavoriteDialogViewModel}"
         utils:DialogHelper.DialogResult="{Binding DialogResult, Mode=OneWay}">
+
+    <d:Window.DataContext>
+        <vm:AddFavoriteDialogViewModel/>
+    </d:Window.DataContext>
 
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
         <KeyBinding Gesture="Esc"
-                    Command="{Binding CancelAddCommand}"/>
+                    Command="{Binding CancelCommand}"/>
         <KeyBinding Gesture="Enter"
-                    Command="{Binding AddFavoriteCommand}"/>
+                    Command="{Binding ConfirmCommand}"/>
     </Window.InputBindings>
 
     <i:Interaction.Behaviors>
@@ -63,12 +67,12 @@
                         HorizontalAlignment="Right">
                 <Button MinWidth="70"
                         Content="{DynamicResource dialog_cancel}"
-                        Command="{Binding CancelAddCommand}"/>
+                        Command="{Binding CancelCommand}"/>
                 <Button MinWidth="70"
                         Margin="10,0,0,0"
                         Content="{DynamicResource dialog_ok}"
                         Style="{StaticResource ButtonPrimary}"
-                        Command="{Binding AddFavoriteCommand}"/>
+                        Command="{Binding ConfirmCommand}"/>
             </StackPanel>
         </Grid>
     </Grid>

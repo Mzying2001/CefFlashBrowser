@@ -179,7 +179,16 @@ namespace CefFlashBrowser.ViewModels
 
         public void AddFavorite(IWebBrowser browser)
         {
-            WindowManager.ShowAddFavoriteDialog(GetWebBrowserTitle(browser), browser.Address);
+            var vm = new AddFavoriteDialogViewModel
+            {
+                Name = GetWebBrowserTitle(browser),
+                Url = browser.Address,
+            };
+
+            if (WindowManager.ShowAddFavoriteDialog(vm))
+            {
+                GlobalData.Favorites.Add(vm.Website.Clone());
+            }
         }
 
         public void ToggleLoadingState(IWebBrowser browser)
