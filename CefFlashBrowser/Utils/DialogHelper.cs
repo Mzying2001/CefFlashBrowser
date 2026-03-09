@@ -104,9 +104,16 @@ namespace CefFlashBrowser.Utils
             var hOwner = new WindowInteropHelper(owner).Handle;
             bool storeEnabled = Win32.IsWindowEnabled(hOwner);
 
+            // Re-enable the owner BEFORE the HWND is destroyed (in Closing),
+            // so Windows activates the owner (not another window) on close.
+            window.Closing += (s, e) =>
+            {
+                if (!e.Cancel)
+                    Win32.EnableWindow(hOwner, storeEnabled);
+            };
+
             window.Closed += (s, e) =>
             {
-                Win32.EnableWindow(hOwner, storeEnabled);
                 owner.Activate();
                 frame.Continue = false;
             };
