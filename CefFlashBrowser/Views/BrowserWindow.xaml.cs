@@ -163,6 +163,7 @@ namespace CefFlashBrowser.Views
             Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
             Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+            Messenger.Global.Register(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
 
             Closed += delegate
             {
@@ -170,6 +171,7 @@ namespace CefFlashBrowser.Views
                 Messenger.Global.Unregister(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
                 Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+                Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
             };
         }
 
@@ -334,6 +336,15 @@ namespace CefFlashBrowser.Views
             if (msg == DataContext)
             {
                 OnFullScreenChanged(ViewModel.Fullscreen);
+            }
+        }
+
+        private void FocusFindPopupHandler(object msg)
+        {
+            if (msg == DataContext)
+            {
+                // Re-focus the search textbox when Ctrl+F is pressed while find popup is already open
+                Keyboard.Focus(findTextBox);
             }
         }
 
