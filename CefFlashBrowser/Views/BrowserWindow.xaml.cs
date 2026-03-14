@@ -3,15 +3,14 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
-using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 
@@ -437,12 +436,13 @@ namespace CefFlashBrowser.Views
         private void UpdateFindPopupPosition()
         {
             Point pos;
+            var popupWidth = findPopup.Child.RenderSize.Width;
 
             if (findButton.IsVisible)
             {
                 pos = findButton.PointToScreen(new Point
                 {
-                    X = findButton.ActualWidth - findPopup.Child.RenderSize.Width,
+                    X = findButton.ActualWidth - popupWidth,
                     Y = findButton.ActualHeight
                 });
             }
@@ -450,10 +450,26 @@ namespace CefFlashBrowser.Views
             {
                 pos = mainGrid.PointToScreen(new Point
                 {
-                    X = mainGrid.ActualWidth - findPopup.Child.RenderSize.Width - 20,
+                    X = mainGrid.ActualWidth - popupWidth - 20,
                     Y = 20
                 });
             }
+
+            // Clamp to current monitor's work area to prevent WPF popup flip
+            var hMonitor = Win32.MonitorFromWindow(_hwnd, Win32.MONITOR_DEFAULTTONEAREST);
+            var monitorInfo = new Win32.MONITORINFO { cbSize = Marshal.SizeOf<Win32.MONITORINFO>() };
+
+            if (Win32.GetMonitorInfo(hMonitor, ref monitorInfo))
+            {
+                var workArea = monitorInfo.rcWork;
+
+                if (pos.X + popupWidth > workArea.right)
+                    pos.X = workArea.right - popupWidth;
+
+                if (pos.X < workArea.left)
+                    pos.X = workArea.left;
+            }
+
             findPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
         }
     }

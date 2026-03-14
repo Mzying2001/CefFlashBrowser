@@ -29,6 +29,9 @@ namespace CefFlashBrowser.Utils
         public const uint SWP_NOACTIVATE = 0x0010;
         public const uint SWP_FRAMECHANGED = 0x0020;
 
+        // monitor
+        public const uint MONITOR_DEFAULTTONEAREST = 2;
+
         // dwm attributes
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
@@ -52,6 +55,16 @@ namespace CefFlashBrowser.Utils
         {
             public int x;
             public int y;
+        }
+
+        // monitor info structure
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MONITORINFO
+        {
+            public int cbSize;
+            public RECT rcMonitor;
+            public RECT rcWork;
+            public uint dwFlags;
         }
 
         // os version info structure
@@ -138,5 +151,11 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("ntdll.dll", CharSet = CharSet.Unicode)]
         public static extern int RtlGetVersion(ref OSVERSIONINFOW lpVersionInformation);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
     }
 }
