@@ -1,6 +1,5 @@
 ﻿using CefSharp;
 using System;
-using System.Diagnostics;
 
 namespace CefFlashBrowser.Utils.Handlers
 {
@@ -13,11 +12,7 @@ namespace CefFlashBrowser.Utils.Handlers
 
             try
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = downloadItem.Url,
-                    UseShellExecute = true,
-                });
+                Win32.DoFileDownload(downloadItem.Url);
             }
             catch (Exception e)
             {

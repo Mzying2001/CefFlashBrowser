@@ -166,5 +166,8 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("shell32.dll")]
         public static extern void ILFree(IntPtr pidl);
+
+        [DllImport("shdocvw.dll", CharSet = CharSet.Unicode)]
+        public static extern int DoFileDownload(string url);
     }
 }
