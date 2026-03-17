@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
-        xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
+        xmlns:data="clr-namespace:CefFlashBrowser.Data"
         xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:converter="clr-namespace:CefFlashBrowser.Utils.Converters"

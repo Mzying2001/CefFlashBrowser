@@ -1,4 +1,4 @@
-﻿namespace CefFlashBrowser.Models.Data
+﻿namespace CefFlashBrowser.Data
 {
     public static class MessageTokens
     {

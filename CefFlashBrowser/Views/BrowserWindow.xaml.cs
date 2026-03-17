@@ -1,6 +1,6 @@
-﻿using CefFlashBrowser.FlashBrowser.Handlers;
+﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.Data;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefSharp;

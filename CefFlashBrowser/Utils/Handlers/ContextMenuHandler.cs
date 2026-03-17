@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
