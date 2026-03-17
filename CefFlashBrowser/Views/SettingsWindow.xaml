@@ -254,9 +254,25 @@
                                                Margin="5"
                                                Text="{DynamicResource settings_userAgent}"
                                                VerticalAlignment="Center"/>
-                                    <TextBox Grid.Column="1"
-                                             Margin="5"
-                                             Text="{Binding UserAgent, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <ComboBox Grid.Column="1"
+                                              Margin="5"
+                                              IsEditable="True"
+                                              TextSearch.TextPath="UserAgent"
+                                              Text="{Binding UserAgent, UpdateSourceTrigger=PropertyChanged}"
+                                              ItemsSource="{Binding UserAgentPresets}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel MaxWidth="500">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock FontSize="10"
+                                                               Text="{Binding UserAgent}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </Grid>
                             </hc:Card>
 
