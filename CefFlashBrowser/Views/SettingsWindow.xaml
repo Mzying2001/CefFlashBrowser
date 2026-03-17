@@ -87,21 +87,25 @@
 
                         <!--theme-->
                         <c:SettingGroup Header="{DynamicResource settings_headerTheme}">
+                            <c:SettingItem Description="{DynamicResource settings_followSystemTheme}">
+                                <CheckBox IsChecked="{Binding FollowSystemTheme}"/>
+                            </c:SettingItem>
+
                             <c:SettingItem Description="{DynamicResource settings_currentTheme}">
+                                <c:SettingItem.Style>
+                                    <Style TargetType="c:SettingItem" BasedOn="{StaticResource {x:Type c:SettingItem}}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding FollowSystemTheme}"
+                                                         Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </c:SettingItem.Style>
                                 <ComboBox ItemsSource="{Binding Themes}"
                                           SelectedIndex="{Binding CurrentThemeIndex, Mode=OneWay}"
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Value">
-                                    <ComboBox.Style>
-                                        <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding FollowSystemTheme}"
-                                                             Value="True">
-                                                    <Setter Property="IsEnabled" Value="False"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.Style>
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="SelectionChanged">
                                             <i:InvokeCommandAction Command="{Binding SetThemeCommand}"
@@ -109,10 +113,6 @@
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </ComboBox>
-                            </c:SettingItem>
-
-                            <c:SettingItem Description="{DynamicResource settings_followSystemTheme}">
-                                <CheckBox IsChecked="{Binding FollowSystemTheme}"/>
                             </c:SettingItem>
                         </c:SettingGroup>
 
