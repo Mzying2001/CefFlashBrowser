@@ -31,15 +31,16 @@ The C++/CLI projects (CefFlashBrowser.Sol, CefFlashBrowser.Singleton) require Vi
 |---------|------|---------|
 | **CefFlashBrowser** | WPF App (.NET 4.6.2) | Main application — Views, ViewModels, Models, Utils |
 | **CefFlashBrowser.FlashBrowser** | C# Library | Flash-enabled browser controls wrapping CefSharp |
-| **CefFlashBrowser.WinformCefSharp4WPF** | C# Library | Bridges WinForms CefSharp into WPF via WindowsFormsHost |
+| **CefFlashBrowser.WinformCefSharp4WPF** | C# Library | Bridges WinForms CefSharp into WPF via HwndHost |
 | **CefFlashBrowser.Sol** | C++/CLI Library | SOL file parser/writer with AMF0/AMF3 serialization |
 | **CefFlashBrowser.Singleton** | C++/CLI Library | Win32 IPC messaging for single-instance enforcement |
-| **CefFlashBrowser.Log** | C# Library (.NET Standard 2.1) | File-based logging |
+| **CefFlashBrowser.Log** | C# Library (.NET 4.6.2) | File-based logging |
 | **CefFlashBrowser.EmptyExe** | WPF Exe | Minimal subprocess used by CefSharp |
 
 ### Main App Structure (CefFlashBrowser/)
 
-- **Models/Data/** — `GlobalData` (global app state, paths, config), `MessageTokens` (MVVM messenger tokens), `Settings` (serialized user preferences)
+- **Data/** — `GlobalData` (global app state, paths, config), `MessageTokens` (MVVM messenger tokens)
+- **Models/** — `Settings` (serialized user preferences), domain models (search engines, themes, SOL types, etc.)
 - **ViewModels/** — One ViewModel per window; `ViewModelLocator` wires DI via `SimpleIoc`
 - **Views/** — WPF windows and dialogs; `Views/Custom/` for reusable controls; `Views/Dialogs/` for modal dialogs
 - **Utils/** — Helpers (`WindowManager`, `ThemeManager`, `LanguageManager`, `DialogHelper`, `SolHelper`), `Converters/`, `Behaviors/`, `Handlers/`
