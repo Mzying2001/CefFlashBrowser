@@ -34,7 +34,7 @@ namespace CefFlashBrowser.Utils.Handlers
                 model.InsertItemAt(0, Search, header);
                 count++;
 
-                if (UrlHelper.IsHttpUrl(selectionText))
+                if (UrlHelper.IsUrl(selectionText))
                 {
                     header = LanguageManager.GetFormattedString("browser_openSelectedUrl", truncatedText);
                     model.InsertCheckItemAt(0, OpenSelectedUrl, header);
