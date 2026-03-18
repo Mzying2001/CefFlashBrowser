@@ -189,13 +189,18 @@ namespace CefFlashBrowser.Utils
         {
             ShowWindow<PopupWebPage>(initializer: window =>
             {
-                window.Address = address;
+                window.SetCurrentValue(PopupWebPage.AddressProperty, address);
+
                 if (popupFeatures != null)
                 {
-                    window.Left = popupFeatures.X;
-                    window.Top = popupFeatures.Y;
-                    window.Width = popupFeatures.Width;
-                    window.Height = popupFeatures.Height;
+                    if (popupFeatures.XSet != 0)
+                        window.SetCurrentValue(Window.LeftProperty, (double)popupFeatures.X);
+                    if (popupFeatures.YSet != 0)
+                        window.SetCurrentValue(Window.TopProperty, (double)popupFeatures.Y);
+                    if (popupFeatures.WidthSet != 0)
+                        window.SetCurrentValue(Window.WidthProperty, (double)popupFeatures.Width);
+                    if (popupFeatures.HeightSet != 0)
+                        window.SetCurrentValue(Window.HeightProperty, (double)popupFeatures.Height);
                 }
             });
         }
