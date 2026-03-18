@@ -264,6 +264,30 @@ namespace CefFlashBrowser.FlashBrowser
 
             public void OnContextCreated(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)
             {
+                // Fix: Intercept GET form submissions targeting _blank to preserve
+                // query parameters that would otherwise be lost in OnBeforePopup.
+                frame.ExecuteJavaScriptAsync(@"
+                    (function() {
+                        document.addEventListener('submit', function(e) {
+                            if (e.defaultPrevented) return;
+                            var form = e.target;
+                            var target = form.target;
+                            if (!target) {
+                                var b = document.querySelector('base[target]');
+                                if (b) target = b.target;
+                            }
+                            if (!target || target.toLowerCase() !== '_blank') return;
+                            if (form.method && form.method.toLowerCase() === 'post') return;
+                            e.preventDefault();
+                            var fd = new FormData(form);
+                            var params = new URLSearchParams(fd).toString();
+                            var url = form.action;
+                            if (params) url += (url.indexOf('?') >= 0 ? '&' : '?') + params;
+                            window.open(url, '_blank');
+                        }, false);
+                    })();
+                ");
+
                 if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
                 {
                     browserEx.Dispatcher.InvokeAsync(() => browserEx.OnJsContextCreated(browser, frame));
