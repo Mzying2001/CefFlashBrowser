@@ -47,6 +47,11 @@ The C++/CLI projects (CefFlashBrowser.Sol, CefFlashBrowser.Singleton) require Vi
 - **Assets/** — Icons, SVGs, language resource dictionaries, bundled CEF/Flash binaries (tar.gz archives extracted at post-build)
 - **Themes/** — WPF theme resource dictionaries
 
+### Reference Documentation (Docs/)
+
+- `amf0-file-format-specification.pdf` — AMF0 file format specification (used by CefFlashBrowser.Sol)
+- `amf3-file-format-spec.pdf` — AMF3 file format specification (used by CefFlashBrowser.Sol)
+
 ### Key Patterns
 
 - **MVVM messaging:** Cross-component communication uses `Messenger` with tokens defined in `MessageTokens.cs`
