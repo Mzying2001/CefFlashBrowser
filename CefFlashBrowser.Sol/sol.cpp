@@ -127,7 +127,8 @@ namespace
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, T> ReadBigEndian(uint8_t* data, int size, int& index)
+    auto ReadBigEndian(uint8_t* data, int size, int& index)
+        -> std::enable_if_t<std::is_integral_v<T>, T>
     {
         if (index + sizeof(T) > size) {
             throw std::runtime_error(utils::FormatString(
@@ -141,7 +142,8 @@ namespace
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, void> WriteBigEndian(std::vector<uint8_t>& buffer, T value)
+    auto WriteBigEndian(std::vector<uint8_t>& buffer, T value)
+        -> std::enable_if_t<std::is_integral_v<T>, void>
     {
         T tmp = utils::ToBigEndian(value);
         buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&tmp), reinterpret_cast<uint8_t*>(&tmp) + sizeof(T));
