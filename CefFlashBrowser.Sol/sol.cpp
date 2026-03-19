@@ -890,8 +890,9 @@ sol::SolValue sol::ReadAMF0XmlDoc(uint8_t* data, int size, int& index)
 
 sol::SolValue sol::ReadAMF0Date(uint8_t* data, int size, int& index)
 {
+    SolValue result(SolType::Date, ReadAMF0Number(data, size, index));
     int16_t zone = ReadBigEndian<int16_t>(data, size, index); // unused
-    return SolValue(SolType::Date, ReadAMF0Number(data, size, index));
+    return result;
 }
 
 sol::SolValue sol::ReadAMF0Reference(uint8_t* data, int size, int& index, SolRefTable& reftable)
@@ -1070,8 +1071,8 @@ void sol::WriteAMF0XmlDoc(std::vector<uint8_t>& buffer, const SolString& value)
 
 void sol::WriteAMF0Date(std::vector<uint8_t>& buffer, SolDouble value)
 {
-    WriteBigEndian(buffer, (int16_t)0); // timezone
     WriteAMF0Number(buffer, value);
+    WriteBigEndian(buffer, (int16_t)0); // timezone
 }
 
 void sol::WriteAMF0EcmaArray(std::vector<uint8_t>& buffer, const SolArray& value, SolWriteRefTable& reftable)
