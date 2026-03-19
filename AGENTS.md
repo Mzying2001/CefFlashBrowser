@@ -19,7 +19,15 @@ dotnet build CefFlashBrowser.slnx --configuration Release --arch x86
 dotnet build CefFlashBrowser.slnx --configuration Debug --arch x64
 ```
 
-The C++/CLI projects (CefFlashBrowser.Sol, CefFlashBrowser.Singleton) require Visual C++ build tools. There are no automated tests in this project.
+The C++/CLI projects (CefFlashBrowser.Sol, CefFlashBrowser.Singleton) require Visual C++ build tools.
+
+```bash
+# Run unit tests (x64)
+dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64
+
+# Run unit tests (x86)
+dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x86
+```
 
 ## Architecture
 

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <Platforms>x86;x64</Platforms>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
+  </ItemGroup>
+
+  <!-- Link source files from the main app that are testable without C++/CLI dependencies -->
+  <ItemGroup>
+    <Compile Include="..\CefFlashBrowser\Utils\UrlHelper.cs" Link="LinkedSources\UrlHelper.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\Converters\ValueConverterBase.cs" Link="LinkedSources\ValueConverterBase.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\Converters\BinaryToSizeString.cs" Link="LinkedSources\BinaryToSizeString.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\Converters\ZoomLevelToScale.cs" Link="LinkedSources\ZoomLevelToScale.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\Settings.cs" Link="LinkedSources\Settings.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\Theme.cs" Link="LinkedSources\Theme.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\SearchEngine.cs" Link="LinkedSources\SearchEngine.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\NavigationType.cs" Link="LinkedSources\NavigationType.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\NewPageBehavior.cs" Link="LinkedSources\NewPageBehavior.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\ProxySettings.cs" Link="LinkedSources\ProxySettings.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\UserAgentSetting.cs" Link="LinkedSources\UserAgentSetting.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\FakeFlashVersionSetting.cs" Link="LinkedSources\FakeFlashVersionSetting.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\WindowSizeInfo.cs" Link="LinkedSources\WindowSizeInfo.cs" />
+  </ItemGroup>
+
+</Project>
