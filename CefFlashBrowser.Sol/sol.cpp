@@ -97,11 +97,13 @@ namespace
     std::string GetClassDefUniqueStr(const sol::SolClassDef& classdef)
     {
         std::stringstream ss;
-        ss << classdef.name << ';'
-            << classdef.dynamic << ';'
-            << classdef.externalizable << ';';
+
+        ss << classdef.name.size() << ':' << classdef.name;
+        ss << ',' << classdef.dynamic;
+        ss << ',' << classdef.externalizable;
+
         for (const auto& member : classdef.members) {
-            ss << member << ';';
+            ss << ',' << member.size() << ':' << member;
         }
         return ss.str();
     }
