@@ -8,36 +8,26 @@ CefFlashBrowser is a Windows WPF desktop application providing a web browser wit
 
 ## Build Commands
 
-```bash
-# Build entire solution (x64 Release)
-dotnet build CefFlashBrowser.slnx --configuration Release --arch x64
+The solution contains C++/CLI projects, so **must use VS MSBuild** (not `dotnet build`). The MSBuild path may vary by VS edition (Community/Professional/Enterprise).
 
-# Build entire solution (x86 Release)
-dotnet build CefFlashBrowser.slnx --configuration Release --arch x86
-
-# Build Debug
-dotnet build CefFlashBrowser.slnx --configuration Debug --arch x64
+```cmd
+:: Build solution (x64 Debug)
+set DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR=C:\Program Files\dotnet
+"C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe" ^
+  CefFlashBrowser.slnx -p:Configuration=Debug -p:Platform=x64 -restore
 ```
 
-The C++/CLI projects (CefFlashBrowser.Sol, CefFlashBrowser.Singleton) require Visual C++ build tools.
-
-```bash
-# Build and run unit tests (requires VS MSBuild for C++/CLI projects)
-# Step 1: Build with VS MSBuild (sets DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR for .NET SDK resolution)
-DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR="C:\Program Files\dotnet" ^
-  "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe" ^
-  CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Configuration=Debug -p:Platform=x64 -restore
-
-# Step 2: Run tests
-dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 --no-build
-
-# Alternative: Build in Visual Studio first, then run tests
+```cmd
+:: Build and run unit tests
+set DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR=C:\Program Files\dotnet
+"C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe" ^
+  CefFlashBrowser.Tests\CefFlashBrowser.Tests.csproj -p:Configuration=Debug -p:Platform=x64 -restore
 dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 --no-build
 ```
 
 ## Architecture
 
-**Solution:** `CefFlashBrowser.slnx` — 7 projects, MVVM pattern using SimpleMvvm framework.
+**Solution:** `CefFlashBrowser.slnx` — 8 projects, MVVM pattern using SimpleMvvm framework.
 
 ### Projects
 
@@ -50,6 +40,7 @@ dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 -
 | **CefFlashBrowser.Singleton** | C++/CLI Library | Win32 IPC messaging for single-instance enforcement |
 | **CefFlashBrowser.Log** | C# Library (.NET 4.6.2) | File-based logging |
 | **CefFlashBrowser.EmptyExe** | WPF Exe | Minimal subprocess used by CefSharp |
+| **CefFlashBrowser.Tests** | MSTest (.NET 4.6.2) | Unit tests — links source files from main app via `<Compile Include>` |
 
 ### Main App Structure (CefFlashBrowser/)
 
@@ -65,6 +56,15 @@ dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 -
 
 - `amf0-file-format-specification.pdf` — AMF0 file format specification (used by CefFlashBrowser.Sol)
 - `amf3-file-format-spec.pdf` — AMF3 file format specification (used by CefFlashBrowser.Sol)
+
+### Unit Tests (CefFlashBrowser.Tests/)
+
+- **Framework:** MSTest (`Microsoft.NET.Test.Sdk`, `MSTest.TestAdapter`, `MSTest.TestFramework`)
+- **Project references:** Only `CefFlashBrowser.Log` and `CefFlashBrowser.Sol` — does **not** reference the main app project
+- **Source linking:** Testable source files (Models, Utils, Converters) are linked from the main app via `<Compile Include>` entries in the test `.csproj`. To test a new class, add a corresponding `<Compile Include>` link.
+- **Limitation:** WPF is enabled (`<UseWPF>true`), but there is no reference to the main app project or CefSharp — cannot directly test code that depends on CefSharp or main app types not linked via `<Compile Include>`
+- **Test data:** SOL fixture files in `TestData/` directory (copied to output via `<Content>`)
+- **Test classes:** `AmfEncodingTests`, `SolFileReadWriteTests`, `SettingsTests`, `UrlHelperTests`, `ConverterTests`, `FileLoggerTests`
 
 ### Key Patterns
 
