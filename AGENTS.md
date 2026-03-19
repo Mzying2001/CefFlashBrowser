@@ -22,11 +22,17 @@ dotnet build CefFlashBrowser.slnx --configuration Debug --arch x64
 The C++/CLI projects (CefFlashBrowser.Sol, CefFlashBrowser.Singleton) require Visual C++ build tools.
 
 ```bash
-# Run unit tests (x64)
-dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64
+# Build and run unit tests (requires VS MSBuild for C++/CLI projects)
+# Step 1: Build with VS MSBuild (sets DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR for .NET SDK resolution)
+DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR="C:\Program Files\dotnet" ^
+  "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe" ^
+  CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Configuration=Debug -p:Platform=x64 -restore
 
-# Run unit tests (x86)
-dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x86
+# Step 2: Run tests
+dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 --no-build
+
+# Alternative: Build in Visual Studio first, then run tests
+dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 --no-build
 ```
 
 ## Architecture

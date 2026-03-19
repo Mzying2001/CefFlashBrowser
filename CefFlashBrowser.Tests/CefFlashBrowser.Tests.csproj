@@ -16,9 +16,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
+    <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
   </ItemGroup>
 
-  <!-- Link source files from the main app that are testable without C++/CLI dependencies -->
+  <!-- Link source files from the main app -->
   <ItemGroup>
     <Compile Include="..\CefFlashBrowser\Utils\UrlHelper.cs" Link="LinkedSources\UrlHelper.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\Converters\ValueConverterBase.cs" Link="LinkedSources\ValueConverterBase.cs" />
@@ -33,6 +34,17 @@
     <Compile Include="..\CefFlashBrowser\Models\UserAgentSetting.cs" Link="LinkedSources\UserAgentSetting.cs" />
     <Compile Include="..\CefFlashBrowser\Models\FakeFlashVersionSetting.cs" Link="LinkedSources\FakeFlashVersionSetting.cs" />
     <Compile Include="..\CefFlashBrowser\Models\WindowSizeInfo.cs" Link="LinkedSources\WindowSizeInfo.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\SolHelper.cs" Link="LinkedSources\SolHelper.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\SolObject.cs" Link="LinkedSources\SolObject.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\SolArray.cs" Link="LinkedSources\SolArray.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\SolTypeDesc.cs" Link="LinkedSources\SolTypeDesc.cs" />
+  </ItemGroup>
+
+  <!-- Test fixture files -->
+  <ItemGroup>
+    <Content Include="TestData\**\*.sol">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
