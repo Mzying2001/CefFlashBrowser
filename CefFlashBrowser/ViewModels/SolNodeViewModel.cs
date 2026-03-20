@@ -322,6 +322,16 @@ namespace CefFlashBrowser.ViewModels
             Editor?.OnNodeChanged(SolNodeChangeType.Removed, this);
         }
 
+        public SolNodeViewModel GetRoot()
+        {
+            var result = this;
+
+            while (result.Parent != null)
+                result = result.Parent;
+
+            return result;
+        }
+
         public SolNodeViewModel(SolEditorWindowViewModel editor, SolNodeViewModel parent, object name, object value)
         {
             Editor = editor;
