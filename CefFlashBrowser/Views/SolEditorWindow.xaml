@@ -115,7 +115,7 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <Button Command="{Binding Editor.AddChildCommand}"
+                <Button Command="{Binding DataContext.AddChildCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         CommandParameter="{Binding}"
                         ToolTip="{DynamicResource solEditor_addItem}">
                     <svgc:SvgIcon Width="12"
@@ -128,7 +128,7 @@
         <!--Open editor button-->
         <DataTemplate x:Key="OpenTextEditorTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
-            <Button Command="{Binding Editor.EditTextCommand}"
+            <Button Command="{Binding DataContext.EditTextCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                     CommandParameter="{Binding}">
                 <Button.Style>
                     <Style TargetType="Button"
@@ -193,14 +193,14 @@
                     </TextBlock.Style>
                 </TextBlock>
                 <Button ToolTip="{DynamicResource common_export}"
-                        Command="{Binding Editor.ExportBinaryCommand}"
+                        Command="{Binding DataContext.ExportBinaryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         CommandParameter="{Binding}">
                     <svgc:SvgIcon Width="12.5"
                                   Height="12.5"
                                   UriSource="/Assets/Svgs/export.svg"/>
                 </Button>
                 <Button ToolTip="{DynamicResource common_import}"
-                        Command="{Binding Editor.ImportBinaryCommand}"
+                        Command="{Binding DataContext.ImportBinaryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         CommandParameter="{Binding}">
                     <svgc:SvgIcon Width="13"
                                   Height="13"
@@ -354,36 +354,45 @@
                        BasedOn="{StaticResource {x:Type TreeViewItem}}">
                     <Setter Property="IsExpanded" Value="True"/>
                     <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
+                    <Setter Property="Tag"
+                            Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"/>
                     <Setter Property="ContextMenu">
                         <Setter.Value>
                             <ContextMenu>
+                                <ContextMenu.Resources>
+                                    <Style TargetType="MenuItem"
+                                           BasedOn="{StaticResource {x:Type MenuItem}}">
+                                        <Setter Property="Tag"
+                                                Value="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                    </Style>
+                                </ContextMenu.Resources>
                                 <MenuItem Header="{DynamicResource solEditor_addItem}"
                                           IsEnabled="{Binding CanAddChild}"
-                                          Command="{Binding Editor.AddChildCommand}"
+                                          Command="{Binding Tag.AddChildCommand, RelativeSource={RelativeSource Mode=Self}}"
                                           CommandParameter="{Binding}"/>
                                 <MenuItem Header="{DynamicResource solEditor_removeItem}"
                                           IsEnabled="{Binding CanRemove}"
-                                          Command="{Binding Editor.RemoveItemCommand}"
+                                          Command="{Binding Tag.RemoveItemCommand, RelativeSource={RelativeSource Mode=Self}}"
                                           CommandParameter="{Binding}"/>
                                 <Separator/>
                                 <MenuItem Header="{DynamicResource common_rename}"
-                                          Command="{Binding Editor.RenameItemCommand}"
+                                          Command="{Binding Tag.RenameItemCommand, RelativeSource={RelativeSource Mode=Self}}"
                                           CommandParameter="{Binding}"
                                           Visibility="{Binding CanRename, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                                 <MenuItem Header="{DynamicResource common_moveUp}"
-                                          Command="{Binding Editor.MoveUpCommand}"
+                                          Command="{Binding Tag.MoveUpCommand, RelativeSource={RelativeSource Mode=Self}}"
                                           CommandParameter="{Binding}"
                                           Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                                 <MenuItem Header="{DynamicResource common_moveDown}"
-                                          Command="{Binding Editor.MoveDownCommand}"
+                                          Command="{Binding Tag.MoveDownCommand, RelativeSource={RelativeSource Mode=Self}}"
                                           CommandParameter="{Binding}"
                                           Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                                 <MenuItem Header="{DynamicResource common_moveToTop}"
-                                          Command="{Binding Editor.MoveToTopCommand}"
+                                          Command="{Binding Tag.MoveToTopCommand, RelativeSource={RelativeSource Mode=Self}}"
                                           CommandParameter="{Binding}"
                                           Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                                 <MenuItem Header="{DynamicResource common_moveToBottom}"
-                                          Command="{Binding Editor.MoveToBottomCommand}"
+                                          Command="{Binding Tag.MoveToBottomCommand, RelativeSource={RelativeSource Mode=Self}}"
                                           CommandParameter="{Binding}"
                                           Visibility="{Binding CanMove, Converter={StaticResource Boolean2VisibilityConverter}}"/>
                             </ContextMenu>
