@@ -69,7 +69,8 @@ namespace CefFlashBrowser.ViewModels
         public SolEditorWindowViewModel(SolFileWrapper file)
         {
             _file = file;
-            Root = new SolNodeViewModel(this, file);
+            Root = new SolNodeViewModel(file);
+            Root.NodeChanged += OnNodeChanged;
         }
 
         [Obsolete("Designer only", true)]
@@ -410,7 +411,7 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        internal void OnNodeChanged(SolNodeChangeType type, SolNodeViewModel node)
+        private void OnNodeChanged(object sender, SolNodeChangeType type)
         {
             Status = SolEditorStatus.Modified;
         }

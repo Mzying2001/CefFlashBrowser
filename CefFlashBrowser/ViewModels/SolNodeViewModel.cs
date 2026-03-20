@@ -11,7 +11,12 @@ namespace CefFlashBrowser.ViewModels
 {
     public class SolNodeViewModel : ViewModelBase
     {
-        public SolEditorWindowViewModel Editor { get; }
+        /// <summary>
+        /// Occurs when this node or any descendant node changes.
+        /// This event is only raised on the root node.
+        /// </summary>
+        public event EventHandler<SolNodeChangeType> NodeChanged;
+
         public SolNodeViewModel Parent { get; }
 
         private object _name;
@@ -48,7 +53,7 @@ namespace CefFlashBrowser.ViewModels
                     RaisePropertyChanged();
                     RaisePropertyChanged(nameof(DisplayName));
                     Parent?.OnChildrenNameChanged(this, oldName);
-                    Editor?.OnNodeChanged(SolNodeChangeType.NameChanged, this);
+                    RaiseNodeChanged(SolNodeChangeType.NameChanged);
                 }
             }
         }
@@ -65,7 +70,7 @@ namespace CefFlashBrowser.ViewModels
                     RaisePropertyChanged(nameof(TypeString));
                     UpdateChildren();
                     Parent?.OnChildrenValueChanged(this);
-                    Editor?.OnNodeChanged(SolNodeChangeType.ValueChanged, this);
+                    RaiseNodeChanged(SolNodeChangeType.ValueChanged);
                 }
             }
         }
@@ -139,25 +144,25 @@ namespace CefFlashBrowser.ViewModels
             {
                 foreach (var pair in SolHelper.GetAllValues(file))
                 {
-                    children.Add(new SolNodeViewModel(Editor, this, pair.Key, pair.Value));
+                    children.Add(new SolNodeViewModel(this, pair.Key, pair.Value));
                 }
             }
             else if (Value is SolArray arr)
             {
                 foreach (var pair in arr.AssocPortion)
                 {
-                    children.Add(new SolNodeViewModel(Editor, this, pair.Key, pair.Value));
+                    children.Add(new SolNodeViewModel(this, pair.Key, pair.Value));
                 }
                 for (int i = 0; i < arr.DensePortion.Count; i++)
                 {
-                    children.Add(new SolNodeViewModel(Editor, this, i, arr.DensePortion[i]));
+                    children.Add(new SolNodeViewModel(this, i, arr.DensePortion[i]));
                 }
             }
             else if (Value is SolObject obj)
             {
                 foreach (var pair in obj.Properties)
                 {
-                    children.Add(new SolNodeViewModel(Editor, this, pair.Key, pair.Value));
+                    children.Add(new SolNodeViewModel(this, pair.Key, pair.Value));
                 }
             }
 
@@ -253,14 +258,14 @@ namespace CefFlashBrowser.ViewModels
 
             if (Value is SolFileWrapper)
             {
-                node = new SolNodeViewModel(Editor, this, name, value);
+                node = new SolNodeViewModel(this, name, value);
             }
             else if (Value is SolArray arr)
             {
                 if (name is string key)
                 {
                     arr.AssocPortion.Add(key, value);
-                    node = new SolNodeViewModel(Editor, this, key, value);
+                    node = new SolNodeViewModel(this, key, value);
                 }
                 else
                 {
@@ -269,19 +274,19 @@ namespace CefFlashBrowser.ViewModels
                     arr.DensePortion.Insert(index, value);
 
                     insertIndex = Children.Count;
-                    node = new SolNodeViewModel(Editor, this, index, value);
+                    node = new SolNodeViewModel(this, index, value);
                 }
             }
             else if (Value is SolObject obj)
             {
                 obj.Properties.Add(name.ToString(), value);
-                node = new SolNodeViewModel(Editor, this, name, value);
+                node = new SolNodeViewModel(this, name, value);
             }
 
             if (node != null)
             {
                 Children.Insert(insertIndex, node);
-                Editor?.OnNodeChanged(SolNodeChangeType.Added, node);
+                node.RaiseNodeChanged(SolNodeChangeType.Added);
             }
         }
 
@@ -319,7 +324,7 @@ namespace CefFlashBrowser.ViewModels
             if (updateSiblingNames)
                 Parent.UpdateDensePortionNodeName();
 
-            Editor?.OnNodeChanged(SolNodeChangeType.Removed, this);
+            RaiseNodeChanged(SolNodeChangeType.Removed);
         }
 
         public SolNodeViewModel GetRoot()
@@ -332,18 +337,21 @@ namespace CefFlashBrowser.ViewModels
             return result;
         }
 
-        public SolNodeViewModel(SolEditorWindowViewModel editor, SolNodeViewModel parent, object name, object value)
+        protected void RaiseNodeChanged(SolNodeChangeType type)
         {
-            Editor = editor;
+            GetRoot().NodeChanged?.Invoke(this, type);
+        }
+
+        public SolNodeViewModel(SolNodeViewModel parent, object name, object value)
+        {
             Parent = parent;
             _name = name;
             _value = value;
             UpdateChildren();
         }
 
-        public SolNodeViewModel(SolEditorWindowViewModel editor, SolFileWrapper file)
+        public SolNodeViewModel(SolFileWrapper file)
         {
-            Editor = editor;
             Parent = null;
             _name = file.SolName;
             _value = file;
