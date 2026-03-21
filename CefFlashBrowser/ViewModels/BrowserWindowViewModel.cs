@@ -274,10 +274,10 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void OnPopup(string url, IPopupFeatures features)
+        public void OnPopup(string url, WindowSizeInfo sizeInfo)
         {
             Fullscreen = false;
-            WindowManager.ShowPopupWebPage(url, features);
+            WindowManager.ShowPopupWebPage(url, sizeInfo);
         }
 
         public void OnDevToolsOpened(IWebBrowser browser, IntPtr hDevTools)

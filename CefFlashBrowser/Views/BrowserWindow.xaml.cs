@@ -85,11 +85,28 @@ namespace CefFlashBrowser.Views
             {
                 if (!window._isClosed)
                 {
+                    var isPopup = targetDisposition == WindowOpenDisposition.NewPopup;
+
+                    // Extract popupFeatures properties in synchronous context,
+                    // as CEF disposes the object after OnBeforePopup returns.
+                    WindowSizeInfo popupSizeInfo = null;
+
+                    if (isPopup && popupFeatures != null)
+                    {
+                        popupSizeInfo = new WindowSizeInfo
+                        {
+                            Left = popupFeatures.XSet != 0 ? popupFeatures.X : double.NaN,
+                            Top = popupFeatures.YSet != 0 ? popupFeatures.Y : double.NaN,
+                            Width = popupFeatures.WidthSet != 0 ? popupFeatures.Width : double.NaN,
+                            Height = popupFeatures.HeightSet != 0 ? popupFeatures.Height : double.NaN,
+                        };
+                    }
+
                     window.Dispatcher.InvokeAsync(delegate
                     {
-                        if (targetDisposition == WindowOpenDisposition.NewPopup)
+                        if (isPopup)
                         {
-                            window.ViewModel.OnPopup(targetUrl, popupFeatures);
+                            window.ViewModel.OnPopup(targetUrl, popupSizeInfo);
                         }
                         else
                         {

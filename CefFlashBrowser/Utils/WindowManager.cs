@@ -184,23 +184,12 @@ namespace CefFlashBrowser.Utils
             ShowWindow<SwfPlayerWindow>(initializer: window => window.FileName = fileName);
         }
 
-        public static void ShowPopupWebPage(string address, CefSharp.IPopupFeatures popupFeatures = null)
+        public static void ShowPopupWebPage(string address, WindowSizeInfo sizeInfo = null)
         {
             ShowWindow<PopupWebPage>(initializer: window =>
             {
+                WindowSizeInfo.Apply(sizeInfo, window);
                 window.SetCurrentValue(PopupWebPage.AddressProperty, address);
-
-                if (popupFeatures != null)
-                {
-                    if (popupFeatures.XSet != 0)
-                        window.SetCurrentValue(Window.LeftProperty, (double)popupFeatures.X);
-                    if (popupFeatures.YSet != 0)
-                        window.SetCurrentValue(Window.TopProperty, (double)popupFeatures.Y);
-                    if (popupFeatures.WidthSet != 0)
-                        window.SetCurrentValue(Window.WidthProperty, (double)popupFeatures.Width);
-                    if (popupFeatures.HeightSet != 0)
-                        window.SetCurrentValue(Window.HeightProperty, (double)popupFeatures.Height);
-                }
             });
         }
 
