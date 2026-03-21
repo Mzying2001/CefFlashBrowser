@@ -21,8 +21,8 @@ namespace CefFlashBrowser.Utils
         // store all browser window instances
         private static readonly List<BrowserWindow> _browserWindows;
 
-        // store Sol editor windows by file path
-        private static readonly Dictionary<string, Window> _solEditorWindows;
+        // store Sol editor windows by view model to ensure only one editor per Sol file
+        private static readonly Dictionary<SolEditorWindowViewModel, Window> _solEditorWindows;
 
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace CefFlashBrowser.Utils
         {
             _singletonWindows = new Dictionary<Type, Window>();
             _browserWindows = new List<BrowserWindow>();
-            _solEditorWindows = new Dictionary<string, Window>();
+            _solEditorWindows = new Dictionary<SolEditorWindowViewModel, Window>();
         }
 
         /// <summary>
@@ -283,20 +283,24 @@ namespace CefFlashBrowser.Utils
         {
             try
             {
-                if (_solEditorWindows.ContainsKey(fileName))
+                var vm = _solEditorWindows.Keys
+                    .Where(x => string.Equals(x.FilePath, fileName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+
+                if (vm != null)
                 {
-                    var window = _solEditorWindows[fileName];
+                    var window = _solEditorWindows[vm];
                     BringWindowToFront(window);
                 }
                 else
                 {
                     var file = new SolFileWrapper(fileName);
+                    vm = new SolEditorWindowViewModel(file);
 
                     ShowWindow<SolEditorWindow>(initializer: window =>
                     {
-                        _solEditorWindows.Add(fileName, window);
-                        window.DataContext = new SolEditorWindowViewModel(file);
-                        window.Closed += (s, e) => _solEditorWindows.Remove(fileName);
+                        window.DataContext = vm;
+                        window.Closed += (s, e) => _solEditorWindows.Remove(vm);
+                        _solEditorWindows.Add(vm, window);
                     });
                 }
             }
