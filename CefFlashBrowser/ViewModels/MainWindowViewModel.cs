@@ -172,8 +172,9 @@ namespace CefFlashBrowser.ViewModels
             if (!_disposed)
             {
                 if (disposing)
-                { }
-                Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+                {
+                    Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+                }
                 _disposed = true;
             }
         }
