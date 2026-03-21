@@ -104,8 +104,18 @@
 
         <GroupBox Grid.Column="2"
                   Margin="0,10,10,10"
-                  Header="{DynamicResource favorites_edit}"
-                  IsEnabled="{Binding SelectedWebsite, Converter={StaticResource NotNull}}">
+                  Header="{DynamicResource favorites_edit}">
+            <GroupBox.Style>
+                <Style TargetType="GroupBox"
+                       BasedOn="{StaticResource {x:Type GroupBox}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedWebsite}"
+                                     Value="{x:Null}">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </GroupBox.Style>
             <Grid>
                 <Grid.BindingGroup>
                     <BindingGroup x:Name="itemEditingGroup"/>
