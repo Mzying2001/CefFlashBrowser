@@ -109,7 +109,15 @@ namespace CefFlashBrowser.ViewModels
 
         private void ViewGithub()
         {
-            Process.Start("https://github.com/Mzying2001/CefFlashBrowser");
+            try
+            {
+                Process.Start("https://github.com/Mzying2001/CefFlashBrowser");
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError("Failed to open GitHub URL", e);
+                WindowManager.ShowError(e.Message);
+            }
         }
 
         private void OpenWebsite(Website website)

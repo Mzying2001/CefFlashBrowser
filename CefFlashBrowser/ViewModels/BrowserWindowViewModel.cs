@@ -101,7 +101,15 @@ namespace CefFlashBrowser.ViewModels
 
         public void OpenInDefaultBrowser(string url)
         {
-            Process.Start(url);
+            try
+            {
+                Process.Start(url);
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError($"Failed to open URL in default browser: {url}", e);
+                WindowManager.ShowError(e.Message);
+            }
         }
 
         private static string GetWebBrowserTitle(IWebBrowser browser)
