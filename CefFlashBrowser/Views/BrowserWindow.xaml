@@ -307,40 +307,34 @@
                 <Button Margin="10,0,0,0"
                         Command="{Binding ToggleLoadingStateCommand}"
                         CommandParameter="{Binding ElementName=browser}">
-                    <Button.Content>
-                        <Binding ElementName="browser"
-                                 Path="IsLoading">
-                            <Binding.Converter>
-                                <converter:BoolToObject>
-                                    <converter:BoolToObject.TrueObject>
-                                        <svgc:SvgIcon Width="12"
-                                                      Height="12"
-                                                      UriSource="/Assets/Svgs/stop.svg"/>
-                                    </converter:BoolToObject.TrueObject>
-                                    <converter:BoolToObject.FalseObject>
-                                        <svgc:SvgIcon Width="14"
-                                                      Height="14"
-                                                      UriSource="/Assets/Svgs/reload.svg"/>
-                                    </converter:BoolToObject.FalseObject>
-                                </converter:BoolToObject>
-                            </Binding.Converter>
-                        </Binding>
-                    </Button.Content>
-                    <Button.ToolTip>
-                        <Binding ElementName="browser"
-                                 Path="IsLoading">
-                            <Binding.Converter>
-                                <converter:BoolToObject>
-                                    <converter:BoolToObject.TrueObject>
-                                        <TextBlock Text="{DynamicResource browser_toolTipStop}"/>
-                                    </converter:BoolToObject.TrueObject>
-                                    <converter:BoolToObject.FalseObject>
-                                        <TextBlock Text="{DynamicResource browser_toolTipReload}"/>
-                                    </converter:BoolToObject.FalseObject>
-                                </converter:BoolToObject>
-                            </Binding.Converter>
-                        </Binding>
-                    </Button.ToolTip>
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <svgc:SvgIcon Width="12"
+                                                  Height="12"
+                                                  UriSource="/Assets/Svgs/stop.svg"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="ToolTip"
+                                    Value="{DynamicResource browser_toolTipStop}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}"
+                                             Value="False">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <svgc:SvgIcon Width="14"
+                                                          Height="14"
+                                                          UriSource="/Assets/Svgs/reload.svg"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="ToolTip"
+                                            Value="{DynamicResource browser_toolTipReload}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
             </StackPanel>
 
