@@ -25,6 +25,11 @@ set DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR=C:\Program Files\dotnet
 dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 --no-build
 ```
 
+```powershell
+# Build Release (x86 + x64) and create versioned zip archives in bin\Publish\
+powershell -ExecutionPolicy Bypass -File publish.ps1
+```
+
 ## Architecture
 
 **Solution:** `CefFlashBrowser.slnx` — 8 projects, MVVM pattern using SimpleMvvm framework.
