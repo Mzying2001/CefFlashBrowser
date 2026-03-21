@@ -153,26 +153,25 @@ namespace CefFlashBrowser.Utils
 
         public static void ShowBrowser(string address)
         {
-            var browserWindow = ShowWindow<BrowserWindow>(initializer: window =>
+            ShowWindow<BrowserWindow>(initializer: window =>
             {
                 _browserWindows.Add(window);
                 ((BrowserWindowViewModel)window.DataContext).Address = address;
-            });
 
-            browserWindow.Closing += (s, e) =>
-            {
-                if (e.Cancel) return;
-
-                var window = (BrowserWindow)s;
-                _browserWindows.Remove(window);
-
-                if (_browserWindows.Count == 0
-                    && !GlobalData.IsStartWithoutMainWindow
-                    && GlobalData.Settings.HideMainWindowOnBrowsing)
+                window.Closing += (s, e) =>
                 {
-                    ShowMainWindow();
-                }
-            };
+                    if (e.Cancel) return;
+
+                    _browserWindows.Remove((BrowserWindow)s);
+
+                    if (_browserWindows.Count == 0
+                        && !GlobalData.IsStartWithoutMainWindow
+                        && GlobalData.Settings.HideMainWindowOnBrowsing)
+                    {
+                        ShowMainWindow();
+                    }
+                };
+            });
         }
 
         public static BrowserWindow GetLatestBrowserWindow()
