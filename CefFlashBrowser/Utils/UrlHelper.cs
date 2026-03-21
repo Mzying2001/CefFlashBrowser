@@ -91,7 +91,11 @@ namespace CefFlashBrowser.Utils
                     return $"https://so2.4399.com/search/search.php?k={encoded}";
 
                 default:
+#if CEFFLASHBROWSER_TESTS
+                    throw new ArgumentOutOfRangeException(nameof(engine));
+#else
                     throw new ArgumentException(LanguageManager.GetString("error_unknownSearchEngine"), nameof(engine));
+#endif
             }
         }
     }

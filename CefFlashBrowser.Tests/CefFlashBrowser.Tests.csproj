@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <UseWPF>true</UseWPF>
+    <DefineConstants>$(DefineConstants);CEFFLASHBROWSER_TESTS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
