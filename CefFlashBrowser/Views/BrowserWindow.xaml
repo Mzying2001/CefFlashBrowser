@@ -570,14 +570,19 @@
                         </Setter>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}" Value="False">
-                                <Setter Property="Visibility"
-                                        Value="{Binding ElementName=browser, Path=StatusText, Converter={StaticResource VisiableIfStrNotEmpty}}"/>
                                 <Setter Property="Content">
                                     <Setter.Value>
                                         <TextBlock Text="{Binding ElementName=browser, Path=StatusText}" TextTrimming="CharacterEllipsis"/>
                                     </Setter.Value>
                                 </Setter>
                             </DataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding ElementName=browser, Path=IsLoading}" Value="False"/>
+                                    <Condition Binding="{Binding ElementName=browser, Path=StatusText}" Value=""/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </MultiDataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Label.Style>
