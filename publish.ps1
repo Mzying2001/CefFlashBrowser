@@ -50,12 +50,12 @@ foreach ($dir in @($releaseX86, $releaseX64)) {
 $sln = "$PSScriptRoot\CefFlashBrowser.slnx"
 
 Write-Host "`nBuilding Release|x86 ..." -ForegroundColor Green
-& $msbuild $sln -p:Configuration=Release -p:Platform=x86 -restore -verbosity:minimal
+& $msbuild $sln -t:Rebuild -p:Configuration=Release -p:Platform=x86 -restore -verbosity:minimal
 if ($LASTEXITCODE -ne 0) { Write-Error "Build failed (x86)."; exit 1 }
 
 # -- 6. Build Release (x64) ----------------------------------------------
 Write-Host "`nBuilding Release|x64 ..." -ForegroundColor Green
-& $msbuild $sln -p:Configuration=Release -p:Platform=x64 -restore -verbosity:minimal
+& $msbuild $sln -t:Rebuild -p:Configuration=Release -p:Platform=x64 -restore -verbosity:minimal
 if ($LASTEXITCODE -ne 0) { Write-Error "Build failed (x64)."; exit 1 }
 
 # -- 7. Create Publish directory -----------------------------------------
