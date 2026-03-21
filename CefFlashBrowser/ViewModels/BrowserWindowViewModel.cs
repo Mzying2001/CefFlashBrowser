@@ -114,9 +114,13 @@ namespace CefFlashBrowser.ViewModels
                 }
                 else
                 {
-                    var frame = browser.GetBrowser().MainFrame;
+                    var frame = browser.GetBrowser()?.MainFrame;
+
+                    if (frame == null)
+                        return string.Empty;
+
                     var result = frame.EvaluateScriptAsync("document.title", timeout: TimeSpan.FromSeconds(1)).Result;
-                    return result.Result.ToString();
+                    return result?.Result?.ToString() ?? string.Empty;
                 }
             }
             catch (Exception e)
