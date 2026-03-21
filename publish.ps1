@@ -31,8 +31,20 @@ if (-not $version) {
 
 Write-Host "Version: $version" -ForegroundColor Cyan
 
-# -- 3. Set environment variable -----------------------------------------
-$env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR = "C:\Program Files\dotnet"
+# -- 3. Set DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR --------------------------
+$dotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
+
+if ($dotnetCmd) {
+    $dotnetDir = Split-Path $dotnetCmd.Source
+} elseif (Test-Path "$env:ProgramFiles\dotnet\dotnet.exe") {
+    $dotnetDir = "$env:ProgramFiles\dotnet"
+} else {
+    Write-Error "dotnet not found. Please install the .NET SDK."
+    exit 1
+}
+
+$env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR = $dotnetDir
+Write-Host "dotnet:  $dotnetDir" -ForegroundColor Cyan
 
 # -- 4. Clean Release output folders -------------------------------------
 $binDir = "$PSScriptRoot\bin"
