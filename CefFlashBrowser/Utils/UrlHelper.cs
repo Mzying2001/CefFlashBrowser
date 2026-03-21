@@ -23,9 +23,12 @@ namespace CefFlashBrowser.Utils
             if (input.All(char.IsDigit))
                 return false;
 
-            // 2. Has explicit scheme (http://, https://, ftp://, etc.)
+            // 2. Has explicit scheme (e.g. http://..., https://..., custom://...)
             if (Uri.TryCreate(input, UriKind.Absolute, out var uri))
-                return uri.Scheme != Uri.UriSchemeFile;
+            {
+                return input.Contains("://")
+                    && uri.Scheme != Uri.UriSchemeFile;
+            }
 
             // 3. Try prepending http:// and check if it forms a valid URL
             if (Uri.TryCreate("http://" + input, UriKind.Absolute, out uri))

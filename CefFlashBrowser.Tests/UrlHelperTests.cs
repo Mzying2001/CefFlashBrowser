@@ -109,6 +109,12 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
+        public void IsUrl_UnknownScheme_ReturnsFalse()
+        {
+            Assert.IsFalse(UrlHelper.IsUrl("abc:abc"));
+        }
+
+        [TestMethod]
         public void IsUrl_WithPath_ReturnsTrue()
         {
             Assert.IsTrue(UrlHelper.IsUrl("example.com/path/to/page"));
