@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CefFlashBrowser.Models;
+using System;
 using System.IO;
 using System.Net;
 
@@ -50,6 +51,44 @@ namespace CefFlashBrowser.Utils
         public static bool IsLocalSolFile(string url)
         {
             return Path.GetExtension(url).Equals(".sol", StringComparison.OrdinalIgnoreCase) && File.Exists(url);
+        }
+
+        public static string GetSearchUrl(SearchEngine engine, string keyword)
+        {
+            var encoded = WebUtility.UrlEncode(keyword);
+
+            switch (engine)
+            {
+                case SearchEngine.Baidu:
+                    return $"https://www.baidu.com/s?wd={encoded}";
+
+                case SearchEngine.Google:
+                    return $"https://www.google.com/search?q={encoded}";
+
+                case SearchEngine.Bing:
+                    return $"https://www.bing.com/search?q={encoded}";
+
+                case SearchEngine.Sogou:
+                    return $"https://www.sogou.com/web?query={encoded}";
+
+                case SearchEngine.So360:
+                    return $"https://www.so.com/s?&q={encoded}";
+
+                case SearchEngine.DuckDuckGo:
+                    return $"https://duckduckgo.com/?q={encoded}";
+
+                case SearchEngine.Yandex:
+                    return $"https://yandex.com/search/?text={encoded}";
+
+                case SearchEngine.Bilibili:
+                    return $"https://search.bilibili.com/all?keyword={encoded}";
+
+                case SearchEngine.Game4399:
+                    return $"https://so2.4399.com/search/search.php?k={encoded}";
+
+                default:
+                    throw new ArgumentException(LanguageManager.GetString("error_unknownSearchEngine"), nameof(engine));
+            }
         }
     }
 }

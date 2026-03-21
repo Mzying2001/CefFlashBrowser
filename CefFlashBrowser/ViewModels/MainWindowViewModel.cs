@@ -65,13 +65,17 @@ namespace CefFlashBrowser.ViewModels
                 case NavigationType.Automatic:
                     {
                         if (!UrlHelper.IsUrl(url))
-                            url = SearchEngineHelper.GetUrl(url, GlobalData.Settings.SearchEngine);
+                        {
+                            var engine = GlobalData.Settings.SearchEngine;
+                            url = UrlHelper.GetSearchUrl(engine, url);
+                        }
                     }
                     break;
 
                 case NavigationType.SearchOnly:
                     {
-                        url = SearchEngineHelper.GetUrl(url, GlobalData.Settings.SearchEngine);
+                        var engine = GlobalData.Settings.SearchEngine;
+                        url = UrlHelper.GetSearchUrl(engine, url);
                     }
                     break;
 
