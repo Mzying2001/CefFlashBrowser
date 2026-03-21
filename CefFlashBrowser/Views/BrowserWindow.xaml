@@ -466,18 +466,38 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left"
                             IsHitTestVisible="False">
-                    <Grid>
-                        <Image Width="16"
-                               Height="16"
-                               Margin="8,0,5,0"
-                               Source="{Binding ElementName=browser, Path=FaviconUrl, TargetNullValue=pack://application:\,\,\,/Assets/Icons/page.png}"
-                               Visibility="{Binding ElementName=browser, Path=FaviconUrl, Converter={StaticResource VisiableIfStrNotEmpty}}"/>
-                        <svgc:SvgIcon Width="15"
-                                      Height="15"
-                                      Margin="8.5,0,5.5,0"
-                                      UriSource="/Assets/Svgs/page.svg"
-                                      Visibility="{Binding ElementName=browser, Path=FaviconUrl, Converter={StaticResource VisiableIfStrEmpty}}"/>
-                    </Grid>
+                    <ContentControl>
+                        <ContentControl.Resources>
+                            <Image x:Key="BrowserIcon"
+                                   Width="16"
+                                   Height="16"
+                                   Margin="8,0,5,0"
+                                   Source="{Binding ElementName=browser, Path=FaviconUrl, TargetNullValue=pack://application:\,\,\,/Assets/Icons/page.png}"/>
+                            <svgc:SvgIcon x:Key="DefaultIcon"
+                                          Width="15"
+                                          Height="15"
+                                          Margin="8.5,0,5.5,0"
+                                          UriSource="/Assets/Svgs/page.svg"/>
+                        </ContentControl.Resources>
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content"
+                                        Value="{StaticResource BrowserIcon}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=browser, Path=FaviconUrl}"
+                                                 Value="">
+                                        <Setter Property="Content"
+                                                Value="{StaticResource DefaultIcon}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ElementName=browser, Path=FaviconUrl}"
+                                                 Value="{x:Null}">
+                                        <Setter Property="Content"
+                                                Value="{StaticResource DefaultIcon}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
                     <Separator Width="20">
                         <Separator.LayoutTransform>
                             <RotateTransform Angle="90"/>
