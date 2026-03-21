@@ -257,8 +257,17 @@ namespace CefFlashBrowser.Views
             else
             {
                 bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
-                browser.GetBrowser().CloseBrowser(forceClose);
-                e.Cancel = true;
+                var cefBrowser = browser.GetBrowser();
+
+                if (cefBrowser != null)
+                {
+                    cefBrowser.CloseBrowser(forceClose);
+                    e.Cancel = true;
+                }
+                else
+                {
+                    _doClose = true;
+                }
             }
             base.OnClosing(e);
         }
@@ -267,6 +276,7 @@ namespace CefFlashBrowser.Views
         {
             base.OnClosed(e);
             _isClosed = true;
+            _hwndSource?.RemoveHook(WndProc);
         }
 
         private void OpenBottomContextMenu(UIElement target, ContextMenu menu)
