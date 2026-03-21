@@ -24,10 +24,10 @@ namespace CefFlashBrowser.Utils
                 return false;
 
             // 2. Has explicit scheme (e.g. http://..., https://..., custom://...)
-            if (Uri.TryCreate(input, UriKind.Absolute, out var uri))
+            if (input.Contains("://") &&
+                Uri.TryCreate(input, UriKind.Absolute, out var uri))
             {
-                return input.Contains("://")
-                    && uri.Scheme != Uri.UriSchemeFile;
+                return uri.Scheme != Uri.UriSchemeFile;
             }
 
             // 3. Try prepending http:// and check if it forms a valid URL
