@@ -97,11 +97,13 @@ namespace
     std::string GetClassDefUniqueStr(const sol::SolClassDef& classdef)
     {
         std::stringstream ss;
-        ss << classdef.name << ';'
-            << classdef.dynamic << ';'
-            << classdef.externalizable << ';';
+
+        ss << classdef.name.size() << ':' << classdef.name;
+        ss << ',' << classdef.dynamic;
+        ss << ',' << classdef.externalizable;
+
         for (const auto& member : classdef.members) {
-            ss << member << ';';
+            ss << ',' << member.size() << ':' << member;
         }
         return ss.str();
     }
@@ -125,7 +127,8 @@ namespace
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, T> ReadBigEndian(uint8_t* data, int size, int& index)
+    auto ReadBigEndian(uint8_t* data, int size, int& index)
+        -> std::enable_if_t<std::is_integral_v<T>, T>
     {
         if (index + sizeof(T) > size) {
             throw std::runtime_error(utils::FormatString(
@@ -139,7 +142,8 @@ namespace
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, void> WriteBigEndian(std::vector<uint8_t>& buffer, T value)
+    auto WriteBigEndian(std::vector<uint8_t>& buffer, T value)
+        -> std::enable_if_t<std::is_integral_v<T>, void>
     {
         T tmp = utils::ToBigEndian(value);
         buffer.insert(buffer.end(), reinterpret_cast<uint8_t*>(&tmp), reinterpret_cast<uint8_t*>(&tmp) + sizeof(T));
@@ -890,8 +894,9 @@ sol::SolValue sol::ReadAMF0XmlDoc(uint8_t* data, int size, int& index)
 
 sol::SolValue sol::ReadAMF0Date(uint8_t* data, int size, int& index)
 {
+    SolValue result(SolType::Date, ReadAMF0Number(data, size, index));
     int16_t zone = ReadBigEndian<int16_t>(data, size, index); // unused
-    return SolValue(SolType::Date, ReadAMF0Number(data, size, index));
+    return result;
 }
 
 sol::SolValue sol::ReadAMF0Reference(uint8_t* data, int size, int& index, SolRefTable& reftable)
@@ -1070,8 +1075,8 @@ void sol::WriteAMF0XmlDoc(std::vector<uint8_t>& buffer, const SolString& value)
 
 void sol::WriteAMF0Date(std::vector<uint8_t>& buffer, SolDouble value)
 {
-    WriteBigEndian(buffer, (int16_t)0); // timezone
     WriteAMF0Number(buffer, value);
+    WriteBigEndian(buffer, (int16_t)0); // timezone
 }
 
 void sol::WriteAMF0EcmaArray(std::vector<uint8_t>& buffer, const SolArray& value, SolWriteRefTable& reftable)

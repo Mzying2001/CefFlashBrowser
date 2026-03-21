@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Log;
-using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Log;
 using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;

@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
@@ -57,7 +57,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 Workspaces = Directory.GetDirectories(GlobalData.SharedObjectsPath)
                     .Select(dir => new SaveMgrWorkspaceViewModel(dir)).ToArray();
-                CurrentWorkspace = Workspaces.FirstOrDefault();
+                CurrentWorkspace = GetMostRecentWorkspace(Workspaces);
             }
             catch (Exception e)
             {
@@ -102,6 +102,50 @@ namespace CefFlashBrowser.ViewModels
             }
 
             e.Accepted = false;
+        }
+
+        private static SaveMgrWorkspaceViewModel GetMostRecentWorkspace(
+            SaveMgrWorkspaceViewModel[] workspaces)
+        {
+            if (workspaces == null || workspaces.Length == 0)
+                return null;
+
+            SaveMgrWorkspaceViewModel best = workspaces[0];
+            DateTime bestTime = GetDirectoryLastWriteTimeRecursive(best.WorkspaceDir);
+
+            for (int i = 1; i < workspaces.Length; i++)
+            {
+                DateTime time = GetDirectoryLastWriteTimeRecursive(workspaces[i].WorkspaceDir);
+
+                if (time > bestTime)
+                {
+                    bestTime = time;
+                    best = workspaces[i];
+                }
+            }
+
+            return best;
+        }
+
+        private static DateTime GetDirectoryLastWriteTimeRecursive(string dirPath)
+        {
+            var dirInfo = new DirectoryInfo(dirPath);
+            DateTime latest = dirInfo.LastWriteTime;
+
+            try
+            {
+                foreach (var file in dirInfo.EnumerateFiles("*", SearchOption.AllDirectories))
+                {
+                    if (file.LastWriteTime > latest)
+                        latest = file.LastWriteTime;
+                }
+            }
+            catch
+            {
+                // fall back to directory timestamp if files cannot be enumerated
+            }
+
+            return latest;
         }
 
         public SolSaveManagerViewModel()

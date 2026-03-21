@@ -4,8 +4,8 @@ using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -111,7 +111,20 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                Process.Start("explorer.exe", $"/select,{solFile.FilePath}");
+                int hr = Win32.SHParseDisplayName(solFile.FilePath, IntPtr.Zero, out IntPtr pidl, 0, out _);
+                if (hr != 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                try
+                {
+                    hr = Win32.SHOpenFolderAndSelectItems(pidl, 0, null, 0);
+                    if (hr != 0)
+                        Marshal.ThrowExceptionForHR(hr);
+                }
+                finally
+                {
+                    Win32.ILFree(pidl);
+                }
             }
             catch (Exception e)
             {

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
-        xmlns:data="clr-namespace:CefFlashBrowser.Models.Data"
+        xmlns:data="clr-namespace:CefFlashBrowser.Data"
         mc:Ignorable="d"
         
         x:Name="window"

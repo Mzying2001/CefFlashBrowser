@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
@@ -90,6 +90,28 @@ namespace CefFlashBrowser.ViewModels
                 RaisePropertyChanged();
             }
         }
+
+        private static string ChromeArch
+        {
+            get => Environment.Is64BitProcess ? "; Win64; x64"
+                 : Environment.Is64BitOperatingSystem ? "; WOW64" : "";
+        }
+
+        public List<UserAgentPreset> UserAgentPresets { get; } = new List<UserAgentPreset>
+        {
+            // Internet Explorer
+            new UserAgentPreset("Internet Explorer 9",  "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)"),
+            new UserAgentPreset("Internet Explorer 10", "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)"),
+            new UserAgentPreset("Internet Explorer 11", "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko"),
+            // Chrome
+            new UserAgentPreset("Chrome 69",  $"Mozilla/5.0 (Windows NT 10.0{ChromeArch}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"),
+            new UserAgentPreset("Chrome 87",  $"Mozilla/5.0 (Windows NT 10.0{ChromeArch}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"),
+            new UserAgentPreset("Chrome 109", $"Mozilla/5.0 (Windows NT 10.0{ChromeArch}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"),
+            // Firefox
+            new UserAgentPreset("Firefox 52",  "Mozilla/5.0 (Windows NT 10.0; rv:52.0) Gecko/20100101 Firefox/52.0"),
+            new UserAgentPreset("Firefox 78",  "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0"),
+            new UserAgentPreset("Firefox 115", "Mozilla/5.0 (Windows NT 10.0; rv:115.0) Gecko/20100101 Firefox/115.0"),
+        };
 
         public bool EnableCustomUserAgent
         {

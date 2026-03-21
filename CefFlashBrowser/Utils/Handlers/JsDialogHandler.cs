@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 

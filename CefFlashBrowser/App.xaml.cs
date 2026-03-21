@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using Newtonsoft.Json;

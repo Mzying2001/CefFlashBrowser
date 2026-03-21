@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
@@ -64,7 +64,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 case NavigationType.Automatic:
                     {
-                        if (!UrlHelper.IsHttpUrl(url))
+                        if (!UrlHelper.IsUrl(url))
                             url = SearchEngineHelper.GetUrl(url, GlobalData.Settings.SearchEngine);
                     }
                     break;

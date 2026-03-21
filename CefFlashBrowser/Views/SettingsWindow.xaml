@@ -87,21 +87,25 @@
 
                         <!--theme-->
                         <c:SettingGroup Header="{DynamicResource settings_headerTheme}">
+                            <c:SettingItem Description="{DynamicResource settings_followSystemTheme}">
+                                <CheckBox IsChecked="{Binding FollowSystemTheme}"/>
+                            </c:SettingItem>
+
                             <c:SettingItem Description="{DynamicResource settings_currentTheme}">
+                                <c:SettingItem.Style>
+                                    <Style TargetType="c:SettingItem" BasedOn="{StaticResource {x:Type c:SettingItem}}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding FollowSystemTheme}"
+                                                         Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </c:SettingItem.Style>
                                 <ComboBox ItemsSource="{Binding Themes}"
                                           SelectedIndex="{Binding CurrentThemeIndex, Mode=OneWay}"
                                           DisplayMemberPath="Name"
                                           SelectedValuePath="Value">
-                                    <ComboBox.Style>
-                                        <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding FollowSystemTheme}"
-                                                             Value="True">
-                                                    <Setter Property="IsEnabled" Value="False"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.Style>
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="SelectionChanged">
                                             <i:InvokeCommandAction Command="{Binding SetThemeCommand}"
@@ -109,10 +113,6 @@
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </ComboBox>
-                            </c:SettingItem>
-
-                            <c:SettingItem Description="{DynamicResource settings_followSystemTheme}">
-                                <CheckBox IsChecked="{Binding FollowSystemTheme}"/>
                             </c:SettingItem>
                         </c:SettingGroup>
 
@@ -254,9 +254,25 @@
                                                Margin="5"
                                                Text="{DynamicResource settings_userAgent}"
                                                VerticalAlignment="Center"/>
-                                    <TextBox Grid.Column="1"
-                                             Margin="5"
-                                             Text="{Binding UserAgent, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <ComboBox Grid.Column="1"
+                                              Margin="5"
+                                              IsEditable="True"
+                                              TextSearch.TextPath="UserAgent"
+                                              Text="{Binding UserAgent, UpdateSourceTrigger=PropertyChanged}"
+                                              ItemsSource="{Binding UserAgentPresets}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel MaxWidth="500">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock FontSize="10"
+                                                               Text="{Binding UserAgent}"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </Grid>
                             </hc:Card>
 

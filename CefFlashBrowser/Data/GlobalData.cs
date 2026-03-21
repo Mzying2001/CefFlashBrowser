@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Utils;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SimpleMvvm.Messaging;
@@ -7,7 +8,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
-namespace CefFlashBrowser.Models.Data
+namespace CefFlashBrowser.Data
 {
     public static class GlobalData
     {

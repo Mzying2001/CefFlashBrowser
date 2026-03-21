@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Models.Data;
+﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using IWshRuntimeLibrary;
@@ -284,6 +284,18 @@ namespace CefFlashBrowser.ViewModels
             Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
         }
 
+        private void OpenFindPopup()
+        {
+            if (!ShowFindPopup)
+            {
+                ShowFindPopup = true;
+            }
+            else
+            {
+                Messenger.Global.Send(MessageTokens.FOCUS_FIND_POPUP, this);
+            }
+        }
+
         public void FindText(IWebBrowser browser, bool forward)
         {
             if (string.IsNullOrEmpty(TextToFind))
@@ -308,7 +320,7 @@ namespace CefFlashBrowser.ViewModels
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             ToggleDevToolsCommand = new DelegateCommand<IWebBrowser>(ToggleDevTools);
             ToggleFullscreenCommand = new DelegateCommand<IWebBrowser>(ToggleFullscreen);
-            OpenFindPopupCommand = new DelegateCommand(() => ShowFindPopup = true);
+            OpenFindPopupCommand = new DelegateCommand(OpenFindPopup);
             CloseFindPopupCommand = new DelegateCommand(() => ShowFindPopup = false);
             FindNextTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, true));
             FindPrevTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, false));
