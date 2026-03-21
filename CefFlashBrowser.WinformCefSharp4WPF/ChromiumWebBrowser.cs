@@ -451,6 +451,17 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         {
             if (!browser.IsDisposed)
             {
+                browser.JavascriptMessageReceived -= OnJavascriptMessageReceived;
+                browser.ConsoleMessage -= OnConsoleMessage;
+                browser.StatusMessage -= OnStatusMessage;
+                browser.FrameLoadStart -= OnFrameLoadStart;
+                browser.FrameLoadEnd -= OnFrameLoadEnd;
+                browser.LoadError -= OnLoadError;
+                browser.LoadingStateChanged -= OnLoadingStateChanged;
+                browser.AddressChanged -= OnAddressChanged;
+                browser.TitleChanged -= OnTitleChanged;
+                browser.IsBrowserInitializedChanged -= OnIsBrowserInitializedChanged;
+
                 browser.Dispose();
             }
 
