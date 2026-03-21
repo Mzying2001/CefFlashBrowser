@@ -155,6 +155,7 @@ namespace CefFlashBrowser
 
         private static void OnTerminate()
         {
+            Microsoft.Win32.SystemEvents.UserPreferenceChanged -= UserPreferenceChangedHandler;
             _mutex?.Dispose();
 
             if (_dataInitialized)

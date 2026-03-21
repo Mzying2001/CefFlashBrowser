@@ -83,17 +83,38 @@ namespace CefFlashBrowser.Views
 
             public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
             {
-                window.Dispatcher.Invoke(delegate
+                if (!window._isClosed)
                 {
-                    if (targetDisposition == WindowOpenDisposition.NewPopup)
+                    var isPopup = targetDisposition == WindowOpenDisposition.NewPopup;
+
+                    // Extract popupFeatures properties in synchronous context,
+                    // as CEF disposes the object after OnBeforePopup returns.
+                    WindowSizeInfo popupSizeInfo = null;
+
+                    if (isPopup && popupFeatures != null)
                     {
-                        window.ViewModel.OnPopup(targetUrl, popupFeatures);
+                        popupSizeInfo = new WindowSizeInfo
+                        {
+                            Left = popupFeatures.XSet != 0 ? popupFeatures.X : double.NaN,
+                            Top = popupFeatures.YSet != 0 ? popupFeatures.Y : double.NaN,
+                            Width = popupFeatures.WidthSet != 0 ? popupFeatures.Width : double.NaN,
+                            Height = popupFeatures.HeightSet != 0 ? popupFeatures.Height : double.NaN,
+                        };
                     }
-                    else
+
+                    window.Dispatcher.InvokeAsync(delegate
                     {
-                        window.ViewModel.OnNewPage(targetUrl);
-                    }
-                });
+                        if (isPopup)
+                        {
+                            window.ViewModel.OnPopup(targetUrl, popupSizeInfo);
+                        }
+                        else
+                        {
+                            window.ViewModel.OnNewPage(targetUrl);
+                        }
+                    });
+                }
+
                 newBrowser = null;
                 return true;
             }
@@ -257,8 +278,17 @@ namespace CefFlashBrowser.Views
             else
             {
                 bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
-                browser.GetBrowser().CloseBrowser(forceClose);
-                e.Cancel = true;
+                var cefBrowser = browser.GetBrowser();
+
+                if (cefBrowser != null)
+                {
+                    cefBrowser.CloseBrowser(forceClose);
+                    e.Cancel = true;
+                }
+                else
+                {
+                    _doClose = true;
+                }
             }
             base.OnClosing(e);
         }
@@ -267,6 +297,7 @@ namespace CefFlashBrowser.Views
         {
             base.OnClosed(e);
             _isClosed = true;
+            _hwndSource?.RemoveHook(WndProc);
         }
 
         private void OpenBottomContextMenu(UIElement target, ContextMenu menu)
