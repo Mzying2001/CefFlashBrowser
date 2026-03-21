@@ -83,17 +83,21 @@ namespace CefFlashBrowser.Views
 
             public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
             {
-                window.Dispatcher.Invoke(delegate
+                if (!window._isClosed)
                 {
-                    if (targetDisposition == WindowOpenDisposition.NewPopup)
+                    window.Dispatcher.InvokeAsync(delegate
                     {
-                        window.ViewModel.OnPopup(targetUrl, popupFeatures);
-                    }
-                    else
-                    {
-                        window.ViewModel.OnNewPage(targetUrl);
-                    }
-                });
+                        if (targetDisposition == WindowOpenDisposition.NewPopup)
+                        {
+                            window.ViewModel.OnPopup(targetUrl, popupFeatures);
+                        }
+                        else
+                        {
+                            window.ViewModel.OnNewPage(targetUrl);
+                        }
+                    });
+                }
+
                 newBrowser = null;
                 return true;
             }
