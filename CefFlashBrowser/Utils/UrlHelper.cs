@@ -1,6 +1,7 @@
 ﻿using CefFlashBrowser.Models;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace CefFlashBrowser.Utils
@@ -18,21 +19,21 @@ namespace CefFlashBrowser.Utils
 
             input = input.Trim();
 
-            // 1. Has explicit scheme (http://, https://, ftp://, etc.)
+            // 1. Pure numbers are not URLs
+            if (input.All(char.IsDigit))
+                return false;
+
+            // 2. Has explicit scheme (http://, https://, ftp://, etc.)
             if (Uri.TryCreate(input, UriKind.Absolute, out var uri))
                 return uri.Scheme != Uri.UriSchemeFile;
 
-            // 2. Try prepending http:// and check if it forms a valid URL
+            // 3. Try prepending http:// and check if it forms a valid URL
             if (Uri.TryCreate("http://" + input, UriKind.Absolute, out uri))
             {
                 var host = uri.Host;
 
                 // localhost (with optional port)
                 if (host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
-                    return true;
-
-                // IP address
-                if (IPAddress.TryParse(host, out _))
                     return true;
 
                 // Domain-like: contains dot and is not a plain number (e.g. "3.14")
