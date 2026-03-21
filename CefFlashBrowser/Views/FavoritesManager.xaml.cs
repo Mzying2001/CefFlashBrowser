@@ -17,7 +17,7 @@ namespace CefFlashBrowser.Views
 
         public FavoritesManager()
         {
-            CommitEditCommand = new DelegateCommand(CommitEdit);
+            CommitEditCommand = new DelegateCommand(CommitEdit) { CanExecuteFunc = CanCommit };
             InitializeComponent();
         }
 
@@ -25,6 +25,18 @@ namespace CefFlashBrowser.Views
         {
             base.OnClosed(e);
             Messenger.Global.Send(MessageTokens.SAVE_FAVORITES, null);
+        }
+
+        private void TextChangedHandler(object sender, TextChangedEventArgs e)
+        {
+            var cmd = CommitEditCommand as DelegateCommand;
+            cmd?.RaiseCanExecuteChanged();
+        }
+
+        private bool CanCommit(object _)
+        {
+            return !string.IsNullOrWhiteSpace(urlTextBox.Text)
+                && !string.IsNullOrWhiteSpace(nameTextBox.Text);
         }
 
         private void TrimTextBoxText(TextBox textBox)
@@ -35,13 +47,9 @@ namespace CefFlashBrowser.Views
 
         private void CommitEdit()
         {
-            if (!string.IsNullOrWhiteSpace(urlTextBox.Text) &&
-                !string.IsNullOrWhiteSpace(nameTextBox.Text))
-            {
-                TrimTextBoxText(urlTextBox);
-                TrimTextBoxText(nameTextBox);
-                itemEditingGroup.CommitEdit();
-            }
+            TrimTextBoxText(urlTextBox);
+            TrimTextBoxText(nameTextBox);
+            itemEditingGroup.CommitEdit();
         }
     }
 }
