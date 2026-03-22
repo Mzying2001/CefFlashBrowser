@@ -6,6 +6,8 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
     {
         public virtual void OnBeforeDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem, IBeforeDownloadCallback callback)
         {
+            if (!callback.IsDisposed)
+                callback.Dispose();
         }
 
         public virtual void OnDownloadUpdated(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem downloadItem, IDownloadItemCallback callback)
