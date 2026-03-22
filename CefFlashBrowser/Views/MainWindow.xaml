@@ -86,8 +86,20 @@
                                   Header="{DynamicResource mainWindow_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
 
-                        <Separator Visibility="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count,
-                                                        Converter={StaticResource VisiableIfNotZero}}"/>
+                        <!--Separator that collapses when there are no favorites-->
+                        <Separator>
+                            <Separator.Style>
+                                <Style TargetType="Separator"
+                                       BasedOn="{StaticResource {x:Type Separator}}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count}"
+                                                     Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Separator.Style>
+                        </Separator>
 
                         <!--Favorites Items-->
                         <CollectionContainer Collection="{Binding Source={x:Static data:GlobalData.Favorites}}"/>

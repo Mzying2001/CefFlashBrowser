@@ -153,26 +153,25 @@ namespace CefFlashBrowser.Utils
 
         public static void ShowBrowser(string address)
         {
-            var browserWindow = ShowWindow<BrowserWindow>(initializer: window =>
+            ShowWindow<BrowserWindow>(initializer: window =>
             {
                 _browserWindows.Add(window);
                 ((BrowserWindowViewModel)window.DataContext).Address = address;
-            });
 
-            browserWindow.Closing += (s, e) =>
-            {
-                if (e.Cancel) return;
-
-                var window = (BrowserWindow)s;
-                _browserWindows.Remove(window);
-
-                if (_browserWindows.Count == 0
-                    && !GlobalData.IsStartWithoutMainWindow
-                    && GlobalData.Settings.HideMainWindowOnBrowsing)
+                window.Closing += (s, e) =>
                 {
-                    ShowMainWindow();
-                }
-            };
+                    if (e.Cancel) return;
+
+                    _browserWindows.Remove((BrowserWindow)s);
+
+                    if (_browserWindows.Count == 0
+                        && !GlobalData.IsStartWithoutMainWindow
+                        && GlobalData.Settings.HideMainWindowOnBrowsing)
+                    {
+                        ShowMainWindow();
+                    }
+                };
+            });
         }
 
         public static BrowserWindow GetLatestBrowserWindow()
@@ -185,23 +184,12 @@ namespace CefFlashBrowser.Utils
             ShowWindow<SwfPlayerWindow>(initializer: window => window.FileName = fileName);
         }
 
-        public static void ShowPopupWebPage(string address, CefSharp.IPopupFeatures popupFeatures = null)
+        public static void ShowPopupWebPage(string address, WindowSizeInfo sizeInfo = null)
         {
             ShowWindow<PopupWebPage>(initializer: window =>
             {
+                WindowSizeInfo.Apply(sizeInfo, window);
                 window.SetCurrentValue(PopupWebPage.AddressProperty, address);
-
-                if (popupFeatures != null)
-                {
-                    if (popupFeatures.XSet != 0)
-                        window.SetCurrentValue(Window.LeftProperty, (double)popupFeatures.X);
-                    if (popupFeatures.YSet != 0)
-                        window.SetCurrentValue(Window.TopProperty, (double)popupFeatures.Y);
-                    if (popupFeatures.WidthSet != 0)
-                        window.SetCurrentValue(Window.WidthProperty, (double)popupFeatures.Width);
-                    if (popupFeatures.HeightSet != 0)
-                        window.SetCurrentValue(Window.HeightProperty, (double)popupFeatures.Height);
-                }
             });
         }
 

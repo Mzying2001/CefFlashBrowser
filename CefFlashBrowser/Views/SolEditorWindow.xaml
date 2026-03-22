@@ -239,8 +239,18 @@
                           Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"
                           InputGestureText="Ctrl+W"/>
             </MenuItem>
-            <MenuItem Header="{DynamicResource solEditor_edit}"
-                      IsEnabled="{Binding SelectedNode, Converter={StaticResource NotNull}}">
+            <MenuItem Header="{DynamicResource solEditor_edit}">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedNode}"
+                                         Value="{x:Null}">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
                 <MenuItem Header="{DynamicResource solEditor_addItem}"
                           Command="{Binding AddChildCommand}"
                           CommandParameter="{Binding SelectedNode}"

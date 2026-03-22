@@ -101,7 +101,15 @@ namespace CefFlashBrowser.ViewModels
 
         public void OpenInDefaultBrowser(string url)
         {
-            Process.Start(url);
+            try
+            {
+                Process.Start(url);
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError($"Failed to open URL in default browser: {url}", e);
+                WindowManager.ShowError(e.Message);
+            }
         }
 
         private static string GetWebBrowserTitle(IWebBrowser browser)
@@ -114,9 +122,13 @@ namespace CefFlashBrowser.ViewModels
                 }
                 else
                 {
-                    var frame = browser.GetBrowser().MainFrame;
+                    var frame = browser.GetBrowser()?.MainFrame;
+
+                    if (frame == null)
+                        return string.Empty;
+
                     var result = frame.EvaluateScriptAsync("document.title", timeout: TimeSpan.FromSeconds(1)).Result;
-                    return result.Result.ToString();
+                    return result?.Result?.ToString() ?? string.Empty;
                 }
             }
             catch (Exception e)
@@ -262,10 +274,10 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void OnPopup(string url, IPopupFeatures features)
+        public void OnPopup(string url, WindowSizeInfo sizeInfo)
         {
             Fullscreen = false;
-            WindowManager.ShowPopupWebPage(url, features);
+            WindowManager.ShowPopupWebPage(url, sizeInfo);
         }
 
         public void OnDevToolsOpened(IWebBrowser browser, IntPtr hDevTools)

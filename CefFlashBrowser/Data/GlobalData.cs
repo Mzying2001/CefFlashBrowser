@@ -150,7 +150,14 @@ namespace CefFlashBrowser.Data
         {
             try
             {
-                var file = new FavoritesFile { Favorites = Favorites.ToArray() };
+                Website[] snapshot;
+
+                lock (Favorites)
+                {
+                    snapshot = Favorites.ToArray();
+                }
+
+                var file = new FavoritesFile { Favorites = snapshot };
                 SafeWriteFile(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
                 LogHelper.LogInfo("Favorites saved successfully");
                 return true;

@@ -56,24 +56,29 @@ namespace CefFlashBrowser.Models
                 double desktopWidth = SystemParameters.WorkArea.Width;
                 double desktopHeight = SystemParameters.WorkArea.Height;
 
-                if (sizeInfo.Left < 0 || sizeInfo.Left + sizeInfo.Width > desktopWidth)
+                bool hasTop = !double.IsNaN(sizeInfo.Top);
+                bool hasLeft = !double.IsNaN(sizeInfo.Left);
+                bool hasWidth = !double.IsNaN(sizeInfo.Width);
+                bool hasHeight = !double.IsNaN(sizeInfo.Height);
+
+                if (hasLeft && hasWidth && (sizeInfo.Left < 0 || sizeInfo.Left + sizeInfo.Width > desktopWidth))
                 {
                     sizeInfo.Left = Math.Max(0, Math.Min(sizeInfo.Left, desktopWidth - sizeInfo.Width));
                 }
 
-                if (sizeInfo.Top < 0 || sizeInfo.Top + sizeInfo.Height > desktopHeight)
+                if (hasTop && hasHeight && (sizeInfo.Top < 0 || sizeInfo.Top + sizeInfo.Height > desktopHeight))
                 {
                     sizeInfo.Top = Math.Max(0, Math.Min(sizeInfo.Top, desktopHeight - sizeInfo.Height));
                 }
 
-                window.Left = sizeInfo.Left;
-                window.Top = sizeInfo.Top;
-                window.Width = sizeInfo.Width;
-                window.Height = sizeInfo.Height;
+                if (hasTop) window.SetCurrentValue(Window.TopProperty, sizeInfo.Top);
+                if (hasLeft) window.SetCurrentValue(Window.LeftProperty, sizeInfo.Left);
+                if (hasWidth) window.SetCurrentValue(FrameworkElement.WidthProperty, sizeInfo.Width);
+                if (hasHeight) window.SetCurrentValue(FrameworkElement.HeightProperty, sizeInfo.Height);
 
                 if (sizeInfo.IsMaximized)
                 {
-                    window.WindowState = WindowState.Maximized;
+                    window.SetCurrentValue(Window.WindowStateProperty, WindowState.Maximized);
                 }
             }
         }

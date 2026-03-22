@@ -15,7 +15,7 @@ namespace CefFlashBrowser.Utils.Handlers
             }
 
             var wpfWebBrowser = (IWpfWebBrowser)chromiumWebBrowser;
-            wpfWebBrowser.Dispatcher.Invoke(delegate
+            wpfWebBrowser.Dispatcher.InvokeAsync(delegate
             {
                 var msg = LanguageManager.GetString(isReload ? "message_askWhetherToReload" : "message_askWhetherToLeave");
                 WindowManager.Confirm(msg, wpfWebBrowser.Title, result =>
@@ -29,7 +29,7 @@ namespace CefFlashBrowser.Utils.Handlers
         public override bool OnJSDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, CefJsDialogType dialogType, string messageText, string defaultPromptText, IJsDialogCallback callback, ref bool suppressMessage)
         {
             var wpfWebBrowser = (IWpfWebBrowser)chromiumWebBrowser;
-            wpfWebBrowser.Dispatcher.Invoke(delegate
+            wpfWebBrowser.Dispatcher.InvokeAsync(delegate
             {
                 switch (dialogType)
                 {

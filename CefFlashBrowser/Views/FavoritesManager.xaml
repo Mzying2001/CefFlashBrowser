@@ -104,8 +104,18 @@
 
         <GroupBox Grid.Column="2"
                   Margin="0,10,10,10"
-                  Header="{DynamicResource favorites_edit}"
-                  IsEnabled="{Binding SelectedWebsite, Converter={StaticResource NotNull}}">
+                  Header="{DynamicResource favorites_edit}">
+            <GroupBox.Style>
+                <Style TargetType="GroupBox"
+                       BasedOn="{StaticResource {x:Type GroupBox}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedWebsite}"
+                                     Value="{x:Null}">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </GroupBox.Style>
             <Grid>
                 <Grid.BindingGroup>
                     <BindingGroup x:Name="itemEditingGroup"/>
@@ -113,7 +123,8 @@
 
                 <StackPanel Width="300"
                             VerticalAlignment="Center"
-                            HorizontalAlignment="Center">
+                            HorizontalAlignment="Center"
+                            TextBox.TextChanged="TextChangedHandler">
                     <hc:TextBox x:Name="nameTextBox"
                                 Text="{Binding SelectedWebsite.Name, UpdateSourceTrigger=Explicit}"
                                 hc:TitleElement.Title="{DynamicResource favorites_name}">
@@ -181,14 +192,7 @@
                                     CommandParameter="{Binding SelectedWebsite}"/>
                             <Button Margin="5,0,0,0"
                                     Content="{DynamicResource favorites_save}"
-                                    Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CommitEditCommand}">
-                                <Button.IsEnabled>
-                                    <MultiBinding Converter="{StaticResource StringArrNotAnyEmpty}">
-                                        <Binding Path="Text" ElementName="nameTextBox"/>
-                                        <Binding Path="Text" ElementName="urlTextBox"/>
-                                    </MultiBinding>
-                                </Button.IsEnabled>
-                            </Button>
+                                    Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CommitEditCommand}"/>
                         </StackPanel>
                     </DockPanel>
                 </StackPanel>

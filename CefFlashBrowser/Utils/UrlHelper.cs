@@ -1,5 +1,7 @@
-﻿using System;
+﻿using CefFlashBrowser.Models;
+using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace CefFlashBrowser.Utils
@@ -17,21 +19,24 @@ namespace CefFlashBrowser.Utils
 
             input = input.Trim();
 
-            // 1. Has explicit scheme (http://, https://, ftp://, etc.)
-            if (Uri.TryCreate(input, UriKind.Absolute, out var uri))
-                return uri.Scheme != Uri.UriSchemeFile;
+            // 1. Pure numbers are not URLs
+            if (input.All(char.IsDigit))
+                return false;
 
-            // 2. Try prepending http:// and check if it forms a valid URL
+            // 2. Has explicit scheme (e.g. http://..., https://..., custom://...)
+            if (input.Contains("://") &&
+                Uri.TryCreate(input, UriKind.Absolute, out var uri))
+            {
+                return uri.Scheme != Uri.UriSchemeFile;
+            }
+
+            // 3. Try prepending http:// and check if it forms a valid URL
             if (Uri.TryCreate("http://" + input, UriKind.Absolute, out uri))
             {
                 var host = uri.Host;
 
                 // localhost (with optional port)
                 if (host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
-                    return true;
-
-                // IP address
-                if (IPAddress.TryParse(host, out _))
                     return true;
 
                 // Domain-like: contains dot and is not a plain number (e.g. "3.14")
@@ -50,6 +55,48 @@ namespace CefFlashBrowser.Utils
         public static bool IsLocalSolFile(string url)
         {
             return Path.GetExtension(url).Equals(".sol", StringComparison.OrdinalIgnoreCase) && File.Exists(url);
+        }
+
+        public static string GetSearchUrl(SearchEngine engine, string keyword)
+        {
+            var encoded = WebUtility.UrlEncode(keyword);
+
+            switch (engine)
+            {
+                case SearchEngine.Baidu:
+                    return $"https://www.baidu.com/s?wd={encoded}";
+
+                case SearchEngine.Google:
+                    return $"https://www.google.com/search?q={encoded}";
+
+                case SearchEngine.Bing:
+                    return $"https://www.bing.com/search?q={encoded}";
+
+                case SearchEngine.Sogou:
+                    return $"https://www.sogou.com/web?query={encoded}";
+
+                case SearchEngine.So360:
+                    return $"https://www.so.com/s?&q={encoded}";
+
+                case SearchEngine.DuckDuckGo:
+                    return $"https://duckduckgo.com/?q={encoded}";
+
+                case SearchEngine.Yandex:
+                    return $"https://yandex.com/search/?text={encoded}";
+
+                case SearchEngine.Bilibili:
+                    return $"https://search.bilibili.com/all?keyword={encoded}";
+
+                case SearchEngine.Game4399:
+                    return $"https://so2.4399.com/search/search.php?k={encoded}";
+
+                default:
+#if CEFFLASHBROWSER_TESTS
+                    throw new ArgumentOutOfRangeException(nameof(engine));
+#else
+                    throw new ArgumentException(LanguageManager.GetString("error_unknownSearchEngine"), nameof(engine));
+#endif
+            }
         }
     }
 }

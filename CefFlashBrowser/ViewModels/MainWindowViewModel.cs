@@ -65,13 +65,17 @@ namespace CefFlashBrowser.ViewModels
                 case NavigationType.Automatic:
                     {
                         if (!UrlHelper.IsUrl(url))
-                            url = SearchEngineHelper.GetUrl(url, GlobalData.Settings.SearchEngine);
+                        {
+                            var engine = GlobalData.Settings.SearchEngine;
+                            url = UrlHelper.GetSearchUrl(engine, url);
+                        }
                     }
                     break;
 
                 case NavigationType.SearchOnly:
                     {
-                        url = SearchEngineHelper.GetUrl(url, GlobalData.Settings.SearchEngine);
+                        var engine = GlobalData.Settings.SearchEngine;
+                        url = UrlHelper.GetSearchUrl(engine, url);
                     }
                     break;
 
@@ -109,7 +113,15 @@ namespace CefFlashBrowser.ViewModels
 
         private void ViewGithub()
         {
-            Process.Start("https://github.com/Mzying2001/CefFlashBrowser");
+            try
+            {
+                Process.Start("https://github.com/Mzying2001/CefFlashBrowser");
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError("Failed to open GitHub URL", e);
+                WindowManager.ShowError(e.Message);
+            }
         }
 
         private void OpenWebsite(Website website)
@@ -164,8 +176,9 @@ namespace CefFlashBrowser.ViewModels
             if (!_disposed)
             {
                 if (disposing)
-                { }
-                Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+                {
+                    Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+                }
                 _disposed = true;
             }
         }

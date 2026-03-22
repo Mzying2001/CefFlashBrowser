@@ -85,10 +85,15 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public void IsUrl_PlainNumber_ParsedAsPartialIp_ReturnsTrue()
+        public void IsUrl_PlainNumber_ReturnsFalse2()
         {
-            // .NET Framework's IPAddress.TryParse accepts partial IPs like "3.14"
-            Assert.IsTrue(UrlHelper.IsUrl("3.14"));
+            Assert.IsFalse(UrlHelper.IsUrl("3.14"));
+        }
+
+        [TestMethod]
+        public void IsUrl_PureNumber_ReturnsFalse()
+        {
+            Assert.IsFalse(UrlHelper.IsUrl("123"));
         }
 
         [TestMethod]
@@ -101,6 +106,12 @@ namespace CefFlashBrowser.Tests
         public void IsUrl_FileScheme_ReturnsFalse()
         {
             Assert.IsFalse(UrlHelper.IsUrl("file:///C:/test.txt"));
+        }
+
+        [TestMethod]
+        public void IsUrl_UnknownScheme_ReturnsFalse()
+        {
+            Assert.IsFalse(UrlHelper.IsUrl("abc:abc"));
         }
 
         [TestMethod]
