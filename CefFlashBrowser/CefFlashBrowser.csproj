@@ -12,7 +12,7 @@
     <ApplicationIcon>Assets\Icons\icon.ico</ApplicationIcon>
     <Version>1.1.7</Version>
     <Authors>Mzying2001</Authors>
-    <Copyright>Copyright ©  2021</Copyright>
+    <Copyright>Copyright © 2021-2026</Copyright>
     <ApplicationManifest>App.manifest</ApplicationManifest>
   </PropertyGroup>
 
