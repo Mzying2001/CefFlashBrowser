@@ -26,6 +26,7 @@
     <Compile Include="..\CefFlashBrowser\Utils\Converters\ValueConverterBase.cs" Link="LinkedSources\ValueConverterBase.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\Converters\BinaryToSizeString.cs" Link="LinkedSources\BinaryToSizeString.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\Converters\ZoomLevelToScale.cs" Link="LinkedSources\ZoomLevelToScale.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\Converters\MultiplyConverter.cs" Link="LinkedSources\MultiplyConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Models\Settings.cs" Link="LinkedSources\Settings.cs" />
     <Compile Include="..\CefFlashBrowser\Models\Theme.cs" Link="LinkedSources\Theme.cs" />
     <Compile Include="..\CefFlashBrowser\Models\SearchEngine.cs" Link="LinkedSources\SearchEngine.cs" />

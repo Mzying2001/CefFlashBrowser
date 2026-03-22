@@ -1,17 +1,19 @@
-﻿using System.Globalization;
+using System.Globalization;
 
 namespace CefFlashBrowser.Utils.Converters
 {
-    public class TwoThird : ValueConverterBase<double, double>
+    public class MultiplyConverter : ValueConverterBase<double, double>
     {
+        public double Multiplier { get; set; } = 1d;
+
         public override double Convert(double value, object parameter, CultureInfo culture)
         {
-            return value * 2d / 3d;
+            return value * Multiplier;
         }
 
         public override double ConvertBack(double value, object parameter, CultureInfo culture)
         {
-            return value * 3d / 2d;
+            return value / Multiplier;
         }
     }
 }

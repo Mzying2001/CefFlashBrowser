@@ -8,10 +8,10 @@
         xmlns:data="clr-namespace:CefFlashBrowser.Data"
         xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
-        xmlns:converter="clr-namespace:CefFlashBrowser.Utils.Converters"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
+        xmlns:converters="clr-namespace:CefFlashBrowser.Utils.Converters"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         mc:Ignorable="d"
@@ -25,6 +25,10 @@
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
+        <!--Converters-->
+        <converters:MultiplyConverter x:Key="TwoThirdConverter"
+                                      Multiplier="0.6666666666666667"/>
+
         <!--ConetxtMenu-->
         <!--more-->
         <ContextMenu x:Key="more"
@@ -513,7 +517,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition x:Name="devtoolsColumn" Width="Auto"
                                   MinWidth="{Binding ElementName=devtoolsContainer, Path=MinWidth}"
-                                  MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth, Converter={StaticResource TwoThird}}"/>
+                                  MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth, Converter={StaticResource TwoThirdConverter}}"/>
             </Grid.ColumnDefinitions>
 
             <flash:ChromiumFlashBrowser x:Name="browser"
@@ -557,7 +561,7 @@
                    Height="22"
                    Padding="5,0"
                    Opacity="0.85"
-                   MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThird}}">
+                   MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThirdConverter}}">
                 <Label.Style>
                     <Style TargetType="Label"
                            BasedOn="{StaticResource {x:Type Label}}">

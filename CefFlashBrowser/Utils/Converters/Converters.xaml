@@ -4,8 +4,6 @@
 
     <local:UrlGetFileName x:Key="UrlGetFileName"/>
 
-    <local:TwoThird x:Key="TwoThird"/>
-
     <local:IntToDouble x:Key="IntToDouble"/>
 
     <local:ObjectToString x:Key="ObjectToString"/>

@@ -139,5 +139,43 @@ namespace CefFlashBrowser.Tests
         }
 
         #endregion
+
+        #region MultiplyConverter
+
+        [TestMethod]
+        public void MultiplyConverter_Convert_DefaultMultiplierReturnsInput()
+        {
+            var converter = new MultiplyConverter();
+            var result = converter.Convert(100.0, null, CultureInfo.InvariantCulture);
+            Assert.AreEqual(100.0, result, 0.001);
+        }
+
+        [TestMethod]
+        public void MultiplyConverter_Convert_TwoThirds()
+        {
+            var converter = new MultiplyConverter { Multiplier = 2d / 3d };
+            var result = converter.Convert(300.0, null, CultureInfo.InvariantCulture);
+            Assert.AreEqual(200.0, result, 0.001);
+        }
+
+        [TestMethod]
+        public void MultiplyConverter_ConvertBack_TwoThirds()
+        {
+            var converter = new MultiplyConverter { Multiplier = 2d / 3d };
+            var result = converter.ConvertBack(200.0, null, CultureInfo.InvariantCulture);
+            Assert.AreEqual(300.0, result, 0.001);
+        }
+
+        [TestMethod]
+        public void MultiplyConverter_Roundtrip()
+        {
+            var converter = new MultiplyConverter { Multiplier = 0.5 };
+            double original = 42.0;
+            double converted = converter.Convert(original, null, CultureInfo.InvariantCulture);
+            double roundtrip = converter.ConvertBack(converted, null, CultureInfo.InvariantCulture);
+            Assert.AreEqual(original, roundtrip, 0.001);
+        }
+
+        #endregion
     }
 }
