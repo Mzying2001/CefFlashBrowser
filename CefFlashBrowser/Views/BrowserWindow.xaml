@@ -276,8 +276,18 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0"
-                   Margin="10"
-                   Visibility="{Binding Fullscreen, Converter={StaticResource Boolean2VisibilityReConverter}}">
+                   Margin="10">
+            <DockPanel.Style>
+                <Style TargetType="DockPanel">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Fullscreen}"
+                                     Value="True">
+                            <Setter Property="Visibility"
+                                    Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DockPanel.Style>
 
             <DockPanel.Resources>
                 <Style TargetType="Button"
@@ -347,8 +357,19 @@
                 <!--blocked swfs button-->
                 <Button Click="ShowBlockedSwfsButtonClicked"
                         Margin="0,0,10,0"
-                        ToolTip="{DynamicResource browser_toolTipBlockedSwfs}"
-                        Visibility="{Binding ElementName=browser, Path=HasBlockedSwfs, Converter={StaticResource Boolean2VisibilityConverter}}">
+                        ToolTip="{DynamicResource browser_toolTipBlockedSwfs}">
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=browser, Path=HasBlockedSwfs}"
+                                             Value="False">
+                                    <Setter Property="Visibility"
+                                            Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                     <svgc:SvgIcon Width="14"
                                   Height="14"
                                   UriSource="/Assets/Svgs/warning.svg"/>
@@ -360,8 +381,19 @@
                               Width="30"
                               Height="30"
                               Padding="0"
-                              IsChecked="{Binding ShowFindPopup}"
-                              Visibility="{Binding ShowFindPopup, Converter={StaticResource Boolean2VisibilityConverter}}">
+                              IsChecked="{Binding ShowFindPopup}">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton"
+                               BasedOn="{StaticResource {x:Type ToggleButton}}">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked"
+                                         Value="False">
+                                    <Setter Property="Visibility"
+                                            Value="Collapsed"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
                     <svgc:SvgIcon Width="13"
                                   Height="13"
                                   UriSource="/Assets/Svgs/search.svg"/>
