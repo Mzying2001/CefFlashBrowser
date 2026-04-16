@@ -122,12 +122,25 @@ struct CefFlashBrowser::Singleton::NativeWnd
 
     static void SendCopyData(HWND hWnd, array<Byte>^ data)
     {
-        pin_ptr<Byte> pinnedData = &data[0];
+        if (data == nullptr) {
+            return;
+        }
 
+        // &data[0] throws IndexOutOfRangeException for an empty array, so we
+        // must pin only when there is at least one element. A zero-length
+        // WM_COPYDATA with a null lpData pointer is still a valid message.
         COPYDATASTRUCT copyData{};
         copyData.cbData = data->Length;
-        copyData.lpData = pinnedData;
-        SendMessageW(hWnd, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&copyData));
+
+        if (data->Length > 0) {
+            pin_ptr<Byte> pinnedData = &data[0];
+            copyData.lpData = pinnedData;
+            SendMessageW(hWnd, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&copyData));
+        }
+        else {
+            copyData.lpData = nullptr;
+            SendMessageW(hWnd, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&copyData));
+        }
     }
 };
 
