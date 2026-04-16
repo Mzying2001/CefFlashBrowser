@@ -1,5 +1,6 @@
 #include "sol.h"
 #include "utils.h"
+#include <climits>
 #include <set>
 #include <sstream>
 
@@ -873,11 +874,17 @@ sol::SolString sol::ReadAMF0ShortString(uint8_t* data, int size, int& index)
 
 sol::SolString sol::ReadAMF0LongString(uint8_t* data, int size, int& index)
 {
-    int len = (int)ReadBigEndian<uint32_t>(data, size, index);
+    uint32_t lenU = ReadBigEndian<uint32_t>(data, size, index);
 
-    if (index + len > size) {
+    // Reject lengths that do not fit in a signed int, otherwise the cast below
+    // produces a negative value that silently passes the bounds check and
+    // results in std::string(...) being constructed with an out-of-range range.
+    if (lenU > static_cast<uint32_t>(INT_MAX) ||
+        index + static_cast<int>(lenU) > size) {
         ThrowFileEndedImproperlyOnReadingType(AMF0Type::LongString);
     }
+
+    int len = static_cast<int>(lenU);
     if (len == 0) {
         return std::string();
     }
