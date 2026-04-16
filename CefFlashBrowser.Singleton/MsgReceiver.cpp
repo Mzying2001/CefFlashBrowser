@@ -122,25 +122,22 @@ struct CefFlashBrowser::Singleton::NativeWnd
 
     static void SendCopyData(HWND hWnd, array<Byte>^ data)
     {
-        if (data == nullptr) {
+        // Skip null / empty payloads entirely. &data[0] throws
+        // IndexOutOfRangeException for a zero-length managed array, and even
+        // if we sent cbData=0 with lpData=nullptr the receiver's OnCopyData
+        // would then call Marshal::Copy with IntPtr::Zero as the source,
+        // which throws ArgumentNullException. There is no meaningful use
+        // case for sending a zero-byte IPC payload.
+        if (data == nullptr || data->Length == 0) {
             return;
         }
 
-        // &data[0] throws IndexOutOfRangeException for an empty array, so we
-        // must pin only when there is at least one element. A zero-length
-        // WM_COPYDATA with a null lpData pointer is still a valid message.
+        pin_ptr<Byte> pinnedData = &data[0];
+
         COPYDATASTRUCT copyData{};
         copyData.cbData = data->Length;
-
-        if (data->Length > 0) {
-            pin_ptr<Byte> pinnedData = &data[0];
-            copyData.lpData = pinnedData;
-            SendMessageW(hWnd, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&copyData));
-        }
-        else {
-            copyData.lpData = nullptr;
-            SendMessageW(hWnd, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&copyData));
-        }
+        copyData.lpData = pinnedData;
+        SendMessageW(hWnd, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&copyData));
     }
 };
 
