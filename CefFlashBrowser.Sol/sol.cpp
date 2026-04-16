@@ -917,6 +917,15 @@ sol::SolArray sol::ReadAMF0EcmaArray(uint8_t* data, int size, int& index, SolRef
 {
     uint32_t len = ReadBigEndian<uint32_t>(data, size, index);
 
+    // Each ECMA array entry consists of a 2-byte length-prefixed key plus at
+    // least a 1-byte type tag, so an entry is no smaller than 3 bytes. Reject
+    // lengths that exceed what the remaining buffer could physically contain,
+    // otherwise a malicious file with len = 0xFFFFFFFF would loop for billions
+    // of iterations or exhaust memory before any bounds check fires.
+    if (index < 0 || index > size || len > static_cast<uint32_t>((size - index) / 3)) {
+        ThrowFileEndedImproperlyOnReadingType(AMF0Type::EcmaArray);
+    }
+
     SolArray result;
     std::string key;
 
@@ -939,6 +948,15 @@ sol::SolArray sol::ReadAMF0EcmaArray(uint8_t* data, int size, int& index, SolRef
 sol::SolArray sol::ReadAMF0StrictArray(uint8_t* data, int size, int& index, SolRefTable& reftable)
 {
     uint32_t len = ReadBigEndian<uint32_t>(data, size, index);
+
+    // Each strict-array element is at least a 1-byte type tag plus (usually)
+    // some payload, so an element is no smaller than 2 bytes. Reject lengths
+    // that cannot possibly fit in the remaining buffer, otherwise a malicious
+    // file with len = 0xFFFFFFFF would reserve 4GB of memory or loop for
+    // billions of iterations before any bounds check fires.
+    if (index < 0 || index > size || len > static_cast<uint32_t>((size - index) / 2)) {
+        ThrowFileEndedImproperlyOnReadingType(AMF0Type::StrictArray);
+    }
 
     SolArray result;
     result.dense.reserve(len);
