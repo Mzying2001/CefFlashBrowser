@@ -57,15 +57,25 @@ namespace CefFlashBrowser.FlashBrowser
             }
 
             var msg = e.Message;
-            if (msg.StartsWith("Cross-origin plugin content from"))
+            if (msg == null || !msg.StartsWith("Cross-origin plugin content from", StringComparison.Ordinal))
             {
-                var url = msg.Split(' ')?[4];
-                if (!string.IsNullOrWhiteSpace(url) && !BlockedSwfs.Contains(url))
-                {
-                    BlockedSwfs.Add(url);
-                    SetCurrentValue(HasBlockedSwfsProperty, true);
-                }
+                return;
             }
+
+            var parts = msg.Split(' ');
+            if (parts.Length <= 4)
+            {
+                return;
+            }
+
+            var url = parts[4];
+            if (string.IsNullOrWhiteSpace(url) || BlockedSwfs.Contains(url))
+            {
+                return;
+            }
+
+            BlockedSwfs.Add(url);
+            SetCurrentValue(HasBlockedSwfsProperty, true);
         }
 
         protected override void OnIsBrowserInitializedChanged(EventArgs e)
