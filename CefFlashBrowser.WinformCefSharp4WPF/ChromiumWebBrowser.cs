@@ -563,10 +563,18 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnAddressChanged(DependencyPropertyChangedEventArgs e)
         {
-            if (!onNotifyAddressChanged)
+            if (onNotifyAddressChanged)
             {
-                browser.Load((string)e.NewValue);
+                return;
             }
+
+            var url = (string)e.NewValue;
+            if (string.IsNullOrEmpty(url))
+            {
+                return;
+            }
+
+            browser.Load(url);
         }
 
         private void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
