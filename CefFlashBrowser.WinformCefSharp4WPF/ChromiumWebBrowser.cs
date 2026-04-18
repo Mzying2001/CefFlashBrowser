@@ -669,8 +669,14 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             lock (onNotifyAddressChangedLock)
             {
                 onNotifyAddressChanged = true;
-                SetCurrentValue(AddressProperty, e.Address);
-                onNotifyAddressChanged = false;
+                try
+                {
+                    SetCurrentValue(AddressProperty, e.Address);
+                }
+                finally
+                {
+                    onNotifyAddressChanged = false;
+                }
             }
             AddressChanged?.Invoke(this, e);
         }
