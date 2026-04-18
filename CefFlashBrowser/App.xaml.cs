@@ -3,6 +3,7 @@ using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -16,6 +17,8 @@ namespace CefFlashBrowser
     {
         private bool _started = false;
         private readonly MsgReceiver _msgReceiver;
+        private readonly object _pendingArgsLock = new object();
+        private readonly Queue<string[]> _pendingArgs = new Queue<string[]>();
 
         public App()
         {
@@ -30,15 +33,56 @@ namespace CefFlashBrowser
                 string json = System.Text.Encoding.UTF8.GetString(e.Data);
                 LogHelper.LogInfo($"Received data from another instance, data: {json}");
 
-                if (_started &&
-                    JsonConvert.DeserializeObject<string[]>(json) is string[] args)
+                if (!(JsonConvert.DeserializeObject<string[]>(json) is string[] args))
                 {
-                    ExecuteArguments(args);
+                    return;
                 }
+
+                // If OnStartup has not finished yet, queue the args and let the
+                // startup path drain them once the main UI is up. Previously
+                // these args were silently dropped, so a second instance that
+                // sent "open this SWF" while the first instance was still
+                // initialising did nothing.
+                if (!_started)
+                {
+                    lock (_pendingArgsLock)
+                    {
+                        if (!_started)
+                        {
+                            _pendingArgs.Enqueue(args);
+                            return;
+                        }
+                    }
+                }
+
+                ExecuteArguments(args);
             }
             catch (Exception ex)
             {
                 LogHelper.LogError("Failed to process received data", ex);
+            }
+        }
+
+        private void DrainPendingArgs()
+        {
+            string[][] toExecute;
+            lock (_pendingArgsLock)
+            {
+                _started = true;
+                toExecute = _pendingArgs.ToArray();
+                _pendingArgs.Clear();
+            }
+
+            foreach (var args in toExecute)
+            {
+                try
+                {
+                    ExecuteArguments(args);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.LogError("Failed to process queued startup args", ex);
+                }
             }
         }
 
@@ -76,7 +120,7 @@ namespace CefFlashBrowser
             }
 
             ShutdownMode = ShutdownMode.OnLastWindowClose;
-            _started = true;
+            DrainPendingArgs();
         }
 
         private void ExecuteArguments(string[] args)

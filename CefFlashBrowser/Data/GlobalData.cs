@@ -134,15 +134,39 @@ namespace CefFlashBrowser.Data
 
         public static void InitFavorites()
         {
+            Favorites = new ObservableCollection<Website>();
+
+            if (!File.Exists(FavoritesPath))
+            {
+                LogHelper.LogInfo("Favorites file does not exist, starting with empty favorites");
+                return;
+            }
+
             try
             {
                 var file = JsonConvert.DeserializeObject<FavoritesFile>(File.ReadAllText(FavoritesPath));
-                Favorites = new ObservableCollection<Website>(file.Favorites);
+
+                // Guard against both a null root (the file literally contains
+                // "null") and a null Favorites array (e.g. {"Favorites": null}
+                // or a file missing the field). Previously the code did
+                //     new ObservableCollection<Website>(file.Favorites)
+                // which threw NullReferenceException / ArgumentNullException
+                // that was silently swallowed by the outer catch, resetting
+                // the user's favorites to empty with a misleading log line.
+                if (file?.Favorites != null)
+                {
+                    Favorites = new ObservableCollection<Website>(file.Favorites);
+                }
+                else
+                {
+                    LogHelper.LogError(
+                        $"Favorites file is malformed (no Favorites array): {FavoritesPath}");
+                }
             }
             catch (Exception e)
             {
-                Favorites = new ObservableCollection<Website>();
-                LogHelper.LogError("Favorites file not found or invalid, using empty favorites", e);
+                LogHelper.LogError(
+                    $"Failed to load favorites file, starting with empty favorites: {FavoritesPath}", e);
             }
         }
 

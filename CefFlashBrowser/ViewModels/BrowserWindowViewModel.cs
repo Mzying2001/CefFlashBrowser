@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -127,7 +128,16 @@ namespace CefFlashBrowser.ViewModels
                     if (frame == null)
                         return string.Empty;
 
-                    var result = frame.EvaluateScriptAsync("document.title", timeout: TimeSpan.FromSeconds(1)).Result;
+                    // Run the awaited call on a thread-pool thread so that the
+                    // blocking wait below cannot deadlock if EvaluateScriptAsync's
+                    // continuation ever needs to capture the caller's
+                    // SynchronizationContext. This method is invoked from the UI
+                    // thread (CreateShortcut / AddFavorite), so a naked .Result
+                    // here would in the worst case freeze the UI until the 1-second
+                    // timeout elapses.
+                    var result = Task.Run(() =>
+                        frame.EvaluateScriptAsync("document.title", timeout: TimeSpan.FromSeconds(1))
+                    ).GetAwaiter().GetResult();
                     return result?.Result?.ToString() ?? string.Empty;
                 }
             }
