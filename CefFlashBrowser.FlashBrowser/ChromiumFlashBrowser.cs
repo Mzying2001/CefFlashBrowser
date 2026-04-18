@@ -1,6 +1,7 @@
 ﻿using CefSharp;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 
 namespace CefFlashBrowser.FlashBrowser
@@ -82,14 +83,32 @@ namespace CefFlashBrowser.FlashBrowser
         {
             base.OnIsBrowserInitializedChanged(e);
 
-            if (IsBrowserInitialized)
+            if (!IsBrowserInitialized)
             {
-                Cef.UIThreadTaskFactory.StartNew(() =>
-                { // enable flash contents automatically
-                    var requestContext = GetBrowser().GetHost().RequestContext;
-                    requestContext.SetPreference("profile.default_content_setting_values.plugins", 1, out _);
-                });
+                return;
             }
+
+            Cef.UIThreadTaskFactory.StartNew(() =>
+            { // enable flash contents automatically
+                var browser = GetBrowser();
+                if (browser == null || browser.IsDisposed)
+                {
+                    return;
+                }
+
+                var host = browser.GetHost();
+                if (host == null)
+                {
+                    return;
+                }
+
+                var ok = host.RequestContext.SetPreference(
+                    "profile.default_content_setting_values.plugins", 1, out var error);
+                if (!ok && !string.IsNullOrEmpty(error))
+                {
+                    Debug.WriteLine($"[ChromiumFlashBrowser] Failed to enable plugins preference: {error}");
+                }
+            });
         }
     }
 }
