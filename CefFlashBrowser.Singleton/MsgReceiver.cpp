@@ -122,6 +122,16 @@ struct CefFlashBrowser::Singleton::NativeWnd
 
     static void SendCopyData(HWND hWnd, array<Byte>^ data)
     {
+        // Skip null / empty payloads entirely. &data[0] throws
+        // IndexOutOfRangeException for a zero-length managed array, and even
+        // if we sent cbData=0 with lpData=nullptr the receiver's OnCopyData
+        // would then call Marshal::Copy with IntPtr::Zero as the source,
+        // which throws ArgumentNullException. There is no meaningful use
+        // case for sending a zero-byte IPC payload.
+        if (data == nullptr || data->Length == 0) {
+            return;
+        }
+
         pin_ptr<Byte> pinnedData = &data[0];
 
         COPYDATASTRUCT copyData{};

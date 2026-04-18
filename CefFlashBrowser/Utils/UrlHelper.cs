@@ -49,12 +49,25 @@ namespace CefFlashBrowser.Utils
 
         public static bool IsLocalSwfFile(string url)
         {
-            return Path.GetExtension(url).Equals(".swf", StringComparison.OrdinalIgnoreCase) && File.Exists(url);
+            return CheckExtension(url, ".swf") && File.Exists(url);
         }
 
         public static bool IsLocalSolFile(string url)
         {
-            return Path.GetExtension(url).Equals(".sol", StringComparison.OrdinalIgnoreCase) && File.Exists(url);
+            return CheckExtension(url, ".sol") && File.Exists(url);
+        }
+
+        private static bool CheckExtension(string path, string extension)
+        {
+            try
+            {
+                var ext = Path.GetExtension(path);
+                return ext?.Equals(extension, StringComparison.OrdinalIgnoreCase) ?? false;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
         }
 
         public static string GetSearchUrl(SearchEngine engine, string keyword)
