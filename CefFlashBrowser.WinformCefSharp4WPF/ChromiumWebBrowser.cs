@@ -569,9 +569,10 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             }
 
             var url = (string)e.NewValue;
+
             if (string.IsNullOrEmpty(url))
             {
-                url = "about:blank";
+                url = e.OldValue as string ?? "about:blank";
             }
 
             browser.Load(url);
