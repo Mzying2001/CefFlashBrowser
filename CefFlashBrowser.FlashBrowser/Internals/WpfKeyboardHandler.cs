@@ -26,6 +26,10 @@ namespace CefFlashBrowser.FlashBrowser.Internals
                 element.Dispatcher.Invoke(() =>
                 {
                     PresentationSource source = PresentationSource.FromVisual(element);
+                    if (source == null)
+                    {
+                        return;
+                    }
 
                     Key key = KeyInterop.KeyFromVirtualKey(windowsKeyCode);
                     KeyEventArgs args = new KeyEventArgs(Keyboard.PrimaryDevice, source, 0, key) { RoutedEvent = Keyboard.KeyDownEvent, };

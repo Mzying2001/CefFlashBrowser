@@ -1,6 +1,7 @@
 ﻿using CefSharp;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 
 namespace CefFlashBrowser.FlashBrowser
@@ -57,29 +58,57 @@ namespace CefFlashBrowser.FlashBrowser
             }
 
             var msg = e.Message;
-            if (msg.StartsWith("Cross-origin plugin content from"))
+            if (msg == null || !msg.StartsWith("Cross-origin plugin content from", StringComparison.Ordinal))
             {
-                var url = msg.Split(' ')?[4];
-                if (!string.IsNullOrWhiteSpace(url) && !BlockedSwfs.Contains(url))
-                {
-                    BlockedSwfs.Add(url);
-                    SetCurrentValue(HasBlockedSwfsProperty, true);
-                }
+                return;
             }
+
+            var parts = msg.Split(' ');
+            if (parts.Length <= 4)
+            {
+                return;
+            }
+
+            var url = parts[4];
+            if (string.IsNullOrWhiteSpace(url) || BlockedSwfs.Contains(url))
+            {
+                return;
+            }
+
+            BlockedSwfs.Add(url);
+            SetCurrentValue(HasBlockedSwfsProperty, true);
         }
 
         protected override void OnIsBrowserInitializedChanged(EventArgs e)
         {
             base.OnIsBrowserInitializedChanged(e);
 
-            if (IsBrowserInitialized)
+            if (!IsBrowserInitialized)
             {
-                Cef.UIThreadTaskFactory.StartNew(() =>
-                { // enable flash contents automatically
-                    var requestContext = GetBrowser().GetHost().RequestContext;
-                    requestContext.SetPreference("profile.default_content_setting_values.plugins", 1, out _);
-                });
+                return;
             }
+
+            Cef.UIThreadTaskFactory.StartNew(() =>
+            { // enable flash contents automatically
+                var browser = GetBrowser();
+                if (browser == null || browser.IsDisposed)
+                {
+                    return;
+                }
+
+                var host = browser.GetHost();
+                if (host == null)
+                {
+                    return;
+                }
+
+                var ok = host.RequestContext.SetPreference(
+                    "profile.default_content_setting_values.plugins", 1, out var error);
+                if (!ok && !string.IsNullOrEmpty(error))
+                {
+                    Debug.WriteLine($"[ChromiumFlashBrowser] Failed to enable plugins preference: {error}");
+                }
+            });
         }
     }
 }
