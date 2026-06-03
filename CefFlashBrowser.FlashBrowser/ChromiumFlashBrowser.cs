@@ -2,7 +2,6 @@ using CefSharp;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.Windows;
 
 namespace CefFlashBrowser.FlashBrowser
@@ -11,177 +10,6 @@ namespace CefFlashBrowser.FlashBrowser
     {
         public static readonly DependencyProperty BlockedSwfsProperty;
         public static readonly DependencyProperty HasBlockedSwfsProperty;
-
-        private const string SpeedGearBootstrapScript = @"
-(function() {
-    if (window.__cefSpeedGear) return;
-
-    var NativeDate = Date;
-    var nativeDateNow = Date.now.bind(Date);
-    var nativeSetTimeout = window.setTimeout.bind(window);
-    var nativeSetInterval = window.setInterval.bind(window);
-    var nativeClearTimeout = window.clearTimeout.bind(window);
-    var nativeClearInterval = window.clearInterval.bind(window);
-    var nativeRequestAnimationFrame = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : null;
-    var nativeCancelAnimationFrame = window.cancelAnimationFrame ? window.cancelAnimationFrame.bind(window) : null;
-    var nativePerformanceNow = window.performance && window.performance.now
-        ? window.performance.now.bind(window.performance)
-        : null;
-
-    var maxDelay = 2147483647;
-    var speed = 1.0;
-    var realAnchor = nativeDateNow();
-    var virtualAnchor = realAnchor;
-    var perfRealAnchor = nativePerformanceNow ? nativePerformanceNow() : 0;
-    var perfVirtualAnchor = perfRealAnchor;
-
-    function clampSpeed(value) {
-        value = Number(value);
-        if (!isFinite(value) || value < 0) return 1.0;
-        if (value > 16) return 16;
-        return value;
-    }
-
-    function virtualDateNow() {
-        if (speed === 0) {
-            return virtualAnchor;
-        }
-        return virtualAnchor + (nativeDateNow() - realAnchor) * speed;
-    }
-
-    function virtualPerformanceNow() {
-        if (!nativePerformanceNow) {
-            return virtualDateNow();
-        }
-        if (speed === 0) {
-            return perfVirtualAnchor;
-        }
-        return perfVirtualAnchor + (nativePerformanceNow() - perfRealAnchor) * speed;
-    }
-
-    function rescaleDelay(delay) {
-        delay = Number(delay) || 0;
-        if (delay <= 0) return 0;
-        if (speed === 0) return maxDelay;
-        return Math.max(0, delay / speed);
-    }
-
-    function CefSpeedGearDate() {
-        if (!(this instanceof CefSpeedGearDate)) {
-            return new NativeDate(virtualDateNow()).toString();
-        }
-
-        if (arguments.length === 0) {
-            return new NativeDate(virtualDateNow());
-        }
-        if (arguments.length === 1) {
-            return new NativeDate(arguments[0]);
-        }
-        if (arguments.length === 2) {
-            return new NativeDate(arguments[0], arguments[1]);
-        }
-        if (arguments.length === 3) {
-            return new NativeDate(arguments[0], arguments[1], arguments[2]);
-        }
-        if (arguments.length === 4) {
-            return new NativeDate(arguments[0], arguments[1], arguments[2], arguments[3]);
-        }
-        if (arguments.length === 5) {
-            return new NativeDate(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4]);
-        }
-        if (arguments.length === 6) {
-            return new NativeDate(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5]);
-        }
-        return new NativeDate(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], arguments[6]);
-    }
-
-    CefSpeedGearDate.prototype = NativeDate.prototype;
-    CefSpeedGearDate.parse = NativeDate.parse;
-    CefSpeedGearDate.UTC = NativeDate.UTC;
-    CefSpeedGearDate.now = virtualDateNow;
-
-    try {
-        Object.defineProperty(window, 'Date', {
-            configurable: true,
-            writable: true,
-            value: CefSpeedGearDate
-        });
-    } catch (e) {
-        window.Date = CefSpeedGearDate;
-    }
-
-    if (window.performance && nativePerformanceNow) {
-        try {
-            Object.defineProperty(window.performance, 'now', {
-                configurable: true,
-                value: virtualPerformanceNow
-            });
-        } catch (e) {}
-    }
-
-    window.setTimeout = function(callback, delay) {
-        var args = Array.prototype.slice.call(arguments, 2);
-        return nativeSetTimeout(function() {
-            if (typeof callback === 'function') {
-                callback.apply(window, args);
-            } else {
-                (0, eval)(callback);
-            }
-        }, rescaleDelay(delay));
-    };
-
-    window.setInterval = function(callback, delay) {
-        var args = Array.prototype.slice.call(arguments, 2);
-        return nativeSetInterval(function() {
-            if (typeof callback === 'function') {
-                callback.apply(window, args);
-            } else {
-                (0, eval)(callback);
-            }
-        }, rescaleDelay(delay));
-    };
-
-    window.clearTimeout = nativeClearTimeout;
-    window.clearInterval = nativeClearInterval;
-
-    window.requestAnimationFrame = function(callback) {
-        if (speed === 1 && nativeRequestAnimationFrame) {
-            return nativeRequestAnimationFrame(callback);
-        }
-
-        return nativeSetTimeout(function() {
-            callback(virtualPerformanceNow());
-        }, speed === 0 ? maxDelay : Math.max(1, 16 / speed));
-    };
-
-    window.cancelAnimationFrame = function(handle) {
-        if (nativeCancelAnimationFrame) {
-            nativeCancelAnimationFrame(handle);
-        }
-        nativeClearTimeout(handle);
-    };
-
-    window.__cefSpeedGear = {
-        setSpeed: function(value) {
-            virtualAnchor = virtualDateNow();
-            realAnchor = nativeDateNow();
-
-            if (nativePerformanceNow) {
-                perfVirtualAnchor = virtualPerformanceNow();
-                perfRealAnchor = nativePerformanceNow();
-            }
-
-            speed = clampSpeed(value);
-            return speed;
-        },
-        getSpeed: function() {
-            return speed;
-        },
-        reset: function() {
-            return this.setSpeed(1.0);
-        }
-    };
-})();";
 
         private const string InputMemoryBootstrapScript = @"
 (function() {
@@ -294,7 +122,6 @@ namespace CefFlashBrowser.FlashBrowser
             SetValue(BlockedSwfsProperty, new ObservableCollection<string>());
         }
 
-
         public ObservableCollection<string> BlockedSwfs
         {
             get => (ObservableCollection<string>)GetValue(BlockedSwfsProperty);
@@ -307,31 +134,16 @@ namespace CefFlashBrowser.FlashBrowser
 
         public bool IsInputMemoryRecording { get; private set; }
 
-        public double SpeedGearFactor { get; private set; } = 1.0;
+        public double SpeedGearFactor { get; private set; } = SpeedGearController.DefaultFactor;
 
         public void SetSpeedGearFactor(double factor)
         {
-            if (double.IsNaN(factor) || double.IsInfinity(factor) || factor < 0)
-            {
-                factor = 1.0;
-            }
-
-            if (factor > 16.0)
-            {
-                factor = 16.0;
-            }
-
-            SpeedGearFactor = factor;
-
-            if (CanExecuteJavascriptInMainFrame)
-            {
-                ExecuteScriptAsync(GetSetSpeedGearScript(factor));
-            }
+            SpeedGearFactor = SpeedGearController.SetFactor(factor);
         }
 
         public void ResetSpeedGear()
         {
-            SetSpeedGearFactor(1.0);
+            SetSpeedGearFactor(SpeedGearController.DefaultFactor);
         }
 
         public void StartInputMemoryRecording()
@@ -370,7 +182,6 @@ namespace CefFlashBrowser.FlashBrowser
             }
         }
 
-
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
         {
             base.OnFrameLoadStart(e);
@@ -389,7 +200,6 @@ namespace CefFlashBrowser.FlashBrowser
 
             if (e.Frame.IsMain)
             {
-                e.Frame.ExecuteJavaScriptAsync(GetSetSpeedGearScript(SpeedGearFactor));
                 e.Frame.ExecuteJavaScriptAsync(InputMemoryBootstrapScript);
             }
         }
@@ -455,12 +265,6 @@ namespace CefFlashBrowser.FlashBrowser
                     Debug.WriteLine($"[ChromiumFlashBrowser] Failed to enable plugins preference: {error}");
                 }
             });
-        }
-
-        private static string GetSetSpeedGearScript(double factor)
-        {
-            var value = factor.ToString("0.###", CultureInfo.InvariantCulture);
-            return SpeedGearBootstrapScript + "\nwindow.__cefSpeedGear.setSpeed(" + value + ");";
         }
     }
 }
