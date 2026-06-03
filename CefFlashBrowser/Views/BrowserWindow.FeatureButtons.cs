@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views
 {
@@ -9,6 +10,22 @@ namespace CefFlashBrowser.Views
     {
         private bool _featureButtonsAdded = false;
         private ContextMenu _inputMemoryMenu;
+
+        static BrowserWindow()
+        {
+            EventManager.RegisterClassHandler(
+                typeof(BrowserWindow),
+                LoadedEvent,
+                new RoutedEventHandler(OnBrowserWindowLoadedFeatureButtons));
+        }
+
+        private static void OnBrowserWindowLoadedFeatureButtons(object sender, RoutedEventArgs e)
+        {
+            if (sender is BrowserWindow window)
+            {
+                window.AddFeatureButtons();
+            }
+        }
 
         private void AddFeatureButtons()
         {
@@ -133,11 +150,6 @@ namespace CefFlashBrowser.Views
                 }
             }
             return null;
-        }
-
-        private void BrowserWindowLoadedFeatureButtons(object sender, RoutedEventArgs e)
-        {
-            AddFeatureButtons();
         }
     }
 }
