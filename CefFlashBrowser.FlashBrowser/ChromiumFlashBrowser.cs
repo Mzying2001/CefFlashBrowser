@@ -11,6 +11,38 @@ namespace CefFlashBrowser.FlashBrowser
         public static readonly DependencyProperty BlockedSwfsProperty;
         public static readonly DependencyProperty HasBlockedSwfsProperty;
 
+        private const string FlashAccelerationScript = @"
+(function() {
+    var nodes = Array.prototype.slice.call(document.querySelectorAll('embed, object'));
+    nodes.forEach(function(node) {
+        try {
+            node.style.transform = 'translateZ(0)';
+            node.style.backfaceVisibility = 'hidden';
+            node.style.willChange = 'transform';
+            node.style.webkitTransform = 'translateZ(0)';
+
+            var tag = (node.tagName || '').toLowerCase();
+            if (tag === 'embed') {
+                node.setAttribute('wmode', 'direct');
+            } else if (tag === 'object') {
+                var hasWmode = false;
+                Array.prototype.slice.call(node.querySelectorAll('param')).forEach(function(param) {
+                    if ((param.getAttribute('name') || '').toLowerCase() === 'wmode') {
+                        param.setAttribute('value', 'direct');
+                        hasWmode = true;
+                    }
+                });
+                if (!hasWmode) {
+                    var wmode = document.createElement('param');
+                    wmode.setAttribute('name', 'wmode');
+                    wmode.setAttribute('value', 'direct');
+                    node.appendChild(wmode);
+                }
+            }
+        } catch (e) {}
+    });
+})();";
+
         static ChromiumFlashBrowser()
         {
             BlockedSwfsProperty = DependencyProperty.Register(
@@ -36,6 +68,14 @@ namespace CefFlashBrowser.FlashBrowser
             get => (bool)GetValue(HasBlockedSwfsProperty);
         }
 
+        public void EnableFlashAcceleration()
+        {
+            if (CanExecuteJavascriptInMainFrame)
+            {
+                ExecuteScriptAsync(FlashAccelerationScript);
+            }
+        }
+
 
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
         {
@@ -45,6 +85,16 @@ namespace CefFlashBrowser.FlashBrowser
             {
                 BlockedSwfs.Clear();
                 SetCurrentValue(HasBlockedSwfsProperty, false);
+            }
+        }
+
+        protected override void OnFrameLoadEnd(FrameLoadEndEventArgs e)
+        {
+            base.OnFrameLoadEnd(e);
+
+            if (e.Frame.IsMain)
+            {
+                e.Frame.ExecuteJavaScriptAsync(FlashAccelerationScript);
             }
         }
 
