@@ -1,0 +1,741 @@
+diff --git a/CefFlashBrowser.slnx b/CefFlashBrowser.slnx
+--- a/CefFlashBrowser.slnx
++++ b/CefFlashBrowser.slnx
+@@ -20,12 +20,14 @@
+   </Project>
+   <Project Path="CefFlashBrowser.Singleton/CefFlashBrowser.Singleton.vcxproj" Id="9cd4757a-3adb-46b3-8521-74077e1005ec" />
+   <Project Path="CefFlashBrowser.Sol/CefFlashBrowser.Sol.vcxproj" Id="b89cd104-d61a-437a-afa3-02c2da3a3248" />
++  <Project Path="CefFlashBrowser.SpeedGear/CefFlashBrowser.SpeedGear.vcxproj" Id="6f8795b6-73de-47f0-a6c8-b9ff94b40931" />
+   <Project Path="CefFlashBrowser.WinformCefSharp4WPF/CefFlashBrowser.WinformCefSharp4WPF.csproj">
+     <Platform Solution="*|x64" Project="x64" />
+     <Platform Solution="*|x86" Project="x86" />
+   </Project>
+   <Project Path="CefFlashBrowser/CefFlashBrowser.csproj">
+     <BuildDependency Project="CefFlashBrowser.EmptyExe/CefFlashBrowser.EmptyExe.csproj" />
++    <BuildDependency Project="CefFlashBrowser.SpeedGear/CefFlashBrowser.SpeedGear.vcxproj" />
+     <Platform Solution="*|x64" Project="x64" />
+     <Platform Solution="*|x86" Project="x86" />
+   </Project>
+diff --git a/CefFlashBrowser/CefFlashBrowser.csproj b/CefFlashBrowser/CefFlashBrowser.csproj
+--- a/CefFlashBrowser/CefFlashBrowser.csproj
++++ b/CefFlashBrowser/CefFlashBrowser.csproj
+@@ -78,6 +78,7 @@
+     <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj" />
+     <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
+     <ProjectReference Include="..\CefFlashBrowser.Singleton\CefFlashBrowser.Singleton.vcxproj" />
+     <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
++    <ProjectReference Include="..\CefFlashBrowser.SpeedGear\CefFlashBrowser.SpeedGear.vcxproj" />
+     <ProjectReference Include="..\CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj" />
+   </ItemGroup>
+ 
+diff --git a/CefFlashBrowser/ViewModels/BrowserWindowViewModel.cs b/CefFlashBrowser/ViewModels/BrowserWindowViewModel.cs
+--- a/CefFlashBrowser/ViewModels/BrowserWindowViewModel.cs
++++ b/CefFlashBrowser/ViewModels/BrowserWindowViewModel.cs
+@@ -1,6 +1,7 @@
+ ﻿using CefFlashBrowser.Data;
+ using CefFlashBrowser.Models;
+ using CefFlashBrowser.Utils;
++using CefFlashBrowser.Utils.SpeedGear;
+ using CefSharp;
+ using IWshRuntimeLibrary;
+ using SimpleMvvm;
+@@ -35,6 +36,9 @@ namespace CefFlashBrowser.ViewModels
+         public DelegateCommand CloseFindPopupCommand { get; set; }
+         public DelegateCommand FindNextTextCommand { get; set; }
+         public DelegateCommand FindPrevTextCommand { get; set; }
++        public DelegateCommand SetSpeedFactorCommand { get; set; }
++
++        public double[] SpeedGearOptions { get; } = new[] { 0.5d, 1d, 2d, 5d, 10d, 20d, 50d, 100d };
+ 
+ 
+ 
+@@ -93,6 +97,26 @@ namespace CefFlashBrowser.ViewModels
+             }
+         }
+ 
++        private double _speedFactor = 1.0;
++        public double SpeedFactor
++        {
++            get => _speedFactor;
++            set => UpdateValue(ref _speedFactor, value);
++        }
++
++        private void SetSpeedFactor(double speedFactor)
++        {
++            try
++            {
++                SpeedGearManager.SetSpeedFactor(speedFactor);
++                SpeedFactor = speedFactor;
++            }
++            catch (Exception e)
++            {
++                LogHelper.LogError($"Failed to set speed gear: {speedFactor}", e);
++                WindowManager.ShowError(e.Message);
++            }
++        }
+ 
+         public void ShowMainWindow()
+         {
+@@ -341,6 +363,7 @@ namespace CefFlashBrowser.ViewModels
+             CloseFindPopupCommand = new DelegateCommand(() => ShowFindPopup = false);
+             FindNextTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, true));
+             FindPrevTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, false));
++            SetSpeedFactorCommand = new DelegateCommand<double>(SetSpeedFactor);
+ 
+             if (GlobalData.Settings.SaveZoomLevel)
+             {
+diff --git a/CefFlashBrowser/Views/BrowserWindow.xaml b/CefFlashBrowser/Views/BrowserWindow.xaml
+--- a/CefFlashBrowser/Views/BrowserWindow.xaml
++++ b/CefFlashBrowser/Views/BrowserWindow.xaml
+@@ -103,11 +103,28 @@
+                             </Button>
+                         </hc:ButtonGroup>
+                     </Grid>
+                 </MenuItem.Header>
+             </MenuItem>
+ 
+             <Separator/>
+ 
++            <MenuItem Header="变速齿轮"
++                      ItemsSource="{Binding SpeedGearOptions}">
++                <MenuItem.ItemContainerStyle>
++                    <Style TargetType="MenuItem"
++                           BasedOn="{StaticResource {x:Type MenuItem}}">
++                        <Setter Property="Header"
++                                Value="{Binding StringFormat={}{0}x}"/>
++                        <Setter Property="Command"
++                                Value="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext.SetSpeedFactorCommand}"/>
++                        <Setter Property="CommandParameter"
++                                Value="{Binding}"/>
++                    </Style>
++                </MenuItem.ItemContainerStyle>
++            </MenuItem>
++
++            <Separator/>
++
+             <MenuItem Header="{DynamicResource common_favorites}"
+                       ItemsSource="{Binding Source={x:Static data:GlobalData.Favorites}}">
+                 <MenuItem.Style>
+diff --git a/CefFlashBrowser/Utils/SpeedGear/SpeedGearManager.cs b/CefFlashBrowser/Utils/SpeedGear/SpeedGearManager.cs
+new file mode 100644
+--- /dev/null
++++ b/CefFlashBrowser/Utils/SpeedGear/SpeedGearManager.cs
+@@ -0,0 +1,203 @@
++using System;
++using System.Diagnostics;
++using System.IO;
++using System.Linq;
++using System.Runtime.InteropServices;
++using System.Text;
++
++namespace CefFlashBrowser.Utils.SpeedGear
++{
++    internal static class SpeedGearManager
++    {
++        private const string SharedMappingName = "Local\\CefFlashBrowser.SpeedGear";
++        private const int SharedMappingSize = 32;
++        private static readonly object SyncRoot = new object();
++        private static IntPtr _sharedMapping = IntPtr.Zero;
++        private static IntPtr _sharedView = IntPtr.Zero;
++        private static long _generation;
++
++        public static void SetSpeedFactor(double speedFactor)
++        {
++            if (speedFactor <= 0 || double.IsNaN(speedFactor) || double.IsInfinity(speedFactor))
++                throw new ArgumentOutOfRangeException(nameof(speedFactor));
++
++            lock (SyncRoot)
++            {
++                WriteSharedSpeed(speedFactor);
++                LoadLocalSpeedGearDll();
++                InjectIntoCandidateProcesses();
++            }
++        }
++
++        private static void WriteSharedSpeed(double speedFactor)
++        {
++            EnsureSharedMapping();
++
++            Marshal.WriteInt64(_sharedView, 0, ++_generation);
++            var bytes = BitConverter.GetBytes(speedFactor);
++            Marshal.Copy(bytes, 0, IntPtr.Add(_sharedView, 8), bytes.Length);
++        }
++
++        private static void EnsureSharedMapping()
++        {
++            if (_sharedView != IntPtr.Zero)
++                return;
++
++            _sharedMapping = Win32.CreateFileMapping(new IntPtr(-1), IntPtr.Zero, Win32.PageReadWrite, 0, SharedMappingSize, SharedMappingName);
++            if (_sharedMapping == IntPtr.Zero)
++                throw new InvalidOperationException("CreateFileMapping failed: " + Marshal.GetLastWin32Error());
++
++            _sharedView = Win32.MapViewOfFile(_sharedMapping, Win32.FileMapAllAccess, 0, 0, SharedMappingSize);
++            if (_sharedView == IntPtr.Zero)
++                throw new InvalidOperationException("MapViewOfFile failed: " + Marshal.GetLastWin32Error());
++        }
++
++        private static string GetDllPath()
++        {
++            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CefFlashBrowser.SpeedGear.dll");
++        }
++
++        private static void LoadLocalSpeedGearDll()
++        {
++            var dllPath = GetDllPath();
++            if (!File.Exists(dllPath))
++                throw new FileNotFoundException("Speed gear DLL not found.", dllPath);
++
++            var module = Win32.GetModuleHandle("CefFlashBrowser.SpeedGear.dll");
++            if (module == IntPtr.Zero)
++            {
++                module = Win32.LoadLibrary(dllPath);
++                if (module == IntPtr.Zero)
++                    throw new InvalidOperationException("LoadLibrary failed: " + Marshal.GetLastWin32Error());
++            }
++        }
++
++        private static void InjectIntoCandidateProcesses()
++        {
++            var dllPath = GetDllPath();
++            if (!File.Exists(dllPath))
++                throw new FileNotFoundException("Speed gear DLL not found.", dllPath);
++
++            var current = Process.GetCurrentProcess();
++            var processes = Process.GetProcesses()
++                .Where(p => IsCandidateProcess(p, current.Id))
++                .ToArray();
++
++            foreach (var process in processes)
++            {
++                try
++                {
++                    Inject(process.Id, dllPath);
++                }
++                catch (Exception e)
++                {
++                    LogHelper.LogError($"Failed to inject speed gear into process {process.Id}", e);
++                }
++                finally
++                {
++                    process.Dispose();
++                }
++            }
++        }
++
++        private static bool IsCandidateProcess(Process process, int currentProcessId)
++        {
++            try
++            {
++                if (process.Id == currentProcessId)
++                    return false;
++
++                var name = process.ProcessName;
++                return name.IndexOf("CefFlashBrowser", StringComparison.OrdinalIgnoreCase) >= 0
++                    || name.IndexOf("CefSharp.BrowserSubprocess", StringComparison.OrdinalIgnoreCase) >= 0;
++            }
++            catch
++            {
++                return false;
++            }
++        }
++
++        private static void Inject(int processId, string dllPath)
++        {
++            var process = Win32.OpenProcess(Win32.ProcessCreateThread | Win32.ProcessQueryInformation |
++                                            Win32.ProcessVirtualMemoryOperation | Win32.ProcessVirtualMemoryWrite |
++                                            Win32.ProcessVirtualMemoryRead,
++                                            false, processId);
++            if (process == IntPtr.Zero)
++                throw new InvalidOperationException("OpenProcess failed: " + Marshal.GetLastWin32Error());
++
++            try
++            {
++                if (!IsSameArchitecture(process))
++                    return;
++
++                var bytes = Encoding.Unicode.GetBytes(dllPath + "\0");
++                var remoteBuffer = Win32.VirtualAllocEx(process, IntPtr.Zero, (UIntPtr)bytes.Length, Win32.MemCommit | Win32.MemReserve, Win32.PageReadWrite);
++                if (remoteBuffer == IntPtr.Zero)
++                    throw new InvalidOperationException("VirtualAllocEx failed: " + Marshal.GetLastWin32Error());
++
++                try
++                {
++                    if (!Win32.WriteProcessMemory(process, remoteBuffer, bytes, bytes.Length, out _))
++                        throw new InvalidOperationException("WriteProcessMemory failed: " + Marshal.GetLastWin32Error());
++
++                    var kernel32 = Win32.GetModuleHandle("kernel32.dll");
++                    var loadLibrary = Win32.GetProcAddress(kernel32, "LoadLibraryW");
++                    var thread = Win32.CreateRemoteThread(process, IntPtr.Zero, 0, loadLibrary, remoteBuffer, 0, IntPtr.Zero);
++                    if (thread == IntPtr.Zero)
++                        throw new InvalidOperationException("CreateRemoteThread failed: " + Marshal.GetLastWin32Error());
++
++                    Win32.WaitForSingleObject(thread, 5000);
++                    Win32.CloseHandle(thread);
++                }
++                finally
++                {
++                    Win32.VirtualFreeEx(process, remoteBuffer, UIntPtr.Zero, Win32.MemRelease);
++                }
++            }
++            finally
++            {
++                Win32.CloseHandle(process);
++            }
++        }
++
++        private static bool IsSameArchitecture(IntPtr process)
++        {
++            if (!Environment.Is64BitOperatingSystem)
++                return true;
++
++            if (!Win32.IsWow64Process(process, out var targetWow64))
++                return false;
++
++            return Environment.Is64BitProcess != targetWow64;
++        }
++
++        private static class Win32
++        {
++            public const int ProcessCreateThread = 0x0002;
++            public const int ProcessQueryInformation = 0x0400;
++            public const int ProcessVirtualMemoryOperation = 0x0008;
++            public const int ProcessVirtualMemoryWrite = 0x0020;
++            public const int ProcessVirtualMemoryRead = 0x0010;
++            public const int MemCommit = 0x1000;
++            public const int MemReserve = 0x2000;
++            public const int MemRelease = 0x8000;
++            public const int PageReadWrite = 0x04;
++            public const int FileMapAllAccess = 0xF001F;
++
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr OpenProcess(int access, bool inheritHandle, int processId);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern bool CloseHandle(IntPtr handle);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr LoadLibrary(string fileName);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr GetModuleHandle(string moduleName);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr GetProcAddress(IntPtr module, string procName);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr VirtualAllocEx(IntPtr process, IntPtr address, UIntPtr size, int allocationType, int protect);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern bool VirtualFreeEx(IntPtr process, IntPtr address, UIntPtr size, int freeType);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern bool WriteProcessMemory(IntPtr process, IntPtr baseAddress, byte[] buffer, int size, out UIntPtr written);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr CreateRemoteThread(IntPtr process, IntPtr threadAttributes, uint stackSize, IntPtr startAddress, IntPtr parameter, uint creationFlags, IntPtr threadId);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern uint WaitForSingleObject(IntPtr handle, uint milliseconds);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern bool IsWow64Process(IntPtr process, out bool wow64Process);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr CreateFileMapping(IntPtr file, IntPtr attributes, int protect, int maximumSizeHigh, int maximumSizeLow, string name);
++            [DllImport("kernel32.dll", SetLastError = true)] public static extern IntPtr MapViewOfFile(IntPtr mapping, int desiredAccess, int fileOffsetHigh, int fileOffsetLow, int bytesToMap);
++        }
++    }
++}
+diff --git a/CefFlashBrowser.SpeedGear/CefFlashBrowser.SpeedGear.vcxproj b/CefFlashBrowser.SpeedGear/CefFlashBrowser.SpeedGear.vcxproj
+new file mode 100644
+--- /dev/null
++++ b/CefFlashBrowser.SpeedGear/CefFlashBrowser.SpeedGear.vcxproj
+@@ -0,0 +1,149 @@
++<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <VCProjectVersion>17.0</VCProjectVersion>
++    <Keyword>Win32Proj</Keyword>
++    <ProjectGuid>{6f8795b6-73de-47f0-a6c8-b9ff94b40931}</ProjectGuid>
++    <RootNamespace>CefFlashBrowserSpeedGear</RootNamespace>
++    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <UseDebugLibraries>true</UseDebugLibraries>
++    <PlatformToolset>v143</PlatformToolset>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <UseDebugLibraries>false</UseDebugLibraries>
++    <PlatformToolset>v143</PlatformToolset>
++    <WholeProgramOptimization>true</WholeProgramOptimization>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <UseDebugLibraries>true</UseDebugLibraries>
++    <PlatformToolset>v143</PlatformToolset>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <UseDebugLibraries>false</UseDebugLibraries>
++    <PlatformToolset>v143</PlatformToolset>
++    <WholeProgramOptimization>true</WholeProgramOptimization>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Label="Shared">
++  </ImportGroup>
++  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup Condition="'$(Platform)'=='Win32'">
++    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
++    <IntDir>$(SolutionDir)bin\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
++    <TargetName>CefFlashBrowser.SpeedGear</TargetName>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Platform)'=='x64'">
++    <OutDir>$(SolutionDir)bin\x64\$(Configuration)\</OutDir>
++    <IntDir>$(SolutionDir)bin\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
++    <TargetName>CefFlashBrowser.SpeedGear</TargetName>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <ClCompile>
++      <WarningLevel>Level3</WarningLevel>
++      <SDLCheck>true</SDLCheck>
++      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <ConformanceMode>true</ConformanceMode>
++      <LanguageStandard>stdcpp17</LanguageStandard>
++    </ClCompile>
++    <Link>
++      <SubSystem>Windows</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <AdditionalDependencies>psapi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <ClCompile>
++      <WarningLevel>Level3</WarningLevel>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <SDLCheck>true</SDLCheck>
++      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <ConformanceMode>true</ConformanceMode>
++      <LanguageStandard>stdcpp17</LanguageStandard>
++    </ClCompile>
++    <Link>
++      <SubSystem>Windows</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <AdditionalDependencies>psapi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <ClCompile>
++      <WarningLevel>Level3</WarningLevel>
++      <SDLCheck>true</SDLCheck>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <ConformanceMode>true</ConformanceMode>
++      <LanguageStandard>stdcpp17</LanguageStandard>
++    </ClCompile>
++    <Link>
++      <SubSystem>Windows</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <AdditionalDependencies>psapi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <ClCompile>
++      <WarningLevel>Level3</WarningLevel>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <SDLCheck>true</SDLCheck>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <ConformanceMode>true</ConformanceMode>
++      <LanguageStandard>stdcpp17</LanguageStandard>
++    </ClCompile>
++    <Link>
++      <SubSystem>Windows</SubSystem>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <AdditionalDependencies>psapi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="SpeedGear.cpp" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+diff --git a/CefFlashBrowser.SpeedGear/SpeedGear.cpp b/CefFlashBrowser.SpeedGear/SpeedGear.cpp
+new file mode 100644
+--- /dev/null
++++ b/CefFlashBrowser.SpeedGear/SpeedGear.cpp
+@@ -0,0 +1,256 @@
++#include <windows.h>
++#include <psapi.h>
++#include <mmsystem.h>
++#include <cstdint>
++#include <cstring>
++
++namespace
++{
++    struct SharedState
++    {
++        volatile long long generation;
++        double speed;
++        unsigned char reserved[16];
++    };
++
++    using SleepFn = void (WINAPI*)(DWORD);
++    using SleepExFn = DWORD (WINAPI*)(DWORD, BOOL);
++    using GetTickCountFn = DWORD (WINAPI*)();
++    using GetTickCount64Fn = ULONGLONG (WINAPI*)();
++    using QueryPerformanceCounterFn = BOOL (WINAPI*)(LARGE_INTEGER*);
++    using GetSystemTimeAsFileTimeFn = void (WINAPI*)(LPFILETIME);
++    using SetTimerFn = UINT_PTR (WINAPI*)(HWND, UINT_PTR, UINT, TIMERPROC);
++    using TimeGetTimeFn = DWORD (WINAPI*)();
++
++    SharedState* g_shared = nullptr;
++    long long g_generation = 0;
++    double g_speed = 1.0;
++
++    SleepFn RealSleep = nullptr;
++    SleepExFn RealSleepEx = nullptr;
++    GetTickCountFn RealGetTickCount = nullptr;
++    GetTickCount64Fn RealGetTickCount64 = nullptr;
++    QueryPerformanceCounterFn RealQueryPerformanceCounter = nullptr;
++    GetSystemTimeAsFileTimeFn RealGetSystemTimeAsFileTime = nullptr;
++    SetTimerFn RealSetTimer = nullptr;
++    TimeGetTimeFn RealTimeGetTime = nullptr;
++
++    DWORD g_baseTick = 0;
++    ULONGLONG g_baseTick64 = 0;
++    DWORD g_baseTimeGetTime = 0;
++    LARGE_INTEGER g_baseQpc{};
++    FILETIME g_baseFileTime{};
++
++    static ULONGLONG FileTimeToU64(FILETIME ft)
++    {
++        return (static_cast<ULONGLONG>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
++    }
++
++    static FILETIME U64ToFileTime(ULONGLONG value)
++    {
++        FILETIME ft{};
++        ft.dwLowDateTime = static_cast<DWORD>(value);
++        ft.dwHighDateTime = static_cast<DWORD>(value >> 32);
++        return ft;
++    }
++
++    static FARPROC Resolve(const wchar_t* moduleName, const char* functionName)
++    {
++        auto module = GetModuleHandleW(moduleName);
++        if (!module)
++            module = LoadLibraryW(moduleName);
++        return module ? GetProcAddress(module, functionName) : nullptr;
++    }
++
++    static void ResetBases()
++    {
++        g_baseTick = RealGetTickCount ? RealGetTickCount() : ::GetTickCount();
++        g_baseTick64 = RealGetTickCount64 ? RealGetTickCount64() : ::GetTickCount64();
++        g_baseTimeGetTime = RealTimeGetTime ? RealTimeGetTime() : ::timeGetTime();
++        if (RealQueryPerformanceCounter)
++            RealQueryPerformanceCounter(&g_baseQpc);
++        else
++            ::QueryPerformanceCounter(&g_baseQpc);
++        if (RealGetSystemTimeAsFileTime)
++            RealGetSystemTimeAsFileTime(&g_baseFileTime);
++        else
++            ::GetSystemTimeAsFileTime(&g_baseFileTime);
++    }
++
++    static double CurrentSpeed()
++    {
++        if (g_shared && g_shared->generation != g_generation)
++        {
++            g_generation = g_shared->generation;
++            g_speed = g_shared->speed > 0 ? g_shared->speed : 1.0;
++            ResetBases();
++        }
++        return g_speed;
++    }
++
++    void WINAPI HookSleep(DWORD ms)
++    {
++        const auto speed = CurrentSpeed();
++        RealSleep(static_cast<DWORD>(ms / speed));
++    }
++
++    DWORD WINAPI HookSleepEx(DWORD ms, BOOL alertable)
++    {
++        const auto speed = CurrentSpeed();
++        return RealSleepEx(static_cast<DWORD>(ms / speed), alertable);
++    }
++
++    DWORD WINAPI HookGetTickCount()
++    {
++        const auto speed = CurrentSpeed();
++        const auto now = RealGetTickCount();
++        return static_cast<DWORD>(g_baseTick + (now - g_baseTick) * speed);
++    }
++
++    ULONGLONG WINAPI HookGetTickCount64()
++    {
++        const auto speed = CurrentSpeed();
++        const auto now = RealGetTickCount64();
++        return static_cast<ULONGLONG>(g_baseTick64 + (now - g_baseTick64) * speed);
++    }
++
++    BOOL WINAPI HookQueryPerformanceCounter(LARGE_INTEGER* out)
++    {
++        if (!out)
++            return FALSE;
++
++        const auto speed = CurrentSpeed();
++        LARGE_INTEGER now{};
++        const auto ok = RealQueryPerformanceCounter(&now);
++        out->QuadPart = static_cast<LONGLONG>(g_baseQpc.QuadPart + (now.QuadPart - g_baseQpc.QuadPart) * speed);
++        return ok;
++    }
++
++    void WINAPI HookGetSystemTimeAsFileTime(LPFILETIME out)
++    {
++        if (!out)
++            return;
++
++        const auto speed = CurrentSpeed();
++        FILETIME now{};
++        RealGetSystemTimeAsFileTime(&now);
++        const auto delta = FileTimeToU64(now) - FileTimeToU64(g_baseFileTime);
++        const auto value = FileTimeToU64(g_baseFileTime) + static_cast<ULONGLONG>(delta * speed);
++        *out = U64ToFileTime(value);
++    }
++
++    UINT_PTR WINAPI HookSetTimer(HWND hwnd, UINT_PTR id, UINT elapse, TIMERPROC proc)
++    {
++        const auto speed = CurrentSpeed();
++        auto scaled = static_cast<UINT>(elapse / speed);
++        if (scaled < 1)
++            scaled = 1;
++        return RealSetTimer(hwnd, id, scaled, proc);
++    }
++
++    DWORD WINAPI HookTimeGetTime()
++    {
++        const auto speed = CurrentSpeed();
++        const auto now = RealTimeGetTime();
++        return static_cast<DWORD>(g_baseTimeGetTime + (now - g_baseTimeGetTime) * speed);
++    }
++
++    static void PatchImport(HMODULE module, const char* importedName, FARPROC replacement)
++    {
++        auto base = reinterpret_cast<std::uint8_t*>(module);
++        auto dos = reinterpret_cast<IMAGE_DOS_HEADER*>(base);
++        if (!dos || dos->e_magic != IMAGE_DOS_SIGNATURE)
++            return;
++
++        auto nt = reinterpret_cast<IMAGE_NT_HEADERS*>(base + dos->e_lfanew);
++        if (!nt || nt->Signature != IMAGE_NT_SIGNATURE)
++            return;
++
++        auto& dir = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
++        if (!dir.VirtualAddress)
++            return;
++
++        auto desc = reinterpret_cast<IMAGE_IMPORT_DESCRIPTOR*>(base + dir.VirtualAddress);
++        for (; desc->Name; ++desc)
++        {
++            auto thunk = reinterpret_cast<IMAGE_THUNK_DATA*>(base + desc->FirstThunk);
++            auto orig = desc->OriginalFirstThunk
++                ? reinterpret_cast<IMAGE_THUNK_DATA*>(base + desc->OriginalFirstThunk)
++                : thunk;
++
++            for (; thunk->u1.Function && orig->u1.AddressOfData; ++thunk, ++orig)
++            {
++                if (IMAGE_SNAP_BY_ORDINAL(orig->u1.Ordinal))
++                    continue;
++
++                auto byName = reinterpret_cast<IMAGE_IMPORT_BY_NAME*>(base + orig->u1.AddressOfData);
++                if (std::strcmp(reinterpret_cast<const char*>(byName->Name), importedName) != 0)
++                    continue;
++
++                DWORD oldProtect = 0;
++                if (VirtualProtect(&thunk->u1.Function, sizeof(void*), PAGE_READWRITE, &oldProtect))
++                {
++                    thunk->u1.Function = reinterpret_cast<ULONG_PTR>(replacement);
++                    VirtualProtect(&thunk->u1.Function, sizeof(void*), oldProtect, &oldProtect);
++                }
++            }
++        }
++    }
++
++    static void PatchAllModules()
++    {
++        HMODULE modules[1024]{};
++        DWORD needed = 0;
++        if (!EnumProcessModules(GetCurrentProcess(), modules, sizeof(modules), &needed))
++            return;
++
++        const auto count = needed / sizeof(HMODULE);
++        for (DWORD i = 0; i < count; ++i)
++        {
++            PatchImport(modules[i], "Sleep", reinterpret_cast<FARPROC>(HookSleep));
++            PatchImport(modules[i], "SleepEx", reinterpret_cast<FARPROC>(HookSleepEx));
++            PatchImport(modules[i], "GetTickCount", reinterpret_cast<FARPROC>(HookGetTickCount));
++            PatchImport(modules[i], "GetTickCount64", reinterpret_cast<FARPROC>(HookGetTickCount64));
++            PatchImport(modules[i], "QueryPerformanceCounter", reinterpret_cast<FARPROC>(HookQueryPerformanceCounter));
++            PatchImport(modules[i], "GetSystemTimeAsFileTime", reinterpret_cast<FARPROC>(HookGetSystemTimeAsFileTime));
++            PatchImport(modules[i], "SetTimer", reinterpret_cast<FARPROC>(HookSetTimer));
++            PatchImport(modules[i], "timeGetTime", reinterpret_cast<FARPROC>(HookTimeGetTime));
++        }
++    }
++
++    static void InitSharedState()
++    {
++        auto mapping = CreateFileMappingW(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, sizeof(SharedState), L"Local\\CefFlashBrowser.SpeedGear");
++        if (!mapping)
++            return;
++
++        g_shared = reinterpret_cast<SharedState*>(MapViewOfFile(mapping, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(SharedState)));
++        if (g_shared)
++        {
++            g_generation = g_shared->generation;
++            g_speed = g_shared->speed > 0 ? g_shared->speed : 1.0;
++        }
++    }
++}
++
++extern "C" __declspec(dllexport) void WINAPI CefFlashBrowserSpeedGearLoaded() {}
++
++BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID)
++{
++    if (reason == DLL_PROCESS_ATTACH)
++    {
++        DisableThreadLibraryCalls(module);
++        RealSleep = reinterpret_cast<SleepFn>(Resolve(L"kernel32.dll", "Sleep"));
++        RealSleepEx = reinterpret_cast<SleepExFn>(Resolve(L"kernel32.dll", "SleepEx"));
++        RealGetTickCount = reinterpret_cast<GetTickCountFn>(Resolve(L"kernel32.dll", "GetTickCount"));
++        RealGetTickCount64 = reinterpret_cast<GetTickCount64Fn>(Resolve(L"kernel32.dll", "GetTickCount64"));
++        RealQueryPerformanceCounter = reinterpret_cast<QueryPerformanceCounterFn>(Resolve(L"kernel32.dll", "QueryPerformanceCounter"));
++        RealGetSystemTimeAsFileTime = reinterpret_cast<GetSystemTimeAsFileTimeFn>(Resolve(L"kernel32.dll", "GetSystemTimeAsFileTime"));
++        RealSetTimer = reinterpret_cast<SetTimerFn>(Resolve(L"user32.dll", "SetTimer"));
++        RealTimeGetTime = reinterpret_cast<TimeGetTimeFn>(Resolve(L"winmm.dll", "timeGetTime"));
++        InitSharedState();
++        ResetBases();
++        PatchAllModules();
++    }
++    return TRUE;
++}

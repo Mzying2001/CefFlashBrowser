@@ -17,12 +17,14 @@
   </Project>
   <Project Path="CefFlashBrowser.Singleton/CefFlashBrowser.Singleton.vcxproj" Id="9cd4757a-3adb-46b3-8521-74077e1005ec" />
   <Project Path="CefFlashBrowser.Sol/CefFlashBrowser.Sol.vcxproj" Id="b89cd104-d61a-437a-afa3-02c2da3a3248" />
+  <Project Path="CefFlashBrowser.SpeedGear/CefFlashBrowser.SpeedGear.vcxproj" Id="6f8795b6-73de-47f0-a6c8-b9ff94b40931" />
   <Project Path="CefFlashBrowser.WinformCefSharp4WPF/CefFlashBrowser.WinformCefSharp4WPF.csproj">
     <Platform Solution="*|x64" Project="x64" />
     <Platform Solution="*|x86" Project="x86" />
   </Project>
   <Project Path="CefFlashBrowser/CefFlashBrowser.csproj">
     <BuildDependency Project="CefFlashBrowser.EmptyExe/CefFlashBrowser.EmptyExe.csproj" />
+    <BuildDependency Project="CefFlashBrowser.SpeedGear/CefFlashBrowser.SpeedGear.vcxproj" />
     <Platform Solution="*|x64" Project="x64" />
     <Platform Solution="*|x86" Project="x86" />
   </Project>

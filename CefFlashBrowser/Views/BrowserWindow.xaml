@@ -107,6 +107,23 @@
 
             <Separator/>
 
+            <MenuItem Header="变速齿轮"
+                      ItemsSource="{Binding SpeedGearOptions}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="Header"
+                                Value="{Binding StringFormat={}{0}x}"/>
+                        <Setter Property="Command"
+                                Value="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext.SetSpeedFactorCommand}"/>
+                        <Setter Property="CommandParameter"
+                                Value="{Binding}"/>
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
+
+            <Separator/>
+
             <MenuItem Header="{DynamicResource common_favorites}"
                       ItemsSource="{Binding Source={x:Static data:GlobalData.Favorites}}">
                 <MenuItem.Style>

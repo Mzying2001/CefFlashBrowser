@@ -1,6 +1,7 @@
 ﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Utils;
+using CefFlashBrowser.Utils.SpeedGear;
 using CefSharp;
 using IWshRuntimeLibrary;
 using SimpleMvvm;
@@ -31,6 +32,9 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand CloseFindPopupCommand { get; set; }
         public DelegateCommand FindNextTextCommand { get; set; }
         public DelegateCommand FindPrevTextCommand { get; set; }
+        public DelegateCommand SetSpeedFactorCommand { get; set; }
+
+        public double[] SpeedGearOptions { get; } = new[] { 0.5d, 1d, 2d, 5d, 10d, 20d, 50d, 100d };
 
 
 
@@ -89,6 +93,26 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private double _speedFactor = 1.0;
+        public double SpeedFactor
+        {
+            get => _speedFactor;
+            set => UpdateValue(ref _speedFactor, value);
+        }
+
+        private void SetSpeedFactor(double speedFactor)
+        {
+            try
+            {
+                SpeedGearManager.SetSpeedFactor(speedFactor);
+                SpeedFactor = speedFactor;
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError($"Failed to set speed gear: {speedFactor}", e);
+                WindowManager.ShowError(e.Message);
+            }
+        }
 
         public void ShowMainWindow()
         {
@@ -346,6 +370,7 @@ namespace CefFlashBrowser.ViewModels
             CloseFindPopupCommand = new DelegateCommand(() => ShowFindPopup = false);
             FindNextTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, true));
             FindPrevTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, false));
+            SetSpeedFactorCommand = new DelegateCommand<double>(SetSpeedFactor);
 
             if (GlobalData.Settings.SaveZoomLevel)
             {
