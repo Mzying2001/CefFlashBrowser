@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -9,6 +9,7 @@ namespace CefFlashBrowser.Views
     public partial class BrowserWindow
     {
         private bool _featureButtonsAdded = false;
+        private ContextMenu _speedGearMenu;
         private ContextMenu _inputMemoryMenu;
 
         static BrowserWindow()
@@ -46,18 +47,21 @@ namespace CefFlashBrowser.Views
                 insertIndex = toolbar.Children.Count;
             }
 
-            toolbar.Children.Insert(insertIndex, CreateFlashAccelerationButton());
+            toolbar.Children.Insert(insertIndex, CreateSpeedGearButton());
             toolbar.Children.Insert(insertIndex + 1, CreateInputMemoryButton());
             _featureButtonsAdded = true;
         }
 
-        private Button CreateFlashAccelerationButton()
+        private Button CreateSpeedGearButton()
         {
-            var button = CreateToolbarButton("⚡", "Flash加速");
+            var button = CreateToolbarButton("⏩", "变速齿轮");
             button.Click += delegate
             {
-                browser.EnableFlashAcceleration();
-                Keyboard.Focus(browser);
+                if (_speedGearMenu == null)
+                {
+                    _speedGearMenu = CreateSpeedGearMenu();
+                }
+                OpenBottomContextMenu(button, _speedGearMenu);
             };
             return button;
         }
@@ -94,6 +98,36 @@ namespace CefFlashBrowser.Views
                     TextAlignment = TextAlignment.Center
                 }
             };
+        }
+
+        private ContextMenu CreateSpeedGearMenu()
+        {
+            var menu = new ContextMenu
+            {
+                VerticalOffset = -8,
+                HorizontalOffset = 8
+            };
+
+            menu.Items.Add(CreateSpeedGearMenuItem("暂停 0x", 0.0));
+            menu.Items.Add(new Separator());
+            menu.Items.Add(CreateSpeedGearMenuItem("减速 0.5x", 0.5));
+            menu.Items.Add(CreateSpeedGearMenuItem("正常 1x", 1.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("加速 2x", 2.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("加速 4x", 4.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("加速 8x", 8.0));
+
+            return menu;
+        }
+
+        private MenuItem CreateSpeedGearMenuItem(string header, double factor)
+        {
+            var item = new MenuItem { Header = header };
+            item.Click += delegate
+            {
+                browser.SetSpeedGearFactor(factor);
+                Keyboard.Focus(browser);
+            };
+            return item;
         }
 
         private ContextMenu CreateInputMemoryMenu()
