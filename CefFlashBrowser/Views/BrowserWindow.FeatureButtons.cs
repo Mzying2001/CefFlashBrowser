@@ -108,13 +108,14 @@ namespace CefFlashBrowser.Views
                 HorizontalOffset = 8
             };
 
-            menu.Items.Add(CreateSpeedGearMenuItem("暂停 0x", 0.0));
-            menu.Items.Add(new Separator());
-            menu.Items.Add(CreateSpeedGearMenuItem("减速 0.5x", 0.5));
-            menu.Items.Add(CreateSpeedGearMenuItem("正常 1x", 1.0));
-            menu.Items.Add(CreateSpeedGearMenuItem("加速 2x", 2.0));
-            menu.Items.Add(CreateSpeedGearMenuItem("加速 4x", 4.0));
-            menu.Items.Add(CreateSpeedGearMenuItem("加速 8x", 8.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("0.5x", 0.5));
+            menu.Items.Add(CreateSpeedGearMenuItem("1x", 1.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("2x", 2.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("5x", 5.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("10x", 10.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("20x", 20.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("50x", 50.0));
+            menu.Items.Add(CreateSpeedGearMenuItem("100x", 100.0));
 
             return menu;
         }
