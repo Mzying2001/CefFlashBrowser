@@ -124,7 +124,17 @@ namespace CefFlashBrowser.Utils
             window.Owner = owner;
             window.Show();
             Win32.EnableWindow(hOwner, false);
-            Dispatcher.PushFrame(frame);
+
+            try
+            {
+                Dispatcher.PushFrame(frame);
+            }
+            finally
+            {
+                frame.Continue = false;
+                Win32.EnableWindow(hOwner, storeEnabled);
+            }
+
             return GetDialogResult(window);
         }
 
