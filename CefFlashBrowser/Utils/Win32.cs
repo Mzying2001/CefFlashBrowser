@@ -7,6 +7,7 @@ namespace CefFlashBrowser.Utils
     public static class Win32
     {
         // window messages
+        public const int WM_DESTROY = 0x0002;
         public const int WM_MOVE = 0x0003;
 
         // window styles

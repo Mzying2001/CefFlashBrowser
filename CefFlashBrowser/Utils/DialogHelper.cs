@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -104,12 +105,14 @@ namespace CefFlashBrowser.Utils
             var hOwner = new WindowInteropHelper(owner).Handle;
             bool storeEnabled = Win32.IsWindowEnabled(hOwner);
 
-            // Re-enable the owner BEFORE the HWND is destroyed (in Closing),
-            // so Windows activates the owner (not another window) on close.
-            window.Closing += (s, e) =>
+            // Re-enable the owner from GetPreCloseHandlers BEFORE WM_DESTROY
+            // tears down the HWND, so Windows activates the owner (not another window) on close.
+            window.SourceInitialized += (s, e) =>
             {
-                if (!e.Cancel)
+                GetPreCloseHandlers(window).Add(delegate
+                {
                     Win32.EnableWindow(hOwner, storeEnabled);
+                });
             };
 
             window.Closed += (s, e) =>
@@ -123,6 +126,55 @@ namespace CefFlashBrowser.Utils
             Win32.EnableWindow(hOwner, false);
             Dispatcher.PushFrame(frame);
             return GetDialogResult(window);
+        }
+
+        /// <summary>
+        /// Gets the handlers that run just before the window HWND is destroyed.
+        /// </summary>
+        /// <remarks>
+        /// The hook is attached through the window's HwndSource, so the window must
+        /// already be initialized before calling this method.
+        /// </remarks>
+        /// <param name="window">The window to attach the pre-close hook to.</param>
+        /// <returns>The list of handlers invoked from WM_DESTROY.</returns>
+        public static List<EventHandler> GetPreCloseHandlers(Window window)
+        {
+            if (window == null)
+                throw new ArgumentNullException(nameof(window));
+
+            const string key = "__PreCloseHandlers";
+
+            List<EventHandler> getHandlers(Window wnd)
+            {
+                return wnd.Resources.Contains(key) ? wnd.Resources[key] as List<EventHandler> : null;
+            }
+
+            if (getHandlers(window) is List<EventHandler> handlers)
+            {
+                return handlers;
+            }
+            else
+            {
+                handlers = new List<EventHandler>();
+
+                IntPtr wndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+                {
+                    if (msg == Win32.WM_DESTROY
+                        && getHandlers(window) is List<EventHandler> list)
+                    {
+                        foreach (var h in list.ToArray())
+                            h?.Invoke(window, EventArgs.Empty);
+                    }
+                    return IntPtr.Zero;
+                }
+
+                var source = (HwndSource)PresentationSource.FromVisual(window)
+                    ?? throw new InvalidOperationException("Window must be initialized before calling GetPreCloseHandlers.");
+
+                window.Resources[key] = handlers;
+                source.AddHook(wndProc);
+                return handlers;
+            }
         }
     }
 }
