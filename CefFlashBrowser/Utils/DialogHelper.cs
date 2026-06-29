@@ -105,11 +105,11 @@ namespace CefFlashBrowser.Utils
             var hOwner = new WindowInteropHelper(owner).Handle;
             bool storeEnabled = Win32.IsWindowEnabled(hOwner);
 
-            // Re-enable the owner from GetPreCloseHandlers BEFORE WM_DESTROY
+            // Re-enable the owner from GetBeforeDestroyHandlers BEFORE WM_DESTROY
             // tears down the HWND, so Windows activates the owner (not another window) on close.
             window.SourceInitialized += (s, e) =>
             {
-                GetPreCloseHandlers(window).Add(delegate
+                GetBeforeDestroyHandlers(window).Add(delegate
                 {
                     Win32.EnableWindow(hOwner, storeEnabled);
                 });
@@ -145,14 +145,14 @@ namespace CefFlashBrowser.Utils
         /// The hook is attached through the window's HwndSource, so the window must
         /// already be initialized before calling this method.
         /// </remarks>
-        /// <param name="window">The window to attach the pre-close hook to.</param>
+        /// <param name="window">The window to attach the before-destroy hook to.</param>
         /// <returns>The list of handlers invoked from WM_DESTROY.</returns>
-        public static List<EventHandler> GetPreCloseHandlers(Window window)
+        public static List<EventHandler> GetBeforeDestroyHandlers(Window window)
         {
             if (window == null)
                 throw new ArgumentNullException(nameof(window));
 
-            const string key = "__PreCloseHandlers";
+            const string key = "__BeforeDestroyHandlers";
 
             List<EventHandler> getHandlers(Window wnd)
             {
@@ -179,7 +179,7 @@ namespace CefFlashBrowser.Utils
                 }
 
                 var source = (HwndSource)PresentationSource.FromVisual(window)
-                    ?? throw new InvalidOperationException("Window must be initialized before calling GetPreCloseHandlers.");
+                    ?? throw new InvalidOperationException("Window must be initialized before calling GetBeforeDestroyHandlers.");
 
                 window.Resources[key] = handlers;
                 source.AddHook(wndProc);

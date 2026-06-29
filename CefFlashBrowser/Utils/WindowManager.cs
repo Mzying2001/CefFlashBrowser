@@ -158,7 +158,7 @@ namespace CefFlashBrowser.Utils
                 _browserWindows.Add(window);
                 ((BrowserWindowViewModel)window.DataContext).Address = address;
 
-                DialogHelper.GetPreCloseHandlers(window).Add((s, e) =>
+                DialogHelper.GetBeforeDestroyHandlers(window).Add((s, e) =>
                 {
                     _browserWindows.Remove((BrowserWindow)s);
 
