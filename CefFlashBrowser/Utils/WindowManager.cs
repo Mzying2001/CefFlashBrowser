@@ -145,6 +145,21 @@ namespace CefFlashBrowser.Utils
             });
         }
 
+        /// <summary>
+        /// If active browser window exists, return it; otherwise, return the last opened browser window.
+        /// </summary>
+        public static BrowserWindow GetCurrentBrowserWindow()
+        {
+            if (_browserWindows.FirstOrDefault(x => x.IsActive) is BrowserWindow activeWindow)
+            {
+                return activeWindow;
+            }
+            else
+            {
+                return _browserWindows.LastOrDefault();
+            }
+        }
+
 
         public static void ShowMainWindow()
         {
@@ -168,11 +183,6 @@ namespace CefFlashBrowser.Utils
                     { ShowMainWindow(); }
                 });
             });
-        }
-
-        public static BrowserWindow GetLatestBrowserWindow()
-        {
-            return _browserWindows.LastOrDefault();
         }
 
         public static void ShowSwfPlayer(string fileName)
