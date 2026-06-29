@@ -66,7 +66,7 @@ namespace CefFlashBrowser.Utils
                 else
                 {
                     window = NewWindow<TWindow>();
-                    window.Closing += (s, e) => _singletonWindows.Remove(s.GetType());
+                    window.Closed += (s, e) => _singletonWindows.Remove(typeof(TWindow));
                     _singletonWindows.Add(typeof(TWindow), window);
                 }
             }
