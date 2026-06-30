@@ -66,7 +66,7 @@ namespace CefFlashBrowser.Utils
                 else
                 {
                     window = NewWindow<TWindow>();
-                    window.Closing += (s, e) => _singletonWindows.Remove(s.GetType());
+                    window.Closed += (s, e) => _singletonWindows.Remove(typeof(TWindow));
                     _singletonWindows.Add(typeof(TWindow), window);
                 }
             }
@@ -145,6 +145,21 @@ namespace CefFlashBrowser.Utils
             });
         }
 
+        /// <summary>
+        /// If active browser window exists, return it; otherwise, return the last opened browser window.
+        /// </summary>
+        public static BrowserWindow GetCurrentBrowserWindow()
+        {
+            if (_browserWindows.FirstOrDefault(x => x.IsActive) is BrowserWindow activeWindow)
+            {
+                return activeWindow;
+            }
+            else
+            {
+                return _browserWindows.LastOrDefault();
+            }
+        }
+
 
         public static void ShowMainWindow()
         {
@@ -158,25 +173,16 @@ namespace CefFlashBrowser.Utils
                 _browserWindows.Add(window);
                 ((BrowserWindowViewModel)window.DataContext).Address = address;
 
-                window.Closing += (s, e) =>
+                DialogHelper.GetBeforeDestroyHandlers(window).Add((s, e) =>
                 {
-                    if (e.Cancel) return;
-
                     _browserWindows.Remove((BrowserWindow)s);
 
                     if (_browserWindows.Count == 0
                         && !GlobalData.IsStartWithoutMainWindow
                         && GlobalData.Settings.HideMainWindowOnBrowsing)
-                    {
-                        ShowMainWindow();
-                    }
-                };
+                    { ShowMainWindow(); }
+                });
             });
-        }
-
-        public static BrowserWindow GetLatestBrowserWindow()
-        {
-            return _browserWindows.LastOrDefault();
         }
 
         public static void ShowSwfPlayer(string fileName)
