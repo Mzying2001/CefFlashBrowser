@@ -12,7 +12,9 @@ namespace CefFlashBrowser.Utils
             if (!Directory.Exists(dir))
                 return null;
 
-            dir = dir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            dir = dir.TrimEnd(
+                Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
             return Directory.GetParent(dir)?.FullName;
         }
 
@@ -101,6 +103,50 @@ namespace CefFlashBrowser.Utils
                     }
                 }
             }, token);
+        }
+
+        public static string GetRedirectDirectory(string baseDir, string folder, string fallbackDir = null)
+        {
+            string result = null;
+            string desire = Path.Combine(baseDir, folder);
+
+            if (string.IsNullOrWhiteSpace(fallbackDir))
+            {
+                fallbackDir = Environment.GetFolderPath(
+                    Environment.SpecialFolder.LocalApplicationData);
+            }
+
+            if (Directory.Exists(desire))
+            {
+                result = desire;
+            }
+            else
+            {
+                try
+                {
+                    string redirect = desire.TrimEnd(
+                        Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+                    if (File.Exists(redirect))
+                    {
+                        result = File.ReadAllText(redirect);
+                    }
+                }
+                catch { }
+            }
+
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                result = Path.Combine(fallbackDir, folder);
+            }
+
+            if (!result.EndsWith(Path.DirectorySeparatorChar.ToString()) &&
+                !result.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+            {
+                result += Path.DirectorySeparatorChar;
+            }
+
+            return result;
         }
     }
 }
