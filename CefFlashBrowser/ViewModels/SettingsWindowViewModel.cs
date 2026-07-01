@@ -275,11 +275,6 @@ namespace CefFlashBrowser.ViewModels
             GlobalData.Settings.SearchEngine = engine;
         }
 
-        private void DeleteDirectory(string path)
-        {
-            new PathInfo(PathInfo.PathType.Directory, path).Delete();
-        }
-
         private void DeleteCache()
         {
             WindowManager.Confirm(LanguageManager.GetString("message_deleteCache"), callback: result =>
@@ -292,7 +287,7 @@ namespace CefFlashBrowser.ViewModels
                         {
                             Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
                             CefSharp.Cef.Shutdown();
-                            DeleteDirectory(GlobalData.CachesPath);
+                            DirectoryHelper.MoveDirectoryToPendingDelete(GlobalData.CachesPath, recreateEmpty: true);
                             break;
                         }
                         catch (Exception e)
