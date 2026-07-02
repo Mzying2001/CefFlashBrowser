@@ -13,23 +13,29 @@ namespace CefFlashBrowser.Utils
         {
             return Task.Run(() =>
             {
-                Parallel.ForEach(files, new ParallelOptions { CancellationToken = token }, item =>
+                Parallel.ForEach(files, new ParallelOptions { CancellationToken = token }, path =>
                 {
                     token.ThrowIfCancellationRequested();
                     try
                     {
-                        if (File.Exists(item))
+                        if (File.Exists(path))
                         {
-                            File.Delete(item);
-                            LogHelper.LogInfo($"Deleted log file: {item}");
+                            File.Delete(path);
+                            LogHelper.LogInfo($"Deleted file: {path}");
                         }
                     }
                     catch (Exception e)
                     {
-                        LogHelper.LogError($"Failed to delete log file: {item}", e);
+                        LogHelper.LogError($"Failed to delete file: {path}", e);
                     }
                 });
             }, token);
+        }
+
+        public static Task DeleteTempFilesAsync(string dir, CancellationToken token)
+        {
+            var files = Directory.GetFiles(dir, "*.tmp", SearchOption.TopDirectoryOnly);
+            return DeleteFilesAsync(files, token);
         }
 
         public static void SafeWriteFile(string path, byte[] data)
