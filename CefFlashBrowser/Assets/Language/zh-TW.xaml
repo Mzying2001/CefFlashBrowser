@@ -31,12 +31,10 @@
     <sys:String x:Key="mainWindow_viewGithub">在GitHub檢視</sys:String>
 
     <!--設定視窗-->
-    <sys:String x:Key="settings_tabMainWindow">主視窗</sys:String>
-    <sys:String x:Key="settings_tabBrowser">瀏覽器</sys:String>
-    <sys:String x:Key="settings_headerAddressBar">網址列與搜尋</sys:String>
+    <sys:String x:Key="settings_headerMainWindow">主視窗</sys:String>
     <sys:String x:Key="settings_headerTheme">主題</sys:String>
     <sys:String x:Key="settings_headerOther">其他</sys:String>
-    <sys:String x:Key="settings_headerBrowserData">瀏覽器快取</sys:String>
+    <sys:String x:Key="settings_headerBrowser">瀏覽器</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">網站行為</sys:String>
     <sys:String x:Key="settings_headerAdvanced">進階</sys:String>
     <sys:String x:Key="settings_headerAboutCef">關於 CEF</sys:String>
@@ -64,7 +62,7 @@
     <sys:String x:Key="settings_ip">IP位址</sys:String>
     <sys:String x:Key="settings_port">通訊埠</sys:String>
     <sys:String x:Key="settings_optional">（選填）</sys:String>
-    <sys:String x:Key="settings_saveZoomLevel">儲存縮放比例</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">儲存網頁縮放比例</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">將開發者工具嵌入至瀏覽器視窗</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止網頁進入全螢幕模式</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">停用GPU加速</sys:String>

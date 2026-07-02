@@ -31,12 +31,10 @@
     <sys:String x:Key="mainWindow_viewGithub">在GitHub中查看</sys:String>
 
     <!--设置窗口-->
-    <sys:String x:Key="settings_tabMainWindow">主窗口</sys:String>
-    <sys:String x:Key="settings_tabBrowser">浏览器</sys:String>
-    <sys:String x:Key="settings_headerAddressBar">地址栏和搜索</sys:String>
+    <sys:String x:Key="settings_headerMainWindow">主窗口</sys:String>
     <sys:String x:Key="settings_headerTheme">主题</sys:String>
     <sys:String x:Key="settings_headerOther">其他</sys:String>
-    <sys:String x:Key="settings_headerBrowserData">浏览器缓存</sys:String>
+    <sys:String x:Key="settings_headerBrowser">浏览器</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">网站行为</sys:String>
     <sys:String x:Key="settings_headerAdvanced">高级</sys:String>
     <sys:String x:Key="settings_headerAboutCef">关于 CEF</sys:String>
@@ -64,7 +62,7 @@
     <sys:String x:Key="settings_ip">IP</sys:String>
     <sys:String x:Key="settings_port">端口</sys:String>
     <sys:String x:Key="settings_optional">（可选）</sys:String>
-    <sys:String x:Key="settings_saveZoomLevel">保存缩放比例</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">保存网页缩放比例</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">嵌入开发工具到浏览器窗口</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止网页进入全屏模式</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">禁用GPU加速</sys:String>

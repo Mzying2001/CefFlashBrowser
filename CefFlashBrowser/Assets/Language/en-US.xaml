@@ -31,12 +31,10 @@
     <sys:String x:Key="mainWindow_viewGithub">View in GitHub</sys:String>
 
     <!--Settings Window-->
-    <sys:String x:Key="settings_tabMainWindow">Main Window</sys:String>
-    <sys:String x:Key="settings_tabBrowser">Browser</sys:String>
-    <sys:String x:Key="settings_headerAddressBar">Address Bar and Search</sys:String>
+    <sys:String x:Key="settings_headerMainWindow">Main Window</sys:String>
     <sys:String x:Key="settings_headerTheme">Theme</sys:String>
     <sys:String x:Key="settings_headerOther">Other</sys:String>
-    <sys:String x:Key="settings_headerBrowserData">Browser Cache</sys:String>
+    <sys:String x:Key="settings_headerBrowser">Browser</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Website Behavior</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Advanced</sys:String>
     <sys:String x:Key="settings_headerAboutCef">About CEF</sys:String>
@@ -64,7 +62,7 @@
     <sys:String x:Key="settings_ip">IP</sys:String>
     <sys:String x:Key="settings_port">Port</sys:String>
     <sys:String x:Key="settings_optional">(Optional)</sys:String>
-    <sys:String x:Key="settings_saveZoomLevel">Save zoom level</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">Save webpage zoom level</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Embed devtools into browser window</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Disable fullscreen mode</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Disable GPU acceleration</sys:String>

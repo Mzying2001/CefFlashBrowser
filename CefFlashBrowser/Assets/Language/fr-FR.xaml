@@ -31,12 +31,10 @@
     <sys:String x:Key="mainWindow_viewGithub">Ouvrir dans GitHub</sys:String>
 
     <!--Settings Window-->
-    <sys:String x:Key="settings_tabMainWindow">Fenêtre principale</sys:String>
-    <sys:String x:Key="settings_tabBrowser">Navigateur</sys:String>
-    <sys:String x:Key="settings_headerAddressBar">Barre d'adresse et de recherche</sys:String>
+    <sys:String x:Key="settings_headerMainWindow">Fenêtre principale</sys:String>
     <sys:String x:Key="settings_headerTheme">Thème</sys:String>
     <sys:String x:Key="settings_headerOther">Autre</sys:String>
-    <sys:String x:Key="settings_headerBrowserData">Cache du navigateur</sys:String>
+    <sys:String x:Key="settings_headerBrowser">Navigateur</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Comportement des site Web</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Avancé</sys:String>
     <sys:String x:Key="settings_headerAboutCef">À propos de CEF</sys:String>
@@ -64,7 +62,7 @@
     <sys:String x:Key="settings_ip">IP</sys:String>
     <sys:String x:Key="settings_port">Port</sys:String>
     <sys:String x:Key="settings_optional">(Optionnel)</sys:String>
-    <sys:String x:Key="settings_saveZoomLevel">Mémoriser le niveau de zoom</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">Mémoriser le niveau de zoom des pages Web</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Intégrer les outils de développement dans la fenêtre du navigateur</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Désactiver le mode plein écran</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Désactiver l’accélération GPU</sys:String>
