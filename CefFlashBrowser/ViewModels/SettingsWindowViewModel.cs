@@ -94,9 +94,9 @@ namespace CefFlashBrowser.ViewModels
                 if (GlobalData.Settings.Theme != value)
                 {
                     GlobalData.Settings.Theme = value;
+                    RaisePropertyChanged();
                     ThemeManager.ChangeTheme(value);
                     Messenger.Global.Send(MessageTokens.REDRAW_ALL_FRAMES, null);
-                    RaisePropertyChanged();
                 }
             }
         }
@@ -248,10 +248,13 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.FollowSystemTheme;
             set
             {
-                GlobalData.Settings.FollowSystemTheme = value;
-                RaisePropertyChanged();
-                ThemeManager.ChangeTheme(value ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme);
-                Messenger.Global.Send(MessageTokens.REDRAW_ALL_FRAMES, null);
+                if (GlobalData.Settings.FollowSystemTheme != value)
+                {
+                    GlobalData.Settings.FollowSystemTheme = value;
+                    RaisePropertyChanged();
+                    ThemeManager.ChangeTheme(value ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme);
+                    Messenger.Global.Send(MessageTokens.REDRAW_ALL_FRAMES, null);
+                }
             }
         }
 
