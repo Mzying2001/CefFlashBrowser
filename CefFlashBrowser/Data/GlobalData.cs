@@ -63,19 +63,11 @@ namespace CefFlashBrowser.Data
             Messenger.Global.Register(MessageTokens.SAVE_FAVORITES, _ => SaveFavorites());
         }
 
-        private static void CreateDirIfNotExist(string path)
-        {
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-        }
-
         public static bool InitData()
         {
-            CreateDirIfNotExist(DataPath);
-            CreateDirIfNotExist(CachesPath);
-            CreateDirIfNotExist(LogsPath);
+            DirectoryHelper.EnsureDirectoryExists(DataPath);
+            DirectoryHelper.EnsureDirectoryExists(LogsPath);
+            DirectoryHelper.EnsureDirectoryExists(CachesPath);
 
             InitFavorites();
             InitSettings();

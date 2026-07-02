@@ -7,6 +7,14 @@ namespace CefFlashBrowser.Utils
 {
     public static class DirectoryHelper
     {
+        public static void EnsureDirectoryExists(string dir)
+        {
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+        }
+
         public static string GetParentDirectory(string dir)
         {
             if (!Directory.Exists(dir))
