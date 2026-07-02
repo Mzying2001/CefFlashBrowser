@@ -192,13 +192,13 @@
                                 </Grid.ColumnDefinitions>
                                 <hc:TextBox Grid.Column="0"
                                             Margin="5"
-                                            Text="{Binding ProxyIP, UpdateSourceTrigger=PropertyChanged}"
+                                            Text="{Binding ProxySettings.IP, UpdateSourceTrigger=PropertyChanged}"
                                             hc:InfoElement.Placeholder="{DynamicResource settings_ip}"/>
                                 <TextBlock Grid.Column="1" Text=":"/>
                                 <hc:TextBox Grid.Column="2"
                                             Margin="5"
                                             Width="70"
-                                            Text="{Binding ProxyPort, UpdateSourceTrigger=PropertyChanged}"
+                                            Text="{Binding ProxySettings.Port, UpdateSourceTrigger=PropertyChanged}"
                                             hc:InfoElement.Placeholder="{DynamicResource settings_port}"/>
                             </Grid>
                             <TextBlock Grid.Row="1"
@@ -207,7 +207,7 @@
                             <hc:TextBox Grid.Row="1"
                                         Grid.Column="2"
                                         Margin="5"
-                                        Text="{Binding ProxyUserName, UpdateSourceTrigger=PropertyChanged}"
+                                        Text="{Binding ProxySettings.UserName, UpdateSourceTrigger=PropertyChanged}"
                                         hc:InfoElement.Placeholder="{DynamicResource settings_optional}"/>
                             <TextBlock Grid.Row="2"
                                        Grid.Column="0"
@@ -215,7 +215,7 @@
                             <hc:TextBox Grid.Row="2"
                                         Grid.Column="2"
                                         Margin="5"
-                                        Text="{Binding ProxyPassword, UpdateSourceTrigger=PropertyChanged}"
+                                        Text="{Binding ProxySettings.Password, UpdateSourceTrigger=PropertyChanged}"
                                         hc:InfoElement.Placeholder="{DynamicResource settings_optional}"/>
                         </Grid>
                     </hc:Card>

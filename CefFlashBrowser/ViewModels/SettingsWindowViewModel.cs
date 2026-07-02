@@ -106,8 +106,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.FakeFlashVersionSetting.Enable;
             set
             {
-                GlobalData.Settings.FakeFlashVersionSetting.Enable = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.FakeFlashVersionSetting.Enable != value)
+                {
+                    GlobalData.Settings.FakeFlashVersionSetting.Enable = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -116,8 +119,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.FakeFlashVersionSetting.FlashVersion;
             set
             {
-                GlobalData.Settings.FakeFlashVersionSetting.FlashVersion = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.FakeFlashVersionSetting.FlashVersion != value)
+                {
+                    GlobalData.Settings.FakeFlashVersionSetting.FlashVersion = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -148,8 +154,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.UserAgentSetting.EnableCustom;
             set
             {
-                GlobalData.Settings.UserAgentSetting.EnableCustom = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.UserAgentSetting.EnableCustom != value)
+                {
+                    GlobalData.Settings.UserAgentSetting.EnableCustom = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -158,8 +167,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.UserAgentSetting.UserAgent;
             set
             {
-                GlobalData.Settings.UserAgentSetting.UserAgent = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.UserAgentSetting.UserAgent != value)
+                {
+                    GlobalData.Settings.UserAgentSetting.UserAgent = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -168,48 +180,24 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.ProxySettings.EnableProxy;
             set
             {
-                GlobalData.Settings.ProxySettings.EnableProxy = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.ProxySettings.EnableProxy != value)
+                {
+                    GlobalData.Settings.ProxySettings.EnableProxy = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
-        public string ProxyIP
+        public ProxySettings ProxySettings
         {
-            get => GlobalData.Settings.ProxySettings.IP;
+            get => GlobalData.Settings.ProxySettings;
             set
             {
-                GlobalData.Settings.ProxySettings.IP = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public string ProxyPort
-        {
-            get => GlobalData.Settings.ProxySettings.Port;
-            set
-            {
-                GlobalData.Settings.ProxySettings.Port = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public string ProxyUserName
-        {
-            get => GlobalData.Settings.ProxySettings.UserName;
-            set
-            {
-                GlobalData.Settings.ProxySettings.UserName = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public string ProxyPassword
-        {
-            get => GlobalData.Settings.ProxySettings.Password;
-            set
-            {
-                GlobalData.Settings.ProxySettings.Password = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.ProxySettings != value)
+                {
+                    GlobalData.Settings.ProxySettings = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -218,8 +206,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.DisableOnBeforeUnloadDialog;
             set
             {
-                GlobalData.Settings.DisableOnBeforeUnloadDialog = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.DisableOnBeforeUnloadDialog != value)
+                {
+                    GlobalData.Settings.DisableOnBeforeUnloadDialog = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -228,8 +219,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.DisableFullscreen;
             set
             {
-                GlobalData.Settings.DisableFullscreen = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.DisableFullscreen != value)
+                {
+                    GlobalData.Settings.DisableFullscreen = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -238,8 +232,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.HideMainWindowOnBrowsing;
             set
             {
-                GlobalData.Settings.HideMainWindowOnBrowsing = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.HideMainWindowOnBrowsing != value)
+                {
+                    GlobalData.Settings.HideMainWindowOnBrowsing = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -263,8 +260,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.EnableIntegratedDevTools;
             set
             {
-                GlobalData.Settings.EnableIntegratedDevTools = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.EnableIntegratedDevTools != value)
+                {
+                    GlobalData.Settings.EnableIntegratedDevTools = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -273,8 +273,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.SaveZoomLevel;
             set
             {
-                GlobalData.Settings.SaveZoomLevel = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.SaveZoomLevel != value)
+                {
+                    GlobalData.Settings.SaveZoomLevel = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -283,8 +286,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.DisableGpuAcceleration;
             set
             {
-                GlobalData.Settings.DisableGpuAcceleration = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.DisableGpuAcceleration != value)
+                {
+                    GlobalData.Settings.DisableGpuAcceleration = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -293,8 +299,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.DisableBrowserContextMenu;
             set
             {
-                GlobalData.Settings.DisableBrowserContextMenu = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.DisableBrowserContextMenu != value)
+                {
+                    GlobalData.Settings.DisableBrowserContextMenu = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -302,34 +311,34 @@ namespace CefFlashBrowser.ViewModels
         {
             WindowManager.Confirm(LanguageManager.GetString("message_deleteCache"), callback: result =>
             {
-                if (result == true)
+                if (result != true)
+                    return;
+
+                while (true)
                 {
-                    while (true)
+                    try
                     {
-                        try
-                        {
-                            Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
-                            Messenger.Global.Send(MessageTokens.CLOSE_MAINWINDOW, null);
-                            CefSharp.Cef.Shutdown();
-                            DirectoryHelper.MoveDirectoryToPendingDelete(GlobalData.CachesPath, recreateEmpty: true);
-                            break;
-                        }
-                        catch (Exception e)
-                        {
-                            LogHelper.LogError("Delete cache failed", e);
-
-                            string msg = string.Format("{0}\n\n{1}:\n{2}",
-                                LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message);
-
-                            bool retry = false;
-                            WindowManager.Confirm(msg, LanguageManager.GetString("dialog_error"), tmp => retry = tmp ?? false);
-
-                            if (!retry) { break; }
-                        }
+                        Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
+                        Messenger.Global.Send(MessageTokens.CLOSE_MAINWINDOW, null);
+                        CefSharp.Cef.Shutdown();
+                        DirectoryHelper.MoveDirectoryToPendingDelete(GlobalData.CachesPath, recreateEmpty: true);
+                        break;
                     }
+                    catch (Exception e)
+                    {
+                        LogHelper.LogError("Delete cache failed", e);
 
-                    Program.Restart();
+                        string msg = string.Format("{0}\n\n{1}:\n{2}",
+                            LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message);
+
+                        bool retry = false;
+                        WindowManager.Confirm(msg, LanguageManager.GetString("dialog_error"), tmp => retry = tmp ?? false);
+
+                        if (!retry) { break; }
+                    }
                 }
+
+                Program.Restart();
             });
         }
 
