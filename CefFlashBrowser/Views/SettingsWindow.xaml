@@ -42,6 +42,7 @@
         <Style TargetType="Button"
                BasedOn="{StaticResource ButtonBaseStyle}">
             <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
         </Style>
 
         <Style TargetType="{x:Type c:SettingGroup}"
@@ -72,16 +73,9 @@
                             </Style>
                         </c:SettingItem.Style>
                         <ComboBox ItemsSource="{Binding Themes}"
-                                  SelectedIndex="{Binding CurrentThemeIndex, Mode=OneWay}"
+                                  SelectedValue="{Binding CurrentTheme}"
                                   DisplayMemberPath="Name"
-                                  SelectedValuePath="Value">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="SelectionChanged">
-                                    <i:InvokeCommandAction Command="{Binding SetThemeCommand}"
-                                                           CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </ComboBox>
+                                  SelectedValuePath="Value"/>
                     </c:SettingItem>
                 </c:SettingGroup>
 
@@ -90,31 +84,17 @@
                     <!--navigation type-->
                     <c:SettingItem Description="{DynamicResource settings_useSearchEngine}">
                         <ComboBox ItemsSource="{Binding NavigationTypes}"
-                                  SelectedIndex="{Binding CurrentNavigationTypeIndex, Mode=OneWay}"
+                                  SelectedValue="{Binding CurrentNavigationType}"
                                   DisplayMemberPath="Name"
-                                  SelectedValuePath="Value">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="SelectionChanged">
-                                    <i:InvokeCommandAction Command="{Binding SetNavigationTypeCommand}"
-                                                           CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </ComboBox>
+                                  SelectedValuePath="Value"/>
                     </c:SettingItem>
 
                     <!--search engine-->
                     <c:SettingItem Description="{DynamicResource settings_searchEngine}">
                         <ComboBox ItemsSource="{Binding SearchEngines}"
-                                  SelectedIndex="{Binding CurrentSearchEngineIndex, Mode=OneWay}"
+                                  SelectedValue="{Binding CurrentSearchEngine}"
                                   DisplayMemberPath="Name"
-                                  SelectedValuePath="Value">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="SelectionChanged">
-                                    <i:InvokeCommandAction Command="{Binding SetSearchEngineCommand}"
-                                                           CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </ComboBox>
+                                  SelectedValuePath="Value"/>
                     </c:SettingItem>
 
                     <!--hide main window on browsing-->
@@ -152,16 +132,9 @@
                 <c:SettingGroup Header="{DynamicResource settings_headerWebsiteBehavior}">
                     <c:SettingItem Description="{DynamicResource settings_openNewPage}">
                         <ComboBox ItemsSource="{Binding NewPageBehaviors}"
-                                  SelectedIndex="{Binding CurrentNewPageBehaviorIndex, Mode=OneWay}"
+                                  SelectedValue="{Binding CurrentNewPageBehavior}"
                                   DisplayMemberPath="Name"
-                                  SelectedValuePath="Value">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="SelectionChanged">
-                                    <i:InvokeCommandAction Command="{Binding SetNewPageBehaviorCommand}"
-                                                           CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBox}, Path=SelectedValue}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </ComboBox>
+                                  SelectedValuePath="Value"/>
                     </c:SettingItem>
 
                     <c:SettingItem Description="{DynamicResource settings_disableOnBeforeUnloadDialog}">
