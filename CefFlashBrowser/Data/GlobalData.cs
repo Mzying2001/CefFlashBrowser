@@ -80,44 +80,6 @@ namespace CefFlashBrowser.Data
             SaveSettings();
         }
 
-        private static void SafeWriteFile(string path, string contents)
-        {
-            var tmpPath = path + $".{Guid.NewGuid()}.tmp";
-
-            try
-            {
-                File.WriteAllText(tmpPath, contents);
-
-                if (File.Exists(path))
-                {
-                    File.Replace(tmpPath, path, null);
-                }
-                else
-                {
-                    File.Move(tmpPath, path);
-                }
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError($"Failed to write file: {path}", e);
-                throw;
-            }
-            finally
-            {
-                if (File.Exists(tmpPath))
-                {
-                    try
-                    {
-                        File.Delete(tmpPath);
-                    }
-                    catch (Exception e)
-                    {
-                        LogHelper.LogError($"Failed to delete temp file: {tmpPath}", e);
-                    }
-                }
-            }
-        }
-
 
 
         #region Favorites
@@ -174,7 +136,7 @@ namespace CefFlashBrowser.Data
                 }
 
                 var file = new FavoritesFile { Favorites = snapshot };
-                SafeWriteFile(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
+                FileHelper.SafeWriteFile(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
                 LogHelper.LogInfo("Favorites saved successfully");
                 return true;
             }
@@ -223,7 +185,7 @@ namespace CefFlashBrowser.Data
                         // Merge with existing settings
                         JObject settingsJson = JObject.Parse(oldSettingsContent);
                         settingsJson.Merge(JToken.FromObject(Settings));
-                        SafeWriteFile(SettingsPath, settingsJson.ToString(Formatting.Indented));
+                        FileHelper.SafeWriteFile(SettingsPath, settingsJson.ToString(Formatting.Indented));
 
                         LogHelper.LogInfo("Settings saved successfully, type: merge");
                         return true;
@@ -236,7 +198,7 @@ namespace CefFlashBrowser.Data
                 }
 
                 // File does not exist or merge failed
-                SafeWriteFile(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+                FileHelper.SafeWriteFile(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
 
                 LogHelper.LogInfo("Settings saved successfully, type: " + (fileExists ? "overwrite" : "create"));
                 return true;

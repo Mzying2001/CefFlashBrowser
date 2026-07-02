@@ -2,7 +2,6 @@
 using CefFlashBrowser.Log;
 using SimpleMvvm.Ioc;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -15,10 +14,10 @@ namespace CefFlashBrowser.Utils
         public static async Task DeleteExpiredLogsAsync(CancellationToken token)
         {
             var logFiles = Directory.GetFiles(GlobalData.LogsPath, "*.log");
-            await TryDeleteFilesAsync(GetDeleteFiles(logFiles), token).ConfigureAwait(false);
+            await FileHelper.DeleteFilesAsync(GetExpiredFiles(logFiles), token).ConfigureAwait(false);
         }
 
-        private static string[] GetDeleteFiles(string[] files)
+        private static string[] GetExpiredFiles(string[] files)
         {
             int retainCount = Math.Max(GlobalData.Settings.RetainedLogCount, 0);
 
@@ -26,29 +25,6 @@ namespace CefFlashBrowser.Utils
                 return Array.Empty<string>();
 
             return files.OrderBy(item => File.GetLastWriteTime(item)).Take(files.Length - retainCount).ToArray();
-        }
-
-        private static Task TryDeleteFilesAsync(IEnumerable<string> files, CancellationToken token)
-        {
-            return Task.Run(delegate
-            {
-                Parallel.ForEach(files, new ParallelOptions { CancellationToken = token }, item =>
-                {
-                    token.ThrowIfCancellationRequested();
-                    try
-                    {
-                        if (File.Exists(item))
-                        {
-                            File.Delete(item);
-                            LogInfo($"Deleted log file: {item}");
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        LogError($"Failed to delete log file: {item}", e);
-                    }
-                });
-            }, token);
         }
 
         private static ILogger GetLogger()
