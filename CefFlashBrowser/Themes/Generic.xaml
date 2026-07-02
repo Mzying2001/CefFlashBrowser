@@ -58,9 +58,10 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock HorizontalAlignment="Left"
                                        VerticalAlignment="Center"
-                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap"
                                        Text="{TemplateBinding Description}"/>
-                            <ContentPresenter Grid.Column="2"/>
+                            <ContentPresenter Grid.Column="2"
+                                              VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
                 </ControlTemplate>
