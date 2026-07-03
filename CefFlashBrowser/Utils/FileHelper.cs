@@ -78,7 +78,12 @@ namespace CefFlashBrowser.Utils
 
         public static void SafeWriteFile(string path, string contents)
         {
-            SafeWriteFile(path, Encoding.UTF8.GetBytes(contents));
+            SafeWriteFile(path, contents, Encoding.UTF8);
+        }
+
+        public static void SafeWriteFile(string path, string contents, Encoding encoding)
+        {
+            SafeWriteFile(path, encoding.GetBytes(contents));
         }
     }
 }

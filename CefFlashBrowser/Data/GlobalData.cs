@@ -7,6 +7,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace CefFlashBrowser.Data
 {
@@ -103,7 +104,8 @@ namespace CefFlashBrowser.Data
 
             try
             {
-                var file = JsonConvert.DeserializeObject<FavoritesFile>(File.ReadAllText(FavoritesPath));
+                var json = File.ReadAllText(FavoritesPath, Encoding.UTF8);
+                var file = JsonConvert.DeserializeObject<FavoritesFile>(json);
 
                 // Guard against both a null root (the file literally contains
                 // "null") and a null Favorites array (e.g. {"Favorites": null}
@@ -141,7 +143,8 @@ namespace CefFlashBrowser.Data
                 }
 
                 var file = new FavoritesFile { Favorites = snapshot };
-                FileHelper.SafeWriteFile(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
+                var json = JsonConvert.SerializeObject(file, Formatting.Indented);
+                FileHelper.SafeWriteFile(FavoritesPath, json, Encoding.UTF8);
                 LogHelper.LogInfo("Favorites saved successfully");
                 return true;
             }
@@ -164,8 +167,8 @@ namespace CefFlashBrowser.Data
         {
             try
             {
-                var file = File.ReadAllText(SettingsPath);
-                Settings = JsonConvert.DeserializeObject<Settings>(file);
+                var json = File.ReadAllText(SettingsPath, Encoding.UTF8);
+                Settings = JsonConvert.DeserializeObject<Settings>(json);
                 Settings.SetNullPropertiesToDefault();
             }
             catch (Exception e)
@@ -183,14 +186,16 @@ namespace CefFlashBrowser.Data
 
                 if (fileExists)
                 {
-                    string oldSettingsContent = File.ReadAllText(SettingsPath);
+                    string oldSettingsContent = File.ReadAllText(SettingsPath, Encoding.UTF8);
 
                     try
                     {
                         // Merge with existing settings
                         JObject settingsJson = JObject.Parse(oldSettingsContent);
                         settingsJson.Merge(JToken.FromObject(Settings));
-                        FileHelper.SafeWriteFile(SettingsPath, settingsJson.ToString(Formatting.Indented));
+
+                        var jsonString = settingsJson.ToString(Formatting.Indented);
+                        FileHelper.SafeWriteFile(SettingsPath, jsonString, Encoding.UTF8);
 
                         LogHelper.LogInfo("Settings saved successfully, type: merge");
                         return true;
@@ -203,7 +208,8 @@ namespace CefFlashBrowser.Data
                 }
 
                 // File does not exist or merge failed
-                FileHelper.SafeWriteFile(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+                var json = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                FileHelper.SafeWriteFile(SettingsPath, json, Encoding.UTF8);
 
                 LogHelper.LogInfo("Settings saved successfully, type: " + (fileExists ? "overwrite" : "create"));
                 return true;
