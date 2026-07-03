@@ -97,18 +97,29 @@ namespace CefFlashBrowser.Utils
         {
             return Task.Run(() =>
             {
-                foreach (var pendingDir in GetPendingDeleteDirectories(dir))
+                try
                 {
-                    token.ThrowIfCancellationRequested();
-                    try
+                    var parallelOptions = new ParallelOptions
                     {
-                        Directory.Delete(pendingDir, recursive: true);
-                        LogHelper.LogInfo($"Deleted directory: {pendingDir}");
-                    }
-                    catch (Exception e)
+                        CancellationToken = token,
+                        MaxDegreeOfParallelism = 2
+                    };
+
+                    Parallel.ForEach(GetPendingDeleteDirectories(dir), parallelOptions, pendingDir =>
                     {
-                        LogHelper.LogError($"Failed to delete directory: {pendingDir}", e);
-                    }
+                        try
+                        {
+                            Directory.Delete(pendingDir, recursive: true);
+                            LogHelper.LogInfo($"Deleted directory: {pendingDir}");
+                        }
+                        catch (Exception e)
+                        {
+                            LogHelper.LogError($"Failed to delete directory: {pendingDir}", e);
+                        }
+                    });
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
                 }
             }, token);
         }
