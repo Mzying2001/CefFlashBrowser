@@ -30,58 +30,36 @@ dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 -
 publish
 ```
 
-## Architecture
+## Project Structure
 
-**Solution:** `CefFlashBrowser.slnx` — 8 projects, MVVM pattern using SimpleMvvm framework.
+- **CefFlashBrowser/** — Main WPF application.
+  - **Data/** — Shared application state, paths, configuration, and MVVM messaging data.
+  - **Models/** — Domain models and persisted user settings.
+  - **ViewModels/** — MVVM presentation logic for windows and dialogs.
+  - **Views/** — WPF windows, dialogs, and reusable UI controls.
+  - **Utils/** — Application helpers, converters, behaviors, and handlers.
+  - **Assets/** — Icons, localization resources, and bundled runtime assets.
+  - **Themes/** — WPF theme resource dictionaries.
+- **CefFlashBrowser.FlashBrowser/** — Flash-enabled CefSharp browser control library.
+- **CefFlashBrowser.WinformCefSharp4WPF/** — WPF hosting bridge for WinForms-based CefSharp controls.
+- **CefFlashBrowser.Sol/** — C++/CLI library for SOL and AMF serialization.
+- **CefFlashBrowser.Singleton/** — C++/CLI library for single-instance and IPC support.
+- **CefFlashBrowser.Log/** — Shared file logging library.
+- **CefFlashBrowser.EmptyExe/** — Minimal subprocess executable used by CefSharp.
+- **CefFlashBrowser.Tests/** — MSTest project for linked application code and supporting libraries.
+- **Docs/** — Reference specifications for AMF and SOL-related implementation work.
 
-### Projects
-
-| Project | Type | Purpose |
-|---------|------|---------|
-| **CefFlashBrowser** | WPF App (.NET 4.6.2) | Main application — Views, ViewModels, Models, Utils |
-| **CefFlashBrowser.FlashBrowser** | C# Library | Flash-enabled browser controls wrapping CefSharp |
-| **CefFlashBrowser.WinformCefSharp4WPF** | C# Library | Bridges WinForms CefSharp into WPF via HwndHost |
-| **CefFlashBrowser.Sol** | C++/CLI Library | SOL file parser/writer with AMF0/AMF3 serialization |
-| **CefFlashBrowser.Singleton** | C++/CLI Library | Win32 IPC messaging for single-instance enforcement |
-| **CefFlashBrowser.Log** | C# Library (.NET 4.6.2) | File-based logging |
-| **CefFlashBrowser.EmptyExe** | WPF Exe | Minimal subprocess used by CefSharp |
-| **CefFlashBrowser.Tests** | MSTest (.NET 4.6.2) | Unit tests — links source files from main app via `<Compile Include>` |
-
-### Main App Structure (CefFlashBrowser/)
-
-- **Data/** — `GlobalData` (global app state, paths, config), `MessageTokens` (MVVM messenger tokens)
-- **Models/** — `Settings` (serialized user preferences), domain models (search engines, themes, SOL types, etc.)
-- **ViewModels/** — One ViewModel per window; `ViewModelLocator` wires DI via `SimpleIoc`
-- **Views/** — WPF windows and dialogs; `Views/Custom/` for reusable controls; `Views/Dialogs/` for modal dialogs
-- **Utils/** — Helpers (`WindowManager`, `ThemeManager`, `LanguageManager`, `DialogHelper`, `SolHelper`), `Converters/`, `Behaviors/`, `Handlers/`
-- **Assets/** — Icons, SVGs, language resource dictionaries, bundled CEF/Flash binaries (tar.gz archives extracted at post-build)
-- **Themes/** — WPF theme resource dictionaries
-
-### Reference Documentation (Docs/)
-
-- `amf0-file-format-specification.pdf` — AMF0 file format specification (used by CefFlashBrowser.Sol)
-- `amf3-file-format-spec.pdf` — AMF3 file format specification (used by CefFlashBrowser.Sol)
-
-### Unit Tests (CefFlashBrowser.Tests/)
-
-- **Framework:** MSTest (`Microsoft.NET.Test.Sdk`, `MSTest.TestAdapter`, `MSTest.TestFramework`)
-- **Project references:** Only `CefFlashBrowser.Log` and `CefFlashBrowser.Sol` — does **not** reference the main app project
-- **Source linking:** Testable source files (Models, Utils, Converters) are linked from the main app via `<Compile Include>` entries in the test `.csproj`. To test a new class, add a corresponding `<Compile Include>` link.
-- **Limitation:** WPF is enabled (`<UseWPF>true`), but there is no reference to the main app project or CefSharp — cannot directly test code that depends on CefSharp or main app types not linked via `<Compile Include>`
-- **Test data:** SOL fixture files in `TestData/` directory (copied to output via `<Content>`)
-- **Test classes:** `AmfEncodingTests`, `SolFileReadWriteTests`, `SettingsTests`, `UrlHelperTests`, `ConverterTests`, `FileLoggerTests`
-
-### Key Patterns
-
-- **MVVM messaging:** Cross-component communication uses `Messenger` with tokens defined in `MessageTokens.cs`
-- **Assembly embedding:** Costura.Fody bundles managed DLLs into the main exe; native DLLs (Sol, Singleton) are excluded and shipped separately
-- **Post-build scripts:** The main `.csproj` has extensive post-build steps that extract tar.gz CEF/Flash archives and organize output directories
-- **Localization:** XAML resource dictionaries in `Assets/Language/`; managed by `LanguageManager`
-- **User data:** Stored in `%USERPROFILE%\Documents\CefFlashBrowser\` (settings.json, favorites.json)
-
-### Platform Notes
+## Platform Notes
 
 - Builds target both x86 and x64; output paths differ: `bin\Release\` (x86) vs `bin\x64\Release\` (x64)
 - Entry point is `Program.cs` (not the default `App.xaml.cs`)
 - CefSharp version 84.4.10 is pinned for Flash compatibility
 - UI controls from HandyControl library
+
+## Git Commit Conventions
+
+- Use Conventional Commits: `<type>(<scope>): <summary>`
+- Common types: `feat`, `fix`, `refactor`, `build`, `docs`, `test`, `chore`
+- Use an optional scope for the affected project, area, class, or file
+- Write concise English summaries
+- For non-trivial changes, include a body explaining the reason and implementation/fix approach
