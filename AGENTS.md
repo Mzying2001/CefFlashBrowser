@@ -59,7 +59,7 @@ publish
 ## Git Commit Conventions
 
 - Use Conventional Commits: `<type>(<scope>): <summary>`
-- Common types: `feat`, `fix`, `refactor`, `build`, `docs`, `test`, `chore`
+- Example types: `feat`, `fix`, `refactor`, `build`, `docs`, `test`, `chore`
 - Use an optional scope for the affected project, area, class, or file
 - Write concise English summaries
 - For non-trivial changes, include a body explaining the reason and implementation/fix approach
