@@ -1,9 +1,11 @@
 ﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Infrastructure.Wpf;
 using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -148,6 +150,12 @@ namespace CefFlashBrowser
                     }
                 }
             }
+        }
+
+        public ResourceDictionary GetNamedResourceDictionary(string name)
+        {
+            return Resources.MergedDictionaries.FirstOrDefault(
+                x => x is NamedResourceDictionary named && named.Name == name);
         }
     }
 }

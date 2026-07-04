@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Infrastructure.Wpf;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections;
@@ -10,6 +11,8 @@ namespace CefFlashBrowser.Utils
 {
     public static class LanguageManager
     {
+        private const string LanguageResourceDictionaryName = "Language";
+
         private static Dictionary<string, ResourceDictionary> LanguageDictionaries { get; }
 
         static LanguageManager()
@@ -28,7 +31,10 @@ namespace CefFlashBrowser.Utils
             {
                 if (entry.Key is string lang && entry.Value is ResourceDictionary langDic)
                 {
-                    LanguageDictionaries.Add(lang, langDic);
+                    LanguageDictionaries.Add(lang, new NamedResourceDictionary(langDic)
+                    {
+                        Name = LanguageResourceDictionaryName
+                    });
                 }
             }
 
@@ -40,19 +46,21 @@ namespace CefFlashBrowser.Utils
 
         private static ResourceDictionary GetCurLangResDic()
         {
-            return Application.Current.Resources.MergedDictionaries[0];
+            return ((App)Application.Current).GetNamedResourceDictionary(LanguageResourceDictionaryName);
         }
 
         private static void SetCurLangResDic(ResourceDictionary dic)
         {
             var oldDic = GetCurLangResDic();
+
             foreach (var key in oldDic.Keys)
             {
                 if (!dic.Contains(key))
                     dic[key] = oldDic[key];
             }
 
-            Application.Current.Resources.MergedDictionaries[0] = dic;
+            var mergedDictionaries = Application.Current.Resources.MergedDictionaries;
+            mergedDictionaries[mergedDictionaries.IndexOf(oldDic)] = dic;
         }
 
 
@@ -73,6 +81,7 @@ namespace CefFlashBrowser.Utils
             get
             {
                 var curDic = GetCurLangResDic();
+
                 foreach (var pair in LanguageDictionaries)
                 {
                     if (pair.Value == curDic) return pair.Key;
