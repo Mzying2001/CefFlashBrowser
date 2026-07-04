@@ -1,0 +1,209 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="locale">ko</sys:String>
+    <sys:String x:Key="language_name">한국어</sys:String>
+
+    <!-- Common Fields -->
+    <sys:String x:Key="common_swfFile">SWF 파일</sys:String>
+    <sys:String x:Key="common_solFile">SOL 파일</sys:String>
+    <sys:String x:Key="common_allFiles">모든 파일</sys:String>
+    <sys:String x:Key="common_shortcut">바로 가기</sys:String>
+    <sys:String x:Key="common_favorites">즐겨찾기</sys:String>
+    <sys:String x:Key="common_settings">설정</sys:String>
+    <sys:String x:Key="common_export">내보내기</sys:String>
+    <sys:String x:Key="common_import">가져오기</sys:String>
+    <sys:String x:Key="common_rename">이름 바꾸기</sys:String>
+    <sys:String x:Key="common_moveUp">위로 이동</sys:String>
+    <sys:String x:Key="common_moveDown">아래로 이동</sys:String>
+    <sys:String x:Key="common_moveToTop">맨 위로 이동</sys:String>
+    <sys:String x:Key="common_moveToBottom">맨 아래로 이동</sys:String>
+
+    <!--Main Window-->
+    <sys:String x:Key="mainWindow_title">환영합니다</sys:String>
+    <sys:String x:Key="mainWindow_go">이동</sys:String>
+    <sys:String x:Key="mainWindow_manageFavorites">즐겨찾기 관리</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">SOL 저장 파일 관리</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">SOL 파일 열기...</sys:String>
+    <sys:String x:Key="mainWindow_languages">언어</sys:String>
+    <sys:String x:Key="mainWindow_options">옵션</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">로컬 SWF 파일 불러오기...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">GitHub에서 보기</sys:String>
+
+    <!--Settings Window-->
+    <sys:String x:Key="settings_headerMainWindow">메인 창</sys:String>
+    <sys:String x:Key="settings_headerTheme">테마</sys:String>
+    <sys:String x:Key="settings_headerOther">기타</sys:String>
+    <sys:String x:Key="settings_headerBrowser">브라우저</sys:String>
+    <sys:String x:Key="settings_headerWebsiteBehavior">웹사이트 동작</sys:String>
+    <sys:String x:Key="settings_headerAdvanced">고급</sys:String>
+    <sys:String x:Key="settings_headerAboutCef">CEF 정보</sys:String>
+    <sys:String x:Key="settings_useSearchEngine">주소 표시줄에서 검색 엔진 사용</sys:String>
+    <sys:String x:Key="settings_searchEngine">검색 엔진</sys:String>
+    <sys:String x:Key="settings_currentTheme">현재 테마</sys:String>
+    <sys:String x:Key="settings_followSystemTheme">시스템 테마 따르기</sys:String>
+    <sys:String x:Key="settings_hideMainWindowOnBrowsing">웹 페이지 탐색 중 메인 창 숨기기</sys:String>
+    <sys:String x:Key="settings_deleteCache">모든 캐시 삭제</sys:String>
+    <sys:String x:Key="settings_openNewPage">새 페이지 열기 방식</sys:String>
+    <sys:String x:Key="settings_disableOnBeforeUnloadDialog">페이지 새로 고침/닫기 팝업 비활성화</sys:String>
+    <sys:String x:Key="settings_enableProxy">프록시 사용</sys:String>
+    <sys:String x:Key="settings_enableCustomUserAgent">사용자 지정 User-Agent</sys:String>
+    <sys:String x:Key="settings_enableFakeFlashVersion">Flash 버전 위장</sys:String>
+    <sys:String x:Key="settings_cefVersion">CefSharp 버전</sys:String>
+    <sys:String x:Key="settings_server">서버</sys:String>
+    <sys:String x:Key="settings_username">사용자 이름</sys:String>
+    <sys:String x:Key="settings_password">비밀번호</sys:String>
+    <sys:String x:Key="settings_userAgent">User-Agent</sys:String>
+    <sys:String x:Key="settings_flashVersion">Flash 버전</sys:String>
+    <sys:String x:Key="settings_buttonDeleteCache">삭제</sys:String>
+    <sys:String x:Key="settings_buttonViewDetails">자세히</sys:String>
+    <sys:String x:Key="settings_buttonRestart">다시 시작</sys:String>
+    <sys:String x:Key="settings_needRestart">이 설정의 변경 사항은 프로그램을 다시 시작한 후 적용됩니다.</sys:String>
+    <sys:String x:Key="settings_ip">IP</sys:String>
+    <sys:String x:Key="settings_port">포트</sys:String>
+    <sys:String x:Key="settings_optional">(선택 사항)</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">웹 페이지 확대/축소 수준 저장</sys:String>
+    <sys:String x:Key="settings_enableIntegratedDevTools">DevTools를 브라우저 창에 포함</sys:String>
+    <sys:String x:Key="settings_disableFullscreen">전체 화면 모드 비활성화</sys:String>
+    <sys:String x:Key="settings_disableGpuAcceleration">GPU 가속 비활성화</sys:String>
+    <sys:String x:Key="settings_disableBrowserContextMenu">컨텍스트 메뉴 비활성화</sys:String>
+
+    <!--Navigation bar of main interface-->
+    <sys:String x:Key="navigationType_auto">자동</sys:String>
+    <sys:String x:Key="navigationType_searchOnly">검색만</sys:String>
+    <sys:String x:Key="navigationType_navigateOnly">탐색만</sys:String>
+
+    <!--New web page behaviors-->
+    <sys:String x:Key="newPageBehavior_originalWindow">원래 창</sys:String>
+    <sys:String x:Key="newPageBehavior_newWindow">새 창</sys:String>
+
+    <!--Search Engine-->
+    <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
+    <sys:String x:Key="searchEngine_google">Google</sys:String>
+    <sys:String x:Key="searchEngine_bing">Bing</sys:String>
+    <sys:String x:Key="searchEngine_sogou">Sogou</sys:String>
+    <sys:String x:Key="searchEngine_so360">360</sys:String>
+    <sys:String x:Key="searchEngine_duckDuckGo">DuckDuckGo</sys:String>
+    <sys:String x:Key="searchEngine_yandex">Yandex</sys:String>
+    <sys:String x:Key="searchEngine_bilibili">Bilibili</sys:String>
+    <sys:String x:Key="searchEngine_game4399">4399</sys:String>
+
+    <!--Theme-->
+    <sys:String x:Key="theme_light">라이트</sys:String>
+    <sys:String x:Key="theme_dark">다크</sys:String>
+
+    <!--Favorites Manager-->
+    <sys:String x:Key="favorites_managerTitle">즐겨찾기 관리자</sys:String>
+    <sys:String x:Key="favorites_add">추가</sys:String>
+    <sys:String x:Key="favorites_remove">제거</sys:String>
+    <sys:String x:Key="favorites_edit">편집</sys:String>
+    <sys:String x:Key="favorites_name">이름</sys:String>
+    <sys:String x:Key="favorites_url">URL</sys:String>
+    <sys:String x:Key="favorites_save">저장</sys:String>
+    <sys:String x:Key="favorites_defaultName">새 즐겨찾기</sys:String>
+
+    <!--Browser Window-->
+    <sys:String x:Key="browser_back">뒤로</sys:String>
+    <sys:String x:Key="browser_forward">앞으로</sys:String>
+    <sys:String x:Key="browser_reload">새로 고침</sys:String>
+    <sys:String x:Key="browser_stop">중지</sys:String>
+    <sys:String x:Key="browser_cut">잘라내기</sys:String>
+    <sys:String x:Key="browser_copy">복사</sys:String>
+    <sys:String x:Key="browser_paste">붙여넣기</sys:String>
+    <sys:String x:Key="browser_selectAll">모두 선택</sys:String>
+    <sys:String x:Key="browser_print">인쇄</sys:String>
+    <sys:String x:Key="browser_redo">다시 실행</sys:String>
+    <sys:String x:Key="browser_undo">실행 취소</sys:String>
+    <sys:String x:Key="browser_find">찾기</sys:String>
+    <sys:String x:Key="browser_searchFor">"{0}" 검색</sys:String>
+    <sys:String x:Key="browser_openInNewWindow">새 창에서 열기</sys:String>
+    <sys:String x:Key="browser_openSelectedUrl">"{0}"(으)로 이동</sys:String>
+    <sys:String x:Key="browser_addToDictionary">사전에 추가</sys:String>
+    <sys:String x:Key="browser_reloadNoCache">캐시 무시하고 새로 고침</sys:String>
+    <sys:String x:Key="browser_openDevTool">DevTools 열기</sys:String>
+    <sys:String x:Key="browser_toggleDevTool">DevTools 열기/닫기</sys:String>
+    <sys:String x:Key="browser_viewSource">소스 보기</sys:String>
+    <sys:String x:Key="browser_zoom">확대/축소</sys:String>
+    <sys:String x:Key="browser_openInDefaultBrowser">기본 브라우저에서 열기</sys:String>
+    <sys:String x:Key="browser_createShortcut">바로 가기 만들기</sys:String>
+    <sys:String x:Key="browser_addFavorite">이 사이트를 즐겨찾기에 추가</sys:String>
+    <sys:String x:Key="browser_tipsBlockedSwfs">일부 Flash 콘텐츠가 Chromium 커널에 의해 차단된 것 같습니다. SWF 플레이어에서 재생할 수 있습니다:</sys:String>
+    <sys:String x:Key="browser_toolTipBack">뒤로(Alt+Left)</sys:String>
+    <sys:String x:Key="browser_toolTipForward">앞으로(Alt+Right)</sys:String>
+    <sys:String x:Key="browser_toolTipReload">새로 고침(F5)</sys:String>
+    <sys:String x:Key="browser_toolTipStop">중지(Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipMore">더 보기</sys:String>
+    <sys:String x:Key="browser_toolTipBlockedSwfs">차단된 Flash 콘텐츠</sys:String>
+    <sys:String x:Key="browser_toolTipZoomIn">확대(Ctrl+Plus)</sys:String>
+    <sys:String x:Key="browser_toolTipZoomOut">축소(Ctrl+Minus)</sys:String>
+    <sys:String x:Key="browser_loading">불러오는 중...</sys:String>
+    <sys:String x:Key="browser_showMainWindow">메인 창 열기</sys:String>
+    <sys:String x:Key="browser_newBrowserWindow">새 브라우저 창</sys:String>
+
+    <!--Save Manager-->
+    <sys:String x:Key="solSaveManager_title">SOL 저장 관리자</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileName">파일 이름</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileDir">파일 경로</sys:String>
+    <sys:String x:Key="solSaveManager_headerOperations">작업</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipReload">새로 고침</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipDelete">삭제</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipEdit">편집</sys:String>
+    <sys:String x:Key="solSaveManager_filterPlaceholder">필터...</sys:String>
+
+    <!--SOL Editor-->
+    <sys:String x:Key="solEditor_title">SOL 편집기</sys:String>
+    <sys:String x:Key="solEditor_file">파일</sys:String>
+    <sys:String x:Key="solEditor_save">저장</sys:String>
+    <sys:String x:Key="solEditor_saveAs">다른 이름으로 저장...</sys:String>
+    <sys:String x:Key="solEditor_close">닫기</sys:String>
+    <sys:String x:Key="solEditor_edit">편집</sys:String>
+    <sys:String x:Key="solEditor_addItem">항목 추가</sys:String>
+    <sys:String x:Key="solEditor_removeItem">항목 제거</sys:String>
+    <sys:String x:Key="solEditor_statusReady">준비됨</sys:String>
+    <sys:String x:Key="solEditor_statusError">오류</sys:String>
+    <sys:String x:Key="solEditor_statusModified">수정됨</sys:String>
+    <sys:String x:Key="solEditor_statusSaved">저장됨</sys:String>
+    <sys:String x:Key="solEditor_statusUnknown">알 수 없는 상태</sys:String>
+    <sys:String x:Key="solEditor_emptyString">(비어 있음)</sys:String>
+    <sys:String x:Key="solEditor_amf0SolFile">AMF0로 인코딩된 SOL 파일</sys:String>
+    <sys:String x:Key="solEditor_amf3SolFile">AMF3로 인코딩된 SOL 파일</sys:String>
+
+    <!--Dialogs-->
+    <sys:String x:Key="dialog_ok">확인</sys:String>
+    <sys:String x:Key="dialog_cancel">취소</sys:String>
+    <sys:String x:Key="dialog_yes">예</sys:String>
+    <sys:String x:Key="dialog_no">아니요</sys:String>
+    <sys:String x:Key="dialog_error">오류</sys:String>
+    <sys:String x:Key="dialog_addFavorite">즐겨찾기 추가</sys:String>
+    <sys:String x:Key="dialog_selectLanguage">언어 선택</sys:String>
+    <sys:String x:Key="dialog_addItem">항목 추가</sys:String>
+    <sys:String x:Key="dialog_itemName">이름</sys:String>
+    <sys:String x:Key="dialog_assocArray">연관 배열</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">URL을 입력하세요.</sys:String>
+    <sys:String x:Key="message_deleteCache">모든 캐시를 삭제하시겠습니까? 브라우저가 다시 시작됩니다.</sys:String>
+    <sys:String x:Key="message_restart">프로그램을 다시 시작하시겠습니까?</sys:String>
+    <sys:String x:Key="message_removeItem">"{0}"을(를) 제거하시겠습니까?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">이 페이지를 떠나시겠습니까?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">이 페이지를 새로 고치시겠습니까?</sys:String>
+    <sys:String x:Key="message_deleteFile">파일 "{0}"을(를) 삭제하시겠습니까?</sys:String>
+    <sys:String x:Key="message_deleted">삭제되었습니다.</sys:String>
+    <sys:String x:Key="message_imported">가져오기가 완료되었습니다.</sys:String>
+    <sys:String x:Key="message_exported">내보내기가 완료되었습니다.</sys:String>
+    <sys:String x:Key="message_askSaveChange">"{0}"의 변경 사항을 저장하시겠습니까?</sys:String>
+    <sys:String x:Key="message_renameItem">"{0}" 이름 바꾸기:</sys:String>
+    <sys:String x:Key="message_askImportFile">파일 "{0}"을(를) "{1}"(으)로 가져오시겠습니까?</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">오류 메시지</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">이름은 비워 둘 수 없습니다.</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">URL은 비워 둘 수 없습니다.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">캐시를 지우는 중 오류가 발생했습니다. 다시 시도하시겠습니까?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">"{0}" 이름의 배열 키가 이미 있습니다.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">"{0}" 이름의 개체 속성이 이미 있습니다.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">키/속성 이름은 비워 둘 수 없습니다.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" 이름의 키/속성이 이미 있습니다.</sys:String>
+    <sys:String x:Key="error_notSolFile">파일 "{0}"은(는) SOL 파일이 아닙니다.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">알 수 없는 검색 엔진입니다.</sys:String>
+</ResourceDictionary>

@@ -5,8 +5,12 @@
     <ResourceDictionary x:Key="zh-CN" Source="zh-CN.xaml"/>
     <ResourceDictionary x:Key="zh-TW" Source="zh-TW.xaml"/>
     <ResourceDictionary x:Key="en-US" Source="en-US.xaml"/>
+    <ResourceDictionary x:Key="de" Source="de.xaml"/>
     <ResourceDictionary x:Key="fr-FR" Source="fr-FR.xaml"/>
     <ResourceDictionary x:Key="it" Source="it.xaml"/>
+    <ResourceDictionary x:Key="ja" Source="ja.xaml"/>
+    <ResourceDictionary x:Key="ko" Source="ko.xaml"/>
+    <ResourceDictionary x:Key="ru" Source="ru.xaml"/>
 
     <!--The following lists all locales supported by CefSharp,
         if a new language is added, uncomment the corresponding line below.-->
@@ -18,7 +22,6 @@
     <ResourceDictionary x:Key="ca" Source="ca.xaml"/>
     <ResourceDictionary x:Key="cs" Source="cs.xaml"/>
     <ResourceDictionary x:Key="da" Source="da.xaml"/>
-    <ResourceDictionary x:Key="de" Source="de.xaml"/>
     <ResourceDictionary x:Key="el" Source="el.xaml"/>
     <ResourceDictionary x:Key="en-GB" Source="en-GB.xaml"/>
     <ResourceDictionary x:Key="es" Source="es.xaml"/>
@@ -34,9 +37,7 @@
     <ResourceDictionary x:Key="hr" Source="hr.xaml"/>
     <ResourceDictionary x:Key="hu" Source="hu.xaml"/>
     <ResourceDictionary x:Key="id" Source="id.xaml"/>
-    <ResourceDictionary x:Key="ja" Source="ja.xaml"/>
     <ResourceDictionary x:Key="kn" Source="kn.xaml"/>
-    <ResourceDictionary x:Key="ko" Source="ko.xaml"/>
     <ResourceDictionary x:Key="lt" Source="lt.xaml"/>
     <ResourceDictionary x:Key="lv" Source="lv.xaml"/>
     <ResourceDictionary x:Key="ml" Source="ml.xaml"/>
@@ -48,7 +49,6 @@
     <ResourceDictionary x:Key="pt-BR" Source="pt-BR.xaml"/>
     <ResourceDictionary x:Key="pt-PT" Source="pt-PT.xaml"/>
     <ResourceDictionary x:Key="ro" Source="ro.xaml"/>
-    <ResourceDictionary x:Key="ru" Source="ru.xaml"/>
     <ResourceDictionary x:Key="sk" Source="sk.xaml"/>
     <ResourceDictionary x:Key="sl" Source="sl.xaml"/>
     <ResourceDictionary x:Key="sr" Source="sr.xaml"/>

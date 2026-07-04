@@ -1,0 +1,209 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="locale">ja</sys:String>
+    <sys:String x:Key="language_name">日本語</sys:String>
+
+    <!-- Common Fields -->
+    <sys:String x:Key="common_swfFile">SWF ファイル</sys:String>
+    <sys:String x:Key="common_solFile">SOL ファイル</sys:String>
+    <sys:String x:Key="common_allFiles">すべてのファイル</sys:String>
+    <sys:String x:Key="common_shortcut">ショートカット</sys:String>
+    <sys:String x:Key="common_favorites">お気に入り</sys:String>
+    <sys:String x:Key="common_settings">設定</sys:String>
+    <sys:String x:Key="common_export">エクスポート</sys:String>
+    <sys:String x:Key="common_import">インポート</sys:String>
+    <sys:String x:Key="common_rename">名前の変更</sys:String>
+    <sys:String x:Key="common_moveUp">上へ移動</sys:String>
+    <sys:String x:Key="common_moveDown">下へ移動</sys:String>
+    <sys:String x:Key="common_moveToTop">一番上へ移動</sys:String>
+    <sys:String x:Key="common_moveToBottom">一番下へ移動</sys:String>
+
+    <!--Main Window-->
+    <sys:String x:Key="mainWindow_title">ようこそ</sys:String>
+    <sys:String x:Key="mainWindow_go">移動</sys:String>
+    <sys:String x:Key="mainWindow_manageFavorites">お気に入りを管理</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">SOL セーブファイルを管理</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">SOL ファイルを開く...</sys:String>
+    <sys:String x:Key="mainWindow_languages">言語</sys:String>
+    <sys:String x:Key="mainWindow_options">オプション</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">ローカル SWF ファイルを読み込む...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">GitHub で表示</sys:String>
+
+    <!--Settings Window-->
+    <sys:String x:Key="settings_headerMainWindow">メインウィンドウ</sys:String>
+    <sys:String x:Key="settings_headerTheme">テーマ</sys:String>
+    <sys:String x:Key="settings_headerOther">その他</sys:String>
+    <sys:String x:Key="settings_headerBrowser">ブラウザー</sys:String>
+    <sys:String x:Key="settings_headerWebsiteBehavior">Web サイトの動作</sys:String>
+    <sys:String x:Key="settings_headerAdvanced">詳細設定</sys:String>
+    <sys:String x:Key="settings_headerAboutCef">CEF について</sys:String>
+    <sys:String x:Key="settings_useSearchEngine">アドレスバーで検索エンジンを使用する</sys:String>
+    <sys:String x:Key="settings_searchEngine">検索エンジン</sys:String>
+    <sys:String x:Key="settings_currentTheme">現在のテーマ</sys:String>
+    <sys:String x:Key="settings_followSystemTheme">システムテーマに合わせる</sys:String>
+    <sys:String x:Key="settings_hideMainWindowOnBrowsing">Web ページ閲覧中にメインウィンドウを隠す</sys:String>
+    <sys:String x:Key="settings_deleteCache">すべてのキャッシュを削除</sys:String>
+    <sys:String x:Key="settings_openNewPage">新しいページの開き方</sys:String>
+    <sys:String x:Key="settings_disableOnBeforeUnloadDialog">ページ更新/終了時のポップアップを無効にする</sys:String>
+    <sys:String x:Key="settings_enableProxy">プロキシを有効にする</sys:String>
+    <sys:String x:Key="settings_enableCustomUserAgent">カスタム User-Agent</sys:String>
+    <sys:String x:Key="settings_enableFakeFlashVersion">Flash バージョンを偽装する</sys:String>
+    <sys:String x:Key="settings_cefVersion">CefSharp バージョン</sys:String>
+    <sys:String x:Key="settings_server">サーバー</sys:String>
+    <sys:String x:Key="settings_username">ユーザー名</sys:String>
+    <sys:String x:Key="settings_password">パスワード</sys:String>
+    <sys:String x:Key="settings_userAgent">User-Agent</sys:String>
+    <sys:String x:Key="settings_flashVersion">Flash バージョン</sys:String>
+    <sys:String x:Key="settings_buttonDeleteCache">削除</sys:String>
+    <sys:String x:Key="settings_buttonViewDetails">詳細</sys:String>
+    <sys:String x:Key="settings_buttonRestart">再起動</sys:String>
+    <sys:String x:Key="settings_needRestart">この設定の変更は、プログラムの再起動後に有効になります。</sys:String>
+    <sys:String x:Key="settings_ip">IP</sys:String>
+    <sys:String x:Key="settings_port">ポート</sys:String>
+    <sys:String x:Key="settings_optional">（任意）</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">Web ページのズームレベルを保存する</sys:String>
+    <sys:String x:Key="settings_enableIntegratedDevTools">DevTools をブラウザーウィンドウに埋め込む</sys:String>
+    <sys:String x:Key="settings_disableFullscreen">フルスクリーンモードを無効にする</sys:String>
+    <sys:String x:Key="settings_disableGpuAcceleration">GPU アクセラレーションを無効にする</sys:String>
+    <sys:String x:Key="settings_disableBrowserContextMenu">コンテキストメニューを無効にする</sys:String>
+
+    <!--Navigation bar of main interface-->
+    <sys:String x:Key="navigationType_auto">自動</sys:String>
+    <sys:String x:Key="navigationType_searchOnly">検索のみ</sys:String>
+    <sys:String x:Key="navigationType_navigateOnly">移動のみ</sys:String>
+
+    <!--New web page behaviors-->
+    <sys:String x:Key="newPageBehavior_originalWindow">元のウィンドウ</sys:String>
+    <sys:String x:Key="newPageBehavior_newWindow">新しいウィンドウ</sys:String>
+
+    <!--Search Engine-->
+    <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
+    <sys:String x:Key="searchEngine_google">Google</sys:String>
+    <sys:String x:Key="searchEngine_bing">Bing</sys:String>
+    <sys:String x:Key="searchEngine_sogou">Sogou</sys:String>
+    <sys:String x:Key="searchEngine_so360">360</sys:String>
+    <sys:String x:Key="searchEngine_duckDuckGo">DuckDuckGo</sys:String>
+    <sys:String x:Key="searchEngine_yandex">Yandex</sys:String>
+    <sys:String x:Key="searchEngine_bilibili">Bilibili</sys:String>
+    <sys:String x:Key="searchEngine_game4399">4399</sys:String>
+
+    <!--Theme-->
+    <sys:String x:Key="theme_light">ライト</sys:String>
+    <sys:String x:Key="theme_dark">ダーク</sys:String>
+
+    <!--Favorites Manager-->
+    <sys:String x:Key="favorites_managerTitle">お気に入りマネージャー</sys:String>
+    <sys:String x:Key="favorites_add">追加</sys:String>
+    <sys:String x:Key="favorites_remove">削除</sys:String>
+    <sys:String x:Key="favorites_edit">編集</sys:String>
+    <sys:String x:Key="favorites_name">名前</sys:String>
+    <sys:String x:Key="favorites_url">URL</sys:String>
+    <sys:String x:Key="favorites_save">保存</sys:String>
+    <sys:String x:Key="favorites_defaultName">新しいお気に入り</sys:String>
+
+    <!--Browser Window-->
+    <sys:String x:Key="browser_back">戻る</sys:String>
+    <sys:String x:Key="browser_forward">進む</sys:String>
+    <sys:String x:Key="browser_reload">再読み込み</sys:String>
+    <sys:String x:Key="browser_stop">停止</sys:String>
+    <sys:String x:Key="browser_cut">切り取り</sys:String>
+    <sys:String x:Key="browser_copy">コピー</sys:String>
+    <sys:String x:Key="browser_paste">貼り付け</sys:String>
+    <sys:String x:Key="browser_selectAll">すべて選択</sys:String>
+    <sys:String x:Key="browser_print">印刷</sys:String>
+    <sys:String x:Key="browser_redo">やり直し</sys:String>
+    <sys:String x:Key="browser_undo">元に戻す</sys:String>
+    <sys:String x:Key="browser_find">検索</sys:String>
+    <sys:String x:Key="browser_searchFor">"{0}" を検索</sys:String>
+    <sys:String x:Key="browser_openInNewWindow">新しいウィンドウで開く</sys:String>
+    <sys:String x:Key="browser_openSelectedUrl">"{0}" に移動</sys:String>
+    <sys:String x:Key="browser_addToDictionary">辞書に追加</sys:String>
+    <sys:String x:Key="browser_reloadNoCache">キャッシュを無視して再読み込み</sys:String>
+    <sys:String x:Key="browser_openDevTool">DevTools を開く</sys:String>
+    <sys:String x:Key="browser_toggleDevTool">DevTools を開く/閉じる</sys:String>
+    <sys:String x:Key="browser_viewSource">ソースを表示</sys:String>
+    <sys:String x:Key="browser_zoom">ズーム</sys:String>
+    <sys:String x:Key="browser_openInDefaultBrowser">既定のブラウザーで開く</sys:String>
+    <sys:String x:Key="browser_createShortcut">ショートカットを作成</sys:String>
+    <sys:String x:Key="browser_addFavorite">このサイトをお気に入りに追加</sys:String>
+    <sys:String x:Key="browser_tipsBlockedSwfs">一部の Flash コンテンツは Chromium カーネルによってブロックされているようです。SWF プレーヤーで再生できます:</sys:String>
+    <sys:String x:Key="browser_toolTipBack">戻る (Alt+Left)</sys:String>
+    <sys:String x:Key="browser_toolTipForward">進む (Alt+Right)</sys:String>
+    <sys:String x:Key="browser_toolTipReload">再読み込み (F5)</sys:String>
+    <sys:String x:Key="browser_toolTipStop">停止 (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipMore">その他</sys:String>
+    <sys:String x:Key="browser_toolTipBlockedSwfs">ブロックされた Flash コンテンツ</sys:String>
+    <sys:String x:Key="browser_toolTipZoomIn">拡大 (Ctrl+Plus)</sys:String>
+    <sys:String x:Key="browser_toolTipZoomOut">縮小 (Ctrl+Minus)</sys:String>
+    <sys:String x:Key="browser_loading">読み込み中...</sys:String>
+    <sys:String x:Key="browser_showMainWindow">メインウィンドウを開く</sys:String>
+    <sys:String x:Key="browser_newBrowserWindow">新しいブラウザーウィンドウ</sys:String>
+
+    <!--Save Manager-->
+    <sys:String x:Key="solSaveManager_title">SOL セーブマネージャー</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileName">ファイル名</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileDir">ファイルパス</sys:String>
+    <sys:String x:Key="solSaveManager_headerOperations">操作</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipReload">更新</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipDelete">削除</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipEdit">編集</sys:String>
+    <sys:String x:Key="solSaveManager_filterPlaceholder">フィルター...</sys:String>
+
+    <!--SOL Editor-->
+    <sys:String x:Key="solEditor_title">SOL エディター</sys:String>
+    <sys:String x:Key="solEditor_file">ファイル</sys:String>
+    <sys:String x:Key="solEditor_save">保存</sys:String>
+    <sys:String x:Key="solEditor_saveAs">名前を付けて保存...</sys:String>
+    <sys:String x:Key="solEditor_close">閉じる</sys:String>
+    <sys:String x:Key="solEditor_edit">編集</sys:String>
+    <sys:String x:Key="solEditor_addItem">項目を追加</sys:String>
+    <sys:String x:Key="solEditor_removeItem">項目を削除</sys:String>
+    <sys:String x:Key="solEditor_statusReady">準備完了</sys:String>
+    <sys:String x:Key="solEditor_statusError">エラー</sys:String>
+    <sys:String x:Key="solEditor_statusModified">変更済み</sys:String>
+    <sys:String x:Key="solEditor_statusSaved">保存済み</sys:String>
+    <sys:String x:Key="solEditor_statusUnknown">不明な状態</sys:String>
+    <sys:String x:Key="solEditor_emptyString">（空）</sys:String>
+    <sys:String x:Key="solEditor_amf0SolFile">AMF0 でエンコードされた SOL ファイル</sys:String>
+    <sys:String x:Key="solEditor_amf3SolFile">AMF3 でエンコードされた SOL ファイル</sys:String>
+
+    <!--Dialogs-->
+    <sys:String x:Key="dialog_ok">OK</sys:String>
+    <sys:String x:Key="dialog_cancel">キャンセル</sys:String>
+    <sys:String x:Key="dialog_yes">はい</sys:String>
+    <sys:String x:Key="dialog_no">いいえ</sys:String>
+    <sys:String x:Key="dialog_error">エラー</sys:String>
+    <sys:String x:Key="dialog_addFavorite">お気に入りを追加</sys:String>
+    <sys:String x:Key="dialog_selectLanguage">言語を選択</sys:String>
+    <sys:String x:Key="dialog_addItem">項目を追加</sys:String>
+    <sys:String x:Key="dialog_itemName">名前</sys:String>
+    <sys:String x:Key="dialog_assocArray">連想配列</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">URL を入力してください。</sys:String>
+    <sys:String x:Key="message_deleteCache">すべてのキャッシュを削除しますか？ブラウザーが再起動します。</sys:String>
+    <sys:String x:Key="message_restart">プログラムを再起動しますか？</sys:String>
+    <sys:String x:Key="message_removeItem">"{0}" を削除してもよろしいですか？</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">このページを離れますか？</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">このページを再読み込みしますか？</sys:String>
+    <sys:String x:Key="message_deleteFile">ファイル "{0}" を削除しますか？</sys:String>
+    <sys:String x:Key="message_deleted">削除しました。</sys:String>
+    <sys:String x:Key="message_imported">インポートしました。</sys:String>
+    <sys:String x:Key="message_exported">エクスポートしました。</sys:String>
+    <sys:String x:Key="message_askSaveChange">"{0}" への変更を保存しますか？</sys:String>
+    <sys:String x:Key="message_renameItem">"{0}" の名前を変更:</sys:String>
+    <sys:String x:Key="message_askImportFile">ファイル "{0}" を "{1}" にインポートしますか？</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">エラーメッセージ</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">名前を空にすることはできません。</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">URL を空にすることはできません。</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">キャッシュの削除中にエラーが発生しました。再試行しますか？</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">"{0}" という名前の配列キーは既に存在します。</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">"{0}" という名前のオブジェクトプロパティは既に存在します。</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">キー/プロパティ名を空にすることはできません。</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" という名前のキー/プロパティは既に存在します。</sys:String>
+    <sys:String x:Key="error_notSolFile">ファイル "{0}" は SOL ファイルではありません。</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">不明な検索エンジンです。</sys:String>
+</ResourceDictionary>
