@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Windows;
 
-namespace CefFlashBrowser.Models
+namespace CefFlashBrowser.Infrastructure.Wpf
 {
     public class AppInfo
     {

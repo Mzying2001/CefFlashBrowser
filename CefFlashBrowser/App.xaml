@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:CefFlashBrowser"
              xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
-             xmlns:m="clr-namespace:CefFlashBrowser.Models"
+             xmlns:infraWpf="clr-namespace:CefFlashBrowser.Infrastructure.Wpf"
              xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
     <Application.Resources>
@@ -15,7 +15,7 @@
 
 
             <!--Application Info-->
-            <m:AppInfo x:Key="AppInfo"/>
+            <infraWpf:AppInfo x:Key="AppInfo"/>
 
 
             <!--Custom window style, WindowManager will set this for all windows-->
