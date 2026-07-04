@@ -49,12 +49,13 @@ publish
 - **CefFlashBrowser.Tests/** — MSTest project for linked application code and supporting libraries.
 - **Docs/** — Reference specifications for AMF and SOL-related implementation work.
 
-## Platform Notes
+## Notes
 
 - Builds target both x86 and x64; output paths differ: `bin\Release\` (x86) vs `bin\x64\Release\` (x64)
 - Entry point is `Program.cs` (not the default `App.xaml.cs`)
 - CefSharp version 84.4.10 is pinned for Flash compatibility
 - UI controls from HandyControl library
+- Keep text and source files using CRLF line endings to match the repository's Windows/WPF conventions
 
 ## Git Commit Conventions
 
