@@ -7,6 +7,7 @@ using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
 using System.Windows;
+using BrowserHandlers = CefFlashBrowser.Browser.Handlers;
 
 namespace CefFlashBrowser.Views
 {
@@ -68,9 +69,9 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
 
-            browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
-            browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
-            browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
+            browser.MenuHandler = new BrowserHandlers.ContextMenuHandler();
+            browser.JsDialogHandler = new BrowserHandlers.JsDialogHandler();
+            browser.DownloadHandler = new BrowserHandlers.DownloadHandler();
             browser.LifeSpanHandler = new PopWebPageLifeSpanHandler(this);
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);

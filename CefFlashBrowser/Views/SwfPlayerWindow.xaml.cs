@@ -7,6 +7,7 @@ using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
 using System.Windows;
+using BrowserHandlers = CefFlashBrowser.Browser.Handlers;
 
 namespace CefFlashBrowser.Views
 {
@@ -75,10 +76,10 @@ namespace CefFlashBrowser.Views
             InitializeComponent();
             WindowSizeInfo.Apply(GlobalData.Settings.SwfWindowSizeInfo, this);
 
-            browser.DragHandler = new Utils.Handlers.DisableDragHandler();
-            browser.MenuHandler = new Utils.Handlers.ContextMenuHandler();
-            browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
-            browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
+            browser.DragHandler = new BrowserHandlers.DisableDragHandler();
+            browser.MenuHandler = new BrowserHandlers.ContextMenuHandler();
+            browser.JsDialogHandler = new BrowserHandlers.JsDialogHandler();
+            browser.DownloadHandler = new BrowserHandlers.DownloadHandler();
             browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
 
             browser.Address = GlobalData.SwfPlayerPath;

@@ -1,9 +1,9 @@
 ﻿using CefSharp;
 using System.Collections.Generic;
 
-namespace CefFlashBrowser.Models
+namespace CefFlashBrowser.Browser.Handlers
 {
-    public class CefMenuItemInfo
+    internal class CefMenuItemInfo
     {
         public bool IsChecked { get; set; }
         public bool IsEnable { get; set; }

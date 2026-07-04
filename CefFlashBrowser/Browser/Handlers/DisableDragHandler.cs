@@ -2,7 +2,7 @@
 using CefSharp;
 using CefSharp.Enums;
 
-namespace CefFlashBrowser.Utils.Handlers
+namespace CefFlashBrowser.Browser.Handlers
 {
     public class DisableDragHandler : DragHandler
     {

@@ -1,8 +1,9 @@
 ﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Utils;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 
-namespace CefFlashBrowser.Utils.Handlers
+namespace CefFlashBrowser.Browser.Handlers
 {
     public class JsDialogHandler : FlashBrowser.Handlers.JsDialogHandler
     {
