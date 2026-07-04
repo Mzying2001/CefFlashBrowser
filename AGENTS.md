@@ -33,11 +33,13 @@ publish
 ## Project Structure
 
 - **CefFlashBrowser/** — Main WPF application.
+  - **Browser/** — Browser-specific application behavior, including CefSharp handler implementations.
   - **Data/** — Shared application state, paths, configuration, and MVVM messaging data.
+  - **Infrastructure/** — Reusable infrastructure helpers for collections and WPF integration.
   - **Models/** — Domain models and persisted user settings.
   - **ViewModels/** — MVVM presentation logic for windows and dialogs.
   - **Views/** — WPF windows, dialogs, and reusable UI controls.
-  - **Utils/** — Application helpers, converters, behaviors, and handlers.
+  - **Utils/** — Application helpers and cross-cutting utility classes.
   - **Assets/** — Icons, localization resources, and bundled runtime assets.
   - **Themes/** — WPF theme resource dictionaries.
 - **CefFlashBrowser.FlashBrowser/** — Flash-enabled CefSharp browser control library.
