@@ -11,13 +11,9 @@ namespace CefFlashBrowser.ViewModels
 {
     public class SettingsWindowViewModel : ViewModelBase
     {
-        public DelegateCommand SetNavigationTypeCommand { get; set; }
-        public DelegateCommand SetSearchEngineCommand { get; set; }
         public DelegateCommand DeleteCacheCommand { get; set; }
         public DelegateCommand PopupAboutCefCommand { get; set; }
-        public DelegateCommand SetNewPageBehaviorCommand { get; set; }
         public DelegateCommand AskRestartAppCommand { get; set; }
-        public DelegateCommand SetThemeCommand { get; set; }
 
         public List<ItemViewModel<NavigationType>> NavigationTypes { get; } = new List<ItemViewModel<NavigationType>>
         {
@@ -26,9 +22,17 @@ namespace CefFlashBrowser.ViewModels
             new ItemViewModel<NavigationType>(NavigationType.NavigateOnly, "navigationType_navigateOnly")
         };
 
-        public int CurrentNavigationTypeIndex
+        public NavigationType CurrentNavigationType
         {
-            get => ItemViewModel.GetIndex(NavigationTypes, GlobalData.Settings.NavigationType);
+            get => GlobalData.Settings.NavigationType;
+            set
+            {
+                if (GlobalData.Settings.NavigationType != value)
+                {
+                    GlobalData.Settings.NavigationType = value;
+                    RaisePropertyChanged();
+                }
+            }
         }
 
         public List<ItemViewModel<SearchEngine>> SearchEngines { get; } = new List<ItemViewModel<SearchEngine>>
@@ -44,9 +48,17 @@ namespace CefFlashBrowser.ViewModels
             new ItemViewModel<SearchEngine>(SearchEngine.Game4399, "searchEngine_game4399")
         };
 
-        public int CurrentSearchEngineIndex
+        public SearchEngine CurrentSearchEngine
         {
-            get => ItemViewModel.GetIndex(SearchEngines, GlobalData.Settings.SearchEngine);
+            get => GlobalData.Settings.SearchEngine;
+            set
+            {
+                if (GlobalData.Settings.SearchEngine != value)
+                {
+                    GlobalData.Settings.SearchEngine = value;
+                    RaisePropertyChanged();
+                }
+            }
         }
 
         public List<ItemViewModel<NewPageBehavior>> NewPageBehaviors { get; } = new List<ItemViewModel<NewPageBehavior>>
@@ -55,9 +67,17 @@ namespace CefFlashBrowser.ViewModels
             new ItemViewModel<NewPageBehavior>(NewPageBehavior.NewWindow, "newPageBehavior_newWindow")
         };
 
-        public int CurrentNewPageBehaviorIndex
+        public NewPageBehavior CurrentNewPageBehavior
         {
-            get => ItemViewModel.GetIndex(NewPageBehaviors, GlobalData.Settings.NewPageBehavior);
+            get => GlobalData.Settings.NewPageBehavior;
+            set
+            {
+                if (GlobalData.Settings.NewPageBehavior != value)
+                {
+                    GlobalData.Settings.NewPageBehavior = value;
+                    RaisePropertyChanged();
+                }
+            }
         }
 
         public List<ItemViewModel<Theme>> Themes { get; } = new List<ItemViewModel<Theme>>
@@ -66,9 +86,19 @@ namespace CefFlashBrowser.ViewModels
             new ItemViewModel<Theme>(Theme.Dark, "theme_dark")
         };
 
-        public int CurrentThemeIndex
+        public Theme CurrentTheme
         {
-            get => ItemViewModel.GetIndex(Themes, GlobalData.Settings.Theme);
+            get => GlobalData.Settings.Theme;
+            set
+            {
+                if (GlobalData.Settings.Theme != value)
+                {
+                    GlobalData.Settings.Theme = value;
+                    RaisePropertyChanged();
+                    ThemeManager.ChangeTheme(value);
+                    Messenger.Global.Send(MessageTokens.REDRAW_ALL_FRAMES, null);
+                }
+            }
         }
 
         public bool EnableFakeFlashVersion
@@ -76,8 +106,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.FakeFlashVersionSetting.Enable;
             set
             {
-                GlobalData.Settings.FakeFlashVersionSetting.Enable = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.FakeFlashVersionSetting.Enable != value)
+                {
+                    GlobalData.Settings.FakeFlashVersionSetting.Enable = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -86,8 +119,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.FakeFlashVersionSetting.FlashVersion;
             set
             {
-                GlobalData.Settings.FakeFlashVersionSetting.FlashVersion = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.FakeFlashVersionSetting.FlashVersion != value)
+                {
+                    GlobalData.Settings.FakeFlashVersionSetting.FlashVersion = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -118,8 +154,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.UserAgentSetting.EnableCustom;
             set
             {
-                GlobalData.Settings.UserAgentSetting.EnableCustom = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.UserAgentSetting.EnableCustom != value)
+                {
+                    GlobalData.Settings.UserAgentSetting.EnableCustom = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -128,8 +167,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.UserAgentSetting.UserAgent;
             set
             {
-                GlobalData.Settings.UserAgentSetting.UserAgent = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.UserAgentSetting.UserAgent != value)
+                {
+                    GlobalData.Settings.UserAgentSetting.UserAgent = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -138,48 +180,24 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.ProxySettings.EnableProxy;
             set
             {
-                GlobalData.Settings.ProxySettings.EnableProxy = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.ProxySettings.EnableProxy != value)
+                {
+                    GlobalData.Settings.ProxySettings.EnableProxy = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
-        public string ProxyIP
+        public ProxySettings ProxySettings
         {
-            get => GlobalData.Settings.ProxySettings.IP;
+            get => GlobalData.Settings.ProxySettings;
             set
             {
-                GlobalData.Settings.ProxySettings.IP = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public string ProxyPort
-        {
-            get => GlobalData.Settings.ProxySettings.Port;
-            set
-            {
-                GlobalData.Settings.ProxySettings.Port = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public string ProxyUserName
-        {
-            get => GlobalData.Settings.ProxySettings.UserName;
-            set
-            {
-                GlobalData.Settings.ProxySettings.UserName = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public string ProxyPassword
-        {
-            get => GlobalData.Settings.ProxySettings.Password;
-            set
-            {
-                GlobalData.Settings.ProxySettings.Password = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.ProxySettings != value)
+                {
+                    GlobalData.Settings.ProxySettings = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -188,8 +206,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.DisableOnBeforeUnloadDialog;
             set
             {
-                GlobalData.Settings.DisableOnBeforeUnloadDialog = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.DisableOnBeforeUnloadDialog != value)
+                {
+                    GlobalData.Settings.DisableOnBeforeUnloadDialog = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -198,8 +219,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.DisableFullscreen;
             set
             {
-                GlobalData.Settings.DisableFullscreen = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.DisableFullscreen != value)
+                {
+                    GlobalData.Settings.DisableFullscreen = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -208,8 +232,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.HideMainWindowOnBrowsing;
             set
             {
-                GlobalData.Settings.HideMainWindowOnBrowsing = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.HideMainWindowOnBrowsing != value)
+                {
+                    GlobalData.Settings.HideMainWindowOnBrowsing = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -218,10 +245,13 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.FollowSystemTheme;
             set
             {
-                GlobalData.Settings.FollowSystemTheme = value;
-                RaisePropertyChanged();
-                ThemeManager.ChangeTheme(value ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme);
-                Messenger.Global.Send(MessageTokens.REDRAW_ALL_FRAMES, null);
+                if (GlobalData.Settings.FollowSystemTheme != value)
+                {
+                    GlobalData.Settings.FollowSystemTheme = value;
+                    RaisePropertyChanged();
+                    ThemeManager.ChangeTheme(value ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme);
+                    Messenger.Global.Send(MessageTokens.REDRAW_ALL_FRAMES, null);
+                }
             }
         }
 
@@ -230,8 +260,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.EnableIntegratedDevTools;
             set
             {
-                GlobalData.Settings.EnableIntegratedDevTools = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.EnableIntegratedDevTools != value)
+                {
+                    GlobalData.Settings.EnableIntegratedDevTools = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -240,8 +273,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.SaveZoomLevel;
             set
             {
-                GlobalData.Settings.SaveZoomLevel = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.SaveZoomLevel != value)
+                {
+                    GlobalData.Settings.SaveZoomLevel = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -250,8 +286,11 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.DisableGpuAcceleration;
             set
             {
-                GlobalData.Settings.DisableGpuAcceleration = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.DisableGpuAcceleration != value)
+                {
+                    GlobalData.Settings.DisableGpuAcceleration = value;
+                    RaisePropertyChanged();
+                }
             }
         }
 
@@ -260,68 +299,52 @@ namespace CefFlashBrowser.ViewModels
             get => GlobalData.Settings.DisableBrowserContextMenu;
             set
             {
-                GlobalData.Settings.DisableBrowserContextMenu = value;
-                RaisePropertyChanged();
+                if (GlobalData.Settings.DisableBrowserContextMenu != value)
+                {
+                    GlobalData.Settings.DisableBrowserContextMenu = value;
+                    RaisePropertyChanged();
+                }
             }
-        }
-
-        private void SetNavigationType(NavigationType type)
-        {
-            GlobalData.Settings.NavigationType = type;
-        }
-
-        private void SetSearchEngine(SearchEngine engine)
-        {
-            GlobalData.Settings.SearchEngine = engine;
-        }
-
-        private void DeleteDirectory(string path)
-        {
-            new PathInfo(PathInfo.PathType.Directory, path).Delete();
         }
 
         private void DeleteCache()
         {
             WindowManager.Confirm(LanguageManager.GetString("message_deleteCache"), callback: result =>
             {
-                if (result == true)
+                if (result != true)
+                    return;
+
+                while (true)
                 {
-                    while (true)
+                    try
                     {
-                        try
-                        {
-                            Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
-                            CefSharp.Cef.Shutdown();
-                            DeleteDirectory(GlobalData.CachesPath);
-                            break;
-                        }
-                        catch (Exception e)
-                        {
-                            LogHelper.LogError("Delete cache failed", e);
-
-                            string msg = string.Format("{0}\n\n{1}:\n{2}",
-                                LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message);
-
-                            bool retry = false;
-                            WindowManager.Confirm(msg, LanguageManager.GetString("dialog_error"), tmp => retry = tmp ?? false);
-
-                            if (!retry) { break; }
-                        }
+                        Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
+                        Messenger.Global.Send(MessageTokens.CLOSE_MAINWINDOW, null);
+                        CefSharp.Cef.Shutdown();
+                        DirectoryHelper.MoveDirectoryToPendingDelete(GlobalData.CachesPath, recreateEmpty: true);
+                        break;
                     }
+                    catch (Exception e)
+                    {
+                        LogHelper.LogError("Delete cache failed", e);
 
-                    Program.Restart();
+                        string msg = string.Format("{0}\n\n{1}:\n{2}",
+                            LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message);
+
+                        bool retry = false;
+                        WindowManager.Confirm(msg, LanguageManager.GetString("dialog_error"), tmp => retry = tmp ?? false);
+
+                        if (!retry) { break; }
+                    }
                 }
+
+                Program.Restart();
             });
         }
 
         private void PopupAboutCef()
         {
             WindowManager.ShowPopupWebPage("chrome://version/");
-        }
-
-        private void SetNewPageBehavior(NewPageBehavior newPageBehavior)
-        {
-            GlobalData.Settings.NewPageBehavior = newPageBehavior;
         }
 
         private void AskRestartApp()
@@ -336,22 +359,11 @@ namespace CefFlashBrowser.ViewModels
             });
         }
 
-        private void SetTheme(Theme theme)
-        {
-            GlobalData.Settings.Theme = theme;
-            ThemeManager.ChangeTheme(theme);
-            Messenger.Global.Send(MessageTokens.REDRAW_ALL_FRAMES, null);
-        }
-
         public SettingsWindowViewModel()
         {
-            SetNavigationTypeCommand = new DelegateCommand<NavigationType>(SetNavigationType);
-            SetSearchEngineCommand = new DelegateCommand<SearchEngine>(SetSearchEngine);
             DeleteCacheCommand = new DelegateCommand(DeleteCache);
             PopupAboutCefCommand = new DelegateCommand(PopupAboutCef);
-            SetNewPageBehaviorCommand = new DelegateCommand<NewPageBehavior>(SetNewPageBehavior);
             AskRestartAppCommand = new DelegateCommand(AskRestartApp);
-            SetThemeCommand = new DelegateCommand<Theme>(SetTheme);
         }
     }
 }

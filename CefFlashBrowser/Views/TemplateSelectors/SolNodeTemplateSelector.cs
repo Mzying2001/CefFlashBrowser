@@ -5,7 +5,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CefFlashBrowser.Utils
+namespace CefFlashBrowser.Views.TemplateSelectors
 {
     public class SolNodeTemplateSelector : DataTemplateSelector
     {

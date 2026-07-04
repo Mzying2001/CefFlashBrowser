@@ -45,6 +45,8 @@ namespace CefFlashBrowser
 
                     var cts = new CancellationTokenSource();
                     var delLogsTask = LogHelper.DeleteExpiredLogsAsync(cts.Token);
+                    var delCachesTask = DirectoryHelper.DeletePendingDeleteDirectoriesAsync(GlobalData.CachesPath, cts.Token);
+                    var delTempFilesTask = FileHelper.DeleteTempFilesAsync(GlobalData.DataPath, cts.Token);
 
                     InitCefFlash();
                     InitTheme();
@@ -54,7 +56,7 @@ namespace CefFlashBrowser
 
                     app.Run();
                     cts.Cancel();
-                    WaitAllTask(delLogsTask);
+                    WaitAllTask(delLogsTask, delCachesTask, delTempFilesTask);
                 }
                 else
                 {

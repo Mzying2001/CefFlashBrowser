@@ -1,0 +1,100 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace CefFlashBrowser.Utils
+{
+    public static class FileHelper
+    {
+        public static Task DeleteFilesAsync(IEnumerable<string> files, CancellationToken token)
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    var parallelOptions = new ParallelOptions
+                    {
+                        CancellationToken = token,
+                        MaxDegreeOfParallelism = 2
+                    };
+
+                    Parallel.ForEach(files, parallelOptions, path =>
+                    {
+                        try
+                        {
+                            if (File.Exists(path))
+                            {
+                                File.Delete(path);
+                                LogHelper.LogInfo($"Deleted file: {path}");
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            LogHelper.LogError($"Failed to delete file: {path}", e);
+                        }
+                    });
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
+                {
+                }
+            }, token);
+        }
+
+        public static Task DeleteTempFilesAsync(string dir, CancellationToken token)
+        {
+            var files = Directory.GetFiles(dir, "*.tmp", SearchOption.TopDirectoryOnly);
+            return DeleteFilesAsync(files, token);
+        }
+
+        public static void SafeWriteFile(string path, byte[] data)
+        {
+            var tmpPath = path + $".{Guid.NewGuid()}.tmp";
+
+            try
+            {
+                File.WriteAllBytes(tmpPath, data);
+
+                if (File.Exists(path))
+                {
+                    File.Replace(tmpPath, path, null);
+                }
+                else
+                {
+                    File.Move(tmpPath, path);
+                }
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError($"Failed to write file: {path}", e);
+                throw;
+            }
+            finally
+            {
+                if (File.Exists(tmpPath))
+                {
+                    try
+                    {
+                        File.Delete(tmpPath);
+                    }
+                    catch (Exception e)
+                    {
+                        LogHelper.LogError($"Failed to delete temp file: {tmpPath}", e);
+                    }
+                }
+            }
+        }
+
+        public static void SafeWriteFile(string path, string contents)
+        {
+            SafeWriteFile(path, contents, Encoding.UTF8);
+        }
+
+        public static void SafeWriteFile(string path, string contents, Encoding encoding)
+        {
+            SafeWriteFile(path, encoding.GetBytes(contents));
+        }
+    }
+}

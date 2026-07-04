@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
-namespace CefFlashBrowser.Utils
+namespace CefFlashBrowser.Infrastructure.Collections
 {
     /// <summary>
     /// ObservableCollection supporting AddRange method.

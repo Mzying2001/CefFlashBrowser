@@ -1,9 +1,10 @@
-﻿using Microsoft.Xaml.Behaviors;
+﻿using CefFlashBrowser.Utils;
+using Microsoft.Xaml.Behaviors;
 using SimpleMvvm.Command;
 using System.Windows;
 using System.Windows.Input;
 
-namespace CefFlashBrowser.Utils.Behaviors
+namespace CefFlashBrowser.Views.Behaviors
 {
     public class WindowBehavior : Behavior<Window>
     {

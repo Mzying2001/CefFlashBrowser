@@ -31,12 +31,10 @@
     <sys:String x:Key="mainWindow_viewGithub">Vedi su GitHub</sys:String>
 
     <!--Impostazioni Finestra-->
-    <sys:String x:Key="settings_tabMainWindow">Finestra Principale</sys:String>
-    <sys:String x:Key="settings_tabBrowser">Browser</sys:String>
-    <sys:String x:Key="settings_headerAddressBar">Barra degli indirizzi e Ricerca</sys:String>
+    <sys:String x:Key="settings_headerMainWindow">Finestra Principale</sys:String>
     <sys:String x:Key="settings_headerTheme">Tema</sys:String>
     <sys:String x:Key="settings_headerOther">Altro</sys:String>
-    <sys:String x:Key="settings_headerBrowserData">Browser Cache</sys:String>
+    <sys:String x:Key="settings_headerBrowser">Browser</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Funzionamento siti web</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Avanzate</sys:String>
     <sys:String x:Key="settings_headerAboutCef">Circa CEF</sys:String>
@@ -64,7 +62,7 @@
     <sys:String x:Key="settings_ip">IP</sys:String>
     <sys:String x:Key="settings_port">Porta</sys:String>
     <sys:String x:Key="settings_optional">(Opzionale)</sys:String>
-    <sys:String x:Key="settings_saveZoomLevel">Salva livello di zoom</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">Salva il livello di zoom delle pagine web</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Incorpora i devtools nella finestra del browser</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Disabilita la modalità a schermo intero</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Disabilita l'accelerazione GPU</sys:String>

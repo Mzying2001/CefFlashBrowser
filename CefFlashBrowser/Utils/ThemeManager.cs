@@ -13,8 +13,8 @@ namespace CefFlashBrowser.Utils
     {
         public static void ChangeTheme(Theme theme)
         {
-            var skinDic = Application.Current.Resources.MergedDictionaries[1];
-            var themeDic = Application.Current.Resources.MergedDictionaries[2];
+            var skinDic = ((App)Application.Current).GetNamedResourceDictionary("Skin");
+            var themeDic = ((App)Application.Current).GetNamedResourceDictionary("Theme");
 
             switch (theme)
             {

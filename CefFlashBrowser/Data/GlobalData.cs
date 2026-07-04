@@ -7,6 +7,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace CefFlashBrowser.Data
 {
@@ -27,7 +28,6 @@ namespace CefFlashBrowser.Data
         public static string SwfPlayerPath { get; }
         public static string SubprocessPath { get; }
 
-        public static string UserDocumentPath { get; }
         public static string DataPath { get; }
         public static string FavoritesPath { get; }
         public static string SettingsPath { get; }
@@ -54,8 +54,14 @@ namespace CefFlashBrowser.Data
             SwfPlayerPath = Path.Combine(AssetsPath, "SwfPlayer\\swfplayer.html");
             SubprocessPath = Path.Combine(CefDllPath, "CefSharp.BrowserSubprocess.exe");
 
-            UserDocumentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            DataPath = Path.Combine(UserDocumentPath, "CefFlashBrowser\\");
+            var userDocumentPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+            // Older versions stored the CefFlashBrowser folder in the user's Documents directory.
+            // Since v1.1.8, it has moved to LocalAppData. GetRedirectDirectory returns the old
+            // directory if it exists; otherwise, it returns the new directory.
+            DataPath = DirectoryHelper.GetRedirectDirectory(userDocumentPath, "CefFlashBrowser\\", localAppDataPath);
+
             FavoritesPath = Path.Combine(DataPath, "favorites.json");
             SettingsPath = Path.Combine(DataPath, "settings.json");
 
@@ -63,19 +69,11 @@ namespace CefFlashBrowser.Data
             Messenger.Global.Register(MessageTokens.SAVE_FAVORITES, _ => SaveFavorites());
         }
 
-        private static void CreateDirIfNotExist(string path)
-        {
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-        }
-
         public static bool InitData()
         {
-            CreateDirIfNotExist(DataPath);
-            CreateDirIfNotExist(CachesPath);
-            CreateDirIfNotExist(LogsPath);
+            DirectoryHelper.EnsureDirectoryExists(DataPath);
+            DirectoryHelper.EnsureDirectoryExists(LogsPath);
+            DirectoryHelper.EnsureDirectoryExists(CachesPath);
 
             InitFavorites();
             InitSettings();
@@ -86,44 +84,6 @@ namespace CefFlashBrowser.Data
         {
             SaveFavorites();
             SaveSettings();
-        }
-
-        private static void SafeWriteFile(string path, string contents)
-        {
-            var tmpPath = path + $".{Guid.NewGuid()}.tmp";
-
-            try
-            {
-                File.WriteAllText(tmpPath, contents);
-
-                if (File.Exists(path))
-                {
-                    File.Replace(tmpPath, path, null);
-                }
-                else
-                {
-                    File.Move(tmpPath, path);
-                }
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError($"Failed to write file: {path}", e);
-                throw;
-            }
-            finally
-            {
-                if (File.Exists(tmpPath))
-                {
-                    try
-                    {
-                        File.Delete(tmpPath);
-                    }
-                    catch (Exception e)
-                    {
-                        LogHelper.LogError($"Failed to delete temp file: {tmpPath}", e);
-                    }
-                }
-            }
         }
 
 
@@ -144,7 +104,8 @@ namespace CefFlashBrowser.Data
 
             try
             {
-                var file = JsonConvert.DeserializeObject<FavoritesFile>(File.ReadAllText(FavoritesPath));
+                var json = File.ReadAllText(FavoritesPath, Encoding.UTF8);
+                var file = JsonConvert.DeserializeObject<FavoritesFile>(json);
 
                 // Guard against both a null root (the file literally contains
                 // "null") and a null Favorites array (e.g. {"Favorites": null}
@@ -182,7 +143,8 @@ namespace CefFlashBrowser.Data
                 }
 
                 var file = new FavoritesFile { Favorites = snapshot };
-                SafeWriteFile(FavoritesPath, JsonConvert.SerializeObject(file, Formatting.Indented));
+                var json = JsonConvert.SerializeObject(file, Formatting.Indented);
+                FileHelper.SafeWriteFile(FavoritesPath, json, Encoding.UTF8);
                 LogHelper.LogInfo("Favorites saved successfully");
                 return true;
             }
@@ -205,8 +167,8 @@ namespace CefFlashBrowser.Data
         {
             try
             {
-                var file = File.ReadAllText(SettingsPath);
-                Settings = JsonConvert.DeserializeObject<Settings>(file);
+                var json = File.ReadAllText(SettingsPath, Encoding.UTF8);
+                Settings = JsonConvert.DeserializeObject<Settings>(json);
                 Settings.SetNullPropertiesToDefault();
             }
             catch (Exception e)
@@ -224,14 +186,16 @@ namespace CefFlashBrowser.Data
 
                 if (fileExists)
                 {
-                    string oldSettingsContent = File.ReadAllText(SettingsPath);
+                    string oldSettingsContent = File.ReadAllText(SettingsPath, Encoding.UTF8);
 
                     try
                     {
                         // Merge with existing settings
                         JObject settingsJson = JObject.Parse(oldSettingsContent);
                         settingsJson.Merge(JToken.FromObject(Settings));
-                        SafeWriteFile(SettingsPath, settingsJson.ToString(Formatting.Indented));
+
+                        var jsonString = settingsJson.ToString(Formatting.Indented);
+                        FileHelper.SafeWriteFile(SettingsPath, jsonString, Encoding.UTF8);
 
                         LogHelper.LogInfo("Settings saved successfully, type: merge");
                         return true;
@@ -244,7 +208,8 @@ namespace CefFlashBrowser.Data
                 }
 
                 // File does not exist or merge failed
-                SafeWriteFile(SettingsPath, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+                var json = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                FileHelper.SafeWriteFile(SettingsPath, json, Encoding.UTF8);
 
                 LogHelper.LogInfo("Settings saved successfully, type: " + (fileExists ? "overwrite" : "create"));
                 return true;

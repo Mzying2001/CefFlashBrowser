@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
+using BrowserHandlers = CefFlashBrowser.Browser.Handlers;
 
 namespace CefFlashBrowser.Views
 {
@@ -120,7 +121,7 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private class BrowserMenuHandler : Utils.Handlers.ContextMenuHandler
+        private class BrowserMenuHandler : BrowserHandlers.ContextMenuHandler
         {
             private readonly BrowserWindow window;
 
@@ -175,8 +176,8 @@ namespace CefFlashBrowser.Views
                 InputBindings.Clear();
             }
 
-            browser.JsDialogHandler = new Utils.Handlers.JsDialogHandler();
-            browser.DownloadHandler = new Utils.Handlers.DownloadHandler();
+            browser.JsDialogHandler = new BrowserHandlers.JsDialogHandler();
+            browser.DownloadHandler = new BrowserHandlers.DownloadHandler();
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
 

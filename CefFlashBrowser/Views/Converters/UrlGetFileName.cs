@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.IO;
 
-namespace CefFlashBrowser.Utils.Converters
+namespace CefFlashBrowser.Views.Converters
 {
     public class UrlGetFileName : ValueConverterBase<string, string>
     {

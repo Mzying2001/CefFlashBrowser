@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace CefFlashBrowser.Utils.Converters
+namespace CefFlashBrowser.Views.Converters
 {
     public class IntToDouble : ValueConverterBase<int, double>
     {

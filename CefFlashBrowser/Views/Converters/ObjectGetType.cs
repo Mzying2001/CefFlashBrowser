@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace CefFlashBrowser.Utils.Converters
+namespace CefFlashBrowser.Views.Converters
 {
     public class ObjectGetType : ValueConverterBase<object, Type>
     {

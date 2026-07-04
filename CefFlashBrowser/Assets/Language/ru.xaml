@@ -1,0 +1,209 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="locale">ru</sys:String>
+    <sys:String x:Key="language_name">Русский</sys:String>
+
+    <!-- Common Fields -->
+    <sys:String x:Key="common_swfFile">SWF-файл</sys:String>
+    <sys:String x:Key="common_solFile">SOL-файл</sys:String>
+    <sys:String x:Key="common_allFiles">Все файлы</sys:String>
+    <sys:String x:Key="common_shortcut">Ярлык</sys:String>
+    <sys:String x:Key="common_favorites">Избранное</sys:String>
+    <sys:String x:Key="common_settings">Настройки</sys:String>
+    <sys:String x:Key="common_export">Экспорт</sys:String>
+    <sys:String x:Key="common_import">Импорт</sys:String>
+    <sys:String x:Key="common_rename">Переименовать</sys:String>
+    <sys:String x:Key="common_moveUp">Переместить вверх</sys:String>
+    <sys:String x:Key="common_moveDown">Переместить вниз</sys:String>
+    <sys:String x:Key="common_moveToTop">Переместить в начало</sys:String>
+    <sys:String x:Key="common_moveToBottom">Переместить в конец</sys:String>
+
+    <!--Main Window-->
+    <sys:String x:Key="mainWindow_title">Добро пожаловать</sys:String>
+    <sys:String x:Key="mainWindow_go">Перейти</sys:String>
+    <sys:String x:Key="mainWindow_manageFavorites">Управление избранным</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">Управление сохранениями SOL</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">Открыть SOL-файл...</sys:String>
+    <sys:String x:Key="mainWindow_languages">Язык</sys:String>
+    <sys:String x:Key="mainWindow_options">Параметры</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">Загрузить локальный SWF-файл...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">Открыть на GitHub</sys:String>
+
+    <!--Settings Window-->
+    <sys:String x:Key="settings_headerMainWindow">Главное окно</sys:String>
+    <sys:String x:Key="settings_headerTheme">Тема</sys:String>
+    <sys:String x:Key="settings_headerOther">Другое</sys:String>
+    <sys:String x:Key="settings_headerBrowser">Браузер</sys:String>
+    <sys:String x:Key="settings_headerWebsiteBehavior">Поведение сайтов</sys:String>
+    <sys:String x:Key="settings_headerAdvanced">Дополнительно</sys:String>
+    <sys:String x:Key="settings_headerAboutCef">О CEF</sys:String>
+    <sys:String x:Key="settings_useSearchEngine">Использовать поисковые системы в адресной строке</sys:String>
+    <sys:String x:Key="settings_searchEngine">Поисковая система</sys:String>
+    <sys:String x:Key="settings_currentTheme">Текущая тема</sys:String>
+    <sys:String x:Key="settings_followSystemTheme">Следовать системной теме</sys:String>
+    <sys:String x:Key="settings_hideMainWindowOnBrowsing">Скрывать главное окно при просмотре веб-страниц</sys:String>
+    <sys:String x:Key="settings_deleteCache">Удалить весь кэш</sys:String>
+    <sys:String x:Key="settings_openNewPage">Открывать новую страницу в ...</sys:String>
+    <sys:String x:Key="settings_disableOnBeforeUnloadDialog">Отключить всплывающие окна при обновлении/закрытии страницы</sys:String>
+    <sys:String x:Key="settings_enableProxy">Включить прокси</sys:String>
+    <sys:String x:Key="settings_enableCustomUserAgent">Пользовательский User-Agent</sys:String>
+    <sys:String x:Key="settings_enableFakeFlashVersion">Подменять версию Flash</sys:String>
+    <sys:String x:Key="settings_cefVersion">Версия CefSharp</sys:String>
+    <sys:String x:Key="settings_server">Сервер</sys:String>
+    <sys:String x:Key="settings_username">Имя пользователя</sys:String>
+    <sys:String x:Key="settings_password">Пароль</sys:String>
+    <sys:String x:Key="settings_userAgent">User-Agent</sys:String>
+    <sys:String x:Key="settings_flashVersion">Версия Flash</sys:String>
+    <sys:String x:Key="settings_buttonDeleteCache">Удалить</sys:String>
+    <sys:String x:Key="settings_buttonViewDetails">Подробнее</sys:String>
+    <sys:String x:Key="settings_buttonRestart">Перезапустить</sys:String>
+    <sys:String x:Key="settings_needRestart">Изменения этих настроек вступят в силу после перезапуска программы.</sys:String>
+    <sys:String x:Key="settings_ip">IP</sys:String>
+    <sys:String x:Key="settings_port">Порт</sys:String>
+    <sys:String x:Key="settings_optional">(Необязательно)</sys:String>
+    <sys:String x:Key="settings_saveZoomLevel">Сохранять масштаб веб-страниц</sys:String>
+    <sys:String x:Key="settings_enableIntegratedDevTools">Встраивать DevTools в окно браузера</sys:String>
+    <sys:String x:Key="settings_disableFullscreen">Отключить полноэкранный режим</sys:String>
+    <sys:String x:Key="settings_disableGpuAcceleration">Отключить ускорение GPU</sys:String>
+    <sys:String x:Key="settings_disableBrowserContextMenu">Отключить контекстное меню</sys:String>
+
+    <!--Navigation bar of main interface-->
+    <sys:String x:Key="navigationType_auto">Автоматически</sys:String>
+    <sys:String x:Key="navigationType_searchOnly">Только поиск</sys:String>
+    <sys:String x:Key="navigationType_navigateOnly">Только переход</sys:String>
+
+    <!--New web page behaviors-->
+    <sys:String x:Key="newPageBehavior_originalWindow">Исходное окно</sys:String>
+    <sys:String x:Key="newPageBehavior_newWindow">Новое окно</sys:String>
+
+    <!--Search Engine-->
+    <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
+    <sys:String x:Key="searchEngine_google">Google</sys:String>
+    <sys:String x:Key="searchEngine_bing">Bing</sys:String>
+    <sys:String x:Key="searchEngine_sogou">Sogou</sys:String>
+    <sys:String x:Key="searchEngine_so360">360</sys:String>
+    <sys:String x:Key="searchEngine_duckDuckGo">DuckDuckGo</sys:String>
+    <sys:String x:Key="searchEngine_yandex">Yandex</sys:String>
+    <sys:String x:Key="searchEngine_bilibili">Bilibili</sys:String>
+    <sys:String x:Key="searchEngine_game4399">4399</sys:String>
+
+    <!--Theme-->
+    <sys:String x:Key="theme_light">Светлая</sys:String>
+    <sys:String x:Key="theme_dark">Темная</sys:String>
+
+    <!--Favorites Manager-->
+    <sys:String x:Key="favorites_managerTitle">Диспетчер избранного</sys:String>
+    <sys:String x:Key="favorites_add">Добавить</sys:String>
+    <sys:String x:Key="favorites_remove">Удалить</sys:String>
+    <sys:String x:Key="favorites_edit">Изменить</sys:String>
+    <sys:String x:Key="favorites_name">Имя</sys:String>
+    <sys:String x:Key="favorites_url">URL</sys:String>
+    <sys:String x:Key="favorites_save">Сохранить</sys:String>
+    <sys:String x:Key="favorites_defaultName">Новый элемент избранного</sys:String>
+
+    <!--Browser Window-->
+    <sys:String x:Key="browser_back">Назад</sys:String>
+    <sys:String x:Key="browser_forward">Вперед</sys:String>
+    <sys:String x:Key="browser_reload">Обновить</sys:String>
+    <sys:String x:Key="browser_stop">Остановить</sys:String>
+    <sys:String x:Key="browser_cut">Вырезать</sys:String>
+    <sys:String x:Key="browser_copy">Копировать</sys:String>
+    <sys:String x:Key="browser_paste">Вставить</sys:String>
+    <sys:String x:Key="browser_selectAll">Выделить все</sys:String>
+    <sys:String x:Key="browser_print">Печать</sys:String>
+    <sys:String x:Key="browser_redo">Повторить</sys:String>
+    <sys:String x:Key="browser_undo">Отменить</sys:String>
+    <sys:String x:Key="browser_find">Найти</sys:String>
+    <sys:String x:Key="browser_searchFor">Искать "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewWindow">Открыть в новом окне</sys:String>
+    <sys:String x:Key="browser_openSelectedUrl">Перейти к "{0}"</sys:String>
+    <sys:String x:Key="browser_addToDictionary">Добавить в словарь</sys:String>
+    <sys:String x:Key="browser_reloadNoCache">Обновить без кэша</sys:String>
+    <sys:String x:Key="browser_openDevTool">Открыть DevTools</sys:String>
+    <sys:String x:Key="browser_toggleDevTool">Открыть/закрыть DevTools</sys:String>
+    <sys:String x:Key="browser_viewSource">Просмотреть исходный код</sys:String>
+    <sys:String x:Key="browser_zoom">Масштаб</sys:String>
+    <sys:String x:Key="browser_openInDefaultBrowser">Открыть в браузере по умолчанию</sys:String>
+    <sys:String x:Key="browser_createShortcut">Создать ярлык</sys:String>
+    <sys:String x:Key="browser_addFavorite">Добавить этот сайт в избранное</sys:String>
+    <sys:String x:Key="browser_tipsBlockedSwfs">Некоторое Flash-содержимое, похоже, заблокировано ядром Chromium. Его можно воспроизвести в SWF-плеере:</sys:String>
+    <sys:String x:Key="browser_toolTipBack">Назад (Alt+Left)</sys:String>
+    <sys:String x:Key="browser_toolTipForward">Вперед (Alt+Right)</sys:String>
+    <sys:String x:Key="browser_toolTipReload">Обновить (F5)</sys:String>
+    <sys:String x:Key="browser_toolTipStop">Остановить (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipMore">Еще</sys:String>
+    <sys:String x:Key="browser_toolTipBlockedSwfs">Заблокированное Flash-содержимое</sys:String>
+    <sys:String x:Key="browser_toolTipZoomIn">Увеличить (Ctrl+Plus)</sys:String>
+    <sys:String x:Key="browser_toolTipZoomOut">Уменьшить (Ctrl+Minus)</sys:String>
+    <sys:String x:Key="browser_loading">Загрузка...</sys:String>
+    <sys:String x:Key="browser_showMainWindow">Открыть главное окно</sys:String>
+    <sys:String x:Key="browser_newBrowserWindow">Новое окно браузера</sys:String>
+
+    <!--Save Manager-->
+    <sys:String x:Key="solSaveManager_title">Диспетчер сохранений SOL</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileName">Имя файла</sys:String>
+    <sys:String x:Key="solSaveManager_headerFileDir">Путь к файлу</sys:String>
+    <sys:String x:Key="solSaveManager_headerOperations">Операции</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipReload">Обновить</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipDelete">Удалить</sys:String>
+    <sys:String x:Key="solSaveManager_toolTipEdit">Изменить</sys:String>
+    <sys:String x:Key="solSaveManager_filterPlaceholder">Фильтр...</sys:String>
+
+    <!--SOL Editor-->
+    <sys:String x:Key="solEditor_title">Редактор SOL</sys:String>
+    <sys:String x:Key="solEditor_file">Файл</sys:String>
+    <sys:String x:Key="solEditor_save">Сохранить</sys:String>
+    <sys:String x:Key="solEditor_saveAs">Сохранить как...</sys:String>
+    <sys:String x:Key="solEditor_close">Закрыть</sys:String>
+    <sys:String x:Key="solEditor_edit">Правка</sys:String>
+    <sys:String x:Key="solEditor_addItem">Добавить элемент</sys:String>
+    <sys:String x:Key="solEditor_removeItem">Удалить элемент</sys:String>
+    <sys:String x:Key="solEditor_statusReady">Готово</sys:String>
+    <sys:String x:Key="solEditor_statusError">Ошибка</sys:String>
+    <sys:String x:Key="solEditor_statusModified">Изменено</sys:String>
+    <sys:String x:Key="solEditor_statusSaved">Сохранено</sys:String>
+    <sys:String x:Key="solEditor_statusUnknown">Неизвестное состояние</sys:String>
+    <sys:String x:Key="solEditor_emptyString">(Пусто)</sys:String>
+    <sys:String x:Key="solEditor_amf0SolFile">SOL-файл, закодированный в AMF0</sys:String>
+    <sys:String x:Key="solEditor_amf3SolFile">SOL-файл, закодированный в AMF3</sys:String>
+
+    <!--Dialogs-->
+    <sys:String x:Key="dialog_ok">OK</sys:String>
+    <sys:String x:Key="dialog_cancel">Отмена</sys:String>
+    <sys:String x:Key="dialog_yes">Да</sys:String>
+    <sys:String x:Key="dialog_no">Нет</sys:String>
+    <sys:String x:Key="dialog_error">Ошибка</sys:String>
+    <sys:String x:Key="dialog_addFavorite">Добавить в избранное</sys:String>
+    <sys:String x:Key="dialog_selectLanguage">Выберите язык</sys:String>
+    <sys:String x:Key="dialog_addItem">Добавить элемент</sys:String>
+    <sys:String x:Key="dialog_itemName">Имя</sys:String>
+    <sys:String x:Key="dialog_assocArray">Ассоциативный массив</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">Введите URL.</sys:String>
+    <sys:String x:Key="message_deleteCache">Удалить весь кэш? Браузер будет перезапущен.</sys:String>
+    <sys:String x:Key="message_restart">Перезапустить программу?</sys:String>
+    <sys:String x:Key="message_removeItem">Удалить "{0}"?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">Покинуть эту страницу?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">Перезагрузить эту страницу?</sys:String>
+    <sys:String x:Key="message_deleteFile">Удалить файл "{0}"?</sys:String>
+    <sys:String x:Key="message_deleted">Удаление выполнено.</sys:String>
+    <sys:String x:Key="message_imported">Импорт выполнен.</sys:String>
+    <sys:String x:Key="message_exported">Экспорт выполнен.</sys:String>
+    <sys:String x:Key="message_askSaveChange">Сохранить изменения в "{0}"?</sys:String>
+    <sys:String x:Key="message_renameItem">Переименовать "{0}":</sys:String>
+    <sys:String x:Key="message_askImportFile">Импортировать файл "{0}" в "{1}"?</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">Сообщение об ошибке</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">Имя не может быть пустым.</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">URL не может быть пустым.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">При очистке кэша произошла ошибка. Повторить попытку?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">Ключ массива с именем "{0}" уже существует.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">Свойство объекта с именем "{0}" уже существует.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Имя ключа/свойства не может быть пустым.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">Ключ/свойство с именем "{0}" уже существует.</sys:String>
+    <sys:String x:Key="error_notSolFile">Файл "{0}" не является SOL-файлом.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">Неизвестная поисковая система.</sys:String>
+</ResourceDictionary>

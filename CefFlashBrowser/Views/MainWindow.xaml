@@ -9,7 +9,7 @@
         xmlns:data="clr-namespace:CefFlashBrowser.Data"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
         mc:Ignorable="d"
         
         DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}"

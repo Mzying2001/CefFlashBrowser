@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace CefFlashBrowser.Utils.Converters
+namespace CefFlashBrowser.Views.Converters
 {
     public abstract class ValueConverterBase<SourceType, TargetType> : IValueConverter
     {

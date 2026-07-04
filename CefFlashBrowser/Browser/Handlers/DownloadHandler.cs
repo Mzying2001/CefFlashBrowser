@@ -1,7 +1,8 @@
-﻿using CefSharp;
+﻿using CefFlashBrowser.Utils;
+using CefSharp;
 using System;
 
-namespace CefFlashBrowser.Utils.Handlers
+namespace CefFlashBrowser.Browser.Handlers
 {
     public class DownloadHandler : FlashBrowser.Handlers.DownloadHandler
     {

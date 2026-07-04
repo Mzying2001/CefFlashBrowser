@@ -3,9 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:CefFlashBrowser"
              xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
-             xmlns:m="clr-namespace:CefFlashBrowser.Models"
              xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
-             xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
+             xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+             xmlns:infraWpf="clr-namespace:CefFlashBrowser.Infrastructure.Wpf">
     <Application.Resources>
         <ResourceDictionary>
 
@@ -15,7 +15,7 @@
 
 
             <!--Application Info-->
-            <m:AppInfo x:Key="AppInfo"/>
+            <infraWpf:AppInfo x:Key="AppInfo"/>
 
 
             <!--Custom window style, WindowManager will set this for all windows-->
@@ -33,16 +33,14 @@
 
             <ResourceDictionary.MergedDictionaries>
                 <!--Language-->
-                <!--Must be the first in MergedDictionaries so LanguageManager can find it for language switching-->
-                <ResourceDictionary Source="Assets/Language/zh-CN.xaml"/>
+                <infraWpf:NamedResourceDictionary Name="Language" Source="Assets/Language/zh-CN.xaml"/>
 
                 <!--HandyControl-->
-                <!--The skin and theme dictionary must be the second and third in MergedDictionaries so ThemeManager can find it for theme switching-->
-                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+                <infraWpf:NamedResourceDictionary Name="Skin" Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+                <infraWpf:NamedResourceDictionary Name="Theme" Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
 
                 <!--Converters-->
-                <ResourceDictionary Source="Utils/Converters/Converters.xaml"/>
+                <infraWpf:NamedResourceDictionary Name="Converters" Source="Views/Converters/Converters.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
 

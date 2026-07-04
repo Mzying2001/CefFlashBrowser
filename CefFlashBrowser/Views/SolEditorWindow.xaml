@@ -8,8 +8,8 @@
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
-        xmlns:utils="clr-namespace:CefFlashBrowser.Utils"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+        xmlns:templateSelectors="clr-namespace:CefFlashBrowser.Views.TemplateSelectors"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
@@ -210,19 +210,20 @@
         </DataTemplate>
 
         <!--Selector for the node editor templates-->
-        <utils:SolNodeTemplateSelector x:Key="NodeEditorSelector"
-                                       RootTemplate="{StaticResource AddItemTemplate}"
-                                       ArrayTemplate="{StaticResource AddItemTemplate}"
-                                       ObjectTemplate="{StaticResource AddItemTemplate}"
-                                       BoolTemplate="{StaticResource BoolNodeTemplate}"
-                                       IntTemplate="{StaticResource IntNodeTemplate}"
-                                       DoubleTemplate="{StaticResource DoubleNodeTemplate}"
-                                       DateTemplate="{StaticResource DateTimeNodeTemplate}"
-                                       StringTemplate="{StaticResource OpenTextEditorTemplate}"
-                                       XmlDocTemplate="{StaticResource OpenTextEditorTemplate}"
-                                       XmlTemplate="{StaticResource OpenTextEditorTemplate}"
-                                       BinaryTemplate="{StaticResource ImportExportTemplate}"
-                                       DefaultTemplate="{StaticResource DisplayNothingTemplate}"/>
+        <templateSelectors:SolNodeTemplateSelector
+            x:Key="NodeEditorSelector"
+            RootTemplate="{StaticResource AddItemTemplate}"
+            ArrayTemplate="{StaticResource AddItemTemplate}"
+            ObjectTemplate="{StaticResource AddItemTemplate}"
+            BoolTemplate="{StaticResource BoolNodeTemplate}"
+            IntTemplate="{StaticResource IntNodeTemplate}"
+            DoubleTemplate="{StaticResource DoubleNodeTemplate}"
+            DateTemplate="{StaticResource DateTimeNodeTemplate}"
+            StringTemplate="{StaticResource OpenTextEditorTemplate}"
+            XmlDocTemplate="{StaticResource OpenTextEditorTemplate}"
+            XmlTemplate="{StaticResource OpenTextEditorTemplate}"
+            BinaryTemplate="{StaticResource ImportExportTemplate}"
+            DefaultTemplate="{StaticResource DisplayNothingTemplate}"/>
     </Window.Resources>
 
     <DockPanel>
