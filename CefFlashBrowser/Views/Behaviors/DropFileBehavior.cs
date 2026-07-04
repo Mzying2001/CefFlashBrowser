@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 
-namespace CefFlashBrowser.Utils.Behaviors
+namespace CefFlashBrowser.Views.Behaviors
 {
     public class DropFileBehavior : Behavior<UIElement>
     {

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views.Dialogs"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:hc="https://handyorg.github.io/handycontrol"
-        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:utils="clr-namespace:CefFlashBrowser.Utils"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"

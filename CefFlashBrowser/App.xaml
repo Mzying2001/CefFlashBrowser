@@ -42,7 +42,7 @@
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
 
                 <!--Converters-->
-                <ResourceDictionary Source="Utils/Converters/Converters.xaml"/>
+                <ResourceDictionary Source="Views/Converters/Converters.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
 

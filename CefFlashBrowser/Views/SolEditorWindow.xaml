@@ -8,7 +8,7 @@
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:behaviors="clr-namespace:CefFlashBrowser.Utils.Behaviors"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
         xmlns:utils="clr-namespace:CefFlashBrowser.Utils"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:hc="https://handyorg.github.io/handycontrol"

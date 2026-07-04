@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace CefFlashBrowser.Utils.Converters
+namespace CefFlashBrowser.Views.Converters
 {
     public class ZoomLevelToScale : ValueConverterBase<double, double>
     {
