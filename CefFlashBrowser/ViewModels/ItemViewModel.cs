@@ -3,8 +3,6 @@ using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Messaging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -65,14 +63,6 @@ namespace CefFlashBrowser.ViewModels
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
-        }
-    }
-
-    public static class ItemViewModel
-    {
-        public static int GetIndex<TValue>(IEnumerable<ItemViewModel<TValue>> list, TValue value)
-        {
-            return list.ToList().FindIndex(item => EqualityComparer<TValue>.Default.Equals(item.Value, value));
         }
     }
 }
