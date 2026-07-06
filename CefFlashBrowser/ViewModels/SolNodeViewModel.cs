@@ -10,6 +10,14 @@ using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
 {
+    public enum SolNodeChangeType
+    {
+        Added,
+        Removed,
+        NameChanged,
+        ValueChanged
+    }
+
     public class SolNodeViewModel : ViewModelBase
     {
         /// <summary>

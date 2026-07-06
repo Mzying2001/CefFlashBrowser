@@ -1,4 +1,3 @@
-using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels;
 using System;
