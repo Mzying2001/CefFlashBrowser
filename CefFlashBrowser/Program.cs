@@ -112,7 +112,7 @@ namespace CefFlashBrowser
 
             var settings = new CefFlashSettings()
             {
-                Locale = LanguageManager.GetLocale(LanguageManager.CurrentLanguage),
+                Locale = LanguageManager.GetLocale(GlobalData.Settings.Language),
                 LogFile = GlobalData.CefLogPath,
                 CachePath = GlobalData.CachesPath,
                 PpapiFlashPath = GlobalData.FlashPath,

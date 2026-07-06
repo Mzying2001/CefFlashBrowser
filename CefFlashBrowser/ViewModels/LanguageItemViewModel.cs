@@ -19,7 +19,7 @@ namespace CefFlashBrowser.ViewModels
 
         public bool IsCurrentLanguage
         {
-            get => Language == LanguageManager.CurrentLanguage;
+            get => Language == LanguageManager.GetCurrentLanguage();
         }
 
         private void OnLanguageChanged(object _)

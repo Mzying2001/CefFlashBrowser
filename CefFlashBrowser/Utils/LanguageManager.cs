@@ -38,7 +38,7 @@ namespace CefFlashBrowser.Utils
                 }
             }
 
-            CurrentLanguage = GlobalData.Settings.Language;
+            SetCurrentLanguage(GlobalData.Settings.Language);
         }
 
 
@@ -76,30 +76,23 @@ namespace CefFlashBrowser.Utils
             return language != null && LanguageDictionaries.ContainsKey(language);
         }
 
-        public static string CurrentLanguage
+        public static string GetCurrentLanguage()
         {
-            get
-            {
-                var curDic = GetCurLangResDic();
+            var dic = GetCurLangResDic();
+            return LanguageDictionaries.FirstOrDefault(pair => pair.Value == dic).Key; // null if not found
+        }
 
-                foreach (var pair in LanguageDictionaries)
-                {
-                    if (pair.Value == curDic) return pair.Key;
-                }
-                return null;
-            }
-            set
+        public static void SetCurrentLanguage(string language)
+        {
+            if (!IsSupportedLanguage(language))
             {
-                if (IsSupportedLanguage(value))
-                {
-                    SetCurLangResDic(LanguageDictionaries[value]);
-                    GlobalData.Settings.Language = value;
-                    Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, value);
-                }
-                else
-                {
-                    LogHelper.LogError($"Language '{value}' is not supported.");
-                }
+                LogHelper.LogError($"Language '{language}' is not supported.");
+            }
+            else
+            {
+                SetCurLangResDic(LanguageDictionaries[language]);
+                GlobalData.Settings.Language = language;
+                Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, language);
             }
         }
 

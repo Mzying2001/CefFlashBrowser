@@ -17,7 +17,7 @@ namespace CefFlashBrowser.ViewModels
         {
             if (language != null)
             {
-                LanguageManager.CurrentLanguage = language;
+                LanguageManager.SetCurrentLanguage(language);
             }
         }
 
