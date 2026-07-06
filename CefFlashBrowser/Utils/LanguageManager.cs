@@ -73,7 +73,7 @@ namespace CefFlashBrowser.Utils
 
         public static bool IsSupportedLanguage(string language)
         {
-            return LanguageDictionaries.ContainsKey(language);
+            return language != null && LanguageDictionaries.ContainsKey(language);
         }
 
         public static string CurrentLanguage
@@ -96,6 +96,10 @@ namespace CefFlashBrowser.Utils
                     GlobalData.Settings.Language = value;
                     Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, value);
                 }
+                else
+                {
+                    LogHelper.LogError($"Language '{value}' is not supported.");
+                }
             }
         }
 
@@ -104,15 +108,19 @@ namespace CefFlashBrowser.Utils
 
         public static string GetString(string language, string key)
         {
-            if (key != null && IsSupportedLanguage(language))
+            ResourceDictionary dic;
+
+            if (IsSupportedLanguage(language))
             {
-                var dic = LanguageDictionaries[language];
-                return dic.Contains(key) ? dic[key].ToString() : string.Empty;
+                dic = LanguageDictionaries[language];
             }
             else
             {
-                return null;
+                dic = GetCurLangResDic();
+                LogHelper.LogError($"Language '{language}' is not supported. Falling back to current language.");
             }
+
+            return dic.Contains(key) ? dic[key].ToString() : string.Empty;
         }
 
         public static string GetString(string key)
