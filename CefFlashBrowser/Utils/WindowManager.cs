@@ -93,8 +93,13 @@ namespace CefFlashBrowser.Utils
         /// </summary>
         private static TWindow NewWindow<TWindow>() where TWindow : Window, new()
         {
-            var window = new TWindow()
-            { Style = (Style)Application.Current.Resources["CustomWindowStyle"] };
+            var window = new TWindow();
+
+            if (window.Style == null)
+            {
+                window.SetCurrentValue(FrameworkElement.StyleProperty,
+                    Application.Current.TryFindResource("CustomWindowStyle") as Style);
+            }
 
             void themeChangedHandler(object theme)
             {
