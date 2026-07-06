@@ -1,6 +1,6 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
-using CefFlashBrowser.Utils;
+using CefFlashBrowser.Services;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System.Collections.ObjectModel;

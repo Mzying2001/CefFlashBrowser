@@ -1,5 +1,6 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Infrastructure.Wpf;
+using CefFlashBrowser.Utils;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 
-namespace CefFlashBrowser.Utils
+namespace CefFlashBrowser.Services
 {
     public static class LanguageManager
     {

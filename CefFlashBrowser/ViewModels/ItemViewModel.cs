@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Data;
-using CefFlashBrowser.Utils;
+using CefFlashBrowser.Data;
+using CefFlashBrowser.Services;
 using SimpleMvvm;
 using SimpleMvvm.Messaging;
 using System;

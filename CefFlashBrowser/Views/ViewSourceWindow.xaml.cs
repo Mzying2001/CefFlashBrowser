@@ -1,6 +1,6 @@
-﻿using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Data;
-using CefFlashBrowser.Utils;
+using CefFlashBrowser.FlashBrowser.Handlers;
+using CefFlashBrowser.Services;
 using CefSharp;
 using SimpleMvvm.Messaging;
 using System.ComponentModel;

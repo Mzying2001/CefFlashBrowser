@@ -1,6 +1,7 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using CefSharp;

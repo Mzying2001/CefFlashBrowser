@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Data;
-using CefFlashBrowser.Utils;
+using CefFlashBrowser.Data;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 

@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models;
 using System;
 using System.IO;
 using System.Linq;
@@ -107,7 +107,8 @@ namespace CefFlashBrowser.Utils
 #if CEFFLASHBROWSER_TESTS
                     throw new ArgumentOutOfRangeException(nameof(engine));
 #else
-                    throw new ArgumentException(LanguageManager.GetString("error_unknownSearchEngine"), nameof(engine));
+                    throw new ArgumentException(
+                        CefFlashBrowser.Services.LanguageManager.GetString("error_unknownSearchEngine"), nameof(engine));
 #endif
             }
         }
