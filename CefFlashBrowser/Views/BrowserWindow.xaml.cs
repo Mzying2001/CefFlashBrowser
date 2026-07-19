@@ -156,7 +156,7 @@ namespace CefFlashBrowser.Views
         private HwndSource _hwndSource;
 
         private WindowState _windowStateBeforeFullScreen;
-        private bool _exitFullScreenWhenMinimize = false;
+        private bool _windowStateRestorePending = false;
 
 
 
@@ -299,9 +299,9 @@ namespace CefFlashBrowser.Views
             {
                 ViewModel.ShowFindPopup = false;
             }
-            else if (_exitFullScreenWhenMinimize)
+            else if (_windowStateRestorePending)
             {
-                _exitFullScreenWhenMinimize = false;
+                _windowStateRestorePending = false;
                 WindowState = _windowStateBeforeFullScreen;
             }
             UpdateStatusPopupVisibility();
@@ -446,11 +446,11 @@ namespace CefFlashBrowser.Views
                     
                     if (WindowState == WindowState.Minimized)
                     {
-                        _exitFullScreenWhenMinimize = true;
+                        _windowStateRestorePending = true;
                     }
                     else
                     {
-                        _exitFullScreenWhenMinimize = false;
+                        _windowStateRestorePending = false;
                         WindowState = _windowStateBeforeFullScreen;
                     }
                 }
