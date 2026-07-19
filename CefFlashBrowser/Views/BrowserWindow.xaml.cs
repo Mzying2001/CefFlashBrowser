@@ -151,10 +151,12 @@ namespace CefFlashBrowser.Views
 
         private bool _doClose = false;
         private bool _isClosed = false;
-        private bool _isMaximizedBeforeFullScreen = false;
 
         private IntPtr _hwnd;
         private HwndSource _hwndSource;
+
+        private WindowState _windowStateBeforeFullScreen;
+        private bool _exitFullScreenWhenMinimize = false;
 
 
 
@@ -198,6 +200,7 @@ namespace CefFlashBrowser.Views
                 Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
+
                 Activated -= BrowserWindowActivated;
                 Deactivated -= BrowserWindowDeactivated;
                 StateChanged -= BrowserWindowStateChanged;
@@ -244,6 +247,7 @@ namespace CefFlashBrowser.Views
             _hwnd = new WindowInteropHelper(this).Handle;
             _hwndSource = HwndSource.FromHwnd(_hwnd);
             _hwndSource.AddHook(new HwndSourceHook(WndProc));
+
             UpdateStatusPopupVisibility();
         }
 
@@ -295,7 +299,11 @@ namespace CefFlashBrowser.Views
             {
                 ViewModel.ShowFindPopup = false;
             }
-
+            else if (_exitFullScreenWhenMinimize)
+            {
+                _exitFullScreenWhenMinimize = false;
+                WindowState = _windowStateBeforeFullScreen;
+            }
             UpdateStatusPopupVisibility();
         }
 
@@ -424,10 +432,9 @@ namespace CefFlashBrowser.Views
             {
                 if (fullScreen)
                 {
-                    _isMaximizedBeforeFullScreen =
-                        WindowState == WindowState.Maximized;
+                    _windowStateBeforeFullScreen = WindowState;
 
-                    if (_isMaximizedBeforeFullScreen)
+                    if (WindowState == WindowState.Maximized)
                         WindowState = WindowState.Normal;
 
                     WindowStyle = WindowStyle.None;
@@ -436,12 +443,15 @@ namespace CefFlashBrowser.Views
                 else
                 {
                     WindowStyle = WindowStyle.SingleBorderWindow;
-                    if (WindowState != WindowState.Minimized)
+                    
+                    if (WindowState == WindowState.Minimized)
                     {
-                        WindowState = WindowState.Normal;
-
-                        if (_isMaximizedBeforeFullScreen)
-                            WindowState = WindowState.Maximized;
+                        _exitFullScreenWhenMinimize = true;
+                    }
+                    else
+                    {
+                        _exitFullScreenWhenMinimize = false;
+                        WindowState = _windowStateBeforeFullScreen;
                     }
                 }
             }
