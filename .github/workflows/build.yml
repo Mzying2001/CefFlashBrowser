@@ -99,7 +99,7 @@ jobs:
           $zipPath = "$outputDir\$zipName"
           
           New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
-          Compress-Archive -Path $artifactDir -DestinationPath $zipPath -Force
+          Compress-Archive -Path "$artifactDir\*" -DestinationPath $zipPath -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
