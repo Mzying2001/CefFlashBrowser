@@ -187,6 +187,10 @@ namespace CefFlashBrowser.Views
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
             Messenger.Global.Register(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
 
+            Activated += BrowserWindowActivated;
+            Deactivated += BrowserWindowDeactivated;
+            StateChanged += BrowserWindowStateChanged;
+
             Closed += delegate
             {
                 Messenger.Global.Unregister(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
@@ -194,6 +198,9 @@ namespace CefFlashBrowser.Views
                 Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
+                Activated -= BrowserWindowActivated;
+                Deactivated -= BrowserWindowDeactivated;
+                StateChanged -= BrowserWindowStateChanged;
             };
         }
 
@@ -237,6 +244,7 @@ namespace CefFlashBrowser.Views
             _hwnd = new WindowInteropHelper(this).Handle;
             _hwndSource = HwndSource.FromHwnd(_hwnd);
             _hwndSource.AddHook(new HwndSourceHook(WndProc));
+            UpdateStatusPopupVisibility();
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -264,6 +272,31 @@ namespace CefFlashBrowser.Views
         {
             var pos = PointToScreen(new Point(0, mainGrid.ActualHeight - statusPopupContent.Height));
             statusPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
+        }
+
+        private void UpdateStatusPopupVisibility()
+        {
+            statusPopup.SetCurrentValue(Popup.IsOpenProperty, IsActive && WindowState != WindowState.Minimized);
+        }
+
+        private void BrowserWindowActivated(object sender, EventArgs e)
+        {
+            UpdateStatusPopupVisibility();
+        }
+
+        private void BrowserWindowDeactivated(object sender, EventArgs e)
+        {
+            UpdateStatusPopupVisibility();
+        }
+
+        private void BrowserWindowStateChanged(object sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                ViewModel.ShowFindPopup = false;
+            }
+
+            UpdateStatusPopupVisibility();
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -403,10 +436,13 @@ namespace CefFlashBrowser.Views
                 else
                 {
                     WindowStyle = WindowStyle.SingleBorderWindow;
-                    WindowState = WindowState.Normal;
+                    if (WindowState != WindowState.Minimized)
+                    {
+                        WindowState = WindowState.Normal;
 
-                    if (_isMaximizedBeforeFullScreen)
-                        WindowState = WindowState.Maximized;
+                        if (_isMaximizedBeforeFullScreen)
+                            WindowState = WindowState.Maximized;
+                    }
                 }
             }
             UpdateFindPopupPosition();
@@ -436,6 +472,16 @@ namespace CefFlashBrowser.Views
         private void StatusPopupMouseEnter(object sender, MouseEventArgs e)
         {
             UpdateStatusPopupOffset();
+        }
+
+        private void StatusPopupOpened(object sender, EventArgs e)
+        {
+            if (PresentationSource.FromVisual(statusPopup.Child) is HwndSource hwndSource)
+            {
+                var hPopup = hwndSource.Handle;
+                HwndHelper.SetOwnerWindow(hPopup, _hwnd);
+                HwndHelper.SetWindowTopmost(hPopup, false);
+            }
         }
 
         private void StatusPopupSizeChanged(object sender, SizeChangedEventArgs e)
