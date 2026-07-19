@@ -32,24 +32,25 @@ publish
 
 ## Project Structure
 
-- **CefFlashBrowser/** — Main WPF application.
-  - **Browser/** — Browser-specific application behavior, including CefSharp handler implementations.
-  - **Data/** — Shared application state, paths, configuration, and MVVM messaging data.
-  - **Infrastructure/** — Reusable infrastructure helpers for collections and WPF integration.
-  - **Models/** — Domain models and persisted user settings.
-  - **ViewModels/** — MVVM presentation logic for windows and dialogs.
-  - **Views/** — WPF windows, dialogs, and reusable UI controls.
-  - **Utils/** — Application helpers and cross-cutting utility classes.
-  - **Assets/** — Icons, localization resources, and bundled runtime assets.
-  - **Themes/** — WPF theme resource dictionaries.
-- **CefFlashBrowser.FlashBrowser/** — Flash-enabled CefSharp browser control library.
-- **CefFlashBrowser.WinformCefSharp4WPF/** — WPF hosting bridge for WinForms-based CefSharp controls.
-- **CefFlashBrowser.Sol/** — C++/CLI library for SOL and AMF serialization.
-- **CefFlashBrowser.Singleton/** — C++/CLI library for single-instance and IPC support.
-- **CefFlashBrowser.Log/** — Shared file logging library.
-- **CefFlashBrowser.EmptyExe/** — Minimal subprocess executable used by CefSharp.
-- **CefFlashBrowser.Tests/** — MSTest project for linked application code and supporting libraries.
-- **Docs/** — Reference specifications for AMF and SOL-related implementation work.
+- **CefFlashBrowser/**: Main WPF application.
+  - **Browser/**: Browser-specific application behavior, including CefSharp handler implementations.
+  - **Data/**: Shared application state, paths, configuration, and MVVM messaging data.
+  - **Infrastructure/**: Reusable infrastructure helpers for collections and WPF integration.
+  - **Models/**: Domain models and persisted user settings.
+  - **Services/**: Application-level services for language, theme, and window coordination.
+  - **ViewModels/**: MVVM presentation logic for windows and dialogs.
+  - **Views/**: WPF windows, dialogs, and reusable UI controls.
+  - **Utils/**: Utility helpers and cross-cutting support code.
+  - **Assets/**: Icons, localization resources, and bundled runtime assets.
+  - **Themes/**: WPF theme resource dictionaries.
+- **CefFlashBrowser.FlashBrowser/**: Flash-enabled CefSharp browser control library.
+- **CefFlashBrowser.WinformCefSharp4WPF/**: WPF hosting bridge for WinForms-based CefSharp controls.
+- **CefFlashBrowser.Sol/**: C++/CLI library for SOL and AMF serialization.
+- **CefFlashBrowser.Singleton/**: C++/CLI library for single-instance and IPC support.
+- **CefFlashBrowser.Log/**: Shared file logging library.
+- **CefFlashBrowser.EmptyExe/**: Minimal subprocess executable used by CefSharp.
+- **CefFlashBrowser.Tests/**: MSTest project for linked application code and supporting libraries.
+- **Docs/**: Reference specifications for AMF and SOL-related implementation work.
 
 ## Notes
 

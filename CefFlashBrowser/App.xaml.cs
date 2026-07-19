@@ -1,5 +1,6 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Infrastructure.Wpf;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using Newtonsoft.Json;

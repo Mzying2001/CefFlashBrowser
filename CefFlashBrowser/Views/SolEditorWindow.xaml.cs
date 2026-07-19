@@ -1,5 +1,4 @@
-﻿using CefFlashBrowser.Models;
-using CefFlashBrowser.Utils;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels;
 using System;
 using System.ComponentModel;

@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Data;
-using CefFlashBrowser.Utils;
+using CefFlashBrowser.Data;
+using CefFlashBrowser.Services;
 using SimpleMvvm;
 using SimpleMvvm.Messaging;
 using System;
@@ -19,7 +19,7 @@ namespace CefFlashBrowser.ViewModels
 
         public bool IsCurrentLanguage
         {
-            get => Language == LanguageManager.CurrentLanguage;
+            get => Language == LanguageManager.GetCurrentLanguage();
         }
 
         private void OnLanguageChanged(object _)

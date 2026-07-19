@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
@@ -9,6 +10,14 @@ using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
 {
+    public enum SolNodeChangeType
+    {
+        Added,
+        Removed,
+        NameChanged,
+        ValueChanged
+    }
+
     public class SolNodeViewModel : ViewModelBase
     {
         /// <summary>

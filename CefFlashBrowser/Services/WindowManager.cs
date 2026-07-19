@@ -1,6 +1,7 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Sol;
+using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
@@ -11,7 +12,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace CefFlashBrowser.Utils
+namespace CefFlashBrowser.Services
 {
     public static class WindowManager
     {
@@ -93,8 +94,13 @@ namespace CefFlashBrowser.Utils
         /// </summary>
         private static TWindow NewWindow<TWindow>() where TWindow : Window, new()
         {
-            var window = new TWindow()
-            { Style = (Style)Application.Current.Resources["CustomWindowStyle"] };
+            var window = new TWindow();
+
+            if (window.Style == null)
+            {
+                window.SetCurrentValue(FrameworkElement.StyleProperty,
+                    Application.Current.TryFindResource("CustomWindowStyle") as Style);
+            }
 
             void themeChangedHandler(object theme)
             {

@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
-        xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -291,16 +290,16 @@
                         <Setter Property="Text" Value="{DynamicResource solEditor_statusUnknown}"/>
                         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Ready}">
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:SolEditorStatus.Ready}">
                                 <Setter Property="Text" Value="{DynamicResource solEditor_statusReady}"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Error}">
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:SolEditorStatus.Error}">
                                 <Setter Property="Text" Value="{DynamicResource solEditor_statusError}"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Modified}">
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:SolEditorStatus.Modified}">
                                 <Setter Property="Text" Value="{DynamicResource solEditor_statusModified}"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Status}" Value="{x:Static m:SolEditorStatus.Saved}">
+                            <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:SolEditorStatus.Saved}">
                                 <Setter Property="Text" Value="{DynamicResource solEditor_statusSaved}"/>
                             </DataTrigger>
                         </Style.Triggers>

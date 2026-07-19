@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
@@ -11,6 +12,14 @@ using System.Xml;
 
 namespace CefFlashBrowser.ViewModels
 {
+    public enum SolEditorStatus
+    {
+        Ready,
+        Error,
+        Modified,
+        Saved
+    }
+
     public class SolEditorWindowViewModel : ViewModelBase
     {
         public DelegateCommand SelectNodeCommand { get; set; }

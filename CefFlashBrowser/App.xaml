@@ -10,27 +10,6 @@
         <ResourceDictionary>
 
 
-            <!--ViewModelLocator-->
-            <vm:ViewModelLocator x:Key="Locator"/>
-
-
-            <!--Application Info-->
-            <infraWpf:AppInfo x:Key="AppInfo"/>
-
-
-            <!--Custom window style, WindowManager will set this for all windows-->
-            <Style x:Key="CustomWindowStyle"
-                   TargetType="{x:Type Window}">
-                <Setter Property="Background" Value="{DynamicResource RegionBrush}"/>
-            </Style>
-
-
-            <!--Change icon colors according to the theme-->
-            <Style TargetType="{x:Type svgc:SvgIcon}">
-                <Setter Property="Fill" Value="{DynamicResource PrimaryTextBrush}"/>
-            </Style>
-
-
             <ResourceDictionary.MergedDictionaries>
                 <!--Language-->
                 <infraWpf:NamedResourceDictionary Name="Language" Source="Assets/Language/zh-CN.xaml"/>
@@ -42,6 +21,26 @@
                 <!--Converters-->
                 <infraWpf:NamedResourceDictionary Name="Converters" Source="Views/Converters/Converters.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+
+            <!--ViewModelLocator-->
+            <vm:ViewModelLocator x:Key="Locator"/>
+
+
+            <!--Application Info-->
+            <infraWpf:AppInfo x:Key="AppInfo"/>
+
+
+            <!--Custom window style, WindowManager will set this for all windows-->
+            <Style x:Key="CustomWindowStyle" TargetType="Window">
+                <Setter Property="Background" Value="{DynamicResource RegionBrush}"/>
+            </Style>
+
+
+            <!--Change icon colors according to the theme-->
+            <Style TargetType="{x:Type svgc:SvgIcon}">
+                <Setter Property="Fill" Value="{DynamicResource PrimaryTextBrush}"/>
+            </Style>
 
 
         </ResourceDictionary>

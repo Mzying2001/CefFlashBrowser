@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Utils;
+using CefFlashBrowser.Services;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace CefFlashBrowser.ViewModels
         {
             if (language != null)
             {
-                LanguageManager.CurrentLanguage = language;
+                LanguageManager.SetCurrentLanguage(language);
             }
         }
 

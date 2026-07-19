@@ -1,5 +1,6 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Utils;
 using Microsoft.Win32;
 using SimpleMvvm.Messaging;
 using System;
@@ -7,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace CefFlashBrowser.Utils
+namespace CefFlashBrowser.Services
 {
     public static class ThemeManager
     {
