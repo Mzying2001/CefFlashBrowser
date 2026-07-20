@@ -583,7 +583,7 @@
         </Grid>
 
         <Popup x:Name="statusPopup"
-               IsOpen="{Binding ElementName=window, Path=IsActive, Mode=OneWay}"
+               Opened="StatusPopupOpened"
                StaysOpen="True"
                Placement="Absolute"
                AllowsTransparency="True"
