@@ -198,6 +198,10 @@ namespace CefFlashBrowser.Views
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
             };
+
+            // IsActive may not be settled during SourceInitialized, so initialize the
+            // status popup visibility after the window has loaded.
+            Loaded += delegate { UpdateStatusPopupVisibility(); };
         }
 
         public WindowSizeInfo GetSizeInfo()
@@ -240,8 +244,6 @@ namespace CefFlashBrowser.Views
             _hwnd = new WindowInteropHelper(this).Handle;
             _hwndSource = HwndSource.FromHwnd(_hwnd);
             _hwndSource.AddHook(new HwndSourceHook(WndProc));
-
-            UpdateStatusPopupVisibility();
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
