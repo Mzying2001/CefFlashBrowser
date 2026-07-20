@@ -190,10 +190,6 @@ namespace CefFlashBrowser.Views
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
             Messenger.Global.Register(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
 
-            Activated += BrowserWindowActivated;
-            Deactivated += BrowserWindowDeactivated;
-            StateChanged += BrowserWindowStateChanged;
-
             Closed += delegate
             {
                 Messenger.Global.Unregister(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
@@ -201,10 +197,6 @@ namespace CefFlashBrowser.Views
                 Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
-
-                Activated -= BrowserWindowActivated;
-                Deactivated -= BrowserWindowDeactivated;
-                StateChanged -= BrowserWindowStateChanged;
             };
         }
 
@@ -284,18 +276,22 @@ namespace CefFlashBrowser.Views
             statusPopup.SetCurrentValue(Popup.IsOpenProperty, IsActive && WindowState != WindowState.Minimized);
         }
 
-        private void BrowserWindowActivated(object sender, EventArgs e)
+        protected override void OnActivated(EventArgs e)
         {
+            base.OnActivated(e);
             UpdateStatusPopupVisibility();
         }
 
-        private void BrowserWindowDeactivated(object sender, EventArgs e)
+        protected override void OnDeactivated(EventArgs e)
         {
+            base.OnDeactivated(e);
             UpdateStatusPopupVisibility();
         }
 
-        private void BrowserWindowStateChanged(object sender, EventArgs e)
+        protected override void OnStateChanged(EventArgs e)
         {
+            base.OnStateChanged(e);
+
             if (WindowState == WindowState.Minimized)
             {
                 ViewModel.ShowFindPopup = false;
@@ -444,7 +440,7 @@ namespace CefFlashBrowser.Views
                 else
                 {
                     WindowStyle = WindowStyle.SingleBorderWindow;
-                    
+
                     if (WindowState == WindowState.Minimized)
                     {
                         _windowStateRestorePending = true;
