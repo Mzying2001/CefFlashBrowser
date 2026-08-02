@@ -23,6 +23,7 @@
   <!-- Link source files from the main app -->
   <ItemGroup>
     <Compile Include="..\CefFlashBrowser\Utils\UrlHelper.cs" Link="LinkedSources\UrlHelper.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\DirectoryAccessChecker.cs" Link="LinkedSources\DirectoryAccessChecker.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\ValueConverterBase.cs" Link="LinkedSources\ValueConverterBase.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\BinaryToSizeString.cs" Link="LinkedSources\BinaryToSizeString.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\ZoomLevelToScale.cs" Link="LinkedSources\ZoomLevelToScale.cs" />
