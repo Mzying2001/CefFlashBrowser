@@ -8,10 +8,6 @@
         html, body {
             margin: 0;
             padding: 0;
-            /* 触屏教学一体机：禁止浏览器把触摸拖动当作页面滚动/缩放，
-               让单指拖动以鼠标事件形式递交给 Flash（SWF 里的滑块/拖拽才可动） */
-            touch-action: none;
-            overscroll-behavior: none;
         }
         #flash-player {
             position: absolute;
@@ -19,11 +15,23 @@
             top: 0px;
             width: 100%;
             height: 100vh;
-            /* 同上：阻止 Chromium 手势吞掉拖动 */
-            touch-action: none;
         }
     </style>
     <script>
+        // 是否启用“屏幕滑动适配”（v1）：由主程序导航本页时带 ?slide=1 决定
+        var slideAdapt = new URLSearchParams(location.search).get('slide') === '1';
+
+        // 禁用浏览器把这区域内的触摸拖动当作滚动/缩放，
+        // 让单指拖动以鼠标事件形式递交给 Flash（SWF 里的滑块/拖拽才可动）
+        function applySlideAdapt() {
+            if (!slideAdapt) return;
+            document.documentElement.style.touchAction = 'none';
+            document.body.style.touchAction = 'none';
+            document.body.style.overscrollBehavior = 'none';
+            var flash = document.getElementById('flash-player');
+            if (flash) flash.style.touchAction = 'none';
+        }
+
         function getFileName(src) {
             src = src.replace(/\\/g, '/');
             return src.split('/').pop().split('?')[0];
@@ -32,9 +40,13 @@
             let flash = document.createElement("embed");
             flash.id = "flash-player";
             flash.setAttribute("src", src);
+            if (slideAdapt) flash.setAttribute("style", "touch-action: none;");
             document.body.replaceChild(flash, document.getElementById(flash.id));
             document.title = getFileName(src);
+            applySlideAdapt();
         }
+
+        applySlideAdapt();
     </script>
 </head>
 
