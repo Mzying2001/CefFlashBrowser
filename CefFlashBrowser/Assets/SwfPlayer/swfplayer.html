@@ -5,12 +5,22 @@
     <meta charset="UTF-8">
     <title>FlashPlayer</title>
     <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            /* 触屏教学一体机：禁止浏览器把触摸拖动当作页面滚动/缩放，
+               让单指拖动以鼠标事件形式递交给 Flash（SWF 里的滑块/拖拽才可动） */
+            touch-action: none;
+            overscroll-behavior: none;
+        }
         #flash-player {
             position: absolute;
             left: 0px;
             top: 0px;
             width: 100%;
             height: 100vh;
+            /* 同上：阻止 Chromium 手势吞掉拖动 */
+            touch-action: none;
         }
     </style>
     <script>

@@ -308,6 +308,24 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        /// <summary>
+        /// (实验室)启用屏幕滑动适配：把单指触摸翻译成鼠标拖动。切换后即时生效。
+        /// </summary>
+        public bool UseTouchMouseEmulation
+        {
+            get => GlobalData.Settings.UseTouchMouseEmulation;
+            set
+            {
+                if (GlobalData.Settings.UseTouchMouseEmulation != value)
+                {
+                    GlobalData.Settings.UseTouchMouseEmulation = value;
+                    // 让运行时翻译开关即时生效，无需重启
+                    CefFlashBrowser.WinformCefSharp4WPF.Internals.TouchEmulationSettings.TranslateToMouse = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         private void DeleteCache()
         {
             WindowManager.Confirm(LanguageManager.GetString("message_deleteCache"), callback: result =>

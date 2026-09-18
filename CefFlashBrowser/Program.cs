@@ -44,6 +44,10 @@ namespace CefFlashBrowser
                     _dataInitialized = GlobalData.InitData();
                     LanguageManager.InitLanguage();
 
+                    // 触屏增强（实验室开关）：把保存的设置同步到运行时（单指=鼠标拖动）
+                    CefFlashBrowser.WinformCefSharp4WPF.Internals.TouchEmulationSettings.TranslateToMouse =
+                        GlobalData.Settings.UseTouchMouseEmulation;
+
                     var cts = new CancellationTokenSource();
                     var delLogsTask = LogHelper.DeleteExpiredLogsAsync(cts.Token);
                     var delCachesTask = DirectoryHelper.DeletePendingDeleteDirectoriesAsync(GlobalData.CachesPath, cts.Token);

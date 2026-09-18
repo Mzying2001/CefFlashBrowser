@@ -1,4 +1,4 @@
-﻿<Window x:Class="CefFlashBrowser.Views.SettingsWindow"
+<Window x:Class="CefFlashBrowser.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -291,6 +291,14 @@
                             <Run Text="{DynamicResource settings_buttonRestart}"/>
                         </Hyperlink>
                     </TextBlock>
+                </c:SettingGroup>
+
+                <!--实验室-->
+                <c:SettingGroup Header="实验室">
+                    <!--启用屏幕滑动适配：把单指触摸翻译成鼠标拖动，让 SWF 的滑块/拖拽在触屏可操作-->
+                    <c:SettingItem Description="启用屏幕滑动适配（单指＝鼠标拖动，适用于 SWF 拖拽/滑块）">
+                        <CheckBox IsChecked="{Binding UseTouchMouseEmulation}"/>
+                    </c:SettingItem>
                 </c:SettingGroup>
             </StackPanel>
         </ScrollViewer>
