@@ -1,4 +1,4 @@
-﻿namespace CefFlashBrowser.Models
+namespace CefFlashBrowser.Models
 {
     public class Settings
     {
@@ -137,6 +137,18 @@
         /// </summary>
         public bool DisableBrowserContextMenu { get; set; }
 
+        /// <summary>
+        /// (实验室/v1)启用屏幕滑动适配：在 SWF 播放页禁止浏览器把触摸拖动当滚动/缩放，
+        /// 让单指拖动以鼠标事件递交 Flash。默认关闭。
+        /// </summary>
+        public bool EnableTouchScrollAdaptation { get; set; }
+
+        /// <summary>
+        /// (实验室/v2)启用触摸转鼠标模拟：在 Win32 层把触摸合成鼠标按下/移动/抬起，
+        /// 让 SWF 里鼠标型的滑块/拖拽在触屏可操作。默认关闭。
+        /// </summary>
+        public bool UseTouchMouseEmulation { get; set; }
+
 
         /// <summary>
         /// Default settings
@@ -176,6 +188,8 @@
             DisableGpuAcceleration = false;
             CustomEmoticon = null;
             DisableBrowserContextMenu = false;
+            EnableTouchScrollAdaptation = false;
+            UseTouchMouseEmulation = false;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.WinformCefSharp4WPF.Internals;
+using CefFlashBrowser.WinformCefSharp4WPF.Internals;
 using CefSharp;
 using CefSharp.Internals;
 using SimpleMvvm.Command;
@@ -395,7 +395,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         public ChromiumWebBrowser()
         {
 #pragma warning disable CS0618 // type or member is obsolete
-            browser = new CefSharp.WinForms.ChromiumWebBrowser();
+            browser = new TouchEmulationChromiumWebBrowser();
             browser.CreateControl();
 #pragma warning restore CS0618 // type or member is obsolete
 

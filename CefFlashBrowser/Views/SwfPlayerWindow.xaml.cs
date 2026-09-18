@@ -83,7 +83,9 @@ namespace CefFlashBrowser.Views
             browser.DownloadHandler = new BrowserHandlers.DownloadHandler();
             browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
 
-            browser.Address = GlobalData.SwfPlayerPath;
+            // v1(屏幕滑动适配)：开启时给播放页传 ?slide=1，由 swfplayer.html 动态启用 touch-action
+            browser.Address = GlobalData.SwfPlayerPath
+                              + (GlobalData.Settings.EnableTouchScrollAdaptation ? "?slide=1" : "");
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
             Closed += delegate { Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler); };

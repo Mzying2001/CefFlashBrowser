@@ -308,6 +308,40 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        /// <summary>
+        /// (实验室/v1)启用屏幕滑动适配：让 SWF 播放页对触摸禁用浏览器滚动/缩放。
+        /// </summary>
+        public bool EnableTouchScrollAdaptation
+        {
+            get => GlobalData.Settings.EnableTouchScrollAdaptation;
+            set
+            {
+                if (GlobalData.Settings.EnableTouchScrollAdaptation != value)
+                {
+                    GlobalData.Settings.EnableTouchScrollAdaptation = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// (实验室/v2)启用触摸转鼠标模拟：把单指触摸翻译成鼠标拖动。切换后即时生效。
+        /// </summary>
+        public bool UseTouchMouseEmulation
+        {
+            get => GlobalData.Settings.UseTouchMouseEmulation;
+            set
+            {
+                if (GlobalData.Settings.UseTouchMouseEmulation != value)
+                {
+                    GlobalData.Settings.UseTouchMouseEmulation = value;
+                    // 让运行时翻译开关即时生效，无需重启
+                    CefFlashBrowser.WinformCefSharp4WPF.Internals.TouchEmulationSettings.TranslateToMouse = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         private void DeleteCache()
         {
             WindowManager.Confirm(LanguageManager.GetString("message_deleteCache"), callback: result =>
