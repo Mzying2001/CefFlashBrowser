@@ -355,9 +355,11 @@
             <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal">
                 <!--blocked swfs button-->
-                <Button Click="ShowBlockedSwfsButtonClicked"
-                        Margin="0,0,10,0"
+                <Button Margin="0,0,10,0"
                         ToolTip="{DynamicResource browser_toolTipBlockedSwfs}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource blockedSwfs}"/>
+                    </i:Interaction.Behaviors>
                     <Button.Style>
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
@@ -400,8 +402,10 @@
                 </ToggleButton>
 
                 <!--menu button-->
-                <Button Click="MenuButtonClicked"
-                        ToolTip="{DynamicResource browser_toolTipMore}">
+                <Button ToolTip="{DynamicResource browser_toolTipMore}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource more}"/>
+                    </i:Interaction.Behaviors>
                     <svgc:SvgIcon Width="10"
                                   Height="10"
                                   UriSource="/Assets/Svgs/more.svg"/>

@@ -10,7 +10,6 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -339,29 +338,6 @@ namespace CefFlashBrowser.Views
             base.OnClosed(e);
             _isClosed = true;
             _hwndSource?.RemoveHook(WndProc);
-        }
-
-        private void OpenBottomContextMenu(UIElement target, ContextMenu menu)
-        {
-            menu.IsOpen = true;
-            menu.Placement = PlacementMode.Relative;
-            menu.PlacementTarget = target;
-
-            menu.PlacementRectangle = new Rect
-            {
-                X = target.RenderSize.Width - menu.RenderSize.Width,
-                Y = target.RenderSize.Height
-            };
-        }
-
-        private void MenuButtonClicked(object sender, RoutedEventArgs e)
-        {
-            OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["more"]);
-        }
-
-        private void ShowBlockedSwfsButtonClicked(object sender, RoutedEventArgs e)
-        {
-            OpenBottomContextMenu((UIElement)sender, (ContextMenu)Resources["blockedSwfs"]);
         }
 
         private void DevToolsOpenedHandler(object msg)
