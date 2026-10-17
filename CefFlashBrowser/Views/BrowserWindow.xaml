@@ -78,27 +78,23 @@
                                     Padding="0"
                                     ToolTip="{DynamicResource browser_toolTipZoomOut}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
-                                <Button.Content>
-                                    <svgc:SvgIcon Width="10"
-                                                  Height="10"
-                                                  UriSource="/Assets/Svgs/sub.svg">
-                                        <svgc:SvgIcon.LayoutTransform>
-                                            <!--disappear when there is only a horzontal line???-->
-                                            <RotateTransform Angle="0.01"/>
-                                        </svgc:SvgIcon.LayoutTransform>
-                                    </svgc:SvgIcon>
-                                </Button.Content>
+                                <svgc:SvgIcon Width="10"
+                                              Height="10"
+                                              UriSource="/Assets/Svgs/sub.svg">
+                                    <svgc:SvgIcon.LayoutTransform>
+                                        <!--disappear when there is only a horzontal line???-->
+                                        <RotateTransform Angle="0.01"/>
+                                    </svgc:SvgIcon.LayoutTransform>
+                                </svgc:SvgIcon>
                             </Button>
                             <Button Width="30"
                                     Height="30"
                                     Padding="0"
                                     ToolTip="{DynamicResource browser_toolTipZoomIn}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
-                                <Button.Content>
-                                    <svgc:SvgIcon Width="10"
-                                                  Height="10"
-                                                  UriSource="/Assets/Svgs/add.svg"/>
-                                </Button.Content>
+                                <svgc:SvgIcon Width="10"
+                                              Height="10"
+                                              UriSource="/Assets/Svgs/add.svg"/>
                             </Button>
                         </hc:ButtonGroup>
                     </Grid>
@@ -302,47 +298,43 @@
                         Orientation="Horizontal">
                 <Button ToolTip="{DynamicResource browser_toolTipBack}"
                         Command="{Binding ElementName=browser, Path=BackCommand}">
-                    <Button.Content>
-                        <svgc:SvgIcon Width="12"
-                                      Height="12"
-                                      UriSource="/Assets/Svgs/back.svg"/>
-                    </Button.Content>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="/Assets/Svgs/back.svg"/>
                 </Button>
 
                 <Button ToolTip="{DynamicResource browser_toolTipForward}"
                         Command="{Binding ElementName=browser, Path=ForwardCommand}">
-                    <Button.Content>
-                        <svgc:SvgIcon Width="12"
-                                      Height="12"
-                                      UriSource="/Assets/Svgs/forward.svg"/>
-                    </Button.Content>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="/Assets/Svgs/forward.svg"/>
                 </Button>
 
                 <Button Margin="10,0,0,0"
                         Command="{Binding ToggleLoadingStateCommand}"
                         CommandParameter="{Binding ElementName=browser}">
+                    <Button.Resources>
+                        <svgc:SvgIcon x:Key="reloadIcon"
+                                      Width="14"
+                                      Height="14"
+                                      UriSource="/Assets/Svgs/reload.svg"/>
+                        <svgc:SvgIcon x:Key="stopIcon"
+                                      Width="12"
+                                      Height="12"
+                                      UriSource="/Assets/Svgs/stop.svg"/>
+                    </Button.Resources>
                     <Button.Style>
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
-                            <Setter Property="Content">
-                                <Setter.Value>
-                                    <svgc:SvgIcon Width="12"
-                                                  Height="12"
-                                                  UriSource="/Assets/Svgs/stop.svg"/>
-                                </Setter.Value>
-                            </Setter>
+                            <Setter Property="Content"
+                                    Value="{StaticResource stopIcon}"/>
                             <Setter Property="ToolTip"
                                     Value="{DynamicResource browser_toolTipStop}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}"
                                              Value="False">
-                                    <Setter Property="Content">
-                                        <Setter.Value>
-                                            <svgc:SvgIcon Width="14"
-                                                          Height="14"
-                                                          UriSource="/Assets/Svgs/reload.svg"/>
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="Content"
+                                            Value="{StaticResource reloadIcon}"/>
                                     <Setter Property="ToolTip"
                                             Value="{DynamicResource browser_toolTipReload}"/>
                                 </DataTrigger>

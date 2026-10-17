@@ -47,15 +47,13 @@
                         Orientation="Horizontal">
                 <Button Margin="0,0,7,0"
                         Command="{Binding AddItemCommand}">
-                    <Button.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <svgc:SvgIcon Width="12"
-                                          Height="12"
-                                          UriSource="/Assets/Svgs/add.svg"/>
-                            <TextBlock Margin="8,0,0,0"
-                                       Text="{DynamicResource favorites_add}"/>
-                        </StackPanel>
-                    </Button.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <svgc:SvgIcon Width="12"
+                                      Height="12"
+                                      UriSource="/Assets/Svgs/add.svg"/>
+                        <TextBlock Margin="8,0,0,0"
+                                   Text="{DynamicResource favorites_add}"/>
+                    </StackPanel>
                 </Button>
             </StackPanel>
 
