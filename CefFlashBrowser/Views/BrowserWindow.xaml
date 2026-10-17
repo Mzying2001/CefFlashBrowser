@@ -587,10 +587,10 @@
         </Grid>
 
         <Popup x:Name="statusPopup"
-               Opened="StatusPopupOpened"
                StaysOpen="True"
                Placement="Absolute"
                AllowsTransparency="True"
+               Opened="StatusPopupOpened"
                MouseEnter="StatusPopupMouseEnter"
                SizeChanged="StatusPopupSizeChanged">
             <Label x:Name="statusPopupContent"
@@ -598,23 +598,23 @@
                    Padding="5,0"
                    Opacity="0.85"
                    MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThirdConverter}}">
+                <Label.Resources>
+                    <DataTemplate x:Key="statusTemplate">
+                        <TextBlock Text="{Binding ElementName=browser, Path=StatusText}" TextTrimming="CharacterEllipsis"/>
+                    </DataTemplate>
+                    <DataTemplate x:Key="loadingTemplate">
+                        <TextBlock>
+                            <Run Text="{DynamicResource browser_loading}"/><Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat={} ({0:p0})}"/>
+                        </TextBlock>
+                    </DataTemplate>
+                </Label.Resources>
                 <Label.Style>
                     <Style TargetType="Label"
                            BasedOn="{StaticResource {x:Type Label}}">
-                        <Setter Property="Content">
-                            <Setter.Value>
-                                <TextBlock>
-                                    <Run Text="{DynamicResource browser_loading}"/><Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat={} ({0:p0})}"/>
-                                </TextBlock>
-                            </Setter.Value>
-                        </Setter>
+                        <Setter Property="ContentTemplate" Value="{StaticResource statusTemplate}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}" Value="False">
-                                <Setter Property="Content">
-                                    <Setter.Value>
-                                        <TextBlock Text="{Binding ElementName=browser, Path=StatusText}" TextTrimming="CharacterEllipsis"/>
-                                    </Setter.Value>
-                                </Setter>
+                            <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}" Value="True">
+                                <Setter Property="ContentTemplate" Value="{StaticResource loadingTemplate}"/>
                             </DataTrigger>
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
