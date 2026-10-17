@@ -30,8 +30,8 @@
                                       Multiplier="0.6666666666666667"/>
 
         <!--ConetxtMenu-->
-        <!--more-->
-        <ContextMenu x:Key="more"
+        <!--Browser actions menu-->
+        <ContextMenu x:Key="browserActionsMenu"
                      VerticalOffset="-8"
                      HorizontalOffset="8">
             <MenuItem Header="{DynamicResource browser_showMainWindow}"
@@ -170,8 +170,8 @@
                       InputGestureText="Ctrl+U"/>
         </ContextMenu>
 
-        <!--blocked swfs-->
-        <ContextMenu x:Key="blockedSwfs"
+        <!--Blocked SWFs menu-->
+        <ContextMenu x:Key="blockedSwfsMenu"
                      VerticalOffset="-8"
                      HorizontalOffset="8">
             <ContextMenu.ItemContainerStyle>
@@ -358,7 +358,7 @@
                 <Button Margin="0,0,10,0"
                         ToolTip="{DynamicResource browser_toolTipBlockedSwfs}">
                     <i:Interaction.Behaviors>
-                        <behaviors:ContextMenuBehavior Menu="{DynamicResource blockedSwfs}"/>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource blockedSwfsMenu}"/>
                     </i:Interaction.Behaviors>
                     <Button.Style>
                         <Style TargetType="Button"
@@ -404,7 +404,7 @@
                 <!--menu button-->
                 <Button ToolTip="{DynamicResource browser_toolTipMore}">
                     <i:Interaction.Behaviors>
-                        <behaviors:ContextMenuBehavior Menu="{DynamicResource more}"/>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource browserActionsMenu}"/>
                     </i:Interaction.Behaviors>
                     <svgc:SvgIcon Width="10"
                                   Height="10"
