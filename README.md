@@ -38,4 +38,10 @@ CefFlashBrowser 是一个自带 Flash Player 插件的浏览器，可以正常�
 
 ## Star 趋势
 
-[![Stargazers over time](https://starchart.cc/Mzying2001/CefFlashBrowser.svg?variant=adaptive)](https://starchart.cc/Mzying2001/CefFlashBrowser)
+<a href="https://star-history.dera.page/Mzying2001/CefFlashBrowser?style=github">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=Mzying2001/CefFlashBrowser&theme=dark&style=github" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=Mzying2001/CefFlashBrowser&style=github" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=Mzying2001/CefFlashBrowser&style=github" />
+ </picture>
+</a>

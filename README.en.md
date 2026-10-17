@@ -38,4 +38,10 @@ With the **SOL Save Manager**, you can export, import, and edit Flash game save 
 
 ## Stargazers over time
 
-[![Stargazers over time](https://starchart.cc/Mzying2001/CefFlashBrowser.svg?variant=adaptive)](https://starchart.cc/Mzying2001/CefFlashBrowser)
+<a href="https://star-history.dera.page/Mzying2001/CefFlashBrowser?style=github">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=Mzying2001/CefFlashBrowser&theme=dark&style=github" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=Mzying2001/CefFlashBrowser&style=github" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=Mzying2001/CefFlashBrowser&style=github" />
+ </picture>
+</a>
