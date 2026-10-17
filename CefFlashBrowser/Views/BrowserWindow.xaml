@@ -30,8 +30,8 @@
                                       Multiplier="0.6666666666666667"/>
 
         <!--ConetxtMenu-->
-        <!--more-->
-        <ContextMenu x:Key="more"
+        <!--Browser actions menu-->
+        <ContextMenu x:Key="browserActionsMenu"
                      VerticalOffset="-8"
                      HorizontalOffset="8">
             <MenuItem Header="{DynamicResource browser_showMainWindow}"
@@ -78,27 +78,23 @@
                                     Padding="0"
                                     ToolTip="{DynamicResource browser_toolTipZoomOut}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
-                                <Button.Content>
-                                    <svgc:SvgIcon Width="10"
-                                                  Height="10"
-                                                  UriSource="/Assets/Svgs/sub.svg">
-                                        <svgc:SvgIcon.LayoutTransform>
-                                            <!--disappear when there is only a horzontal line???-->
-                                            <RotateTransform Angle="0.01"/>
-                                        </svgc:SvgIcon.LayoutTransform>
-                                    </svgc:SvgIcon>
-                                </Button.Content>
+                                <svgc:SvgIcon Width="10"
+                                              Height="10"
+                                              UriSource="/Assets/Svgs/sub.svg">
+                                    <svgc:SvgIcon.LayoutTransform>
+                                        <!--disappear when there is only a horzontal line???-->
+                                        <RotateTransform Angle="0.01"/>
+                                    </svgc:SvgIcon.LayoutTransform>
+                                </svgc:SvgIcon>
                             </Button>
                             <Button Width="30"
                                     Height="30"
                                     Padding="0"
                                     ToolTip="{DynamicResource browser_toolTipZoomIn}"
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
-                                <Button.Content>
-                                    <svgc:SvgIcon Width="10"
-                                                  Height="10"
-                                                  UriSource="/Assets/Svgs/add.svg"/>
-                                </Button.Content>
+                                <svgc:SvgIcon Width="10"
+                                              Height="10"
+                                              UriSource="/Assets/Svgs/add.svg"/>
                             </Button>
                         </hc:ButtonGroup>
                     </Grid>
@@ -170,8 +166,8 @@
                       InputGestureText="Ctrl+U"/>
         </ContextMenu>
 
-        <!--blocked swfs-->
-        <ContextMenu x:Key="blockedSwfs"
+        <!--Blocked SWFs menu-->
+        <ContextMenu x:Key="blockedSwfsMenu"
                      VerticalOffset="-8"
                      HorizontalOffset="8">
             <ContextMenu.ItemContainerStyle>
@@ -302,47 +298,43 @@
                         Orientation="Horizontal">
                 <Button ToolTip="{DynamicResource browser_toolTipBack}"
                         Command="{Binding ElementName=browser, Path=BackCommand}">
-                    <Button.Content>
-                        <svgc:SvgIcon Width="12"
-                                      Height="12"
-                                      UriSource="/Assets/Svgs/back.svg"/>
-                    </Button.Content>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="/Assets/Svgs/back.svg"/>
                 </Button>
 
                 <Button ToolTip="{DynamicResource browser_toolTipForward}"
                         Command="{Binding ElementName=browser, Path=ForwardCommand}">
-                    <Button.Content>
-                        <svgc:SvgIcon Width="12"
-                                      Height="12"
-                                      UriSource="/Assets/Svgs/forward.svg"/>
-                    </Button.Content>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="/Assets/Svgs/forward.svg"/>
                 </Button>
 
                 <Button Margin="10,0,0,0"
                         Command="{Binding ToggleLoadingStateCommand}"
                         CommandParameter="{Binding ElementName=browser}">
+                    <Button.Resources>
+                        <svgc:SvgIcon x:Key="reloadIcon"
+                                      Width="14"
+                                      Height="14"
+                                      UriSource="/Assets/Svgs/reload.svg"/>
+                        <svgc:SvgIcon x:Key="stopIcon"
+                                      Width="12"
+                                      Height="12"
+                                      UriSource="/Assets/Svgs/stop.svg"/>
+                    </Button.Resources>
                     <Button.Style>
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
-                            <Setter Property="Content">
-                                <Setter.Value>
-                                    <svgc:SvgIcon Width="12"
-                                                  Height="12"
-                                                  UriSource="/Assets/Svgs/stop.svg"/>
-                                </Setter.Value>
-                            </Setter>
+                            <Setter Property="Content"
+                                    Value="{StaticResource stopIcon}"/>
                             <Setter Property="ToolTip"
                                     Value="{DynamicResource browser_toolTipStop}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}"
                                              Value="False">
-                                    <Setter Property="Content">
-                                        <Setter.Value>
-                                            <svgc:SvgIcon Width="14"
-                                                          Height="14"
-                                                          UriSource="/Assets/Svgs/reload.svg"/>
-                                        </Setter.Value>
-                                    </Setter>
+                                    <Setter Property="Content"
+                                            Value="{StaticResource reloadIcon}"/>
                                     <Setter Property="ToolTip"
                                             Value="{DynamicResource browser_toolTipReload}"/>
                                 </DataTrigger>
@@ -355,9 +347,11 @@
             <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal">
                 <!--blocked swfs button-->
-                <Button Click="ShowBlockedSwfsButtonClicked"
-                        Margin="0,0,10,0"
+                <Button Margin="0,0,10,0"
                         ToolTip="{DynamicResource browser_toolTipBlockedSwfs}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource blockedSwfsMenu}"/>
+                    </i:Interaction.Behaviors>
                     <Button.Style>
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
@@ -400,8 +394,10 @@
                 </ToggleButton>
 
                 <!--menu button-->
-                <Button Click="MenuButtonClicked"
-                        ToolTip="{DynamicResource browser_toolTipMore}">
+                <Button ToolTip="{DynamicResource browser_toolTipMore}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource browserActionsMenu}"/>
+                    </i:Interaction.Behaviors>
                     <svgc:SvgIcon Width="10"
                                   Height="10"
                                   UriSource="/Assets/Svgs/more.svg"/>
@@ -583,10 +579,10 @@
         </Grid>
 
         <Popup x:Name="statusPopup"
-               Opened="StatusPopupOpened"
                StaysOpen="True"
                Placement="Absolute"
                AllowsTransparency="True"
+               Opened="StatusPopupOpened"
                MouseEnter="StatusPopupMouseEnter"
                SizeChanged="StatusPopupSizeChanged">
             <Label x:Name="statusPopupContent"
@@ -594,23 +590,23 @@
                    Padding="5,0"
                    Opacity="0.85"
                    MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThirdConverter}}">
+                <Label.Resources>
+                    <DataTemplate x:Key="statusTemplate">
+                        <TextBlock Text="{Binding ElementName=browser, Path=StatusText}" TextTrimming="CharacterEllipsis"/>
+                    </DataTemplate>
+                    <DataTemplate x:Key="loadingTemplate">
+                        <TextBlock>
+                            <Run Text="{DynamicResource browser_loading}"/><Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat={} ({0:p0})}"/>
+                        </TextBlock>
+                    </DataTemplate>
+                </Label.Resources>
                 <Label.Style>
                     <Style TargetType="Label"
                            BasedOn="{StaticResource {x:Type Label}}">
-                        <Setter Property="Content">
-                            <Setter.Value>
-                                <TextBlock>
-                                    <Run Text="{DynamicResource browser_loading}"/><Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat={} ({0:p0})}"/>
-                                </TextBlock>
-                            </Setter.Value>
-                        </Setter>
+                        <Setter Property="ContentTemplate" Value="{StaticResource statusTemplate}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}" Value="False">
-                                <Setter Property="Content">
-                                    <Setter.Value>
-                                        <TextBlock Text="{Binding ElementName=browser, Path=StatusText}" TextTrimming="CharacterEllipsis"/>
-                                    </Setter.Value>
-                                </Setter>
+                            <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}" Value="True">
+                                <Setter Property="ContentTemplate" Value="{StaticResource loadingTemplate}"/>
                             </DataTrigger>
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
