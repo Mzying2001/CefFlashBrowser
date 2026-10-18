@@ -119,7 +119,7 @@
                         ToolTip="{DynamicResource solEditor_addItem}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
-                                  UriSource="/Assets/Svgs/add.svg"/>
+                                  UriSource="{StaticResource AddIconUri}"/>
                 </Button>
             </Grid>
         </DataTemplate>
@@ -196,14 +196,14 @@
                         CommandParameter="{Binding}">
                     <svgc:SvgIcon Width="12.5"
                                   Height="12.5"
-                                  UriSource="/Assets/Svgs/export.svg"/>
+                                  UriSource="{StaticResource ExportIconUri}"/>
                 </Button>
                 <Button ToolTip="{DynamicResource common_import}"
                         Command="{Binding DataContext.ImportBinaryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         CommandParameter="{Binding}">
                     <svgc:SvgIcon Width="13"
                                   Height="13"
-                                  UriSource="/Assets/Svgs/import.svg"/>
+                                  UriSource="{StaticResource ImportIconUri}"/>
                 </Button>
             </StackPanel>
         </DataTemplate>

@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:CefFlashBrowser"
+             xmlns:sys="clr-namespace:System;assembly=System"
              xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
              xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
@@ -41,6 +42,25 @@
             <Style TargetType="{x:Type svgc:SvgIcon}">
                 <Setter Property="Fill" Value="{DynamicResource PrimaryTextBrush}"/>
             </Style>
+
+
+            <!--Icon resources-->
+            <sys:Uri x:Key="AddIconUri">/Assets/Svgs/add.svg</sys:Uri>
+            <sys:Uri x:Key="BackIconUri">/Assets/Svgs/back.svg</sys:Uri>
+            <sys:Uri x:Key="DownIconUri">/Assets/Svgs/down.svg</sys:Uri>
+            <sys:Uri x:Key="EditIconUri">/Assets/Svgs/edit.svg</sys:Uri>
+            <sys:Uri x:Key="ExportIconUri">/Assets/Svgs/export.svg</sys:Uri>
+            <sys:Uri x:Key="ForwardIconUri">/Assets/Svgs/forward.svg</sys:Uri>
+            <sys:Uri x:Key="ImportIconUri">/Assets/Svgs/import.svg</sys:Uri>
+            <sys:Uri x:Key="MoreIconUri">/Assets/Svgs/more.svg</sys:Uri>
+            <sys:Uri x:Key="PageIconUri">/Assets/Svgs/page.svg</sys:Uri>
+            <sys:Uri x:Key="ReloadIconUri">/Assets/Svgs/reload.svg</sys:Uri>
+            <sys:Uri x:Key="SearchIconUri">/Assets/Svgs/search.svg</sys:Uri>
+            <sys:Uri x:Key="StopIconUri">/Assets/Svgs/stop.svg</sys:Uri>
+            <sys:Uri x:Key="SubIconUri">/Assets/Svgs/sub.svg</sys:Uri>
+            <sys:Uri x:Key="TrashIconUri">/Assets/Svgs/trash.svg</sys:Uri>
+            <sys:Uri x:Key="UpIconUri">/Assets/Svgs/up.svg</sys:Uri>
+            <sys:Uri x:Key="WarningIconUri">/Assets/Svgs/warning.svg</sys:Uri>
 
 
         </ResourceDictionary>

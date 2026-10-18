@@ -50,7 +50,7 @@
                     <StackPanel Orientation="Horizontal">
                         <svgc:SvgIcon Width="12"
                                       Height="12"
-                                      UriSource="/Assets/Svgs/add.svg"/>
+                                      UriSource="{StaticResource AddIconUri}"/>
                         <TextBlock Margin="8,0,0,0"
                                    Text="{DynamicResource favorites_add}"/>
                     </StackPanel>
@@ -166,14 +166,14 @@
                                     CommandParameter="{Binding SelectedWebsite}">
                                 <svgc:SvgIcon Width="12"
                                               Height="12"
-                                              UriSource="/Assets/Svgs/up.svg"/>
+                                              UriSource="{StaticResource UpIconUri}"/>
                             </Button>
                             <Button ToolTip="{DynamicResource common_moveDown}"
                                     Command="{Binding MoveDownCommand}"
                                     CommandParameter="{Binding SelectedWebsite}">
                                 <svgc:SvgIcon Width="12"
                                               Height="12"
-                                              UriSource="/Assets/Svgs/down.svg"/>
+                                              UriSource="{StaticResource DownIconUri}"/>
                             </Button>
                         </StackPanel>
 
