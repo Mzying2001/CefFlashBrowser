@@ -24,6 +24,16 @@ namespace CefFlashBrowser
         private static bool _dataInitialized;
         private static Mutex _mutex;
 
+        private const string InsufficientDirectoryPermissionsMessage =
+            "CefFlashBrowser 需要对程序运行目录拥有读取、写入和删除文件的权限，无法继续运行。\r\n\r\n" +
+            "程序目录：{0}\r\n\r\n" +
+            "请修改目录权限、将程序移动到有读写权限的位置，或以管理员身份运行。\r\n\r\n" +
+            "------------------------------------------------------------\r\n\r\n" +
+            "CefFlashBrowser requires permission to read, write, and delete files in its application " +
+            "directory and cannot continue.\r\n\r\n" +
+            "Application directory: {0}\r\n\r\n" +
+            "Please change the directory permissions, move the application to a location where it has " +
+            "read and write access, or run it as an administrator.";
 
         [STAThread]
         private static void Main(string[] args)
@@ -37,15 +47,7 @@ namespace CefFlashBrowser
             else
             {
                 MessageBox.Show(
-                    "CefFlashBrowser 需要对程序运行目录拥有读取、写入和删除文件的权限，无法继续运行。\r\n\r\n" +
-                    $"程序目录：{appDirectory}\r\n\r\n" +
-                    "请修改目录权限、将程序移动到有读写权限的位置，或以管理员身份运行。\r\n\r\n" +
-                    "------------------------------------------------------------\r\n\r\n" +
-                    "CefFlashBrowser requires permission to read, write, and delete files in its application " +
-                    "directory and cannot continue.\r\n\r\n" +
-                    $"Application directory: {appDirectory}\r\n\r\n" +
-                    "Please change the directory permissions, move the application to a location where it has " +
-                    "read and write access, or run it as an administrator.",
+                    string.Format(InsufficientDirectoryPermissionsMessage, appDirectory),
                     "CefFlashBrowser - Insufficient Permissions",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
