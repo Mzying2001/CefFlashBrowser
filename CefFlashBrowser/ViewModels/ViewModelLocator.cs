@@ -1,27 +1,48 @@
-﻿using SimpleMvvm.Ioc;
+﻿using CefSharp;
+using SimpleMvvm.Ioc;
+using System;
+using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
 {
     public class ViewModelLocator
     {
-        static ViewModelLocator()
+        private static readonly object _lock = new object();
+
+        public ViewModelLocator()
         {
+            lock (_lock)
+            {
+                Initialize();
+            }
+        }
+
+        private void Initialize()
+        {
+            if (SimpleIoc.Global.IsRegistered<ViewModelLocator>())
+            {
+                throw new InvalidOperationException("ViewModelLocator has already been initialized.");
+            }
+
+            SimpleIoc.Global.Register(this);
+
             SimpleIoc.Global.Register<MainWindowViewModel>();
-            SimpleIoc.Global.Register<BrowserWindowViewModel>(Lifetime.Transient);
             SimpleIoc.Global.Register<SettingsWindowViewModel>();
             SimpleIoc.Global.Register<FavoritesManagerViewModel>();
             SimpleIoc.Global.Register<LanguageSelectorViewModel>();
+
+            SimpleIoc.Global.Register(BrowserWindowViewModelFactory, Lifetime.Transient);
             SimpleIoc.Global.Register<SolSaveManagerViewModel>(Lifetime.Transient);
+        }
+
+        private static BrowserWindowViewModel BrowserWindowViewModelFactory(object[] parameters)
+        {
+            return new BrowserWindowViewModel { Browser = parameters?.FirstOrDefault() as IWebBrowser };
         }
 
         public MainWindowViewModel MainWindowViewModel
         {
             get => SimpleIoc.Global.GetInstance<MainWindowViewModel>();
-        }
-
-        public BrowserWindowViewModel BrowserWindowViewModel
-        {
-            get => SimpleIoc.Global.GetInstance<BrowserWindowViewModel>();
         }
 
         public SettingsWindowViewModel SettingsWindowViewModel

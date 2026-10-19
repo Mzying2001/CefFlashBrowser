@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
+        xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:data="clr-namespace:CefFlashBrowser.Data"
         xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
@@ -21,8 +22,11 @@
         Height="Auto"
         MinWidth="400"
         MinHeight="300"
-        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}"
-        DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
+        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}">
+
+    <d:Window.DataContext>
+        <vm:BrowserWindowViewModel/>
+    </d:Window.DataContext>
 
     <Window.Resources>
         <!--Converters-->

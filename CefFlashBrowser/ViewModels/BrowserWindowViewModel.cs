@@ -34,6 +34,23 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand FindPrevTextCommand { get; set; }
 
 
+        private IWebBrowser _browser;
+        public IWebBrowser Browser
+        {
+            get => _browser;
+            set
+            {
+                if (UpdateValue(ref _browser, value))
+                {
+                    RaisePropertyChanged(nameof(WpfBrowser));
+                }
+            }
+        }
+
+        public WinformCefSharp4WPF.IWpfWebBrowser WpfBrowser
+        {
+            get => Browser as WinformCefSharp4WPF.IWpfWebBrowser;
+        }
 
         private string _address = "about:blank";
         public string Address

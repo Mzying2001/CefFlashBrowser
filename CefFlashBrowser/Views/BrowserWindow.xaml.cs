@@ -5,6 +5,7 @@ using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefSharp;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
@@ -182,6 +183,8 @@ namespace CefFlashBrowser.Views
             browser.DownloadHandler = new BrowserHandlers.DownloadHandler();
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
+
+            ViewModel = SimpleIoc.Global.GetInstance<BrowserWindowViewModel>(browser);
 
             Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
