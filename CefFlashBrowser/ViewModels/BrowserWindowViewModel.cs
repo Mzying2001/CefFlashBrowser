@@ -34,18 +34,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand FindPrevTextCommand { get; set; }
 
 
-        private IWebBrowser _browser;
-        public IWebBrowser Browser
-        {
-            get => _browser;
-            set
-            {
-                if (UpdateValue(ref _browser, value))
-                {
-                    RaisePropertyChanged(nameof(WpfBrowser));
-                }
-            }
-        }
+
+        public IWebBrowser Browser { get; }
 
         public WinformCefSharp4WPF.IWpfWebBrowser WpfBrowser
         {
@@ -348,8 +338,25 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public BrowserWindowViewModel()
+        public BrowserWindowViewModel() : this(null)
         {
+            if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(new System.Windows.DependencyObject()))
+            {
+                throw new InvalidOperationException(
+                    "BrowserWindowViewModel must be constructed with a valid IWebBrowser instance.");
+            }
+        }
+
+        public BrowserWindowViewModel(IWebBrowser browser)
+        {
+            Browser = browser ?? throw new ArgumentNullException(nameof(browser),
+                "BrowserWindowViewModel must be constructed with a valid IWebBrowser instance.");
+
+            if (GlobalData.Settings.SaveZoomLevel)
+            {
+                ZoomLevel = GlobalData.Settings.BrowserZoomLevel;
+            }
+
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
             ViewSourceCommand = new DelegateCommand<string>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
@@ -362,13 +369,8 @@ namespace CefFlashBrowser.ViewModels
             ToggleFullscreenCommand = new DelegateCommand<IWebBrowser>(ToggleFullscreen);
             OpenFindPopupCommand = new DelegateCommand(OpenFindPopup);
             CloseFindPopupCommand = new DelegateCommand(() => ShowFindPopup = false);
-            FindNextTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, true));
-            FindPrevTextCommand = new DelegateCommand<IWebBrowser>(browser => FindText(browser, false));
-
-            if (GlobalData.Settings.SaveZoomLevel)
-            {
-                ZoomLevel = GlobalData.Settings.BrowserZoomLevel;
-            }
+            FindNextTextCommand = new DelegateCommand<IWebBrowser>(b => FindText(b, true));
+            FindPrevTextCommand = new DelegateCommand<IWebBrowser>(b => FindText(b, false));
         }
     }
 }
