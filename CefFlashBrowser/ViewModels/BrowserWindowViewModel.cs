@@ -338,7 +338,7 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public BrowserWindowViewModel() : this(null)
+        public BrowserWindowViewModel() : this(new WinformCefSharp4WPF.ChromiumWebBrowser())
         {
             if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(new System.Windows.DependencyObject()))
             {
