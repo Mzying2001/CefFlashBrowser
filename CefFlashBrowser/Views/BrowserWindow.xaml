@@ -80,7 +80,7 @@
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
                                 <svgc:SvgIcon Width="10"
                                               Height="10"
-                                              UriSource="/Assets/Svgs/sub.svg">
+                                              UriSource="{StaticResource SubIconUri}">
                                     <svgc:SvgIcon.LayoutTransform>
                                         <!--disappear when there is only a horzontal line???-->
                                         <RotateTransform Angle="0.01"/>
@@ -94,7 +94,7 @@
                                     Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
                                 <svgc:SvgIcon Width="10"
                                               Height="10"
-                                              UriSource="/Assets/Svgs/add.svg"/>
+                                              UriSource="{StaticResource AddIconUri}"/>
                             </Button>
                         </hc:ButtonGroup>
                     </Grid>
@@ -300,14 +300,14 @@
                         Command="{Binding ElementName=browser, Path=BackCommand}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
-                                  UriSource="/Assets/Svgs/back.svg"/>
+                                  UriSource="{StaticResource BackIconUri}"/>
                 </Button>
 
                 <Button ToolTip="{DynamicResource browser_toolTipForward}"
                         Command="{Binding ElementName=browser, Path=ForwardCommand}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
-                                  UriSource="/Assets/Svgs/forward.svg"/>
+                                  UriSource="{StaticResource ForwardIconUri}"/>
                 </Button>
 
                 <Button Margin="10,0,0,0"
@@ -317,11 +317,11 @@
                         <svgc:SvgIcon x:Key="reloadIcon"
                                       Width="14"
                                       Height="14"
-                                      UriSource="/Assets/Svgs/reload.svg"/>
+                                      UriSource="{StaticResource ReloadIconUri}"/>
                         <svgc:SvgIcon x:Key="stopIcon"
                                       Width="12"
                                       Height="12"
-                                      UriSource="/Assets/Svgs/stop.svg"/>
+                                      UriSource="{StaticResource StopIconUri}"/>
                     </Button.Resources>
                     <Button.Style>
                         <Style TargetType="Button"
@@ -366,7 +366,7 @@
                     </Button.Style>
                     <svgc:SvgIcon Width="14"
                                   Height="14"
-                                  UriSource="/Assets/Svgs/warning.svg"/>
+                                  UriSource="{StaticResource WarningIconUri}"/>
                 </Button>
 
                 <!--find button-->
@@ -390,7 +390,7 @@
                     </ToggleButton.Style>
                     <svgc:SvgIcon Width="13"
                                   Height="13"
-                                  UriSource="/Assets/Svgs/search.svg"/>
+                                  UriSource="{StaticResource SearchIconUri}"/>
                 </ToggleButton>
 
                 <!--menu button-->
@@ -400,7 +400,7 @@
                     </i:Interaction.Behaviors>
                     <svgc:SvgIcon Width="10"
                                   Height="10"
-                                  UriSource="/Assets/Svgs/more.svg"/>
+                                  UriSource="{StaticResource MoreIconUri}"/>
                 </Button>
 
                 <!--find popup-->
@@ -465,14 +465,14 @@
                                     CommandParameter="{Binding ElementName=browser}">
                                 <svgc:SvgIcon Width="13"
                                               Height="13"
-                                              UriSource="/Assets/Svgs/up.svg"/>
+                                              UriSource="{StaticResource UpIconUri}"/>
                             </Button>
 
                             <Button Command="{Binding FindNextTextCommand}"
                                     CommandParameter="{Binding ElementName=browser}">
                                 <svgc:SvgIcon Width="13"
                                               Height="13"
-                                              UriSource="/Assets/Svgs/down.svg"/>
+                                              UriSource="{StaticResource DownIconUri}"/>
                             </Button>
                         </StackPanel>
                     </hc:Card>
@@ -509,7 +509,7 @@
                                           Width="15"
                                           Height="15"
                                           Margin="8.5,0,5.5,0"
-                                          UriSource="/Assets/Svgs/page.svg"/>
+                                          UriSource="{StaticResource PageIconUri}"/>
                         </ContentControl.Resources>
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
