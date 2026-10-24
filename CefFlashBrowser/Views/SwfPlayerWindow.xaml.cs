@@ -24,9 +24,8 @@ namespace CefFlashBrowser.Views
         private bool _isClosed = false;
         private ChromiumWebBrowser _browserPendingClose;
         private bool _forceClosePending;
-        private string _initialAddress = GlobalData.SwfPlayerPath;
 
-        private BrowserViewModel ViewModel => browserView.ViewModel;
+        private BrowserViewModel ViewModel => browserView?.ViewModel;
 
         public string FileName
         {
@@ -35,8 +34,7 @@ namespace CefFlashBrowser.Views
         }
 
         public static readonly DependencyProperty FileNameProperty =
-            DependencyProperty.Register(nameof(FileName), typeof(string), typeof(SwfPlayerWindow),
-                new PropertyMetadata(string.Empty, OnFileNamePropertyChanged));
+            DependencyProperty.Register(nameof(FileName), typeof(string), typeof(SwfPlayerWindow), new PropertyMetadata(string.Empty, OnFileNamePropertyChanged));
 
         private static void OnFileNamePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -67,18 +65,11 @@ namespace CefFlashBrowser.Views
             InitializeComponent();
             WindowSizeInfo.Apply(GlobalData.Settings.SwfWindowSizeInfo, this);
 
-            // Defer navigation until WPF has created the native owner window.
-            browserView.ViewModel = SimpleIoc.Global.GetInstance<BrowserViewModel>();
+            browserView.ViewModel = SimpleIoc.Global.GetInstance<BrowserViewModel>(GlobalData.SwfPlayerPath);
             ViewModel.Browser.FrameLoadEnd += OnBrowserFrameLoadEnd;
             ViewModel.Browser.DragHandler = new Browser.Handlers.DisableDragHandler();
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
-        }
-
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
-            ViewModel.Address = _initialAddress;
         }
 
         protected override void OnClosing(CancelEventArgs e)

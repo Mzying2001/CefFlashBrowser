@@ -24,11 +24,65 @@ function Test-BrowserBeforeInitialization($Context) {
     Assert-Regression (!$model.Fullscreen) 'commands tolerate missing browsers'
 }
 
+function Test-NavigationBeforeHosting($Context) {
+    $browser = New-Object CefFlashBrowser.WinformCefSharp4WPF.ChromiumWebBrowser
+    $window = New-Object System.Windows.Window
+    $window.Width = 800
+    $window.Height = 600
+    $window.Left = -10000
+    $window.Top = -10000
+    $window.ShowActivated = $false
+    $window.ShowInTaskbar = $false
+    $window.Content = $browser
+
+    $navigationState = @{ FirstAddressLoaded = $false }
+    $loading = [EventHandler[CefSharp.FrameLoadStartEventArgs]]({
+        param($sender, $eventArgs)
+        if ($eventArgs.Frame.IsMain -and $eventArgs.Frame.Url -eq $Context.AuxiliaryAddress) {
+            $navigationState.FirstAddressLoaded = $true
+        }
+    }.GetNewClosure())
+    $browser.add_FrameLoadStart($loading)
+    try {
+        $browser.Address = $Context.AuxiliaryAddress
+        $browser.Load($Context.AuxiliarySecondAddress)
+        Wait-Regression $Context { $browser.IsBrowserInitialized } 'unhosted browser initialization'
+        Assert-Regression ($browser.Address -eq $Context.AuxiliarySecondAddress) 'unhosted browser retains the latest requested address'
+        $nativeAddress = $browser.GetBrowser().MainFrame.Url
+        Assert-Regression ($nativeAddress -ne $Context.AuxiliaryAddress -and $nativeAddress -ne $Context.AuxiliarySecondAddress) 'navigation waits for a native parent even after CEF initialization'
+
+        $window.Show()
+        Wait-Regression $Context { $browser.Title -eq 'Second auxiliary page' } 'hosting starts the pending navigation'
+        Assert-Regression (!$navigationState.FirstAddressLoaded) 'hosting skips superseded navigation requests'
+        Assert-Regression ($browser.Address -eq $Context.AuxiliarySecondAddress) 'pending navigation updates the public address'
+
+        $browser.Load($Context.AuxiliaryAddress)
+        Wait-Regression $Context { $browser.Title -eq 'Auxiliary regression' } 'hosted browser navigates immediately'
+        Assert-Regression $navigationState.FirstAddressLoaded 'hosted navigation reaches the requested page'
+    } finally {
+        $browser.remove_FrameLoadStart($loading)
+        $window.Close()
+        $browser.Dispose()
+    }
+
+    $browser.Load($Context.AuxiliarySecondAddress)
+    Assert-Regression $browser.IsDisposed 'late navigation does not recreate a disposed browser'
+}
+
 function Test-AuxiliaryBeforeShow($Context) {
     foreach ($auxType in $Context.AuxiliaryTypes) {
         foreach ($force in @($false, $true)) {
             $auxWindow = [Activator]::CreateInstance($auxType)
             $auxView = $auxWindow.FindName('browserView')
+            if ($auxWindow -isnot [CefFlashBrowser.Views.SwfPlayerWindow]) {
+                $auxWindow.Address = $Context.AuxiliaryAddress
+                $expectedAddress = if ($auxWindow -is [CefFlashBrowser.Views.ViewSourceWindow]) {
+                    'view-source:' + $Context.AuxiliaryAddress
+                } else {
+                    $Context.AuxiliaryAddress
+                }
+                Assert-Regression ($auxView.ViewModel.Address -eq $expectedAddress) "$($auxType.Name) accepts an address before Show"
+            }
             if ($force) { $auxWindow.ForceCloseWindow() } else { $auxWindow.Close() }
             Assert-AuxiliaryClosed $Context $auxWindow $auxView
         }

@@ -35,6 +35,7 @@ try {
     Initialize-RegressionEnvironment $context
     Test-BrowserBeforeInitialization $context
     Start-RegressionCef $context
+    Test-NavigationBeforeHosting $context
     Test-AuxiliaryBeforeShow $context
     Test-BrowserWindow $context
     Test-BrowserCloseDuringInitialization $context

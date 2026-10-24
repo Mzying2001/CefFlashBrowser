@@ -64,10 +64,7 @@ function New-RegressionWindow($Context, [switch]$SkipWait, [double]$Width = 900,
     $window.Top = -10000
     $window.ShowActivated = $false
     $window.ShowInTaskbar = $false
-    $window.add_SourceInitialized({
-        param($sender, $eventArgs)
-        $sender.ViewModel.CurrentBrowser.Address = 'about:blank'
-    })
+    $window.ViewModel.CurrentBrowser.Address = 'about:blank'
     $window.Show()
     if (!$SkipWait) {
         Wait-Regression $Context {

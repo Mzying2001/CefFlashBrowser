@@ -23,9 +23,8 @@ namespace CefFlashBrowser.Views
         private bool _isClosed = false;
         private ChromiumWebBrowser _browserPendingClose;
         private bool _forceClosePending;
-        private string _initialAddress = "about:blank";
 
-        private BrowserViewModel ViewModel => browserView.ViewModel;
+        private BrowserViewModel ViewModel => browserView?.ViewModel;
 
         public string Address
         {
@@ -34,30 +33,23 @@ namespace CefFlashBrowser.Views
         }
 
         public static readonly DependencyProperty AddressProperty =
-            DependencyProperty.Register(nameof(Address), typeof(string), typeof(PopupWebPage),
-                new PropertyMetadata(null, (d, e) =>
-                {
-                    var window = (PopupWebPage)d;
-                    window._initialAddress = e.NewValue as string;
+            DependencyProperty.Register(nameof(Address), typeof(string), typeof(PopupWebPage), new PropertyMetadata(null, OnAddressPropertyChanged));
 
-                    if (!window._isClosed && new WindowInteropHelper(window).Handle != IntPtr.Zero)
-                        window.ViewModel.Address = window._initialAddress;
-                }));
+        private static void OnAddressPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var window = (PopupWebPage)d;
+
+            if (!window._isClosed && window.ViewModel != null)
+                window.ViewModel.Address = e.NewValue as string;
+        }
 
         public PopupWebPage()
         {
             InitializeComponent();
 
-            // Defer navigation until WPF has created the native owner window.
-            browserView.ViewModel = SimpleIoc.Global.GetInstance<BrowserViewModel>();
+            browserView.ViewModel = SimpleIoc.Global.GetInstance<BrowserViewModel>(Address ?? "about:blank");
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
-        }
-
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
-            ViewModel.Address = _initialAddress;
         }
 
         protected override void OnClosing(CancelEventArgs e)

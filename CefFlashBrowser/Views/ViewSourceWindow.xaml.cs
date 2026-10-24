@@ -4,6 +4,7 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
@@ -22,9 +23,8 @@ namespace CefFlashBrowser.Views
         private bool _isClosed = false;
         private ChromiumWebBrowser _browserPendingClose;
         private bool _forceClosePending;
-        private string _initialAddress = "about:blank";
 
-        private BrowserViewModel ViewModel => browserView.ViewModel;
+        private BrowserViewModel ViewModel => browserView?.ViewModel;
 
         public string Address
         {
@@ -33,30 +33,29 @@ namespace CefFlashBrowser.Views
         }
 
         public static readonly DependencyProperty AddressProperty =
-            DependencyProperty.Register(nameof(Address), typeof(string), typeof(ViewSourceWindow),
-                new PropertyMetadata(null, (d, e) =>
-                {
-                    var window = (ViewSourceWindow)d;
-                    window._initialAddress = $"view-source:{e.NewValue}";
-                    if (!window._isClosed && new WindowInteropHelper(window).Handle != IntPtr.Zero)
-                        window.ViewModel.Address = window._initialAddress;
-                }));
+            DependencyProperty.Register(nameof(Address), typeof(string), typeof(ViewSourceWindow), new PropertyMetadata(null, OnAddressPropertyChanged));
+
+        private static void OnAddressPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var window = (ViewSourceWindow)d;
+
+            if (!window._isClosed && window.ViewModel != null)
+                window.ViewModel.Address = GetViewSourceAddress(e.NewValue as string);
+        }
 
         public ViewSourceWindow()
         {
             InitializeComponent();
 
-            // Defer navigation until WPF has created the native owner window.
-            browserView.ViewModel = new BrowserViewModel { Address = null };
+            browserView.ViewModel = SimpleIoc.Global.GetInstance<BrowserViewModel>(GetViewSourceAddress(Address));
             ViewModel.Browser.DragHandler = new Browser.Handlers.DisableDragHandler();
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
         }
 
-        protected override void OnSourceInitialized(EventArgs e)
+        private static string GetViewSourceAddress(string address)
         {
-            base.OnSourceInitialized(e);
-            ViewModel.Address = _initialAddress;
+            return address == null ? "about:blank" : $"view-source:{address}";
         }
 
         protected override void OnClosing(CancelEventArgs e)
