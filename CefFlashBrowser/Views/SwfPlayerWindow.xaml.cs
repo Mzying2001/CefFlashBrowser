@@ -1,14 +1,16 @@
 using CefFlashBrowser.Data;
-using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
+using CefFlashBrowser.ViewModels;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
 using System.Windows;
-using BrowserHandlers = CefFlashBrowser.Browser.Handlers;
+using System.Windows.Interop;
+using System.Windows.Threading;
 
 namespace CefFlashBrowser.Views
 {
@@ -17,108 +19,154 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class SwfPlayerWindow : Window
     {
-        private class SwfPlayerLifeSpanHandler : LifeSpanHandler
-        {
-            private readonly SwfPlayerWindow window;
-
-            public SwfPlayerLifeSpanHandler(SwfPlayerWindow window)
-            {
-                this.window = window;
-            }
-
-            public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
-            {
-                if (!window._isClosed
-                    && (browser.IsDisposed || !browser.IsPopup))
-                {
-                    window.Dispatcher.Invoke(delegate
-                    {
-                        window._doClose = true;
-                        window.Close();
-                    });
-                }
-                return false;
-            }
-
-            public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
-            {
-                Application.Current.Dispatcher.Invoke(() => WindowManager.ShowBrowser(targetUrl));
-                newBrowser = null;
-                return true;
-            }
-        }
-
         private bool _doClose = false;
         private bool _isClosed = false;
+        private ChromiumWebBrowser _browserPendingClose;
+        private bool _forceClosePending;
+        private string _initialAddress = GlobalData.SwfPlayerPath;
 
+        private BrowserViewModel ViewModel => browserView.ViewModel;
 
         public string FileName
         {
-            get { return (string)GetValue(FileNameProperty); }
-            set { SetValue(FileNameProperty, value); }
+            get => (string)GetValue(FileNameProperty);
+            set => SetValue(FileNameProperty, value);
         }
 
-        // Using a DependencyProperty as the backing store for FileName.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty FileNameProperty =
-            DependencyProperty.Register("FileName", typeof(string), typeof(SwfPlayerWindow), new PropertyMetadata(string.Empty, OnFileNamePropertyChanged));
+            DependencyProperty.Register(nameof(FileName), typeof(string), typeof(SwfPlayerWindow),
+                new PropertyMetadata(string.Empty, OnFileNamePropertyChanged));
 
         private static void OnFileNamePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is SwfPlayerWindow swfPlayerWindow)
+            var window = (SwfPlayerWindow)d;
+            if (!window._isClosed && window.browserView.IsLoaded
+                && window.ViewModel.Browser.CanExecuteJavascriptInMainFrame)
             {
-                if (swfPlayerWindow.browser.IsLoaded)
-                    swfPlayerWindow.LoadSwf(e.NewValue as string);
+                window.LoadSwf(e.NewValue as string);
             }
         }
-
 
         public SwfPlayerWindow()
         {
             InitializeComponent();
             WindowSizeInfo.Apply(GlobalData.Settings.SwfWindowSizeInfo, this);
 
-            browser.DragHandler = new BrowserHandlers.DisableDragHandler();
-            browser.MenuHandler = new BrowserHandlers.ContextMenuHandler();
-            browser.JsDialogHandler = new BrowserHandlers.JsDialogHandler();
-            browser.DownloadHandler = new BrowserHandlers.DownloadHandler();
-            browser.LifeSpanHandler = new SwfPlayerLifeSpanHandler(this);
-
-            browser.Address = GlobalData.SwfPlayerPath;
+            // Defer navigation until WPF has created the native owner window.
+            browserView.ViewModel = new BrowserViewModel { Address = null };
+            ViewModel.Browser.FrameLoadEnd += OnBrowserFrameLoadEnd;
+            ViewModel.Browser.DragHandler = new Browser.Handlers.DisableDragHandler();
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
-            Closed += delegate { Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler); };
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            ViewModel.Address = _initialAddress;
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (browser.IsDisposed || _doClose)
+            var browser = ViewModel?.Browser;
+
+            if (_doClose || browser == null || browser.IsDisposed)
             {
                 GlobalData.Settings.SwfWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
             }
+            else if (browser is ChromiumWebBrowser wpfBrowser && !browser.IsBrowserInitialized)
+            {
+                DeferCloseUntilBrowserInitialized(wpfBrowser);
+                e.Cancel = true;
+            }
             else
             {
-                bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
-                browser.GetBrowser().CloseBrowser(forceClose);
-                e.Cancel = true;
+                var cefBrowser = browser.GetBrowser();
+                if (cefBrowser != null)
+                {
+                    cefBrowser.CloseBrowser(_forceClosePending || GlobalData.Settings.DisableOnBeforeUnloadDialog);
+                    e.Cancel = true;
+                }
+                else
+                {
+                    _doClose = true;
+                }
             }
             base.OnClosing(e);
         }
 
+        private void DeferCloseUntilBrowserInitialized(ChromiumWebBrowser browser)
+        {
+            if (_browserPendingClose == browser)
+                return;
+
+            _browserPendingClose = browser;
+            browser.IsBrowserInitializedChanged += BrowserInitializedForClose;
+        }
+
+        private void BrowserInitializedForClose(object sender, EventArgs e)
+        {
+            var browser = _browserPendingClose;
+
+            if (browser == null || !browser.IsBrowserInitialized)
+                return;
+
+            browser.IsBrowserInitializedChanged -= BrowserInitializedForClose;
+            _browserPendingClose = null;
+
+            // The initialized notification can reach WPF before CEF has returned
+            // from OnAfterCreated. Wait for that callback before destroying its HWND.
+            InvokeAfterCefCallback(() =>
+            {
+                if (!_isClosed)
+                {
+                    if (_forceClosePending)
+                    {
+                        browser.GetBrowser()?.CloseBrowser(true);
+                    }
+                    else
+                    {
+                        Close();
+                    }
+                }
+            });
+        }
+
+        private void InvokeAfterCefCallback(Action action)
+        {
+            // Let CEF's current callback return before running the action on WPF.
+            Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(action));
+        }
+
         protected override void OnClosed(EventArgs e)
         {
-            base.OnClosed(e);
             _isClosed = true;
+
+            if (_browserPendingClose != null)
+            {
+                _browserPendingClose.IsBrowserInitializedChanged -= BrowserInitializedForClose;
+                _browserPendingClose = null;
+            }
+
+            ViewModel.Browser.FrameLoadEnd -= OnBrowserFrameLoadEnd;
+
+            Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+            base.OnClosed(e);
         }
 
         private void LoadSwf(string fileName)
         {
-            try { browser.ExecuteScriptAsync("loadSwf", fileName); }
+            try { ViewModel.Browser.ExecuteScriptAsync("loadSwf", fileName); }
             catch (Exception e) { LogHelper.LogError($"Failed to load swf file: {fileName}", e); }
         }
 
         private void OnBrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
-            LoadSwf(FileName);
+            if (!_isClosed && browserView.IsLoaded && e.Frame.IsMain
+                && string.Equals(e.Url, new Uri(GlobalData.SwfPlayerPath).AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+            {
+                LoadSwf(FileName);
+            }
         }
 
         private void CloseBrowserHandler(object msg)
@@ -128,13 +176,104 @@ namespace CefFlashBrowser.Views
 
         public void ForceCloseWindow()
         {
-            if (!browser.IsDisposed)
+            if (_isClosed || _forceClosePending)
+                return;
+
+            var browser = ViewModel?.Browser;
+            if (browser != null && !browser.IsDisposed)
             {
-                browser.LifeSpanHandler = null;
-                browser.CloseBrowser(true);
+                // Keep the native parent alive until asynchronous CEF creation finishes.
+                // Pump WPF so a caller can safely shut CEF down as soon as this returns.
+                _forceClosePending = true;
+
+                var frame = new DispatcherFrame();
+
+                EventHandler closed = (s, e) => frame.Continue = false;
+                Closed += closed;
+
+                try
+                {
+                    if (browser is ChromiumWebBrowser wpfBrowser && !browser.IsBrowserInitialized)
+                    {
+                        DeferCloseUntilBrowserInitialized(wpfBrowser);
+                    }
+                    else
+                    {
+                        InvokeAfterCefCallback(() =>
+                        {
+                            if (!_isClosed)
+                            {
+                                browser.GetBrowser()?.CloseBrowser(true);
+                            }
+                        });
+                    }
+
+                    Dispatcher.PushFrame(frame);
+                }
+                finally
+                {
+                    Closed -= closed;
+                    _forceClosePending = false;
+                }
+                return;
             }
+
             _doClose = true;
             Close();
+        }
+
+        private void DevToolsOpened(object sender, RoutedEventArgs e)
+        {
+            if (!_isClosed && GlobalData.Settings.EnableIntegratedDevTools)
+            {
+                Activate();
+            }
+        }
+
+        private void DevToolsClosed(object sender, RoutedEventArgs e)
+        {
+            if (!_isClosed)
+            {
+                Activate();
+            }
+        }
+
+        private void BrowserDoClose(object sender, BrowserDoCloseEventArgs e)
+        {
+            if (!_isClosed && !e.IsPopup && !e.IsDevTools)
+            {
+                _doClose = true;
+
+                // Return from CEF's DoClose callback before destroying its parent HWND.
+                InvokeAfterCefCallback(() =>
+                {
+                    if (!_isClosed) Close();
+                });
+            }
+        }
+
+        private void BrowserAfterCreated(object sender, BrowserAfterCreatedEventArgs e)
+        {
+            if (!_isClosed && HwndHelper.IsDevToolsWindow(e.HostHandle))
+            {
+                HwndHelper.SetOwnerWindow(e.HostHandle, new WindowInteropHelper(this).Handle);
+            }
+        }
+
+        private void BrowserPopup(object sender, BrowserPopupEventArgs e)
+        {
+            if (!_isClosed)
+            {
+                WindowManager.ShowPopupWebPage(e.TargetUrl, e.PopupSizeInfo);
+            }
+        }
+
+        private void BrowserNewPage(object sender, BrowserNewPageEventArgs e)
+        {
+            if (!_isClosed)
+            {
+                WindowManager.ShowBrowser(e.TargetUrl);
+            }
         }
     }
 }

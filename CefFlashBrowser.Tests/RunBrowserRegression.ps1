@@ -98,6 +98,35 @@ public sealed class DisposedBrowserProxy : RealProxy
     }
 }
 
+public sealed class RegressionPopupFeaturesProxy : RealProxy
+{
+    public RegressionPopupFeaturesProxy() : base(typeof(IPopupFeatures)) { }
+
+    public override IMessage Invoke(IMessage message)
+    {
+        var call = (IMethodCallMessage)message;
+        object result;
+        switch (call.MethodName)
+        {
+            case "GetType": result = typeof(IPopupFeatures); break;
+            case "ToString": result = "Regression popup features"; break;
+            case "GetHashCode": result = GetHashCode(); break;
+            case "Equals": result = ReferenceEquals(GetTransparentProxy(), call.Args[0]); break;
+            case "get_X": result = 20; break;
+            case "get_Y": result = 30; break;
+            case "get_Width": result = 500; break;
+            case "get_Height": result = 360; break;
+            case "get_XSet":
+            case "get_YSet":
+            case "get_WidthSet":
+            case "get_HeightSet": result = 1; break;
+            default:
+                return new ReturnMessage(new InvalidOperationException(call.MethodName), call);
+        }
+        return new ReturnMessage(result, null, 0, call.LogicalCallContext, call);
+    }
+}
+
 public sealed class RegressionJsDialogHandler : CefFlashBrowser.FlashBrowser.Handlers.JsDialogHandler
 {
     public volatile bool Accept;
@@ -126,6 +155,10 @@ $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
 $globalDataType.GetField('<Settings>k__BackingField', $privateStatic).SetValue($null, [CefFlashBrowser.Models.Settings]::Default)
 $globalDataType.GetField('<Favorites>k__BackingField', $privateStatic).SetValue($null,
     (New-Object 'System.Collections.ObjectModel.ObservableCollection[CefFlashBrowser.Models.Website]'))
+# PowerShell has a different application base directory than the deployed executable.
+$globalDataType.GetField('<SwfPlayerPath>k__BackingField', $privateStatic).SetValue(
+    $null, (Join-Path $applicationPath 'Assets\SwfPlayer\swfplayer.html'))
+[CefFlashBrowser.Data.GlobalData]::IsStartWithoutMainWindow = $true
 $locator = New-Object CefFlashBrowser.ViewModels.ViewModelLocator
 $logger = New-Object CefFlashBrowser.Log.FileLogger((Join-Path $temporaryPath 'app.log'))
 $registerInstance = [SimpleMvvm.Ioc.SimpleIoc].GetMethods() | Where-Object {
@@ -235,6 +268,245 @@ function Invoke-ViewCallback($View, [string]$Method, [object[]]$Arguments) {
     [void]$View.GetType().GetMethod($Method, $privateInstance).Invoke($View, $Arguments)
 }
 
+$auxiliaryTypes = @(
+    [CefFlashBrowser.Views.PopupWebPage],
+    [CefFlashBrowser.Views.SwfPlayerWindow],
+    [CefFlashBrowser.Views.ViewSourceWindow]
+)
+$auxiliaryFile = Join-Path $temporaryPath 'auxiliary.html'
+$auxiliarySecondFile = Join-Path $temporaryPath 'auxiliary-second.html'
+[IO.File]::WriteAllText($auxiliaryFile, '<title>Auxiliary regression</title><p>auxiliary-source-token</p>')
+[IO.File]::WriteAllText($auxiliarySecondFile, '<title>Second auxiliary page</title><p>second-source-token</p>')
+$auxiliaryAddress = ([Uri]$auxiliaryFile).AbsoluteUri
+$auxiliarySecondAddress = ([Uri]$auxiliarySecondFile).AbsoluteUri
+
+function New-AuxiliaryWindow([Type]$WindowType, [switch]$WaitForLoad) {
+    $auxWindow = [Activator]::CreateInstance($WindowType)
+    $auxWindow.Width = 900
+    $auxWindow.Height = 600
+    $auxWindow.Left = -10000
+    $auxWindow.Top = -10000
+    $auxWindow.ShowActivated = $false
+    $auxWindow.ShowInTaskbar = $false
+    if ($auxWindow -is [CefFlashBrowser.Views.SwfPlayerWindow]) {
+        $auxWindow.FileName = 'first.swf'
+    } else {
+        $auxWindow.Address = $auxiliaryAddress
+    }
+
+    $auxView = $auxWindow.FindName('browserView')
+    $loadState = @{ MainFrameLoaded = $false }
+    $loaded = [EventHandler[CefSharp.FrameLoadEndEventArgs]]({
+        param($sender, $eventArgs)
+        if ($eventArgs.Frame.IsMain) { $loadState.MainFrameLoaded = $true }
+    }.GetNewClosure())
+    $auxView.ViewModel.Browser.add_FrameLoadEnd($loaded)
+    try {
+        $auxWindow.Show()
+        if ($WaitForLoad) {
+            Wait-Regression { $loadState.MainFrameLoaded } "$($WindowType.Name) main frame load"
+        }
+    } finally {
+        $auxView.ViewModel.Browser.remove_FrameLoadEnd($loaded)
+    }
+    return $auxWindow
+}
+
+function Assert-AuxiliaryClosed($AuxWindow, $AuxView) {
+    Wait-Regression { $AuxView.ViewModel.Browser.IsDisposed } "$($AuxWindow.GetType().Name) completes browser cleanup"
+    Assert-Regression (!$AuxWindow.IsVisible -and $AuxView.ViewModel.Browser.IsDisposed) "$($AuxWindow.GetType().Name) releases its browser"
+    Assert-Regression ($AuxView.GetType().GetField('_isClosed', $privateInstance).GetValue($AuxView)) "$($AuxWindow.GetType().Name) cleans up BrowserView"
+    $AuxWindow.ForceCloseWindow()
+}
+
+function Get-RegressionSource($Browser) {
+    $sourceTask = $Browser.GetBrowser().MainFrame.GetSourceAsync()
+    Wait-Regression { $sourceTask.IsCompleted } 'page source result'
+    return $sourceTask.GetAwaiter().GetResult()
+}
+
+function Get-RegressionText($Browser) {
+    $textTask = $Browser.GetBrowser().MainFrame.GetTextAsync()
+    Wait-Regression { $textTask.IsCompleted } 'page text result'
+    return $textTask.GetAwaiter().GetResult()
+}
+
+function Test-AuxiliaryRouting($AuxWindow, $AuxView) {
+    $auxBrowser = $AuxView.ViewModel.Browser
+    $originalAddress = $AuxView.ViewModel.Address
+    $features = (New-Object RegressionPopupFeaturesProxy).GetTransparentProxy()
+    foreach ($behavior in @(
+        [CefFlashBrowser.Models.NewPageBehavior]::NewWindow,
+        [CefFlashBrowser.Models.NewPageBehavior]::OriginalWindow
+    )) {
+        [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior = $behavior
+        foreach ($isPopup in @($false, $true)) {
+            $beforeWindows = @($application.Windows)
+            $disposition = if ($isPopup) {
+                [CefSharp.WindowOpenDisposition]::NewPopup
+            } else {
+                [CefSharp.WindowOpenDisposition]::NewForegroundTab
+            }
+            Invoke-ViewCallback $AuxView 'OnBrowserBeforePopup' @(
+                $auxBrowser, $auxBrowser.GetBrowser(), $null, $auxiliaryAddress, '',
+                $disposition, $true, $features, $null, $null, $false)
+            Wait-Regression { @($application.Windows | Where-Object { !$beforeWindows.Contains($_) }).Count -gt 0 } 'routed new window'
+            $childWindow = $application.Windows | Where-Object { !$beforeWindows.Contains($_) } | Select-Object -First 1
+            if ($isPopup) {
+                Assert-Regression ($childWindow -is [CefFlashBrowser.Views.PopupWebPage]) "$($AuxWindow.GetType().Name) routes popups to PopupWebPage ($behavior)"
+                Assert-Regression ($childWindow.Left -eq 20 -and $childWindow.Top -eq 30 -and $childWindow.Width -eq 500 -and $childWindow.Height -eq 360) 'popup request position and size are applied'
+            } else {
+                Assert-Regression ($childWindow -is [CefFlashBrowser.Views.BrowserWindow]) "$($AuxWindow.GetType().Name) always opens ordinary pages in BrowserWindow ($behavior)"
+            }
+            Assert-Regression ($AuxView.ViewModel.Address -eq $originalAddress) 'opening a new page preserves the originating page'
+            $childWindow.ForceCloseWindow()
+        }
+    }
+}
+
+function Open-RegressionDevTools($View) {
+    $toolsState = @{ Browser = $null }
+    $created = [CefFlashBrowser.Views.BrowserAfterCreatedEventHandler]({
+        param($sender, $eventArgs)
+        if ([CefFlashBrowser.Utils.HwndHelper]::IsDevToolsWindow($eventArgs.HostHandle)) {
+            $toolsState.Browser = $eventArgs.Browser
+        }
+    }.GetNewClosure())
+    $View.add_BrowserAfterCreated($created)
+    try {
+        $View.ViewModel.ToggleDevTools()
+        Wait-Regression { $null -ne $toolsState.Browser } 'DevTools browser created'
+        Wait-Regression {
+            $evaluation = $toolsState.Browser.MainFrame.EvaluateScriptAsync(
+                "document.readyState === 'complete' && !!document.querySelector('.root-view')",
+                'about:blank', 1, [TimeSpan]::FromSeconds(3))
+            Wait-Regression { $evaluation.IsCompleted } 'DevTools frontend evaluation'
+            $response = $evaluation.GetAwaiter().GetResult()
+            $response.Success -and $response.Result -eq $true
+        } 'DevTools frontend ready'
+    } finally {
+        $View.remove_BrowserAfterCreated($created)
+    }
+}
+
+function Set-RegressionBeforeUnload($Browser) {
+    $dialogHandler = New-Object RegressionJsDialogHandler
+    $Browser.JsDialogHandler = $dialogHandler
+    [CefFlashBrowser.Data.GlobalData]::Settings.DisableOnBeforeUnloadDialog = $false
+    [void](Invoke-JavaScript $Browser "window.onbeforeunload=function(e){e.preventDefault();e.returnValue='leave';return 'leave';};")
+    $hostBrowser = $Browser.GetBrowser().GetHost()
+    $mouse = New-Object CefSharp.MouseEvent(40, 40, [CefSharp.CefEventFlags]::None)
+    $hostBrowser.SendMouseClickEvent($mouse, [CefSharp.MouseButtonType]::Left, $false, 1)
+    $hostBrowser.SendMouseClickEvent($mouse, [CefSharp.MouseButtonType]::Left, $true, 1)
+    [void](Invoke-JavaScript $Browser 'document.hasFocus()')
+    return $dialogHandler
+}
+
+function Test-AuxiliaryWindows {
+    foreach ($auxType in $auxiliaryTypes) {
+        $auxWindow = New-AuxiliaryWindow $auxType -WaitForLoad
+        $auxView = $auxWindow.FindName('browserView')
+        $auxBrowser = $auxView.ViewModel.Browser
+        Assert-Regression ($auxView -is [CefFlashBrowser.Views.BrowserView] -and $auxBrowser.IsBrowserInitialized) "$($auxType.Name) hosts BrowserView with its own initialized model"
+        $expectedTitle = $auxView.ViewModel.Title
+        if ($null -eq $expectedTitle) { $expectedTitle = 'view-source' }
+        Assert-Regression ($auxWindow.Title -eq $expectedTitle) "$($auxType.Name) binds its title to BrowserViewModel"
+        $closeBinding = $auxWindow.InputBindings | Where-Object {
+            $_.Key -eq [System.Windows.Input.Key]::W -and
+            $_.Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
+        }
+        Assert-Regression ([object]::ReferenceEquals($closeBinding.Command, $auxBrowser.CloseBrowserCommand)) "$($auxType.Name) binds Ctrl+W to its hosted browser"
+        if ($auxWindow -is [CefFlashBrowser.Views.PopupWebPage]) {
+            Assert-Regression ($auxView.ViewModel.Address -eq $auxiliaryAddress) 'popup Address initializes BrowserViewModel'
+            $auxWindow.Address = $auxiliarySecondAddress
+            Wait-Regression { $auxWindow.Title -eq 'Second auxiliary page' } 'popup Address updates navigate the hosted browser'
+        } elseif ($auxWindow -is [CefFlashBrowser.Views.SwfPlayerWindow]) {
+            Wait-Regression { $auxWindow.Title -eq 'first.swf' } 'initial SWF filename reaches loadSwf'
+            Assert-Regression ((Invoke-JavaScript $auxBrowser "document.getElementById('flash-player').getAttribute('src')") -eq 'first.swf') 'initial SWF embed source is set'
+            $auxWindow.FileName = 'second.swf'
+            Wait-Regression { $auxWindow.Title -eq 'second.swf' } 'SWF FileName updates reach loadSwf'
+            Assert-Regression ((Invoke-JavaScript $auxBrowser "document.getElementById('flash-player').getAttribute('src')") -eq 'second.swf') 'changed SWF embed source is set'
+            $auxWindow.Width = 910
+            $auxWindow.Height = 610
+        } else {
+            # CEF reports source-view addresses without their prefix after navigation.
+            Assert-Regression ($auxWindow.Address -eq $auxiliaryAddress) 'source window retains its requested URL'
+            Assert-Regression ((Get-RegressionText $auxBrowser).Contains('<title>Auxiliary regression</title>')) 'source window renders source markup'
+            Assert-Regression ((Get-RegressionSource $auxBrowser).Contains('auxiliary-source-token')) 'source window displays the requested source'
+            $auxWindow.Address = $auxiliarySecondAddress
+            Wait-Regression { (Get-RegressionSource $auxBrowser).Contains('second-source-token') } 'source Address updates navigate to the requested source'
+            Assert-Regression ((Get-RegressionText $auxBrowser).Contains('<title>Second auxiliary page</title>')) 'updated source address continues to render markup'
+        }
+        if ($auxWindow -isnot [CefFlashBrowser.Views.PopupWebPage]) {
+            Assert-Regression ($auxBrowser.DragHandler -is [CefFlashBrowser.Browser.Handlers.DisableDragHandler]) "$($auxType.Name) keeps drag disabled"
+        }
+
+        Test-AuxiliaryRouting $auxWindow $auxView
+        [CefFlashBrowser.Data.GlobalData]::Settings.EnableIntegratedDevTools = $false
+        Open-RegressionDevTools $auxView
+        Wait-Regression { [CefFlashBrowser.Utils.HwndHelper]::FindNotIntegratedDevTools($auxBrowser) -ne [IntPtr]::Zero } "$($auxType.Name) detached DevTools opens"
+        $toolsHandle = [CefFlashBrowser.Utils.HwndHelper]::FindNotIntegratedDevTools($auxBrowser)
+        $ownerHandle = (New-Object System.Windows.Interop.WindowInteropHelper($auxWindow)).Handle
+        Assert-Regression ([CefFlashBrowser.Utils.HwndHelper]::GetOwnerWindow($toolsHandle) -eq $ownerHandle) "$($auxType.Name) owns its detached DevTools"
+        $auxView.ViewModel.ToggleDevTools()
+        Wait-Regression { [CefFlashBrowser.Utils.HwndHelper]::FindNotIntegratedDevTools($auxBrowser) -eq [IntPtr]::Zero } 'detached DevTools closes'
+        Assert-Regression $auxWindow.IsVisible 'closing detached DevTools keeps its auxiliary window open'
+
+        [CefFlashBrowser.Data.GlobalData]::Settings.EnableIntegratedDevTools = $true
+        [CefFlashBrowser.Data.GlobalData]::Settings.IntegratedDevToolsWidth = 340
+        Open-RegressionDevTools $auxView
+        Wait-Regression { $auxView.ViewModel.IntegratedDevToolsHandle -ne [IntPtr]::Zero } "$($auxType.Name) integrated DevTools opens"
+        Assert-Regression ($auxView.FindName('devtoolsColumn').Width.Value -eq 340) 'auxiliary DevTools restores its saved width'
+        $auxView.FindName('devtoolsColumn').Width = New-Object System.Windows.GridLength(350)
+        $auxView.ViewModel.ToggleDevTools()
+        Wait-Regression { $auxView.ViewModel.IntegratedDevToolsHandle -eq [IntPtr]::Zero } 'integrated DevTools closes'
+        Assert-Regression ($auxWindow.IsVisible -and [CefFlashBrowser.Data.GlobalData]::Settings.IntegratedDevToolsWidth -eq 350) 'auxiliary DevTools closes independently and saves its width'
+
+        # Use an HTML document to exercise the source window's forced-close policy too.
+        $auxView.ViewModel.Address = $auxiliaryAddress
+        Wait-Regression { $auxWindow.Title -eq 'Auxiliary regression' -and $auxBrowser.CanExecuteJavascriptInMainFrame } 'beforeunload fixture ready'
+        $dialogHandler = Set-RegressionBeforeUnload $auxBrowser
+        $auxWindow.Close()
+        if ($auxWindow -is [CefFlashBrowser.Views.ViewSourceWindow]) {
+            Wait-Regression { !$auxWindow.IsVisible } 'source window force closes normally'
+            Assert-Regression ($dialogHandler.Count -eq 0) 'source window skips beforeunload confirmation'
+        } else {
+            Wait-Regression { $dialogHandler.Count -gt 0 } "$($auxType.Name) requests beforeunload confirmation"
+            Assert-Regression $auxWindow.IsVisible "$($auxType.Name) stays open when beforeunload is cancelled"
+            $dialogHandler.Accept = $true
+            Invoke-BrowserCommand $closeBinding.Command ([bool]$closeBinding.CommandParameter)
+            Wait-Regression { !$auxWindow.IsVisible } "$($auxType.Name) Ctrl+W closes after confirmation"
+        }
+        Assert-AuxiliaryClosed $auxWindow $auxView
+        if ($auxWindow -is [CefFlashBrowser.Views.SwfPlayerWindow]) {
+            $size = [CefFlashBrowser.Data.GlobalData]::Settings.SwfWindowSizeInfo
+            Assert-Regression ($size.Width -eq 910 -and $size.Height -eq 610) 'SWF window dimensions are preserved'
+        }
+        Invoke-ViewCallback $auxView 'OnBrowserDoClose' @($auxBrowser, $disposedBrowser)
+
+        $auxWindow = New-AuxiliaryWindow $auxType -WaitForLoad
+        $auxView = $auxWindow.FindName('browserView')
+        $auxView.ViewModel.Address = $auxiliarySecondAddress
+        Wait-Regression { $auxWindow.Title -eq 'Second auxiliary page' -and $auxView.ViewModel.Browser.CanExecuteJavascriptInMainFrame } 'force-close beforeunload fixture ready'
+        $forceDialogHandler = Set-RegressionBeforeUnload $auxView.ViewModel.Browser
+        Open-RegressionDevTools $auxView
+        Wait-Regression { $auxView.ViewModel.IntegratedDevToolsHandle -ne [IntPtr]::Zero } 'DevTools opens before auxiliary force close'
+        $auxView.FindName('devtoolsColumn').Width = New-Object System.Windows.GridLength(365)
+        $auxWindow.ForceCloseWindow()
+        Assert-AuxiliaryClosed $auxWindow $auxView
+        Assert-Regression ([CefFlashBrowser.Data.GlobalData]::Settings.IntegratedDevToolsWidth -eq 365) 'auxiliary force close saves DevTools width'
+        Assert-Regression ($forceDialogHandler.Count -eq 0) 'force close skips beforeunload confirmation'
+
+        foreach ($force in @($false, $true) * 2) {
+            $auxWindow = New-AuxiliaryWindow $auxType
+            $auxView = $auxWindow.FindName('browserView')
+            if ($force) { $auxWindow.ForceCloseWindow() } else { $auxWindow.Close() }
+            Wait-Regression { !$auxWindow.IsVisible } "$($auxType.Name) closes during initialization (force=$force)"
+            Assert-AuxiliaryClosed $auxWindow $auxView
+        }
+    }
+}
+
 $cefStarted = $false
 try {
     $window = New-Object CefFlashBrowser.Views.BrowserWindow
@@ -268,6 +540,16 @@ try {
     if (!$cefStarted) {
         throw 'CEF initialization failed'
     }
+
+    foreach ($auxType in $auxiliaryTypes) {
+        foreach ($force in @($false, $true)) {
+            $auxWindow = [Activator]::CreateInstance($auxType)
+            $auxView = $auxWindow.FindName('browserView')
+            if ($force) { $auxWindow.ForceCloseWindow() } else { $auxWindow.Close() }
+            Assert-AuxiliaryClosed $auxWindow $auxView
+        }
+    }
+
 
     $window = New-RegressionWindow
     $browser = $window.ViewModel.CurrentBrowser.Browser
@@ -314,7 +596,7 @@ try {
 
     [CefFlashBrowser.Data.GlobalData]::Settings.EnableIntegratedDevTools = $true
     [CefFlashBrowser.Data.GlobalData]::Settings.IntegratedDevToolsWidth = 340
-    $view.ViewModel.ToggleDevTools()
+    Open-RegressionDevTools $view
     Wait-Regression { $view.ViewModel.IntegratedDevToolsHandle -ne [IntPtr]::Zero } 'integrated DevTools opens'
     $devtoolsColumn = $view.FindName('devtoolsColumn')
     $devtoolsColumn.Width = New-Object System.Windows.GridLength(380)
@@ -421,7 +703,7 @@ try {
     }
 
     Assert-Regression $rejected 'a different browser instance is rejected'
-    $view.ViewModel.ToggleDevTools()
+    Open-RegressionDevTools $view
     Wait-Regression { $view.ViewModel.IntegratedDevToolsHandle -ne [IntPtr]::Zero } 'DevTools opens before force close'
     Assert-Regression ($view.FindName('devtoolsColumn').Width.Value -eq 380) 'integrated DevTools restores its saved width'
     $view.FindName('devtoolsColumn').Width = New-Object System.Windows.GridLength(400)
@@ -450,6 +732,10 @@ try {
         Assert-Regression (!$window.IsVisible) "close during initialization is safe (force=$forceClose)"
     }
 
+    Test-AuxiliaryWindows
+
+    $readyAuxiliaryWindows = @($auxiliaryTypes | ForEach-Object { New-AuxiliaryWindow $_ -WaitForLoad })
+    $pendingAuxiliaryWindows = @($auxiliaryTypes | ForEach-Object { New-AuxiliaryWindow $_ })
     $readyWindow = New-RegressionWindow
     $pendingWindow = New-Object CefFlashBrowser.Views.BrowserWindow
     $pendingWindow.ShowActivated = $false
@@ -459,10 +745,13 @@ try {
     $pendingWindow.Show()
     [SimpleMvvm.Messaging.Messenger]::Global.Send([CefFlashBrowser.Data.MessageTokens]::CLOSE_ALL_BROWSERS, $null)
     Assert-Regression (!$readyWindow.IsVisible -and !$pendingWindow.IsVisible) 'close-all message completes before CEF shutdown'
+    foreach ($auxWindow in @($readyAuxiliaryWindows) + @($pendingAuxiliaryWindows)) {
+        Assert-AuxiliaryClosed $auxWindow ($auxWindow.FindName('browserView'))
+    }
     Write-Host 'Browser regression checks passed.'
 } finally {
     foreach ($remainingWindow in @($application.Windows)) {
-        if ($remainingWindow -is [CefFlashBrowser.Views.BrowserWindow]) {
+        if ($remainingWindow -is [CefFlashBrowser.Views.BrowserWindow] -or $auxiliaryTypes.Contains($remainingWindow.GetType())) {
             $remainingWindow.ForceCloseWindow()
         } else {
             $remainingWindow.Close()
