@@ -18,24 +18,32 @@ set DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR=C:\Program Files\dotnet
 ```
 
 ```cmd
-:: Build and run unit tests
+:: Build unit test project only (x64 Debug)
 set DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR=C:\Program Files\dotnet
 "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\MSBuild.exe" ^
   CefFlashBrowser.Tests\CefFlashBrowser.Tests.csproj -p:Configuration=Debug -p:Platform=x64 -restore
-dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 --no-build
 ```
-
-```cmd
-:: Run browser regression checks after building the solution (fresh x64 STA process)
-powershell -NoProfile -STA -ExecutionPolicy Bypass -File CefFlashBrowser.Tests\BrowserRegression\Run.ps1
-```
-
-For browser regression setup, x86/Release commands, and diagnostics, see `CefFlashBrowser.Tests/BrowserRegression/README.md`.
 
 ```cmd
 :: Build Release (x86 + x64) and create versioned zip archives in bin\Publish\
 publish
 ```
+
+## Test Commands
+
+Build the required Debug|x64 outputs first. Unit tests require the test project; browser regression checks require the full solution.
+
+```cmd
+:: Run unit tests (x64 Debug)
+dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 --no-build
+```
+
+```cmd
+:: Run browser regression checks (fresh x64 STA process)
+powershell -NoProfile -STA -ExecutionPolicy Bypass -File CefFlashBrowser.Tests\BrowserRegression\Run.ps1
+```
+
+For browser regression setup, x86/Release commands, and diagnostics, see `CefFlashBrowser.Tests/BrowserRegression/README.md`.
 
 ## Project Structure
 
