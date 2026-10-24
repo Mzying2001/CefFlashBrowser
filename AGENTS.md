@@ -57,7 +57,7 @@ publish
 - Builds target both x86 and x64; output paths differ: `bin\Release\` (x86) vs `bin\x64\Release\` (x64)
 - Entry point is `Program.cs` (not the default `App.xaml.cs`)
 - CefSharp version 84.4.10 is pinned for Flash compatibility
-- UI controls from HandyControl library
+- Follow the project's existing code style when modifying or adding code
 - Keep text and source files using CRLF line endings to match the repository's Windows/WPF conventions
 
 ## Git Commit Conventions
