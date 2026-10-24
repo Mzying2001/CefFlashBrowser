@@ -220,6 +220,7 @@ namespace CefFlashBrowser.Views
         private void BrowserInitializedForClose(object sender, EventArgs e)
         {
             var browser = _browserPendingClose;
+
             if (browser == null || !browser.IsBrowserInitialized)
                 return;
 
@@ -231,14 +232,16 @@ namespace CefFlashBrowser.Views
 
             // The initialized notification can reach WPF before CEF has returned
             // from OnAfterCreated. Wait for that callback before destroying its HWND.
-            Cef.UIThreadTaskFactory.StartNew(() =>
-                Dispatcher.InvokeAsync(() =>
-                {
-                    if (_isClosed)
-                        return;
+            InvokeAfterCefCallback(() =>
+            {
+                if (!_isClosed) Close();
+            });
+        }
 
-                    Close();
-                }));
+        private void InvokeAfterCefCallback(Action action)
+        {
+            // Let CEF's current callback return before running the action on WPF.
+            Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(action));
         }
 
         protected override void OnClosed(EventArgs e)
@@ -333,24 +336,24 @@ namespace CefFlashBrowser.Views
                 browser.LifeSpanHandler = null;
 
                 var frame = new DispatcherFrame();
+
                 EventHandler closed = (s, e) => frame.Continue = false;
                 Closed += closed;
 
                 try
                 {
-                    Cef.UIThreadTaskFactory.StartNew(() =>
-                        Dispatcher.InvokeAsync(() =>
+                    InvokeAfterCefCallback(() =>
+                    {
+                        if (!_isClosed)
                         {
-                            if (!_isClosed)
-                            {
-                                _doClose = true;
+                            _doClose = true;
 
-                                if (!browser.IsDisposed && browser.IsBrowserInitialized)
-                                    browser.GetBrowser()?.CloseBrowser(true);
+                            if (!browser.IsDisposed && browser.IsBrowserInitialized)
+                                browser.GetBrowser()?.CloseBrowser(true);
 
-                                Close();
-                            }
-                        }));
+                            Close();
+                        }
+                    });
 
                     Dispatcher.PushFrame(frame);
                 }
@@ -465,19 +468,25 @@ namespace CefFlashBrowser.Views
         private void DevToolsOpened(object sender, RoutedEventArgs e)
         {
             if (!_isClosed && GlobalData.Settings.EnableIntegratedDevTools)
+            {
                 Activate();
+            }
         }
 
         private void DevToolsClosed(object sender, RoutedEventArgs e)
         {
             if (!_isClosed)
+            {
                 Activate();
+            }
         }
 
         private void FullscreenChanged(object sender, FullscreenChangedEventArgs e)
         {
             if (!_isClosed)
+            {
                 ViewModel.Fullscreen = e.Fullscreen;
+            }
         }
 
         private void BrowserDoClose(object sender, BrowserDoCloseEventArgs e)
@@ -487,12 +496,10 @@ namespace CefFlashBrowser.Views
                 _doClose = true;
 
                 // Return from CEF's DoClose callback before destroying its parent HWND.
-                Cef.UIThreadTaskFactory.StartNew(() =>
-                    Dispatcher.InvokeAsync(() =>
-                    {
-                        if (!_isClosed)
-                            Close();
-                    }));
+                InvokeAfterCefCallback(() =>
+                {
+                    if (!_isClosed) Close();
+                });
             }
         }
 
@@ -507,13 +514,17 @@ namespace CefFlashBrowser.Views
         private void BrowserPopup(object sender, BrowserPopupEventArgs e)
         {
             if (!_isClosed)
+            {
                 ViewModel.OnPopup(e.TargetUrl, e.PopupSizeInfo);
+            }
         }
 
         private void BrowserNewPage(object sender, BrowserNewPageEventArgs e)
         {
             if (!_isClosed)
+            {
                 ViewModel.OnNewPage(e.TargetUrl);
+            }
         }
     }
 }
