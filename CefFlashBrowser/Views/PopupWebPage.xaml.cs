@@ -4,6 +4,7 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
@@ -38,6 +39,7 @@ namespace CefFlashBrowser.Views
                 {
                     var window = (PopupWebPage)d;
                     window._initialAddress = e.NewValue as string;
+
                     if (!window._isClosed && new WindowInteropHelper(window).Handle != IntPtr.Zero)
                         window.ViewModel.Address = window._initialAddress;
                 }));
@@ -47,7 +49,7 @@ namespace CefFlashBrowser.Views
             InitializeComponent();
 
             // Defer navigation until WPF has created the native owner window.
-            browserView.ViewModel = new BrowserViewModel { Address = null };
+            browserView.ViewModel = SimpleIoc.Global.GetInstance<BrowserViewModel>();
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
         }

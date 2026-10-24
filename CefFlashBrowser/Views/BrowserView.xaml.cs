@@ -98,6 +98,7 @@ namespace CefFlashBrowser.Views
         }
 
 
+
         private volatile bool _isClosed;
         private Window _ownerWindow;
         private readonly CancellationTokenSource _closeCancellation = new CancellationTokenSource();
@@ -125,6 +126,7 @@ namespace CefFlashBrowser.Views
 
         public static readonly RoutedEvent BrowserNewPageEvent = EventManager.RegisterRoutedEvent(
             nameof(BrowserNewPage), RoutingStrategy.Bubble, typeof(BrowserNewPageEventHandler), typeof(BrowserView));
+
 
 
         public event RoutedEventHandler DevToolsOpened
@@ -189,9 +191,6 @@ namespace CefFlashBrowser.Views
 
             Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
-
-            DataContextChanged += BrowserDataContextChanged;
-            Loaded += BrowserViewLoaded;
         }
 
         private void UnregisterMessageHandlers()

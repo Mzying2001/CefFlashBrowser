@@ -6,6 +6,7 @@ using CefSharp;
 using IWshRuntimeLibrary;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
@@ -302,7 +303,7 @@ namespace CefFlashBrowser.ViewModels
 
         public BrowserWindowViewModel()
         {
-            CurrentBrowser = new BrowserViewModel();
+            CurrentBrowser = SimpleIoc.Global.GetInstance<BrowserViewModel>();
 
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
             ViewSourceCommand = new DelegateCommand<string>(ViewSource);

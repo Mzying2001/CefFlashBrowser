@@ -160,6 +160,7 @@ $globalDataType.GetField('<SwfPlayerPath>k__BackingField', $privateStatic).SetVa
     $null, (Join-Path $applicationPath 'Assets\SwfPlayer\swfplayer.html'))
 [CefFlashBrowser.Data.GlobalData]::IsStartWithoutMainWindow = $true
 $locator = New-Object CefFlashBrowser.ViewModels.ViewModelLocator
+$application.Resources.Add('Locator', $locator.PSObject.BaseObject)
 $logger = New-Object CefFlashBrowser.Log.FileLogger((Join-Path $temporaryPath 'app.log'))
 $registerInstance = [SimpleMvvm.Ioc.SimpleIoc].GetMethods() | Where-Object {
     $_.Name -eq 'Register' -and $_.IsGenericMethodDefinition -and
@@ -247,6 +248,10 @@ function New-RegressionWindow {
     $window.Top = -10000
     $window.ShowActivated = $false
     $window.ShowInTaskbar = $false
+    $window.add_SourceInitialized({
+        param($sender, $eventArgs)
+        $sender.ViewModel.CurrentBrowser.Address = 'about:blank'
+    })
     $window.Show()
     Wait-Regression {
         $null -ne $window.ViewModel.CurrentBrowser.Browser -and
@@ -511,6 +516,7 @@ $cefStarted = $false
 try {
     $window = New-Object CefFlashBrowser.Views.BrowserWindow
     Assert-Regression ($null -eq $window.ViewModel.CurrentBrowser.Browser) 'browser is initially deferred'
+    Assert-Regression ($null -eq $window.ViewModel.CurrentBrowser.Address) 'browser address is initially unset'
     $window.Close()
     $window.ForceCloseWindow()
     Assert-Regression ($window.GetType().GetField('_isClosed', $privateInstance).GetValue($window)) 'close before Show is safe and idempotent'
@@ -721,6 +727,10 @@ try {
         $window.ShowInTaskbar = $false
         $window.Left = -10000
         $window.Top = -10000
+        $window.add_SourceInitialized({
+            param($sender, $eventArgs)
+            $sender.ViewModel.CurrentBrowser.Address = 'about:blank'
+        })
         $window.Show()
         if ($forceClose) {
             $window.ForceCloseWindow()
@@ -742,6 +752,10 @@ try {
     $pendingWindow.ShowInTaskbar = $false
     $pendingWindow.Left = -10000
     $pendingWindow.Top = -10000
+    $pendingWindow.add_SourceInitialized({
+        param($sender, $eventArgs)
+        $sender.ViewModel.CurrentBrowser.Address = 'about:blank'
+    })
     $pendingWindow.Show()
     [SimpleMvvm.Messaging.Messenger]::Global.Send([CefFlashBrowser.Data.MessageTokens]::CLOSE_ALL_BROWSERS, $null)
     Assert-Regression (!$readyWindow.IsVisible -and !$pendingWindow.IsVisible) 'close-all message completes before CEF shutdown'

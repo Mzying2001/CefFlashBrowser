@@ -55,8 +55,6 @@ namespace CefFlashBrowser.Views
                 InputBindings.Clear();
             }
 
-            ViewModel = SimpleIoc.Global.GetInstance<BrowserWindowViewModel>();
-
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
             Messenger.Global.Register(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
             Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);

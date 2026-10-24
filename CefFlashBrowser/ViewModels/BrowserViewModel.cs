@@ -30,7 +30,7 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private string _address = "about:blank";
+        private string _address;
         public string Address
         {
             get => _address;

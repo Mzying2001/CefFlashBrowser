@@ -5,6 +5,7 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
@@ -40,6 +41,7 @@ namespace CefFlashBrowser.Views
         private static void OnFileNamePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var window = (SwfPlayerWindow)d;
+
             if (!window._isClosed && window.browserView.IsLoaded
                 && window.ViewModel.Browser.CanExecuteJavascriptInMainFrame)
             {
@@ -53,7 +55,7 @@ namespace CefFlashBrowser.Views
             WindowSizeInfo.Apply(GlobalData.Settings.SwfWindowSizeInfo, this);
 
             // Defer navigation until WPF has created the native owner window.
-            browserView.ViewModel = new BrowserViewModel { Address = null };
+            browserView.ViewModel = SimpleIoc.Global.GetInstance<BrowserViewModel>();
             ViewModel.Browser.FrameLoadEnd += OnBrowserFrameLoadEnd;
             ViewModel.Browser.DragHandler = new Browser.Handlers.DisableDragHandler();
 

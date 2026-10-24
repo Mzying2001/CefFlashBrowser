@@ -1,5 +1,4 @@
-﻿using CefSharp;
-using SimpleMvvm.Ioc;
+﻿using SimpleMvvm.Ioc;
 using System;
 using System.Linq;
 
@@ -31,18 +30,29 @@ namespace CefFlashBrowser.ViewModels
             SimpleIoc.Global.Register<FavoritesManagerViewModel>();
             SimpleIoc.Global.Register<LanguageSelectorViewModel>();
 
-            SimpleIoc.Global.Register(BrowserWindowViewModelFactory, Lifetime.Transient);
+            SimpleIoc.Global.Register(BrowserViewModelFactory, Lifetime.Transient);
+            SimpleIoc.Global.Register<BrowserWindowViewModel>(Lifetime.Transient);
             SimpleIoc.Global.Register<SolSaveManagerViewModel>(Lifetime.Transient);
         }
 
-        private static BrowserWindowViewModel BrowserWindowViewModelFactory(object[] parameters)
+        private static BrowserViewModel BrowserViewModelFactory(object[] parameters)
         {
-            return new BrowserWindowViewModel();
+            var viewModel = new BrowserViewModel();
+
+            if (parameters?.FirstOrDefault() is string address)
+                viewModel.Address = address;
+
+            return viewModel;
         }
 
         public MainWindowViewModel MainWindowViewModel
         {
             get => SimpleIoc.Global.GetInstance<MainWindowViewModel>();
+        }
+
+        public BrowserWindowViewModel BrowserWindowViewModel
+        {
+            get => SimpleIoc.Global.GetInstance<BrowserWindowViewModel>();
         }
 
         public SettingsWindowViewModel SettingsWindowViewModel
