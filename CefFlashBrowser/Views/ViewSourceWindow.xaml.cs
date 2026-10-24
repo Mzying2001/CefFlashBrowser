@@ -74,13 +74,20 @@ namespace CefFlashBrowser.Views
             }
             else
             {
-                var cefBrowser = browser.GetBrowser();
-                if (cefBrowser != null)
+                try
                 {
-                    cefBrowser.CloseBrowser(true);
-                    e.Cancel = true;
+                    var cefBrowser = browser.GetBrowser();
+                    if (cefBrowser != null)
+                    {
+                        cefBrowser.CloseBrowser(true);
+                        e.Cancel = true;
+                    }
+                    else
+                    {
+                        _doClose = true;
+                    }
                 }
-                else
+                catch (ObjectDisposedException)
                 {
                     _doClose = true;
                 }
@@ -115,7 +122,15 @@ namespace CefFlashBrowser.Views
                 {
                     if (_forceClosePending)
                     {
-                        browser.GetBrowser()?.CloseBrowser(true);
+                        try
+                        {
+                            browser.GetBrowser()?.CloseBrowser(true);
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            _doClose = true;
+                            Close();
+                        }
                     }
                     else
                     {
@@ -179,7 +194,15 @@ namespace CefFlashBrowser.Views
                         {
                             if (!_isClosed)
                             {
-                                browser.GetBrowser()?.CloseBrowser(true);
+                                try
+                                {
+                                    browser.GetBrowser()?.CloseBrowser(true);
+                                }
+                                catch (ObjectDisposedException)
+                                {
+                                    _doClose = true;
+                                    Close();
+                                }
                             }
                         });
                     }

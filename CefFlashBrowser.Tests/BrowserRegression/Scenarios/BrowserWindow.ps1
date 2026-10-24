@@ -4,11 +4,45 @@ function Test-BrowserWindow($Context) {
     $view = Find-BrowserView $window
 
     Test-BrowserTemplate $Context $view $browser
+    Test-BrowserFrameLoadStartAfterDisposal $Context
     Test-BrowserDevTools $Context $window $view $browser
     Test-BrowserNavigation $Context $window $view $browser
     Test-BrowserDisplay $Context $window $view $browser
     Test-BrowserClose $Context $window $view $browser
     Test-BrowserStateRestoration $Context $browser
+}
+
+function Test-BrowserFrameLoadStartAfterDisposal($Context) {
+    $window = New-RegressionWindow $Context
+    $browser = $window.ViewModel.CurrentBrowser.Browser
+    $callback = @{ Disposed = $false }
+    $handler = [EventHandler[CefSharp.FrameLoadStartEventArgs]]({
+        param($sender, $eventArgs)
+        $callback.Disposed = $true
+        $sender.Dispose()
+    }.GetNewClosure())
+    $browser.add_FrameLoadStart($handler)
+    $eventArgs = New-Object CefSharp.FrameLoadStartEventArgs(
+        $browser.GetBrowser(),
+        (New-Object RegressionMainFrameProxy).GetTransparentProxy(),
+        [CefSharp.TransitionType]::LinkClicked)
+    $method = [CefFlashBrowser.WinformCefSharp4WPF.ChromiumWebBrowser].GetMethod(
+        'OnFrameLoadStart', [Reflection.BindingFlags]'Instance,NonPublic', $null,
+        [Type[]]@([object], [CefSharp.FrameLoadStartEventArgs]), $null)
+    Assert-Regression ($null -ne $method) 'frame-load handler is discoverable'
+    $threw = $false
+
+    try {
+        [void]$method.Invoke($browser.PSObject.BaseObject, [object[]]@($null, $eventArgs.PSObject.BaseObject))
+    } catch {
+        $threw = $true
+    } finally {
+        $browser.remove_FrameLoadStart($handler)
+        $window.ForceCloseWindow()
+    }
+
+    Assert-Regression $callback.Disposed 'main-frame callback can dispose the hosted browser'
+    Assert-Regression (!$threw) 'frame-load zoom update tolerates disposal during the callback'
 }
 
 function Test-BrowserTemplate($Context, $view, $browser) {
@@ -32,6 +66,22 @@ function Test-BrowserTemplate($Context, $view, $browser) {
         $view.remove_BrowserDoClose($interceptClose)
     }
     Assert-Regression $capture.Called 'disposed callback browser does not access popup or host properties'
+
+    $capture = @{ Called = $false }
+    $interceptClose = [CefFlashBrowser.Views.BrowserDoCloseEventHandler](
+        {
+            param($sender, $eventArgs)
+            $capture.Called = $true
+            $eventArgs.Handled = $true
+        }.GetNewClosure())
+    $view.add_BrowserDoClose($interceptClose)
+    try {
+        $racingBrowser = (New-Object DisposedDuringCallbackBrowserProxy).GetTransparentProxy()
+        Invoke-ViewCallback $view 'OnBrowserDoClose' @($browser, $racingBrowser)
+    } finally {
+        $view.remove_BrowserDoClose($interceptClose)
+    }
+    Assert-Regression $capture.Called 'browser disposal between IsDisposed and GetHost does not escape the close callback'
 }
 
 function Test-BrowserDevTools($Context, $window, $view, $browser) {

@@ -350,11 +350,23 @@ namespace CefFlashBrowser.Views
                 || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
                 return;
 
-            // A disposed callback browser can no longer expose its popup state or host.
-            var isDisposed = browser.IsDisposed;
-            var isPopup = !isDisposed && browser.IsPopup;
-            var hostHandle = isDisposed ? IntPtr.Zero : browser.GetHost().GetWindowHandle();
-            var isDevTools = !isDisposed && HwndHelper.IsDevToolsWindow(hostHandle);
+            // CEF can dispose the callback browser between any two property calls.
+            var isPopup = false;
+            var isDevTools = false;
+            var hostHandle = IntPtr.Zero;
+            try
+            {
+                if (!browser.IsDisposed)
+                {
+                    isPopup = browser.IsPopup;
+                    hostHandle = browser.GetHost().GetWindowHandle();
+                    isDevTools = HwndHelper.IsDevToolsWindow(hostHandle);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Treat a browser disposed during the callback as a normal close.
+            }
 
             InvokeOnUIThread(() =>
             {
@@ -376,12 +388,24 @@ namespace CefFlashBrowser.Views
 
         protected virtual void OnBrowserAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
-            if (_isClosed || browser.IsDisposed
+            if (_isClosed
                 || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
                 return;
 
-            var hostHandle = browser.GetHost().GetWindowHandle();
-            var isDevTools = HwndHelper.IsDevToolsWindow(hostHandle);
+            var hostHandle = IntPtr.Zero;
+            var isDevTools = false;
+            try
+            {
+                if (browser.IsDisposed)
+                    return;
+
+                hostHandle = browser.GetHost().GetWindowHandle();
+                isDevTools = HwndHelper.IsDevToolsWindow(hostHandle);
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
 
             if (isDevTools)
             {
@@ -390,8 +414,18 @@ namespace CefFlashBrowser.Views
 
             InvokeOnUIThread(() =>
             {
-                if (_isClosed || browser.IsDisposed)
+                if (_isClosed)
                     return;
+
+                try
+                {
+                    if (browser.IsDisposed)
+                        return;
+                }
+                catch (ObjectDisposedException)
+                {
+                    return;
+                }
 
                 var e = new BrowserAfterCreatedEventArgs(BrowserAfterCreatedEvent, this, chromiumWebBrowser, browser, hostHandle);
                 RaiseEvent(e);
@@ -439,8 +473,18 @@ namespace CefFlashBrowser.Views
 
             Dispatcher.InvokeAsync(() =>
             {
-                if (_isClosed || this.browser.IsDisposed)
+                if (_isClosed)
                     return;
+
+                try
+                {
+                    if (this.browser.IsDisposed)
+                        return;
+                }
+                catch (ObjectDisposedException)
+                {
+                    return;
+                }
 
                 if (isPopup)
                 {

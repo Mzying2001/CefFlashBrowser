@@ -5,6 +5,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
 
     return [pscustomobject]@{
         ScriptPath = $ScriptPath
+        RepositoryPath = $repositoryPath
         Platform = $Platform
         Configuration = $Configuration
         ApplicationPath = $applicationPath
@@ -24,6 +25,21 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
     }
 }
 
+function Get-RegressionDependencyPath($Context, [string]$Dependency) {
+    $applicationPath = Join-Path $Context.ApplicationPath $Dependency
+    $projectOutputPath = Join-Path $Context.RepositoryPath (
+        "$([IO.Path]::GetFileNameWithoutExtension($Dependency))\bin\$($Context.Platform)\$($Context.Configuration)\net462\$Dependency")
+
+    if (Test-Path -LiteralPath $projectOutputPath -PathType Leaf) {
+        if (!(Test-Path -LiteralPath $applicationPath -PathType Leaf) -or
+            (Get-Item -LiteralPath $projectOutputPath).LastWriteTimeUtc -gt (Get-Item -LiteralPath $applicationPath).LastWriteTimeUtc) {
+            return $projectOutputPath
+        }
+    }
+
+    return $applicationPath
+}
+
 function Initialize-RegressionEnvironment($Context) {
     $dependencies = @(
         'SimpleMvvm.dll',
@@ -38,11 +54,17 @@ function Initialize-RegressionEnvironment($Context) {
         'CefFlashBrowser.FlashBrowser.dll'
     )
     $cefDependencies = @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.WinForms.dll')
-    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SwfPlayer\swfplayer.html') + $dependencies + @(
+    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SwfPlayer\swfplayer.html') + @(
         ($cefDependencies + @('CefSharp.BrowserSubprocess.exe', 'libcef.dll')) | ForEach-Object { "Assets\CefSharp\$_" }
     )
     foreach ($file in $requiredFiles) {
         $path = Join-Path $Context.ApplicationPath $file
+        if (!(Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw "Build output not found: $path. Build the solution with VS MSBuild for $($Context.Configuration)|$($Context.Platform) first."
+        }
+    }
+    foreach ($dependency in $dependencies) {
+        $path = Get-RegressionDependencyPath $Context $dependency
         if (!(Test-Path -LiteralPath $path -PathType Leaf)) {
             throw "Build output not found: $path. Build the solution with VS MSBuild for $($Context.Configuration)|$($Context.Platform) first."
         }
@@ -55,7 +77,7 @@ function Initialize-RegressionEnvironment($Context) {
         throw 'Run the regression in a fresh Windows PowerShell process.'
     }
     foreach ($dependency in $dependencies) {
-        [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.ApplicationPath $dependency))
+        [void][Reflection.Assembly]::LoadFrom((Get-RegressionDependencyPath $Context $dependency))
     }
     [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.CefPath 'CefSharp.dll'))
     $applicationAssembly = [Reflection.Assembly]::LoadFrom((Join-Path $Context.ApplicationPath 'CefFlashBrowser.exe'))
@@ -66,7 +88,7 @@ function Initialize-RegressionEnvironment($Context) {
 
     $references = @(
         (Join-Path $Context.CefPath 'CefSharp.dll'),
-        (Join-Path $Context.ApplicationPath 'CefFlashBrowser.FlashBrowser.dll')
+        (Get-RegressionDependencyPath $Context 'CefFlashBrowser.FlashBrowser.dll')
     )
     Add-Type -ReferencedAssemblies $references -Path (Join-Path $Context.ScriptPath 'TestDoubles.cs')
     $Context.DisposedBrowser = (New-Object DisposedBrowserProxy([CefSharp.IBrowser])).GetTransparentProxy()

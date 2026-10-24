@@ -107,7 +107,12 @@ function New-AuxiliaryWindow($Context, [Type]$WindowType, [switch]$WaitForLoad) 
     $loadState = @{ MainFrameLoaded = $false }
     $loaded = [EventHandler[CefSharp.FrameLoadEndEventArgs]]({
         param($sender, $eventArgs)
-        if ($eventArgs.Frame.IsMain) { $loadState.MainFrameLoaded = $true }
+        try {
+            if ($sender.IsDisposed) { return }
+            if ($eventArgs.Frame.IsMain) { $loadState.MainFrameLoaded = $true }
+        } catch {
+            # CEF can deliver a late FrameLoadEnd callback after the window starts closing.
+        }
     }.GetNewClosure())
     $auxView.ViewModel.Browser.add_FrameLoadEnd($loaded)
     try {

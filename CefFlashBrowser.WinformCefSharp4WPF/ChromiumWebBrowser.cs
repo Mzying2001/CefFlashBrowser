@@ -622,7 +622,14 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             if (e.Frame.IsMain)
             {
                 // sync the zoom level when the main frame starts loading
-                browser.SetZoomLevel(zoomLevel);
+                try
+                {
+                    browser.SetZoomLevel(zoomLevel);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // The frame callback can dispose the browser before the zoom update runs.
+                }
             }
         }
 

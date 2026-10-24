@@ -40,6 +40,61 @@ public sealed class DisposedBrowserProxy : RealProxy
     }
 }
 
+public sealed class DisposedDuringCallbackBrowserProxy : RealProxy
+{
+    public DisposedDuringCallbackBrowserProxy() : base(typeof(IBrowser))
+    {
+    }
+
+    public override IMessage Invoke(IMessage message)
+    {
+        var call = (IMethodCallMessage)message;
+        object result;
+
+        switch (call.MethodName)
+        {
+            case "get_IsDisposed": result = false; break;
+            case "get_IsPopup": result = false; break;
+            case "GetType": result = typeof(IBrowser); break;
+            case "ToString": result = "Browser disposed during callback"; break;
+            case "GetHashCode": result = GetHashCode(); break;
+            case "Equals": result = ReferenceEquals(GetTransparentProxy(), call.Args[0]); break;
+            default:
+                return new ReturnMessage(new ObjectDisposedException("test browser"), call);
+        }
+
+        return new ReturnMessage(result, null, 0, call.LogicalCallContext, call);
+    }
+}
+
+public sealed class RegressionMainFrameProxy : RealProxy
+{
+    public RegressionMainFrameProxy() : base(typeof(IFrame))
+    {
+    }
+
+    public override IMessage Invoke(IMessage message)
+    {
+        var call = (IMethodCallMessage)message;
+        object result;
+
+        switch (call.MethodName)
+        {
+            case "get_IsMain": result = true; break;
+            case "GetType": result = typeof(IFrame); break;
+            case "ToString": result = "Regression main frame"; break;
+            case "GetHashCode": result = GetHashCode(); break;
+            case "Equals": result = ReferenceEquals(GetTransparentProxy(), call.Args[0]); break;
+            default:
+                var returnType = ((System.Reflection.MethodInfo)call.MethodBase).ReturnType;
+                result = returnType.IsValueType ? Activator.CreateInstance(returnType) : null;
+                break;
+        }
+
+        return new ReturnMessage(result, null, 0, call.LogicalCallContext, call);
+    }
+}
+
 public sealed class RegressionPopupFeaturesProxy : RealProxy
 {
     public RegressionPopupFeaturesProxy() : base(typeof(IPopupFeatures)) { }

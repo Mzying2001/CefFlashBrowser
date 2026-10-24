@@ -41,11 +41,24 @@ namespace CefFlashBrowser.Views
         private static void OnFileNamePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var window = (SwfPlayerWindow)d;
+            var browser = window.ViewModel?.Browser;
 
-            if (!window._isClosed && window.browserView.IsLoaded
-                && window.ViewModel.Browser.CanExecuteJavascriptInMainFrame)
+            if (window._isClosed || !window.browserView.IsLoaded
+                || browser == null || browser.IsDisposed)
             {
-                window.LoadSwf(e.NewValue as string);
+                return;
+            }
+
+            try
+            {
+                if (browser.CanExecuteJavascriptInMainFrame)
+                {
+                    window.LoadSwf(e.NewValue as string);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // CEF can dispose the browser between the state check and this query.
             }
         }
 
@@ -83,13 +96,20 @@ namespace CefFlashBrowser.Views
             }
             else
             {
-                var cefBrowser = browser.GetBrowser();
-                if (cefBrowser != null)
+                try
                 {
-                    cefBrowser.CloseBrowser(_forceClosePending || GlobalData.Settings.DisableOnBeforeUnloadDialog);
-                    e.Cancel = true;
+                    var cefBrowser = browser.GetBrowser();
+                    if (cefBrowser != null)
+                    {
+                        cefBrowser.CloseBrowser(_forceClosePending || GlobalData.Settings.DisableOnBeforeUnloadDialog);
+                        e.Cancel = true;
+                    }
+                    else
+                    {
+                        _doClose = true;
+                    }
                 }
-                else
+                catch (ObjectDisposedException)
                 {
                     _doClose = true;
                 }
@@ -124,7 +144,15 @@ namespace CefFlashBrowser.Views
                 {
                     if (_forceClosePending)
                     {
-                        browser.GetBrowser()?.CloseBrowser(true);
+                        try
+                        {
+                            browser.GetBrowser()?.CloseBrowser(true);
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            _doClose = true;
+                            Close();
+                        }
                     }
                     else
                     {
@@ -164,7 +192,10 @@ namespace CefFlashBrowser.Views
 
         private void OnBrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
-            if (!_isClosed && browserView.IsLoaded && e.Frame.IsMain
+            var browser = ViewModel?.Browser;
+
+            if (!_isClosed && browserView.IsLoaded && browser != null && !browser.IsDisposed
+                && e.Frame.IsMain
                 && string.Equals(e.Url, new Uri(GlobalData.SwfPlayerPath).AbsoluteUri, StringComparison.OrdinalIgnoreCase))
             {
                 LoadSwf(FileName);
@@ -205,7 +236,15 @@ namespace CefFlashBrowser.Views
                         {
                             if (!_isClosed)
                             {
-                                browser.GetBrowser()?.CloseBrowser(true);
+                                try
+                                {
+                                    browser.GetBrowser()?.CloseBrowser(true);
+                                }
+                                catch (ObjectDisposedException)
+                                {
+                                    _doClose = true;
+                                    Close();
+                                }
                             }
                         });
                     }

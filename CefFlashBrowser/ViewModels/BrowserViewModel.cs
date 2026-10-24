@@ -116,9 +116,19 @@ namespace CefFlashBrowser.ViewModels
 
         public void ExitFullScreen()
         {
-            if (IsBrowserReady() && Browser.CanExecuteJavascriptInMainFrame)
+            if (!IsBrowserReady())
+                return;
+
+            try
             {
-                Browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
+                if (Browser.CanExecuteJavascriptInMainFrame)
+                {
+                    Browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // The browser may be disposed after IsBrowserReady returns.
             }
         }
 

@@ -191,14 +191,20 @@ namespace CefFlashBrowser.Views
             else
             {
                 bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
-                var cefBrowser = browser.GetBrowser();
-
-                if (cefBrowser != null)
+                try
                 {
-                    cefBrowser.CloseBrowser(forceClose);
-                    e.Cancel = true;
+                    var cefBrowser = browser.GetBrowser();
+                    if (cefBrowser != null)
+                    {
+                        cefBrowser.CloseBrowser(forceClose);
+                        e.Cancel = true;
+                    }
+                    else
+                    {
+                        _doClose = true;
+                    }
                 }
-                else
+                catch (ObjectDisposedException)
                 {
                     _doClose = true;
                 }
@@ -346,8 +352,17 @@ namespace CefFlashBrowser.Views
                         {
                             _doClose = true;
 
-                            if (!browser.IsDisposed && browser.IsBrowserInitialized)
-                                browser.GetBrowser()?.CloseBrowser(true);
+                            try
+                            {
+                                if (!browser.IsDisposed && browser.IsBrowserInitialized)
+                                {
+                                    browser.GetBrowser()?.CloseBrowser(true);
+                                }
+                            }
+                            catch (ObjectDisposedException)
+                            {
+                                // CEF can dispose the browser after the state check.
+                            }
 
                             Close();
                         }
