@@ -143,14 +143,14 @@
 
             <MenuItem Header="{DynamicResource browser_addFavorite}"
                       Command="{Binding AddFavoriteCommand}"
-                      CommandParameter="{Binding CurrentBrowser.Browser}"
+                      CommandParameter="{Binding CurrentBrowser}"
                       InputGestureText="Ctrl+D"/>
 
             <Separator/>
 
             <MenuItem Header="{DynamicResource browser_createShortcut}"
                       Command="{Binding CreateShortcutCommand}"
-                      CommandParameter="{Binding CurrentBrowser.Browser}"
+                      CommandParameter="{Binding CurrentBrowser}"
                       InputGestureText="Ctrl+Shift+S"/>
 
             <MenuItem Header="{DynamicResource browser_openInDefaultBrowser}"
@@ -241,7 +241,7 @@
                     Command="{Binding CurrentBrowser.Browser.ZoomResetCommand}"/>
         <KeyBinding Gesture="Ctrl+D"
                     Command="{Binding AddFavoriteCommand}"
-                    CommandParameter="{Binding CurrentBrowser.Browser}"/>
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Ctrl+F"
                     Command="{Binding OpenFindPopupCommand}"/>
         <KeyBinding Gesture="Ctrl+M"
@@ -259,7 +259,7 @@
                     CommandParameter="{Binding CurrentBrowser.Address}"/>
         <KeyBinding Gesture="Ctrl+Shift+S"
                     Command="{Binding CreateShortcutCommand}"
-                    CommandParameter="{Binding CurrentBrowser.Browser}"/>
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding CurrentBrowser.Browser.CloseBrowserCommand}"
                     CommandParameter="{Binding Source={x:Static data:GlobalData.Settings}, Path=DisableOnBeforeUnloadDialog}"/>
@@ -317,7 +317,7 @@
 
                 <Button Margin="10,0,0,0"
                         Command="{Binding ToggleLoadingStateCommand}"
-                        CommandParameter="{Binding CurrentBrowser.Browser}">
+                        CommandParameter="{Binding CurrentBrowser}">
                     <Button.Resources>
                         <svgc:SvgIcon x:Key="reloadIcon"
                                       Width="14"
@@ -418,7 +418,7 @@
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Opened">
                             <i:InvokeCommandAction Command="{Binding FindNextTextCommand}"
-                                                   CommandParameter="{Binding CurrentBrowser.Browser}"/>
+                                                   CommandParameter="{Binding CurrentBrowser}"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                     <hc:Card>
@@ -442,7 +442,7 @@
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="TextChanged">
                                         <i:InvokeCommandAction Command="{Binding FindNextTextCommand}"
-                                                               CommandParameter="{Binding CurrentBrowser.Browser}"/>
+                                                               CommandParameter="{Binding CurrentBrowser}"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                                 <TextBox.InputBindings>
@@ -450,13 +450,13 @@
                                                 Command="{Binding CloseFindPopupCommand}"/>
                                     <KeyBinding Key="Enter"
                                                 Command="{Binding FindNextTextCommand}"
-                                                CommandParameter="{Binding CurrentBrowser.Browser}"/>
+                                                CommandParameter="{Binding CurrentBrowser}"/>
                                     <KeyBinding Key="Up"
                                                 Command="{Binding FindPrevTextCommand}"
-                                                CommandParameter="{Binding CurrentBrowser.Browser}"/>
+                                                CommandParameter="{Binding CurrentBrowser}"/>
                                     <KeyBinding Key="Down"
                                                 Command="{Binding FindNextTextCommand}"
-                                                CommandParameter="{Binding CurrentBrowser.Browser}"/>
+                                                CommandParameter="{Binding CurrentBrowser}"/>
                                 </TextBox.InputBindings>
                             </TextBox>
 
@@ -467,14 +467,14 @@
                             </Separator>
 
                             <Button Command="{Binding FindPrevTextCommand}"
-                                    CommandParameter="{Binding CurrentBrowser.Browser}">
+                                    CommandParameter="{Binding CurrentBrowser}">
                                 <svgc:SvgIcon Width="13"
                                               Height="13"
                                               UriSource="{StaticResource UpIconUri}"/>
                             </Button>
 
                             <Button Command="{Binding FindNextTextCommand}"
-                                    CommandParameter="{Binding CurrentBrowser.Browser}">
+                                    CommandParameter="{Binding CurrentBrowser}">
                                 <svgc:SvgIcon Width="13"
                                               Height="13"
                                               UriSource="{StaticResource DownIconUri}"/>

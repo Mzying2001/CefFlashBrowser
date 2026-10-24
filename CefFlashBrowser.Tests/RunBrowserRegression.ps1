@@ -529,6 +529,14 @@ try {
     $model.AddFavorite($null)
     $model.ToggleLoadingState($null)
     $model.FindText($null, $true)
+    $browserCommandNames = @(
+        'CreateShortcutCommand', 'AddFavoriteCommand', 'ToggleLoadingStateCommand',
+        'FindNextTextCommand', 'FindPrevTextCommand'
+    )
+    foreach ($commandName in $browserCommandNames) {
+        Invoke-BrowserCommand $model.$commandName
+        Invoke-BrowserCommand $model.$commandName $model.CurrentBrowser
+    }
     $model.ToggleDevTools($model.CurrentBrowser)
     $model.ToggleFullscreen($model.CurrentBrowser)
     $model.CurrentBrowser.ExitFullScreen()
@@ -623,6 +631,8 @@ try {
     Assert-Regression ($view.ViewModel.Address -eq $secondAddress) 'history navigation updates the address binding'
     Invoke-BrowserCommand $browser.ReloadCommand
     Wait-Regression { !$browser.IsLoading -and $browser.CanExecuteJavascriptInMainFrame } 'reload command'
+    Invoke-BrowserCommand $window.ViewModel.ToggleLoadingStateCommand $view.ViewModel
+    Wait-Regression { !$browser.IsLoading -and $browser.CanExecuteJavascriptInMainFrame } 'reload through BrowserViewModel command'
 
     $favoriteTimer = New-Object System.Windows.Threading.DispatcherTimer
     $favoriteTimer.Interval = [TimeSpan]::FromMilliseconds(20)
@@ -639,7 +649,7 @@ try {
     $favoriteTimer.Start()
 
     try {
-        $window.ViewModel.AddFavorite($browser)
+        Invoke-BrowserCommand $window.ViewModel.AddFavoriteCommand $view.ViewModel
     } finally {
         $favoriteTimer.Stop()
     }
@@ -659,7 +669,10 @@ try {
     Assert-Regression ([object]::ReferenceEquals($window.FindName('statusPopupContent').Content, $view.ViewModel)) 'status popup retains its browser binding'
 
     $window.ViewModel.TextToFind = 'find this'
-    $window.ViewModel.FindText($browser, $true)
+    Invoke-BrowserCommand $window.ViewModel.FindNextTextCommand $view.ViewModel
+    Invoke-BrowserCommand $window.ViewModel.FindPrevTextCommand $view.ViewModel
+    $window.ViewModel.TextToFind = ''
+    Invoke-BrowserCommand $window.ViewModel.FindNextTextCommand $view.ViewModel
     $window.ViewModel.ShowFindPopup = $true
     $window.ViewModel.ShowFindPopup = $false
     $browser.ZoomLevel = 0.5
@@ -690,10 +703,13 @@ try {
     Wait-Regression { !$window.IsVisible } 'Ctrl+W closes after beforeunload approval'
     Assert-Regression ($view.GetType().GetField('_isClosed', $privateInstance).GetValue($view)) 'host close cleans up BrowserView'
     Invoke-ViewCallback $view 'OnBrowserDoClose' @($browser, $disposedBrowser)
-    $window.ViewModel.CreateShortcut($browser)
-    $window.ViewModel.AddFavorite($browser)
-    $window.ViewModel.ToggleLoadingState($browser)
-    $window.ViewModel.FindText($browser, $true)
+    $window.ViewModel.CreateShortcut($view.ViewModel)
+    $window.ViewModel.AddFavorite($view.ViewModel)
+    $window.ViewModel.ToggleLoadingState($view.ViewModel)
+    $window.ViewModel.FindText($view.ViewModel, $true)
+    foreach ($commandName in $browserCommandNames) {
+        Invoke-BrowserCommand $window.ViewModel.$commandName $view.ViewModel
+    }
     $view.ViewModel.ToggleDevTools()
     $view.ViewModel.ExitFullScreen()
     Assert-Regression $browser.IsDisposed 'commands tolerate disposed browsers'

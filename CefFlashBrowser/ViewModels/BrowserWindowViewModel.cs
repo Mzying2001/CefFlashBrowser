@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -94,41 +93,6 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private static string GetWebBrowserTitle(IWebBrowser browser)
-        {
-            try
-            {
-                if (browser is WinformCefSharp4WPF.IWpfWebBrowser b)
-                {
-                    return b.Title;
-                }
-                else
-                {
-                    var frame = browser.GetBrowser()?.MainFrame;
-
-                    if (frame == null)
-                        return string.Empty;
-
-                    // Run the awaited call on a thread-pool thread so that the
-                    // blocking wait below cannot deadlock if EvaluateScriptAsync's
-                    // continuation ever needs to capture the caller's
-                    // SynchronizationContext. This method is invoked from the UI
-                    // thread (CreateShortcut / AddFavorite), so a naked .Result
-                    // here would in the worst case freeze the UI until the 1-second
-                    // timeout elapses.
-                    var result = Task.Run(() =>
-                        frame.EvaluateScriptAsync("document.title", timeout: TimeSpan.FromSeconds(1))
-                    ).GetAwaiter().GetResult();
-                    return result?.Result?.ToString() ?? string.Empty;
-                }
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError("Failed to get web browser title", e);
-                return string.Empty;
-            }
-        }
-
         private static string ReplaceInvalidFileNameChars(string str, char replaceChar = '_')
         {
             if (string.IsNullOrEmpty(str))
@@ -149,12 +113,13 @@ namespace CefFlashBrowser.ViewModels
             return builder.ToString();
         }
 
-        public void CreateShortcut(IWebBrowser browser)
+        public void CreateShortcut(BrowserViewModel browser)
         {
-            if (browser == null || browser.IsDisposed || !browser.IsBrowserInitialized)
+            if (browser?.Browser == null || browser.Browser.IsDisposed
+                || !browser.Browser.IsBrowserInitialized)
                 return;
 
-            var title = ReplaceInvalidFileNameChars(GetWebBrowserTitle(browser));
+            var title = ReplaceInvalidFileNameChars(browser.Title);
 
             var sfd = new Microsoft.Win32.SaveFileDialog()
             {
@@ -183,14 +148,15 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void AddFavorite(IWebBrowser browser)
+        public void AddFavorite(BrowserViewModel browser)
         {
-            if (browser == null || browser.IsDisposed || !browser.IsBrowserInitialized)
+            if (browser?.Browser == null || browser.Browser.IsDisposed
+                || !browser.Browser.IsBrowserInitialized)
                 return;
 
             var vm = new AddFavoriteDialogViewModel
             {
-                Name = GetWebBrowserTitle(browser),
+                Name = browser.Title,
                 Url = browser.Address,
             };
 
@@ -200,18 +166,19 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void ToggleLoadingState(IWebBrowser browser)
+        public void ToggleLoadingState(BrowserViewModel browser)
         {
-            if (browser == null || browser.IsDisposed || !browser.IsBrowserInitialized)
+            if (browser?.Browser == null || browser.Browser.IsDisposed
+                || !browser.Browser.IsBrowserInitialized)
                 return;
 
-            if (browser.IsLoading)
+            if (browser.Browser.IsLoading)
             {
-                browser.Stop();
+                browser.Browser.Stop();
             }
             else
             {
-                browser.Reload();
+                browser.Browser.Reload();
             }
         }
 
@@ -286,18 +253,19 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void FindText(IWebBrowser browser, bool forward)
+        public void FindText(BrowserViewModel browser, bool forward)
         {
-            if (browser == null || browser.IsDisposed || !browser.IsBrowserInitialized)
+            if (browser?.Browser == null || browser.Browser.IsDisposed
+                || !browser.Browser.IsBrowserInitialized)
                 return;
 
             if (string.IsNullOrEmpty(TextToFind))
             {
-                browser.GetBrowser()?.StopFinding(true);
+                browser.Browser.GetBrowser()?.StopFinding(true);
             }
             else
             {
-                browser.GetBrowser()?.Find(0, TextToFind, forward, false, false);
+                browser.Browser.GetBrowser()?.Find(0, TextToFind, forward, false, false);
             }
         }
 
@@ -308,17 +276,17 @@ namespace CefFlashBrowser.ViewModels
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
             ViewSourceCommand = new DelegateCommand<string>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
-            CreateShortcutCommand = new DelegateCommand<IWebBrowser>(CreateShortcut);
-            AddFavoriteCommand = new DelegateCommand<IWebBrowser>(AddFavorite);
-            ToggleLoadingStateCommand = new DelegateCommand<IWebBrowser>(ToggleLoadingState);
+            CreateShortcutCommand = new DelegateCommand<BrowserViewModel>(CreateShortcut);
+            AddFavoriteCommand = new DelegateCommand<BrowserViewModel>(AddFavorite);
+            ToggleLoadingStateCommand = new DelegateCommand<BrowserViewModel>(ToggleLoadingState);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             ToggleDevToolsCommand = new DelegateCommand<BrowserViewModel>(ToggleDevTools);
             ToggleFullscreenCommand = new DelegateCommand<BrowserViewModel>(ToggleFullscreen);
             OpenFindPopupCommand = new DelegateCommand(OpenFindPopup);
             CloseFindPopupCommand = new DelegateCommand(() => ShowFindPopup = false);
-            FindNextTextCommand = new DelegateCommand<IWebBrowser>(b => FindText(b, true));
-            FindPrevTextCommand = new DelegateCommand<IWebBrowser>(b => FindText(b, false));
+            FindNextTextCommand = new DelegateCommand<BrowserViewModel>(b => FindText(b, true));
+            FindPrevTextCommand = new DelegateCommand<BrowserViewModel>(b => FindText(b, false));
         }
     }
 }
