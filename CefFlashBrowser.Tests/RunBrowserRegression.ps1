@@ -19,16 +19,29 @@ if (([IntPtr]::Size -eq 8) -ne ($Platform -eq 'x64')) {
 }
 
 $repositoryPath = Split-Path $PSScriptRoot -Parent
-$buildPath = if ($Platform -eq 'x64') { "bin\x64\$Configuration" } else { "bin\$Configuration" }
+$buildPath = if ($Platform -eq 'x64') {
+    "bin\x64\$Configuration"
+} else {
+    "bin\$Configuration"
+}
 $applicationPath = Join-Path $repositoryPath $buildPath
 $cefPath = Join-Path $applicationPath 'Assets\CefSharp'
 $temporaryPath = Join-Path ([IO.Path]::GetTempPath()) ('CefFlashBrowser-regression-' + [Guid]::NewGuid())
 [void][IO.Directory]::CreateDirectory($temporaryPath)
 
-Add-Type -AssemblyName PresentationFramework,PresentationCore,WindowsBase,System.Xaml,System.Windows.Forms
-foreach ($dependency in @('SimpleMvvm.dll', 'Microsoft.Xaml.Behaviors.dll', 'HandyControl.dll',
-    'Newtonsoft.Json.dll', 'SharpVectors.Core.dll', 'SharpVectors.Runtime.Wpf.dll', 'SharpVectors.Converters.Wpf.dll',
-    'CefFlashBrowser.Log.dll', 'CefFlashBrowser.WinformCefSharp4WPF.dll', 'CefFlashBrowser.FlashBrowser.dll')) {
+Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml, System.Windows.Forms
+foreach ($dependency in @(
+    'SimpleMvvm.dll',
+    'Microsoft.Xaml.Behaviors.dll',
+    'HandyControl.dll',
+    'Newtonsoft.Json.dll',
+    'SharpVectors.Core.dll',
+    'SharpVectors.Runtime.Wpf.dll',
+    'SharpVectors.Converters.Wpf.dll',
+    'CefFlashBrowser.Log.dll',
+    'CefFlashBrowser.WinformCefSharp4WPF.dll',
+    'CefFlashBrowser.FlashBrowser.dll'
+)) {
     [void][Reflection.Assembly]::LoadFrom((Join-Path $applicationPath $dependency))
 }
 [void][Reflection.Assembly]::LoadFrom((Join-Path $cefPath 'CefSharp.dll'))
@@ -51,19 +64,35 @@ using CefSharp;
 
 public sealed class DisposedBrowserProxy : RealProxy
 {
-    public DisposedBrowserProxy(Type type) : base(type) { }
+    public DisposedBrowserProxy(Type type)
+        : base(type)
+    {
+    }
+
     public override IMessage Invoke(IMessage message)
     {
         var call = (IMethodCallMessage)message;
         object result;
+
         switch (call.MethodName)
         {
-            case "get_IsDisposed": result = true; break;
-            case "GetType": result = GetProxiedType(); break;
-            case "ToString": result = "Disposed browser proxy"; break;
-            case "GetHashCode": result = GetHashCode(); break;
-            case "Equals": result = ReferenceEquals(GetTransparentProxy(), call.Args[0]); break;
-            default: return new ReturnMessage(new ObjectDisposedException("test browser"), call);
+            case "get_IsDisposed":
+                result = true;
+                break;
+            case "GetType":
+                result = GetProxiedType();
+                break;
+            case "ToString":
+                result = "Disposed browser proxy";
+                break;
+            case "GetHashCode":
+                result = GetHashCode();
+                break;
+            case "Equals":
+                result = ReferenceEquals(GetTransparentProxy(), call.Args[0]);
+                break;
+            default:
+                return new ReturnMessage(new ObjectDisposedException("test browser"), call);
         }
         return new ReturnMessage(result, null, 0, call.LogicalCallContext, call);
     }
@@ -73,11 +102,17 @@ public sealed class RegressionJsDialogHandler : CefFlashBrowser.FlashBrowser.Han
 {
     public volatile bool Accept;
     public int Count;
+
     public override bool OnBeforeUnloadDialog(IWebBrowser control, IBrowser browser,
         string message, bool isReload, IJsDialogCallback callback)
     {
         Interlocked.Increment(ref Count);
-        using (callback) { callback.Continue(Accept); }
+
+        using (callback)
+        {
+            callback.Continue(Accept);
+        }
+
         return true;
     }
 }
@@ -103,7 +138,8 @@ foreach ($dictionaryUri in @(
     'pack://application:,,,/CefFlashBrowser;component/Assets/Language/zh-CN.xaml',
     'pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml',
     'pack://application:,,,/HandyControl;component/Themes/Theme.xaml',
-    'pack://application:,,,/CefFlashBrowser;component/Views/Converters/Converters.xaml')) {
+    'pack://application:,,,/CefFlashBrowser;component/Views/Converters/Converters.xaml'
+)) {
     $dictionary = New-Object System.Windows.ResourceDictionary
     $dictionary.set_Source([Uri]$dictionaryUri)
     $application.Resources.MergedDictionaries.Add($dictionary)
@@ -113,14 +149,21 @@ foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning'
 }
 
 function Assert-Regression([bool]$Condition, [string]$Message) {
-    if (!$Condition) { throw $Message }
+    if (!$Condition) {
+        throw $Message
+    }
+
     Write-Host "PASS $Message"
 }
 
 function Wait-Regression([scriptblock]$Condition, [string]$Message, [int]$TimeoutSeconds = 15) {
     $timeout = [Diagnostics.Stopwatch]::StartNew()
+
     while (!(& $Condition)) {
-        if ($timeout.Elapsed.TotalSeconds -ge $TimeoutSeconds) { throw "Timed out: $Message" }
+        if ($timeout.Elapsed.TotalSeconds -ge $TimeoutSeconds) {
+            throw "Timed out: $Message"
+        }
+
         $frame = New-Object System.Windows.Threading.DispatcherFrame
         $stopFrame = [Action]({ $frame.Continue = $false }.GetNewClosure())
         [void]$application.Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Background, $stopFrame)
@@ -133,21 +176,33 @@ function Invoke-JavaScript($Browser, [string]$Code) {
     $evaluation = [CefSharp.WebBrowserExtensions]::EvaluateScriptAsync($Browser, $Code, [TimeSpan]::FromSeconds(5))
     Wait-Regression { $evaluation.IsCompleted } 'JavaScript result'
     $response = $evaluation.GetAwaiter().GetResult()
-    if (!$response.Success) { throw $response.Message }
+
+    if (!$response.Success) {
+        throw $response.Message
+    }
+
     return $response.Result
 }
 
 function Invoke-BrowserCommand($Command, $Parameter = $null) {
-    if ($null -ne $Parameter) { $Parameter = $Parameter.PSObject.BaseObject }
+    if ($null -ne $Parameter) {
+        $Parameter = $Parameter.PSObject.BaseObject
+    }
+
     [void][System.Windows.Input.ICommand].GetMethod('Execute').Invoke(
         $Command.PSObject.BaseObject, [object[]]@($Parameter))
 }
 
 function Find-BrowserView($Element) {
-    if ($Element -is [CefFlashBrowser.Views.BrowserView]) { return $Element }
+    if ($Element -is [CefFlashBrowser.Views.BrowserView]) {
+        return $Element
+    }
+
     for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
         $view = Find-BrowserView ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index))
-        if ($null -ne $view) { return $view }
+        if ($null -ne $view) {
+            return $view
+        }
     }
 }
 
@@ -160,17 +215,23 @@ function New-RegressionWindow {
     $window.ShowActivated = $false
     $window.ShowInTaskbar = $false
     $window.Show()
-    Wait-Regression { $null -ne $window.ViewModel.CurrentBrowser.Browser -and
+    Wait-Regression {
+        $null -ne $window.ViewModel.CurrentBrowser.Browser -and
         $window.ViewModel.CurrentBrowser.Browser.IsBrowserInitialized -and
-        $window.ViewModel.CurrentBrowser.Browser.CanExecuteJavascriptInMainFrame } 'browser initialization'
+        $window.ViewModel.CurrentBrowser.Browser.CanExecuteJavascriptInMainFrame
+    } 'browser initialization'
     return $window
 }
 
 $privateInstance = [Reflection.BindingFlags]'Instance,NonPublic'
+
 function Invoke-ViewCallback($View, [string]$Method, [object[]]$Arguments) {
     for ($index = 0; $index -lt $Arguments.Count; $index++) {
-        if ($null -ne $Arguments[$index]) { $Arguments[$index] = $Arguments[$index].PSObject.BaseObject }
+        if ($null -ne $Arguments[$index]) {
+            $Arguments[$index] = $Arguments[$index].PSObject.BaseObject
+        }
     }
+
     [void]$View.GetType().GetMethod($Method, $privateInstance).Invoke($View, $Arguments)
 }
 
@@ -203,7 +264,10 @@ try {
     $cefSettings.LogFile = Join-Path $temporaryPath 'cef.log'
     $cefSettings.CefCommandLineArgs['disable-gpu'] = '1'
     $cefStarted = [CefSharp.Cef]::Initialize($cefSettings)
-    if (!$cefStarted) { throw 'CEF initialization failed' }
+
+    if (!$cefStarted) {
+        throw 'CEF initialization failed'
+    }
 
     $window = New-RegressionWindow
     $browser = $window.ViewModel.CurrentBrowser.Browser
@@ -275,15 +339,23 @@ try {
     $favoriteTimer = New-Object System.Windows.Threading.DispatcherTimer
     $favoriteTimer.Interval = [TimeSpan]::FromMilliseconds(20)
     $favoriteTimer.add_Tick({
-        $dialog = $application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.AddFavoriteDialog] } | Select-Object -First 1
+        $dialog = $application.Windows | Where-Object {
+            $_ -is [CefFlashBrowser.Views.Dialogs.AddFavoriteDialog]
+        } | Select-Object -First 1
+
         if ($null -ne $dialog -and $dialog.IsLoaded) {
             $favoriteTimer.Stop()
             Invoke-BrowserCommand $dialog.DataContext.ConfirmCommand
         }
     })
     $favoriteTimer.Start()
-    try { $window.ViewModel.AddFavorite($browser) }
-    finally { $favoriteTimer.Stop() }
+
+    try {
+        $window.ViewModel.AddFavorite($browser)
+    } finally {
+        $favoriteTimer.Stop()
+    }
+
     $favorite = [CefFlashBrowser.Data.GlobalData]::Favorites | Select-Object -Last 1
     Assert-Regression ($favorite.Name -eq 'Browser regression' -and $favorite.Url -eq $secondAddress) 'favorite dialog preserves the current title and address'
 
@@ -322,7 +394,10 @@ try {
     Wait-Regression { $dialogHandler.Count -gt 0 } 'beforeunload dialog on normal close'
     Assert-Regression $window.IsVisible 'cancelling beforeunload keeps the window open'
     $dialogHandler.Accept = $true
-    $closeBinding = $window.InputBindings | Where-Object { $_.Key -eq [System.Windows.Input.Key]::W -and $_.Modifiers -eq [System.Windows.Input.ModifierKeys]::Control }
+    $closeBinding = $window.InputBindings | Where-Object {
+        $_.Key -eq [System.Windows.Input.Key]::W -and
+        $_.Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
+    }
     Invoke-BrowserCommand $closeBinding.Command ([bool]$closeBinding.CommandParameter)
     Wait-Regression { !$window.IsVisible } 'Ctrl+W closes after beforeunload approval'
     Assert-Regression ($view.GetType().GetField('_isClosed', $privateInstance).GetValue($view)) 'host close cleans up BrowserView'
@@ -339,8 +414,12 @@ try {
     $view = Find-BrowserView $window
     Assert-Regression ($view.ViewModel.ZoomLevel -eq 0.5) 'a new browser restores the saved zoom level'
     $rejected = $false
-    try { $view.ViewModel.Browser = $browser }
-    catch { $rejected = $true }
+    try {
+        $view.ViewModel.Browser = $browser
+    } catch {
+        $rejected = $true
+    }
+
     Assert-Regression $rejected 'a different browser instance is rejected'
     $view.ViewModel.ToggleDevTools()
     Wait-Regression { $view.ViewModel.IntegratedDevToolsHandle -ne [IntPtr]::Zero } 'DevTools opens before force close'
@@ -361,7 +440,12 @@ try {
         $window.Left = -10000
         $window.Top = -10000
         $window.Show()
-        if ($forceClose) { $window.ForceCloseWindow() } else { $window.Close() }
+        if ($forceClose) {
+            $window.ForceCloseWindow()
+        } else {
+            $window.Close()
+        }
+
         Wait-Regression { !$window.IsVisible } 'close during initialization'
         Assert-Regression (!$window.IsVisible) "close during initialization is safe (force=$forceClose)"
     }
@@ -376,13 +460,19 @@ try {
     [SimpleMvvm.Messaging.Messenger]::Global.Send([CefFlashBrowser.Data.MessageTokens]::CLOSE_ALL_BROWSERS, $null)
     Assert-Regression (!$readyWindow.IsVisible -and !$pendingWindow.IsVisible) 'close-all message completes before CEF shutdown'
     Write-Host 'Browser regression checks passed.'
-}
-finally {
+} finally {
     foreach ($remainingWindow in @($application.Windows)) {
-        if ($remainingWindow -is [CefFlashBrowser.Views.BrowserWindow]) { $remainingWindow.ForceCloseWindow() }
-        else { $remainingWindow.Close() }
+        if ($remainingWindow -is [CefFlashBrowser.Views.BrowserWindow]) {
+            $remainingWindow.ForceCloseWindow()
+        } else {
+            $remainingWindow.Close()
+        }
     }
-    if ($cefStarted) { [CefSharp.Cef]::Shutdown() }
+
+    if ($cefStarted) {
+        [CefSharp.Cef]::Shutdown()
+    }
+
     $logger.Dispose()
     Write-Host "Isolated test data: $temporaryPath"
 }

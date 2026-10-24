@@ -65,6 +65,8 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+
+
         public BrowserViewModel()
         {
             if (GlobalData.Settings.SaveZoomLevel)
@@ -72,6 +74,8 @@ namespace CefFlashBrowser.ViewModels
                 ZoomLevel = GlobalData.Settings.BrowserZoomLevel;
             }
         }
+
+
 
         public void OnDevToolsOpened(IntPtr hDevTools)
         {
@@ -107,7 +111,8 @@ namespace CefFlashBrowser.ViewModels
 
         public void ExitFullScreen()
         {
-            if (Browser != null && !Browser.IsDisposed && Browser.CanExecuteJavascriptInMainFrame)
+            if (Browser != null && !Browser.IsDisposed
+                && Browser.CanExecuteJavascriptInMainFrame)
             {
                 Browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
             }

@@ -91,7 +91,8 @@ namespace CefFlashBrowser.Views
                             break;
                         }
                 }
-                return !view._isClosed && !chromiumWebBrowser.IsDisposed
+                return !view._isClosed
+                    && !chromiumWebBrowser.IsDisposed
                     && base.OnContextMenuCommand(chromiumWebBrowser, browser, frame, parameters, commandId, eventFlags);
             }
         }
@@ -101,6 +102,8 @@ namespace CefFlashBrowser.Views
         private Window _ownerWindow;
         private readonly CancellationTokenSource _closeCancellation = new CancellationTokenSource();
         private readonly CancellationToken _closeToken;
+
+
 
         public static readonly RoutedEvent DevToolsOpenedEvent = EventManager.RegisterRoutedEvent(
             nameof(DevToolsOpened), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(BrowserView));
@@ -172,6 +175,8 @@ namespace CefFlashBrowser.Views
             set => DataContext = value;
         }
 
+
+
         public BrowserView()
         {
             _closeToken = _closeCancellation.Token;
@@ -197,7 +202,8 @@ namespace CefFlashBrowser.Views
 
         private void InvokeOnUIThread(Action action)
         {
-            if (_isClosed || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+            if (_isClosed
+                || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
                 return;
 
             try
@@ -247,7 +253,8 @@ namespace CefFlashBrowser.Views
         private void SaveDevToolsWidth()
         {
             if (devtoolsContainer.ContentHandle != IntPtr.Zero
-                && devtoolsColumn.Width.IsAbsolute && devtoolsColumn.Width.Value > 0)
+                && devtoolsColumn.Width.IsAbsolute
+                && devtoolsColumn.Width.Value > 0)
             {
                 GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
             }
@@ -259,10 +266,13 @@ namespace CefFlashBrowser.Views
                 return;
 
             _isClosed = true;
+
             _closeCancellation.Cancel();
             _closeCancellation.Dispose();
+
             SaveDevToolsWidth();
             UnregisterMessageHandlers();
+
             DataContextChanged -= BrowserDataContextChanged;
             Loaded -= BrowserViewLoaded;
 
@@ -337,7 +347,8 @@ namespace CefFlashBrowser.Views
 
         protected virtual void OnBrowserDoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
-            if (_isClosed || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+            if (_isClosed
+                || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
                 return;
 
             // A disposed callback browser can no longer expose its popup state or host.
@@ -366,7 +377,8 @@ namespace CefFlashBrowser.Views
 
         protected virtual void OnBrowserAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
-            if (_isClosed || browser.IsDisposed || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+            if (_isClosed || browser.IsDisposed
+                || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
                 return;
 
             var hostHandle = browser.GetHost().GetWindowHandle();
@@ -405,7 +417,8 @@ namespace CefFlashBrowser.Views
             IBrowserSettings browserSettings,
             ref bool noJavascriptAccess)
         {
-            if (_isClosed || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+            if (_isClosed
+                || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
                 return;
 
             var isPopup = targetDisposition == WindowOpenDisposition.NewPopup;

@@ -151,7 +151,8 @@ namespace CefFlashBrowser.Utils
         /// </summary>
         public static IntPtr FindNotIntegratedDevTools(IWebBrowser browser)
         {
-            if (browser is DependencyObject obj && Window.GetWindow(obj) is Window w)
+            if (browser is DependencyObject obj
+                && Window.GetWindow(obj) is Window w)
             {
                 IntPtr hwnd = new WindowInteropHelper(w).Handle;
                 Win32.GetWindowThreadProcessId(hwnd, out IntPtr pidWnd);

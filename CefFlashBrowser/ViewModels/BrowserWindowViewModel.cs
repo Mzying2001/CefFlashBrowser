@@ -234,7 +234,8 @@ namespace CefFlashBrowser.ViewModels
 
         public void ToggleFullscreen(BrowserViewModel browser)
         {
-            if (browser?.Browser == null || browser.Browser.IsDisposed || !browser.Browser.IsBrowserInitialized)
+            if (browser?.Browser == null || browser.Browser.IsDisposed
+                || !browser.Browser.IsBrowserInitialized)
                 return;
 
             if (Fullscreen)

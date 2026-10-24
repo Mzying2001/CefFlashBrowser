@@ -25,6 +25,7 @@ namespace CefFlashBrowser.Views
     {
         private bool _doClose = false;
         private bool _isClosed = false;
+
         private ChromiumWebBrowser _browserPendingClose;
         private bool _forceClosePending;
 
@@ -224,28 +225,32 @@ namespace CefFlashBrowser.Views
 
             browser.IsBrowserInitializedChanged -= BrowserInitializedForClose;
             _browserPendingClose = null;
+
             if (_forceClosePending)
                 return;
 
             // The initialized notification can reach WPF before CEF has returned
             // from OnAfterCreated. Wait for that callback before destroying its HWND.
-            Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(() =>
-            {
-                if (_isClosed)
-                    return;
+            Cef.UIThreadTaskFactory.StartNew(() =>
+                Dispatcher.InvokeAsync(() =>
+                {
+                    if (_isClosed)
+                        return;
 
-                Close();
-            }));
+                    Close();
+                }));
         }
 
         protected override void OnClosed(EventArgs e)
         {
             _isClosed = true;
+
             if (_browserPendingClose != null)
             {
                 _browserPendingClose.IsBrowserInitializedChanged -= BrowserInitializedForClose;
                 _browserPendingClose = null;
             }
+
             base.OnClosed(e);
             _hwndSource?.RemoveHook(WndProc);
         }
@@ -326,21 +331,27 @@ namespace CefFlashBrowser.Views
                 // Pump WPF so a caller can safely shut CEF down as soon as this returns.
                 _forceClosePending = true;
                 browser.LifeSpanHandler = null;
+
                 var frame = new DispatcherFrame();
                 EventHandler closed = (s, e) => frame.Continue = false;
                 Closed += closed;
+
                 try
                 {
-                    Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(() =>
-                    {
-                        if (!_isClosed)
+                    Cef.UIThreadTaskFactory.StartNew(() =>
+                        Dispatcher.InvokeAsync(() =>
                         {
-                            _doClose = true;
-                            if (!browser.IsDisposed && browser.IsBrowserInitialized)
-                                browser.GetBrowser()?.CloseBrowser(true);
-                            Close();
-                        }
-                    }));
+                            if (!_isClosed)
+                            {
+                                _doClose = true;
+
+                                if (!browser.IsDisposed && browser.IsBrowserInitialized)
+                                    browser.GetBrowser()?.CloseBrowser(true);
+
+                                Close();
+                            }
+                        }));
+
                     Dispatcher.PushFrame(frame);
                 }
                 finally
@@ -406,6 +417,7 @@ namespace CefFlashBrowser.Views
         private void FindPopupClosed(object sender, EventArgs e)
         {
             var browser = ViewModel?.CurrentBrowser?.Browser;
+
             if (browser != null && !browser.IsDisposed && browser.IsBrowserInitialized)
                 browser.GetBrowser()?.StopFinding(true);
         }
@@ -473,12 +485,14 @@ namespace CefFlashBrowser.Views
             if (!_isClosed && !e.IsPopup && !e.IsDevTools)
             {
                 _doClose = true;
+
                 // Return from CEF's DoClose callback before destroying its parent HWND.
-                Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(() =>
-                {
-                    if (!_isClosed)
-                        Close();
-                }));
+                Cef.UIThreadTaskFactory.StartNew(() =>
+                    Dispatcher.InvokeAsync(() =>
+                    {
+                        if (!_isClosed)
+                            Close();
+                    }));
             }
         }
 
