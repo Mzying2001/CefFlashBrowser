@@ -35,38 +35,11 @@ namespace CefFlashBrowser.ViewModels
 
 
 
-        public IWebBrowser Browser { get; }
-
-        public WinformCefSharp4WPF.IWpfWebBrowser WpfBrowser
+        private BrowserViewModel _currentBrowser;
+        public BrowserViewModel CurrentBrowser
         {
-            get => Browser as WinformCefSharp4WPF.IWpfWebBrowser;
-        }
-
-        private string _address = "about:blank";
-        public string Address
-        {
-            get => _address;
-            set => UpdateValue(ref _address, value);
-        }
-
-        private IntPtr _integratedDevToolsHandle = IntPtr.Zero;
-        public IntPtr IntegratedDevToolsHandle
-        {
-            get => _integratedDevToolsHandle;
-            set => UpdateValue(ref _integratedDevToolsHandle, value);
-        }
-
-        private bool _fullscreen = false;
-        public bool Fullscreen
-        {
-            get => _fullscreen;
-            set
-            {
-                if (UpdateValue(ref _fullscreen, value))
-                {
-                    Messenger.Global.Send(MessageTokens.FULLSCREEN_CHANGED, this);
-                }
-            }
+            get => _currentBrowser;
+            set => UpdateValue(ref _currentBrowser, value);
         }
 
         private bool _showFindPopup = false;
@@ -93,6 +66,19 @@ namespace CefFlashBrowser.ViewModels
                     && GlobalData.Settings.SaveZoomLevel)
                 {
                     GlobalData.Settings.BrowserZoomLevel = value;
+                }
+            }
+        }
+
+        private bool _fullscreen = false;
+        public bool Fullscreen
+        {
+            get => _fullscreen;
+            set
+            {
+                if (UpdateValue(ref _fullscreen, value))
+                {
+                    Messenger.Global.Send(MessageTokens.FULLSCREEN_CHANGED, this);
                 }
             }
         }
@@ -243,33 +229,23 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowBrowser(url ?? "about:blank");
         }
 
-        public void ToggleDevTools(IWebBrowser browser)
+        public void ToggleDevTools(BrowserViewModel browser)
         {
             if (browser != null)
             {
-                if (IntegratedDevToolsHandle == IntPtr.Zero
-                    && HwndHelper.FindNotIntegratedDevTools(browser) == IntPtr.Zero)
-                {
-                    browser.ShowDevTools();
-                }
-                else
-                {
-                    browser.CloseDevTools();
-                }
+                browser.ToggleDevTools();
             }
         }
 
-        public void ToggleFullscreen(IWebBrowser browser)
+        public void ToggleFullscreen(BrowserViewModel browser)
         {
             if (Fullscreen)
             {
-                if (browser.CanExecuteJavascriptInMainFrame)
-                    browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
+                browser.ExitFullScreen();
                 Fullscreen = false;
             }
             else
             {
-                //browser.ExecuteScriptAsync("document.documentElement.requestFullscreen();");
                 Fullscreen = true;
             }
         }
@@ -286,7 +262,7 @@ namespace CefFlashBrowser.ViewModels
                     }
                 case NewPageBehavior.OriginalWindow:
                     {
-                        Address = url;
+                        CurrentBrowser.Address = url;
                         break;
                     }
             }
@@ -296,22 +272,6 @@ namespace CefFlashBrowser.ViewModels
         {
             Fullscreen = false;
             WindowManager.ShowPopupWebPage(url, sizeInfo);
-        }
-
-        public void OnDevToolsOpened(IWebBrowser browser, IntPtr hDevTools)
-        {
-            if (GlobalData.Settings.EnableIntegratedDevTools)
-            {
-                HwndHelper.ApplyEmbeddedChildStyle(hDevTools);
-                IntegratedDevToolsHandle = hDevTools;
-            }
-            Messenger.Global.Send(MessageTokens.DEVTOOLS_OPENED, browser);
-        }
-
-        public void OnDevToolsClosed(IWebBrowser browser)
-        {
-            IntegratedDevToolsHandle = IntPtr.Zero;
-            Messenger.Global.Send(MessageTokens.DEVTOOLS_CLOSED, browser);
         }
 
         private void OpenFindPopup()
@@ -338,24 +298,9 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public BrowserWindowViewModel() : this(new WinformCefSharp4WPF.ChromiumWebBrowser())
+        public BrowserWindowViewModel()
         {
-            if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(new System.Windows.DependencyObject()))
-            {
-                throw new InvalidOperationException(
-                    "BrowserWindowViewModel must be constructed with a valid IWebBrowser instance.");
-            }
-        }
-
-        public BrowserWindowViewModel(IWebBrowser browser)
-        {
-            Browser = browser ?? throw new ArgumentNullException(nameof(browser),
-                "BrowserWindowViewModel must be constructed with a valid IWebBrowser instance.");
-
-            if (GlobalData.Settings.SaveZoomLevel)
-            {
-                ZoomLevel = GlobalData.Settings.BrowserZoomLevel;
-            }
+            CurrentBrowser = new BrowserViewModel();
 
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
             ViewSourceCommand = new DelegateCommand<string>(ViewSource);
@@ -365,8 +310,8 @@ namespace CefFlashBrowser.ViewModels
             ToggleLoadingStateCommand = new DelegateCommand<IWebBrowser>(ToggleLoadingState);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
-            ToggleDevToolsCommand = new DelegateCommand<IWebBrowser>(ToggleDevTools);
-            ToggleFullscreenCommand = new DelegateCommand<IWebBrowser>(ToggleFullscreen);
+            ToggleDevToolsCommand = new DelegateCommand<BrowserViewModel>(ToggleDevTools);
+            ToggleFullscreenCommand = new DelegateCommand<BrowserViewModel>(ToggleFullscreen);
             OpenFindPopupCommand = new DelegateCommand(OpenFindPopup);
             CloseFindPopupCommand = new DelegateCommand(() => ShowFindPopup = false);
             FindNextTextCommand = new DelegateCommand<IWebBrowser>(b => FindText(b, true));

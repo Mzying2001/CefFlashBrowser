@@ -37,7 +37,7 @@ namespace CefFlashBrowser.ViewModels
 
         private static BrowserWindowViewModel BrowserWindowViewModelFactory(object[] parameters)
         {
-            return new BrowserWindowViewModel(parameters?.FirstOrDefault() as IWebBrowser);
+            return new BrowserWindowViewModel();
         }
 
         public MainWindowViewModel MainWindowViewModel

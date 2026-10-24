@@ -22,7 +22,7 @@
         Height="Auto"
         MinWidth="400"
         MinHeight="300"
-        Title="{Binding ElementName=browser, Path=Title, TargetNullValue=FlashBrowser}">
+        Title="{Binding CurrentBrowser.Title, TargetNullValue=FlashBrowser}">
 
     <d:Window.DataContext>
         <vm:BrowserWindowViewModel/>
@@ -44,7 +44,7 @@
 
             <MenuItem Header="{DynamicResource browser_newBrowserWindow}"
                       Command="{Binding NewBrowserWindowCommand}"
-                      CommandParameter="{Binding Address}"
+                      CommandParameter="{Binding CurrentBrowser.Address}"
                       InputGestureText="Ctrl+N"/>
 
             <Separator/>
@@ -72,7 +72,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    VerticalAlignment="Center">
-                            <Run Text="{DynamicResource browser_zoom}"/><Run Text="{Binding ZoomLevel, Converter={StaticResource ZoomLevelToScale}, StringFormat={}: {0:p0}}"/>
+                            <Run Text="{DynamicResource browser_zoom}"/><Run Text="{Binding CurrentBrowser.ZoomLevel, Converter={StaticResource ZoomLevelToScale}, StringFormat={}: {0:p0}}"/>
                         </TextBlock>
                         <hc:ButtonGroup Grid.Column="1"
                                         Margin="0,0,43,0"
@@ -81,7 +81,7 @@
                                     Height="30"
                                     Padding="0"
                                     ToolTip="{DynamicResource browser_toolTipZoomOut}"
-                                    Command="{Binding Source={x:Reference Name=browser}, Path=ZoomOutCommand}">
+                                    Command="{Binding Source={x:Reference Name=window}, Path=DataContext.CurrentBrowser.Browser.ZoomOutCommand}">
                                 <svgc:SvgIcon Width="10"
                                               Height="10"
                                               UriSource="{StaticResource SubIconUri}">
@@ -95,7 +95,7 @@
                                     Height="30"
                                     Padding="0"
                                     ToolTip="{DynamicResource browser_toolTipZoomIn}"
-                                    Command="{Binding Source={x:Reference Name=browser}, Path=ZoomInCommand}">
+                                    Command="{Binding Source={x:Reference Name=window}, Path=DataContext.CurrentBrowser.Browser.ZoomInCommand}">
                                 <svgc:SvgIcon Width="10"
                                               Height="10"
                                               UriSource="{StaticResource AddIconUri}"/>
@@ -126,7 +126,7 @@
                         <!--<Setter Property="Header"
                                 Value="{Binding Name}"/>-->
                         <Setter Property="Command"
-                                Value="{Binding Source={x:Reference Name=browser}, Path=LoadUrlCommand}"/>
+                                Value="{Binding Source={x:Reference Name=window}, Path=DataContext.CurrentBrowser.Browser.LoadUrlCommand}"/>
                         <Setter Property="CommandParameter"
                                 Value="{Binding Url}"/>
                     </Style>
@@ -142,31 +142,31 @@
 
             <MenuItem Header="{DynamicResource browser_addFavorite}"
                       Command="{Binding AddFavoriteCommand}"
-                      CommandParameter="{x:Reference Name=browser}"
+                      CommandParameter="{Binding CurrentBrowser.Browser}"
                       InputGestureText="Ctrl+D"/>
 
             <Separator/>
 
             <MenuItem Header="{DynamicResource browser_createShortcut}"
                       Command="{Binding CreateShortcutCommand}"
-                      CommandParameter="{x:Reference Name=browser}"
+                      CommandParameter="{Binding CurrentBrowser.Browser}"
                       InputGestureText="Ctrl+Shift+S"/>
 
             <MenuItem Header="{DynamicResource browser_openInDefaultBrowser}"
                       Command="{Binding OpenInDefaultBrowserCommand}"
-                      CommandParameter="{Binding Address}"
+                      CommandParameter="{Binding CurrentBrowser.Address}"
                       InputGestureText="Ctrl+O"/>
 
             <Separator/>
 
             <MenuItem Header="{DynamicResource browser_toggleDevTool}"
                       Command="{Binding ToggleDevToolsCommand}"
-                      CommandParameter="{Binding Source={x:Reference Name=browser}}"
+                      CommandParameter="{Binding CurrentBrowser}"
                       InputGestureText="F12"/>
 
             <MenuItem Header="{DynamicResource browser_viewSource}"
                       Command="{Binding ViewSourceCommand}"
-                      CommandParameter="{Binding Address}"
+                      CommandParameter="{Binding CurrentBrowser.Address}"
                       InputGestureText="Ctrl+U"/>
         </ContextMenu>
 
@@ -193,7 +193,7 @@
                                FontWeight="Bold"
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                Text="{DynamicResource browser_tipsBlockedSwfs}"/>
-                    <ItemsControl ItemsSource="{Binding Source={x:Reference Name=browser}, Path=BlockedSwfs}">
+                    <ItemsControl ItemsSource="{Binding Source={x:Reference Name=window}, Path=DataContext.CurrentBrowser.Browser.BlockedSwfs}">
                         <ItemsControl.Resources>
                             <Style TargetType="MenuItem"
                                    BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -225,47 +225,47 @@
         <!--<KeyBinding Key="Esc"
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>-->
         <KeyBinding Key="F5"
-                    Command="{Binding ElementName=browser, Path=ReloadCommand}"/>
+                    Command="{Binding CurrentBrowser.Browser.ReloadCommand}"/>
         <KeyBinding Key="F11"
                     Command="{Binding ToggleFullscreenCommand}"
-                    CommandParameter="{Binding ElementName=browser}"/>
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Key="F12"
                     Command="{Binding ToggleDevToolsCommand}"
-                    CommandParameter="{Binding ElementName=browser}"/>
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Ctrl+OemPlus"
-                    Command="{Binding ElementName=browser, Path=ZoomInCommand}"/>
+                    Command="{Binding CurrentBrowser.Browser.ZoomInCommand}"/>
         <KeyBinding Gesture="Ctrl+OemMinus"
-                    Command="{Binding ElementName=browser, Path=ZoomOutCommand}"/>
+                    Command="{Binding CurrentBrowser.Browser.ZoomOutCommand}"/>
         <KeyBinding Gesture="Ctrl+0"
-                    Command="{Binding ElementName=browser, Path=ZoomResetCommand}"/>
+                    Command="{Binding CurrentBrowser.Browser.ZoomResetCommand}"/>
         <KeyBinding Gesture="Ctrl+D"
                     Command="{Binding AddFavoriteCommand}"
-                    CommandParameter="{Binding ElementName=browser}"/>
+                    CommandParameter="{Binding CurrentBrowser.Browser}"/>
         <KeyBinding Gesture="Ctrl+F"
                     Command="{Binding OpenFindPopupCommand}"/>
         <KeyBinding Gesture="Ctrl+M"
                     Command="{Binding ShowMainWindowCommand}"/>
         <KeyBinding Gesture="Ctrl+N"
                     Command="{Binding NewBrowserWindowCommand}"
-                    CommandParameter="{Binding Address}"/>
+                    CommandParameter="{Binding CurrentBrowser.Address}"/>
         <KeyBinding Gesture="Ctrl+O"
                     Command="{Binding OpenInDefaultBrowserCommand}"
-                    CommandParameter="{Binding Address}"/>
+                    CommandParameter="{Binding CurrentBrowser.Address}"/>
         <KeyBinding Gesture="Ctrl+P"
-                    Command="{Binding ElementName=browser, Path=PrintCommand}"/>
+                    Command="{Binding CurrentBrowser.Browser.PrintCommand}"/>
         <KeyBinding Gesture="Ctrl+U"
                     Command="{Binding ViewSourceCommand}"
-                    CommandParameter="{Binding Address}"/>
+                    CommandParameter="{Binding CurrentBrowser.Address}"/>
         <KeyBinding Gesture="Ctrl+Shift+S"
                     Command="{Binding CreateShortcutCommand}"
-                    CommandParameter="{Binding ElementName=browser}"/>
+                    CommandParameter="{Binding CurrentBrowser.Browser}"/>
         <KeyBinding Gesture="Ctrl+W"
-                    Command="{Binding ElementName=browser, Path=CloseBrowserCommand}"
+                    Command="{Binding CurrentBrowser.Browser.CloseBrowserCommand}"
                     CommandParameter="{Binding Source={x:Static data:GlobalData.Settings}, Path=DisableOnBeforeUnloadDialog}"/>
         <KeyBinding Gesture="Alt+Left"
-                    Command="{Binding ElementName=browser, Path=BackCommand}"/>
+                    Command="{Binding CurrentBrowser.Browser.BackCommand}"/>
         <KeyBinding Gesture="Alt+Right"
-                    Command="{Binding ElementName=browser, Path=ForwardCommand}"/>
+                    Command="{Binding CurrentBrowser.Browser.ForwardCommand}"/>
     </Window.InputBindings>
 
 
@@ -301,14 +301,14 @@
             <StackPanel DockPanel.Dock="Left"
                         Orientation="Horizontal">
                 <Button ToolTip="{DynamicResource browser_toolTipBack}"
-                        Command="{Binding ElementName=browser, Path=BackCommand}">
+                        Command="{Binding CurrentBrowser.Browser.BackCommand}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="{StaticResource BackIconUri}"/>
                 </Button>
 
                 <Button ToolTip="{DynamicResource browser_toolTipForward}"
-                        Command="{Binding ElementName=browser, Path=ForwardCommand}">
+                        Command="{Binding CurrentBrowser.Browser.ForwardCommand}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="{StaticResource ForwardIconUri}"/>
@@ -316,7 +316,7 @@
 
                 <Button Margin="10,0,0,0"
                         Command="{Binding ToggleLoadingStateCommand}"
-                        CommandParameter="{Binding ElementName=browser}">
+                        CommandParameter="{Binding CurrentBrowser.Browser}">
                     <Button.Resources>
                         <svgc:SvgIcon x:Key="reloadIcon"
                                       Width="14"
@@ -335,7 +335,7 @@
                             <Setter Property="ToolTip"
                                     Value="{DynamicResource browser_toolTipStop}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}"
+                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.IsLoading}"
                                              Value="False">
                                     <Setter Property="Content"
                                             Value="{StaticResource reloadIcon}"/>
@@ -360,7 +360,7 @@
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=browser, Path=HasBlockedSwfs}"
+                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.HasBlockedSwfs}"
                                              Value="False">
                                     <Setter Property="Visibility"
                                             Value="Collapsed"/>
@@ -417,7 +417,7 @@
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Opened">
                             <i:InvokeCommandAction Command="{Binding FindNextTextCommand}"
-                                                   CommandParameter="{Binding ElementName=browser}"/>
+                                                   CommandParameter="{Binding CurrentBrowser.Browser}"/>
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                     <hc:Card>
@@ -441,7 +441,7 @@
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="TextChanged">
                                         <i:InvokeCommandAction Command="{Binding FindNextTextCommand}"
-                                                               CommandParameter="{Binding ElementName=browser}"/>
+                                                               CommandParameter="{Binding CurrentBrowser.Browser}"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                                 <TextBox.InputBindings>
@@ -449,13 +449,13 @@
                                                 Command="{Binding CloseFindPopupCommand}"/>
                                     <KeyBinding Key="Enter"
                                                 Command="{Binding FindNextTextCommand}"
-                                                CommandParameter="{Binding ElementName=browser}"/>
+                                                CommandParameter="{Binding CurrentBrowser.Browser}"/>
                                     <KeyBinding Key="Up"
                                                 Command="{Binding FindPrevTextCommand}"
-                                                CommandParameter="{Binding ElementName=browser}"/>
+                                                CommandParameter="{Binding CurrentBrowser.Browser}"/>
                                     <KeyBinding Key="Down"
                                                 Command="{Binding FindNextTextCommand}"
-                                                CommandParameter="{Binding ElementName=browser}"/>
+                                                CommandParameter="{Binding CurrentBrowser.Browser}"/>
                                 </TextBox.InputBindings>
                             </TextBox>
 
@@ -466,14 +466,14 @@
                             </Separator>
 
                             <Button Command="{Binding FindPrevTextCommand}"
-                                    CommandParameter="{Binding ElementName=browser}">
+                                    CommandParameter="{Binding CurrentBrowser.Browser}">
                                 <svgc:SvgIcon Width="13"
                                               Height="13"
                                               UriSource="{StaticResource UpIconUri}"/>
                             </Button>
 
                             <Button Command="{Binding FindNextTextCommand}"
-                                    CommandParameter="{Binding ElementName=browser}">
+                                    CommandParameter="{Binding CurrentBrowser.Browser}">
                                 <svgc:SvgIcon Width="13"
                                               Height="13"
                                               UriSource="{StaticResource DownIconUri}"/>
@@ -487,13 +487,13 @@
                   Height="30">
                 <!--address-->
                 <TextBox Padding="35,0,8,0"
-                         Text="{Binding ElementName=browser, Path=Address, Mode=OneWay}">
+                         Text="{Binding CurrentBrowser.Browser.Address, Mode=OneWay}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
-                                    Command="{Binding ElementName=browser, Path=LoadUrlCommand}"
+                                    Command="{Binding CurrentBrowser.Browser.LoadUrlCommand}"
                                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TextBox}, Path=Text}"/>
                     </TextBox.InputBindings>
                 </TextBox>
@@ -508,7 +508,7 @@
                                    Width="16"
                                    Height="16"
                                    Margin="8,0,5,0"
-                                   Source="{Binding ElementName=browser, Path=FaviconUrl, TargetNullValue=pack://application:\,\,\,/Assets/Icons/page.png}"/>
+                                   Source="{Binding CurrentBrowser.Browser.FaviconUrl, TargetNullValue=pack://application:\,\,\,/Assets/Icons/page.png}"/>
                             <svgc:SvgIcon x:Key="DefaultIcon"
                                           Width="15"
                                           Height="15"
@@ -520,12 +520,12 @@
                                 <Setter Property="Content"
                                         Value="{StaticResource BrowserIcon}"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=browser, Path=FaviconUrl}"
+                                    <DataTrigger Binding="{Binding CurrentBrowser.Browser.FaviconUrl}"
                                                  Value="">
                                         <Setter Property="Content"
                                                 Value="{StaticResource DefaultIcon}"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding ElementName=browser, Path=FaviconUrl}"
+                                    <DataTrigger Binding="{Binding CurrentBrowser.Browser.FaviconUrl}"
                                                  Value="{x:Null}">
                                         <Setter Property="Content"
                                                 Value="{StaticResource DefaultIcon}"/>
@@ -543,43 +543,21 @@
             </Grid>
         </DockPanel>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition x:Name="devtoolsColumn" Width="Auto"
-                                  MinWidth="{Binding ElementName=devtoolsContainer, Path=MinWidth}"
-                                  MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth, Converter={StaticResource TwoThirdConverter}}"/>
-            </Grid.ColumnDefinitions>
-
-            <flash:ChromiumFlashBrowser x:Name="browser"
-                                        ZoomLevelIncrement="0.25"
-                                        ZoomLevel="{Binding ZoomLevel, Mode=TwoWay}"
-                                        Address="{Binding Address, Mode=TwoWay, TargetNullValue='about:blank'}"
-                                        FullscreenModeChanged="BrowserFullscreenModeChanged"/>
-
-            <GridSplitter Grid.Column="1"
-                          Width="5"
-                          Background="Transparent"
-                          HorizontalAlignment="Stretch"
-                          Visibility="{Binding ElementName=devtoolsContainer, Path=Visibility}"/>
-
-            <c:HwndContainer x:Name="devtoolsContainer"
-                             Grid.Column="2"
-                             ContentHandle="{Binding IntegratedDevToolsHandle}">
-                <c:HwndContainer.Style>
-                    <Style TargetType="{x:Type c:HwndContainer}">
-                        <Setter Property="MinWidth" Value="300"/>
-                        <Style.Triggers>
-                            <Trigger Property="ContentHandle"
-                                     Value="{x:Static sys:IntPtr.Zero}">
-                                <Setter Property="MinWidth" Value="0"/>
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </c:HwndContainer.Style>
-            </c:HwndContainer>
+        <Grid Grid.Row="1"
+              local:BrowserView.DevToolsOpened="DevToolsOpened"
+              local:BrowserView.DevToolsClosed="DevToolsClosed"
+              local:BrowserView.FullscreenChanged="FullscreenChanged"
+              local:BrowserView.BrowserDoClose="BrowserDoClose"
+              local:BrowserView.BrowserAfterCreated="BrowserAfterCreated"
+              local:BrowserView.BrowserPopup="BrowserPopup"
+              local:BrowserView.BrowserNewPage="BrowserNewPage">
+            <ContentControl Content="{Binding CurrentBrowser}">
+                <ContentControl.ContentTemplate>
+                    <DataTemplate>
+                        <local:BrowserView/>
+                    </DataTemplate>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
         </Grid>
 
         <Popup x:Name="statusPopup"
@@ -593,14 +571,15 @@
                    Height="22"
                    Padding="5,0"
                    Opacity="0.85"
+                   Content="{Binding CurrentBrowser}"
                    MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThirdConverter}}">
                 <Label.Resources>
-                    <DataTemplate x:Key="statusTemplate">
-                        <TextBlock Text="{Binding ElementName=browser, Path=StatusText}" TextTrimming="CharacterEllipsis"/>
+                    <DataTemplate x:Key="statusTemplate" DataType="{x:Type vm:BrowserViewModel}">
+                        <TextBlock Text="{Binding Browser.StatusText}" TextTrimming="CharacterEllipsis"/>
                     </DataTemplate>
-                    <DataTemplate x:Key="loadingTemplate">
+                    <DataTemplate x:Key="loadingTemplate" DataType="{x:Type vm:BrowserViewModel}">
                         <TextBlock>
-                            <Run Text="{DynamicResource browser_loading}"/><Run Text="{Binding ElementName=browser, Path=LoadingProgress, StringFormat={} ({0:p0})}"/>
+                            <Run Text="{DynamicResource browser_loading}"/><Run Text="{Binding Browser.LoadingProgress, StringFormat={} ({0:p0})}"/>
                         </TextBlock>
                     </DataTemplate>
                 </Label.Resources>
@@ -609,13 +588,13 @@
                            BasedOn="{StaticResource {x:Type Label}}">
                         <Setter Property="ContentTemplate" Value="{StaticResource statusTemplate}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=browser, Path=IsLoading}" Value="True">
+                            <DataTrigger Binding="{Binding CurrentBrowser.Browser.IsLoading}" Value="True">
                                 <Setter Property="ContentTemplate" Value="{StaticResource loadingTemplate}"/>
                             </DataTrigger>
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding ElementName=browser, Path=IsLoading}" Value="False"/>
-                                    <Condition Binding="{Binding ElementName=browser, Path=StatusText}" Value=""/>
+                                    <Condition Binding="{Binding CurrentBrowser.Browser.IsLoading}" Value="False"/>
+                                    <Condition Binding="{Binding CurrentBrowser.Browser.StatusText}" Value=""/>
                                 </MultiDataTrigger.Conditions>
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </MultiDataTrigger>

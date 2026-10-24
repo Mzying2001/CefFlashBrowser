@@ -177,7 +177,7 @@ namespace CefFlashBrowser.Services
             ShowWindow<BrowserWindow>(initializer: window =>
             {
                 _browserWindows.Add(window);
-                ((BrowserWindowViewModel)window.DataContext).Address = address;
+                ((BrowserWindowViewModel)window.DataContext).CurrentBrowser.Address = address;
 
                 DialogHelper.GetBeforeDestroyHandlers(window).Add((s, e) =>
                 {

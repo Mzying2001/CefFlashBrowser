@@ -1,4 +1,5 @@
 using CefFlashBrowser.Data;
+using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
@@ -23,133 +24,6 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserWindow : Window
     {
-        private class BrowserLifeSpanHandler : LifeSpanHandler
-        {
-            private readonly BrowserWindow window;
-
-            public BrowserLifeSpanHandler(BrowserWindow window)
-            {
-                this.window = window;
-            }
-
-            public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
-            {
-                if (window._isClosed)
-                {
-                    return false;
-                }
-
-                if (browser.IsDisposed)
-                {
-                    window.Dispatcher.Invoke(ContinueClose);
-                    return false;
-                }
-
-                bool isPopup = browser.IsPopup;
-                IntPtr hHost = browser.GetHost().GetWindowHandle();
-
-                window.Dispatcher.Invoke(delegate
-                {
-                    if (HwndHelper.IsDevToolsWindow(hHost))
-                    {
-                        window.ViewModel.OnDevToolsClosed(chromiumWebBrowser);
-                    }
-                    else if (!isPopup)
-                    {
-                        ContinueClose();
-                    }
-                });
-                return false;
-            }
-
-            private void ContinueClose()
-            {
-                window._doClose = true;
-                window.Close();
-            }
-
-            public override void OnAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
-            {
-                var hHost = browser.GetHost().GetWindowHandle();
-
-                if (HwndHelper.IsDevToolsWindow(hHost))
-                {
-                    window.Dispatcher.Invoke(() =>
-                    {
-                        HwndHelper.SetDevToolsFlag(hHost);
-                        HwndHelper.SetOwnerWindow(hHost, window._hwnd);
-                        window.ViewModel.OnDevToolsOpened(chromiumWebBrowser, hHost);
-                    });
-                }
-            }
-
-            public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
-            {
-                if (!window._isClosed)
-                {
-                    var isPopup = targetDisposition == WindowOpenDisposition.NewPopup;
-
-                    // Extract popupFeatures properties in synchronous context,
-                    // as CEF disposes the object after OnBeforePopup returns.
-                    WindowSizeInfo popupSizeInfo = null;
-
-                    if (isPopup && popupFeatures != null)
-                    {
-                        popupSizeInfo = new WindowSizeInfo
-                        {
-                            Left = popupFeatures.XSet != 0 ? popupFeatures.X : double.NaN,
-                            Top = popupFeatures.YSet != 0 ? popupFeatures.Y : double.NaN,
-                            Width = popupFeatures.WidthSet != 0 ? popupFeatures.Width : double.NaN,
-                            Height = popupFeatures.HeightSet != 0 ? popupFeatures.Height : double.NaN,
-                        };
-                    }
-
-                    window.Dispatcher.InvokeAsync(delegate
-                    {
-                        if (isPopup)
-                        {
-                            window.ViewModel.OnPopup(targetUrl, popupSizeInfo);
-                        }
-                        else
-                        {
-                            window.ViewModel.OnNewPage(targetUrl);
-                        }
-                    });
-                }
-
-                newBrowser = null;
-                return true;
-            }
-        }
-
-        private class BrowserMenuHandler : BrowserHandlers.ContextMenuHandler
-        {
-            private readonly BrowserWindow window;
-
-            public BrowserMenuHandler(BrowserWindow window)
-            {
-                this.window = window;
-            }
-
-            public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
-            {
-                switch (commandId)
-                {
-                    case Search:
-                    case OpenInNewWindow:
-                    case OpenSelectedUrl:
-                    case CefMenuCommand.ViewSource:
-                        {
-                            window.Dispatcher.Invoke(() => window.ExitFullScreen());
-                            break;
-                        }
-                }
-                return base.OnContextMenuCommand(chromiumWebBrowser, browser, frame, parameters, commandId, eventFlags);
-            }
-        }
-
-
-
         private bool _doClose = false;
         private bool _isClosed = false;
 
@@ -179,26 +53,17 @@ namespace CefFlashBrowser.Views
                 InputBindings.Clear();
             }
 
-            browser.JsDialogHandler = new BrowserHandlers.JsDialogHandler();
-            browser.DownloadHandler = new BrowserHandlers.DownloadHandler();
-            browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
-            browser.MenuHandler = new BrowserMenuHandler(this);
+            ViewModel = SimpleIoc.Global.GetInstance<BrowserWindowViewModel>();
 
-            ViewModel = SimpleIoc.Global.GetInstance<BrowserWindowViewModel>(browser);
-
-            Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
-            Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
-            Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
             Messenger.Global.Register(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
+            Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
 
             Closed += delegate
             {
-                Messenger.Global.Unregister(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
-                Messenger.Global.Unregister(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
-                Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
+                Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);    
             };
 
             // IsActive may not be settled during SourceInitialized, so initialize the
@@ -233,9 +98,9 @@ namespace CefFlashBrowser.Views
                 {
                     ViewModel.ShowFindPopup = false;
                 }
-                else if (browser.IsLoading)
+                else if (ViewModel.CurrentBrowser.Browser.IsLoading)
                 {
-                    browser.Stop();
+                    ViewModel.CurrentBrowser.Browser.Stop();
                 }
             }
         }
@@ -310,13 +175,12 @@ namespace CefFlashBrowser.Views
 
         protected override void OnClosing(CancelEventArgs e)
         {
+            var browser = ViewModel.CurrentBrowser.Browser;
+
             if (browser.IsDisposed || _doClose)
             {
                 if (!ViewModel.Fullscreen)
                     GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
-
-                if (devtoolsContainer.ContentHandle != IntPtr.Zero)
-                    GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
             }
             else
             {
@@ -343,48 +207,9 @@ namespace CefFlashBrowser.Views
             _hwndSource?.RemoveHook(WndProc);
         }
 
-        private void DevToolsOpenedHandler(object msg)
-        {
-            if (msg == browser)
-            {
-                OnDevToolsOpened();
-            }
-        }
-
-        private void DevToolsClosedHandler(object msg)
-        {
-            if (msg == browser)
-            {
-                OnDevToolsClosed();
-            }
-        }
-
-        private void OnDevToolsOpened()
-        {
-            if (GlobalData.Settings.EnableIntegratedDevTools)
-            {
-                Activate();
-                Keyboard.Focus(browser);
-                devtoolsColumn.Width = new GridLength(GlobalData.Settings.IntegratedDevToolsWidth);
-            }
-        }
-
-        private void OnDevToolsClosed()
-        {
-            Activate();
-            Keyboard.Focus(browser);
-            GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
-            devtoolsColumn.Width = new GridLength(0);
-        }
-
-        private void BrowserFullscreenModeChanged(object sender, EventArgs e)
-        {
-            ViewModel.Fullscreen = browser.FullscreenMode;
-        }
-
         private void FullScreenChangedHandler(object msg)
         {
-            if (msg == DataContext)
+            if (msg == ViewModel)
             {
                 OnFullScreenChanged(ViewModel.Fullscreen);
             }
@@ -448,12 +273,8 @@ namespace CefFlashBrowser.Views
 
         public void ForceCloseWindow()
         {
-            if (!browser.IsDisposed)
-            {
-                browser.LifeSpanHandler = null;
-                browser.CloseBrowser(true);
-            }
             _doClose = true;
+            ViewModel.CurrentBrowser.Browser.GetBrowser()?.CloseBrowser(true);
             Close();
         }
 
@@ -507,7 +328,7 @@ namespace CefFlashBrowser.Views
 
         private void FindPopupClosed(object sender, EventArgs e)
         {
-            browser.GetBrowser()?.StopFinding(true);
+            ViewModel.CurrentBrowser.Browser.GetBrowser()?.StopFinding(true);
         }
 
         private void UpdateFindPopupPosition()
@@ -548,6 +369,48 @@ namespace CefFlashBrowser.Views
             }
 
             findPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
+        }
+
+        private void DevToolsOpened(object sender, RoutedEventArgs e)
+        {
+            Activate();
+        }
+
+        private void DevToolsClosed(object sender, RoutedEventArgs e)
+        {
+            Activate();
+        }
+
+        private void FullscreenChanged(object sender, FullscreenChangedEventArgs e)
+        {
+            ViewModel.Fullscreen = e.Fullscreen;
+        }
+
+        private void BrowserDoClose(object sender, BrowserDoCloseEventArgs e)
+        {
+            if (!e.IsPopup)
+            {
+                _doClose = true;
+                Close();
+            }
+        }
+
+        private void BrowserAfterCreated(object sender, BrowserAfterCreatedEventArgs e)
+        {
+            if (HwndHelper.IsDevToolsWindow(e.HostHandle))
+            {
+                HwndHelper.SetOwnerWindow(e.HostHandle, _hwnd);
+            }
+        }
+
+        private void BrowserPopup(object sender, BrowserPopupEventArgs e)
+        {
+            ViewModel.OnPopup(e.TargetUrl, e.PopupSizeInfo);
+        }
+
+        private void BrowserNewPage(object sender, BrowserNewPageEventArgs e)
+        {
+            ViewModel.OnNewPage(e.TargetUrl);
         }
     }
 }
