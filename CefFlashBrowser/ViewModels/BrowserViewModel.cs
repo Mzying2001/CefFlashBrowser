@@ -1,14 +1,9 @@
 ﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm;
 using SimpleMvvm.Messaging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -20,6 +15,9 @@ namespace CefFlashBrowser.ViewModels
             get => _browser;
             set
             {
+                if (ReferenceEquals(_browser, value))
+                    return;
+
                 if (_browser == null)
                 {
                     UpdateValue(ref _browser, value);
@@ -39,7 +37,7 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _address, value);
         }
 
-        private string _title = string.Empty;
+        private string _title;
         public string Title
         {
             get => _title;
@@ -93,6 +91,9 @@ namespace CefFlashBrowser.ViewModels
 
         public void ToggleDevTools()
         {
+            if (Browser == null || Browser.IsDisposed || !Browser.IsBrowserInitialized)
+                return;
+
             if (IntegratedDevToolsHandle == IntPtr.Zero
                 && HwndHelper.FindNotIntegratedDevTools(Browser) == IntPtr.Zero)
             {
@@ -106,7 +107,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void ExitFullScreen()
         {
-            if (Browser.CanExecuteJavascriptInMainFrame)
+            if (Browser != null && !Browser.IsDisposed && Browser.CanExecuteJavascriptInMainFrame)
             {
                 Browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
             }

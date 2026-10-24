@@ -6,9 +6,11 @@ using CefFlashBrowser.ViewModels;
 using CefSharp;
 using SimpleMvvm.Messaging;
 using System;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace CefFlashBrowser.Views
 {
@@ -75,18 +77,30 @@ namespace CefFlashBrowser.Views
                     case OpenSelectedUrl:
                     case CefMenuCommand.ViewSource:
                         {
-                            view.Dispatcher.Invoke(() =>
+                            if (view._isClosed || chromiumWebBrowser.IsDisposed)
+                                return false;
+
+                            view.InvokeOnUIThread(() =>
                             {
-                                view.ViewModel.ExitFullScreen();
-                                view.OnFullScreenChanged(false);
+                                if (!view._isClosed)
+                                {
+                                    view.ViewModel?.ExitFullScreen();
+                                    view.OnFullScreenChanged(false);
+                                }
                             });
                             break;
                         }
                 }
-                return base.OnContextMenuCommand(chromiumWebBrowser, browser, frame, parameters, commandId, eventFlags);
+                return !view._isClosed && !chromiumWebBrowser.IsDisposed
+                    && base.OnContextMenuCommand(chromiumWebBrowser, browser, frame, parameters, commandId, eventFlags);
             }
         }
 
+
+        private volatile bool _isClosed;
+        private Window _ownerWindow;
+        private readonly CancellationTokenSource _closeCancellation = new CancellationTokenSource();
+        private readonly CancellationToken _closeToken;
 
         public static readonly RoutedEvent DevToolsOpenedEvent = EventManager.RegisterRoutedEvent(
             nameof(DevToolsOpened), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(BrowserView));
@@ -160,6 +174,7 @@ namespace CefFlashBrowser.Views
 
         public BrowserView()
         {
+            _closeToken = _closeCancellation.Token;
             InitializeComponent();
 
             browser.JsDialogHandler = new Browser.Handlers.JsDialogHandler();
@@ -169,6 +184,9 @@ namespace CefFlashBrowser.Views
 
             Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
+
+            DataContextChanged += BrowserDataContextChanged;
+            Loaded += BrowserViewLoaded;
         }
 
         private void UnregisterMessageHandlers()
@@ -177,22 +195,90 @@ namespace CefFlashBrowser.Views
             Messenger.Global.Unregister(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
         }
 
-        public override void OnApplyTemplate()
+        private void InvokeOnUIThread(Action action)
         {
-            base.OnApplyTemplate();
+            if (_isClosed || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                return;
 
-            Dispatcher.InvokeAsync(() =>
+            try
             {
-                if (ViewModel != null)
-                {
-                    ViewModel.Browser = browser;
-                }
-            });
+                Dispatcher.Invoke(action, DispatcherPriority.Send, _closeToken);
+            }
+            catch (OperationCanceledException) when (_closeToken.IsCancellationRequested || Dispatcher.HasShutdownStarted)
+            {
+                // Release CEF callbacks waiting for a window that has already closed.
+            }
+        }
+
+        private void BrowserDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            AttachBrowser();
+        }
+
+        private void BrowserViewLoaded(object sender, RoutedEventArgs e)
+        {
+            AttachBrowser();
+        }
+
+        private void AttachBrowser()
+        {
+            if (_isClosed)
+                return;
+
+            if (ViewModel != null)
+            {
+                ViewModel.Browser = browser;
+                ViewModel.Title = browser.Title;
+            }
+
+            var ownerWindow = Window.GetWindow(this);
+            if (_ownerWindow != ownerWindow)
+            {
+                if (_ownerWindow != null)
+                    _ownerWindow.Closed -= OwnerWindowClosed;
+
+                _ownerWindow = ownerWindow;
+
+                if (_ownerWindow != null)
+                    _ownerWindow.Closed += OwnerWindowClosed;
+            }
+        }
+
+        private void SaveDevToolsWidth()
+        {
+            if (devtoolsContainer.ContentHandle != IntPtr.Zero
+                && devtoolsColumn.Width.IsAbsolute && devtoolsColumn.Width.Value > 0)
+            {
+                GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
+            }
+        }
+
+        private void OwnerWindowClosed(object sender, EventArgs e)
+        {
+            if (_isClosed)
+                return;
+
+            _isClosed = true;
+            _closeCancellation.Cancel();
+            _closeCancellation.Dispose();
+            SaveDevToolsWidth();
+            UnregisterMessageHandlers();
+            DataContextChanged -= BrowserDataContextChanged;
+            Loaded -= BrowserViewLoaded;
+
+            _ownerWindow.Closed -= OwnerWindowClosed;
+            _ownerWindow = null;
+
+            if (!browser.IsDisposed)
+                browser.LifeSpanHandler = null;
+
+            browser.Dispose();
+            devtoolsContainer.Dispose();
         }
 
         private void DevToolsOpenedHandler(object msg)
         {
-            if (msg == browser)
+            if (!_isClosed && msg == browser)
             {
                 OnDevToolsOpened();
             }
@@ -200,7 +286,7 @@ namespace CefFlashBrowser.Views
 
         private void DevToolsClosedHandler(object msg)
         {
-            if (msg == browser)
+            if (!_isClosed && msg == browser)
             {
                 OnDevToolsClosed();
             }
@@ -208,10 +294,13 @@ namespace CefFlashBrowser.Views
 
         protected virtual void OnDevToolsOpened()
         {
+            if (_isClosed)
+                return;
+
             var e = new RoutedEventArgs(DevToolsOpenedEvent, this);
             RaiseEvent(e);
 
-            if (!e.Handled && GlobalData.Settings.EnableIntegratedDevTools)
+            if (!_isClosed && !e.Handled && GlobalData.Settings.EnableIntegratedDevTools)
             {
                 Keyboard.Focus(browser);
                 devtoolsColumn.Width = new GridLength(GlobalData.Settings.IntegratedDevToolsWidth);
@@ -220,10 +309,13 @@ namespace CefFlashBrowser.Views
 
         protected virtual void OnDevToolsClosed()
         {
+            if (_isClosed)
+                return;
+
             var e = new RoutedEventArgs(DevToolsClosedEvent, this);
             RaiseEvent(e);
 
-            if (!e.Handled)
+            if (!_isClosed && !e.Handled)
             {
                 Keyboard.Focus(browser);
                 GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
@@ -233,42 +325,50 @@ namespace CefFlashBrowser.Views
 
         private void BrowserFullscreenModeChanged(object sender, EventArgs e)
         {
-            OnFullScreenChanged(browser.FullscreenMode);
+            if (!_isClosed)
+                OnFullScreenChanged(browser.FullscreenMode);
         }
 
         protected virtual void OnFullScreenChanged(bool fullScreen)
         {
-            RaiseEvent(new FullscreenChangedEventArgs(FullscreenChangedEvent, this, fullScreen));
+            if (!_isClosed)
+                RaiseEvent(new FullscreenChangedEventArgs(FullscreenChangedEvent, this, fullScreen));
         }
 
         protected virtual void OnBrowserDoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
-            var isPopup = browser.IsPopup;
-            var hostHandle = browser.GetHost().GetWindowHandle();
-            var isDevTools = HwndHelper.IsDevToolsWindow(hostHandle);
+            if (_isClosed || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                return;
 
-            Dispatcher.Invoke(() =>
+            // A disposed callback browser can no longer expose its popup state or host.
+            var isDisposed = browser.IsDisposed;
+            var isPopup = !isDisposed && browser.IsPopup;
+            var hostHandle = isDisposed ? IntPtr.Zero : browser.GetHost().GetWindowHandle();
+            var isDevTools = !isDisposed && HwndHelper.IsDevToolsWindow(hostHandle);
+
+            InvokeOnUIThread(() =>
             {
-                var e = new BrowserDoCloseEventArgs(BrowserDoCloseEvent, this, chromiumWebBrowser, browser, isPopup, hostHandle);
-                RaiseEvent(e);
-
-                if (!e.Handled && isDevTools)
-                {
-                    ViewModel.OnDevToolsClosed();
-                }
+                if (_isClosed)
+                    return;
 
                 if (!isPopup && !isDevTools)
-                {
-                    UnregisterMessageHandlers();
+                    SaveDevToolsWidth();
 
-                    if (devtoolsContainer.ContentHandle != IntPtr.Zero)
-                        GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
+                var e = new BrowserDoCloseEventArgs(BrowserDoCloseEvent, this, chromiumWebBrowser, browser, isPopup, isDevTools, hostHandle);
+                RaiseEvent(e);
+
+                if (!_isClosed && !e.Handled && isDevTools)
+                {
+                    ViewModel?.OnDevToolsClosed();
                 }
             });
         }
 
         protected virtual void OnBrowserAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
+            if (_isClosed || browser.IsDisposed || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                return;
+
             var hostHandle = browser.GetHost().GetWindowHandle();
             var isDevTools = HwndHelper.IsDevToolsWindow(hostHandle);
 
@@ -277,14 +377,17 @@ namespace CefFlashBrowser.Views
                 HwndHelper.SetDevToolsFlag(hostHandle);
             }
 
-            Dispatcher.Invoke(() =>
+            InvokeOnUIThread(() =>
             {
+                if (_isClosed || browser.IsDisposed)
+                    return;
+
                 var e = new BrowserAfterCreatedEventArgs(BrowserAfterCreatedEvent, this, chromiumWebBrowser, browser, hostHandle);
                 RaiseEvent(e);
 
-                if (!e.Handled && isDevTools)
+                if (!_isClosed && !e.Handled && isDevTools)
                 {
-                    ViewModel.OnDevToolsOpened(hostHandle);
+                    ViewModel?.OnDevToolsOpened(hostHandle);
                 }
             });
         }
@@ -302,6 +405,9 @@ namespace CefFlashBrowser.Views
             IBrowserSettings browserSettings,
             ref bool noJavascriptAccess)
         {
+            if (_isClosed || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                return;
+
             var isPopup = targetDisposition == WindowOpenDisposition.NewPopup;
 
             // Extract popupFeatures properties in synchronous context,
@@ -321,6 +427,9 @@ namespace CefFlashBrowser.Views
 
             Dispatcher.InvokeAsync(() =>
             {
+                if (_isClosed || this.browser.IsDisposed)
+                    return;
+
                 if (isPopup)
                 {
                     var e = new BrowserPopupEventArgs(BrowserPopupEvent, this, chromiumWebBrowser, browser, targetUrl, popupSizeInfo);
@@ -336,7 +445,8 @@ namespace CefFlashBrowser.Views
 
         private void BrowserTitleChanged(object sender, TitleChangedEventArgs e)
         {
-            ViewModel.Title = e.Title;
+            if (!_isClosed && ViewModel != null)
+                ViewModel.Title = e.Title;
         }
     }
 
@@ -358,14 +468,16 @@ namespace CefFlashBrowser.Views
         public IWebBrowser ChromiumWebBrowser { get; }
         public IBrowser Browser { get; }
         public bool IsPopup { get; }
+        public bool IsDevTools { get; }
         public IntPtr HostHandle { get; }
 
-        public BrowserDoCloseEventArgs(RoutedEvent routedEvent, object source, IWebBrowser chromiumWebBrowser, IBrowser browser, bool isPopup, IntPtr hostHandle)
+        public BrowserDoCloseEventArgs(RoutedEvent routedEvent, object source, IWebBrowser chromiumWebBrowser, IBrowser browser, bool isPopup, bool isDevTools, IntPtr hostHandle)
             : base(routedEvent, source)
         {
             ChromiumWebBrowser = chromiumWebBrowser;
             Browser = browser;
             IsPopup = isPopup;
+            IsDevTools = isDevTools;
             HostHandle = hostHandle;
         }
     }

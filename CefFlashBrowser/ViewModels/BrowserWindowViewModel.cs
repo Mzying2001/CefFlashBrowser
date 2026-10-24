@@ -56,20 +56,6 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _textToFind, value);
         }
 
-        private double _zoomLevel = 0.0;
-        public double ZoomLevel
-        {
-            get => _zoomLevel;
-            set
-            {
-                if (UpdateValue(ref _zoomLevel, value)
-                    && GlobalData.Settings.SaveZoomLevel)
-                {
-                    GlobalData.Settings.BrowserZoomLevel = value;
-                }
-            }
-        }
-
         private bool _fullscreen = false;
         public bool Fullscreen
         {
@@ -164,6 +150,9 @@ namespace CefFlashBrowser.ViewModels
 
         public void CreateShortcut(IWebBrowser browser)
         {
+            if (browser == null || browser.IsDisposed || !browser.IsBrowserInitialized)
+                return;
+
             var title = ReplaceInvalidFileNameChars(GetWebBrowserTitle(browser));
 
             var sfd = new Microsoft.Win32.SaveFileDialog()
@@ -195,6 +184,9 @@ namespace CefFlashBrowser.ViewModels
 
         public void AddFavorite(IWebBrowser browser)
         {
+            if (browser == null || browser.IsDisposed || !browser.IsBrowserInitialized)
+                return;
+
             var vm = new AddFavoriteDialogViewModel
             {
                 Name = GetWebBrowserTitle(browser),
@@ -209,6 +201,9 @@ namespace CefFlashBrowser.ViewModels
 
         public void ToggleLoadingState(IWebBrowser browser)
         {
+            if (browser == null || browser.IsDisposed || !browser.IsBrowserInitialized)
+                return;
+
             if (browser.IsLoading)
             {
                 browser.Stop();
@@ -239,6 +234,9 @@ namespace CefFlashBrowser.ViewModels
 
         public void ToggleFullscreen(BrowserViewModel browser)
         {
+            if (browser?.Browser == null || browser.Browser.IsDisposed || !browser.Browser.IsBrowserInitialized)
+                return;
+
             if (Fullscreen)
             {
                 browser.ExitFullScreen();
@@ -288,6 +286,9 @@ namespace CefFlashBrowser.ViewModels
 
         public void FindText(IWebBrowser browser, bool forward)
         {
+            if (browser == null || browser.IsDisposed || !browser.IsBrowserInitialized)
+                return;
+
             if (string.IsNullOrEmpty(TextToFind))
             {
                 browser.GetBrowser()?.StopFinding(true);

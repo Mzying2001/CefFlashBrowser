@@ -1,10 +1,9 @@
 using CefFlashBrowser.Data;
-using CefFlashBrowser.FlashBrowser;
-using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
@@ -15,7 +14,7 @@ using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
-using BrowserHandlers = CefFlashBrowser.Browser.Handlers;
+using System.Windows.Threading;
 
 namespace CefFlashBrowser.Views
 {
@@ -26,6 +25,8 @@ namespace CefFlashBrowser.Views
     {
         private bool _doClose = false;
         private bool _isClosed = false;
+        private ChromiumWebBrowser _browserPendingClose;
+        private bool _forceClosePending;
 
         private IntPtr _hwnd;
         private HwndSource _hwndSource;
@@ -63,7 +64,7 @@ namespace CefFlashBrowser.Views
             {
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
-                Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);    
+                Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
             };
 
             // IsActive may not be settled during SourceInitialized, so initialize the
@@ -98,9 +99,10 @@ namespace CefFlashBrowser.Views
                 {
                     ViewModel.ShowFindPopup = false;
                 }
-                else if (ViewModel.CurrentBrowser.Browser.IsLoading)
+                else if (ViewModel.CurrentBrowser?.Browser is IWebBrowser browser
+                    && !browser.IsDisposed && browser.IsLoading)
                 {
-                    ViewModel.CurrentBrowser.Browser.Stop();
+                    browser.Stop();
                 }
             }
         }
@@ -175,12 +177,17 @@ namespace CefFlashBrowser.Views
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            var browser = ViewModel.CurrentBrowser.Browser;
+            var browser = ViewModel?.CurrentBrowser?.Browser;
 
-            if (browser.IsDisposed || _doClose)
+            if (_doClose || browser == null || browser.IsDisposed)
             {
-                if (!ViewModel.Fullscreen)
+                if (ViewModel?.Fullscreen != true)
                     GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+            }
+            else if (browser is ChromiumWebBrowser wpfBrowser && !browser.IsBrowserInitialized)
+            {
+                DeferCloseUntilBrowserInitialized(wpfBrowser);
+                e.Cancel = true;
             }
             else
             {
@@ -200,10 +207,46 @@ namespace CefFlashBrowser.Views
             base.OnClosing(e);
         }
 
+        private void DeferCloseUntilBrowserInitialized(ChromiumWebBrowser browser)
+        {
+            if (_browserPendingClose == browser)
+                return;
+
+            _browserPendingClose = browser;
+            browser.IsBrowserInitializedChanged += BrowserInitializedForClose;
+        }
+
+        private void BrowserInitializedForClose(object sender, EventArgs e)
+        {
+            var browser = _browserPendingClose;
+            if (browser == null || !browser.IsBrowserInitialized)
+                return;
+
+            browser.IsBrowserInitializedChanged -= BrowserInitializedForClose;
+            _browserPendingClose = null;
+            if (_forceClosePending)
+                return;
+
+            // The initialized notification can reach WPF before CEF has returned
+            // from OnAfterCreated. Wait for that callback before destroying its HWND.
+            Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(() =>
+            {
+                if (_isClosed)
+                    return;
+
+                Close();
+            }));
+        }
+
         protected override void OnClosed(EventArgs e)
         {
-            base.OnClosed(e);
             _isClosed = true;
+            if (_browserPendingClose != null)
+            {
+                _browserPendingClose.IsBrowserInitializedChanged -= BrowserInitializedForClose;
+                _browserPendingClose = null;
+            }
+            base.OnClosed(e);
             _hwndSource?.RemoveHook(WndProc);
         }
 
@@ -273,8 +316,42 @@ namespace CefFlashBrowser.Views
 
         public void ForceCloseWindow()
         {
+            if (_isClosed || _forceClosePending)
+                return;
+
+            var browser = ViewModel?.CurrentBrowser?.Browser;
+            if (browser != null && !browser.IsDisposed)
+            {
+                // Keep the native parent alive until asynchronous CEF creation finishes.
+                // Pump WPF so a caller can safely shut CEF down as soon as this returns.
+                _forceClosePending = true;
+                browser.LifeSpanHandler = null;
+                var frame = new DispatcherFrame();
+                EventHandler closed = (s, e) => frame.Continue = false;
+                Closed += closed;
+                try
+                {
+                    Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(() =>
+                    {
+                        if (!_isClosed)
+                        {
+                            _doClose = true;
+                            if (!browser.IsDisposed && browser.IsBrowserInitialized)
+                                browser.GetBrowser()?.CloseBrowser(true);
+                            Close();
+                        }
+                    }));
+                    Dispatcher.PushFrame(frame);
+                }
+                finally
+                {
+                    Closed -= closed;
+                    _forceClosePending = false;
+                }
+                return;
+            }
+
             _doClose = true;
-            ViewModel.CurrentBrowser.Browser.GetBrowser()?.CloseBrowser(true);
             Close();
         }
 
@@ -328,7 +405,9 @@ namespace CefFlashBrowser.Views
 
         private void FindPopupClosed(object sender, EventArgs e)
         {
-            ViewModel.CurrentBrowser.Browser.GetBrowser()?.StopFinding(true);
+            var browser = ViewModel?.CurrentBrowser?.Browser;
+            if (browser != null && !browser.IsDisposed && browser.IsBrowserInitialized)
+                browser.GetBrowser()?.StopFinding(true);
         }
 
         private void UpdateFindPopupPosition()
@@ -373,31 +452,39 @@ namespace CefFlashBrowser.Views
 
         private void DevToolsOpened(object sender, RoutedEventArgs e)
         {
-            Activate();
+            if (!_isClosed && GlobalData.Settings.EnableIntegratedDevTools)
+                Activate();
         }
 
         private void DevToolsClosed(object sender, RoutedEventArgs e)
         {
-            Activate();
+            if (!_isClosed)
+                Activate();
         }
 
         private void FullscreenChanged(object sender, FullscreenChangedEventArgs e)
         {
-            ViewModel.Fullscreen = e.Fullscreen;
+            if (!_isClosed)
+                ViewModel.Fullscreen = e.Fullscreen;
         }
 
         private void BrowserDoClose(object sender, BrowserDoCloseEventArgs e)
         {
-            if (!e.IsPopup)
+            if (!_isClosed && !e.IsPopup && !e.IsDevTools)
             {
                 _doClose = true;
-                Close();
+                // Return from CEF's DoClose callback before destroying its parent HWND.
+                Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(() =>
+                {
+                    if (!_isClosed)
+                        Close();
+                }));
             }
         }
 
         private void BrowserAfterCreated(object sender, BrowserAfterCreatedEventArgs e)
         {
-            if (HwndHelper.IsDevToolsWindow(e.HostHandle))
+            if (!_isClosed && HwndHelper.IsDevToolsWindow(e.HostHandle))
             {
                 HwndHelper.SetOwnerWindow(e.HostHandle, _hwnd);
             }
@@ -405,12 +492,14 @@ namespace CefFlashBrowser.Views
 
         private void BrowserPopup(object sender, BrowserPopupEventArgs e)
         {
-            ViewModel.OnPopup(e.TargetUrl, e.PopupSizeInfo);
+            if (!_isClosed)
+                ViewModel.OnPopup(e.TargetUrl, e.PopupSizeInfo);
         }
 
         private void BrowserNewPage(object sender, BrowserNewPageEventArgs e)
         {
-            ViewModel.OnNewPage(e.TargetUrl);
+            if (!_isClosed)
+                ViewModel.OnNewPage(e.TargetUrl);
         }
     }
 }
