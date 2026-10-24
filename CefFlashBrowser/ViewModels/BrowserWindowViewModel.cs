@@ -93,6 +93,13 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private static bool IsBrowserReady(BrowserViewModel browser)
+        {
+            return browser?.Browser != null
+                && !browser.Browser.IsDisposed
+                && browser.Browser.IsBrowserInitialized;
+        }
+
         private static string ReplaceInvalidFileNameChars(string str, char replaceChar = '_')
         {
             if (string.IsNullOrEmpty(str))
@@ -115,8 +122,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void CreateShortcut(BrowserViewModel browser)
         {
-            if (browser?.Browser == null || browser.Browser.IsDisposed
-                || !browser.Browser.IsBrowserInitialized)
+            if (!IsBrowserReady(browser))
                 return;
 
             var title = ReplaceInvalidFileNameChars(browser.Title);
@@ -150,8 +156,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void AddFavorite(BrowserViewModel browser)
         {
-            if (browser?.Browser == null || browser.Browser.IsDisposed
-                || !browser.Browser.IsBrowserInitialized)
+            if (!IsBrowserReady(browser))
                 return;
 
             var vm = new AddFavoriteDialogViewModel
@@ -168,8 +173,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void ToggleLoadingState(BrowserViewModel browser)
         {
-            if (browser?.Browser == null || browser.Browser.IsDisposed
-                || !browser.Browser.IsBrowserInitialized)
+            if (!IsBrowserReady(browser))
                 return;
 
             if (browser.Browser.IsLoading)
@@ -202,8 +206,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void ToggleFullscreen(BrowserViewModel browser)
         {
-            if (browser?.Browser == null || browser.Browser.IsDisposed
-                || !browser.Browser.IsBrowserInitialized)
+            if (!IsBrowserReady(browser))
                 return;
 
             if (Fullscreen)
@@ -255,8 +258,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void FindText(BrowserViewModel browser, bool forward)
         {
-            if (browser?.Browser == null || browser.Browser.IsDisposed
-                || !browser.Browser.IsBrowserInitialized)
+            if (!IsBrowserReady(browser))
                 return;
 
             if (string.IsNullOrEmpty(TextToFind))
