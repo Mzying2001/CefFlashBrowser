@@ -95,9 +95,7 @@ namespace CefFlashBrowser.ViewModels
 
         private static bool IsBrowserReady(BrowserViewModel browser)
         {
-            return browser?.Browser != null
-                && !browser.Browser.IsDisposed
-                && browser.Browser.IsBrowserInitialized;
+            return browser?.IsBrowserReady() ?? false;
         }
 
         private static string ReplaceInvalidFileNameChars(string str, char replaceChar = '_')
@@ -198,7 +196,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void ToggleDevTools(BrowserViewModel browser)
         {
-            if (browser != null)
+            if (IsBrowserReady(browser))
             {
                 browser.ToggleDevTools();
             }
@@ -209,14 +207,14 @@ namespace CefFlashBrowser.ViewModels
             if (!IsBrowserReady(browser))
                 return;
 
-            if (Fullscreen)
+            if (!Fullscreen)
             {
-                browser.ExitFullScreen();
-                Fullscreen = false;
+                Fullscreen = true;
             }
             else
             {
-                Fullscreen = true;
+                browser.ExitFullScreen();
+                Fullscreen = false;
             }
         }
 
@@ -263,11 +261,11 @@ namespace CefFlashBrowser.ViewModels
 
             if (string.IsNullOrEmpty(TextToFind))
             {
-                browser.Browser.GetBrowser()?.StopFinding(true);
+                browser.StopFinding(true);
             }
             else
             {
-                browser.Browser.GetBrowser()?.Find(0, TextToFind, forward, false, false);
+                browser.FindText(TextToFind, forward, false, false);
             }
         }
 

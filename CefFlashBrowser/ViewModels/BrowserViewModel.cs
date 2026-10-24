@@ -77,6 +77,11 @@ namespace CefFlashBrowser.ViewModels
 
 
 
+        public bool IsBrowserReady()
+        {
+            return Browser != null && !Browser.IsDisposed && Browser.IsBrowserInitialized;
+        }
+
         public void OnDevToolsOpened(IntPtr hDevTools)
         {
             if (GlobalData.Settings.EnableIntegratedDevTools)
@@ -95,7 +100,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void ToggleDevTools()
         {
-            if (Browser == null || Browser.IsDisposed || !Browser.IsBrowserInitialized)
+            if (!IsBrowserReady())
                 return;
 
             if (IntegratedDevToolsHandle == IntPtr.Zero
@@ -111,10 +116,25 @@ namespace CefFlashBrowser.ViewModels
 
         public void ExitFullScreen()
         {
-            if (Browser != null && !Browser.IsDisposed
-                && Browser.CanExecuteJavascriptInMainFrame)
+            if (IsBrowserReady() && Browser.CanExecuteJavascriptInMainFrame)
             {
                 Browser.ExecuteScriptAsync("if (document.fullscreenElement) document.exitFullscreen();");
+            }
+        }
+
+        public void FindText(string searchText, bool forward, bool matchCase, bool findNext)
+        {
+            if (IsBrowserReady())
+            {
+                Browser.GetBrowser()?.Find(0, searchText, forward, matchCase, findNext);
+            }
+        }
+
+        public void StopFinding(bool clearSelection)
+        {
+            if (IsBrowserReady())
+            {
+                Browser.GetBrowser()?.StopFinding(clearSelection);
             }
         }
     }
