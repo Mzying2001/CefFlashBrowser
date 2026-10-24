@@ -37,6 +37,12 @@
     <Compile Include="..\CefFlashBrowser\Models\SolTypeDesc.cs" Link="LinkedSources\SolTypeDesc.cs" />
   </ItemGroup>
 
+  <!-- Compiled at runtime by the standalone browser regression runner. -->
+  <ItemGroup>
+    <Compile Remove="BrowserRegression\**\*.cs" />
+    <None Include="BrowserRegression\**\*.cs" />
+  </ItemGroup>
+
   <!-- Test fixture files -->
   <ItemGroup>
     <Content Include="TestData\**\*.sol">

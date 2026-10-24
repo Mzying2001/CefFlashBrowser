@@ -26,6 +26,13 @@ dotnet test CefFlashBrowser.Tests/CefFlashBrowser.Tests.csproj -p:Platform=x64 -
 ```
 
 ```cmd
+:: Run browser regression checks after building the solution (fresh x64 STA process)
+powershell -NoProfile -STA -ExecutionPolicy Bypass -File CefFlashBrowser.Tests\BrowserRegression\Run.ps1
+```
+
+For browser regression setup, x86/Release commands, and diagnostics, see `CefFlashBrowser.Tests/BrowserRegression/README.md`.
+
+```cmd
 :: Build Release (x86 + x64) and create versioned zip archives in bin\Publish\
 publish
 ```
