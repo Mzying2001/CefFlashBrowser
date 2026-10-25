@@ -63,7 +63,8 @@ function Test-BrowserTabStrip($Context) {
         $first = $model.CurrentBrowser
         Assert-Regression ($model.Browsers.Count -eq 1 -and $tabs.SelectedItem -eq $first) 'window starts with a single selected tab'
         $newButton = $window.FindName('newTabButton')
-        $peer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($newButton)
+        $toolbarNewButton = $window.FindName('toolbarNewTabButton')
+        $peer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($toolbarNewButton)
         $peer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
         Wait-Regression $Context { $model.Browsers.Count -eq 2 -and $model.CurrentBrowser.IsBrowserReady() } 'new tab button creates and selects a browser'
         $second = $model.CurrentBrowser
@@ -105,7 +106,7 @@ function Test-BrowserTabStrip($Context) {
         $model.ToggleFullscreen($third)
         Assert-Regression (!$window.FindName('tabStrip').IsVisible) 'fullscreen hides the tab strip'
         $model.ToggleFullscreen($third)
-        Assert-Regression $window.FindName('tabStrip').IsVisible 'leaving fullscreen restores the tab strip'
+        Assert-Regression (!$window.FindName('tabStrip').IsVisible) 'leaving fullscreen keeps the tab strip hidden for a single tab'
     } finally {
         $window.ForceCloseWindow()
     }

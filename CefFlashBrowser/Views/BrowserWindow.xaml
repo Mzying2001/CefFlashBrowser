@@ -366,6 +366,27 @@
 
             <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal">
+                <!--new tab button-->
+                <Button x:Name="toolbarNewTabButton"
+                        Margin="0,0,10,0"
+                        ToolTip="{DynamicResource browser_newTab}"
+                        Command="{Binding AddBrowserCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <svgc:SvgIcon Width="10"
+                                  Height="10"
+                                  UriSource="{StaticResource AddIconUri}"/>
+                </Button>
+
                 <!--blocked swfs button-->
                 <Button Margin="0,0,10,0"
                         ToolTip="{DynamicResource browser_toolTipBlockedSwfs}">
@@ -503,11 +524,21 @@
                   Height="30">
                 <!--address-->
                 <TextBox x:Name="addressTextBox"
-                         Padding="35,0,8,0"
                          Text="{Binding CurrentBrowser.Browser.Address, Mode=OneWay}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>
+                    <TextBox.Style>
+                        <Style TargetType="TextBox"
+                               BasedOn="{StaticResource {x:Type TextBox}}">
+                            <Setter Property="Padding" Value="8,0"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
+                                    <Setter Property="Padding" Value="35,0,8,0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
                                     Command="{Binding CurrentBrowser.Browser.LoadUrlCommand}"
@@ -519,6 +550,16 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left"
                             IsHitTestVisible="False">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
                     <c:BrowserIcon Margin="8,0,5,0"
                                    FaviconUrl="{Binding CurrentBrowser.Browser.FaviconUrl}"/>
                     <Separator Width="20">
@@ -536,6 +577,9 @@
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding Fullscreen}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
