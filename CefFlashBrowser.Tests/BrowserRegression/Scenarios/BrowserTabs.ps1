@@ -40,6 +40,7 @@ function Test-BrowserTabs($Context) {
     Test-BrowserTabNewPageRouting $Context
     Test-BrowserTabSelection $Context
     Test-BrowserTabReordering $Context
+    Test-BrowserTabDragPreview $Context
     Test-BrowserTabCallbacks $Context
     Test-BrowserTabCloseCancellation $Context
     Test-BrowserTabsReloadClose $Context
@@ -362,6 +363,61 @@ function Test-BrowserTabReordering($Context) {
         $model.CloseBrowser($third)
         Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'reordered selected tab closes'
         Assert-Regression ($model.CurrentBrowser -eq $second) 'closing a reordered tab selects its current neighbor'
+    } finally {
+        $window.ForceCloseWindow()
+    }
+}
+
+function Assert-TabDragPreview($Window, $Browser, [string]$Scenario) {
+    $draggedField = $Window.GetType().GetField('_draggedTab', [Reflection.BindingFlags]'Instance,NonPublic')
+    $draggedField.SetValue($Window, $Browser)
+    try {
+        Invoke-ViewCallback $Window 'ShowTabDragPreview' @()
+        $snapshot = $Window.FindName('tabDragPreviewImage').Source
+        Assert-Regression ($null -ne $snapshot) "$Scenario creates a preview image"
+        $stride = $snapshot.PixelWidth * 4
+        $pixels = New-Object byte[] ($stride * $snapshot.PixelHeight)
+        $snapshot.CopyPixels($pixels, $stride, 0)
+        # The selected header background has low alpha; opaque pixels come from its text and icons.
+        $visiblePixels = 0
+        for ($index = 3; $index -lt $pixels.Length; $index += 4) {
+            if ($pixels[$index] -gt 128) { $visiblePixels++ }
+        }
+        Assert-Regression ($visiblePixels -gt 20) "$Scenario preview contains header content ($visiblePixels visible pixels)"
+    } finally {
+        Invoke-ViewCallback $Window 'HideTabDragPreview' @()
+        $draggedField.SetValue($Window, $null)
+    }
+}
+
+function Test-BrowserTabDragPreview($Context) {
+    $window = New-RegressionWindow $Context -Width 1000
+    try {
+        $model = $window.ViewModel
+        $first = $model.CurrentBrowser
+        $second = New-RegressionTab $Context $window
+        $third = New-RegressionTab $Context $window
+        $browsers = @($first, $second, $third)
+        for ($index = 0; $index -lt $browsers.Count; $index++) {
+            $browser = $browsers[$index]
+            $browser.Title = "Preview tab $($index + 1)"
+            $model.CurrentBrowser = $browser
+            $window.UpdateLayout()
+            Assert-TabDragPreview $window $browser "tab $($index + 1)"
+        }
+
+        $model.MoveBrowser($third, 1)
+        $window.UpdateLayout()
+        Assert-TabDragPreview $window $third 'reordered second tab'
+        $window.Width = 400
+        $window.UpdateLayout()
+        $tabs = $window.FindName('tabList')
+        $tabs.ScrollIntoView($third)
+        $window.UpdateLayout()
+        $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
+        Assert-Regression ($scroll.HorizontalOffset -gt 0) 'preview check covers a scrolled tab strip'
+        Assert-TabDragPreview $window $third 'second tab after horizontal scrolling'
+        Assert-Regression (!$window.FindName('tabDragPreview').IsOpen -and $null -eq $tabs.Tag) 'preview cleanup restores the tab strip'
     } finally {
         $window.ForceCloseWindow()
     }

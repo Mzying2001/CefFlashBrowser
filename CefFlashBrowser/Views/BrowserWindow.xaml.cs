@@ -256,7 +256,9 @@ namespace CefFlashBrowser.Views
                 Math.Max(1, (int)Math.Ceiling(tab.ActualWidth * dpi.DpiScaleX)),
                 Math.Max(1, (int)Math.Ceiling(tab.ActualHeight * dpi.DpiScaleY)),
                 dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
-            snapshot.Render(tab);
+
+            // The template root starts at (0, 0); the container includes its list layout offset.
+            snapshot.Render((Visual)VisualTreeHelper.GetChild(tab, 0));
             snapshot.Freeze();
 
             tabDragPreviewImage.Source = snapshot;
