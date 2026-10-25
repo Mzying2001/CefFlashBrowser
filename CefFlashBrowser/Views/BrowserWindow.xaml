@@ -638,6 +638,38 @@
                                     CommandParameter="{Binding}"
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Grid Background="{TemplateBinding Background}">
+                                                            <Border x:Name="highlight"
+                                                                    CornerRadius="4"
+                                                                    Background="{TemplateBinding Foreground}"
+                                                                    Opacity="0"/>
+                                                            <ContentPresenter HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="highlight" Property="Opacity" Value="0.12"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsPressed" Value="True">
+                                                                <Setter TargetName="highlight" Property="Opacity" Value="0.24"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsEnabled" Value="False">
+                                                                <Setter TargetName="highlight" Property="Opacity" Value="0"/>
+                                                                <Setter Property="Opacity" Value="0.4"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Button.Style>
                                     <svgc:SvgIcon
                                         Width="8"
                                         Height="8"
