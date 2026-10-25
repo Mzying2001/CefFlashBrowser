@@ -218,7 +218,7 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowBrowser(url ?? "about:blank");
         }
 
-        public BrowserViewModel AddBrowser(string address = "about:blank", bool activate = true)
+        private BrowserViewModel InsertBrowser(int index, string address, bool activate)
         {
             if (IsClosing)
             {
@@ -227,7 +227,7 @@ namespace CefFlashBrowser.ViewModels
             }
 
             var browser = SimpleIoc.Global.GetInstance<BrowserViewModel>(address);
-            _browsers.Add(browser);
+            _browsers.Insert(index, browser);
 
             if (activate || CurrentBrowser == null)
             {
@@ -235,6 +235,11 @@ namespace CefFlashBrowser.ViewModels
             }
 
             return browser;
+        }
+
+        public BrowserViewModel AddBrowser(string address = "about:blank", bool activate = true)
+        {
+            return InsertBrowser(_browsers.Count, address, activate);
         }
 
         private void AddBrowserCommandImpl(string address)
@@ -314,7 +319,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 case NewPageBehavior.NewTab:
                     {
-                        AddBrowser(url, activate);
+                        InsertBrowser(_browsers.IndexOf(source) + 1, url, activate);
                         break;
                     }
                 case NewPageBehavior.NewWindow:

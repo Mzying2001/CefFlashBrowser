@@ -74,6 +74,14 @@ function Test-BrowserTabStrip($Context) {
         Invoke-TabShortcut $window T Control
         Wait-Regression $Context { $model.Browsers.Count -eq 3 -and $model.CurrentBrowser.IsBrowserReady() } 'Ctrl+T creates a tab'
         $third = $model.CurrentBrowser
+        Assert-Regression ($model.Browsers[2] -eq $third) 'Ctrl+T appends a tab after all existing tabs'
+        $model.CurrentBrowser = $first
+        $peer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $model.Browsers.Count -eq 4 -and $model.CurrentBrowser.IsBrowserReady() } 'new tab button creates another tab'
+        $fourth = $model.CurrentBrowser
+        Assert-Regression ($model.Browsers[3] -eq $fourth) 'new tab button appends a tab after all existing tabs'
+        $model.CloseBrowser($fourth)
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 } 'extra toolbar tab closes'
         Invoke-TabShortcut $window Tab Control
         Assert-Regression ($model.CurrentBrowser -eq $first) 'Ctrl+Tab wraps to the first tab'
         Invoke-TabShortcut $window Tab ([System.Windows.Input.ModifierKeys]::Control -bor [System.Windows.Input.ModifierKeys]::Shift)
@@ -118,20 +126,36 @@ function Test-BrowserTabNewPageRouting($Context) {
     try {
         $model = $window.ViewModel
         $first = $model.CurrentBrowser
+        $last = New-RegressionTab $Context $window
+        $model.CurrentBrowser = $first
         $view = Find-BrowserView $window $first
         [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior = [CefFlashBrowser.Models.NewPageBehavior]::NewTab
         $model.ToggleFullscreen($first)
         Invoke-ViewCallback $view 'OnBrowserBeforePopup' @(
             $first.Browser, $first.Browser.GetBrowser(), $null, $Context.AuxiliaryAddress, '',
             [CefSharp.WindowOpenDisposition]::NewBackgroundTab, $true, $null, $null, $null, $false)
-        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'background page request opens a tab'
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 } 'background page request opens a tab'
+        $background = $model.Browsers[1]
+        Assert-Regression ($model.Browsers[0] -eq $first -and $background.Address -eq $Context.AuxiliaryAddress -and $model.Browsers[2] -eq $last) 'background page opens immediately after its source before existing tabs'
         Assert-Regression ($model.CurrentBrowser -eq $first -and $model.Fullscreen) 'background page request preserves selection and fullscreen'
         Invoke-ViewCallback $view 'OnBrowserBeforePopup' @(
             $first.Browser, $first.Browser.GetBrowser(), $null, $Context.AuxiliarySecondAddress, '',
             [CefSharp.WindowOpenDisposition]::NewForegroundTab, $true, $null, $null, $null, $false)
-        Wait-Regression $Context { $model.Browsers.Count -eq 3 -and $window.Title -eq 'Second auxiliary page' } 'foreground page request selects the new tab'
+        Wait-Regression $Context { $model.Browsers.Count -eq 4 -and $window.Title -eq 'Second auxiliary page' } 'foreground page request selects the new tab'
+        $foreground = $model.CurrentBrowser
         Assert-Regression (!$model.Fullscreen -and $first.Address -eq 'about:blank') 'foreground tab exits fullscreen and preserves the source page'
-        Assert-Regression ($model.Browsers[1].Address -eq $Context.AuxiliaryAddress -and $model.CurrentBrowser -eq $model.Browsers[2]) 'new page requests retain their target addresses'
+        Assert-Regression ($model.Browsers[0] -eq $first -and $model.Browsers[1] -eq $foreground -and $model.Browsers[2] -eq $background -and $model.Browsers[3] -eq $last) 'repeated page requests insert the newest tab immediately after their source'
+        Assert-Regression ($foreground.Address -eq $Context.AuxiliarySecondAddress -and $background.Address -eq $Context.AuxiliaryAddress) 'new page requests retain their target addresses'
+
+        Wait-Regression $Context { $background.IsBrowserReady() } 'background source tab initialization'
+        $backgroundView = Find-BrowserView $window $background
+        $model.ToggleFullscreen($foreground)
+        Invoke-ViewCallback $backgroundView 'OnBrowserBeforePopup' @(
+            $background.Browser, $background.Browser.GetBrowser(), $null, 'about:blank', '',
+            [CefSharp.WindowOpenDisposition]::NewBackgroundTab, $true, $null, $null, $null, $false)
+        Wait-Regression $Context { $model.Browsers.Count -eq 5 } 'background source opens a new tab'
+        Assert-Regression ($model.Browsers[1] -eq $foreground -and $model.Browsers[2] -eq $background -and $model.Browsers[3].Address -eq 'about:blank' -and $model.Browsers[4] -eq $last) 'background source inserts after itself instead of the selected tab'
+        Assert-Regression ($model.CurrentBrowser -eq $foreground -and $model.Fullscreen) 'background source request preserves selection and fullscreen'
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior = $savedBehavior
         $window.ForceCloseWindow()
