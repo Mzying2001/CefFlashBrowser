@@ -702,7 +702,7 @@ namespace CefFlashBrowser.Views
                 }
                 else
                 {
-                    var e = new BrowserNewPageEventArgs(BrowserNewPageEvent, this, chromiumWebBrowser, browser, targetUrl);
+                    var e = new BrowserNewPageEventArgs(BrowserNewPageEvent, this, chromiumWebBrowser, browser, targetUrl, targetDisposition);
                     RaiseEvent(e);
                 }
             });
@@ -790,13 +790,16 @@ namespace CefFlashBrowser.Views
         public IWebBrowser ChromiumWebBrowser { get; }
         public IBrowser Browser { get; }
         public string TargetUrl { get; }
+        public WindowOpenDisposition TargetDisposition { get; }
 
-        public BrowserNewPageEventArgs(RoutedEvent routedEvent, object source, IWebBrowser chromiumWebBrowser, IBrowser browser, string targetUrl)
+        public BrowserNewPageEventArgs(RoutedEvent routedEvent, object source, IWebBrowser chromiumWebBrowser, IBrowser browser, string targetUrl,
+            WindowOpenDisposition targetDisposition = WindowOpenDisposition.NewForegroundTab)
             : base(routedEvent, source)
         {
             ChromiumWebBrowser = chromiumWebBrowser;
             Browser = browser;
             TargetUrl = targetUrl;
+            TargetDisposition = targetDisposition;
         }
     }
 

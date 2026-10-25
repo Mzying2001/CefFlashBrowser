@@ -17,6 +17,7 @@
     {
         OriginalWindow,
         NewWindow,
+        NewTab,
     }
 
     /// <summary>

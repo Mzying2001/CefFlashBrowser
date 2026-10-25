@@ -76,6 +76,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">원래 창</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">새 창</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">새 탭</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -139,6 +140,8 @@
     <sys:String x:Key="browser_loading">불러오는 중...</sys:String>
     <sys:String x:Key="browser_showMainWindow">메인 창 열기</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">새 브라우저 창</sys:String>
+    <sys:String x:Key="browser_newTab">새 탭</sys:String>
+    <sys:String x:Key="browser_closeTab">탭 닫기</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL 저장 관리자</sys:String>

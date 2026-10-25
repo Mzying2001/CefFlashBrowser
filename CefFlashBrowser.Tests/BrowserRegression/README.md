@@ -36,7 +36,7 @@ The runner exits with code 0 after all checks and cleanup succeed. An assertion,
 | `Helpers.ps1` | Assertions, Dispatcher waits, browser commands, window creation, JavaScript, DevTools, and reflection helpers. |
 | `TestDoubles.cs` | Browser and popup proxies and the beforeunload handler, compiled at runtime with `Add-Type -Path`. Excluded from the MSTest project's compilation. |
 | `Scenarios/BrowserWindow.ps1` | Template callbacks, DevTools, navigation and favorites, display state, closing, and saved state restoration. |
-| `Scenarios/BrowserTabs.ps1` | Tab collection and selection, retained browser/DevTools state, source-specific callbacks, close cancellation and retry, sequential window close, and forced disposal of initializing tabs. |
+| `Scenarios/BrowserTabs.ps1` | Tab strip buttons, middle click, keyboard cycling, overflow, titles and fullscreen; foreground/background new-page routing; retained browser/DevTools state; source-specific callbacks; close cancellation and retry; sequential window close; and forced disposal of initializing tabs. |
 | `Scenarios/AuxiliaryWindows.ps1` | Popup, SWF player, and source windows: bindings, routing, DevTools, beforeunload, and cleanup. |
 | `Scenarios/Lifecycle.ps1` | Operations before CEF initialization, navigation before native hosting, closing before Show or during initialization, and the close-all message. |
 

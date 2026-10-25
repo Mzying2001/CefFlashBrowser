@@ -76,6 +76,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">Ursprüngliches Fenster</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Neues Fenster</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">Neuer Tab</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -139,6 +140,8 @@
     <sys:String x:Key="browser_loading">Wird geladen...</sys:String>
     <sys:String x:Key="browser_showMainWindow">Hauptfenster öffnen</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">Neues Browserfenster</sys:String>
+    <sys:String x:Key="browser_newTab">Neuer Tab</sys:String>
+    <sys:String x:Key="browser_closeTab">Tab schließen</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL-Speicherstandsverwaltung</sys:String>

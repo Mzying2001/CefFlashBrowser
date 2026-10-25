@@ -76,6 +76,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">元のウィンドウ</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新しいウィンドウ</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">新しいタブ</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -139,6 +140,8 @@
     <sys:String x:Key="browser_loading">読み込み中...</sys:String>
     <sys:String x:Key="browser_showMainWindow">メインウィンドウを開く</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">新しいブラウザーウィンドウ</sys:String>
+    <sys:String x:Key="browser_newTab">新しいタブ</sys:String>
+    <sys:String x:Key="browser_closeTab">タブを閉じる</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL セーブマネージャー</sys:String>

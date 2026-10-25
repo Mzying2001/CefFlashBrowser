@@ -28,6 +28,8 @@ function Test-BrowserTabsBeforeShow($Context) {
 }
 
 function Test-BrowserTabs($Context) {
+    Test-BrowserTabStrip $Context
+    Test-BrowserTabNewPageRouting $Context
     Test-BrowserTabSelection $Context
     Test-BrowserTabCallbacks $Context
     Test-BrowserTabCloseCancellation $Context
@@ -35,6 +37,104 @@ function Test-BrowserTabs($Context) {
     Test-BrowserTabsWindowClose $Context
     Test-BrowserTabsForceClose $Context
     Test-BrowserTabsForceClosePending $Context
+}
+
+function Find-TabElement($Element, [string]$Name) {
+    if ($Element -is [System.Windows.FrameworkElement] -and $Element.Name -eq $Name) {
+        return $Element
+    }
+    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
+        $found = Find-TabElement ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index)) $Name
+        if ($null -ne $found) { return $found }
+    }
+}
+
+function Invoke-TabShortcut($Window, [System.Windows.Input.Key]$Key, [System.Windows.Input.ModifierKeys]$Modifiers) {
+    $binding = $Window.InputBindings | Where-Object { $_.Key -eq $Key -and $_.Modifiers -eq $Modifiers }
+    Assert-Regression ($null -ne $binding) "tab shortcut exists: $Modifiers+$Key"
+    Invoke-BrowserCommand $binding.Command $binding.CommandParameter
+}
+
+function Test-BrowserTabStrip($Context) {
+    $window = New-RegressionWindow $Context -Width 600
+    try {
+        $model = $window.ViewModel
+        $tabs = $window.FindName('tabList')
+        $first = $model.CurrentBrowser
+        Assert-Regression ($model.Browsers.Count -eq 1 -and $tabs.SelectedItem -eq $first) 'window starts with a single selected tab'
+        $newButton = $window.FindName('newTabButton')
+        $peer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($newButton)
+        $peer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 -and $model.CurrentBrowser.IsBrowserReady() } 'new tab button creates and selects a browser'
+        $second = $model.CurrentBrowser
+        Assert-Regression ($second.Address -eq 'about:blank' -and $tabs.SelectedItem -eq $second) 'new tab has a blank address and selected header'
+        $tabs.SetCurrentValue([System.Windows.Controls.Primitives.Selector]::SelectedItemProperty, $first)
+        Assert-Regression ($model.CurrentBrowser -eq $first) 'selecting a tab header changes the current browser'
+        Invoke-TabShortcut $window T Control
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 -and $model.CurrentBrowser.IsBrowserReady() } 'Ctrl+T creates a tab'
+        $third = $model.CurrentBrowser
+        Invoke-TabShortcut $window Tab Control
+        Assert-Regression ($model.CurrentBrowser -eq $first) 'Ctrl+Tab wraps to the first tab'
+        Invoke-TabShortcut $window Tab ([System.Windows.Input.ModifierKeys]::Control -bor [System.Windows.Input.ModifierKeys]::Shift)
+        Assert-Regression ($model.CurrentBrowser -eq $third) 'Ctrl+Shift+Tab wraps to the last tab'
+        Invoke-TabShortcut $window Next Control
+        Invoke-TabShortcut $window Prior Control
+        Assert-Regression ($model.CurrentBrowser -eq $third) 'Ctrl+PageDown and Ctrl+PageUp cycle tabs'
+        $window.UpdateLayout()
+        $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
+        Wait-Regression $Context { $scroll.HorizontalOffset -gt 0 } 'selecting an overflowing tab brings it into view'
+        Assert-Regression ($newButton.IsVisible -and $scroll.ScrollableWidth -gt 0) 'overflow keeps the new tab button accessible'
+
+        $container = $tabs.ItemContainerGenerator.ContainerFromItem($second)
+        $title = Find-TabElement $container 'tabTitle'
+        $second.Title = ''
+        Assert-Regression ($title.Text -eq $window.FindResource('browser_newTab')) 'empty tab title uses localized fallback'
+        $second.Title = 'Updated tab title'
+        Assert-Regression ($title.Text -eq 'Updated tab title') 'tab header follows title changes'
+        $closeButton = Find-TabElement $container 'closeTabButton'
+        $peer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($closeButton)
+        $peer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'tab close button closes its own browser'
+        Assert-Regression ($model.CurrentBrowser -eq $third -and $second.Browser.IsDisposed) 'closing a background header preserves selection and disposes its browser'
+        $container = $tabs.ItemContainerGenerator.ContainerFromItem($first)
+        $middle = New-Object System.Windows.Input.MouseButtonEventArgs([System.Windows.Input.Mouse]::PrimaryDevice, 0, [System.Windows.Input.MouseButton]::Middle)
+        $middle.RoutedEvent = [System.Windows.Input.Mouse]::PreviewMouseDownEvent
+        $container.RaiseEvent($middle)
+        Wait-Regression $Context { $model.Browsers.Count -eq 1 } 'middle click closes a tab'
+        Assert-Regression ($middle.Handled -and $model.CurrentBrowser -eq $third) 'middle click preserves selection'
+        $model.ToggleFullscreen($third)
+        Assert-Regression (!$window.FindName('tabStrip').IsVisible) 'fullscreen hides the tab strip'
+        $model.ToggleFullscreen($third)
+        Assert-Regression $window.FindName('tabStrip').IsVisible 'leaving fullscreen restores the tab strip'
+    } finally {
+        $window.ForceCloseWindow()
+    }
+}
+
+function Test-BrowserTabNewPageRouting($Context) {
+    $window = New-RegressionWindow $Context
+    $savedBehavior = [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior
+    try {
+        $model = $window.ViewModel
+        $first = $model.CurrentBrowser
+        $view = Find-BrowserView $window $first
+        [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior = [CefFlashBrowser.Models.NewPageBehavior]::NewTab
+        $model.ToggleFullscreen($first)
+        Invoke-ViewCallback $view 'OnBrowserBeforePopup' @(
+            $first.Browser, $first.Browser.GetBrowser(), $null, $Context.AuxiliaryAddress, '',
+            [CefSharp.WindowOpenDisposition]::NewBackgroundTab, $true, $null, $null, $null, $false)
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'background page request opens a tab'
+        Assert-Regression ($model.CurrentBrowser -eq $first -and $model.Fullscreen) 'background page request preserves selection and fullscreen'
+        Invoke-ViewCallback $view 'OnBrowserBeforePopup' @(
+            $first.Browser, $first.Browser.GetBrowser(), $null, $Context.AuxiliarySecondAddress, '',
+            [CefSharp.WindowOpenDisposition]::NewForegroundTab, $true, $null, $null, $null, $false)
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 -and $window.Title -eq 'Second auxiliary page' } 'foreground page request selects the new tab'
+        Assert-Regression (!$model.Fullscreen -and $first.Address -eq 'about:blank') 'foreground tab exits fullscreen and preserves the source page'
+        Assert-Regression ($model.Browsers[1].Address -eq $Context.AuxiliaryAddress -and $model.CurrentBrowser -eq $model.Browsers[2]) 'new page requests retain their target addresses'
+    } finally {
+        [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior = $savedBehavior
+        $window.ForceCloseWindow()
+    }
 }
 
 function Test-BrowserTabSelection($Context) {
@@ -233,6 +333,13 @@ function Test-BrowserTabsForceClosePending($Context) {
         $handler.Hold = $true
         $window.Close()
         Wait-Regression $Context { $handler.Count -eq 1 } 'window close awaits beforeunload approval'
+        $model = $window.ViewModel
+        $current = $model.CurrentBrowser
+        $count = $model.Browsers.Count
+        Invoke-BrowserCommand $model.AddBrowserCommand
+        Invoke-BrowserCommand $model.SelectNextBrowserCommand
+        $model.OnNewPage($current, 'about:blank')
+        Assert-Regression ($model.Browsers.Count -eq $count -and $model.CurrentBrowser -eq $current) 'closing window ignores new tab and selection commands'
         $browsers = @($window.ViewModel.Browsers | ForEach-Object { $_.Browser })
         $watchdog.Interval = [TimeSpan]::FromSeconds(5)
         $watchdog.add_Tick({

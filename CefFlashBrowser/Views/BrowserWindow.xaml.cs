@@ -11,6 +11,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -106,6 +107,45 @@ namespace CefFlashBrowser.Views
                 {
                     browser.Stop();
                 }
+            }
+        }
+
+        private void TabSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Removing the selected item temporarily clears WPF's selection.
+            // The view model chooses its neighbor once collection removal finishes.
+            if (tabList.SelectedItem is BrowserViewModel browser)
+            {
+                ViewModel.CurrentBrowser = browser;
+                tabList.ScrollIntoView(browser);
+
+                if (browser.Address == "about:blank")
+                {
+                    addressTextBox.Focus();
+                    addressTextBox.SelectAll();
+                }
+            }
+        }
+
+        private void TabPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && sender is ListBoxItem item)
+            {
+                e.Handled = true;
+                ViewModel.CloseBrowser(item.DataContext as BrowserViewModel);
+            }
+        }
+
+        private void TabListPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (tabList.Template.FindName("tabScrollViewer", tabList) is ScrollViewer scrollViewer)
+            {
+                if (e.Delta > 0)
+                    scrollViewer.LineLeft();
+                else if (e.Delta < 0)
+                    scrollViewer.LineRight();
+
+                e.Handled = true;
             }
         }
 
@@ -567,7 +607,8 @@ namespace CefFlashBrowser.Views
         {
             if (!_isClosed && e.OriginalSource is BrowserView view)
             {
-                ViewModel.OnNewPage(view.ViewModel, e.TargetUrl);
+                ViewModel.OnNewPage(view.ViewModel, e.TargetUrl,
+                    e.TargetDisposition != WindowOpenDisposition.NewBackgroundTab);
             }
         }
     }

@@ -28,6 +28,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand NewBrowserWindowCommand { get; set; }
         public DelegateCommand AddBrowserCommand { get; set; }
         public DelegateCommand CloseBrowserCommand { get; set; }
+        public DelegateCommand SelectNextBrowserCommand { get; set; }
+        public DelegateCommand SelectPreviousBrowserCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
         public DelegateCommand ToggleFullscreenCommand { get; set; }
         public DelegateCommand OpenFindPopupCommand { get; set; }
@@ -235,10 +237,33 @@ namespace CefFlashBrowser.ViewModels
             return browser;
         }
 
+        private void AddBrowserCommandImpl(string address)
+        {
+            if (!IsClosing)
+            {
+                AddBrowser(address ?? "about:blank");
+            }
+        }
+
         public void CloseBrowser(BrowserViewModel browser)
         {
             if (!IsClosing && browser != null && _browsers.Contains(browser))
+            {
                 Messenger.Global.Send(MessageTokens.CLOSE_BROWSER, browser);
+            }
+        }
+
+        public void SelectBrowser(int offset)
+        {
+            if (IsClosing || _browsers.Count == 0)
+                return;
+
+            var index = (_browsers.IndexOf(CurrentBrowser) + offset) % _browsers.Count;
+
+            if (index < 0)
+                index += _browsers.Count;
+
+            CurrentBrowser = _browsers[index];
         }
 
         internal void RemoveBrowser(BrowserViewModel browser)
@@ -280,13 +305,18 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void OnNewPage(BrowserViewModel source, string url)
+        public void OnNewPage(BrowserViewModel source, string url, bool activate = true)
         {
             if (IsClosing || source == null || !_browsers.Contains(source))
                 return;
 
             switch (GlobalData.Settings.NewPageBehavior)
             {
+                case NewPageBehavior.NewTab:
+                    {
+                        AddBrowser(url, activate);
+                        break;
+                    }
                 case NewPageBehavior.NewWindow:
                     {
                         if (source == CurrentBrowser)
@@ -344,6 +374,7 @@ namespace CefFlashBrowser.ViewModels
         {
             _browsers = new ObservableCollection<BrowserViewModel>();
             Browsers = new ReadOnlyObservableCollection<BrowserViewModel>(_browsers);
+
             AddBrowser(null);
 
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
@@ -354,8 +385,10 @@ namespace CefFlashBrowser.ViewModels
             ToggleLoadingStateCommand = new DelegateCommand<BrowserViewModel>(ToggleLoadingState);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
-            AddBrowserCommand = new DelegateCommand<string>(address => AddBrowser(address));
+            AddBrowserCommand = new DelegateCommand<string>(AddBrowserCommandImpl);
             CloseBrowserCommand = new DelegateCommand<BrowserViewModel>(CloseBrowser);
+            SelectNextBrowserCommand = new DelegateCommand(() => SelectBrowser(1));
+            SelectPreviousBrowserCommand = new DelegateCommand(() => SelectBrowser(-1));
             ToggleDevToolsCommand = new DelegateCommand<BrowserViewModel>(ToggleDevTools);
             ToggleFullscreenCommand = new DelegateCommand<BrowserViewModel>(ToggleFullscreen);
             OpenFindPopupCommand = new DelegateCommand(OpenFindPopup);
