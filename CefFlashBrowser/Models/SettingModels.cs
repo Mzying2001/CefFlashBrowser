@@ -15,9 +15,9 @@
     /// </summary>
     public enum NewPageBehavior
     {
-        OriginalWindow,
-        NewWindow,
         NewTab,
+        NewWindow,
+        OriginalWindow,
     }
 
     /// <summary>
