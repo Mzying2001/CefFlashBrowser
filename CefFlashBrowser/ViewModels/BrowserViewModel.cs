@@ -134,17 +134,27 @@ namespace CefFlashBrowser.ViewModels
 
         public void FindText(string searchText, bool forward, bool matchCase, bool findNext)
         {
-            if (IsBrowserReady())
+            try
             {
-                Browser.GetBrowser()?.Find(0, searchText, forward, matchCase, findNext);
+                if (IsBrowserReady())
+                    Browser.GetBrowser()?.Find(0, searchText, forward, matchCase, findNext);
+            }
+            catch (ObjectDisposedException)
+            {
+                // A tab can finish closing between the readiness check and the call.
             }
         }
 
         public void StopFinding(bool clearSelection)
         {
-            if (IsBrowserReady())
+            try
             {
-                Browser.GetBrowser()?.StopFinding(clearSelection);
+                if (IsBrowserReady())
+                    Browser.GetBrowser()?.StopFinding(clearSelection);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Selection may change while CEF finishes closing the previous tab.
             }
         }
     }

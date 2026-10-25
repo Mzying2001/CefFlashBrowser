@@ -1,8 +1,72 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Proxies;
 using System.Threading;
 using CefSharp;
+
+public sealed class RegressionContextMenuParamsProxy : RealProxy
+{
+    public string SelectionText = "";
+    public string LinkUrl = "";
+
+    public RegressionContextMenuParamsProxy() : base(typeof(IContextMenuParams)) { }
+
+    public override IMessage Invoke(IMessage message)
+    {
+        var call = (IMethodCallMessage)message;
+        object result;
+        switch (call.MethodName)
+        {
+            case "get_SelectionText": result = SelectionText; break;
+            case "get_LinkUrl": result = LinkUrl; break;
+            case "GetType": result = typeof(IContextMenuParams); break;
+            case "ToString": result = "Regression context menu parameters"; break;
+            case "GetHashCode": result = GetHashCode(); break;
+            case "Equals": result = ReferenceEquals(GetTransparentProxy(), call.Args[0]); break;
+            default:
+                return new ReturnMessage(new InvalidOperationException(call.MethodName), call);
+        }
+        return new ReturnMessage(result, null, 0, call.LogicalCallContext, call);
+    }
+}
+
+public sealed class RegressionMenuModelProxy : RealProxy
+{
+    public readonly List<CefMenuCommand> Commands = new List<CefMenuCommand> { CefMenuCommand.Copy };
+    public readonly List<string> Labels = new List<string> { "Copy" };
+
+    public RegressionMenuModelProxy() : base(typeof(IMenuModel)) { }
+
+    public override IMessage Invoke(IMessage message)
+    {
+        var call = (IMethodCallMessage)message;
+        object result = true;
+        switch (call.MethodName)
+        {
+            case "InsertItemAt":
+            case "InsertCheckItemAt":
+                Commands.Insert((int)call.Args[0], (CefMenuCommand)call.Args[1]);
+                Labels.Insert((int)call.Args[0], (string)call.Args[2]);
+                break;
+            case "InsertSeparatorAt":
+                Commands.Insert((int)call.Args[0], CefMenuCommand.NotFound);
+                Labels.Insert((int)call.Args[0], null);
+                break;
+            case "Clear":
+                Commands.Clear();
+                Labels.Clear();
+                break;
+            case "GetType": result = typeof(IMenuModel); break;
+            case "ToString": result = "Regression menu model"; break;
+            case "GetHashCode": result = GetHashCode(); break;
+            case "Equals": result = ReferenceEquals(GetTransparentProxy(), call.Args[0]); break;
+            default:
+                return new ReturnMessage(new InvalidOperationException(call.MethodName), call);
+        }
+        return new ReturnMessage(result, null, 0, call.LogicalCallContext, call);
+    }
+}
 
 public sealed class DisposedBrowserProxy : RealProxy
 {
@@ -124,21 +188,39 @@ public sealed class RegressionPopupFeaturesProxy : RealProxy
     }
 }
 
-public sealed class RegressionJsDialogHandler : CefFlashBrowser.FlashBrowser.Handlers.JsDialogHandler
+public sealed class RegressionJsDialogHandler : CefFlashBrowser.Browser.Handlers.JsDialogHandler
 {
     public volatile bool Accept;
+    public volatile bool Hold;
     public int Count;
+    private IJsDialogCallback pendingCallback;
+    private IWebBrowser pendingBrowser;
+    private bool pendingIsReload;
 
     public override bool OnBeforeUnloadDialog(IWebBrowser control, IBrowser browser,
         string message, bool isReload, IJsDialogCallback callback)
     {
-        Interlocked.Increment(ref Count);
+        RegisterBeforeUnloadDialog(control, callback, isReload);
 
-        using (callback)
+        if (Hold)
         {
-            callback.Continue(Accept);
+            pendingBrowser = control;
+            pendingIsReload = isReload;
+            pendingCallback = callback;
+            Interlocked.Increment(ref Count);
+            return true;
         }
 
+        Interlocked.Increment(ref Count);
+        CompleteBeforeUnloadDialog(control, callback, isReload, Accept);
+
         return true;
+    }
+
+    public void CompletePending(bool accepted)
+    {
+        var callback = Interlocked.Exchange(ref pendingCallback, null);
+        if (callback != null)
+            CompleteBeforeUnloadDialog(pendingBrowser, callback, pendingIsReload, accepted);
     }
 }

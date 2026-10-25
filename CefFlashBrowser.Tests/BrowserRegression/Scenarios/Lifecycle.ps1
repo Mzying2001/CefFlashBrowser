@@ -107,9 +107,17 @@ function Test-CloseAllBrowsers($Context) {
     $readyAuxiliaryWindows = @($Context.AuxiliaryTypes | ForEach-Object { New-AuxiliaryWindow $Context $_ -WaitForLoad })
     $pendingAuxiliaryWindows = @($Context.AuxiliaryTypes | ForEach-Object { New-AuxiliaryWindow $Context $_ })
     $readyWindow = New-RegressionWindow $Context
+    New-RegressionTab $Context $readyWindow $Context.AuxiliaryAddress | Out-Null
+    New-RegressionTab $Context $readyWindow $Context.AuxiliarySecondAddress | Out-Null
     $pendingWindow = New-RegressionWindow $Context -SkipWait
+    $pendingWindow.ViewModel.AddBrowser('about:blank', $false) | Out-Null
+    $pendingWindow.ViewModel.AddBrowser('about:blank', $true) | Out-Null
+    $pendingWindow.UpdateLayout()
+    $browsers = @($readyWindow.ViewModel.Browsers) + @($pendingWindow.ViewModel.Browsers) |
+        ForEach-Object { $_.Browser }
     [SimpleMvvm.Messaging.Messenger]::Global.Send([CefFlashBrowser.Data.MessageTokens]::CLOSE_ALL_BROWSERS, $null)
     Assert-Regression (!$readyWindow.IsVisible -and !$pendingWindow.IsVisible) 'close-all message completes before CEF shutdown'
+    Assert-Regression (@($browsers | Where-Object { $null -ne $_ -and !$_.IsDisposed }).Count -eq 0) 'close-all message releases every ready and initializing tab before returning'
     foreach ($auxWindow in @($readyAuxiliaryWindows) + @($pendingAuxiliaryWindows)) {
         Assert-AuxiliaryClosed $Context $auxWindow ($auxWindow.FindName('browserView'))
     }

@@ -76,6 +76,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">Исходное окно</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Новое окно</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">Новая вкладка</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -116,6 +117,7 @@
     <sys:String x:Key="browser_undo">Отменить</sys:String>
     <sys:String x:Key="browser_find">Найти</sys:String>
     <sys:String x:Key="browser_searchFor">Искать "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewTab">Открыть в новой вкладке</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Открыть в новом окне</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">Перейти к "{0}"</sys:String>
     <sys:String x:Key="browser_addToDictionary">Добавить в словарь</sys:String>
@@ -139,6 +141,8 @@
     <sys:String x:Key="browser_loading">Загрузка...</sys:String>
     <sys:String x:Key="browser_showMainWindow">Открыть главное окно</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">Новое окно браузера</sys:String>
+    <sys:String x:Key="browser_newTab">Новая вкладка</sys:String>
+    <sys:String x:Key="browser_closeTab">Закрыть вкладку</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">Диспетчер сохранений SOL</sys:String>

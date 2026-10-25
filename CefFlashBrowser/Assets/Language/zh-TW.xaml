@@ -76,6 +76,7 @@
     <!--開啟新網頁時的行為-->
     <sys:String x:Key="newPageBehavior_originalWindow">原視窗</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新視窗</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">新分頁</sys:String>
 
     <!--搜尋引擎-->
     <sys:String x:Key="searchEngine_baidu">百度</sys:String>
@@ -116,6 +117,7 @@
     <sys:String x:Key="browser_undo">復原</sys:String>
     <sys:String x:Key="browser_find">尋找</sys:String>
     <sys:String x:Key="browser_searchFor">搜尋「{0}」</sys:String>
+    <sys:String x:Key="browser_openInNewTab">在新分頁開啟</sys:String>
     <sys:String x:Key="browser_openInNewWindow">在新視窗開啟</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">前往「{0}」</sys:String>
     <sys:String x:Key="browser_addToDictionary">新增到字典</sys:String>
@@ -139,6 +141,8 @@
     <sys:String x:Key="browser_loading">載入中...</sys:String>
     <sys:String x:Key="browser_showMainWindow">開啟主視窗</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">新建瀏覽器視窗</sys:String>
+    <sys:String x:Key="browser_newTab">新分頁</sys:String>
+    <sys:String x:Key="browser_closeTab">關閉分頁</sys:String>
 
     <!--存檔管理員-->
     <sys:String x:Key="solSaveManager_title">SOL存檔管理員</sys:String>

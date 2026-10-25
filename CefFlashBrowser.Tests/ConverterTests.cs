@@ -7,56 +7,56 @@ namespace CefFlashBrowser.Tests
     [TestClass]
     public class ConverterTests
     {
-        #region BinaryToSizeString
+        #region BinaryToSizeStringConverter
 
         [TestMethod]
-        public void BinaryToSizeString_GetReadableSize_Bytes()
+        public void BinaryToSizeStringConverter_GetReadableSize_Bytes()
         {
             var data = new byte[500];
-            Assert.AreEqual("500 B", BinaryToSizeString.GetReadableSize(data));
+            Assert.AreEqual("500 B", BinaryToSizeStringConverter.GetReadableSize(data));
         }
 
         [TestMethod]
-        public void BinaryToSizeString_GetReadableSize_Kilobytes()
+        public void BinaryToSizeStringConverter_GetReadableSize_Kilobytes()
         {
             var data = new byte[1024];
-            Assert.AreEqual("1 KB", BinaryToSizeString.GetReadableSize(data));
+            Assert.AreEqual("1 KB", BinaryToSizeStringConverter.GetReadableSize(data));
         }
 
         [TestMethod]
-        public void BinaryToSizeString_GetReadableSize_Megabytes()
+        public void BinaryToSizeStringConverter_GetReadableSize_Megabytes()
         {
             var data = new byte[1024 * 1024];
-            Assert.AreEqual("1 MB", BinaryToSizeString.GetReadableSize(data));
+            Assert.AreEqual("1 MB", BinaryToSizeStringConverter.GetReadableSize(data));
         }
 
         [TestMethod]
-        public void BinaryToSizeString_GetReadableSize_FractionalKB()
+        public void BinaryToSizeStringConverter_GetReadableSize_FractionalKB()
         {
             var data = new byte[1536]; // 1.5 KB
-            Assert.AreEqual("1.5 KB", BinaryToSizeString.GetReadableSize(data));
+            Assert.AreEqual("1.5 KB", BinaryToSizeStringConverter.GetReadableSize(data));
         }
 
         [TestMethod]
-        public void BinaryToSizeString_GetReadableSize_EmptyArray()
+        public void BinaryToSizeStringConverter_GetReadableSize_EmptyArray()
         {
             var data = new byte[0];
-            Assert.AreEqual("0 B", BinaryToSizeString.GetReadableSize(data));
+            Assert.AreEqual("0 B", BinaryToSizeStringConverter.GetReadableSize(data));
         }
 
         [TestMethod]
-        public void BinaryToSizeString_Convert_WithoutReadableSize()
+        public void BinaryToSizeStringConverter_Convert_WithoutReadableSize()
         {
-            var converter = new BinaryToSizeString { UseReadableSize = false };
+            var converter = new BinaryToSizeStringConverter { UseReadableSize = false };
             var data = new byte[1024];
             var result = converter.Convert(data, null, CultureInfo.InvariantCulture);
             Assert.AreEqual("1024 B", result);
         }
 
         [TestMethod]
-        public void BinaryToSizeString_Convert_WithReadableSize()
+        public void BinaryToSizeStringConverter_Convert_WithReadableSize()
         {
-            var converter = new BinaryToSizeString { UseReadableSize = true };
+            var converter = new BinaryToSizeStringConverter { UseReadableSize = true };
             var data = new byte[1024];
             var result = converter.Convert(data, null, CultureInfo.InvariantCulture);
             Assert.AreEqual("1 KB", result);
@@ -64,64 +64,64 @@ namespace CefFlashBrowser.Tests
 
         #endregion
 
-        #region ZoomLevelToScale
+        #region ZoomLevelToScaleConverter
 
         [TestMethod]
-        public void ZoomLevelToScale_Convert_ZeroReturnsOne()
+        public void ZoomLevelToScaleConverter_Convert_ZeroReturnsOne()
         {
-            var converter = new ZoomLevelToScale();
+            var converter = new ZoomLevelToScaleConverter();
             var result = converter.Convert(0.0, null, CultureInfo.InvariantCulture);
             Assert.AreEqual(1.0, result, 0.001);
         }
 
         [TestMethod]
-        public void ZoomLevelToScale_Convert_PositiveValue()
+        public void ZoomLevelToScaleConverter_Convert_PositiveValue()
         {
-            var converter = new ZoomLevelToScale();
+            var converter = new ZoomLevelToScaleConverter();
             // value >= 0: scale = value + 1
             var result = converter.Convert(1.0, null, CultureInfo.InvariantCulture);
             Assert.AreEqual(2.0, result, 0.001);
         }
 
         [TestMethod]
-        public void ZoomLevelToScale_Convert_NegativeValue()
+        public void ZoomLevelToScaleConverter_Convert_NegativeValue()
         {
-            var converter = new ZoomLevelToScale();
+            var converter = new ZoomLevelToScaleConverter();
             // value < 0: scale = 1 / (1 - value)
             var result = converter.Convert(-1.0, null, CultureInfo.InvariantCulture);
             Assert.AreEqual(0.5, result, 0.001);
         }
 
         [TestMethod]
-        public void ZoomLevelToScale_ConvertBack_OneReturnsZero()
+        public void ZoomLevelToScaleConverter_ConvertBack_OneReturnsZero()
         {
-            var converter = new ZoomLevelToScale();
+            var converter = new ZoomLevelToScaleConverter();
             var result = converter.ConvertBack(1.0, null, CultureInfo.InvariantCulture);
             Assert.AreEqual(0.0, result, 0.001);
         }
 
         [TestMethod]
-        public void ZoomLevelToScale_ConvertBack_PositiveScale()
+        public void ZoomLevelToScaleConverter_ConvertBack_PositiveScale()
         {
-            var converter = new ZoomLevelToScale();
+            var converter = new ZoomLevelToScaleConverter();
             // scale >= 1: level = scale - 1
             var result = converter.ConvertBack(2.0, null, CultureInfo.InvariantCulture);
             Assert.AreEqual(1.0, result, 0.001);
         }
 
         [TestMethod]
-        public void ZoomLevelToScale_ConvertBack_FractionalScale()
+        public void ZoomLevelToScaleConverter_ConvertBack_FractionalScale()
         {
-            var converter = new ZoomLevelToScale();
+            var converter = new ZoomLevelToScaleConverter();
             // scale < 1: level = 1 - (1 / scale)
             var result = converter.ConvertBack(0.5, null, CultureInfo.InvariantCulture);
             Assert.AreEqual(-1.0, result, 0.001);
         }
 
         [TestMethod]
-        public void ZoomLevelToScale_Roundtrip_PositiveValue()
+        public void ZoomLevelToScaleConverter_Roundtrip_PositiveValue()
         {
-            var converter = new ZoomLevelToScale();
+            var converter = new ZoomLevelToScaleConverter();
             double original = 2.5;
             double scale = converter.Convert(original, null, CultureInfo.InvariantCulture);
             double roundtrip = converter.ConvertBack(scale, null, CultureInfo.InvariantCulture);
@@ -129,9 +129,9 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public void ZoomLevelToScale_Roundtrip_NegativeValue()
+        public void ZoomLevelToScaleConverter_Roundtrip_NegativeValue()
         {
-            var converter = new ZoomLevelToScale();
+            var converter = new ZoomLevelToScaleConverter();
             double original = -0.5;
             double scale = converter.Convert(original, null, CultureInfo.InvariantCulture);
             double roundtrip = converter.ConvertBack(scale, null, CultureInfo.InvariantCulture);

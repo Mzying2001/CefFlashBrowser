@@ -16,7 +16,7 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(Theme.Light, settings.Theme);
             Assert.AreEqual(SearchEngine.Bing, settings.SearchEngine);
             Assert.AreEqual(NavigationType.Automatic, settings.NavigationType);
-            Assert.AreEqual(NewPageBehavior.OriginalWindow, settings.NewPageBehavior);
+            Assert.AreEqual(NewPageBehavior.NewTab, settings.NewPageBehavior);
             Assert.IsFalse(settings.DisableOnBeforeUnloadDialog);
             Assert.IsNull(settings.MainWindowSizeInfo);
             Assert.IsNull(settings.BrowserWindowSizeInfo);

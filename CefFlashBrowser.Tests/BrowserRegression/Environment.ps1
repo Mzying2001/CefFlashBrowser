@@ -88,6 +88,7 @@ function Initialize-RegressionEnvironment($Context) {
 
     $references = @(
         (Join-Path $Context.CefPath 'CefSharp.dll'),
+        $applicationAssembly.FullName,
         (Get-RegressionDependencyPath $Context 'CefFlashBrowser.FlashBrowser.dll')
     )
     Add-Type -ReferencedAssemblies $references -Path (Join-Path $Context.ScriptPath 'TestDoubles.cs')
@@ -130,9 +131,19 @@ function Initialize-RegressionEnvironment($Context) {
         $dictionary.set_Source([Uri]$dictionaryUri)
         $Context.Application.Resources.MergedDictionaries.Add($dictionary)
     }
+    # Supply LanguageManager lookups without starting App or loading the user's profile.
+    $languages = New-Object System.Windows.ResourceDictionary
+    $languages.set_Source([Uri]'pack://application:,,,/CefFlashBrowser;component/Assets/Language/langs.xaml')
+    $languageDictionaries = [CefFlashBrowser.Services.LanguageManager].GetProperty(
+        'LanguageDictionaries', $privateStatic).GetValue($null, $null)
+    foreach ($language in $languages.Keys) {
+        $languageDictionaries.Add($language, $languages[$language])
+    }
+
     foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Up', 'Down', 'Page')) {
         $Context.Application.Resources.Add($icon + 'IconUri', [Uri]('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg', [UriKind]::Relative))
     }
+    $Context.Application.Resources.Add('NewTabIconUri', [Uri]::new('/Assets/Svgs/new-tab.svg', [UriKind]::Relative))
 
     $auxiliaryFile = Join-Path $Context.TemporaryPath 'auxiliary.html'
     $auxiliarySecondFile = Join-Path $Context.TemporaryPath 'auxiliary-second.html'

@@ -187,34 +187,37 @@ function Test-BrowserDisplay($Context, $window, $view, $browser) {
 }
 
 function Test-BrowserClose($Context, $window, $view, $browser) {
+    $browserModel = $view.ViewModel
     $dialogHandler = Set-RegressionBeforeUnload $Context $browser
     $window.Close()
     Wait-Regression $Context { $dialogHandler.Count -gt 0 } 'beforeunload dialog on normal close'
+    Wait-Regression $Context { !$window.ViewModel.IsClosing } 'cancelled close returns the window to its open state'
     Assert-Regression $window.IsVisible 'cancelling beforeunload keeps the window open'
     $dialogHandler.Accept = $true
     $closeBinding = $window.InputBindings | Where-Object {
         $_.Key -eq [System.Windows.Input.Key]::W -and
         $_.Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
     }
-    Invoke-BrowserCommand $closeBinding.Command ([bool]$closeBinding.CommandParameter)
+    Invoke-BrowserCommand $closeBinding.Command $closeBinding.CommandParameter
     Wait-Regression $Context { !$window.IsVisible } 'Ctrl+W closes after beforeunload approval'
     Assert-Regression ($view.GetType().GetField('_isClosed', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)) 'host close cleans up BrowserView'
     Invoke-ViewCallback $view 'OnBrowserDoClose' @($browser, $Context.DisposedBrowser)
-    $window.ViewModel.CreateShortcut($view.ViewModel)
-    $window.ViewModel.AddFavorite($view.ViewModel)
-    $window.ViewModel.ToggleLoadingState($view.ViewModel)
-    $window.ViewModel.FindText($view.ViewModel, $true)
+    $window.ViewModel.CreateShortcut($browserModel)
+    $window.ViewModel.AddFavorite($browserModel)
+    $window.ViewModel.ToggleLoadingState($browserModel)
+    $window.ViewModel.FindText($browserModel, $true)
     foreach ($commandName in $Context.BrowserCommandNames) {
-        Invoke-BrowserCommand $window.ViewModel.$commandName $view.ViewModel
+        Invoke-BrowserCommand $window.ViewModel.$commandName $browserModel
     }
-    $view.ViewModel.ToggleDevTools()
-    $view.ViewModel.ExitFullScreen()
+    $browserModel.ToggleDevTools()
+    $browserModel.ExitFullScreen()
     Assert-Regression $browser.IsDisposed 'commands tolerate disposed browsers'
 }
 
 function Test-BrowserStateRestoration($Context, $PreviousBrowser) {
     $window = New-RegressionWindow $Context
     $view = Find-BrowserView $window
+    $browserModel = $view.ViewModel
     Assert-Regression ($view.ViewModel.ZoomLevel -eq 0.5) 'a new browser restores the saved zoom level'
     $rejected = $false
     try {
@@ -231,6 +234,6 @@ function Test-BrowserStateRestoration($Context, $PreviousBrowser) {
     $window.ForceCloseWindow()
     Assert-Regression ([CefFlashBrowser.Data.GlobalData]::Settings.IntegratedDevToolsWidth -eq 400) 'force close preserves DevTools width without DoClose'
     Assert-Regression ($view.GetType().GetField('_isClosed', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)) 'force close cleans up BrowserView'
-    Assert-Regression $view.ViewModel.Browser.IsDisposed 'force close releases the hosted browser'
+    Assert-Regression $browserModel.Browser.IsDisposed 'force close releases the hosted browser'
     $window.ForceCloseWindow()
 }

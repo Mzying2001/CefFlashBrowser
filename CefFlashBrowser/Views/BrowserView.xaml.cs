@@ -7,6 +7,7 @@ using CefSharp;
 using SimpleMvvm.Messaging;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,7 +18,7 @@ namespace CefFlashBrowser.Views
     /// <summary>
     /// BrowserView.xaml 的交互逻辑
     /// </summary>
-    public partial class BrowserView : UserControl
+    public partial class BrowserView : UserControl, IDisposable
     {
         private class BrowserLifeSpanHandler : LifeSpanHandler
         {
@@ -30,8 +31,7 @@ namespace CefFlashBrowser.Views
 
             public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
             {
-                view.OnBrowserDoClose(chromiumWebBrowser, browser);
-                return false;
+                return view.OnBrowserDoClose(chromiumWebBrowser, browser);
             }
 
             public override void OnAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
@@ -68,12 +68,23 @@ namespace CefFlashBrowser.Views
                 this.view = view;
             }
 
+            protected override void OpenPage(IWebBrowser chromiumWebBrowser, IBrowser browser, string url,
+                NewPageBehavior? behaviorOverride = null)
+            {
+                if (!view._isClosed && !chromiumWebBrowser.IsDisposed)
+                {
+                    view.RaiseEvent(new BrowserNewPageEventArgs(BrowserNewPageEvent, view, chromiumWebBrowser, browser, url,
+                        behaviorOverride: behaviorOverride));
+                }
+            }
+
             public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
             {
                 switch (commandId)
                 {
                     case Search:
                     case OpenInNewWindow:
+                    case OpenInNewTab:
                     case OpenSelectedUrl:
                     case CefMenuCommand.ViewSource:
                         {
@@ -103,6 +114,12 @@ namespace CefFlashBrowser.Views
         private Window _ownerWindow;
         private readonly CancellationTokenSource _closeCancellation = new CancellationTokenSource();
         private readonly CancellationToken _closeToken;
+        private TaskCompletionSource<bool> _closeCompletion;
+        private bool _closeSent;
+        private bool _closeAccepted;
+        private bool _forceCloseRequested;
+        private bool _waitingForInitialization;
+        private bool _devToolsOpen;
 
 
 
@@ -191,12 +208,14 @@ namespace CefFlashBrowser.Views
 
             Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
+            Messenger.Global.Register(MessageTokens.BROWSER_CLOSE_CANCELED, BrowserCloseCanceledHandler);
         }
 
         private void UnregisterMessageHandlers()
         {
             Messenger.Global.Unregister(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Unregister(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
+            Messenger.Global.Unregister(MessageTokens.BROWSER_CLOSE_CANCELED, BrowserCloseCanceledHandler);
         }
 
         private void InvokeOnUIThread(Action action)
@@ -261,6 +280,167 @@ namespace CefFlashBrowser.Views
 
         private void OwnerWindowClosed(object sender, EventArgs e)
         {
+            Dispose();
+        }
+
+        internal Task<bool> RequestCloseAsync(bool forceClose)
+        {
+            if (_isClosed)
+                return Task.FromResult(true);
+
+            if (_closeCompletion == null)
+                _closeCompletion = new TaskCompletionSource<bool>();
+
+            var task = _closeCompletion.Task;
+
+            if (forceClose && !_forceCloseRequested)
+            {
+                _forceCloseRequested = true;
+                _closeSent = false;
+                (browser.JsDialogHandler as Browser.Handlers.JsDialogHandler)?.ForceClosePendingDialog();
+            }
+
+            BeginClose();
+            return task;
+        }
+
+        private async void BeginClose()
+        {
+            if (_isClosed || _closeSent || _closeAccepted)
+                return;
+
+            if (browser.IsDisposed)
+            {
+                Dispose();
+                return;
+            }
+
+            if (!browser.IsBrowserInitialized)
+            {
+                if (!_waitingForInitialization)
+                {
+                    _waitingForInitialization = true;
+                    browser.IsBrowserInitializedChanged += BrowserInitializedForClose;
+                }
+                return;
+            }
+
+            _closeSent = true;
+
+            // CEF ignores CloseBrowser while a reload's beforeunload is pending.
+            // Its answer belongs to the reload, so wait and then request a close.
+            var dialogHandler = browser.JsDialogHandler as Browser.Handlers.JsDialogHandler;
+            if (dialogHandler != null)
+                await dialogHandler.WaitForPendingReloadAsync();
+
+            if (_isClosed || _closeAccepted)
+                return;
+
+            InvokeAfterCefCallback(() =>
+            {
+                if (_isClosed || _closeAccepted)
+                    return;
+
+                try
+                {
+                    var cefBrowser = browser.IsDisposed ? null : browser.GetBrowser();
+                    if (cefBrowser == null)
+                        Dispose();
+                    else
+                        cefBrowser.CloseBrowser(_forceCloseRequested || GlobalData.Settings.DisableOnBeforeUnloadDialog);
+                }
+                catch (ObjectDisposedException)
+                {
+                    Dispose();
+                }
+            });
+        }
+
+        private void BrowserInitializedForClose(object sender, EventArgs e)
+        {
+            if (!browser.IsBrowserInitialized)
+                return;
+
+            browser.IsBrowserInitializedChanged -= BrowserInitializedForClose;
+            _waitingForInitialization = false;
+            BeginClose();
+        }
+
+        internal Task<bool> CompleteCloseAsync()
+        {
+            if (_isClosed)
+                return Task.FromResult(true);
+
+            if (_closeCompletion == null)
+                _closeCompletion = new TaskCompletionSource<bool>();
+
+            if (!_closeAccepted)
+            {
+                _closeAccepted = true;
+                InvokeAfterCefCallback(() =>
+                {
+                    if (_devToolsOpen && !browser.IsDisposed)
+                        browser.CloseDevTools();
+                    else
+                        DestroyClosedBrowser();
+                });
+            }
+
+            return _closeCompletion.Task;
+        }
+
+        private void DestroyClosedBrowser()
+        {
+            Cef.UIThreadTaskFactory.StartNew(() =>
+            {
+                if (!browser.IsDisposed)
+                {
+                    try
+                    {
+                        var cefBrowser = browser.GetBrowser();
+                        if (cefBrowser != null && !cefBrowser.IsDisposed)
+                            Win32.DestroyWindow(cefBrowser.GetHost().GetWindowHandle());
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
+                }
+                Dispatcher.InvokeAsync(Dispose);
+            });
+        }
+
+        private void InvokeAfterCefCallback(Action action)
+        {
+            // Never destroy a native host while CEF is still inside its callback.
+            Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(action));
+        }
+
+        private void BrowserCloseCanceledHandler(object msg)
+        {
+            if (_isClosed || msg != browser)
+                return;
+
+            InvokeOnUIThread(() =>
+            {
+                var completion = _closeCompletion;
+                if (completion == null || _forceCloseRequested || _closeAccepted)
+                    return;
+
+                // Let CEF consume the rejected callback before another close can start.
+                InvokeAfterCefCallback(() =>
+                {
+                    if (_isClosed || _forceCloseRequested || _closeAccepted || _closeCompletion != completion)
+                        return;
+
+                    _closeCompletion = null;
+                    _closeSent = false;
+                    completion.TrySetResult(false);
+                });
+            });
+        }
+
+        public void Dispose()
+        {
             if (_isClosed)
                 return;
 
@@ -271,18 +451,35 @@ namespace CefFlashBrowser.Views
 
             SaveDevToolsWidth();
             UnregisterMessageHandlers();
+            (browser.JsDialogHandler as Browser.Handlers.JsDialogHandler)?.ForceClosePendingDialog();
 
             DataContextChanged -= BrowserDataContextChanged;
             Loaded -= BrowserViewLoaded;
 
-            _ownerWindow.Closed -= OwnerWindowClosed;
-            _ownerWindow = null;
+            if (_ownerWindow != null)
+            {
+                _ownerWindow.Closed -= OwnerWindowClosed;
+                _ownerWindow = null;
+            }
 
-            if (!browser.IsDisposed)
-                browser.LifeSpanHandler = null;
+            if (_waitingForInitialization)
+            {
+                browser.IsBrowserInitializedChanged -= BrowserInitializedForClose;
+                _waitingForInitialization = false;
+            }
 
-            browser.Dispose();
+            if (ViewModel != null)
+                ViewModel.IntegratedDevToolsHandle = IntPtr.Zero;
+
+            // Detach DevTools before CEF closes it; its default close must not reach
+            // the WPF window that still owns other tabs.
+            devtoolsContainer.SetCurrentValue(Custom.HwndContainer.ContentHandleProperty, IntPtr.Zero);
             devtoolsContainer.Dispose();
+
+            // Keep the handler through native disposal so a repeated DoClose cannot
+            // fall back to sending WM_CLOSE to a surviving multi-tab window.
+            browser.Dispose();
+            _closeCompletion?.TrySetResult(true);
         }
 
         private void DevToolsOpenedHandler(object msg)
@@ -311,7 +508,8 @@ namespace CefFlashBrowser.Views
 
             if (!_isClosed && !e.Handled && GlobalData.Settings.EnableIntegratedDevTools)
             {
-                Keyboard.Focus(browser);
+                if (IsVisible)
+                    Keyboard.Focus(browser);
                 devtoolsColumn.Width = new GridLength(GlobalData.Settings.IntegratedDevToolsWidth);
             }
         }
@@ -326,7 +524,8 @@ namespace CefFlashBrowser.Views
 
             if (!_isClosed && !e.Handled)
             {
-                Keyboard.Focus(browser);
+                if (IsVisible)
+                    Keyboard.Focus(browser);
                 GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
                 devtoolsColumn.Width = new GridLength(0);
             }
@@ -344,11 +543,11 @@ namespace CefFlashBrowser.Views
                 RaiseEvent(new FullscreenChangedEventArgs(FullscreenChangedEvent, this, fullScreen));
         }
 
-        protected virtual void OnBrowserDoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
+        protected virtual bool OnBrowserDoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
         {
             if (_isClosed
                 || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
-                return;
+                return true;
 
             // CEF can dispose the callback browser between any two property calls.
             var isPopup = false;
@@ -368,6 +567,7 @@ namespace CefFlashBrowser.Views
                 // Treat a browser disposed during the callback as a normal close.
             }
 
+            bool handled = false;
             InvokeOnUIThread(() =>
             {
                 if (_isClosed)
@@ -378,12 +578,31 @@ namespace CefFlashBrowser.Views
 
                 var e = new BrowserDoCloseEventArgs(BrowserDoCloseEvent, this, chromiumWebBrowser, browser, isPopup, isDevTools, hostHandle);
                 RaiseEvent(e);
+                handled = e.Handled;
 
                 if (!_isClosed && !e.Handled && isDevTools)
                 {
                     ViewModel?.OnDevToolsClosed();
+                    devtoolsContainer.SetCurrentValue(Custom.HwndContainer.ContentHandleProperty, IntPtr.Zero);
+                    _devToolsOpen = false;
+                    // CEF's default close targets the top-level parent of embedded
+                    // DevTools. Destroy its own HWND on the thread that created it.
+                    handled = true;
+                    Cef.UIThreadTaskFactory.StartNew(() =>
+                    {
+                        Win32.DestroyWindow(hostHandle);
+                        Dispatcher.InvokeAsync(() =>
+                        {
+                            if (_closeAccepted)
+                                DestroyClosedBrowser();
+                        });
+                    });
                 }
             });
+
+            // A tab owner handles destruction after this callback. Suppress CEF's
+            // default WM_CLOSE, which would otherwise close the whole WPF window.
+            return handled;
         }
 
         protected virtual void OnBrowserAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
@@ -432,6 +651,7 @@ namespace CefFlashBrowser.Views
 
                 if (!_isClosed && !e.Handled && isDevTools)
                 {
+                    _devToolsOpen = true;
                     ViewModel?.OnDevToolsOpened(hostHandle);
                 }
             });
@@ -493,7 +713,7 @@ namespace CefFlashBrowser.Views
                 }
                 else
                 {
-                    var e = new BrowserNewPageEventArgs(BrowserNewPageEvent, this, chromiumWebBrowser, browser, targetUrl);
+                    var e = new BrowserNewPageEventArgs(BrowserNewPageEvent, this, chromiumWebBrowser, browser, targetUrl, targetDisposition);
                     RaiseEvent(e);
                 }
             });
@@ -581,13 +801,18 @@ namespace CefFlashBrowser.Views
         public IWebBrowser ChromiumWebBrowser { get; }
         public IBrowser Browser { get; }
         public string TargetUrl { get; }
+        public WindowOpenDisposition TargetDisposition { get; }
+        public NewPageBehavior? BehaviorOverride { get; }
 
-        public BrowserNewPageEventArgs(RoutedEvent routedEvent, object source, IWebBrowser chromiumWebBrowser, IBrowser browser, string targetUrl)
+        public BrowserNewPageEventArgs(RoutedEvent routedEvent, object source, IWebBrowser chromiumWebBrowser, IBrowser browser, string targetUrl,
+            WindowOpenDisposition targetDisposition = WindowOpenDisposition.NewForegroundTab, NewPageBehavior? behaviorOverride = null)
             : base(routedEvent, source)
         {
             ChromiumWebBrowser = chromiumWebBrowser;
             Browser = browser;
             TargetUrl = targetUrl;
+            TargetDisposition = targetDisposition;
+            BehaviorOverride = behaviorOverride;
         }
     }
 

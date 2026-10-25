@@ -16,7 +16,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         mc:Ignorable="d"
-        
+
         x:Name="window"
         Width="Auto"
         Height="Auto"
@@ -24,10 +24,6 @@
         MinHeight="300"
         Title="{Binding CurrentBrowser.Title, TargetNullValue=FlashBrowser}"
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
-
-    <d:Window.DataContext>
-        <vm:BrowserWindowViewModel/>
-    </d:Window.DataContext>
 
     <Window.Resources>
         <!--Converters-->
@@ -42,6 +38,10 @@
             <MenuItem Header="{DynamicResource browser_showMainWindow}"
                       Command="{Binding ShowMainWindowCommand}"
                       InputGestureText="Ctrl+M"/>
+
+            <MenuItem Header="{DynamicResource browser_newTab}"
+                      Command="{Binding AddBrowserCommand}"
+                      InputGestureText="Ctrl+T"/>
 
             <MenuItem Header="{DynamicResource browser_newBrowserWindow}"
                       Command="{Binding NewBrowserWindowCommand}"
@@ -73,7 +73,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    VerticalAlignment="Center">
-                            <Run Text="{DynamicResource browser_zoom}"/><Run Text="{Binding CurrentBrowser.ZoomLevel, Converter={StaticResource ZoomLevelToScale}, StringFormat={}: {0:p0}}"/>
+                            <Run Text="{DynamicResource browser_zoom}"/><Run Text="{Binding CurrentBrowser.ZoomLevel, Converter={StaticResource ZoomLevelToScaleConverter}, StringFormat={}: {0:p0}}"/>
                         </TextBlock>
                         <hc:ButtonGroup Grid.Column="1"
                                         Margin="0,0,43,0"
@@ -209,7 +209,7 @@
                                     <MenuItem.Header>
                                         <TextBlock MaxWidth="250"
                                                    TextTrimming="CharacterEllipsis"
-                                                   Text="{Binding Converter={StaticResource UrlGetFileName}}"
+                                                   Text="{Binding Converter={StaticResource UrlGetFileNameConverter}}"
                                                    ToolTip="{Binding}"/>
                                     </MenuItem.Header>
                                 </MenuItem>
@@ -249,6 +249,16 @@
         <KeyBinding Gesture="Ctrl+N"
                     Command="{Binding NewBrowserWindowCommand}"
                     CommandParameter="{Binding CurrentBrowser.Address}"/>
+        <KeyBinding Gesture="Ctrl+T"
+                    Command="{Binding AddBrowserCommand}"/>
+        <KeyBinding Gesture="Ctrl+Tab"
+                    Command="{Binding SelectNextBrowserCommand}"/>
+        <KeyBinding Gesture="Ctrl+Shift+Tab"
+                    Command="{Binding SelectPreviousBrowserCommand}"/>
+        <KeyBinding Gesture="Ctrl+PageDown"
+                    Command="{Binding SelectNextBrowserCommand}"/>
+        <KeyBinding Gesture="Ctrl+PageUp"
+                    Command="{Binding SelectPreviousBrowserCommand}"/>
         <KeyBinding Gesture="Ctrl+O"
                     Command="{Binding OpenInDefaultBrowserCommand}"
                     CommandParameter="{Binding CurrentBrowser.Address}"/>
@@ -261,8 +271,8 @@
                     Command="{Binding CreateShortcutCommand}"
                     CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Ctrl+W"
-                    Command="{Binding CurrentBrowser.Browser.CloseBrowserCommand}"
-                    CommandParameter="{Binding Source={x:Static data:GlobalData.Settings}, Path=DisableOnBeforeUnloadDialog}"/>
+                    Command="{Binding CloseBrowserCommand}"
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Alt+Left"
                     Command="{Binding CurrentBrowser.Browser.BackCommand}"/>
         <KeyBinding Gesture="Alt+Right"
@@ -272,6 +282,7 @@
 
     <Grid x:Name="mainGrid">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
@@ -351,6 +362,27 @@
 
             <StackPanel DockPanel.Dock="Right"
                         Orientation="Horizontal">
+                <!--new tab button-->
+                <Button x:Name="toolbarNewTabButton"
+                        Margin="0,0,10,0"
+                        ToolTip="{DynamicResource browser_newTab}"
+                        Command="{Binding AddBrowserCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource NewTabIconUri}"/>
+                </Button>
+
                 <!--blocked swfs button-->
                 <Button Margin="0,0,10,0"
                         ToolTip="{DynamicResource browser_toolTipBlockedSwfs}">
@@ -487,11 +519,22 @@
             <Grid Margin="10,0"
                   Height="30">
                 <!--address-->
-                <TextBox Padding="35,0,8,0"
+                <TextBox x:Name="addressTextBox"
                          Text="{Binding CurrentBrowser.Browser.Address, Mode=OneWay}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>
+                    <TextBox.Style>
+                        <Style TargetType="TextBox"
+                               BasedOn="{StaticResource {x:Type TextBox}}">
+                            <Setter Property="Padding" Value="8,0"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
+                                    <Setter Property="Padding" Value="35,0,8,0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
                                     Command="{Binding CurrentBrowser.Browser.LoadUrlCommand}"
@@ -503,6 +546,16 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left"
                             IsHitTestVisible="False">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
                     <c:BrowserIcon Margin="8,0,5,0"
                                    FaviconUrl="{Binding CurrentBrowser.Browser.FaviconUrl}"/>
                     <Separator Width="20">
@@ -514,7 +567,198 @@
             </Grid>
         </DockPanel>
 
-        <Grid Grid.Row="1"
+        <Grid x:Name="tabStrip"
+              Grid.Row="1"
+              Margin="10,0">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Fullscreen}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsClosing}" Value="True">
+                            <Setter Property="IsEnabled" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <Grid HorizontalAlignment="Left"
+                  MaxWidth="{Binding ElementName=tabStrip, Path=ActualWidth}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!--tabs-->
+                <ListBox x:Name="tabList"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         ItemsSource="{Binding Browsers}"
+                         SelectedItem="{Binding CurrentBrowser, Mode=OneWay}"
+                         SelectionMode="Single"
+                         SelectionChanged="TabSelectionChanged"
+                         PreviewMouseWheel="TabListPreviewMouseWheel">
+                    <ListBox.Template>
+                        <ControlTemplate TargetType="ListBox">
+                            <ScrollViewer x:Name="tabScrollViewer"
+                                          Focusable="False"
+                                          CanContentScroll="True"
+                                          VerticalScrollBarVisibility="Disabled"
+                                          HorizontalScrollBarVisibility="Hidden">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </ListBox.Template>
+                    <ListBox.Resources>
+                        <ControlTemplate x:Key="tabContainerTemplate"
+                                         TargetType="ListBoxItem">
+                            <Border CornerRadius="6,6,0,0"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </ControlTemplate>
+                    </ListBox.Resources>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Width"
+                                    Value="250"/>
+                            <Setter Property="MinHeight"
+                                    Value="32"/>
+                            <Setter Property="Padding"
+                                    Value="6"/>
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Stretch"/>
+                            <Setter Property="Background"
+                                    Value="Transparent"/>
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource PrimaryTextBrush}"/>
+                            <Setter Property="Template"
+                                    Value="{StaticResource tabContainerTemplate}"/>
+                            <Setter Property="ToolTip"
+                                    Value="{Binding Address}"/>
+                            <EventSetter Event="PreviewMouseDown"
+                                         Handler="TabPreviewMouseDown"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#30808080"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
+                            <DockPanel>
+                                <c:BrowserIcon
+                                    DockPanel.Dock="Left"
+                                    Margin="0,0,6,0"
+                                    FaviconUrl="{Binding Browser.FaviconUrl}"/>
+                                <Button
+                                    x:Name="closeTabButton"
+                                    DockPanel.Dock="Right"
+                                    Padding="0"
+                                    Margin="6,0,0,0"
+                                    Width="20"
+                                    Height="20"
+                                    BorderThickness="0"
+                                    Focusable="False"
+                                    ToolTip="{DynamicResource browser_closeTab}"
+                                    Command="{Binding DataContext.CloseBrowserCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Grid Background="{TemplateBinding Background}">
+                                                            <Border x:Name="highlight"
+                                                                    CornerRadius="4"
+                                                                    Background="{TemplateBinding Foreground}"
+                                                                    Opacity="0"/>
+                                                            <ContentPresenter HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="highlight" Property="Opacity" Value="0.12"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsPressed" Value="True">
+                                                                <Setter TargetName="highlight" Property="Opacity" Value="0.24"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsEnabled" Value="False">
+                                                                <Setter TargetName="highlight" Property="Opacity" Value="0"/>
+                                                                <Setter Property="Opacity" Value="0.4"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Button.Style>
+                                    <svgc:SvgIcon
+                                        Width="8"
+                                        Height="8"
+                                        UriSource="{StaticResource StopIconUri}"/>
+                                </Button>
+                                <TextBlock x:Name="tabTitle"
+                                    TextTrimming="CharacterEllipsis"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    ToolTip="{Binding Title}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding Title}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Title}" Value="{x:Null}">
+                                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Title}" Value="">
+                                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!--new tab-->
+                <Button x:Name="newTabButton"
+                        Grid.Column="1"
+                        Width="30"
+                        Height="30"
+                        Margin="4,0,0,0"
+                        Padding="0"
+                        Focusable="False"
+                        BorderThickness="0"
+                        VerticalAlignment="Center"
+                        ToolTip="{DynamicResource browser_newTab}"
+                        Command="{Binding AddBrowserCommand}">
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource AddIconUri}"/>
+                </Button>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2"
               local:BrowserView.DevToolsOpened="DevToolsOpened"
               local:BrowserView.DevToolsClosed="DevToolsClosed"
               local:BrowserView.FullscreenChanged="FullscreenChanged"
@@ -522,13 +766,34 @@
               local:BrowserView.BrowserAfterCreated="BrowserAfterCreated"
               local:BrowserView.BrowserPopup="BrowserPopup"
               local:BrowserView.BrowserNewPage="BrowserNewPage">
-            <ContentControl Content="{Binding CurrentBrowser}">
-                <ContentControl.ContentTemplate>
-                    <DataTemplate>
+            <ItemsControl x:Name="browsersControl" ItemsSource="{Binding Browsers}">
+                <ItemsControl.Resources>
+                    <Style TargetType="{x:Type local:BrowserView}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
+                                        <Binding Path="DataContext" RelativeSource="{RelativeSource Self}"/>
+                                        <Binding Path="DataContext.CurrentBrowser" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ItemsControl.Resources>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
                         <local:BrowserView/>
                     </DataTemplate>
-                </ContentControl.ContentTemplate>
-            </ContentControl>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
 
         <Popup x:Name="statusPopup"

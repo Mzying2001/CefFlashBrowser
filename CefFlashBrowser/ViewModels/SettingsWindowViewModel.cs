@@ -64,8 +64,9 @@ namespace CefFlashBrowser.ViewModels
 
         public List<ItemViewModel<NewPageBehavior>> NewPageBehaviors { get; } = new List<ItemViewModel<NewPageBehavior>>
         {
-            new ItemViewModel<NewPageBehavior>(NewPageBehavior.OriginalWindow, "newPageBehavior_originalWindow"),
-            new ItemViewModel<NewPageBehavior>(NewPageBehavior.NewWindow, "newPageBehavior_newWindow")
+            new ItemViewModel<NewPageBehavior>(NewPageBehavior.NewTab, "newPageBehavior_newTab"),
+            new ItemViewModel<NewPageBehavior>(NewPageBehavior.NewWindow, "newPageBehavior_newWindow"),
+            new ItemViewModel<NewPageBehavior>(NewPageBehavior.OriginalWindow, "newPageBehavior_originalWindow")
         };
 
         public NewPageBehavior CurrentNewPageBehavior

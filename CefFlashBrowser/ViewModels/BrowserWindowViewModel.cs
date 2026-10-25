@@ -9,6 +9,7 @@ using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -25,6 +26,10 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ToggleLoadingStateCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
         public DelegateCommand NewBrowserWindowCommand { get; set; }
+        public DelegateCommand AddBrowserCommand { get; set; }
+        public DelegateCommand CloseBrowserCommand { get; set; }
+        public DelegateCommand SelectNextBrowserCommand { get; set; }
+        public DelegateCommand SelectPreviousBrowserCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
         public DelegateCommand ToggleFullscreenCommand { get; set; }
         public DelegateCommand OpenFindPopupCommand { get; set; }
@@ -34,11 +39,34 @@ namespace CefFlashBrowser.ViewModels
 
 
 
+        private readonly ObservableCollection<BrowserViewModel> _browsers;
+        public ReadOnlyObservableCollection<BrowserViewModel> Browsers { get; }
+
+        private bool _isClosing;
+        public bool IsClosing
+        {
+            get => _isClosing;
+            internal set => UpdateValue(ref _isClosing, value);
+        }
+
         private BrowserViewModel _currentBrowser;
         public BrowserViewModel CurrentBrowser
         {
             get => _currentBrowser;
-            set => UpdateValue(ref _currentBrowser, value);
+            set
+            {
+                if (ReferenceEquals(_currentBrowser, value))
+                    return;
+
+                if (value == null ? _browsers.Count != 0 : !_browsers.Contains(value))
+                    throw new ArgumentException("The current browser must belong to this window.", nameof(value));
+
+                _currentBrowser?.StopFinding(true);
+                _currentBrowser?.ExitFullScreen();
+                ShowFindPopup = false;
+                Fullscreen = false;
+                UpdateValue(ref _currentBrowser, value);
+            }
         }
 
         private bool _showFindPopup = false;
@@ -190,6 +218,74 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowBrowser(url ?? "about:blank");
         }
 
+        private BrowserViewModel InsertBrowser(int index, string address, bool activate)
+        {
+            if (IsClosing)
+            {
+                throw new InvalidOperationException(
+                    "Cannot add a browser while the window is closing.");
+            }
+
+            var browser = SimpleIoc.Global.GetInstance<BrowserViewModel>(address);
+            _browsers.Insert(index, browser);
+
+            if (activate || CurrentBrowser == null)
+            {
+                CurrentBrowser = browser;
+            }
+
+            return browser;
+        }
+
+        public BrowserViewModel AddBrowser(string address = "about:blank", bool activate = true)
+        {
+            return InsertBrowser(_browsers.Count, address, activate);
+        }
+
+        private void AddBrowserCommandImpl(string address)
+        {
+            if (!IsClosing)
+            {
+                AddBrowser(address ?? "about:blank");
+            }
+        }
+
+        public void CloseBrowser(BrowserViewModel browser)
+        {
+            if (!IsClosing && browser != null && _browsers.Contains(browser))
+            {
+                Messenger.Global.Send(MessageTokens.CLOSE_BROWSER, browser);
+            }
+        }
+
+        public void SelectBrowser(int offset)
+        {
+            if (IsClosing || _browsers.Count == 0)
+                return;
+
+            var index = (_browsers.IndexOf(CurrentBrowser) + offset) % _browsers.Count;
+
+            if (index < 0)
+                index += _browsers.Count;
+
+            CurrentBrowser = _browsers[index];
+        }
+
+        internal void RemoveBrowser(BrowserViewModel browser)
+        {
+            var index = _browsers.IndexOf(browser);
+            if (index < 0)
+                return;
+
+            bool wasCurrent = ReferenceEquals(CurrentBrowser, browser);
+            _browsers.RemoveAt(index);
+
+            if (wasCurrent)
+            {
+                CurrentBrowser = _browsers.Count == 0 ? null : _browsers[Math.Min(index, _browsers.Count - 1)];
+            }
+        }
+
         public void ToggleDevTools(BrowserViewModel browser)
         {
             if (IsBrowserReady(browser))
@@ -214,27 +310,41 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void OnNewPage(string url)
+        public void OnNewPage(BrowserViewModel source, string url, bool activate = true, NewPageBehavior? behaviorOverride = null)
         {
-            switch (GlobalData.Settings.NewPageBehavior)
+            if (IsClosing || source == null || !_browsers.Contains(source))
+                return;
+
+            switch (behaviorOverride ?? GlobalData.Settings.NewPageBehavior)
             {
+                case NewPageBehavior.NewTab:
+                    {
+                        InsertBrowser(_browsers.IndexOf(source) + 1, url, activate);
+                        break;
+                    }
                 case NewPageBehavior.NewWindow:
                     {
-                        Fullscreen = false;
+                        if (source == CurrentBrowser)
+                            Fullscreen = false;
                         WindowManager.ShowBrowser(url);
                         break;
                     }
                 case NewPageBehavior.OriginalWindow:
                     {
-                        CurrentBrowser.Address = url;
+                        source.Address = url;
                         break;
                     }
             }
         }
 
-        public void OnPopup(string url, WindowSizeInfo sizeInfo)
+        public void OnPopup(BrowserViewModel source, string url, WindowSizeInfo sizeInfo)
         {
-            Fullscreen = false;
+            if (IsClosing || source == null || !_browsers.Contains(source))
+                return;
+
+            if (source == CurrentBrowser)
+                Fullscreen = false;
+
             WindowManager.ShowPopupWebPage(url, sizeInfo);
         }
 
@@ -267,7 +377,10 @@ namespace CefFlashBrowser.ViewModels
 
         public BrowserWindowViewModel()
         {
-            CurrentBrowser = SimpleIoc.Global.GetInstance<BrowserViewModel>();
+            _browsers = new ObservableCollection<BrowserViewModel>();
+            Browsers = new ReadOnlyObservableCollection<BrowserViewModel>(_browsers);
+
+            AddBrowser(null);
 
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
             ViewSourceCommand = new DelegateCommand<string>(ViewSource);
@@ -277,6 +390,10 @@ namespace CefFlashBrowser.ViewModels
             ToggleLoadingStateCommand = new DelegateCommand<BrowserViewModel>(ToggleLoadingState);
             OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
+            AddBrowserCommand = new DelegateCommand<string>(AddBrowserCommandImpl);
+            CloseBrowserCommand = new DelegateCommand<BrowserViewModel>(CloseBrowser);
+            SelectNextBrowserCommand = new DelegateCommand(() => SelectBrowser(1));
+            SelectPreviousBrowserCommand = new DelegateCommand(() => SelectBrowser(-1));
             ToggleDevToolsCommand = new DelegateCommand<BrowserViewModel>(ToggleDevTools);
             ToggleFullscreenCommand = new DelegateCommand<BrowserViewModel>(ToggleFullscreen);
             OpenFindPopupCommand = new DelegateCommand(OpenFindPopup);

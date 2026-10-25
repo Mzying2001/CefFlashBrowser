@@ -76,6 +76,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">Fenêtre d'origine</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Nouvelle fenêtre</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">Nouvel onglet</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -116,6 +117,7 @@
     <sys:String x:Key="browser_undo">Annuler</sys:String>
     <sys:String x:Key="browser_find">Trouver</sys:String>
     <sys:String x:Key="browser_searchFor">Chercher "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewTab">Ouvrir dans un nouvel onglet</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Ouvrir dans une nouvelle fenêtre</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">Aller à "{0}"</sys:String>
     <sys:String x:Key="browser_addToDictionary">Ajouter au dictionnaire</sys:String>
@@ -139,6 +141,8 @@
     <sys:String x:Key="browser_loading">Chargement...</sys:String>
     <sys:String x:Key="browser_showMainWindow">Ouvrir la fenêtre principale</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">Nouvelle fenêtre de navigation</sys:String>
+    <sys:String x:Key="browser_newTab">Nouvel onglet</sys:String>
+    <sys:String x:Key="browser_closeTab">Fermer l’onglet</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">Gestionnaire de sauvegarde SOL</sys:String>

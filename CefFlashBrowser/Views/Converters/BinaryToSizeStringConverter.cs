@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace CefFlashBrowser.Views.Converters
 {
-    public class BinaryToSizeString : ValueConverterBase<byte[], string>
+    public class BinaryToSizeStringConverter : ValueConverterBase<byte[], string>
     {
         public bool UseReadableSize { get; set; }
 

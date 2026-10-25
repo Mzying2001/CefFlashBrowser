@@ -155,7 +155,7 @@
             Theme = Theme.Light;
             SearchEngine = SearchEngine.Bing;
             NavigationType = NavigationType.Automatic;
-            NewPageBehavior = NewPageBehavior.OriginalWindow;
+            NewPageBehavior = NewPageBehavior.NewTab;
             DisableOnBeforeUnloadDialog = false;
             MainWindowSizeInfo = null;
             BrowserWindowSizeInfo = null;
