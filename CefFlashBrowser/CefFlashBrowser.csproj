@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Content Include="Assets\Icons\icon.ico" />
-    <Resource Include="Assets\Icons\page.png" />
     <Resource Include="Assets\Svgs\add.svg" />
     <Resource Include="Assets\Svgs\back.svg" />
     <Resource Include="Assets\Svgs\down.svg" />

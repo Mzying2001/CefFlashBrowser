@@ -32,14 +32,10 @@
                         </Grid>
                     </Viewbox>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="FaviconUrl" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding Source, ElementName=favicon}" Value="{x:Null}">
                             <Setter TargetName="favicon" Property="Visibility" Value="Collapsed"/>
                             <Setter TargetName="defaultIcon" Property="Visibility" Value="Visible"/>
-                        </Trigger>
-                        <Trigger Property="FaviconUrl" Value="">
-                            <Setter TargetName="favicon" Property="Visibility" Value="Collapsed"/>
-                            <Setter TargetName="defaultIcon" Property="Visibility" Value="Visible"/>
-                        </Trigger>
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
