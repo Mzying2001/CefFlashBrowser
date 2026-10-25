@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace CefFlashBrowser.Views.Converters
 {
-    public class ObjectToString : ValueConverterBase<object, string>
+    public class ObjectToStringConverter : ValueConverterBase<object, string>
     {
         public override string Convert(object value, object parameter, CultureInfo culture)
         {

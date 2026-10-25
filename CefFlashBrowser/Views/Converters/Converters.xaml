@@ -2,18 +2,18 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:CefFlashBrowser.Views.Converters">
 
-    <local:UrlGetFileName x:Key="UrlGetFileName"/>
+    <local:UrlGetFileNameConverter x:Key="UrlGetFileNameConverter"/>
 
-    <local:IntToDouble x:Key="IntToDouble"/>
+    <local:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
 
-    <local:ObjectToString x:Key="ObjectToString"/>
+    <local:ObjectToStringConverter x:Key="ObjectToStringConverter"/>
 
-    <local:ObjectGetType x:Key="ObjectGetType"/>
+    <local:ObjectGetTypeConverter x:Key="ObjectGetTypeConverter"/>
 
-    <local:BinaryToSizeString x:Key="BinaryToSizeString"/>
+    <local:BinaryToSizeStringConverter x:Key="BinaryToSizeStringConverter"/>
 
-    <local:BinaryToSizeString x:Key="BinaryToReadableSizeString" UseReadableSize="True"/>
+    <local:BinaryToSizeStringConverter x:Key="BinaryToReadableSizeStringConverter" UseReadableSize="True"/>
 
-    <local:ZoomLevelToScale x:Key="ZoomLevelToScale"/>
+    <local:ZoomLevelToScaleConverter x:Key="ZoomLevelToScaleConverter"/>
 
 </ResourceDictionary>

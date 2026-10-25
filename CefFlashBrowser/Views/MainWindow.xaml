@@ -59,7 +59,7 @@
                         <Setter Property="Tag"
                                 Value="{Binding RelativeSource={RelativeSource AncestorType=Menu}, Path=DataContext}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ., Converter={StaticResource ObjectGetType}}"
+                            <DataTrigger Binding="{Binding ., Converter={StaticResource ObjectGetTypeConverter}}"
                                          Value="{x:Type m:Website}">
                                 <Setter Property="Command"
                                         Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.OpenWebsiteCommand}"/>

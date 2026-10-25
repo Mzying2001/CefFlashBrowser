@@ -73,7 +73,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    VerticalAlignment="Center">
-                            <Run Text="{DynamicResource browser_zoom}"/><Run Text="{Binding CurrentBrowser.ZoomLevel, Converter={StaticResource ZoomLevelToScale}, StringFormat={}: {0:p0}}"/>
+                            <Run Text="{DynamicResource browser_zoom}"/><Run Text="{Binding CurrentBrowser.ZoomLevel, Converter={StaticResource ZoomLevelToScaleConverter}, StringFormat={}: {0:p0}}"/>
                         </TextBlock>
                         <hc:ButtonGroup Grid.Column="1"
                                         Margin="0,0,43,0"
@@ -209,7 +209,7 @@
                                     <MenuItem.Header>
                                         <TextBlock MaxWidth="250"
                                                    TextTrimming="CharacterEllipsis"
-                                                   Text="{Binding Converter={StaticResource UrlGetFileName}}"
+                                                   Text="{Binding Converter={StaticResource UrlGetFileNameConverter}}"
                                                    ToolTip="{Binding}"/>
                                     </MenuItem.Header>
                                 </MenuItem>

@@ -60,7 +60,7 @@
             <hc:NumericUpDown Minimum="-268435456"
                               Maximum="268435455"
                               DecimalPlaces="0"
-                              Value="{Binding Value, Converter={StaticResource IntToDouble}}"/>
+                              Value="{Binding Value, Converter={StaticResource IntToDoubleConverter}}"/>
         </DataTemplate>
 
         <!--Double Editor-->
@@ -136,7 +136,7 @@
                         <Setter Property="HorizontalAlignment" Value="Stretch"/>
                         <Setter Property="ToolTip" Value="{Binding Value, Mode=OneWay}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Value, Converter={StaticResource ObjectToString}}" Value="">
+                            <DataTrigger Binding="{Binding Value, Converter={StaticResource ObjectToStringConverter}}" Value="">
                                 <Setter Property="ToolTip" Value="{x:Null}"/>
                             </DataTrigger>
                         </Style.Triggers>
@@ -150,7 +150,7 @@
                             <Setter Property="Text" Value="{Binding Value, Mode=OneWay}"/>
                             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Value, Converter={StaticResource ObjectToString}}" Value="">
+                                <DataTrigger Binding="{Binding Value, Converter={StaticResource ObjectToStringConverter}}" Value="">
                                     <Setter Property="Text" Value="{DynamicResource solEditor_emptyString}"/>
                                     <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
                                 </DataTrigger>
@@ -181,8 +181,8 @@
                             <Setter Property="VerticalAlignment" Value="Center"/>
                             <Setter Property="Background" Value="Transparent"/>
                             <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
-                            <Setter Property="Text" Value="{Binding Value, Converter={StaticResource BinaryToReadableSizeString}}"/>
-                            <Setter Property="ToolTip" Value="{Binding Value, Converter={StaticResource BinaryToSizeString}}"/>
+                            <Setter Property="Text" Value="{Binding Value, Converter={StaticResource BinaryToReadableSizeStringConverter}}"/>
+                            <Setter Property="ToolTip" Value="{Binding Value, Converter={StaticResource BinaryToSizeStringConverter}}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsSelected}"  Value="True">
                                     <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=Foreground}"/>
