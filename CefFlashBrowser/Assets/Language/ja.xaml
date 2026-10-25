@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">ポート</sys:String>
     <sys:String x:Key="settings_optional">（任意）</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Web ページのズームレベルを保存する</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">タブバーを常に表示する</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">DevTools をブラウザーウィンドウに埋め込む</sys:String>
     <sys:String x:Key="settings_disableFullscreen">フルスクリーンモードを無効にする</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">GPU アクセラレーションを無効にする</sys:String>

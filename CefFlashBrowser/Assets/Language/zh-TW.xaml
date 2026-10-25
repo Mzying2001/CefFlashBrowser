@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">通訊埠</sys:String>
     <sys:String x:Key="settings_optional">（選填）</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">儲存網頁縮放比例</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">一律顯示分頁列</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">將開發者工具嵌入至瀏覽器視窗</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止網頁進入全螢幕模式</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">停用GPU加速</sys:String>

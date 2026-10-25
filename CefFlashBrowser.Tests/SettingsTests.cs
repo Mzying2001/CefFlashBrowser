@@ -30,6 +30,7 @@ namespace CefFlashBrowser.Tests
             Assert.IsTrue(settings.EnableIntegratedDevTools);
             Assert.AreEqual(300d, settings.IntegratedDevToolsWidth);
             Assert.IsTrue(settings.SaveZoomLevel);
+            Assert.IsFalse(settings.AlwaysShowTabStrip);
             Assert.AreEqual(0d, settings.BrowserZoomLevel);
             Assert.IsFalse(settings.DisableFullscreen);
             Assert.AreEqual(30, settings.RetainedLogCount);

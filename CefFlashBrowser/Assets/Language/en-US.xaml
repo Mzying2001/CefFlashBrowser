@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">Port</sys:String>
     <sys:String x:Key="settings_optional">(Optional)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Save webpage zoom level</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">Always show tab bar</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Embed devtools into browser window</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Disable fullscreen mode</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Disable GPU acceleration</sys:String>

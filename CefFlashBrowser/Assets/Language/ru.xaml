@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">Порт</sys:String>
     <sys:String x:Key="settings_optional">(Необязательно)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Сохранять масштаб веб-страниц</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">Всегда показывать панель вкладок</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Встраивать DevTools в окно браузера</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Отключить полноэкранный режим</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Отключить ускорение GPU</sys:String>

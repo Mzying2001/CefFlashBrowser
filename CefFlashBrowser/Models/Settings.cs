@@ -98,6 +98,11 @@
         public bool SaveZoomLevel { get; set; }
 
         /// <summary>
+        /// Determines whether the tab strip remains visible with a single tab
+        /// </summary>
+        public bool AlwaysShowTabStrip { get; set; }
+
+        /// <summary>
         /// The browser zoom level
         /// </summary>
         public double BrowserZoomLevel { get; set; }
@@ -169,6 +174,7 @@
             EnableIntegratedDevTools = true;
             IntegratedDevToolsWidth = 300d;
             SaveZoomLevel = true;
+            AlwaysShowTabStrip = false;
             BrowserZoomLevel = 0d;
             DisableFullscreen = false;
             RetainedLogCount = 30;

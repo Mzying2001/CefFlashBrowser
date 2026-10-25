@@ -29,6 +29,9 @@ namespace CefFlashBrowser.Data
         /// <summary>Sent when fullscreen state toggles, adjusting window borders and maximization.</summary>
         public const string FULLSCREEN_CHANGED = "FULLSCREEN_CHANGED";
 
+        /// <summary>Sent when the always-show-tab-strip setting changes, refreshing browser window layouts.</summary>
+        public const string TAB_STRIP_VISIBILITY_CHANGED = "TAB_STRIP_VISIBILITY_CHANGED";
+
         /// <summary>Sent when clearing cache or switching architecture, force-closing all browser instances.</summary>
         public const string CLOSE_ALL_BROWSERS = "CLOSE_ALL_BROWSERS";
 

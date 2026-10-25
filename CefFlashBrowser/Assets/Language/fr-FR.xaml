@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">Port</sys:String>
     <sys:String x:Key="settings_optional">(Optionnel)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Mémoriser le niveau de zoom des pages Web</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">Toujours afficher la barre d’onglets</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Intégrer les outils de développement dans la fenêtre du navigateur</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Désactiver le mode plein écran</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Désactiver l’accélération GPU</sys:String>

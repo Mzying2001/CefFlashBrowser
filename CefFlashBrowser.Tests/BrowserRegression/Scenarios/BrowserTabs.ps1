@@ -29,6 +29,7 @@ function Test-BrowserTabsBeforeShow($Context) {
 
 function Test-BrowserTabs($Context) {
     Test-BrowserTabStrip $Context
+    Test-BrowserTabStripSettings $Context
     Test-BrowserTabNewPageRouting $Context
     Test-BrowserTabSelection $Context
     Test-BrowserTabCallbacks $Context
@@ -55,6 +56,18 @@ function Invoke-TabShortcut($Window, [System.Windows.Input.Key]$Key, [System.Win
     Invoke-BrowserCommand $binding.Command $binding.CommandParameter
 }
 
+function Assert-TabStripLayout($Context, $Window, [bool]$ShowTabStrip) {
+    $address = $Window.FindName('addressTextBox')
+    $icon = $address.Parent.Children | Where-Object { $_ -is [System.Windows.Controls.StackPanel] }
+    $padding = if ($ShowTabStrip) { 8 } else { 35 }
+    Wait-Regression $Context {
+        $Window.ViewModel.ShowTabStrip -eq $ShowTabStrip -and
+        $Window.FindName('tabStrip').IsVisible -eq $ShowTabStrip -and
+        $Window.FindName('toolbarNewTabButton').IsVisible -eq !$ShowTabStrip -and
+        $icon.IsVisible -eq !$ShowTabStrip -and $address.Padding.Left -eq $padding
+    } "tab strip and toolbar layout match visibility $ShowTabStrip"
+}
+
 function Test-BrowserTabStrip($Context) {
     $window = New-RegressionWindow $Context -Width 600
     try {
@@ -62,12 +75,14 @@ function Test-BrowserTabStrip($Context) {
         $tabs = $window.FindName('tabList')
         $first = $model.CurrentBrowser
         Assert-Regression ($model.Browsers.Count -eq 1 -and $tabs.SelectedItem -eq $first) 'window starts with a single selected tab'
+        Assert-TabStripLayout $Context $window $false
         $newButton = $window.FindName('newTabButton')
         $toolbarNewButton = $window.FindName('toolbarNewTabButton')
         $peer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($toolbarNewButton)
         $peer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
         Wait-Regression $Context { $model.Browsers.Count -eq 2 -and $model.CurrentBrowser.IsBrowserReady() } 'new tab button creates and selects a browser'
         $second = $model.CurrentBrowser
+        Assert-TabStripLayout $Context $window $true
         Assert-Regression ($second.Address -eq 'about:blank' -and $tabs.SelectedItem -eq $second) 'new tab has a blank address and selected header'
         $tabs.SetCurrentValue([System.Windows.Controls.Primitives.Selector]::SelectedItemProperty, $first)
         Assert-Regression ($model.CurrentBrowser -eq $first) 'selecting a tab header changes the current browser'
@@ -111,12 +126,70 @@ function Test-BrowserTabStrip($Context) {
         $container.RaiseEvent($middle)
         Wait-Regression $Context { $model.Browsers.Count -eq 1 } 'middle click closes a tab'
         Assert-Regression ($middle.Handled -and $model.CurrentBrowser -eq $third) 'middle click preserves selection'
+        Assert-TabStripLayout $Context $window $false
         $model.ToggleFullscreen($third)
         Assert-Regression (!$window.FindName('tabStrip').IsVisible) 'fullscreen hides the tab strip'
         $model.ToggleFullscreen($third)
         Assert-Regression (!$window.FindName('tabStrip').IsVisible) 'leaving fullscreen keeps the tab strip hidden for a single tab'
     } finally {
         $window.ForceCloseWindow()
+    }
+}
+
+function Test-BrowserTabStripSettings($Context) {
+    $settings = $Context.Application.Resources['Locator'].SettingsWindowViewModel
+    $savedAlwaysShow = $settings.AlwaysShowTabStrip
+    $windows = @()
+    try {
+        $legacy = [Newtonsoft.Json.JsonConvert]::DeserializeObject('{"SaveZoomLevel":false}', [CefFlashBrowser.Models.Settings])
+        Assert-Regression (!$legacy.AlwaysShowTabStrip -and !$legacy.SaveZoomLevel) 'older settings default to hiding a single tab without changing other values'
+        foreach ($language in [CefFlashBrowser.Services.LanguageManager]::GetSupportedLanguage()) {
+            $label = [CefFlashBrowser.Services.LanguageManager]::GetString($language, 'settings_alwaysShowTabStrip')
+            Assert-Regression (![string]::IsNullOrWhiteSpace($label)) "always-show tab strip setting has a localized label ($language)"
+        }
+
+        $settings.AlwaysShowTabStrip = $false
+        $first = New-RegressionWindow $Context
+        $windows += $first
+        $second = New-RegressionWindow $Context
+        $windows += $second
+        foreach ($window in $windows) { Assert-TabStripLayout $Context $window $false }
+
+        $settings.AlwaysShowTabStrip = $true
+        foreach ($window in $windows) { Assert-TabStripLayout $Context $window $true }
+        $json = [Newtonsoft.Json.JsonConvert]::SerializeObject([CefFlashBrowser.Data.GlobalData]::Settings)
+        $restored = [Newtonsoft.Json.JsonConvert]::DeserializeObject($json, [CefFlashBrowser.Models.Settings])
+        Assert-Regression $restored.AlwaysShowTabStrip 'JSON round trip preserves the always-show tab strip setting'
+
+        $third = New-RegressionWindow $Context
+        $windows += $third
+        Assert-TabStripLayout $Context $third $true
+        $extra = New-RegressionTab $Context $third
+        Assert-TabStripLayout $Context $third $true
+        $third.ViewModel.CloseBrowser($extra)
+        Wait-Regression $Context { $third.ViewModel.Browsers.Count -eq 1 } 'closing to a single tab preserves the always-visible tab strip'
+        Assert-TabStripLayout $Context $third $true
+
+        $first.ViewModel.ToggleFullscreen($first.ViewModel.CurrentBrowser)
+        Assert-Regression (!$first.FindName('tabStrip').IsVisible) 'fullscreen hides the always-visible tab strip'
+        $settings.AlwaysShowTabStrip = $false
+        Assert-Regression (!$first.FindName('tabStrip').IsVisible) 'disabling always-show during fullscreen keeps the tab strip hidden'
+        $settings.AlwaysShowTabStrip = $true
+        Assert-Regression (!$first.FindName('tabStrip').IsVisible) 'enabling always-show during fullscreen keeps the tab strip hidden'
+        $first.ViewModel.ToggleFullscreen($first.ViewModel.CurrentBrowser)
+        Assert-TabStripLayout $Context $first $true
+
+        $extra = New-RegressionTab $Context $third
+        $settings.AlwaysShowTabStrip = $false
+        Assert-TabStripLayout $Context $first $false
+        Assert-TabStripLayout $Context $second $false
+        Assert-TabStripLayout $Context $third $true
+        $third.ViewModel.CloseBrowser($extra)
+        Wait-Regression $Context { $third.ViewModel.Browsers.Count -eq 1 } 'disabling always-show restores hiding after closing to a single tab'
+        Assert-TabStripLayout $Context $third $false
+    } finally {
+        foreach ($window in $windows) { $window.ForceCloseWindow() }
+        $settings.AlwaysShowTabStrip = $savedAlwaysShow
     }
 }
 

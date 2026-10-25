@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">Port</sys:String>
     <sys:String x:Key="settings_optional">(Optional)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Zoomstufe von Webseiten speichern</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">Tableiste immer anzeigen</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Entwicklertools in das Browserfenster einbetten</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Vollbildmodus deaktivieren</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">GPU-Beschleunigung deaktivieren</sys:String>

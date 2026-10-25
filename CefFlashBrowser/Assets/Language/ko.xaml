@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">포트</sys:String>
     <sys:String x:Key="settings_optional">(선택 사항)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">웹 페이지 확대/축소 수준 저장</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">항상 탭 표시줄 표시</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">DevTools를 브라우저 창에 포함</sys:String>
     <sys:String x:Key="settings_disableFullscreen">전체 화면 모드 비활성화</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">GPU 가속 비활성화</sys:String>

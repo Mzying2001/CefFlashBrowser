@@ -116,6 +116,11 @@
                         <CheckBox IsChecked="{Binding SaveZoomLevel}"/>
                     </c:SettingItem>
 
+                    <!--always show tab strip-->
+                    <c:SettingItem Description="{DynamicResource settings_alwaysShowTabStrip}">
+                        <CheckBox IsChecked="{Binding AlwaysShowTabStrip}"/>
+                    </c:SettingItem>
+
                     <!--enable integrated devtools-->
                     <c:SettingItem Description="{DynamicResource settings_enableIntegratedDevTools}">
                         <CheckBox IsChecked="{Binding EnableIntegratedDevTools}"/>

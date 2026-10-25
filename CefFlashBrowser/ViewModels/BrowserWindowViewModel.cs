@@ -99,7 +99,7 @@ namespace CefFlashBrowser.ViewModels
 
         public bool ShowTabStrip
         {
-            get => Browsers.Count > 1;
+            get => GlobalData.Settings.AlwaysShowTabStrip || Browsers.Count > 1;
         }
 
 
@@ -381,6 +381,11 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public void RefreshTabStripVisibility()
+        {
+            RaisePropertyChanged(nameof(ShowTabStrip));
+        }
+
         private void OnBrowserCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
@@ -388,7 +393,7 @@ namespace CefFlashBrowser.ViewModels
                 case NotifyCollectionChangedAction.Add:
                 case NotifyCollectionChangedAction.Remove:
                 case NotifyCollectionChangedAction.Reset:
-                    RaisePropertyChanged(nameof(ShowTabStrip));
+                    RefreshTabStripVisibility();
                     break;
             }
         }

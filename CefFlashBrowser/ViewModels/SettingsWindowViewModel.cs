@@ -283,6 +283,20 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool AlwaysShowTabStrip
+        {
+            get => GlobalData.Settings.AlwaysShowTabStrip;
+            set
+            {
+                if (GlobalData.Settings.AlwaysShowTabStrip != value)
+                {
+                    GlobalData.Settings.AlwaysShowTabStrip = value;
+                    RaisePropertyChanged();
+                    Messenger.Global.Send(MessageTokens.TAB_STRIP_VISIBILITY_CHANGED, null);
+                }
+            }
+        }
+
         public bool DisableGpuAcceleration
         {
             get => GlobalData.Settings.DisableGpuAcceleration;

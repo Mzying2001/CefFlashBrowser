@@ -61,6 +61,7 @@ namespace CefFlashBrowser.Views
             Messenger.Global.Register(MessageTokens.CLOSE_BROWSER, CloseTabHandler);
             Messenger.Global.Register(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
             Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
+            Messenger.Global.Register(MessageTokens.TAB_STRIP_VISIBILITY_CHANGED, TabStripVisibilityChangedHandler);
 
             Closed += delegate
             {
@@ -68,6 +69,7 @@ namespace CefFlashBrowser.Views
                 Messenger.Global.Unregister(MessageTokens.CLOSE_BROWSER, CloseTabHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
                 Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
+                Messenger.Global.Unregister(MessageTokens.TAB_STRIP_VISIBILITY_CHANGED, TabStripVisibilityChangedHandler);
             };
 
             // IsActive may not be settled during SourceInitialized, so initialize the
@@ -339,6 +341,11 @@ namespace CefFlashBrowser.Views
 
             base.OnClosed(e);
             _hwndSource?.RemoveHook(WndProc);
+        }
+
+        private void TabStripVisibilityChangedHandler(object msg)
+        {
+            ViewModel?.RefreshTabStripVisibility();
         }
 
         private void FullScreenChangedHandler(object msg)
