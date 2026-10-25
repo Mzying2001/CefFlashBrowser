@@ -620,7 +620,7 @@
                     <ListBox.Resources>
                         <ControlTemplate x:Key="tabContainerTemplate"
                                          TargetType="ListBoxItem">
-                            <Border CornerRadius="4,4,0,0"
+                            <Border CornerRadius="6,6,0,0"
                                     Background="{TemplateBinding Background}">
                                 <ContentPresenter Margin="{TemplateBinding Padding}"/>
                             </Border>
