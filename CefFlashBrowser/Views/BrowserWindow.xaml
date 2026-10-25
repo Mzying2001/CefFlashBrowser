@@ -25,10 +25,6 @@
         Title="{Binding CurrentBrowser.Title, TargetNullValue=FlashBrowser}"
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
-    <d:Window.DataContext>
-        <vm:BrowserWindowViewModel/>
-    </d:Window.DataContext>
-
     <Window.Resources>
         <!--Converters-->
         <converters:MultiplyConverter x:Key="TwoThirdConverter"
