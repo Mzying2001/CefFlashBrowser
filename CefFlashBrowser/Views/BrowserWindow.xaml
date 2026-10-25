@@ -16,7 +16,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         mc:Ignorable="d"
-        
+
         x:Name="window"
         Width="Auto"
         Height="Auto"
@@ -533,10 +533,6 @@
         <Grid x:Name="tabStrip"
               Grid.Row="1"
               Margin="10,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Style.Triggers>
@@ -550,134 +546,144 @@
                 </Style>
             </Grid.Style>
 
-            <!--tabs-->
-            <ListBox x:Name="tabList"
-                     BorderThickness="0"
-                     Background="Transparent"
-                     ItemsSource="{Binding Browsers}"
-                     SelectedItem="{Binding CurrentBrowser, Mode=OneWay}"
-                     SelectionMode="Single"
-                     SelectionChanged="TabSelectionChanged"
-                     PreviewMouseWheel="TabListPreviewMouseWheel">
-                <ListBox.Template>
-                    <ControlTemplate TargetType="ListBox">
-                        <ScrollViewer x:Name="tabScrollViewer"
-                                      Focusable="False"
-                                      CanContentScroll="True"
-                                      VerticalScrollBarVisibility="Disabled"
-                                      HorizontalScrollBarVisibility="Hidden">
-                            <ItemsPresenter/>
-                        </ScrollViewer>
-                    </ControlTemplate>
-                </ListBox.Template>
-                <ListBox.Resources>
-                    <ControlTemplate x:Key="tabContainerTemplate"
-                                     TargetType="ListBoxItem">
-                        <Border CornerRadius="4,4,0,0"
-                                Background="{TemplateBinding Background}">
-                            <ContentPresenter Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                    </ControlTemplate>
-                </ListBox.Resources>
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Width"
-                                Value="250"/>
-                        <Setter Property="MinHeight"
-                                Value="32"/>
-                        <Setter Property="Padding"
-                                Value="6"/>
-                        <Setter Property="HorizontalContentAlignment"
-                                Value="Stretch"/>
-                        <Setter Property="Background"
-                                Value="Transparent"/>
-                        <Setter Property="Foreground"
-                                Value="{DynamicResource PrimaryTextBrush}"/>
-                        <Setter Property="Template"
-                                Value="{StaticResource tabContainerTemplate}"/>
-                        <Setter Property="ToolTip"
-                                Value="{Binding Address}"/>
-                        <EventSetter Event="PreviewMouseDown"
-                                     Handler="TabPreviewMouseDown"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#30808080"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-                <ListBox.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
-                        <DockPanel>
-                            <c:BrowserIcon
-                                DockPanel.Dock="Left"
-                                Margin="0,0,6,0"
-                                FaviconUrl="{Binding Browser.FaviconUrl}"/>
-                            <Button
-                                x:Name="closeTabButton"
-                                DockPanel.Dock="Right"
-                                Padding="0"
-                                Margin="6,0,0,0"
-                                Width="20"
-                                Height="20"
-                                BorderThickness="0"
-                                Focusable="False"
-                                ToolTip="{DynamicResource browser_closeTab}"
-                                Command="{Binding DataContext.CloseBrowserCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="{Binding}"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Center">
-                                <svgc:SvgIcon
-                                    Width="8"
-                                    Height="8"
-                                    UriSource="{StaticResource StopIconUri}"/>
-                            </Button>
-                            <TextBlock x:Name="tabTitle"
-                                TextTrimming="CharacterEllipsis"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Left"
-                                ToolTip="{Binding Title}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="{Binding Title}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Title}" Value="{x:Null}">
-                                                <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Title}" Value="">
-                                                <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </DockPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <Button x:Name="newTabButton"
-                    Grid.Column="1"
-                    Width="30"
-                    Height="30"
-                    Margin="4,0,0,0"
-                    Padding="0"
-                    VerticalAlignment="Top"
-                    BorderThickness="0"
-                    Focusable="False"
-                    ToolTip="{DynamicResource browser_newTab}"
-                    Command="{Binding AddBrowserCommand}">
-                <svgc:SvgIcon Width="12"
-                              Height="12"
-                              UriSource="{StaticResource AddIconUri}"/>
-            </Button>
+            <Grid HorizontalAlignment="Left"
+                  MaxWidth="{Binding ElementName=tabStrip, Path=ActualWidth}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!--tabs-->
+                <ListBox x:Name="tabList"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         ItemsSource="{Binding Browsers}"
+                         SelectedItem="{Binding CurrentBrowser, Mode=OneWay}"
+                         SelectionMode="Single"
+                         SelectionChanged="TabSelectionChanged"
+                         PreviewMouseWheel="TabListPreviewMouseWheel">
+                    <ListBox.Template>
+                        <ControlTemplate TargetType="ListBox">
+                            <ScrollViewer x:Name="tabScrollViewer"
+                                          Focusable="False"
+                                          CanContentScroll="True"
+                                          VerticalScrollBarVisibility="Disabled"
+                                          HorizontalScrollBarVisibility="Hidden">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </ListBox.Template>
+                    <ListBox.Resources>
+                        <ControlTemplate x:Key="tabContainerTemplate"
+                                         TargetType="ListBoxItem">
+                            <Border CornerRadius="4,4,0,0"
+                                    Background="{TemplateBinding Background}">
+                                <ContentPresenter Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </ControlTemplate>
+                    </ListBox.Resources>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Width"
+                                    Value="250"/>
+                            <Setter Property="MinHeight"
+                                    Value="32"/>
+                            <Setter Property="Padding"
+                                    Value="6"/>
+                            <Setter Property="HorizontalContentAlignment"
+                                    Value="Stretch"/>
+                            <Setter Property="Background"
+                                    Value="Transparent"/>
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource PrimaryTextBrush}"/>
+                            <Setter Property="Template"
+                                    Value="{StaticResource tabContainerTemplate}"/>
+                            <Setter Property="ToolTip"
+                                    Value="{Binding Address}"/>
+                            <EventSetter Event="PreviewMouseDown"
+                                         Handler="TabPreviewMouseDown"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#30808080"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
+                            <DockPanel>
+                                <c:BrowserIcon
+                                    DockPanel.Dock="Left"
+                                    Margin="0,0,6,0"
+                                    FaviconUrl="{Binding Browser.FaviconUrl}"/>
+                                <Button
+                                    x:Name="closeTabButton"
+                                    DockPanel.Dock="Right"
+                                    Padding="0"
+                                    Margin="6,0,0,0"
+                                    Width="20"
+                                    Height="20"
+                                    BorderThickness="0"
+                                    Focusable="False"
+                                    ToolTip="{DynamicResource browser_closeTab}"
+                                    Command="{Binding DataContext.CloseBrowserCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center">
+                                    <svgc:SvgIcon
+                                        Width="8"
+                                        Height="8"
+                                        UriSource="{StaticResource StopIconUri}"/>
+                                </Button>
+                                <TextBlock x:Name="tabTitle"
+                                    TextTrimming="CharacterEllipsis"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    ToolTip="{Binding Title}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding Title}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Title}" Value="{x:Null}">
+                                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Title}" Value="">
+                                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!--new tab-->
+                <Button x:Name="newTabButton"
+                        Grid.Column="1"
+                        Width="30"
+                        Height="30"
+                        Margin="4,0,0,0"
+                        Padding="0"
+                        Focusable="False"
+                        BorderThickness="0"
+                        VerticalAlignment="Center"
+                        ToolTip="{DynamicResource browser_newTab}"
+                        Command="{Binding AddBrowserCommand}">
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource AddIconUri}"/>
+                </Button>
+            </Grid>
         </Grid>
 
         <Grid Grid.Row="2"
