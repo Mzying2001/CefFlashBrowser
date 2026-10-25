@@ -88,6 +88,7 @@ function Initialize-RegressionEnvironment($Context) {
 
     $references = @(
         (Join-Path $Context.CefPath 'CefSharp.dll'),
+        $applicationAssembly.FullName,
         (Get-RegressionDependencyPath $Context 'CefFlashBrowser.FlashBrowser.dll')
     )
     Add-Type -ReferencedAssemblies $references -Path (Join-Path $Context.ScriptPath 'TestDoubles.cs')

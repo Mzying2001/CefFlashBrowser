@@ -124,21 +124,39 @@ public sealed class RegressionPopupFeaturesProxy : RealProxy
     }
 }
 
-public sealed class RegressionJsDialogHandler : CefFlashBrowser.FlashBrowser.Handlers.JsDialogHandler
+public sealed class RegressionJsDialogHandler : CefFlashBrowser.Browser.Handlers.JsDialogHandler
 {
     public volatile bool Accept;
+    public volatile bool Hold;
     public int Count;
+    private IJsDialogCallback pendingCallback;
+    private IWebBrowser pendingBrowser;
+    private bool pendingIsReload;
 
     public override bool OnBeforeUnloadDialog(IWebBrowser control, IBrowser browser,
         string message, bool isReload, IJsDialogCallback callback)
     {
-        Interlocked.Increment(ref Count);
+        RegisterBeforeUnloadDialog(control, callback, isReload);
 
-        using (callback)
+        if (Hold)
         {
-            callback.Continue(Accept);
+            pendingBrowser = control;
+            pendingIsReload = isReload;
+            pendingCallback = callback;
+            Interlocked.Increment(ref Count);
+            return true;
         }
 
+        Interlocked.Increment(ref Count);
+        CompleteBeforeUnloadDialog(control, callback, isReload, Accept);
+
         return true;
+    }
+
+    public void CompletePending(bool accepted)
+    {
+        var callback = Interlocked.Exchange(ref pendingCallback, null);
+        if (callback != null)
+            CompleteBeforeUnloadDialog(pendingBrowser, callback, pendingIsReload, accepted);
     }
 }

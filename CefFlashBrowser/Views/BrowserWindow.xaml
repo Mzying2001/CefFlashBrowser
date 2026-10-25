@@ -261,8 +261,8 @@
                     Command="{Binding CreateShortcutCommand}"
                     CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Ctrl+W"
-                    Command="{Binding CurrentBrowser.Browser.CloseBrowserCommand}"
-                    CommandParameter="{Binding Source={x:Static data:GlobalData.Settings}, Path=DisableOnBeforeUnloadDialog}"/>
+                    Command="{Binding CloseBrowserCommand}"
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Alt+Left"
                     Command="{Binding CurrentBrowser.Browser.BackCommand}"/>
         <KeyBinding Gesture="Alt+Right"
@@ -522,13 +522,34 @@
               local:BrowserView.BrowserAfterCreated="BrowserAfterCreated"
               local:BrowserView.BrowserPopup="BrowserPopup"
               local:BrowserView.BrowserNewPage="BrowserNewPage">
-            <ContentControl Content="{Binding CurrentBrowser}">
-                <ContentControl.ContentTemplate>
-                    <DataTemplate>
+            <ItemsControl x:Name="browsersControl" ItemsSource="{Binding Browsers}">
+                <ItemsControl.Resources>
+                    <Style TargetType="{x:Type local:BrowserView}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
+                                        <Binding Path="DataContext" RelativeSource="{RelativeSource Self}"/>
+                                        <Binding Path="DataContext.CurrentBrowser" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ItemsControl.Resources>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
                         <local:BrowserView/>
                     </DataTemplate>
-                </ContentControl.ContentTemplate>
-            </ContentControl>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
 
         <Popup x:Name="statusPopup"

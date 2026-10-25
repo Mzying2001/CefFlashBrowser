@@ -43,13 +43,14 @@ function Invoke-BrowserCommand($Command, $Parameter = $null) {
         $Command.PSObject.BaseObject, [object[]]@($Parameter))
 }
 
-function Find-BrowserView($Element) {
-    if ($Element -is [CefFlashBrowser.Views.BrowserView]) {
+function Find-BrowserView($Element, $BrowserViewModel = $null) {
+    if ($Element -is [CefFlashBrowser.Views.BrowserView] -and
+        ($null -eq $BrowserViewModel -or [object]::ReferenceEquals($Element.ViewModel, $BrowserViewModel))) {
         return $Element
     }
 
     for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
-        $view = Find-BrowserView ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index))
+        $view = Find-BrowserView ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index)) $BrowserViewModel
         if ($null -ne $view) {
             return $view
         }

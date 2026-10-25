@@ -32,6 +32,12 @@ namespace CefFlashBrowser.Data
         /// <summary>Sent when clearing cache or switching architecture, force-closing all browser instances.</summary>
         public const string CLOSE_ALL_BROWSERS = "CLOSE_ALL_BROWSERS";
 
+        /// <summary>Requests closing a browser tab, carrying its BrowserViewModel.</summary>
+        public const string CLOSE_BROWSER = "CLOSE_BROWSER";
+
+        /// <summary>Sent with the browser when its beforeunload close request is cancelled.</summary>
+        public const string BROWSER_CLOSE_CANCELED = "BROWSER_CLOSE_CANCELED";
+
         /// <summary>Sent when theme settings change, redrawing all window title bars.</summary>
         public const string REDRAW_ALL_FRAMES = "REDRAW_ALL_FRAMES";
 

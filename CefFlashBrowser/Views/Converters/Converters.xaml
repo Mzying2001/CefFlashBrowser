@@ -16,4 +16,6 @@
 
     <local:ZoomLevelToScaleConverter x:Key="ZoomLevelToScaleConverter"/>
 
+    <local:MultiEqualityConverter x:Key="MultiEqualityConverter"/>
+
 </ResourceDictionary>

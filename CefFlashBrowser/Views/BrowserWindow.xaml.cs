@@ -3,17 +3,18 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
-using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
-using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace CefFlashBrowser.Views
@@ -26,7 +27,7 @@ namespace CefFlashBrowser.Views
         private bool _doClose = false;
         private bool _isClosed = false;
 
-        private ChromiumWebBrowser _browserPendingClose;
+        private bool _closingWindow;
         private bool _forceClosePending;
 
         private IntPtr _hwnd;
@@ -56,12 +57,14 @@ namespace CefFlashBrowser.Views
             }
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+            Messenger.Global.Register(MessageTokens.CLOSE_BROWSER, CloseTabHandler);
             Messenger.Global.Register(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
             Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
 
             Closed += delegate
             {
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+                Messenger.Global.Unregister(MessageTokens.CLOSE_BROWSER, CloseTabHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
                 Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
             };
@@ -176,86 +179,122 @@ namespace CefFlashBrowser.Views
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            var browser = ViewModel?.CurrentBrowser?.Browser;
-
-            if (_doClose || browser == null || browser.IsDisposed)
+            if (_doClose || ViewModel == null || ViewModel.Browsers.All(x => x.Browser == null || x.Browser.IsDisposed))
             {
                 if (ViewModel?.Fullscreen != true)
                     GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
             }
-            else if (browser is ChromiumWebBrowser wpfBrowser && !browser.IsBrowserInitialized)
-            {
-                DeferCloseUntilBrowserInitialized(wpfBrowser);
-                e.Cancel = true;
-            }
             else
             {
-                bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
-                try
+                e.Cancel = true;
+                if (!_closingWindow)
                 {
-                    var cefBrowser = browser.GetBrowser();
-                    if (cefBrowser != null)
-                    {
-                        cefBrowser.CloseBrowser(forceClose);
-                        e.Cancel = true;
-                    }
-                    else
-                    {
-                        _doClose = true;
-                    }
-                }
-                catch (ObjectDisposedException)
-                {
-                    _doClose = true;
+                    _closingWindow = true;
+                    ViewModel.IsClosing = true;
+                    // Leave WPF's Closing event before removing tabs or closing again.
+                    Dispatcher.InvokeAsync(CloseBrowsers);
                 }
             }
             base.OnClosing(e);
         }
 
-        private void DeferCloseUntilBrowserInitialized(ChromiumWebBrowser browser)
+        private async void CloseBrowsers()
         {
-            if (_browserPendingClose == browser)
-                return;
-
-            _browserPendingClose = browser;
-            browser.IsBrowserInitializedChanged += BrowserInitializedForClose;
-        }
-
-        private void BrowserInitializedForClose(object sender, EventArgs e)
-        {
-            var browser = _browserPendingClose;
-
-            if (browser == null || !browser.IsBrowserInitialized)
-                return;
-
-            browser.IsBrowserInitializedChanged -= BrowserInitializedForClose;
-            _browserPendingClose = null;
-
-            if (_forceClosePending)
-                return;
-
-            // The initialized notification can reach WPF before CEF has returned
-            // from OnAfterCreated. Wait for that callback before destroying its HWND.
-            InvokeAfterCefCallback(() =>
+            try
             {
-                if (!_isClosed) Close();
-            });
+                var browsers = ViewModel.Browsers.OrderBy(x => x == ViewModel.CurrentBrowser ? 0 : 1).ToArray();
+                foreach (var browser in browsers)
+                {
+                    if (_isClosed || _forceClosePending)
+                        return;
+
+                    if (!ViewModel.Browsers.Contains(browser))
+                        continue;
+
+                    ViewModel.CurrentBrowser = browser;
+                    if (!await CloseTabAsync(browser))
+                        return;
+                }
+
+                if (!_isClosed && !_forceClosePending)
+                {
+                    _doClose = true;
+                    Close();
+                }
+            }
+            finally
+            {
+                if (!_isClosed && !_forceClosePending)
+                {
+                    _closingWindow = false;
+                    ViewModel.IsClosing = false;
+                }
+            }
         }
 
-        private void InvokeAfterCefCallback(Action action)
+        private async void CloseTabHandler(object msg)
         {
-            // Let CEF's current callback return before running the action on WPF.
-            Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(action));
+            if (!_isClosed && !_closingWindow && !_forceClosePending
+                && msg is BrowserViewModel browser && ViewModel.Browsers.Contains(browser))
+            {
+                await CloseTabAsync(browser);
+            }
+        }
+
+        private BrowserView FindBrowserView(DependencyObject element, BrowserViewModel browser)
+        {
+            if (element is BrowserView view && ReferenceEquals(view.ViewModel, browser))
+                return view;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+            {
+                var child = FindBrowserView(VisualTreeHelper.GetChild(element, i), browser);
+                if (child != null) return child;
+            }
+            return null;
+        }
+
+        private async Task<bool> CloseTabAsync(BrowserViewModel browser, BrowserView approvedView = null, bool forceClose = false)
+        {
+            if (_isClosed || !ViewModel.Browsers.Contains(browser))
+                return true;
+
+            var view = approvedView
+                ?? FindBrowserView(browsersControl, browser);
+
+            if (view != null)
+            {
+                bool closed = await (approvedView != null ? view.CompleteCloseAsync() : view.RequestCloseAsync(forceClose));
+                if (!closed) return false;
+            }
+
+            if (!_isClosed)
+            {
+                ViewModel.RemoveBrowser(browser);
+
+                if (ViewModel.Browsers.Count == 0
+                    && !_closingWindow && !_forceClosePending)
+                {
+                    _doClose = true;
+                    Close();
+                }
+            }
+            return true;
         }
 
         protected override void OnClosed(EventArgs e)
         {
             _isClosed = true;
 
-            if (_browserPendingClose != null)
+            if (ViewModel != null)
             {
-                _browserPendingClose.IsBrowserInitializedChanged -= BrowserInitializedForClose;
-                _browserPendingClose = null;
+                ViewModel.IsClosing = true;
+
+                foreach (var browser in ViewModel.Browsers.ToArray())
+                {
+                    FindBrowserView(browsersControl, browser)?.Dispose();
+                    ViewModel.RemoveBrowser(browser);
+                }
             }
 
             base.OnClosed(e);
@@ -331,52 +370,41 @@ namespace CefFlashBrowser.Views
             if (_isClosed || _forceClosePending)
                 return;
 
-            var browser = ViewModel?.CurrentBrowser?.Browser;
-            if (browser != null && !browser.IsDisposed)
+            _forceClosePending = true;
+
+            if (ViewModel != null)
+                ViewModel.IsClosing = true;
+
+            try
             {
-                // Keep the native parent alive until asynchronous CEF creation finishes.
-                // Pump WPF so a caller can safely shut CEF down as soon as this returns.
-                _forceClosePending = true;
-                browser.LifeSpanHandler = null;
-
-                var frame = new DispatcherFrame();
-
-                EventHandler closed = (s, e) => frame.Continue = false;
-                Closed += closed;
-
-                try
+                var closing = ForceCloseBrowsersAsync();
+                if (!closing.IsCompleted)
                 {
-                    InvokeAfterCefCallback(() =>
-                    {
-                        if (!_isClosed)
-                        {
-                            _doClose = true;
-
-                            try
-                            {
-                                if (!browser.IsDisposed && browser.IsBrowserInitialized)
-                                {
-                                    browser.GetBrowser()?.CloseBrowser(true);
-                                }
-                            }
-                            catch (ObjectDisposedException)
-                            {
-                                // CEF can dispose the browser after the state check.
-                            }
-
-                            Close();
-                        }
-                    });
-
+                    // Keep all native parents alive during creation and close callbacks.
+                    // Callers can shut CEF down as soon as this synchronous method returns.
+                    var frame = new DispatcherFrame();
+                    closing.GetAwaiter().OnCompleted(() => Dispatcher.InvokeAsync(() => frame.Continue = false));
                     Dispatcher.PushFrame(frame);
                 }
-                finally
-                {
-                    Closed -= closed;
-                    _forceClosePending = false;
-                }
-                return;
+
+                closing.GetAwaiter().GetResult();
             }
+            finally
+            {
+                _forceClosePending = false;
+            }
+        }
+
+        private async Task ForceCloseBrowsersAsync()
+        {
+            if (ViewModel != null)
+            {
+                await Task.WhenAll(ViewModel.Browsers.ToArray()
+                    .Select(browser => CloseTabAsync(browser, forceClose: true)));
+            }
+
+            if (_isClosed)
+                return;
 
             _doClose = true;
             Close();
@@ -480,7 +508,7 @@ namespace CefFlashBrowser.Views
 
         private void DevToolsOpened(object sender, RoutedEventArgs e)
         {
-            if (!_isClosed && GlobalData.Settings.EnableIntegratedDevTools)
+            if (IsCurrentBrowserEvent(e) && GlobalData.Settings.EnableIntegratedDevTools)
             {
                 Activate();
             }
@@ -488,7 +516,7 @@ namespace CefFlashBrowser.Views
 
         private void DevToolsClosed(object sender, RoutedEventArgs e)
         {
-            if (!_isClosed)
+            if (IsCurrentBrowserEvent(e))
             {
                 Activate();
             }
@@ -496,23 +524,26 @@ namespace CefFlashBrowser.Views
 
         private void FullscreenChanged(object sender, FullscreenChangedEventArgs e)
         {
-            if (!_isClosed)
+            if (IsCurrentBrowserEvent(e))
             {
                 ViewModel.Fullscreen = e.Fullscreen;
             }
         }
 
-        private void BrowserDoClose(object sender, BrowserDoCloseEventArgs e)
+        private bool IsCurrentBrowserEvent(RoutedEventArgs e)
         {
-            if (!_isClosed && !e.IsPopup && !e.IsDevTools)
-            {
-                _doClose = true;
+            return !_isClosed && e.OriginalSource is BrowserView view
+                && ReferenceEquals(view.ViewModel, ViewModel.CurrentBrowser);
+        }
 
-                // Return from CEF's DoClose callback before destroying its parent HWND.
-                InvokeAfterCefCallback(() =>
-                {
-                    if (!_isClosed) Close();
-                });
+        private async void BrowserDoClose(object sender, BrowserDoCloseEventArgs e)
+        {
+            if (!_isClosed && !e.IsPopup && !e.IsDevTools
+                && e.OriginalSource is BrowserView view && ViewModel.Browsers.Contains(view.ViewModel)
+                && ReferenceEquals(view.ViewModel.Browser, e.ChromiumWebBrowser))
+            {
+                e.Handled = true;
+                await CloseTabAsync(view.ViewModel, view);
             }
         }
 
@@ -526,17 +557,17 @@ namespace CefFlashBrowser.Views
 
         private void BrowserPopup(object sender, BrowserPopupEventArgs e)
         {
-            if (!_isClosed)
+            if (!_isClosed && e.OriginalSource is BrowserView view)
             {
-                ViewModel.OnPopup(e.TargetUrl, e.PopupSizeInfo);
+                ViewModel.OnPopup(view.ViewModel, e.TargetUrl, e.PopupSizeInfo);
             }
         }
 
         private void BrowserNewPage(object sender, BrowserNewPageEventArgs e)
         {
-            if (!_isClosed)
+            if (!_isClosed && e.OriginalSource is BrowserView view)
             {
-                ViewModel.OnNewPage(e.TargetUrl);
+                ViewModel.OnNewPage(view.ViewModel, e.TargetUrl);
             }
         }
     }

@@ -23,6 +23,7 @@ foreach ($file in @(
     'Environment.ps1',
     'Helpers.ps1',
     'Scenarios\BrowserWindow.ps1',
+    'Scenarios\BrowserTabs.ps1',
     'Scenarios\AuxiliaryWindows.ps1',
     'Scenarios\Lifecycle.ps1'
 )) {
@@ -34,11 +35,13 @@ $failure = $null
 try {
     Initialize-RegressionEnvironment $context
     Test-BrowserBeforeInitialization $context
+    Test-BrowserTabsBeforeShow $context
     Start-RegressionCef $context
     Test-NavigationBeforeHosting $context
     Test-AuxiliaryBeforeShow $context
     Test-BrowserWindow $context
     Test-BrowserCloseDuringInitialization $context
+    Test-BrowserTabs $context
     Test-AuxiliaryWindows $context
     Test-CloseAllBrowsers $context
 } catch {
