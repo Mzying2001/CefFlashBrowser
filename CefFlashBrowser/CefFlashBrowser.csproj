@@ -35,6 +35,7 @@
     <Resource Include="Assets\Svgs\forward.svg" />
     <Resource Include="Assets\Svgs\import.svg" />
     <Resource Include="Assets\Svgs\more.svg" />
+    <Resource Include="Assets\Svgs\new-tab.svg" />
     <Resource Include="Assets\Svgs\page.svg" />
     <Resource Include="Assets\Svgs\reload.svg" />
     <Resource Include="Assets\Svgs\search.svg" />

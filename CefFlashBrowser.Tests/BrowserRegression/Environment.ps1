@@ -134,6 +134,7 @@ function Initialize-RegressionEnvironment($Context) {
     foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Up', 'Down', 'Page')) {
         $Context.Application.Resources.Add($icon + 'IconUri', [Uri]('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg', [UriKind]::Relative))
     }
+    $Context.Application.Resources.Add('NewTabIconUri', [Uri]::new('/Assets/Svgs/new-tab.svg', [UriKind]::Relative))
 
     $auxiliaryFile = Join-Path $Context.TemporaryPath 'auxiliary.html'
     $auxiliarySecondFile = Join-Path $Context.TemporaryPath 'auxiliary-second.html'

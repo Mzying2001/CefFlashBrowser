@@ -382,9 +382,9 @@
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
-                    <svgc:SvgIcon Width="10"
-                                  Height="10"
-                                  UriSource="{StaticResource AddIconUri}"/>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource NewTabIconUri}"/>
                 </Button>
 
                 <!--blocked swfs button-->
