@@ -346,7 +346,8 @@ FodyWeavers.xsd
 **/Properties/launchSettings.json
 
 # VSCode
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 # Claude Code
 .claude/
