@@ -599,6 +599,13 @@
                          SelectedItem="{Binding CurrentBrowser, Mode=OneWay}"
                          SelectionMode="Single"
                          SelectionChanged="TabSelectionChanged"
+                         AllowDrop="True"
+                         PreviewMouseMove="TabListPreviewMouseMove"
+                         PreviewMouseLeftButtonUp="TabListPreviewMouseLeftButtonUp"
+                         DragOver="TabListDragOver"
+                         DragLeave="TabListDragLeave"
+                         Drop="TabListDrop"
+                         QueryContinueDrag="TabListQueryContinueDrag"
                          PreviewMouseWheel="TabListPreviewMouseWheel">
                     <ListBox.Template>
                         <ControlTemplate TargetType="ListBox">

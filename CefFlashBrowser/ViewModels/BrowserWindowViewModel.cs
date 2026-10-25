@@ -264,6 +264,18 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public void MoveBrowser(BrowserViewModel browser, int index)
+        {
+            if (IsClosing || browser == null || index < 0 || index >= _browsers.Count)
+                return;
+
+            var oldIndex = _browsers.IndexOf(browser);
+            if (oldIndex >= 0 && oldIndex != index)
+            {
+                _browsers.Move(oldIndex, index);
+            }
+        }
+
         public void SelectBrowser(int offset)
         {
             if (IsClosing || _browsers.Count == 0)

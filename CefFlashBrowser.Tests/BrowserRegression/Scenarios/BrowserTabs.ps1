@@ -14,6 +14,13 @@ function Test-BrowserTabsBeforeShow($Context) {
     $second = $model.AddBrowser('about:blank', $false)
     Assert-Regression ([object]::ReferenceEquals($model.CurrentBrowser, $first)) 'background creation preserves selection'
     Assert-Regression (([Collections.IList]$model.Browsers).IsReadOnly) 'browser collection is read-only to callers'
+    $model.MoveBrowser($first, 1)
+    Assert-Regression ($model.Browsers[1] -eq $first -and $model.CurrentBrowser -eq $first) 'reordering unrealized tabs preserves selection'
+    $model.MoveBrowser($first, 0)
+    foreach ($index in @(-1, 2)) { $model.MoveBrowser($first, $index) }
+    $model.MoveBrowser((New-Object CefFlashBrowser.ViewModels.BrowserViewModel), 0)
+    $model.MoveBrowser($null, 0)
+    Assert-Regression ($model.Browsers[0] -eq $first -and $model.Browsers[1] -eq $second) 'invalid reorder requests leave tabs unchanged'
     foreach ($invalid in @($null, (New-Object CefFlashBrowser.ViewModels.BrowserViewModel))) {
         $rejected = $false
         try { $model.CurrentBrowser = $invalid } catch { $rejected = $true }
@@ -32,6 +39,7 @@ function Test-BrowserTabs($Context) {
     Test-BrowserTabStripSettings $Context
     Test-BrowserTabNewPageRouting $Context
     Test-BrowserTabSelection $Context
+    Test-BrowserTabReordering $Context
     Test-BrowserTabCallbacks $Context
     Test-BrowserTabCloseCancellation $Context
     Test-BrowserTabsReloadClose $Context
@@ -280,6 +288,80 @@ function Test-BrowserTabSelection($Context) {
         Invoke-BrowserCommand $closeBinding.Command $closeBinding.CommandParameter
         Wait-Regression $Context { !$window.IsVisible } 'Ctrl+W on the final tab closes its window'
         Assert-Regression ($null -eq $model.CurrentBrowser -and $third.Browser.IsDisposed) 'final tab close clears selection and releases CEF'
+    } finally {
+        $window.ForceCloseWindow()
+    }
+}
+
+function Test-BrowserTabReordering($Context) {
+    $window = New-RegressionWindow $Context
+    try {
+        $model = $window.ViewModel
+        $first = $model.CurrentBrowser
+        $first.Address = $Context.AuxiliaryAddress
+        Wait-Regression $Context { $window.Title -eq 'Auxiliary regression' } 'reorder source page loaded'
+        $second = New-RegressionTab $Context $window
+        $third = New-RegressionTab $Context $window
+        $model.CurrentBrowser = $first
+        $window.UpdateLayout()
+        $tabs = $window.FindName('tabList')
+        $firstView = Find-BrowserView $window $first
+        $firstBrowser = $first.Browser
+        [void](Invoke-JavaScript $Context $firstBrowser 'window.preservedReorderValue = 73')
+        [CefFlashBrowser.Data.GlobalData]::Settings.EnableIntegratedDevTools = $true
+        Open-RegressionDevTools $Context $firstView
+        $toolsHandle = $first.IntegratedDevToolsHandle
+
+        $model.MoveBrowser($first, 2)
+        $window.UpdateLayout()
+        Assert-Regression ($model.Browsers[0] -eq $second -and $model.Browsers[1] -eq $third -and $model.Browsers[2] -eq $first) 'moving a tab right updates its position'
+        Assert-Regression ($model.CurrentBrowser -eq $first -and $tabs.SelectedItem -eq $first) 'moving the selected tab preserves selection'
+        Assert-Regression ([object]::ReferenceEquals((Find-BrowserView $window $first), $firstView)) 'reordering retains the BrowserView instance'
+        Assert-Regression ([object]::ReferenceEquals($first.Browser, $firstBrowser) -and !$firstBrowser.IsDisposed) 'reordering retains the CEF browser instance'
+        Assert-Regression ((Invoke-JavaScript $Context $firstBrowser 'window.preservedReorderValue') -eq 73) 'reordering preserves JavaScript state'
+        Assert-Regression ($first.IntegratedDevToolsHandle -eq $toolsHandle) 'reordering preserves integrated DevTools'
+
+        $model.MoveBrowser($first, 0)
+        $model.MoveBrowser($third, 1)
+        $window.UpdateLayout()
+        Assert-Regression ($model.Browsers[0] -eq $first -and $model.Browsers[1] -eq $third -and $model.Browsers[2] -eq $second) 'moving selected and background tabs left updates the order'
+        Assert-Regression ($model.CurrentBrowser -eq $first -and $tabs.SelectedItem -eq $first) 'moving a background tab preserves selection'
+        Invoke-TabShortcut $window Tab Control
+        Assert-Regression ($model.CurrentBrowser -eq $third) 'keyboard cycling follows the reordered tabs'
+
+        # Exercise the same midpoint and viewport logic used by DragOver without moving the desktop cursor.
+        $draggedField = $window.GetType().GetField('_draggedTab', [Reflection.BindingFlags]'Instance,NonPublic')
+        $draggedField.SetValue($window, $third)
+        $firstHeader = $tabs.ItemContainerGenerator.ContainerFromItem($first)
+        $point = $firstHeader.TranslatePoint([System.Windows.Point]::new(1, 10), $tabs)
+        Invoke-ViewCallback $window 'UpdateTabDrag' @($point, $false)
+        Assert-Regression ($model.Browsers[0] -eq $third -and $model.CurrentBrowser -eq $third) 'dragging past the left midpoint moves the tab left'
+        $window.UpdateLayout()
+        $secondHeader = $tabs.ItemContainerGenerator.ContainerFromItem($second)
+        $point = $secondHeader.TranslatePoint([System.Windows.Point]::new($secondHeader.ActualWidth - 1, 10), $tabs)
+        Invoke-ViewCallback $window 'UpdateTabDrag' @($point, $false)
+        Assert-Regression ($model.Browsers[2] -eq $third) 'dragging past the right midpoint moves the tab right'
+        Invoke-ViewCallback $window 'UpdateTabDrag' @([System.Windows.Point]::new(0, -10), $false)
+        Assert-Regression ($model.Browsers[2] -eq $third) 'dragging outside the tab strip leaves the order unchanged'
+
+        $window.Width = 400
+        $window.UpdateLayout()
+        $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
+        $scroll.ScrollToLeftEnd()
+        $window.UpdateLayout()
+        $offset = $scroll.HorizontalOffset
+        $point = $scroll.TranslatePoint([System.Windows.Point]::new($scroll.ActualWidth - 1, 10), $tabs)
+        Invoke-ViewCallback $window 'UpdateTabDrag' @($point, $true)
+        Assert-Regression ($scroll.HorizontalOffset -gt $offset) 'dragging at the right edge scrolls overflowing tabs'
+        $point = $scroll.TranslatePoint([System.Windows.Point]::new(1, 10), $tabs)
+        Invoke-ViewCallback $window 'UpdateTabDrag' @($point, $true)
+        Assert-Regression ($scroll.HorizontalOffset -eq 0) 'dragging at the left edge scrolls back'
+        $draggedField.SetValue($window, $null)
+
+        $model.MoveBrowser($third, 2)
+        $model.CloseBrowser($third)
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'reordered selected tab closes'
+        Assert-Regression ($model.CurrentBrowser -eq $second) 'closing a reordered tab selects its current neighbor'
     } finally {
         $window.ForceCloseWindow()
     }

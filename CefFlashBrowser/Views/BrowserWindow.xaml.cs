@@ -37,6 +37,12 @@ namespace CefFlashBrowser.Views
         private WindowState _windowStateBeforeFullScreen;
         private bool _windowStateRestorePending = false;
 
+        private BrowserViewModel _draggedTab;
+        private Point _tabDragStart;
+        private Point _tabDragPosition;
+        private bool _isTabDragging;
+        private DispatcherTimer _tabDragScrollTimer;
+
 
 
         public BrowserWindowViewModel ViewModel
@@ -136,6 +142,157 @@ namespace CefFlashBrowser.Views
                 e.Handled = true;
                 ViewModel.CloseBrowser(item.DataContext as BrowserViewModel);
             }
+
+            if (e.ChangedButton != MouseButton.Left || _isTabDragging)
+                return;
+
+            _draggedTab = null;
+
+            // The close button keeps its own mouse gesture, including mouse capture.
+            for (var source = e.OriginalSource as DependencyObject;
+                source != null && source != sender; source = VisualTreeHelper.GetParent(source))
+            {
+                if (source is ButtonBase)
+                    return;
+            }
+
+            if (!ViewModel.IsClosing && sender is ListBoxItem tab)
+            {
+                _draggedTab = tab.DataContext as BrowserViewModel;
+                _tabDragStart = e.GetPosition(tabList);
+            }
+        }
+
+        private void TabListPreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isTabDragging || _draggedTab == null)
+                return;
+
+            if (e.LeftButton != MouseButtonState.Pressed || ViewModel.IsClosing
+                || !ViewModel.Browsers.Contains(_draggedTab))
+            {
+                _draggedTab = null;
+                return;
+            }
+
+            var position = e.GetPosition(tabList);
+
+            if (Math.Abs(position.X - _tabDragStart.X) < SystemParameters.MinimumHorizontalDragDistance
+                && Math.Abs(position.Y - _tabDragStart.Y) < SystemParameters.MinimumVerticalDragDistance)
+                return;
+
+            e.Handled = true;
+            ViewModel.CurrentBrowser = _draggedTab;
+            _isTabDragging = true;
+            _tabDragPosition = position;
+            _tabDragScrollTimer = new DispatcherTimer(
+                TimeSpan.FromMilliseconds(150), DispatcherPriority.Input,
+                (s, args) => UpdateTabDrag(_tabDragPosition, true), Dispatcher);
+
+            try
+            {
+                // Use the stable list as the source: a moved header can lose its container.
+                DragDrop.DoDragDrop(tabList, new DataObject(typeof(BrowserViewModel), _draggedTab), DragDropEffects.Move);
+            }
+            finally
+            {
+                _tabDragScrollTimer.Stop();
+                _tabDragScrollTimer = null;
+                _isTabDragging = false;
+                _draggedTab = null;
+            }
+        }
+
+        private void TabListPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!_isTabDragging)
+                _draggedTab = null;
+        }
+
+        private bool IsTabDrag(DragEventArgs e)
+        {
+            return _isTabDragging && !ViewModel.IsClosing && _draggedTab != null
+                && ViewModel.Browsers.Contains(_draggedTab)
+                && e.Data.GetDataPresent(typeof(BrowserViewModel))
+                && ReferenceEquals(e.Data.GetData(typeof(BrowserViewModel)), _draggedTab);
+        }
+
+        private void TabListDragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = IsTabDrag(e) ? DragDropEffects.Move : DragDropEffects.None;
+            e.Handled = true;
+            if (e.Effects == DragDropEffects.Move)
+            {
+                _tabDragPosition = e.GetPosition(tabList);
+                UpdateTabDrag(_tabDragPosition, false);
+            }
+        }
+
+        private void TabListDrop(object sender, DragEventArgs e)
+        {
+            TabListDragOver(sender, e);
+        }
+
+        private void TabListDragLeave(object sender, DragEventArgs e)
+        {
+            _tabDragPosition = new Point(-1, -1);
+        }
+
+        private void TabListQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
+        {
+            if (ViewModel.IsClosing || !tabList.IsVisible)
+            {
+                e.Action = DragAction.Cancel;
+                e.Handled = true;
+            }
+        }
+
+        private void UpdateTabDrag(Point position, bool scroll)
+        {
+            if (ViewModel.IsClosing || !tabList.IsVisible || _draggedTab == null
+                || !(tabList.Template.FindName("tabScrollViewer", tabList) is ScrollViewer scrollViewer))
+                return;
+
+            var viewportPosition = tabList.TranslatePoint(position, scrollViewer);
+
+            if (viewportPosition.Y < 0 || viewportPosition.Y > scrollViewer.ActualHeight
+                || viewportPosition.X < 0 || viewportPosition.X > scrollViewer.ActualWidth)
+                return;
+
+            if (scroll)
+            {
+                const double edgeWidth = 24;
+
+                if (viewportPosition.X < edgeWidth)
+                    scrollViewer.LineLeft();
+                else if (viewportPosition.X > scrollViewer.ActualWidth - edgeWidth)
+                    scrollViewer.LineRight();
+
+                tabList.UpdateLayout();
+            }
+
+            var oldIndex = ViewModel.Browsers.IndexOf(_draggedTab);
+            var newIndex = oldIndex;
+
+            for (int i = 0; i < ViewModel.Browsers.Count; i++)
+            {
+                if (i == oldIndex || !(tabList.ItemContainerGenerator.ContainerFromIndex(i) is ListBoxItem tab))
+                    continue;
+
+                var center = tab.TranslatePoint(new Point(tab.ActualWidth / 2, 0), tabList).X;
+
+                if (i < oldIndex && position.X < center)
+                {
+                    newIndex = i;
+                    break;
+                }
+                if (i > oldIndex && position.X > center)
+                {
+                    newIndex = i;
+                }
+            }
+
+            ViewModel.MoveBrowser(_draggedTab, newIndex);
         }
 
         private void TabListPreviewMouseWheel(object sender, MouseWheelEventArgs e)
