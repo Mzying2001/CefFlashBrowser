@@ -1,4 +1,5 @@
 using CefFlashBrowser.Data;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.WinformCefSharp4WPF;
@@ -15,6 +16,7 @@ namespace CefFlashBrowser.Browser.Handlers
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
         public const CefMenuCommand OpenSelectedUrl = CefMenuCommand.UserFirst + 3;
+        public const CefMenuCommand OpenInNewTab = CefMenuCommand.UserFirst + 4;
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
@@ -48,6 +50,10 @@ namespace CefFlashBrowser.Browser.Handlers
                 var header = LanguageManager.GetString("browser_openInNewWindow");
                 model.InsertCheckItemAt(0, OpenInNewWindow, header);
                 count++;
+
+                header = LanguageManager.GetString("browser_openInNewTab");
+                model.InsertItemAt(0, OpenInNewTab, header);
+                count++;
             }
 
             if (count > 0)
@@ -75,7 +81,13 @@ namespace CefFlashBrowser.Browser.Handlers
                     case Search:
                         {
                             var url = UrlHelper.GetSearchUrl(GlobalData.Settings.SearchEngine, selectionText);
-                            WindowManager.ShowBrowser(url);
+                            OpenPage(chromiumWebBrowser, browser, url);
+                            result = true;
+                            break;
+                        }
+                    case OpenInNewTab:
+                        {
+                            OpenPage(chromiumWebBrowser, browser, linkUrl, NewPageBehavior.NewTab);
                             result = true;
                             break;
                         }
@@ -87,13 +99,19 @@ namespace CefFlashBrowser.Browser.Handlers
                         }
                     case OpenSelectedUrl:
                         {
-                            WindowManager.ShowBrowser(selectionText);
+                            OpenPage(chromiumWebBrowser, browser, selectionText);
                             result = true;
                             break;
                         }
                 }
             });
             return result;
+        }
+
+        protected virtual void OpenPage(IWebBrowser chromiumWebBrowser, IBrowser browser, string url,
+            NewPageBehavior? behaviorOverride = null)
+        {
+            WindowManager.ShowBrowser(url);
         }
 
         public override void OnContextMenuDismissed(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame)

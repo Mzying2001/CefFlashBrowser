@@ -68,12 +68,23 @@ namespace CefFlashBrowser.Views
                 this.view = view;
             }
 
+            protected override void OpenPage(IWebBrowser chromiumWebBrowser, IBrowser browser, string url,
+                NewPageBehavior? behaviorOverride = null)
+            {
+                if (!view._isClosed && !chromiumWebBrowser.IsDisposed)
+                {
+                    view.RaiseEvent(new BrowserNewPageEventArgs(BrowserNewPageEvent, view, chromiumWebBrowser, browser, url,
+                        behaviorOverride: behaviorOverride));
+                }
+            }
+
             public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
             {
                 switch (commandId)
                 {
                     case Search:
                     case OpenInNewWindow:
+                    case OpenInNewTab:
                     case OpenSelectedUrl:
                     case CefMenuCommand.ViewSource:
                         {
@@ -791,15 +802,17 @@ namespace CefFlashBrowser.Views
         public IBrowser Browser { get; }
         public string TargetUrl { get; }
         public WindowOpenDisposition TargetDisposition { get; }
+        public NewPageBehavior? BehaviorOverride { get; }
 
         public BrowserNewPageEventArgs(RoutedEvent routedEvent, object source, IWebBrowser chromiumWebBrowser, IBrowser browser, string targetUrl,
-            WindowOpenDisposition targetDisposition = WindowOpenDisposition.NewForegroundTab)
+            WindowOpenDisposition targetDisposition = WindowOpenDisposition.NewForegroundTab, NewPageBehavior? behaviorOverride = null)
             : base(routedEvent, source)
         {
             ChromiumWebBrowser = chromiumWebBrowser;
             Browser = browser;
             TargetUrl = targetUrl;
             TargetDisposition = targetDisposition;
+            BehaviorOverride = behaviorOverride;
         }
     }
 

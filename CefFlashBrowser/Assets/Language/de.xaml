@@ -117,6 +117,7 @@
     <sys:String x:Key="browser_undo">Rückgängig</sys:String>
     <sys:String x:Key="browser_find">Suchen</sys:String>
     <sys:String x:Key="browser_searchFor">Nach "{0}" suchen</sys:String>
+    <sys:String x:Key="browser_openInNewTab">In neuem Tab öffnen</sys:String>
     <sys:String x:Key="browser_openInNewWindow">In neuem Fenster öffnen</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">Zu "{0}" wechseln</sys:String>
     <sys:String x:Key="browser_addToDictionary">Zum Wörterbuch hinzufügen</sys:String>

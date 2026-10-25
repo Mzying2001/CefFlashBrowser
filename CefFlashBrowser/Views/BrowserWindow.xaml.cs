@@ -608,7 +608,7 @@ namespace CefFlashBrowser.Views
             if (!_isClosed && e.OriginalSource is BrowserView view)
             {
                 ViewModel.OnNewPage(view.ViewModel, e.TargetUrl,
-                    e.TargetDisposition != WindowOpenDisposition.NewBackgroundTab);
+                    e.TargetDisposition != WindowOpenDisposition.NewBackgroundTab, e.BehaviorOverride);
             }
         }
     }

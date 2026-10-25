@@ -117,6 +117,7 @@
     <sys:String x:Key="browser_undo">復原</sys:String>
     <sys:String x:Key="browser_find">尋找</sys:String>
     <sys:String x:Key="browser_searchFor">搜尋「{0}」</sys:String>
+    <sys:String x:Key="browser_openInNewTab">在新分頁開啟</sys:String>
     <sys:String x:Key="browser_openInNewWindow">在新視窗開啟</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">前往「{0}」</sys:String>
     <sys:String x:Key="browser_addToDictionary">新增到字典</sys:String>

@@ -117,6 +117,7 @@
     <sys:String x:Key="browser_undo">元に戻す</sys:String>
     <sys:String x:Key="browser_find">検索</sys:String>
     <sys:String x:Key="browser_searchFor">"{0}" を検索</sys:String>
+    <sys:String x:Key="browser_openInNewTab">新しいタブで開く</sys:String>
     <sys:String x:Key="browser_openInNewWindow">新しいウィンドウで開く</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">"{0}" に移動</sys:String>
     <sys:String x:Key="browser_addToDictionary">辞書に追加</sys:String>

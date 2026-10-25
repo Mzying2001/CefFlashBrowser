@@ -117,6 +117,7 @@
     <sys:String x:Key="browser_undo">Annulla</sys:String>
     <sys:String x:Key="browser_find">Trova</sys:String>
     <sys:String x:Key="browser_searchFor">Cerca "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewTab">Apri in una nuova scheda</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Apri in una nuova finestra</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">Vai a "{0}"</sys:String>
     <sys:String x:Key="browser_addToDictionary">Aggiungi al dizionario</sys:String>

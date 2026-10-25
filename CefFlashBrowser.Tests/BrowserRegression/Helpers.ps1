@@ -43,6 +43,18 @@ function Invoke-BrowserCommand($Command, $Parameter = $null) {
         $Command.PSObject.BaseObject, [object[]]@($Parameter))
 }
 
+function Invoke-ContextMenuCommand($Browser, [CefSharp.CefMenuCommand]$Command, [string]$SelectionText = '', [string]$LinkUrl = '') {
+    $parameters = New-Object RegressionContextMenuParamsProxy
+    $parameters.SelectionText = $SelectionText
+    $parameters.LinkUrl = $LinkUrl
+    $proxy = $parameters.GetTransparentProxy()
+    $cefBrowser = if (!$Browser.IsDisposed) { $Browser.GetBrowser().PSObject.BaseObject } else { $null }
+    return [CefSharp.IContextMenuHandler].GetMethod('OnContextMenuCommand').Invoke(
+        $Browser.MenuHandler.PSObject.BaseObject, [object[]]@(
+            $Browser.PSObject.BaseObject, $cefBrowser, $null, $proxy.PSObject.BaseObject,
+            $Command, [CefSharp.CefEventFlags]::None))
+}
+
 function Find-BrowserView($Element, $BrowserViewModel = $null) {
     if ($Element -is [CefFlashBrowser.Views.BrowserView] -and
         ($null -eq $BrowserViewModel -or [object]::ReferenceEquals($Element.ViewModel, $BrowserViewModel))) {

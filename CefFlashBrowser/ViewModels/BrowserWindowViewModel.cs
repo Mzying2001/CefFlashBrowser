@@ -310,12 +310,12 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void OnNewPage(BrowserViewModel source, string url, bool activate = true)
+        public void OnNewPage(BrowserViewModel source, string url, bool activate = true, NewPageBehavior? behaviorOverride = null)
         {
             if (IsClosing || source == null || !_browsers.Contains(source))
                 return;
 
-            switch (GlobalData.Settings.NewPageBehavior)
+            switch (behaviorOverride ?? GlobalData.Settings.NewPageBehavior)
             {
                 case NewPageBehavior.NewTab:
                     {

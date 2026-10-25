@@ -131,6 +131,15 @@ function Initialize-RegressionEnvironment($Context) {
         $dictionary.set_Source([Uri]$dictionaryUri)
         $Context.Application.Resources.MergedDictionaries.Add($dictionary)
     }
+    # Supply LanguageManager lookups without starting App or loading the user's profile.
+    $languages = New-Object System.Windows.ResourceDictionary
+    $languages.set_Source([Uri]'pack://application:,,,/CefFlashBrowser;component/Assets/Language/langs.xaml')
+    $languageDictionaries = [CefFlashBrowser.Services.LanguageManager].GetProperty(
+        'LanguageDictionaries', $privateStatic).GetValue($null, $null)
+    foreach ($language in $languages.Keys) {
+        $languageDictionaries.Add($language, $languages[$language])
+    }
+
     foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Up', 'Down', 'Page')) {
         $Context.Application.Resources.Add($icon + 'IconUri', [Uri]('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg', [UriKind]::Relative))
     }

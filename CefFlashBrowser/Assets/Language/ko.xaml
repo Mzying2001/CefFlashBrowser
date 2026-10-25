@@ -117,6 +117,7 @@
     <sys:String x:Key="browser_undo">실행 취소</sys:String>
     <sys:String x:Key="browser_find">찾기</sys:String>
     <sys:String x:Key="browser_searchFor">"{0}" 검색</sys:String>
+    <sys:String x:Key="browser_openInNewTab">새 탭에서 열기</sys:String>
     <sys:String x:Key="browser_openInNewWindow">새 창에서 열기</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">"{0}"(으)로 이동</sys:String>
     <sys:String x:Key="browser_addToDictionary">사전에 추가</sys:String>
