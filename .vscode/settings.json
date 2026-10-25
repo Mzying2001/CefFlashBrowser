@@ -1,6 +1,0 @@
-{
-    "dotnet.defaultSolution": "CefFlashBrowser.slnx",
-    "dotnet.preferCSharpExtension": true,
-    "dotnet.server.useOmnisharp": true,
-    "omnisharp.useModernNet": false
-}
