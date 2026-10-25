@@ -728,9 +728,10 @@
                                     <svgc:SvgIcon
                                         Width="8"
                                         Height="8"
-                                        UriSource="{StaticResource StopIconUri}"/>
+                                        UriSource="{StaticResource CloseIconUri}"/>
                                 </Button>
-                                <TextBlock x:Name="tabTitle"
+                                <TextBlock
+                                    x:Name="tabTitle"
                                     TextTrimming="CharacterEllipsis"
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Left"

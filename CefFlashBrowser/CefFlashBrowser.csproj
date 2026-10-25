@@ -28,6 +28,7 @@
     <Content Include="Assets\Icons\icon.ico" />
     <Resource Include="Assets\Svgs\add.svg" />
     <Resource Include="Assets\Svgs\back.svg" />
+    <Resource Include="Assets\Svgs\close.svg" />
     <Resource Include="Assets\Svgs\down.svg" />
     <Resource Include="Assets\Svgs\edit.svg" />
     <Resource Include="Assets\Svgs\export.svg" />

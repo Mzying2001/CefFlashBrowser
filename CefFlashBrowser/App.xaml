@@ -47,6 +47,7 @@
             <!--Icon resources-->
             <sys:Uri x:Key="AddIconUri">/Assets/Svgs/add.svg</sys:Uri>
             <sys:Uri x:Key="BackIconUri">/Assets/Svgs/back.svg</sys:Uri>
+            <sys:Uri x:Key="CloseIconUri">/Assets/Svgs/close.svg</sys:Uri>
             <sys:Uri x:Key="DownIconUri">/Assets/Svgs/down.svg</sys:Uri>
             <sys:Uri x:Key="EditIconUri">/Assets/Svgs/edit.svg</sys:Uri>
             <sys:Uri x:Key="ExportIconUri">/Assets/Svgs/export.svg</sys:Uri>
