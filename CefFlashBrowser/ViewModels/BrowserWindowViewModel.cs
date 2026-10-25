@@ -3,7 +3,6 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefSharp;
-using IWshRuntimeLibrary;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using SimpleMvvm.Ioc;
@@ -139,10 +138,7 @@ namespace CefFlashBrowser.ViewModels
 
                 try
                 {
-                    WshShortcut shortcut = new WshShell().CreateShortcut(fileName);
-                    shortcut.TargetPath = path;
-                    shortcut.Arguments = arg;
-                    shortcut.Save();
+                    ShortcutHelper.Create(fileName, path, arg);
                 }
                 catch (Exception e)
                 {
