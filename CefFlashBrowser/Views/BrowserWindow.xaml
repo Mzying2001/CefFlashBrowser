@@ -370,10 +370,9 @@
                     <Button.Style>
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
-                                    <Setter Property="Visibility" Value="Visible"/>
+                                <DataTrigger Binding="{Binding ShowTabStrip}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -527,10 +526,10 @@
                     <TextBox.Style>
                         <Style TargetType="TextBox"
                                BasedOn="{StaticResource {x:Type TextBox}}">
-                            <Setter Property="Padding" Value="8,0"/>
+                            <Setter Property="Padding" Value="35,0,8,0"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
-                                    <Setter Property="Padding" Value="35,0,8,0"/>
+                                <DataTrigger Binding="{Binding ShowTabStrip}" Value="True">
+                                    <Setter Property="Padding" Value="8,0"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -548,10 +547,9 @@
                             IsHitTestVisible="False">
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
-                            <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
-                                    <Setter Property="Visibility" Value="Visible"/>
+                                <DataTrigger Binding="{Binding ShowTabStrip}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -573,7 +571,7 @@
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Browsers.Count}" Value="1">
+                        <DataTrigger Binding="{Binding ShowTabStrip}" Value="False">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding Fullscreen}" Value="True">

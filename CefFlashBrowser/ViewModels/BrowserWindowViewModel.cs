@@ -10,6 +10,7 @@ using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -94,6 +95,11 @@ namespace CefFlashBrowser.ViewModels
                     Messenger.Global.Send(MessageTokens.FULLSCREEN_CHANGED, this);
                 }
             }
+        }
+
+        public bool ShowTabStrip
+        {
+            get => Browsers.Count > 1;
         }
 
 
@@ -375,11 +381,24 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private void OnBrowserCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                case NotifyCollectionChangedAction.Remove:
+                case NotifyCollectionChangedAction.Reset:
+                    RaisePropertyChanged(nameof(ShowTabStrip));
+                    break;
+            }
+        }
+
         public BrowserWindowViewModel()
         {
             _browsers = new ObservableCollection<BrowserViewModel>();
-            Browsers = new ReadOnlyObservableCollection<BrowserViewModel>(_browsers);
+            _browsers.CollectionChanged += OnBrowserCollectionChanged;
 
+            Browsers = new ReadOnlyObservableCollection<BrowserViewModel>(_browsers);
             AddBrowser(null);
 
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
