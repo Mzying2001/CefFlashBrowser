@@ -16,6 +16,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace CefFlashBrowser.Views
@@ -39,6 +40,7 @@ namespace CefFlashBrowser.Views
 
         private BrowserViewModel _draggedTab;
         private Point _tabDragStart;
+        private Point _tabDragOffset;
         private Point _tabDragPosition;
         private bool _isTabDragging;
         private DispatcherTimer _tabDragScrollTimer;
@@ -160,6 +162,7 @@ namespace CefFlashBrowser.Views
             {
                 _draggedTab = tab.DataContext as BrowserViewModel;
                 _tabDragStart = e.GetPosition(tabList);
+                _tabDragOffset = e.GetPosition(tab);
             }
         }
 
@@ -191,11 +194,13 @@ namespace CefFlashBrowser.Views
 
             try
             {
+                ShowTabDragPreview();
                 // Use the stable list as the source: a moved header can lose its container.
                 DragDrop.DoDragDrop(tabList, new DataObject(typeof(BrowserViewModel), _draggedTab), DragDropEffects.Move);
             }
             finally
             {
+                HideTabDragPreview();
                 _tabDragScrollTimer.Stop();
                 _tabDragScrollTimer = null;
                 _isTabDragging = false;
@@ -236,6 +241,79 @@ namespace CefFlashBrowser.Views
         private void TabListDragLeave(object sender, DragEventArgs e)
         {
             _tabDragPosition = new Point(-1, -1);
+        }
+
+        private void ShowTabDragPreview()
+        {
+            tabList.UpdateLayout();
+
+            if (!(tabList.ItemContainerGenerator.ContainerFromItem(_draggedTab) is ListBoxItem tab))
+                return;
+
+            // Capture before dimming, so the preview survives header regeneration during moves.
+            var dpi = VisualTreeHelper.GetDpi(tab);
+            var snapshot = new RenderTargetBitmap(
+                Math.Max(1, (int)Math.Ceiling(tab.ActualWidth * dpi.DpiScaleX)),
+                Math.Max(1, (int)Math.Ceiling(tab.ActualHeight * dpi.DpiScaleY)),
+                dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+            snapshot.Render(tab);
+            snapshot.Freeze();
+
+            tabDragPreviewImage.Source = snapshot;
+            tabDragPreviewImage.Width = tab.ActualWidth;
+            tabDragPreviewImage.Height = tab.ActualHeight;
+            tabDragPreview.HorizontalOffset = _tabDragPosition.X - _tabDragOffset.X - 8;
+            tabDragPreview.VerticalOffset = _tabDragPosition.Y - _tabDragOffset.Y - 8;
+            tabDragPreview.IsOpen = true;
+            tabList.Tag = _draggedTab;
+        }
+
+        private void HideTabDragPreview()
+        {
+            tabDragPreview.IsOpen = false;
+            tabDragPreviewImage.Source = null;
+            tabList.Tag = null;
+        }
+
+        private void TabDragPreviewOpened(object sender, EventArgs e)
+        {
+            if (PresentationSource.FromVisual(tabDragPreview.Child) is HwndSource source)
+            {
+                // The native popup must let OLE drag hit testing reach the tab strip beneath it.
+                HwndHelper.SetWindowExStyle(source.Handle, HwndHelper.GetWindowExStyle(source.Handle)
+                    | Win32.WS_EX_TRANSPARENT | Win32.WS_EX_NOACTIVATE);
+                UpdateTabDragPreview();
+            }
+        }
+
+        private void UpdateTabDragPreview()
+        {
+            if (tabDragPreview.IsOpen
+                && PresentationSource.FromVisual(tabDragPreview.Child) is HwndSource source
+                && Win32.GetCursorPos(out var cursor))
+            {
+                var offset = source.CompositionTarget.TransformToDevice.Transform(
+                    new Vector(_tabDragOffset.X + 8, _tabDragOffset.Y + 8));
+
+                Win32.SetWindowPos(source.Handle, IntPtr.Zero,
+                    cursor.x - (int)offset.X, cursor.y - (int)offset.Y, 0, 0,
+                    Win32.SWP_NOSIZE | Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE);
+            }
+        }
+
+        private void TabListGiveFeedback(object sender, GiveFeedbackEventArgs e)
+        {
+            if (!_isTabDragging)
+                return;
+
+            UpdateTabDragPreview();
+
+            if (e.Effects == DragDropEffects.Move)
+            {
+                e.UseDefaultCursors = false;
+                Mouse.SetCursor(Cursors.Arrow);
+                e.Handled = true;
+            }
         }
 
         private void TabListQueryContinueDrag(object sender, QueryContinueDragEventArgs e)

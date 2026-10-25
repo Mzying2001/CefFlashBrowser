@@ -605,6 +605,7 @@
                          DragOver="TabListDragOver"
                          DragLeave="TabListDragLeave"
                          Drop="TabListDrop"
+                         GiveFeedback="TabListGiveFeedback"
                          QueryContinueDrag="TabListQueryContinueDrag"
                          PreviewMouseWheel="TabListPreviewMouseWheel">
                     <ListBox.Template>
@@ -659,6 +660,15 @@
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="#30808080"/>
                                 </Trigger>
+                                <DataTrigger Value="True">
+                                    <DataTrigger.Binding>
+                                        <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
+                                            <Binding/>
+                                            <Binding Path="Tag" RelativeSource="{RelativeSource AncestorType=ListBox}"/>
+                                        </MultiBinding>
+                                    </DataTrigger.Binding>
+                                    <Setter Property="Opacity" Value="0.35"/>
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </ListBox.ItemContainerStyle>
@@ -800,6 +810,29 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Grid>
+
+        <Popup x:Name="tabDragPreview"
+               Placement="RelativePoint"
+               PlacementTarget="{Binding ElementName=tabList}"
+               AllowsTransparency="True"
+               StaysOpen="True"
+               Focusable="False"
+               IsHitTestVisible="False"
+               Opened="TabDragPreviewOpened">
+            <Border Margin="8"
+                    CornerRadius="6"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource PrimaryBrush}"
+                    Background="{DynamicResource RegionBrush}"
+                    Opacity="0.95">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="12"
+                                      ShadowDepth="3"
+                                      Opacity="0.25"/>
+                </Border.Effect>
+                <Image x:Name="tabDragPreviewImage"/>
+            </Border>
+        </Popup>
 
         <Popup x:Name="statusPopup"
                StaysOpen="True"

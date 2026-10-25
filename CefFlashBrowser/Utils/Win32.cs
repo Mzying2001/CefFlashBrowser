@@ -14,6 +14,7 @@ namespace CefFlashBrowser.Utils
         public const int WS_CHILD = 0x40000000;
         public const int WS_VISIBLE = 0x10000000;
         public const int WS_CAPTION = 0x00C00000;
+        public const int WS_EX_TRANSPARENT = 0x00000020;
         public const int WS_EX_NOACTIVATE = 0x08000000;
 
         // get/set window long
