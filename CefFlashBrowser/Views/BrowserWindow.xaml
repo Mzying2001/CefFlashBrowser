@@ -287,15 +287,16 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0"
-                   Margin="10">
+        <DockPanel Grid.Row="0">
             <DockPanel.Style>
                 <Style TargetType="DockPanel">
+                    <Setter Property="Margin" Value="10"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Fullscreen}"
-                                     Value="True">
-                            <Setter Property="Visibility"
-                                    Value="Collapsed"/>
+                        <DataTrigger Binding="{Binding ShowTabStrip}" Value="True">
+                            <Setter Property="Margin" Value="10,10,10,5"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Fullscreen}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
