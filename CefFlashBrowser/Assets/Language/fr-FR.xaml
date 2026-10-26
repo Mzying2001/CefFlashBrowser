@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">Port</sys:String>
     <sys:String x:Key="settings_optional">(Optionnel)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Mémoriser le niveau de zoom des pages Web</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">Toujours afficher la barre d’onglets</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Intégrer les outils de développement dans la fenêtre du navigateur</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Désactiver le mode plein écran</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Désactiver l’accélération GPU</sys:String>
@@ -76,6 +77,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">Fenêtre d'origine</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Nouvelle fenêtre</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">Nouvel onglet</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -116,6 +118,7 @@
     <sys:String x:Key="browser_undo">Annuler</sys:String>
     <sys:String x:Key="browser_find">Trouver</sys:String>
     <sys:String x:Key="browser_searchFor">Chercher "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewTab">Ouvrir dans un nouvel onglet</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Ouvrir dans une nouvelle fenêtre</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">Aller à "{0}"</sys:String>
     <sys:String x:Key="browser_addToDictionary">Ajouter au dictionnaire</sys:String>
@@ -132,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">Avancer (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Recharger (F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">Arrêter (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">Nouvel onglet (Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">Fermer l’onglet (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Plus</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">Contenu Flash bloqué</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Augmente la taille du texte (Ctrl+Plus)</sys:String>
@@ -139,6 +144,11 @@
     <sys:String x:Key="browser_loading">Chargement...</sys:String>
     <sys:String x:Key="browser_showMainWindow">Ouvrir la fenêtre principale</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">Nouvelle fenêtre de navigation</sys:String>
+    <sys:String x:Key="browser_newTab">Nouvel onglet</sys:String>
+    <sys:String x:Key="browser_closeTab">Fermer l’onglet</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">Fermer les autres onglets</sys:String>
+    <sys:String x:Key="browser_duplicateTab">Dupliquer l’onglet</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">Ouvrir l’onglet dans une nouvelle fenêtre</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">Gestionnaire de sauvegarde SOL</sys:String>

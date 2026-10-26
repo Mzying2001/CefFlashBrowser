@@ -22,6 +22,8 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         /// The base browser
         /// </summary>
         private readonly CefSharp.WinForms.ChromiumWebBrowser browser;
+        private bool isHosted;
+        private string pendingAddress;
 
 
 
@@ -436,11 +438,16 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         protected override HandleRef BuildWindowCore(HandleRef hwndParent)
         {
             Win32.SetParent(browser.Handle, hwndParent.Handle);
+            isHosted = true;
+            LoadPendingAddress();
             return new HandleRef(this, browser.Handle);
         }
 
         protected override void DestroyWindowCore(HandleRef hwnd)
         {
+            isHosted = false;
+            pendingAddress = null;
+
             if (!browser.IsDisposed)
             {
                 browser.Dispose();
@@ -449,6 +456,9 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected override void Dispose(bool disposing)
         {
+            isHosted = false;
+            pendingAddress = null;
+
             if (!browser.IsDisposed)
             {
                 browser.JavascriptMessageReceived -= OnJavascriptMessageReceived;
@@ -563,7 +573,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnAddressChanged(DependencyPropertyChangedEventArgs e)
         {
-            if (onNotifyAddressChanged)
+            if (onNotifyAddressChanged || browser.IsDisposed)
             {
                 return;
             }
@@ -575,6 +585,18 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 url = e.OldValue as string ?? "about:blank";
             }
 
+            // Keep only the latest request until WPF attaches the native browser.
+            pendingAddress = url;
+            LoadPendingAddress();
+        }
+
+        private void LoadPendingAddress()
+        {
+            if (!isHosted || browser.IsDisposed || pendingAddress == null)
+                return;
+
+            var url = pendingAddress;
+            pendingAddress = null;
             browser.Load(url);
         }
 
@@ -622,7 +644,14 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             if (e.Frame.IsMain)
             {
                 // sync the zoom level when the main frame starts loading
-                browser.SetZoomLevel(zoomLevel);
+                try
+                {
+                    browser.SetZoomLevel(zoomLevel);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // The frame callback can dispose the browser before the zoom update runs.
+                }
             }
         }
 
@@ -675,6 +704,10 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected virtual void OnAddressChanged(AddressChangedEventArgs e)
         {
+            // Initial CEF notifications must not replace an unhosted navigation request.
+            if (!isHosted || browser.IsDisposed)
+                return;
+
             lock (onNotifyAddressChangedLock)
             {
                 onNotifyAddressChanged = true;

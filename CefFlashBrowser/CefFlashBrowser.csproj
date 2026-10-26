@@ -25,28 +25,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <COMReference Include="IWshRuntimeLibrary">
-      <WrapperTool>tlbimp</WrapperTool>
-      <VersionMinor>0</VersionMinor>
-      <VersionMajor>1</VersionMajor>
-      <Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
-      <Lcid>0</Lcid>
-      <Isolated>false</Isolated>
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Assets\Icons\icon.ico" />
-    <Resource Include="Assets\Icons\page.png" />
     <Resource Include="Assets\Svgs\add.svg" />
     <Resource Include="Assets\Svgs\back.svg" />
+    <Resource Include="Assets\Svgs\close.svg" />
     <Resource Include="Assets\Svgs\down.svg" />
     <Resource Include="Assets\Svgs\edit.svg" />
     <Resource Include="Assets\Svgs\export.svg" />
     <Resource Include="Assets\Svgs\forward.svg" />
     <Resource Include="Assets\Svgs\import.svg" />
     <Resource Include="Assets\Svgs\more.svg" />
+    <Resource Include="Assets\Svgs\new-tab.svg" />
     <Resource Include="Assets\Svgs\page.svg" />
     <Resource Include="Assets\Svgs\reload.svg" />
     <Resource Include="Assets\Svgs\search.svg" />

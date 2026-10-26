@@ -47,12 +47,14 @@
             <!--Icon resources-->
             <sys:Uri x:Key="AddIconUri">/Assets/Svgs/add.svg</sys:Uri>
             <sys:Uri x:Key="BackIconUri">/Assets/Svgs/back.svg</sys:Uri>
+            <sys:Uri x:Key="CloseIconUri">/Assets/Svgs/close.svg</sys:Uri>
             <sys:Uri x:Key="DownIconUri">/Assets/Svgs/down.svg</sys:Uri>
             <sys:Uri x:Key="EditIconUri">/Assets/Svgs/edit.svg</sys:Uri>
             <sys:Uri x:Key="ExportIconUri">/Assets/Svgs/export.svg</sys:Uri>
             <sys:Uri x:Key="ForwardIconUri">/Assets/Svgs/forward.svg</sys:Uri>
             <sys:Uri x:Key="ImportIconUri">/Assets/Svgs/import.svg</sys:Uri>
             <sys:Uri x:Key="MoreIconUri">/Assets/Svgs/more.svg</sys:Uri>
+            <sys:Uri x:Key="NewTabIconUri">/Assets/Svgs/new-tab.svg</sys:Uri>
             <sys:Uri x:Key="PageIconUri">/Assets/Svgs/page.svg</sys:Uri>
             <sys:Uri x:Key="ReloadIconUri">/Assets/Svgs/reload.svg</sys:Uri>
             <sys:Uri x:Key="SearchIconUri">/Assets/Svgs/search.svg</sys:Uri>

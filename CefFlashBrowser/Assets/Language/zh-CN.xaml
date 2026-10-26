@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">端口</sys:String>
     <sys:String x:Key="settings_optional">（可选）</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">保存网页缩放比例</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">始终显示标签页栏</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">嵌入开发工具到浏览器窗口</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止网页进入全屏模式</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">禁用GPU加速</sys:String>
@@ -76,6 +77,7 @@
     <!--打开新网页时的行为-->
     <sys:String x:Key="newPageBehavior_originalWindow">原窗口</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新窗口</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">新标签页</sys:String>
 
     <!--搜索引擎-->
     <sys:String x:Key="searchEngine_baidu">百度</sys:String>
@@ -116,6 +118,7 @@
     <sys:String x:Key="browser_undo">撤销</sys:String>
     <sys:String x:Key="browser_find">查找</sys:String>
     <sys:String x:Key="browser_searchFor">搜索“{0}”</sys:String>
+    <sys:String x:Key="browser_openInNewTab">在新标签页中打开</sys:String>
     <sys:String x:Key="browser_openInNewWindow">在新窗口中打开</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">转到“{0}”</sys:String>
     <sys:String x:Key="browser_addToDictionary">添加到字典</sys:String>
@@ -132,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">前进（Alt+向右键）</sys:String>
     <sys:String x:Key="browser_toolTipReload">刷新（F5）</sys:String>
     <sys:String x:Key="browser_toolTipStop">停止（Esc）</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">新标签页（Ctrl+T）</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">关闭标签页（Ctrl+W）</sys:String>
     <sys:String x:Key="browser_toolTipMore">更多</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">被屏蔽的Flash内容</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加号键）</sys:String>
@@ -139,6 +144,11 @@
     <sys:String x:Key="browser_loading">加载中...</sys:String>
     <sys:String x:Key="browser_showMainWindow">打开主窗口</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">新建浏览器窗口</sys:String>
+    <sys:String x:Key="browser_newTab">新标签页</sys:String>
+    <sys:String x:Key="browser_closeTab">关闭标签页</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">关闭其他标签页</sys:String>
+    <sys:String x:Key="browser_duplicateTab">复制标签页</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">在新窗口中打开标签页</sys:String>
 
     <!--存档管理器-->
     <sys:String x:Key="solSaveManager_title">SOL存档管理器</sys:String>

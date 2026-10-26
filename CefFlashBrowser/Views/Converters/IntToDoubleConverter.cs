@@ -2,7 +2,7 @@
 
 namespace CefFlashBrowser.Views.Converters
 {
-    public class IntToDouble : ValueConverterBase<int, double>
+    public class IntToDoubleConverter : ValueConverterBase<int, double>
     {
         public override double Convert(int value, object parameter, CultureInfo culture)
         {

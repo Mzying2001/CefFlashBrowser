@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">ポート</sys:String>
     <sys:String x:Key="settings_optional">（任意）</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Web ページのズームレベルを保存する</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">タブバーを常に表示する</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">DevTools をブラウザーウィンドウに埋め込む</sys:String>
     <sys:String x:Key="settings_disableFullscreen">フルスクリーンモードを無効にする</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">GPU アクセラレーションを無効にする</sys:String>
@@ -76,6 +77,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">元のウィンドウ</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新しいウィンドウ</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">新しいタブ</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -116,6 +118,7 @@
     <sys:String x:Key="browser_undo">元に戻す</sys:String>
     <sys:String x:Key="browser_find">検索</sys:String>
     <sys:String x:Key="browser_searchFor">"{0}" を検索</sys:String>
+    <sys:String x:Key="browser_openInNewTab">新しいタブで開く</sys:String>
     <sys:String x:Key="browser_openInNewWindow">新しいウィンドウで開く</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">"{0}" に移動</sys:String>
     <sys:String x:Key="browser_addToDictionary">辞書に追加</sys:String>
@@ -132,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">進む (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">再読み込み (F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">停止 (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">新しいタブ (Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">タブを閉じる (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">その他</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">ブロックされた Flash コンテンツ</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">拡大 (Ctrl+Plus)</sys:String>
@@ -139,6 +144,11 @@
     <sys:String x:Key="browser_loading">読み込み中...</sys:String>
     <sys:String x:Key="browser_showMainWindow">メインウィンドウを開く</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">新しいブラウザーウィンドウ</sys:String>
+    <sys:String x:Key="browser_newTab">新しいタブ</sys:String>
+    <sys:String x:Key="browser_closeTab">タブを閉じる</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">他のタブを閉じる</sys:String>
+    <sys:String x:Key="browser_duplicateTab">タブを複製</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">タブを新しいウィンドウで開く</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL セーブマネージャー</sys:String>

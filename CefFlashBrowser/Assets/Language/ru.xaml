@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">Порт</sys:String>
     <sys:String x:Key="settings_optional">(Необязательно)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Сохранять масштаб веб-страниц</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">Всегда показывать панель вкладок</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Встраивать DevTools в окно браузера</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Отключить полноэкранный режим</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Отключить ускорение GPU</sys:String>
@@ -76,6 +77,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">Исходное окно</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Новое окно</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">Новая вкладка</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -116,6 +118,7 @@
     <sys:String x:Key="browser_undo">Отменить</sys:String>
     <sys:String x:Key="browser_find">Найти</sys:String>
     <sys:String x:Key="browser_searchFor">Искать "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewTab">Открыть в новой вкладке</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Открыть в новом окне</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">Перейти к "{0}"</sys:String>
     <sys:String x:Key="browser_addToDictionary">Добавить в словарь</sys:String>
@@ -132,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">Вперед (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Обновить (F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">Остановить (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">Новая вкладка (Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">Закрыть вкладку (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Еще</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">Заблокированное Flash-содержимое</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Увеличить (Ctrl+Plus)</sys:String>
@@ -139,6 +144,11 @@
     <sys:String x:Key="browser_loading">Загрузка...</sys:String>
     <sys:String x:Key="browser_showMainWindow">Открыть главное окно</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">Новое окно браузера</sys:String>
+    <sys:String x:Key="browser_newTab">Новая вкладка</sys:String>
+    <sys:String x:Key="browser_closeTab">Закрыть вкладку</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">Закрыть другие вкладки</sys:String>
+    <sys:String x:Key="browser_duplicateTab">Дублировать вкладку</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">Открыть вкладку в новом окне</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">Диспетчер сохранений SOL</sys:String>

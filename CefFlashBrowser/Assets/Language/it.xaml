@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">Porta</sys:String>
     <sys:String x:Key="settings_optional">(Opzionale)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Salva il livello di zoom delle pagine web</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">Mostra sempre la barra delle schede</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Incorpora i devtools nella finestra del browser</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Disabilita la modalità a schermo intero</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Disabilita l'accelerazione GPU</sys:String>
@@ -76,6 +77,7 @@
     <!--Nuovi comportamenti delle pagine web-->
     <sys:String x:Key="newPageBehavior_originalWindow">Finestra originale</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Nuova Finestra</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">Nuova scheda</sys:String>
 
     <!--Motore di ricerca-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -116,6 +118,7 @@
     <sys:String x:Key="browser_undo">Annulla</sys:String>
     <sys:String x:Key="browser_find">Trova</sys:String>
     <sys:String x:Key="browser_searchFor">Cerca "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewTab">Apri in una nuova scheda</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Apri in una nuova finestra</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">Vai a "{0}"</sys:String>
     <sys:String x:Key="browser_addToDictionary">Aggiungi al dizionario</sys:String>
@@ -132,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">Avanti (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Ricarica (F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">Stop (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">Nuova scheda (Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">Chiudi scheda (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Altro</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">Contenuti Flash bloccati</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Ingrandisci (Ctrl+Plus)</sys:String>
@@ -139,6 +144,11 @@
     <sys:String x:Key="browser_loading">Caricamento...</sys:String>
     <sys:String x:Key="browser_showMainWindow">Apri finestra principale</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">Nuova finestra del browser</sys:String>
+    <sys:String x:Key="browser_newTab">Nuova scheda</sys:String>
+    <sys:String x:Key="browser_closeTab">Chiudi scheda</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">Chiudi le altre schede</sys:String>
+    <sys:String x:Key="browser_duplicateTab">Duplica scheda</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">Apri scheda in una nuova finestra</sys:String>
 
     <!--Gestore dei salvataggi-->
     <sys:String x:Key="solSaveManager_title">Gestore dei salvataggi SOL</sys:String>

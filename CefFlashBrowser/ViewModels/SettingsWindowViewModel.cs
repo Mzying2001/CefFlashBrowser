@@ -64,8 +64,9 @@ namespace CefFlashBrowser.ViewModels
 
         public List<ItemViewModel<NewPageBehavior>> NewPageBehaviors { get; } = new List<ItemViewModel<NewPageBehavior>>
         {
-            new ItemViewModel<NewPageBehavior>(NewPageBehavior.OriginalWindow, "newPageBehavior_originalWindow"),
-            new ItemViewModel<NewPageBehavior>(NewPageBehavior.NewWindow, "newPageBehavior_newWindow")
+            new ItemViewModel<NewPageBehavior>(NewPageBehavior.NewTab, "newPageBehavior_newTab"),
+            new ItemViewModel<NewPageBehavior>(NewPageBehavior.NewWindow, "newPageBehavior_newWindow"),
+            new ItemViewModel<NewPageBehavior>(NewPageBehavior.OriginalWindow, "newPageBehavior_originalWindow")
         };
 
         public NewPageBehavior CurrentNewPageBehavior
@@ -278,6 +279,20 @@ namespace CefFlashBrowser.ViewModels
                 {
                     GlobalData.Settings.SaveZoomLevel = value;
                     RaisePropertyChanged();
+                }
+            }
+        }
+
+        public bool AlwaysShowTabStrip
+        {
+            get => GlobalData.Settings.AlwaysShowTabStrip;
+            set
+            {
+                if (GlobalData.Settings.AlwaysShowTabStrip != value)
+                {
+                    GlobalData.Settings.AlwaysShowTabStrip = value;
+                    RaisePropertyChanged();
+                    Messenger.Global.Send(MessageTokens.TAB_STRIP_VISIBILITY_CHANGED, null);
                 }
             }
         }

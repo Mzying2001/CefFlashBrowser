@@ -1,0 +1,49 @@
+name: Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+      - dev
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Unit tests (x64 Debug)
+    runs-on: windows-2022
+
+    env:
+      DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR: C:\Program Files\dotnet
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Build test project
+        shell: cmd
+        run: >-
+          msbuild CefFlashBrowser.Tests\CefFlashBrowser.Tests.csproj
+          /restore /m /p:Configuration=Debug /p:Platform=x64 /verbosity:minimal
+
+      - name: Run unit tests
+        run: >-
+          dotnet test CefFlashBrowser.Tests\CefFlashBrowser.Tests.csproj
+          -p:Platform=x64 --no-build --no-restore
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/**/*.trx
+          if-no-files-found: warn

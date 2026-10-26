@@ -1,5 +1,4 @@
 using CefFlashBrowser.Data;
-using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
@@ -8,12 +7,17 @@ using CefSharp;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
-using BrowserHandlers = CefFlashBrowser.Browser.Handlers;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace CefFlashBrowser.Views
 {
@@ -22,141 +26,25 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserWindow : Window
     {
-        private class BrowserLifeSpanHandler : LifeSpanHandler
-        {
-            private readonly BrowserWindow window;
-
-            public BrowserLifeSpanHandler(BrowserWindow window)
-            {
-                this.window = window;
-            }
-
-            public override bool DoClose(IWebBrowser chromiumWebBrowser, IBrowser browser)
-            {
-                if (window._isClosed)
-                {
-                    return false;
-                }
-
-                if (browser.IsDisposed)
-                {
-                    window.Dispatcher.Invoke(ContinueClose);
-                    return false;
-                }
-
-                bool isPopup = browser.IsPopup;
-                IntPtr hHost = browser.GetHost().GetWindowHandle();
-
-                window.Dispatcher.Invoke(delegate
-                {
-                    if (HwndHelper.IsDevToolsWindow(hHost))
-                    {
-                        window.ViewModel.OnDevToolsClosed(chromiumWebBrowser);
-                    }
-                    else if (!isPopup)
-                    {
-                        ContinueClose();
-                    }
-                });
-                return false;
-            }
-
-            private void ContinueClose()
-            {
-                window._doClose = true;
-                window.Close();
-            }
-
-            public override void OnAfterCreated(IWebBrowser chromiumWebBrowser, IBrowser browser)
-            {
-                var hHost = browser.GetHost().GetWindowHandle();
-
-                if (HwndHelper.IsDevToolsWindow(hHost))
-                {
-                    window.Dispatcher.Invoke(() =>
-                    {
-                        HwndHelper.SetDevToolsFlag(hHost);
-                        HwndHelper.SetOwnerWindow(hHost, window._hwnd);
-                        window.ViewModel.OnDevToolsOpened(chromiumWebBrowser, hHost);
-                    });
-                }
-            }
-
-            public override bool OnBeforePopup(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, string targetUrl, string targetFrameName, WindowOpenDisposition targetDisposition, bool userGesture, IPopupFeatures popupFeatures, IWindowInfo windowInfo, IBrowserSettings browserSettings, ref bool noJavascriptAccess, out IWebBrowser newBrowser)
-            {
-                if (!window._isClosed)
-                {
-                    var isPopup = targetDisposition == WindowOpenDisposition.NewPopup;
-
-                    // Extract popupFeatures properties in synchronous context,
-                    // as CEF disposes the object after OnBeforePopup returns.
-                    WindowSizeInfo popupSizeInfo = null;
-
-                    if (isPopup && popupFeatures != null)
-                    {
-                        popupSizeInfo = new WindowSizeInfo
-                        {
-                            Left = popupFeatures.XSet != 0 ? popupFeatures.X : double.NaN,
-                            Top = popupFeatures.YSet != 0 ? popupFeatures.Y : double.NaN,
-                            Width = popupFeatures.WidthSet != 0 ? popupFeatures.Width : double.NaN,
-                            Height = popupFeatures.HeightSet != 0 ? popupFeatures.Height : double.NaN,
-                        };
-                    }
-
-                    window.Dispatcher.InvokeAsync(delegate
-                    {
-                        if (isPopup)
-                        {
-                            window.ViewModel.OnPopup(targetUrl, popupSizeInfo);
-                        }
-                        else
-                        {
-                            window.ViewModel.OnNewPage(targetUrl);
-                        }
-                    });
-                }
-
-                newBrowser = null;
-                return true;
-            }
-        }
-
-        private class BrowserMenuHandler : BrowserHandlers.ContextMenuHandler
-        {
-            private readonly BrowserWindow window;
-
-            public BrowserMenuHandler(BrowserWindow window)
-            {
-                this.window = window;
-            }
-
-            public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
-            {
-                switch (commandId)
-                {
-                    case Search:
-                    case OpenInNewWindow:
-                    case OpenSelectedUrl:
-                    case CefMenuCommand.ViewSource:
-                        {
-                            window.Dispatcher.Invoke(() => window.ExitFullScreen());
-                            break;
-                        }
-                }
-                return base.OnContextMenuCommand(chromiumWebBrowser, browser, frame, parameters, commandId, eventFlags);
-            }
-        }
-
-
-
         private bool _doClose = false;
         private bool _isClosed = false;
+
+        private bool _closingWindow;
+        private bool _forceClosePending;
+        private object _closeOtherTabsOperation;
 
         private IntPtr _hwnd;
         private HwndSource _hwndSource;
 
         private WindowState _windowStateBeforeFullScreen;
         private bool _windowStateRestorePending = false;
+
+        private BrowserViewModel _draggedTab;
+        private Point _tabDragStart;
+        private Point _tabDragOffset;
+        private Point _tabDragPosition;
+        private bool _isTabDragging;
+        private DispatcherTimer _tabDragScrollTimer;
 
 
 
@@ -178,24 +66,21 @@ namespace CefFlashBrowser.Views
                 InputBindings.Clear();
             }
 
-            browser.JsDialogHandler = new BrowserHandlers.JsDialogHandler();
-            browser.DownloadHandler = new BrowserHandlers.DownloadHandler();
-            browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
-            browser.MenuHandler = new BrowserMenuHandler(this);
-
-            Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
-            Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
-            Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+            Messenger.Global.Register(MessageTokens.CLOSE_BROWSER, CloseTabHandler);
+            Messenger.Global.Register(MessageTokens.CLOSE_OTHER_BROWSERS, CloseOtherTabsHandler);
             Messenger.Global.Register(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
+            Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
+            Messenger.Global.Register(MessageTokens.TAB_STRIP_VISIBILITY_CHANGED, TabStripVisibilityChangedHandler);
 
             Closed += delegate
             {
-                Messenger.Global.Unregister(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
-                Messenger.Global.Unregister(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
-                Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+                Messenger.Global.Unregister(MessageTokens.CLOSE_BROWSER, CloseTabHandler);
+                Messenger.Global.Unregister(MessageTokens.CLOSE_OTHER_BROWSERS, CloseOtherTabsHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
+                Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
+                Messenger.Global.Unregister(MessageTokens.TAB_STRIP_VISIBILITY_CHANGED, TabStripVisibilityChangedHandler);
             };
 
             // IsActive may not be settled during SourceInitialized, so initialize the
@@ -230,10 +115,279 @@ namespace CefFlashBrowser.Views
                 {
                     ViewModel.ShowFindPopup = false;
                 }
-                else if (browser.IsLoading)
+                else if (ViewModel.CurrentBrowser?.Browser is IWebBrowser browser
+                    && !browser.IsDisposed && browser.IsLoading)
                 {
                     browser.Stop();
                 }
+            }
+        }
+
+        private void TabSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Removing the selected item temporarily clears WPF's selection.
+            // The view model chooses its neighbor once collection removal finishes.
+            if (tabList.SelectedItem is BrowserViewModel browser)
+            {
+                ViewModel.CurrentBrowser = browser;
+                tabList.ScrollIntoView(browser);
+
+                if (browser.Address == "about:blank")
+                {
+                    addressTextBox.Focus();
+                    addressTextBox.SelectAll();
+                }
+            }
+        }
+
+        private void TabPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && sender is ListBoxItem item)
+            {
+                e.Handled = true;
+                ViewModel.CloseBrowser(item.DataContext as BrowserViewModel);
+            }
+
+            if (e.ChangedButton != MouseButton.Left || _isTabDragging)
+                return;
+
+            _draggedTab = null;
+
+            // The close button keeps its own mouse gesture, including mouse capture.
+            for (var source = e.OriginalSource as DependencyObject;
+                source != null && source != sender; source = VisualTreeHelper.GetParent(source))
+            {
+                if (source is ButtonBase)
+                    return;
+            }
+
+            if (!ViewModel.IsClosing && sender is ListBoxItem tab)
+            {
+                _draggedTab = tab.DataContext as BrowserViewModel;
+                _tabDragStart = e.GetPosition(tabList);
+                _tabDragOffset = e.GetPosition(tab);
+            }
+        }
+
+        private void TabListPreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isTabDragging || _draggedTab == null)
+                return;
+
+            if (e.LeftButton != MouseButtonState.Pressed || ViewModel.IsClosing
+                || !ViewModel.Browsers.Contains(_draggedTab))
+            {
+                _draggedTab = null;
+                return;
+            }
+
+            var position = e.GetPosition(tabList);
+
+            if (Math.Abs(position.X - _tabDragStart.X) < SystemParameters.MinimumHorizontalDragDistance
+                && Math.Abs(position.Y - _tabDragStart.Y) < SystemParameters.MinimumVerticalDragDistance)
+                return;
+
+            e.Handled = true;
+            ViewModel.CurrentBrowser = _draggedTab;
+            _isTabDragging = true;
+            _tabDragPosition = position;
+            _tabDragScrollTimer = new DispatcherTimer(
+                TimeSpan.FromMilliseconds(150), DispatcherPriority.Input,
+                (s, args) => UpdateTabDrag(_tabDragPosition, true), Dispatcher);
+
+            try
+            {
+                ShowTabDragPreview();
+                // Use the stable list as the source: a moved header can lose its container.
+                DragDrop.DoDragDrop(tabList, new DataObject(typeof(BrowserViewModel), _draggedTab), DragDropEffects.Move);
+            }
+            finally
+            {
+                HideTabDragPreview();
+                _tabDragScrollTimer.Stop();
+                _tabDragScrollTimer = null;
+                _isTabDragging = false;
+                _draggedTab = null;
+            }
+        }
+
+        private void TabListPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!_isTabDragging)
+                _draggedTab = null;
+        }
+
+        private bool IsTabDrag(DragEventArgs e)
+        {
+            return _isTabDragging && !ViewModel.IsClosing && _draggedTab != null
+                && ViewModel.Browsers.Contains(_draggedTab)
+                && e.Data.GetDataPresent(typeof(BrowserViewModel))
+                && ReferenceEquals(e.Data.GetData(typeof(BrowserViewModel)), _draggedTab);
+        }
+
+        private void TabListDragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = IsTabDrag(e) ? DragDropEffects.Move : DragDropEffects.None;
+            e.Handled = true;
+            if (e.Effects == DragDropEffects.Move)
+            {
+                _tabDragPosition = e.GetPosition(tabList);
+                UpdateTabDrag(_tabDragPosition, false);
+            }
+        }
+
+        private void TabListDrop(object sender, DragEventArgs e)
+        {
+            TabListDragOver(sender, e);
+        }
+
+        private void TabListDragLeave(object sender, DragEventArgs e)
+        {
+            _tabDragPosition = new Point(-1, -1);
+        }
+
+        private void ShowTabDragPreview()
+        {
+            tabList.UpdateLayout();
+
+            if (!(tabList.ItemContainerGenerator.ContainerFromItem(_draggedTab) is ListBoxItem tab))
+                return;
+
+            // Capture before dimming, so the preview survives header regeneration during moves.
+            var dpi = VisualTreeHelper.GetDpi(tab);
+            var snapshot = new RenderTargetBitmap(
+                Math.Max(1, (int)Math.Ceiling(tab.ActualWidth * dpi.DpiScaleX)),
+                Math.Max(1, (int)Math.Ceiling(tab.ActualHeight * dpi.DpiScaleY)),
+                dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+
+            // The template root starts at (0, 0); the container includes its list layout offset.
+            snapshot.Render((Visual)VisualTreeHelper.GetChild(tab, 0));
+            snapshot.Freeze();
+
+            tabDragPreviewImage.Source = snapshot;
+            tabDragPreviewImage.Width = tab.ActualWidth;
+            tabDragPreviewImage.Height = tab.ActualHeight;
+            tabDragPreview.HorizontalOffset = _tabDragPosition.X - _tabDragOffset.X - 8;
+            tabDragPreview.VerticalOffset = _tabDragPosition.Y - _tabDragOffset.Y - 8;
+            tabDragPreview.IsOpen = true;
+            tabList.Tag = _draggedTab;
+        }
+
+        private void HideTabDragPreview()
+        {
+            tabDragPreview.IsOpen = false;
+            tabDragPreviewImage.Source = null;
+            tabList.Tag = null;
+        }
+
+        private void TabDragPreviewOpened(object sender, EventArgs e)
+        {
+            if (PresentationSource.FromVisual(tabDragPreview.Child) is HwndSource source)
+            {
+                // The native popup must let OLE drag hit testing reach the tab strip beneath it.
+                HwndHelper.SetWindowExStyle(source.Handle, HwndHelper.GetWindowExStyle(source.Handle)
+                    | Win32.WS_EX_TRANSPARENT | Win32.WS_EX_NOACTIVATE);
+                UpdateTabDragPreview();
+            }
+        }
+
+        private void UpdateTabDragPreview()
+        {
+            if (tabDragPreview.IsOpen
+                && PresentationSource.FromVisual(tabDragPreview.Child) is HwndSource source
+                && Win32.GetCursorPos(out var cursor))
+            {
+                var offset = source.CompositionTarget.TransformToDevice.Transform(
+                    new Vector(_tabDragOffset.X + 8, _tabDragOffset.Y + 8));
+
+                Win32.SetWindowPos(source.Handle, IntPtr.Zero,
+                    cursor.x - (int)offset.X, cursor.y - (int)offset.Y, 0, 0,
+                    Win32.SWP_NOSIZE | Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE);
+            }
+        }
+
+        private void TabListGiveFeedback(object sender, GiveFeedbackEventArgs e)
+        {
+            if (!_isTabDragging)
+                return;
+
+            UpdateTabDragPreview();
+
+            if (e.Effects == DragDropEffects.Move)
+            {
+                e.UseDefaultCursors = false;
+                Mouse.SetCursor(Cursors.Arrow);
+                e.Handled = true;
+            }
+        }
+
+        private void TabListQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
+        {
+            if (ViewModel.IsClosing || !tabList.IsVisible)
+            {
+                e.Action = DragAction.Cancel;
+                e.Handled = true;
+            }
+        }
+
+        private void UpdateTabDrag(Point position, bool scroll)
+        {
+            if (ViewModel.IsClosing || !tabList.IsVisible || _draggedTab == null
+                || !(tabList.Template.FindName("tabScrollViewer", tabList) is ScrollViewer scrollViewer))
+                return;
+
+            var viewportPosition = tabList.TranslatePoint(position, scrollViewer);
+
+            if (viewportPosition.Y < 0 || viewportPosition.Y > scrollViewer.ActualHeight
+                || viewportPosition.X < 0 || viewportPosition.X > scrollViewer.ActualWidth)
+                return;
+
+            if (scroll)
+            {
+                const double edgeWidth = 24;
+
+                if (viewportPosition.X < edgeWidth)
+                    scrollViewer.LineLeft();
+                else if (viewportPosition.X > scrollViewer.ActualWidth - edgeWidth)
+                    scrollViewer.LineRight();
+
+                tabList.UpdateLayout();
+            }
+
+            var oldIndex = ViewModel.Browsers.IndexOf(_draggedTab);
+            var newIndex = oldIndex;
+
+            for (int i = 0; i < ViewModel.Browsers.Count; i++)
+            {
+                if (i == oldIndex || !(tabList.ItemContainerGenerator.ContainerFromIndex(i) is ListBoxItem tab))
+                    continue;
+
+                var center = tab.TranslatePoint(new Point(tab.ActualWidth / 2, 0), tabList).X;
+
+                if (i < oldIndex && position.X < center)
+                {
+                    newIndex = i;
+                    break;
+                }
+                if (i > oldIndex && position.X > center)
+                {
+                    newIndex = i;
+                }
+            }
+
+            ViewModel.MoveBrowser(_draggedTab, newIndex);
+        }
+
+        private void TabListPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (tabList.Template.FindName("tabScrollViewer", tabList) is ScrollViewer scrollViewer)
+            {
+                if (e.Delta > 0)
+                    scrollViewer.LineLeft();
+                else if (e.Delta < 0)
+                    scrollViewer.LineRight();
+
+                e.Handled = true;
             }
         }
 
@@ -307,81 +461,167 @@ namespace CefFlashBrowser.Views
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if (browser.IsDisposed || _doClose)
+            if (_doClose || ViewModel == null || ViewModel.Browsers.All(x => x.Browser == null || x.Browser.IsDisposed))
             {
-                if (!ViewModel.Fullscreen)
+                if (ViewModel?.Fullscreen != true)
                     GlobalData.Settings.BrowserWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
-
-                if (devtoolsContainer.ContentHandle != IntPtr.Zero)
-                    GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
             }
             else
             {
-                bool forceClose = GlobalData.Settings.DisableOnBeforeUnloadDialog;
-                var cefBrowser = browser.GetBrowser();
-
-                if (cefBrowser != null)
+                e.Cancel = true;
+                if (!_closingWindow)
                 {
-                    cefBrowser.CloseBrowser(forceClose);
-                    e.Cancel = true;
-                }
-                else
-                {
-                    _doClose = true;
+                    _closingWindow = true;
+                    // Cancel the current batch even if the window close is later rejected.
+                    _closeOtherTabsOperation = null;
+                    ViewModel.IsClosing = true;
+                    // Leave WPF's Closing event before removing tabs or closing again.
+                    Dispatcher.InvokeAsync(CloseBrowsers);
                 }
             }
             base.OnClosing(e);
         }
 
+        private async void CloseBrowsers()
+        {
+            try
+            {
+                var browsers = ViewModel.Browsers.OrderBy(x => x == ViewModel.CurrentBrowser ? 0 : 1).ToArray();
+                foreach (var browser in browsers)
+                {
+                    if (_isClosed || _forceClosePending)
+                        return;
+
+                    if (!ViewModel.Browsers.Contains(browser))
+                        continue;
+
+                    ViewModel.CurrentBrowser = browser;
+                    if (!await CloseTabAsync(browser))
+                        return;
+                }
+
+                if (!_isClosed && !_forceClosePending)
+                {
+                    _doClose = true;
+                    Close();
+                }
+            }
+            finally
+            {
+                if (!_isClosed && !_forceClosePending)
+                {
+                    _closingWindow = false;
+                    ViewModel.IsClosing = false;
+                }
+            }
+        }
+
+        private async void CloseTabHandler(object msg)
+        {
+            if (!_isClosed && !_closingWindow && !_forceClosePending
+                && msg is BrowserViewModel browser && ViewModel.Browsers.Contains(browser))
+            {
+                await CloseTabAsync(browser);
+            }
+        }
+
+        private async void CloseOtherTabsHandler(object msg)
+        {
+            if (_isClosed || _closingWindow || _forceClosePending || _closeOtherTabsOperation != null
+                || !(msg is BrowserViewModel retained) || !ViewModel.Browsers.Contains(retained))
+                return;
+
+            var operation = new object();
+            _closeOtherTabsOperation = operation;
+            try
+            {
+                var browsers = ViewModel.Browsers.Where(x => x != retained).ToArray();
+                ViewModel.CurrentBrowser = retained;
+                foreach (var browser in browsers)
+                {
+                    if (_closeOtherTabsOperation != operation || _isClosed || _closingWindow || _forceClosePending
+                        || !ViewModel.Browsers.Contains(retained))
+                        return;
+
+                    if (!await CloseTabAsync(browser))
+                        return;
+                }
+            }
+            finally
+            {
+                if (_closeOtherTabsOperation == operation)
+                    _closeOtherTabsOperation = null;
+            }
+        }
+
+        private BrowserView FindBrowserView(DependencyObject element, BrowserViewModel browser)
+        {
+            if (element is BrowserView view && ReferenceEquals(view.ViewModel, browser))
+                return view;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+            {
+                var child = FindBrowserView(VisualTreeHelper.GetChild(element, i), browser);
+                if (child != null) return child;
+            }
+            return null;
+        }
+
+        private async Task<bool> CloseTabAsync(BrowserViewModel browser, BrowserView approvedView = null, bool forceClose = false)
+        {
+            if (_isClosed || !ViewModel.Browsers.Contains(browser))
+                return true;
+
+            var view = approvedView
+                ?? FindBrowserView(browsersControl, browser);
+
+            if (view != null)
+            {
+                bool closed = await (approvedView != null ? view.CompleteCloseAsync() : view.RequestCloseAsync(forceClose));
+                if (!closed) return false;
+            }
+
+            if (!_isClosed)
+            {
+                ViewModel.RemoveBrowser(browser);
+
+                if (ViewModel.Browsers.Count == 0
+                    && !_closingWindow && !_forceClosePending)
+                {
+                    _doClose = true;
+                    Close();
+                }
+            }
+            return true;
+        }
+
         protected override void OnClosed(EventArgs e)
         {
-            base.OnClosed(e);
             _isClosed = true;
+
+            if (ViewModel != null)
+            {
+                ViewModel.IsClosing = true;
+
+                foreach (var browser in ViewModel.Browsers.ToArray())
+                {
+                    FindBrowserView(browsersControl, browser)?.Dispose();
+                    ViewModel.RemoveBrowser(browser);
+                }
+            }
+
+            base.OnClosed(e);
             _hwndSource?.RemoveHook(WndProc);
         }
 
-        private void DevToolsOpenedHandler(object msg)
+        private void TabStripVisibilityChangedHandler(object msg)
         {
-            if (msg == browser)
-            {
-                OnDevToolsOpened();
-            }
-        }
-
-        private void DevToolsClosedHandler(object msg)
-        {
-            if (msg == browser)
-            {
-                OnDevToolsClosed();
-            }
-        }
-
-        private void OnDevToolsOpened()
-        {
-            if (GlobalData.Settings.EnableIntegratedDevTools)
-            {
-                Activate();
-                Keyboard.Focus(browser);
-                devtoolsColumn.Width = new GridLength(GlobalData.Settings.IntegratedDevToolsWidth);
-            }
-        }
-
-        private void OnDevToolsClosed()
-        {
-            Activate();
-            Keyboard.Focus(browser);
-            GlobalData.Settings.IntegratedDevToolsWidth = devtoolsColumn.Width.Value;
-            devtoolsColumn.Width = new GridLength(0);
-        }
-
-        private void BrowserFullscreenModeChanged(object sender, EventArgs e)
-        {
-            ViewModel.Fullscreen = browser.FullscreenMode;
+            ViewModel?.RefreshTabStripVisibility();
         }
 
         private void FullScreenChangedHandler(object msg)
         {
-            if (msg == DataContext)
+            if (msg == ViewModel)
             {
                 OnFullScreenChanged(ViewModel.Fullscreen);
             }
@@ -445,11 +685,45 @@ namespace CefFlashBrowser.Views
 
         public void ForceCloseWindow()
         {
-            if (!browser.IsDisposed)
+            if (_isClosed || _forceClosePending)
+                return;
+
+            _forceClosePending = true;
+
+            if (ViewModel != null)
+                ViewModel.IsClosing = true;
+
+            try
             {
-                browser.LifeSpanHandler = null;
-                browser.CloseBrowser(true);
+                var closing = ForceCloseBrowsersAsync();
+                if (!closing.IsCompleted)
+                {
+                    // Keep all native parents alive during creation and close callbacks.
+                    // Callers can shut CEF down as soon as this synchronous method returns.
+                    var frame = new DispatcherFrame();
+                    closing.GetAwaiter().OnCompleted(() => Dispatcher.InvokeAsync(() => frame.Continue = false));
+                    Dispatcher.PushFrame(frame);
+                }
+
+                closing.GetAwaiter().GetResult();
             }
+            finally
+            {
+                _forceClosePending = false;
+            }
+        }
+
+        private async Task ForceCloseBrowsersAsync()
+        {
+            if (ViewModel != null)
+            {
+                await Task.WhenAll(ViewModel.Browsers.ToArray()
+                    .Select(browser => CloseTabAsync(browser, forceClose: true)));
+            }
+
+            if (_isClosed)
+                return;
+
             _doClose = true;
             Close();
         }
@@ -457,6 +731,15 @@ namespace CefFlashBrowser.Views
         private void StatusPopupMouseEnter(object sender, MouseEventArgs e)
         {
             UpdateStatusPopupOffset();
+        }
+
+        private void StatusPopupContentIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (statusPopupContent.IsVisible)
+            {
+                // Visibility can change before the popup content has loaded.
+                Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(UpdateStatusPopupOffset));
+            }
         }
 
         private void StatusPopupOpened(object sender, EventArgs e)
@@ -481,7 +764,7 @@ namespace CefFlashBrowser.Views
 
             Rect popupRect = new Rect(
                 statusPopupContent.PointToScreen(new Point(0, -statusPopup.VerticalOffset)),
-                statusPopupContent.PointToScreen(new Point(statusPopupContent.ActualWidth, statusPopupContent.ActualHeight)));
+                statusPopupContent.PointToScreen(new Point(statusPopupContent.ActualWidth, statusPopupContent.ActualHeight - statusPopup.VerticalOffset)));
 
             Win32.GetCursorPos(out var cursorPos);
             statusPopup.VerticalOffset = (cursorPos.y >= popupRect.Y && cursorPos.y <= popupRect.Bottom) ? -30 : 0;
@@ -504,7 +787,10 @@ namespace CefFlashBrowser.Views
 
         private void FindPopupClosed(object sender, EventArgs e)
         {
-            browser.GetBrowser()?.StopFinding(true);
+            var browser = ViewModel?.CurrentBrowser?.Browser;
+
+            if (browser != null && !browser.IsDisposed && browser.IsBrowserInitialized)
+                browser.GetBrowser()?.StopFinding(true);
         }
 
         private void UpdateFindPopupPosition()
@@ -545,6 +831,72 @@ namespace CefFlashBrowser.Views
             }
 
             findPopup.PlacementRectangle = new Rect { X = pos.X, Y = pos.Y };
+        }
+
+        private void DevToolsOpened(object sender, RoutedEventArgs e)
+        {
+            if (IsCurrentBrowserEvent(e) && GlobalData.Settings.EnableIntegratedDevTools)
+            {
+                Activate();
+            }
+        }
+
+        private void DevToolsClosed(object sender, RoutedEventArgs e)
+        {
+            if (IsCurrentBrowserEvent(e))
+            {
+                Activate();
+            }
+        }
+
+        private void FullscreenChanged(object sender, FullscreenChangedEventArgs e)
+        {
+            if (IsCurrentBrowserEvent(e))
+            {
+                ViewModel.Fullscreen = e.Fullscreen;
+            }
+        }
+
+        private bool IsCurrentBrowserEvent(RoutedEventArgs e)
+        {
+            return !_isClosed && e.OriginalSource is BrowserView view
+                && ReferenceEquals(view.ViewModel, ViewModel.CurrentBrowser);
+        }
+
+        private async void BrowserDoClose(object sender, BrowserDoCloseEventArgs e)
+        {
+            if (!_isClosed && !e.IsPopup && !e.IsDevTools
+                && e.OriginalSource is BrowserView view && ViewModel.Browsers.Contains(view.ViewModel)
+                && ReferenceEquals(view.ViewModel.Browser, e.ChromiumWebBrowser))
+            {
+                e.Handled = true;
+                await CloseTabAsync(view.ViewModel, view);
+            }
+        }
+
+        private void BrowserAfterCreated(object sender, BrowserAfterCreatedEventArgs e)
+        {
+            if (!_isClosed && HwndHelper.IsDevToolsWindow(e.HostHandle))
+            {
+                HwndHelper.SetOwnerWindow(e.HostHandle, _hwnd);
+            }
+        }
+
+        private void BrowserPopup(object sender, BrowserPopupEventArgs e)
+        {
+            if (!_isClosed && e.OriginalSource is BrowserView view)
+            {
+                ViewModel.OnPopup(view.ViewModel, e.TargetUrl, e.PopupSizeInfo);
+            }
+        }
+
+        private void BrowserNewPage(object sender, BrowserNewPageEventArgs e)
+        {
+            if (!_isClosed && e.OriginalSource is BrowserView view)
+            {
+                ViewModel.OnNewPage(view.ViewModel, e.TargetUrl,
+                    e.TargetDisposition != WindowOpenDisposition.NewBackgroundTab, e.BehaviorOverride);
+            }
         }
     }
 }

@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">Port</sys:String>
     <sys:String x:Key="settings_optional">(Optional)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">Save webpage zoom level</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">Always show tab bar</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Embed devtools into browser window</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Disable fullscreen mode</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Disable GPU acceleration</sys:String>
@@ -76,6 +77,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">Original window</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">New window</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">New tab</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -116,6 +118,7 @@
     <sys:String x:Key="browser_undo">Undo</sys:String>
     <sys:String x:Key="browser_find">Find</sys:String>
     <sys:String x:Key="browser_searchFor">Search "{0}"</sys:String>
+    <sys:String x:Key="browser_openInNewTab">Open in new tab</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Open in new window</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">Go to "{0}"</sys:String>
     <sys:String x:Key="browser_addToDictionary">Add to dictionary</sys:String>
@@ -132,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">Forward (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Reload (F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">Stop (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">New tab (Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">Close tab (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">More</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">Blocked Flash content</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Zoom in (Ctrl+Plus)</sys:String>
@@ -139,6 +144,11 @@
     <sys:String x:Key="browser_loading">Loading...</sys:String>
     <sys:String x:Key="browser_showMainWindow">Open main window</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">New browser window</sys:String>
+    <sys:String x:Key="browser_newTab">New tab</sys:String>
+    <sys:String x:Key="browser_closeTab">Close tab</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">Close other tabs</sys:String>
+    <sys:String x:Key="browser_duplicateTab">Duplicate tab</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">Open tab in new window</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL Save Manager</sys:String>

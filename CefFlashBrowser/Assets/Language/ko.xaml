@@ -63,6 +63,7 @@
     <sys:String x:Key="settings_port">포트</sys:String>
     <sys:String x:Key="settings_optional">(선택 사항)</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">웹 페이지 확대/축소 수준 저장</sys:String>
+    <sys:String x:Key="settings_alwaysShowTabStrip">항상 탭 표시줄 표시</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">DevTools를 브라우저 창에 포함</sys:String>
     <sys:String x:Key="settings_disableFullscreen">전체 화면 모드 비활성화</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">GPU 가속 비활성화</sys:String>
@@ -76,6 +77,7 @@
     <!--New web page behaviors-->
     <sys:String x:Key="newPageBehavior_originalWindow">원래 창</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">새 창</sys:String>
+    <sys:String x:Key="newPageBehavior_newTab">새 탭</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -116,6 +118,7 @@
     <sys:String x:Key="browser_undo">실행 취소</sys:String>
     <sys:String x:Key="browser_find">찾기</sys:String>
     <sys:String x:Key="browser_searchFor">"{0}" 검색</sys:String>
+    <sys:String x:Key="browser_openInNewTab">새 탭에서 열기</sys:String>
     <sys:String x:Key="browser_openInNewWindow">새 창에서 열기</sys:String>
     <sys:String x:Key="browser_openSelectedUrl">"{0}"(으)로 이동</sys:String>
     <sys:String x:Key="browser_addToDictionary">사전에 추가</sys:String>
@@ -132,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">앞으로(Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">새로 고침(F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">중지(Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">새 탭(Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">탭 닫기(Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">더 보기</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">차단된 Flash 콘텐츠</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">확대(Ctrl+Plus)</sys:String>
@@ -139,6 +144,11 @@
     <sys:String x:Key="browser_loading">불러오는 중...</sys:String>
     <sys:String x:Key="browser_showMainWindow">메인 창 열기</sys:String>
     <sys:String x:Key="browser_newBrowserWindow">새 브라우저 창</sys:String>
+    <sys:String x:Key="browser_newTab">새 탭</sys:String>
+    <sys:String x:Key="browser_closeTab">탭 닫기</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">다른 탭 닫기</sys:String>
+    <sys:String x:Key="browser_duplicateTab">탭 복제</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">새 창에서 탭 열기</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL 저장 관리자</sys:String>

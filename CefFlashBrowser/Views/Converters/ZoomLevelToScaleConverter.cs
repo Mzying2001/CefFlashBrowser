@@ -2,7 +2,7 @@
 
 namespace CefFlashBrowser.Views.Converters
 {
-    public class ZoomLevelToScale : ValueConverterBase<double, double>
+    public class ZoomLevelToScaleConverter : ValueConverterBase<double, double>
     {
         public override double Convert(double value, object parameter, CultureInfo culture)
         {

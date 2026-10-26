@@ -25,8 +25,8 @@
     <Compile Include="..\CefFlashBrowser\Utils\UrlHelper.cs" Link="LinkedSources\UrlHelper.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\DirectoryAccessChecker.cs" Link="LinkedSources\DirectoryAccessChecker.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\ValueConverterBase.cs" Link="LinkedSources\ValueConverterBase.cs" />
-    <Compile Include="..\CefFlashBrowser\Views\Converters\BinaryToSizeString.cs" Link="LinkedSources\BinaryToSizeString.cs" />
-    <Compile Include="..\CefFlashBrowser\Views\Converters\ZoomLevelToScale.cs" Link="LinkedSources\ZoomLevelToScale.cs" />
+    <Compile Include="..\CefFlashBrowser\Views\Converters\BinaryToSizeStringConverter.cs" Link="LinkedSources\BinaryToSizeStringConverter.cs" />
+    <Compile Include="..\CefFlashBrowser\Views\Converters\ZoomLevelToScaleConverter.cs" Link="LinkedSources\ZoomLevelToScaleConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\MultiplyConverter.cs" Link="LinkedSources\MultiplyConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Models\Settings.cs" Link="LinkedSources\Settings.cs" />
     <Compile Include="..\CefFlashBrowser\Models\SettingModels.cs" Link="LinkedSources\SettingModels.cs" />
@@ -35,6 +35,12 @@
     <Compile Include="..\CefFlashBrowser\Models\SolObject.cs" Link="LinkedSources\SolObject.cs" />
     <Compile Include="..\CefFlashBrowser\Models\SolArray.cs" Link="LinkedSources\SolArray.cs" />
     <Compile Include="..\CefFlashBrowser\Models\SolTypeDesc.cs" Link="LinkedSources\SolTypeDesc.cs" />
+  </ItemGroup>
+
+  <!-- Compiled at runtime by the standalone browser regression runner. -->
+  <ItemGroup>
+    <Compile Remove="BrowserRegression\**\*.cs" />
+    <None Include="BrowserRegression\**\*.cs" />
   </ItemGroup>
 
   <!-- Test fixture files -->
