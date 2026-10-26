@@ -170,6 +170,8 @@ function Test-BrowserDisplay($Context, $window, $view, $browser) {
     Assert-Regression ($browser.StatusText -eq 'regression status') 'status callback updates the browser property'
     Assert-Regression ([object]::ReferenceEquals($window.FindName('statusPopupContent').Content, $view.ViewModel)) 'status popup retains its browser binding'
 
+    Test-BrowserStatusPopupOffset $Context $window
+
     $window.ViewModel.TextToFind = 'find this'
     Invoke-BrowserCommand $window.ViewModel.FindNextTextCommand $view.ViewModel
     Invoke-BrowserCommand $window.ViewModel.FindPrevTextCommand $view.ViewModel
@@ -184,6 +186,60 @@ function Test-BrowserDisplay($Context, $window, $view, $browser) {
     Assert-Regression ($window.WindowStyle -eq [System.Windows.WindowStyle]::None) 'F11 enters window fullscreen'
     $window.ViewModel.ToggleFullscreen($view.ViewModel)
     Assert-Regression ($window.WindowStyle -eq [System.Windows.WindowStyle]::SingleBorderWindow) 'F11 restores window chrome'
+}
+
+function Test-BrowserStatusPopupOffset($Context, $window) {
+    $popup = $window.FindName('statusPopup')
+    $content = $window.FindName('statusPopupContent')
+    $wasOpen = $popup.IsOpen
+    $placement = $popup.PlacementRectangle
+    $cursor = [System.Windows.Forms.Cursor]::Position
+    $flushLayout = {
+        [void]$Context.Application.Dispatcher.Invoke(
+            [System.Windows.Threading.DispatcherPriority]::Background, [Action]{})
+    }
+
+    try {
+        $area = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
+        $outside = New-Object System.Drawing.Point(($area.Right - 10), ($area.Top + 10))
+        [System.Windows.Forms.Cursor]::Position = $outside
+        $popup.PlacementRectangle = New-Object System.Windows.Rect(($area.Left + 100), ($area.Top + 100), 0, 0)
+        $content.Visibility = [System.Windows.Visibility]::Visible
+        $popup.IsOpen = $true
+        Wait-Regression $Context { $content.IsVisible -and $content.IsLoaded -and $content.ActualHeight -gt 0 } 'status popup layout'
+        & $flushLayout
+        $origin = $content.PointToScreen((New-Object System.Windows.Point(0, 0)))
+        [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(
+            ($area.Right - 10), ([int]($origin.Y + $content.ActualHeight / 2)))
+        Invoke-ViewCallback $window 'StatusPopupMouseEnter' @($popup, $null)
+        Assert-Regression ($popup.VerticalOffset -eq -30) 'status popup avoids the cursor using the vertical interval'
+
+        for ($update = 0; $update -lt 3; $update++) {
+            Wait-Regression $Context {
+                $content.PointToScreen((New-Object System.Windows.Point(0, 0))).Y -lt $origin.Y
+            } 'status popup has moved above the cursor'
+            Invoke-ViewCallback $window 'StatusPopupSizeChanged' @($popup, $null)
+            Assert-Regression ($popup.VerticalOffset -eq -30) 'repeated status popup updates preserve cursor avoidance'
+        }
+
+        $content.Visibility = [System.Windows.Visibility]::Collapsed
+        $content.Visibility = [System.Windows.Visibility]::Visible
+        & $flushLayout
+        Assert-Regression ($popup.VerticalOffset -eq -30) 'redisplaying shifted status content keeps avoiding the cursor'
+
+        $content.Visibility = [System.Windows.Visibility]::Collapsed
+        [System.Windows.Forms.Cursor]::Position = $outside
+        $content.Visibility = [System.Windows.Visibility]::Visible
+        & $flushLayout
+        Assert-Regression ($popup.VerticalOffset -eq 0) 'redisplaying status content outside the interval restores its position'
+    } finally {
+        $popup.IsOpen = $false
+        $popup.VerticalOffset = 0
+        $popup.PlacementRectangle = $placement
+        [System.Windows.Forms.Cursor]::Position = $cursor
+        $content.ClearValue([System.Windows.UIElement]::VisibilityProperty)
+        $popup.IsOpen = $wasOpen
+    }
 }
 
 function Test-BrowserClose($Context, $window, $view, $browser) {

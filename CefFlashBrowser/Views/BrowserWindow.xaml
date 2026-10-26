@@ -848,6 +848,7 @@
                    Padding="5,0"
                    Opacity="0.85"
                    Content="{Binding CurrentBrowser}"
+                   IsVisibleChanged="StatusPopupContentIsVisibleChanged"
                    MaxWidth="{Binding ElementName=mainGrid, Path=ActualWidth, Converter={StaticResource TwoThirdConverter}}">
                 <Label.Resources>
                     <DataTemplate x:Key="statusTemplate" DataType="{x:Type vm:BrowserViewModel}">

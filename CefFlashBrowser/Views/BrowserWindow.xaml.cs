@@ -699,6 +699,15 @@ namespace CefFlashBrowser.Views
             UpdateStatusPopupOffset();
         }
 
+        private void StatusPopupContentIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (statusPopupContent.IsVisible)
+            {
+                // Visibility can change before the popup content has loaded.
+                Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(UpdateStatusPopupOffset));
+            }
+        }
+
         private void StatusPopupOpened(object sender, EventArgs e)
         {
             if (PresentationSource.FromVisual(statusPopup.Child) is HwndSource hwndSource)
@@ -721,7 +730,7 @@ namespace CefFlashBrowser.Views
 
             Rect popupRect = new Rect(
                 statusPopupContent.PointToScreen(new Point(0, -statusPopup.VerticalOffset)),
-                statusPopupContent.PointToScreen(new Point(statusPopupContent.ActualWidth, statusPopupContent.ActualHeight)));
+                statusPopupContent.PointToScreen(new Point(statusPopupContent.ActualWidth, statusPopupContent.ActualHeight - statusPopup.VerticalOffset)));
 
             Win32.GetCursorPos(out var cursorPos);
             statusPopup.VerticalOffset = (cursorPos.y >= popupRect.Y && cursorPos.y <= popupRect.Bottom) ? -30 : 0;
