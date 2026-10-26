@@ -33,6 +33,11 @@
         public NewPageBehavior NewPageBehavior { get; set; }
 
         /// <summary>
+        /// The address to open when creating a new tab
+        /// </summary>
+        public string NewTabAddress { get; set; }
+
+        /// <summary>
         /// Determines whether the "onbeforeunload" dialog is disabled
         /// </summary>
         public bool DisableOnBeforeUnloadDialog { get; set; }
@@ -161,6 +166,7 @@
             SearchEngine = SearchEngine.Bing;
             NavigationType = NavigationType.Automatic;
             NewPageBehavior = NewPageBehavior.NewTab;
+            NewTabAddress = "about:blank";
             DisableOnBeforeUnloadDialog = false;
             MainWindowSizeInfo = null;
             BrowserWindowSizeInfo = null;

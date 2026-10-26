@@ -257,7 +257,7 @@ namespace CefFlashBrowser.ViewModels
         {
             if (!IsClosing)
             {
-                AddBrowser(address ?? "about:blank");
+                AddBrowser(address ?? GlobalData.Settings.NewTabAddress);
             }
         }
 
