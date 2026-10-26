@@ -612,7 +612,7 @@
                         <ControlTemplate TargetType="ListBox">
                             <ScrollViewer x:Name="tabScrollViewer"
                                           Focusable="False"
-                                          CanContentScroll="True"
+                                          CanContentScroll="False"
                                           VerticalScrollBarVisibility="Disabled"
                                           HorizontalScrollBarVisibility="Hidden">
                                 <ItemsPresenter/>
