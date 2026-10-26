@@ -135,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">前进（Alt+向右键）</sys:String>
     <sys:String x:Key="browser_toolTipReload">刷新（F5）</sys:String>
     <sys:String x:Key="browser_toolTipStop">停止（Esc）</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">新标签页（Ctrl+T）</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">关闭标签页（Ctrl+W）</sys:String>
     <sys:String x:Key="browser_toolTipMore">更多</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">被屏蔽的Flash内容</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加号键）</sys:String>

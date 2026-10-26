@@ -135,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">Вперед (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Обновить (F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">Остановить (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">Новая вкладка (Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">Закрыть вкладку (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Еще</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">Заблокированное Flash-содержимое</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Увеличить (Ctrl+Plus)</sys:String>

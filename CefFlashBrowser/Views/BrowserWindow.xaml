@@ -366,7 +366,7 @@
                 <!--new tab button-->
                 <Button x:Name="toolbarNewTabButton"
                         Margin="0,0,10,0"
-                        ToolTip="{DynamicResource browser_newTab}"
+                        ToolTip="{DynamicResource browser_toolTipNewTab}"
                         Command="{Binding AddBrowserCommand}">
                     <Button.Style>
                         <Style TargetType="Button"
@@ -689,7 +689,7 @@
                                     Height="20"
                                     BorderThickness="0"
                                     Focusable="False"
-                                    ToolTip="{DynamicResource browser_closeTab}"
+                                    ToolTip="{DynamicResource browser_toolTipCloseTab}"
                                     Command="{Binding DataContext.CloseBrowserCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                     CommandParameter="{Binding}"
                                     VerticalAlignment="Center"
@@ -766,7 +766,7 @@
                         Focusable="False"
                         BorderThickness="0"
                         VerticalAlignment="Center"
-                        ToolTip="{DynamicResource browser_newTab}"
+                        ToolTip="{DynamicResource browser_toolTipNewTab}"
                         Command="{Binding AddBrowserCommand}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"

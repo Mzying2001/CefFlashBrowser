@@ -135,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">앞으로(Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">새로 고침(F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">중지(Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">새 탭(Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">탭 닫기(Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">더 보기</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">차단된 Flash 콘텐츠</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">확대(Ctrl+Plus)</sys:String>

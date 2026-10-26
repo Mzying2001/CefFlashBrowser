@@ -135,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">Avanti (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Ricarica (F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">Stop (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">Nuova scheda (Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">Chiudi scheda (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Altro</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">Contenuti Flash bloccati</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Ingrandisci (Ctrl+Plus)</sys:String>

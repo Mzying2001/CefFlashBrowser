@@ -135,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">進む (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">再読み込み (F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">停止 (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">新しいタブ (Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">タブを閉じる (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">その他</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">ブロックされた Flash コンテンツ</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">拡大 (Ctrl+Plus)</sys:String>

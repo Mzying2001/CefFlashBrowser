@@ -135,6 +135,8 @@
     <sys:String x:Key="browser_toolTipForward">Forward (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Reload (F5)</sys:String>
     <sys:String x:Key="browser_toolTipStop">Stop (Esc)</sys:String>
+    <sys:String x:Key="browser_toolTipNewTab">New tab (Ctrl+T)</sys:String>
+    <sys:String x:Key="browser_toolTipCloseTab">Close tab (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">More</sys:String>
     <sys:String x:Key="browser_toolTipBlockedSwfs">Blocked Flash content</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Zoom in (Ctrl+Plus)</sys:String>
