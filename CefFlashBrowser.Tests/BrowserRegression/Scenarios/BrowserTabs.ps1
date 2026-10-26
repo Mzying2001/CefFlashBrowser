@@ -49,6 +49,7 @@ function Test-BrowserTabsBeforeShow($Context) {
 
 function Test-BrowserTabs($Context) {
     Test-BrowserTabStrip $Context
+    Test-BrowserTabAdaptiveWidth $Context
     Test-BrowserTabStripSettings $Context
     Test-BrowserTabContextMenu $Context
     Test-BrowserTabCloseOthers $Context
@@ -347,8 +348,7 @@ function Test-BrowserTabStrip($Context) {
         Assert-Regression ($model.CurrentBrowser -eq $third) 'Ctrl+PageDown and Ctrl+PageUp cycle tabs'
         $window.UpdateLayout()
         $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
-        Wait-Regression $Context { $scroll.HorizontalOffset -gt 0 } 'selecting an overflowing tab brings it into view'
-        Assert-Regression ($newButton.IsVisible -and $scroll.ScrollableWidth -gt 0) 'overflow keeps the new tab button accessible'
+        Assert-Regression ($newButton.IsVisible -and $scroll.ScrollableWidth -lt 1) 'tabs shrink to fit beside the new tab button'
 
         $container = $tabs.ItemContainerGenerator.ContainerFromItem($second)
         $title = Find-TabElement $container 'tabTitle'
@@ -372,6 +372,78 @@ function Test-BrowserTabStrip($Context) {
         Assert-Regression (!$window.FindName('tabStrip').IsVisible) 'fullscreen hides the tab strip'
         $model.ToggleFullscreen($third)
         Assert-Regression (!$window.FindName('tabStrip').IsVisible) 'leaving fullscreen keeps the tab strip hidden for a single tab'
+    } finally {
+        $window.ForceCloseWindow()
+    }
+}
+
+function Assert-TabWidths($Window, [double]$ExpectedWidth, [string]$Scenario) {
+    $Window.UpdateLayout()
+    $tabs = $Window.FindName('tabList')
+    foreach ($browser in $Window.ViewModel.Browsers) {
+        $header = $tabs.ItemContainerGenerator.ContainerFromItem($browser)
+        Assert-Regression ($null -ne $header -and [Math]::Abs($header.ActualWidth - $ExpectedWidth) -lt 0.01) $Scenario
+    }
+}
+
+function Test-BrowserTabAdaptiveWidth($Context) {
+    $window = New-RegressionWindow $Context -Width 1000
+    try {
+        $model = $window.ViewModel
+        $first = $model.CurrentBrowser
+        $second = New-RegressionTab $Context $window
+        $third = New-RegressionTab $Context $window
+        $tabs = $window.FindName('tabList')
+        $strip = $window.FindName('tabStrip')
+        $newButton = $window.FindName('newTabButton')
+        $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
+        Assert-TabWidths $window 250 'tabs use their default width when space is available'
+
+        $window.Width = 600
+        $window.UpdateLayout()
+        $width = $tabs.ItemContainerGenerator.ContainerFromItem($first).ActualWidth
+        Assert-Regression ($width -gt 80 -and $width -lt 250) 'resizing shrinks tabs within the width limits'
+        Assert-TabWidths $window $width 'selected and background tabs have equal widths'
+        Assert-Regression ($scroll.ScrollableWidth -lt 1) 'shrinking tabs avoids unnecessary horizontal scrolling'
+
+        $extras = @(1..3 | ForEach-Object { New-RegressionTab $Context $window })
+        $window.Width = 400
+        Assert-TabWidths $window 80 'overflowing tabs stop shrinking at the minimum width'
+        Assert-Regression ($scroll.ScrollableWidth -gt 0) 'minimum-width tabs overflow horizontally'
+        $buttonPosition = $newButton.TranslatePoint([System.Windows.Point]::new(0, 0), $strip)
+        Assert-Regression ($newButton.IsVisible -and $newButton.IsEnabled -and
+            $buttonPosition.X -ge 0 -and $buttonPosition.X + $newButton.ActualWidth -le $strip.ActualWidth + 0.01) 'overflow keeps the new tab button fully accessible'
+
+        $model.CurrentBrowser = $first
+        $window.UpdateLayout()
+        $model.CurrentBrowser = $extras[-1]
+        Wait-Regression $Context { $scroll.HorizontalOffset -gt 0 } 'selecting an overflowing tab brings it into view'
+        $lastHeader = $tabs.ItemContainerGenerator.ContainerFromItem($extras[-1])
+        $closeButton = Find-TabElement $lastHeader 'closeTabButton'
+        Assert-Regression ($closeButton.IsVisible -and $closeButton.IsEnabled -and $closeButton.ActualWidth -eq 20) 'minimum-width tab retains its close button'
+        $peer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($closeButton)
+        $peer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $model.Browsers.Count -eq 5 } 'close button works at the minimum tab width'
+        $peer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($newButton)
+        $peer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $model.Browsers.Count -eq 6 -and $model.CurrentBrowser.IsBrowserReady() } 'new tab button works while tabs overflow'
+        Assert-TabWidths $window 80 'new tabs share the minimum width while space is exhausted'
+
+        foreach ($browser in @($model.Browsers | Where-Object { $_ -ne $first -and $_ -ne $second -and $_ -ne $third })) {
+            $model.CloseBrowser($browser)
+        }
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 } 'extra overflow tabs close'
+        $window.UpdateLayout()
+        $width = $tabs.ItemContainerGenerator.ContainerFromItem($first).ActualWidth
+        Assert-Regression ($width -gt 80 -and $width -lt 250 -and $scroll.ScrollableWidth -lt 1) 'closing tabs restores space and removes overflow'
+        Assert-TabWidths $window $width 'remaining tabs expand equally after closing tabs'
+
+        $window.Width = 1000
+        Assert-TabWidths $window 250 'enlarging the window restores the default width'
+        $window.Width = 600
+        $model.CloseBrowser($third)
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'third tab closes after shrinking the window'
+        Assert-TabWidths $window 250 'closing a tab restores the default width when enough space remains'
     } finally {
         $window.ForceCloseWindow()
     }
@@ -577,6 +649,8 @@ function Test-BrowserTabReordering($Context) {
         Invoke-ViewCallback $window 'UpdateTabDrag' @([System.Windows.Point]::new(0, -10), $false)
         Assert-Regression ($model.Browsers[2] -eq $third) 'dragging outside the tab strip leaves the order unchanged'
 
+        $extras = @(1..3 | ForEach-Object { New-RegressionTab $Context $window })
+        $model.CurrentBrowser = $third
         $window.Width = 400
         $window.UpdateLayout()
         $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
@@ -591,6 +665,8 @@ function Test-BrowserTabReordering($Context) {
         Assert-Regression ($scroll.HorizontalOffset -eq 0) 'dragging at the left edge scrolls back'
         $draggedField.SetValue($window, $null)
 
+        foreach ($browser in $extras) { $model.CloseBrowser($browser) }
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 } 'extra drag overflow tabs close'
         $model.MoveBrowser($third, 2)
         $model.CloseBrowser($third)
         Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'reordered selected tab closes'
@@ -641,6 +717,9 @@ function Test-BrowserTabDragPreview($Context) {
         $model.MoveBrowser($third, 1)
         $window.UpdateLayout()
         Assert-TabDragPreview $window $third 'reordered second tab'
+        1..3 | ForEach-Object { New-RegressionTab $Context $window | Out-Null }
+        $model.MoveBrowser($third, $model.Browsers.Count - 1)
+        $model.CurrentBrowser = $third
         $window.Width = 400
         $window.UpdateLayout()
         $tabs = $window.FindName('tabList')
@@ -648,7 +727,7 @@ function Test-BrowserTabDragPreview($Context) {
         $window.UpdateLayout()
         $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
         Assert-Regression ($scroll.HorizontalOffset -gt 0) 'preview check covers a scrolled tab strip'
-        Assert-TabDragPreview $window $third 'second tab after horizontal scrolling'
+        Assert-TabDragPreview $window $third 'last tab after horizontal scrolling'
         Assert-Regression (!$window.FindName('tabDragPreview').IsOpen -and $null -eq $tabs.Tag) 'preview cleanup restores the tab strip'
     } finally {
         $window.ForceCloseWindow()

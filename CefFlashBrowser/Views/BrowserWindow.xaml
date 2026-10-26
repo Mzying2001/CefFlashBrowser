@@ -29,6 +29,7 @@
         <!--Converters-->
         <converters:MultiplyConverter x:Key="TwoThirdConverter"
                                       Multiplier="0.6666666666666667"/>
+        <converters:BrowserTabWidthConverter x:Key="BrowserTabWidthConverter"/>
 
         <!--ConetxtMenu-->
         <!--Browser actions menu-->
@@ -639,8 +640,16 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
-                            <Setter Property="Width"
-                                    Value="250"/>
+                            <Setter Property="Width">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource BrowserTabWidthConverter}">
+                                        <Binding ElementName="tabStrip" Path="ActualWidth"/>
+                                        <Binding ElementName="newTabButton" Path="ActualWidth"/>
+                                        <Binding ElementName="newTabButton" Path="Margin"/>
+                                        <Binding RelativeSource="{RelativeSource AncestorType=ListBox}" Path="Items.Count"/>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
                             <Setter Property="MinHeight"
                                     Value="32"/>
                             <Setter Property="Padding"
