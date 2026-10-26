@@ -146,6 +146,9 @@
     <sys:String x:Key="browser_newBrowserWindow">새 브라우저 창</sys:String>
     <sys:String x:Key="browser_newTab">새 탭</sys:String>
     <sys:String x:Key="browser_closeTab">탭 닫기</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">다른 탭 닫기</sys:String>
+    <sys:String x:Key="browser_duplicateTab">탭 복제</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">새 창에서 탭 열기</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL 저장 관리자</sys:String>

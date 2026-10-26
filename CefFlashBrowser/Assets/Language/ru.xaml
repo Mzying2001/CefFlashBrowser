@@ -146,6 +146,9 @@
     <sys:String x:Key="browser_newBrowserWindow">Новое окно браузера</sys:String>
     <sys:String x:Key="browser_newTab">Новая вкладка</sys:String>
     <sys:String x:Key="browser_closeTab">Закрыть вкладку</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">Закрыть другие вкладки</sys:String>
+    <sys:String x:Key="browser_duplicateTab">Дублировать вкладку</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">Открыть вкладку в новом окне</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">Диспетчер сохранений SOL</sys:String>

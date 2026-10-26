@@ -28,6 +28,19 @@ function Test-BrowserTabsBeforeShow($Context) {
     }
     $model.CloseBrowser($second)
     Assert-Regression ($model.Browsers.Count -eq 1) 'unrealized background tab closes without creating CEF'
+    foreach ($address in @($null, '')) {
+        $first.Address = $address
+        Invoke-BrowserCommand $model.DuplicateBrowserCommand $first
+        $duplicate = $model.CurrentBrowser
+        Assert-Regression ($model.Browsers[1] -eq $duplicate -and $duplicate.Address -eq 'about:blank' -and
+            $null -eq $duplicate.Browser) 'duplicating an unrealized empty-address tab creates a blank tab without CEF'
+        $model.CloseBrowser($duplicate)
+    }
+    foreach ($invalid in @($null, (New-Object CefFlashBrowser.ViewModels.BrowserViewModel), $second)) {
+        $model.DuplicateBrowser($invalid)
+        $model.CloseOtherBrowsers($invalid)
+    }
+    Assert-Regression ($model.Browsers.Count -eq 1 -and $model.CurrentBrowser -eq $first) 'new tab commands ignore missing and removed source tabs'
     $model.AddBrowser('about:blank', $true) | Out-Null
     $window.Close()
     Assert-Regression ($model.Browsers.Count -eq 0) 'closing before Show removes all unrealized tabs'
@@ -37,6 +50,9 @@ function Test-BrowserTabsBeforeShow($Context) {
 function Test-BrowserTabs($Context) {
     Test-BrowserTabStrip $Context
     Test-BrowserTabStripSettings $Context
+    Test-BrowserTabContextMenu $Context
+    Test-BrowserTabCloseOthers $Context
+    Test-BrowserTabCloseOthersInterrupted $Context
     Test-BrowserTabNewPageRouting $Context
     Test-BrowserTabSelection $Context
     Test-BrowserTabReordering $Context
@@ -63,6 +79,222 @@ function Invoke-TabShortcut($Window, [System.Windows.Input.Key]$Key, [System.Win
     $binding = $Window.InputBindings | Where-Object { $_.Key -eq $Key -and $_.Modifiers -eq $Modifiers }
     Assert-Regression ($null -ne $binding) "tab shortcut exists: $Modifiers+$Key"
     Invoke-BrowserCommand $binding.Command $binding.CommandParameter
+}
+
+function Open-TabContextMenu($Context, $Window, $Browser) {
+    $Window.UpdateLayout()
+    $tabs = $Window.FindName('tabList')
+    $container = $tabs.ItemContainerGenerator.ContainerFromItem($Browser)
+    Assert-Regression ($null -ne $container.ContextMenu) 'tab header has a context menu'
+    $menu = $container.ContextMenu
+    $menu.PlacementTarget = $container
+    $menu.IsOpen = $true
+    Wait-Regression $Context {
+        $menu.Items[0].CommandParameter -eq $Browser -and $null -ne $menu.Items[1].Command
+    } 'tab menu binds to its placement target'
+    return $menu
+}
+
+function Invoke-TabMenuItem($Menu, [int]$Index) {
+    $item = $Menu.Items[$Index]
+    $command = $item.Command
+    $parameter = $item.CommandParameter
+    $Menu.IsOpen = $false
+    Invoke-BrowserCommand $command $parameter
+}
+
+function Test-BrowserTabContextMenu($Context) {
+    $settings = [CefFlashBrowser.Data.GlobalData]::Settings
+    $savedBehavior = $settings.NewPageBehavior
+    $savedShortcuts = $settings.DisableBrowserShortcuts
+    $savedTabStrip = $settings.AlwaysShowTabStrip
+    $savedLanguage = $Context.Application.Resources.MergedDictionaries[0]
+    $beforeWindows = @($Context.Application.Windows)
+    try {
+        $settings.AlwaysShowTabStrip = $true
+        $window = New-RegressionWindow $Context
+        $model = $window.ViewModel
+        $source = $model.CurrentBrowser
+        $menu = Open-TabContextMenu $Context $window $source
+        Assert-Regression ($menu.Items.Count -eq 5 -and $menu.Items[2] -is [System.Windows.Controls.Separator] -and
+            $menu.Items[0].InputGestureText -eq 'Ctrl+W' -and $menu.Items[3].InputGestureText -eq 'Ctrl+Shift+K') 'tab menu has the requested order, separator and shortcut hints'
+        Assert-Regression (!$menu.Items[1].IsEnabled) 'close other tabs is disabled for a single tab'
+        $keys = @('browser_closeTab', 'browser_closeOtherTabs', 'browser_duplicateTab', 'browser_openTabInNewWindow')
+        foreach ($language in [CefFlashBrowser.Services.LanguageManager]::GetSupportedLanguage()) {
+            $dictionary = New-Object System.Windows.ResourceDictionary
+            $dictionary.set_Source([Uri]("pack://application:,,,/CefFlashBrowser;component/Assets/Language/$language.xaml"))
+            $Context.Application.Resources.MergedDictionaries[0] = $dictionary
+            foreach ($index in 0..3) {
+                $itemIndex = @(0, 1, 3, 4)[$index]
+                $label = [CefFlashBrowser.Services.LanguageManager]::GetString($language, $keys[$index])
+                Assert-Regression (![string]::IsNullOrWhiteSpace($label)) "tab menu label exists: $($keys[$index]) ($language)"
+                Wait-Regression $Context { $menu.Items[$itemIndex].Header -eq $label } "tab menu language updates ($language)"
+            }
+        }
+        $menu.IsOpen = $false
+        $Context.Application.Resources.MergedDictionaries[0] = $savedLanguage
+        $last = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
+        $source.Address = $Context.AuxiliaryAddress
+        Wait-Regression $Context {
+            $source.Browser.Address -eq $Context.AuxiliaryAddress -and !$source.Browser.IsLoading -and
+            $source.Browser.CanExecuteJavascriptInMainFrame
+        } 'source page loads'
+        [void](Invoke-JavaScript $Context $source.Browser 'window.tabDuplicateToken = 42;')
+        foreach ($behavior in [Enum]::GetValues([CefFlashBrowser.Models.NewPageBehavior])) {
+            $settings.NewPageBehavior = $behavior
+            $model.CurrentBrowser = $last
+            $menu = Open-TabContextMenu $Context $window $source
+            Assert-Regression ($menu.Items[1].IsEnabled -and $menu.Items[4].CommandParameter -eq $source.Address) 'tab menu enables close others and targets the source address'
+            Invoke-TabMenuItem $menu 3
+            $duplicate = $model.CurrentBrowser
+            Wait-Regression $Context {
+                $duplicate.IsBrowserReady() -and !$duplicate.Browser.IsLoading -and $duplicate.Browser.CanExecuteJavascriptInMainFrame
+            } 'duplicated tab initialization'
+            Assert-Regression ($model.Browsers.Count -eq 3 -and $model.Browsers[1] -eq $duplicate -and
+                $duplicate.Address -eq $source.Address -and $model.Browsers[2] -eq $last) "menu duplication inserts and selects a copy beside its source ($behavior)"
+            Assert-Regression (Invoke-JavaScript $Context $duplicate.Browser "typeof window.tabDuplicateToken === 'undefined'") 'duplicated page starts with fresh runtime state'
+            $menu = Open-TabContextMenu $Context $window $last
+            Assert-Regression ($menu.Items[4].CommandParameter -eq $last.Address -and $menu.Items[3].CommandParameter -eq $last) 'reopening a shared menu updates its target'
+            $menu.IsOpen = $false
+            $menu = Open-TabContextMenu $Context $window $duplicate
+            Invoke-TabMenuItem $menu 0
+            Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'tab menu closes its target'
+            Assert-Regression ($duplicate.Browser.IsDisposed -and $model.Browsers.Contains($last)) 'menu close releases only the target browser'
+        }
+        $model.CurrentBrowser = $source
+        Invoke-TabShortcut $window K ([System.Windows.Input.ModifierKeys]::Control -bor [System.Windows.Input.ModifierKeys]::Shift)
+        $duplicate = $model.CurrentBrowser
+        Assert-Regression ($model.Browsers[1] -eq $duplicate -and $duplicate.Address -eq $source.Address) 'Ctrl+Shift+K duplicates the current tab'
+        $model.CloseBrowser($duplicate)
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'shortcut-created tab closes'
+
+        $menu = Open-TabContextMenu $Context $window $source
+        $existing = @($Context.Application.Windows)
+        Invoke-TabMenuItem $menu 4
+        $child = @($Context.Application.Windows | Where-Object { !$existing.Contains($_) })
+        Assert-Regression ($child.Count -eq 1 -and $child[0] -is [CefFlashBrowser.Views.BrowserWindow] -and
+            $child[0].ViewModel.CurrentBrowser.Address -eq $source.Address -and $model.Browsers.Count -eq 2 -and
+            !$source.Browser.IsDisposed) 'open tab in new window preserves the source tab'
+        $child[0].ForceCloseWindow()
+        foreach ($address in @($null, '')) {
+            $existing = @($Context.Application.Windows)
+            Invoke-BrowserCommand $model.NewBrowserWindowCommand $address
+            $child = @($Context.Application.Windows | Where-Object { !$existing.Contains($_) })
+            Assert-Regression ($child.Count -eq 1 -and $child[0].ViewModel.CurrentBrowser.Address -eq 'about:blank') 'new window command defaults empty addresses to a blank page'
+            $child[0].ForceCloseWindow()
+        }
+
+        $settings.DisableBrowserShortcuts = $true
+        $disabledWindow = New-RegressionWindow $Context
+        Assert-Regression ($disabledWindow.InputBindings.Count -eq 0) 'disabling browser shortcuts removes tab shortcut bindings'
+        $menu = Open-TabContextMenu $Context $disabledWindow $disabledWindow.ViewModel.CurrentBrowser
+        Invoke-TabMenuItem $menu 3
+        Assert-Regression ($disabledWindow.ViewModel.Browsers.Count -eq 2) 'tab menu duplication works when shortcuts are disabled'
+        $menu = Open-TabContextMenu $Context $disabledWindow $disabledWindow.ViewModel.CurrentBrowser
+        Invoke-TabMenuItem $menu 1
+        Wait-Regression $Context { $disabledWindow.ViewModel.Browsers.Count -eq 1 } 'tab menu closes other tabs with shortcuts disabled'
+        $menu = Open-TabContextMenu $Context $disabledWindow $disabledWindow.ViewModel.CurrentBrowser
+        Invoke-TabMenuItem $menu 0
+        Wait-Regression $Context { !$disabledWindow.IsVisible } 'tab menu closes the window with its final tab'
+    } finally {
+        if ($null -ne $menu) { $menu.IsOpen = $false }
+        $Context.Application.Resources.MergedDictionaries[0] = $savedLanguage
+        $settings.NewPageBehavior = $savedBehavior
+        $settings.DisableBrowserShortcuts = $savedShortcuts
+        $settings.AlwaysShowTabStrip = $savedTabStrip
+        foreach ($created in @($Context.Application.Windows | Where-Object { !$beforeWindows.Contains($_) })) {
+            $created.ForceCloseWindow()
+        }
+    }
+}
+
+function Test-BrowserTabCloseOthers($Context) {
+    $window = New-RegressionWindow $Context
+    $handler = $null
+    try {
+        $model = $window.ViewModel
+        $first = $model.CurrentBrowser
+        $blocked = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+        $later = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
+        $retained = New-RegressionTab $Context $window
+        $handler = Set-RegressionBeforeUnload $Context $blocked.Browser
+        $handler.Hold = $true
+        $model.CurrentBrowser = $later
+        $menu = Open-TabContextMenu $Context $window $retained
+        Invoke-TabMenuItem $menu 1
+        Wait-Regression $Context { $handler.Count -eq 1 -and !$model.Browsers.Contains($first) } 'close others waits for each preceding tab to close'
+        $model.CloseOtherBrowsers($later)
+        Assert-Regression ($model.CurrentBrowser -eq $retained -and !$later.Browser.IsDisposed -and $handler.Count -eq 1) 'duplicate batches are ignored and later tabs await confirmation'
+        $handler.CompletePending($false)
+        Wait-Regression $Context {
+            $null -eq $window.GetType().GetField('_closeOtherTabsOperation', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($window)
+        } 'cancelled close-others batch finishes'
+        Assert-Regression ($first.Browser.IsDisposed -and $model.Browsers.Count -eq 3 -and
+            !$blocked.Browser.IsDisposed -and !$later.Browser.IsDisposed) 'cancelling close others preserves the rejected and later tabs'
+        $handler.Hold = $true
+        $model.CloseOtherBrowsers($retained)
+        Wait-Regression $Context { $handler.Count -eq 2 } 'close others can be retried after cancellation'
+        $added = New-RegressionTab $Context $window
+        $handler.CompletePending($true)
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'approved close-others snapshot completes'
+        Assert-Regression ($model.Browsers.Contains($retained) -and $model.Browsers.Contains($added) -and
+            $blocked.Browser.IsDisposed -and $later.Browser.IsDisposed) 'close others disposes snapshot tabs and preserves tabs added during confirmation'
+        $model.CloseOtherBrowsers($retained)
+        Wait-Regression $Context { $model.Browsers.Count -eq 1 } 'another batch closes the newly added tab'
+        Assert-Regression ($window.IsVisible -and $model.CurrentBrowser -eq $retained -and !$retained.Browser.IsDisposed) 'close others leaves its selected target and window alive'
+    } finally {
+        if ($null -ne $handler) { $handler.CompletePending($true) }
+        $window.ForceCloseWindow()
+    }
+}
+
+function Test-BrowserTabCloseOthersInterrupted($Context) {
+    foreach ($interruption in @('retained-tab', 'window-close', 'force-close')) {
+        $window = New-RegressionWindow $Context
+        $handler = $null
+        try {
+            $model = $window.ViewModel
+            $blocked = $model.CurrentBrowser
+            $blocked.Address = $Context.AuxiliaryAddress
+            Wait-Regression $Context {
+                $blocked.Browser.Address -eq $Context.AuxiliaryAddress -and !$blocked.Browser.IsLoading -and
+                $blocked.Browser.CanExecuteJavascriptInMainFrame
+            } 'interruption source loads'
+            $retained = New-RegressionTab $Context $window
+            $later = New-RegressionTab $Context $window
+            $handler = Set-RegressionBeforeUnload $Context $blocked.Browser
+            $handler.Hold = $true
+            $model.CloseOtherBrowsers($retained)
+            Wait-Regression $Context { $handler.Count -eq 1 } 'close others awaits interruption'
+            switch ($interruption) {
+                'retained-tab' {
+                    $model.CloseBrowser($retained)
+                    Wait-Regression $Context { !$model.Browsers.Contains($retained) } 'retained tab closes independently'
+                    $handler.CompletePending($true)
+                    Wait-Regression $Context { $model.Browsers.Count -eq 1 } 'batch stops when retained tab disappears'
+                    Assert-Regression ($model.CurrentBrowser -eq $later -and !$later.Browser.IsDisposed) 'later tab survives removal of the retained tab'
+                }
+                'window-close' {
+                    $window.Close()
+                    Wait-Regression $Context {
+                        !$model.Browsers.Contains($retained) -and $model.CurrentBrowser -eq $blocked
+                    } 'window close reaches the pending batch confirmation'
+                    $handler.CompletePending($false)
+                    Wait-Regression $Context { !$model.IsClosing } 'window close cancellation finishes'
+                    Assert-Regression ($model.Browsers.Count -eq 2 -and $model.Browsers.Contains($later) -and
+                        !$later.Browser.IsDisposed) 'window close takes over the batch and cancellation preserves later tabs'
+                }
+                'force-close' {
+                    $window.ForceCloseWindow()
+                    Wait-Regression $Context { !$window.IsVisible -and $model.Browsers.Count -eq 0 } 'force close interrupts a pending close-others batch'
+                    Assert-Regression ($blocked.Browser.IsDisposed -and $retained.Browser.IsDisposed -and $later.Browser.IsDisposed) 'force close releases all tabs during a batch'
+                }
+            }
+        } finally {
+            if ($null -ne $handler) { $handler.CompletePending($true) }
+            $window.ForceCloseWindow()
+        }
+    }
 }
 
 function Assert-TabStripLayout($Context, $Window, [bool]$ShowTabStrip) {

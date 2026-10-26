@@ -29,6 +29,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand NewBrowserWindowCommand { get; set; }
         public DelegateCommand AddBrowserCommand { get; set; }
         public DelegateCommand CloseBrowserCommand { get; set; }
+        public DelegateCommand CloseOtherBrowsersCommand { get; set; }
+        public DelegateCommand DuplicateBrowserCommand { get; set; }
         public DelegateCommand SelectNextBrowserCommand { get; set; }
         public DelegateCommand SelectPreviousBrowserCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
@@ -221,7 +223,10 @@ namespace CefFlashBrowser.ViewModels
 
         public void NewBrowserWindow(string url)
         {
-            WindowManager.ShowBrowser(url ?? "about:blank");
+            if (!IsClosing)
+            {
+                WindowManager.ShowBrowser(string.IsNullOrEmpty(url) ? "about:blank" : url);
+            }
         }
 
         private BrowserViewModel InsertBrowser(int index, string address, bool activate)
@@ -262,6 +267,23 @@ namespace CefFlashBrowser.ViewModels
             {
                 Messenger.Global.Send(MessageTokens.CLOSE_BROWSER, browser);
             }
+        }
+
+        public void CloseOtherBrowsers(BrowserViewModel browser)
+        {
+            if (!IsClosing && browser != null && _browsers.Contains(browser) && _browsers.Count > 1)
+            {
+                Messenger.Global.Send(MessageTokens.CLOSE_OTHER_BROWSERS, browser);
+            }
+        }
+
+        public void DuplicateBrowser(BrowserViewModel browser)
+        {
+            if (IsClosing || browser == null || !_browsers.Contains(browser))
+                return;
+
+            InsertBrowser(_browsers.IndexOf(browser) + 1,
+                string.IsNullOrEmpty(browser.Address) ? "about:blank" : browser.Address, true);
         }
 
         public void MoveBrowser(BrowserViewModel browser, int index)
@@ -428,6 +450,8 @@ namespace CefFlashBrowser.ViewModels
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             AddBrowserCommand = new DelegateCommand<string>(AddBrowserCommandImpl);
             CloseBrowserCommand = new DelegateCommand<BrowserViewModel>(CloseBrowser);
+            CloseOtherBrowsersCommand = new DelegateCommand<BrowserViewModel>(CloseOtherBrowsers);
+            DuplicateBrowserCommand = new DelegateCommand<BrowserViewModel>(DuplicateBrowser);
             SelectNextBrowserCommand = new DelegateCommand(() => SelectBrowser(1));
             SelectPreviousBrowserCommand = new DelegateCommand(() => SelectBrowser(-1));
             ToggleDevToolsCommand = new DelegateCommand<BrowserViewModel>(ToggleDevTools);

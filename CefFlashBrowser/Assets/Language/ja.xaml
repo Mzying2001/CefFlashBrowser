@@ -146,6 +146,9 @@
     <sys:String x:Key="browser_newBrowserWindow">新しいブラウザーウィンドウ</sys:String>
     <sys:String x:Key="browser_newTab">新しいタブ</sys:String>
     <sys:String x:Key="browser_closeTab">タブを閉じる</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">他のタブを閉じる</sys:String>
+    <sys:String x:Key="browser_duplicateTab">タブを複製</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">タブを新しいウィンドウで開く</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL セーブマネージャー</sys:String>

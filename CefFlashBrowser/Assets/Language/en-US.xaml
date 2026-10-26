@@ -146,6 +146,9 @@
     <sys:String x:Key="browser_newBrowserWindow">New browser window</sys:String>
     <sys:String x:Key="browser_newTab">New tab</sys:String>
     <sys:String x:Key="browser_closeTab">Close tab</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">Close other tabs</sys:String>
+    <sys:String x:Key="browser_duplicateTab">Duplicate tab</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">Open tab in new window</sys:String>
 
     <!--Save Manager-->
     <sys:String x:Key="solSaveManager_title">SOL Save Manager</sys:String>

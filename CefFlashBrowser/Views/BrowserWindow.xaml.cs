@@ -31,6 +31,7 @@ namespace CefFlashBrowser.Views
 
         private bool _closingWindow;
         private bool _forceClosePending;
+        private object _closeOtherTabsOperation;
 
         private IntPtr _hwnd;
         private HwndSource _hwndSource;
@@ -67,6 +68,7 @@ namespace CefFlashBrowser.Views
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
             Messenger.Global.Register(MessageTokens.CLOSE_BROWSER, CloseTabHandler);
+            Messenger.Global.Register(MessageTokens.CLOSE_OTHER_BROWSERS, CloseOtherTabsHandler);
             Messenger.Global.Register(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
             Messenger.Global.Register(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
             Messenger.Global.Register(MessageTokens.TAB_STRIP_VISIBILITY_CHANGED, TabStripVisibilityChangedHandler);
@@ -75,6 +77,7 @@ namespace CefFlashBrowser.Views
             {
                 Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
                 Messenger.Global.Unregister(MessageTokens.CLOSE_BROWSER, CloseTabHandler);
+                Messenger.Global.Unregister(MessageTokens.CLOSE_OTHER_BROWSERS, CloseOtherTabsHandler);
                 Messenger.Global.Unregister(MessageTokens.FOCUS_FIND_POPUP, FocusFindPopupHandler);
                 Messenger.Global.Unregister(MessageTokens.FULLSCREEN_CHANGED, FullScreenChangedHandler);
                 Messenger.Global.Unregister(MessageTokens.TAB_STRIP_VISIBILITY_CHANGED, TabStripVisibilityChangedHandler);
@@ -469,6 +472,8 @@ namespace CefFlashBrowser.Views
                 if (!_closingWindow)
                 {
                     _closingWindow = true;
+                    // Cancel the current batch even if the window close is later rejected.
+                    _closeOtherTabsOperation = null;
                     ViewModel.IsClosing = true;
                     // Leave WPF's Closing event before removing tabs or closing again.
                     Dispatcher.InvokeAsync(CloseBrowsers);
@@ -517,6 +522,35 @@ namespace CefFlashBrowser.Views
                 && msg is BrowserViewModel browser && ViewModel.Browsers.Contains(browser))
             {
                 await CloseTabAsync(browser);
+            }
+        }
+
+        private async void CloseOtherTabsHandler(object msg)
+        {
+            if (_isClosed || _closingWindow || _forceClosePending || _closeOtherTabsOperation != null
+                || !(msg is BrowserViewModel retained) || !ViewModel.Browsers.Contains(retained))
+                return;
+
+            var operation = new object();
+            _closeOtherTabsOperation = operation;
+            try
+            {
+                var browsers = ViewModel.Browsers.Where(x => x != retained).ToArray();
+                ViewModel.CurrentBrowser = retained;
+                foreach (var browser in browsers)
+                {
+                    if (_closeOtherTabsOperation != operation || _isClosed || _closingWindow || _forceClosePending
+                        || !ViewModel.Browsers.Contains(retained))
+                        return;
+
+                    if (!await CloseTabAsync(browser))
+                        return;
+                }
+            }
+            finally
+            {
+                if (_closeOtherTabsOperation == operation)
+                    _closeOtherTabsOperation = null;
             }
         }
 

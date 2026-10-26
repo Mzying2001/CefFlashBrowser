@@ -38,6 +38,9 @@ namespace CefFlashBrowser.Data
         /// <summary>Requests closing a browser tab, carrying its BrowserViewModel.</summary>
         public const string CLOSE_BROWSER = "CLOSE_BROWSER";
 
+        /// <summary>Requests closing all other tabs, carrying the BrowserViewModel to keep.</summary>
+        public const string CLOSE_OTHER_BROWSERS = "CLOSE_OTHER_BROWSERS";
+
         /// <summary>Sent with the browser when its beforeunload close request is cancelled.</summary>
         public const string BROWSER_CLOSE_CANCELED = "BROWSER_CLOSE_CANCELED";
 

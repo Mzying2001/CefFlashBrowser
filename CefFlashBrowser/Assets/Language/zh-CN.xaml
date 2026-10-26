@@ -146,6 +146,9 @@
     <sys:String x:Key="browser_newBrowserWindow">新建浏览器窗口</sys:String>
     <sys:String x:Key="browser_newTab">新标签页</sys:String>
     <sys:String x:Key="browser_closeTab">关闭标签页</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">关闭其他标签页</sys:String>
+    <sys:String x:Key="browser_duplicateTab">复制标签页</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">在新窗口中打开标签页</sys:String>
 
     <!--存档管理器-->
     <sys:String x:Key="solSaveManager_title">SOL存档管理器</sys:String>

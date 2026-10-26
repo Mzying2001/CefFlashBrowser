@@ -273,6 +273,9 @@
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding CloseBrowserCommand}"
                     CommandParameter="{Binding CurrentBrowser}"/>
+        <KeyBinding Gesture="Ctrl+Shift+K"
+                    Command="{Binding DuplicateBrowserCommand}"
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Alt+Left"
                     Command="{Binding CurrentBrowser.Browser.BackCommand}"/>
         <KeyBinding Gesture="Alt+Right"
@@ -652,6 +655,48 @@
                                     Value="{StaticResource tabContainerTemplate}"/>
                             <Setter Property="ToolTip"
                                     Value="{Binding Address}"/>
+                            <Setter Property="Tag"
+                                    Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                        <ContextMenu.Resources>
+                                            <Style TargetType="MenuItem"
+                                                   BasedOn="{StaticResource {x:Type MenuItem}}">
+                                                <Setter Property="Tag"
+                                                        Value="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            </Style>
+                                        </ContextMenu.Resources>
+                                        <MenuItem Header="{DynamicResource browser_closeTab}"
+                                                  Command="{Binding Tag.CloseBrowserCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding}"
+                                                  InputGestureText="Ctrl+W"/>
+                                        <MenuItem Header="{DynamicResource browser_closeOtherTabs}"
+                                                  Command="{Binding Tag.CloseOtherBrowsersCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding}">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem"
+                                                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Tag.Browsers.Count, RelativeSource={RelativeSource Self}}"
+                                                                     Value="1">
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="{DynamicResource browser_duplicateTab}"
+                                                  Command="{Binding Tag.DuplicateBrowserCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding}"
+                                                  InputGestureText="Ctrl+Shift+K"/>
+                                        <MenuItem Header="{DynamicResource browser_openTabInNewWindow}"
+                                                  Command="{Binding Tag.NewBrowserWindowCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding Address}"/>
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
                             <EventSetter Event="PreviewMouseDown"
                                          Handler="TabPreviewMouseDown"/>
                             <Style.Triggers>

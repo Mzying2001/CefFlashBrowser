@@ -146,6 +146,9 @@
     <sys:String x:Key="browser_newBrowserWindow">Nuova finestra del browser</sys:String>
     <sys:String x:Key="browser_newTab">Nuova scheda</sys:String>
     <sys:String x:Key="browser_closeTab">Chiudi scheda</sys:String>
+    <sys:String x:Key="browser_closeOtherTabs">Chiudi le altre schede</sys:String>
+    <sys:String x:Key="browser_duplicateTab">Duplica scheda</sys:String>
+    <sys:String x:Key="browser_openTabInNewWindow">Apri scheda in una nuova finestra</sys:String>
 
     <!--Gestore dei salvataggi-->
     <sys:String x:Key="solSaveManager_title">Gestore dei salvataggi SOL</sys:String>
