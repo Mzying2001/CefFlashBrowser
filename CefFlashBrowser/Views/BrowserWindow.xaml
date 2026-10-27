@@ -660,6 +660,8 @@
                                     Value="Transparent"/>
                             <Setter Property="Foreground"
                                     Value="{DynamicResource PrimaryTextBrush}"/>
+                            <Setter Property="FocusVisualStyle"
+                                    Value="{x:Null}"/>
                             <Setter Property="Template"
                                     Value="{StaticResource tabContainerTemplate}"/>
                             <Setter Property="ToolTip"
