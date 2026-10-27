@@ -56,6 +56,9 @@ function Test-BrowserTabs($Context) {
     Test-BrowserTabCloseOthersInterrupted $Context
     Test-BrowserTabNewPageRouting $Context
     Test-BrowserTabSelection $Context
+    Test-BrowserTabCloseKeyboard $Context
+    Test-BrowserTabCloseKeyboardCancellation $Context
+    Test-BrowserTabCloseFocusChanges $Context
     Test-BrowserTabReordering $Context
     Test-BrowserTabDragPreview $Context
     Test-BrowserTabCallbacks $Context
@@ -80,6 +83,187 @@ function Invoke-TabShortcut($Window, [System.Windows.Input.Key]$Key, [System.Win
     $binding = $Window.InputBindings | Where-Object { $_.Key -eq $Key -and $_.Modifiers -eq $Modifiers }
     Assert-Regression ($null -ne $binding) "tab shortcut exists: $Modifiers+$Key"
     Invoke-BrowserCommand $binding.Command $binding.CommandParameter
+}
+
+function Set-TabKeyboardFocus($Context, $Window, [switch]$Address) {
+    $Window.Left = 100
+    $Window.Top = 100
+    $Window.Topmost = $true
+    [void]$Window.Activate()
+    $handle = (New-Object System.Windows.Interop.WindowInteropHelper($Window)).Handle
+    Wait-Regression $Context {
+        $Window.IsActive -and [RegressionKeyboard]::IsForegroundWindow($handle)
+    } 'keyboard test window is in the foreground'
+    if ($Address) {
+        [void]$Window.FindName('addressTextBox').Focus()
+    } else {
+        $browser = $Window.ViewModel.CurrentBrowser.Browser
+        [void]$browser.Focus()
+        $hostBrowser = $browser.GetBrowser().GetHost()
+        $hostBrowser.SetFocus($true)
+        Wait-Regression $Context {
+            [RegressionKeyboard]::HasFocus($hostBrowser.GetWindowHandle()) -and
+            (Invoke-JavaScript $Context $browser 'document.hasFocus()')
+        } 'keyboard test page has native focus'
+    }
+}
+
+function Send-TabCloseKey($Window) {
+    $handle = (New-Object System.Windows.Interop.WindowInteropHelper($Window)).Handle
+    Assert-Regression ([RegressionKeyboard]::IsForegroundWindow($handle)) 'Ctrl+W targets the test window'
+    [RegressionKeyboard]::PressKey(0x57)
+}
+
+function Test-BrowserTabCloseKeyboard($Context) {
+    foreach ($scenario in @('last', 'middle', 'address', 'blank')) {
+        $window = New-RegressionWindow $Context
+        try {
+            $model = $window.ViewModel
+            $first = $model.CurrentBrowser
+            if ($scenario -ne 'blank') {
+                $first.Address = $Context.AuxiliaryAddress
+                Wait-Regression $Context { $window.Title -eq 'Auxiliary regression' } 'first keyboard test page loads'
+            }
+            $second = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
+            $remaining = @($first)
+            if ($scenario -ne 'blank') {
+                $third = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+                $remaining = @($second, $first)
+                if ($scenario -eq 'middle') {
+                    $model.CurrentBrowser = $second
+                    $remaining = @($third, $first)
+                }
+            }
+            Set-TabKeyboardFocus $Context $window -Address:($scenario -eq 'address')
+            [RegressionKeyboard]::SetKey(0x11, $false)
+            Wait-Regression $Context {
+                [System.Windows.Input.Keyboard]::Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
+            } 'Ctrl remains held between tab close keys'
+
+            foreach ($next in $remaining) {
+                $expectedCount = $model.Browsers.Count - 1
+                Send-TabCloseKey $window
+                Wait-Regression $Context { $model.Browsers.Count -eq $expectedCount } "real Ctrl+W closes a tab ($scenario, remaining=$expectedCount)" 5
+                Assert-Regression ($model.CurrentBrowser -eq $next) "Ctrl+W selects the expected neighbor ($scenario)"
+            }
+            if ($scenario -eq 'address' -or $scenario -eq 'blank') {
+                $address = $window.FindName('addressTextBox')
+                Assert-Regression ([object]::ReferenceEquals([System.Windows.Input.Keyboard]::FocusedElement, $address)) "address focus survives tab close ($scenario)"
+                if ($scenario -eq 'blank') {
+                    Assert-Regression ($address.SelectionLength -eq $address.Text.Length) 'blank successor selects the whole address'
+                }
+            } else {
+                Assert-Regression (Invoke-JavaScript $Context $first.Browser 'document.hasFocus()') 'surviving page receives native focus'
+            }
+            Send-TabCloseKey $window
+            Wait-Regression $Context { !$window.IsVisible } "real Ctrl+W closes the final tab and window ($scenario)" 5
+        } finally {
+            [RegressionKeyboard]::SetKey(0x11, $true)
+            $window.ForceCloseWindow()
+        }
+    }
+}
+
+function Test-BrowserTabCloseKeyboardCancellation($Context) {
+    $window = New-RegressionWindow $Context
+    try {
+        $model = $window.ViewModel
+        $first = $model.CurrentBrowser
+        $first.Address = $Context.AuxiliaryAddress
+        Wait-Regression $Context { $window.Title -eq 'Auxiliary regression' } 'first cancellation test page loads'
+        $second = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
+        $view = Find-BrowserView $window $second
+        $handler = Set-RegressionBeforeUnload $Context $second.Browser
+        Set-TabKeyboardFocus $Context $window
+        [RegressionKeyboard]::SetKey(0x11, $false)
+        Wait-Regression $Context {
+            [System.Windows.Input.Keyboard]::Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
+        } 'Ctrl is held for cancellation and retry'
+        Send-TabCloseKey $window
+        Wait-Regression $Context {
+            $handler.Count -eq 1 -and $null -eq $view.GetType().GetField('_closeCompletion', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
+        } 'keyboard close cancellation completes'
+        Assert-Regression ($model.Browsers.Count -eq 2 -and $model.CurrentBrowser -eq $second -and
+            [RegressionKeyboard]::HasFocus($second.Browser.GetBrowser().GetHost().GetWindowHandle())) 'cancelled keyboard close retains its tab and native focus'
+        $handler.Accept = $true
+        Send-TabCloseKey $window
+        Wait-Regression $Context { $model.Browsers.Count -eq 1 } 'keyboard close retries after cancellation' 5
+        Assert-Regression ($model.CurrentBrowser -eq $first -and $handler.Count -eq 2) 'retry selects the successor after approval'
+        Send-TabCloseKey $window
+        Wait-Regression $Context { !$window.IsVisible } 'keyboard close continues on the surviving page after retry' 5
+    } finally {
+        [RegressionKeyboard]::SetKey(0x11, $true)
+        $window.ForceCloseWindow()
+    }
+}
+
+function Test-BrowserTabCloseFocusChanges($Context) {
+    foreach ($scenario in @('background', 'tab', 'address', 'window')) {
+        $window = New-RegressionWindow $Context
+        $otherWindow = $null
+        $handler = $null
+        try {
+            $model = $window.ViewModel
+            $first = $model.CurrentBrowser
+            $first.Address = $Context.AuxiliaryAddress
+            Wait-Regression $Context { $window.Title -eq 'Auxiliary regression' } 'first focus change test page loads'
+            $second = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
+            if ($scenario -eq 'background') {
+                $third = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+                Set-TabKeyboardFocus $Context $window
+                $model.CloseBrowser($second)
+                Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'background tab closes while another page has focus'
+                Assert-Regression ($model.CurrentBrowser -eq $third -and
+                    [RegressionKeyboard]::HasFocus($third.Browser.GetBrowser().GetHost().GetWindowHandle())) 'background close preserves the current page and native focus'
+                continue
+            }
+
+            $handler = Set-RegressionBeforeUnload $Context $second.Browser
+            $handler.Hold = $true
+            Set-TabKeyboardFocus $Context $window
+            [RegressionKeyboard]::SetKey(0x11, $false)
+            Wait-Regression $Context {
+                [System.Windows.Input.Keyboard]::Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
+            } 'Ctrl is held for the pending close'
+            Send-TabCloseKey $window
+            Wait-Regression $Context { $handler.Count -eq 1 } 'keyboard close awaits confirmation'
+            [RegressionKeyboard]::SetKey(0x11, $true)
+            switch ($scenario) {
+                'tab' {
+                    $model.CurrentBrowser = $first
+                    Set-TabKeyboardFocus $Context $window
+                }
+                'address' { Set-TabKeyboardFocus $Context $window -Address }
+                'window' {
+                    $otherWindow = New-RegressionWindow $Context
+                    Set-TabKeyboardFocus $Context $otherWindow -Address
+                }
+            }
+            $handler.CompletePending($true)
+            Wait-Regression $Context { $model.Browsers.Count -eq 1 } "pending close completes after focus changes ($scenario)"
+            Assert-Regression ($model.CurrentBrowser -eq $first) 'pending close preserves the surviving selection'
+            switch ($scenario) {
+                'tab' {
+                    Assert-Regression ([RegressionKeyboard]::HasFocus($first.Browser.GetBrowser().GetHost().GetWindowHandle())) 'pending background close preserves the newly focused page'
+                }
+                'address' {
+                    Assert-Regression ([object]::ReferenceEquals([System.Windows.Input.Keyboard]::FocusedElement,
+                        $window.FindName('addressTextBox'))) 'pending close preserves focus moved to the address bar'
+                }
+                'window' {
+                    $handle = (New-Object System.Windows.Interop.WindowInteropHelper($otherWindow)).Handle
+                    Assert-Regression ($otherWindow.IsActive -and [RegressionKeyboard]::IsForegroundWindow($handle) -and
+                        [object]::ReferenceEquals([System.Windows.Input.Keyboard]::FocusedElement,
+                            $otherWindow.FindName('addressTextBox'))) 'pending close does not take focus from another window'
+                }
+            }
+        } finally {
+            [RegressionKeyboard]::SetKey(0x11, $true)
+            if ($null -ne $handler) { $handler.CompletePending($true) }
+            if ($null -ne $otherWindow) { $otherWindow.ForceCloseWindow() }
+            $window.ForceCloseWindow()
+        }
+    }
 }
 
 function Open-TabContextMenu($Context, $Window, $Browser) {

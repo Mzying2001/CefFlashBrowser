@@ -1,9 +1,96 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Proxies;
+using System.Runtime.InteropServices;
 using System.Threading;
 using CefSharp;
+
+public static class RegressionKeyboard
+{
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Input
+    {
+        public uint Type;
+        public InputData Data;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    private struct InputData
+    {
+        [FieldOffset(0)] public KeyboardInput Keyboard;
+        [FieldOffset(0)] public MouseInput Mouse;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct KeyboardInput
+    {
+        public ushort VirtualKey;
+        public ushort ScanCode;
+        public uint Flags;
+        public uint Time;
+        public UIntPtr ExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MouseInput
+    {
+        public int X;
+        public int Y;
+        public uint MouseData;
+        public uint Flags;
+        public uint Time;
+        public UIntPtr ExtraInfo;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint SendInput(uint count, Input[] inputs, int size);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetAncestor(IntPtr window, uint flags);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetFocus();
+
+    [DllImport("user32.dll")]
+    private static extern bool IsChild(IntPtr parent, IntPtr child);
+
+    public static bool IsForegroundWindow(IntPtr window)
+    {
+        return GetAncestor(GetForegroundWindow(), 3) == window;
+    }
+
+    public static bool HasFocus(IntPtr window)
+    {
+        var focused = GetFocus();
+        return focused == window || IsChild(window, focused);
+    }
+
+    public static void SetKey(ushort virtualKey, bool released)
+    {
+        var input = new Input { Type = 1 };
+        input.Data.Keyboard.VirtualKey = virtualKey;
+        input.Data.Keyboard.Flags = released ? 2u : 0u;
+        if (SendInput(1, new[] { input }, Marshal.SizeOf(typeof(Input))) != 1)
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+    }
+
+    public static void PressKey(ushort virtualKey)
+    {
+        try
+        {
+            SetKey(virtualKey, false);
+        }
+        finally
+        {
+            SetKey(virtualKey, true);
+        }
+    }
+}
 
 public sealed class RegressionContextMenuParamsProxy : RealProxy
 {
