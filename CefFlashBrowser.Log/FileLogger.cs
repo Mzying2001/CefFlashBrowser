@@ -8,23 +8,35 @@ namespace CefFlashBrowser.Log
     public class FileLogger : ILogger, IDisposable
     {
         private bool _disposed;
-        private readonly string _newLine;
-        private readonly FileStream _stream;
-        private readonly StreamWriter _writer;
+        private string _fileName;
+        private FileStream _stream;
+        private StreamWriter _writer;
+
+        private readonly Func<DateTime> _getCurrentTime;
+        private readonly Func<DateTime, string> _fileNameFactory;
+
+        private readonly string _newLine = Environment.NewLine;
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         public FileLogger(string fileName)
+            : this(_ => fileName)
         {
-            CreateDirIfNotExists(fileName);
-
-            _newLine = Environment.NewLine;
-            _stream = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-            _writer = new StreamWriter(_stream);
         }
 
-        ~FileLogger()
+        public FileLogger(Func<DateTime, string> fileNameFactory)
+            : this(fileNameFactory, () => DateTime.Now)
         {
-            Dispose(disposing: false);
+        }
+
+        internal FileLogger(Func<DateTime, string> fileNameFactory, Func<DateTime> getCurrentTime)
+        {
+            _fileNameFactory = fileNameFactory
+                ?? throw new ArgumentNullException(nameof(fileNameFactory));
+
+            _getCurrentTime = getCurrentTime
+                ?? throw new ArgumentNullException(nameof(getCurrentTime));
+
+            EnsureWriter(_getCurrentTime());
         }
 
         public void Dispose()
@@ -35,16 +47,50 @@ namespace CefFlashBrowser.Log
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!disposing)
+                return;
+
+            _semaphore.Wait();
+
+            try
             {
-                if (disposing)
-                {
-                    _writer?.Dispose();
-                    _stream?.Dispose();
-                    _semaphore?.Dispose();
-                }
+                if (_disposed)
+                    return;
+
                 _disposed = true;
+                _writer?.Dispose();
             }
+            // Keep the semaphore available so queued writes can observe disposal.
+            finally { _semaphore.Release(); }
+        }
+
+        private void EnsureWriter(DateTime time)
+        {
+            string fileName = _fileNameFactory(time);
+
+            if (_writer != null && string.Equals(fileName, _fileName, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            CreateDirIfNotExists(fileName);
+            var stream = new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+
+            StreamWriter writer;
+
+            try
+            {
+                writer = new StreamWriter(stream);
+            }
+            catch
+            {
+                stream.Dispose();
+                throw;
+            }
+
+            var oldWriter = _writer;
+            _stream = stream;
+            _writer = writer;
+            _fileName = fileName;
+            oldWriter?.Dispose();
         }
 
         private void CreateDirIfNotExists(string fileName)
@@ -71,38 +117,41 @@ namespace CefFlashBrowser.Log
             }
         }
 
-        private string GetTimeString()
-        {
-            return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-        }
-
-        private void WriteLine(string message)
+        private string PrepareWrite(LogLevel level, string message)
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(FileLogger));
 
+            var time = _getCurrentTime();
+            var line = $"{time:yyyy-MM-dd HH:mm:ss.fff} | {GetLogLevelString(level)} | {message}";
+
+            EnsureWriter(time);
+            return line;
+        }
+
+        private void WriteLine(LogLevel level, string message)
+        {
             _semaphore.Wait();
 
             try
             {
+                string line = PrepareWrite(level, message);
                 _stream.Seek(0, SeekOrigin.End);
-                _writer.WriteLine(message);
+                _writer.WriteLine(line);
                 _writer.Flush();
             }
             finally { _semaphore.Release(); }
         }
 
-        private async Task WriteLineAsync(string message)
+        private async Task WriteLineAsync(LogLevel level, string message)
         {
-            if (_disposed)
-                throw new ObjectDisposedException(nameof(FileLogger));
-
             await _semaphore.WaitAsync().ConfigureAwait(false);
 
             try
             {
+                string line = PrepareWrite(level, message);
                 _stream.Seek(0, SeekOrigin.End);
-                await _writer.WriteLineAsync(message).ConfigureAwait(false);
+                await _writer.WriteLineAsync(line).ConfigureAwait(false);
                 await _writer.FlushAsync().ConfigureAwait(false);
             }
             finally { _semaphore.Release(); }
@@ -110,32 +159,32 @@ namespace CefFlashBrowser.Log
 
         public void Log(LogLevel level, string message)
         {
-            WriteLine($"{GetTimeString()} | {GetLogLevelString(level)} | {message}");
+            WriteLine(level, message);
         }
 
         public void Log(LogLevel level, Exception exception)
         {
-            WriteLine($"{GetTimeString()} | {GetLogLevelString(level)} | {_newLine}{exception}");
+            WriteLine(level, $"{_newLine}{exception}");
         }
 
         public void Log(LogLevel level, string message, Exception exception)
         {
-            WriteLine($"{GetTimeString()} | {GetLogLevelString(level)} | {message}{_newLine}{exception}");
+            WriteLine(level, $"{message}{_newLine}{exception}");
         }
 
         public Task LogAsync(LogLevel level, string message)
         {
-            return WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {message}");
+            return WriteLineAsync(level, message);
         }
 
         public Task LogAsync(LogLevel level, Exception exception)
         {
-            return WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {_newLine}{exception}");
+            return WriteLineAsync(level, $"{_newLine}{exception}");
         }
 
         public Task LogAsync(LogLevel level, string message, Exception exception)
         {
-            return WriteLineAsync($"{GetTimeString()} | {GetLogLevelString(level)} | {message}{_newLine}{exception}");
+            return WriteLineAsync(level, $"{message}{_newLine}{exception}");
         }
     }
 }
