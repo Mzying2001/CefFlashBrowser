@@ -710,7 +710,7 @@
                                          Handler="TabPreviewMouseDown"/>
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}"/>
+                                    <Setter Property="Background" Value="#20808080"/>
                                 </Trigger>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="#30808080"/>
@@ -758,8 +758,8 @@
                                                         <Grid Background="{TemplateBinding Background}">
                                                             <Border x:Name="highlight"
                                                                     CornerRadius="4"
-                                                                    Background="{TemplateBinding Foreground}"
-                                                                    Opacity="0"/>
+                                                                    Opacity="0"
+                                                                    Background="{TemplateBinding Foreground}"/>
                                                             <ContentPresenter HorizontalAlignment="Center"
                                                                               VerticalAlignment="Center"/>
                                                         </Grid>
