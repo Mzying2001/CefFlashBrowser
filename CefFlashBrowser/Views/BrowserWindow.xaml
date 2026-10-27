@@ -397,8 +397,8 @@
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.HasBlockedSwfs}"
-                                             Value="False">
+                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.BlockedSwfs.Count}"
+                                             Value="0">
                                     <Setter Property="Visibility"
                                             Value="Collapsed"/>
                                 </DataTrigger>

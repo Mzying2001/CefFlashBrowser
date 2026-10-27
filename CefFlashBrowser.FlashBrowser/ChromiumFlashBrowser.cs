@@ -8,34 +8,18 @@ namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumFlashBrowser : ChromiumWebBrowserEx
     {
-        public static readonly DependencyProperty BlockedSwfsProperty;
-        public static readonly DependencyProperty HasBlockedSwfsProperty;
-
-        static ChromiumFlashBrowser()
-        {
-            BlockedSwfsProperty = DependencyProperty.Register(
-                nameof(BlockedSwfs), typeof(ObservableCollection<string>), typeof(ChromiumFlashBrowser), new PropertyMetadata(null));
-
-            HasBlockedSwfsProperty = DependencyProperty.Register(
-                nameof(HasBlockedSwfs), typeof(bool), typeof(ChromiumFlashBrowser), new PropertyMetadata(false));
-        }
-
-        public ChromiumFlashBrowser()
-        {
-            SetValue(BlockedSwfsProperty, new ObservableCollection<string>());
-        }
-
+        public static readonly DependencyProperty BlockedSwfsProperty = DependencyProperty.Register(
+            nameof(BlockedSwfs), typeof(ObservableCollection<string>), typeof(ChromiumFlashBrowser), new PropertyMetadata(null));
 
         public ObservableCollection<string> BlockedSwfs
         {
             get => (ObservableCollection<string>)GetValue(BlockedSwfsProperty);
         }
 
-        public bool HasBlockedSwfs
+        public ChromiumFlashBrowser()
         {
-            get => (bool)GetValue(HasBlockedSwfsProperty);
+            SetValue(BlockedSwfsProperty, new ObservableCollection<string>());
         }
-
 
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
         {
@@ -44,7 +28,6 @@ namespace CefFlashBrowser.FlashBrowser
             if (e.Frame.IsMain)
             {
                 BlockedSwfs.Clear();
-                SetCurrentValue(HasBlockedSwfsProperty, false);
             }
         }
 
@@ -76,7 +59,6 @@ namespace CefFlashBrowser.FlashBrowser
             }
 
             BlockedSwfs.Add(url);
-            SetCurrentValue(HasBlockedSwfsProperty, true);
         }
 
         protected override void OnIsBrowserInitializedChanged(EventArgs e)
