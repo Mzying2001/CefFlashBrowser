@@ -743,13 +743,13 @@
                                     Height="20"
                                     BorderThickness="0"
                                     Focusable="False"
-                                    ToolTip="{DynamicResource browser_toolTipCloseTab}"
                                     Command="{Binding DataContext.CloseBrowserCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                     CommandParameter="{Binding}"
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
                                     <Button.Style>
                                         <Style TargetType="Button">
+                                            <Setter Property="ToolTip" Value="{DynamicResource browser_closeTab}"/>
                                             <Setter Property="Background" Value="Transparent"/>
                                             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
                                             <Setter Property="Template">
@@ -778,6 +778,11 @@
                                                     </ControlTemplate>
                                                 </Setter.Value>
                                             </Setter>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
+                                                    <Setter Property="ToolTip" Value="{DynamicResource browser_toolTipCloseTab}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
                                         </Style>
                                     </Button.Style>
                                     <svgc:SvgIcon
