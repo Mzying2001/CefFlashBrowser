@@ -56,6 +56,7 @@
             <sys:Uri x:Key="MoreIconUri">/Assets/Svgs/more.svg</sys:Uri>
             <sys:Uri x:Key="NewTabIconUri">/Assets/Svgs/new-tab.svg</sys:Uri>
             <sys:Uri x:Key="PageIconUri">/Assets/Svgs/page.svg</sys:Uri>
+            <sys:Uri x:Key="PluginIconUri">/Assets/Svgs/plugin.svg</sys:Uri>
             <sys:Uri x:Key="ReloadIconUri">/Assets/Svgs/reload.svg</sys:Uri>
             <sys:Uri x:Key="SearchIconUri">/Assets/Svgs/search.svg</sys:Uri>
             <sys:Uri x:Key="StopIconUri">/Assets/Svgs/stop.svg</sys:Uri>
