@@ -218,7 +218,7 @@ namespace CefFlashBrowser
 
         private static void RegisterServices()
         {
-            SimpleIoc.Global.Register<ILogger>(() => new FileLogger(GlobalData.AppLogPath));
+            SimpleIoc.Global.Register<ILogger>(() => new FileLogger(GlobalData.GetAppLogPath));
         }
 
         private static void UnregisterServices()

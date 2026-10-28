@@ -49,12 +49,16 @@ function Test-BrowserTabsBeforeShow($Context) {
 
 function Test-BrowserTabs($Context) {
     Test-BrowserTabStrip $Context
+    Test-BrowserTabAdaptiveWidth $Context
     Test-BrowserTabStripSettings $Context
     Test-BrowserTabContextMenu $Context
     Test-BrowserTabCloseOthers $Context
     Test-BrowserTabCloseOthersInterrupted $Context
     Test-BrowserTabNewPageRouting $Context
     Test-BrowserTabSelection $Context
+    Test-BrowserTabCloseKeyboard $Context
+    Test-BrowserTabCloseKeyboardCancellation $Context
+    Test-BrowserTabCloseFocusChanges $Context
     Test-BrowserTabReordering $Context
     Test-BrowserTabDragPreview $Context
     Test-BrowserTabCallbacks $Context
@@ -79,6 +83,187 @@ function Invoke-TabShortcut($Window, [System.Windows.Input.Key]$Key, [System.Win
     $binding = $Window.InputBindings | Where-Object { $_.Key -eq $Key -and $_.Modifiers -eq $Modifiers }
     Assert-Regression ($null -ne $binding) "tab shortcut exists: $Modifiers+$Key"
     Invoke-BrowserCommand $binding.Command $binding.CommandParameter
+}
+
+function Set-TabKeyboardFocus($Context, $Window, [switch]$Address) {
+    $Window.Left = 100
+    $Window.Top = 100
+    $Window.Topmost = $true
+    [void]$Window.Activate()
+    $handle = (New-Object System.Windows.Interop.WindowInteropHelper($Window)).Handle
+    Wait-Regression $Context {
+        $Window.IsActive -and [RegressionKeyboard]::IsForegroundWindow($handle)
+    } 'keyboard test window is in the foreground'
+    if ($Address) {
+        [void]$Window.FindName('addressTextBox').Focus()
+    } else {
+        $browser = $Window.ViewModel.CurrentBrowser.Browser
+        [void]$browser.Focus()
+        $hostBrowser = $browser.GetBrowser().GetHost()
+        $hostBrowser.SetFocus($true)
+        Wait-Regression $Context {
+            [RegressionKeyboard]::HasFocus($hostBrowser.GetWindowHandle()) -and
+            (Invoke-JavaScript $Context $browser 'document.hasFocus()')
+        } 'keyboard test page has native focus'
+    }
+}
+
+function Send-TabCloseKey($Window) {
+    $handle = (New-Object System.Windows.Interop.WindowInteropHelper($Window)).Handle
+    Assert-Regression ([RegressionKeyboard]::IsForegroundWindow($handle)) 'Ctrl+W targets the test window'
+    [RegressionKeyboard]::PressKey(0x57)
+}
+
+function Test-BrowserTabCloseKeyboard($Context) {
+    foreach ($scenario in @('last', 'middle', 'address', 'blank')) {
+        $window = New-RegressionWindow $Context
+        try {
+            $model = $window.ViewModel
+            $first = $model.CurrentBrowser
+            if ($scenario -ne 'blank') {
+                $first.Address = $Context.AuxiliaryAddress
+                Wait-Regression $Context { $window.Title -eq 'Auxiliary regression' } 'first keyboard test page loads'
+            }
+            $second = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
+            $remaining = @($first)
+            if ($scenario -ne 'blank') {
+                $third = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+                $remaining = @($second, $first)
+                if ($scenario -eq 'middle') {
+                    $model.CurrentBrowser = $second
+                    $remaining = @($third, $first)
+                }
+            }
+            Set-TabKeyboardFocus $Context $window -Address:($scenario -eq 'address')
+            [RegressionKeyboard]::SetKey(0x11, $false)
+            Wait-Regression $Context {
+                [System.Windows.Input.Keyboard]::Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
+            } 'Ctrl remains held between tab close keys'
+
+            foreach ($next in $remaining) {
+                $expectedCount = $model.Browsers.Count - 1
+                Send-TabCloseKey $window
+                Wait-Regression $Context { $model.Browsers.Count -eq $expectedCount } "real Ctrl+W closes a tab ($scenario, remaining=$expectedCount)" 5
+                Assert-Regression ($model.CurrentBrowser -eq $next) "Ctrl+W selects the expected neighbor ($scenario)"
+            }
+            if ($scenario -eq 'address' -or $scenario -eq 'blank') {
+                $address = $window.FindName('addressTextBox')
+                Assert-Regression ([object]::ReferenceEquals([System.Windows.Input.Keyboard]::FocusedElement, $address)) "address focus survives tab close ($scenario)"
+                if ($scenario -eq 'blank') {
+                    Assert-Regression ($address.SelectionLength -eq $address.Text.Length) 'blank successor selects the whole address'
+                }
+            } else {
+                Assert-Regression (Invoke-JavaScript $Context $first.Browser 'document.hasFocus()') 'surviving page receives native focus'
+            }
+            Send-TabCloseKey $window
+            Wait-Regression $Context { !$window.IsVisible } "real Ctrl+W closes the final tab and window ($scenario)" 5
+        } finally {
+            [RegressionKeyboard]::SetKey(0x11, $true)
+            $window.ForceCloseWindow()
+        }
+    }
+}
+
+function Test-BrowserTabCloseKeyboardCancellation($Context) {
+    $window = New-RegressionWindow $Context
+    try {
+        $model = $window.ViewModel
+        $first = $model.CurrentBrowser
+        $first.Address = $Context.AuxiliaryAddress
+        Wait-Regression $Context { $window.Title -eq 'Auxiliary regression' } 'first cancellation test page loads'
+        $second = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
+        $view = Find-BrowserView $window $second
+        $handler = Set-RegressionBeforeUnload $Context $second.Browser
+        Set-TabKeyboardFocus $Context $window
+        [RegressionKeyboard]::SetKey(0x11, $false)
+        Wait-Regression $Context {
+            [System.Windows.Input.Keyboard]::Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
+        } 'Ctrl is held for cancellation and retry'
+        Send-TabCloseKey $window
+        Wait-Regression $Context {
+            $handler.Count -eq 1 -and $null -eq $view.GetType().GetField('_closeCompletion', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
+        } 'keyboard close cancellation completes'
+        Assert-Regression ($model.Browsers.Count -eq 2 -and $model.CurrentBrowser -eq $second -and
+            [RegressionKeyboard]::HasFocus($second.Browser.GetBrowser().GetHost().GetWindowHandle())) 'cancelled keyboard close retains its tab and native focus'
+        $handler.Accept = $true
+        Send-TabCloseKey $window
+        Wait-Regression $Context { $model.Browsers.Count -eq 1 } 'keyboard close retries after cancellation' 5
+        Assert-Regression ($model.CurrentBrowser -eq $first -and $handler.Count -eq 2) 'retry selects the successor after approval'
+        Send-TabCloseKey $window
+        Wait-Regression $Context { !$window.IsVisible } 'keyboard close continues on the surviving page after retry' 5
+    } finally {
+        [RegressionKeyboard]::SetKey(0x11, $true)
+        $window.ForceCloseWindow()
+    }
+}
+
+function Test-BrowserTabCloseFocusChanges($Context) {
+    foreach ($scenario in @('background', 'tab', 'address', 'window')) {
+        $window = New-RegressionWindow $Context
+        $otherWindow = $null
+        $handler = $null
+        try {
+            $model = $window.ViewModel
+            $first = $model.CurrentBrowser
+            $first.Address = $Context.AuxiliaryAddress
+            Wait-Regression $Context { $window.Title -eq 'Auxiliary regression' } 'first focus change test page loads'
+            $second = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
+            if ($scenario -eq 'background') {
+                $third = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+                Set-TabKeyboardFocus $Context $window
+                $model.CloseBrowser($second)
+                Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'background tab closes while another page has focus'
+                Assert-Regression ($model.CurrentBrowser -eq $third -and
+                    [RegressionKeyboard]::HasFocus($third.Browser.GetBrowser().GetHost().GetWindowHandle())) 'background close preserves the current page and native focus'
+                continue
+            }
+
+            $handler = Set-RegressionBeforeUnload $Context $second.Browser
+            $handler.Hold = $true
+            Set-TabKeyboardFocus $Context $window
+            [RegressionKeyboard]::SetKey(0x11, $false)
+            Wait-Regression $Context {
+                [System.Windows.Input.Keyboard]::Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
+            } 'Ctrl is held for the pending close'
+            Send-TabCloseKey $window
+            Wait-Regression $Context { $handler.Count -eq 1 } 'keyboard close awaits confirmation'
+            [RegressionKeyboard]::SetKey(0x11, $true)
+            switch ($scenario) {
+                'tab' {
+                    $model.CurrentBrowser = $first
+                    Set-TabKeyboardFocus $Context $window
+                }
+                'address' { Set-TabKeyboardFocus $Context $window -Address }
+                'window' {
+                    $otherWindow = New-RegressionWindow $Context
+                    Set-TabKeyboardFocus $Context $otherWindow -Address
+                }
+            }
+            $handler.CompletePending($true)
+            Wait-Regression $Context { $model.Browsers.Count -eq 1 } "pending close completes after focus changes ($scenario)"
+            Assert-Regression ($model.CurrentBrowser -eq $first) 'pending close preserves the surviving selection'
+            switch ($scenario) {
+                'tab' {
+                    Assert-Regression ([RegressionKeyboard]::HasFocus($first.Browser.GetBrowser().GetHost().GetWindowHandle())) 'pending background close preserves the newly focused page'
+                }
+                'address' {
+                    Assert-Regression ([object]::ReferenceEquals([System.Windows.Input.Keyboard]::FocusedElement,
+                        $window.FindName('addressTextBox'))) 'pending close preserves focus moved to the address bar'
+                }
+                'window' {
+                    $handle = (New-Object System.Windows.Interop.WindowInteropHelper($otherWindow)).Handle
+                    Assert-Regression ($otherWindow.IsActive -and [RegressionKeyboard]::IsForegroundWindow($handle) -and
+                        [object]::ReferenceEquals([System.Windows.Input.Keyboard]::FocusedElement,
+                            $otherWindow.FindName('addressTextBox'))) 'pending close does not take focus from another window'
+                }
+            }
+        } finally {
+            [RegressionKeyboard]::SetKey(0x11, $true)
+            if ($null -ne $handler) { $handler.CompletePending($true) }
+            if ($null -ne $otherWindow) { $otherWindow.ForceCloseWindow() }
+            $window.ForceCloseWindow()
+        }
+    }
 }
 
 function Open-TabContextMenu($Context, $Window, $Browser) {
@@ -347,8 +532,7 @@ function Test-BrowserTabStrip($Context) {
         Assert-Regression ($model.CurrentBrowser -eq $third) 'Ctrl+PageDown and Ctrl+PageUp cycle tabs'
         $window.UpdateLayout()
         $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
-        Wait-Regression $Context { $scroll.HorizontalOffset -gt 0 } 'selecting an overflowing tab brings it into view'
-        Assert-Regression ($newButton.IsVisible -and $scroll.ScrollableWidth -gt 0) 'overflow keeps the new tab button accessible'
+        Assert-Regression ($newButton.IsVisible -and $scroll.ScrollableWidth -lt 1) 'tabs shrink to fit beside the new tab button'
 
         $container = $tabs.ItemContainerGenerator.ContainerFromItem($second)
         $title = Find-TabElement $container 'tabTitle'
@@ -372,6 +556,78 @@ function Test-BrowserTabStrip($Context) {
         Assert-Regression (!$window.FindName('tabStrip').IsVisible) 'fullscreen hides the tab strip'
         $model.ToggleFullscreen($third)
         Assert-Regression (!$window.FindName('tabStrip').IsVisible) 'leaving fullscreen keeps the tab strip hidden for a single tab'
+    } finally {
+        $window.ForceCloseWindow()
+    }
+}
+
+function Assert-TabWidths($Window, [double]$ExpectedWidth, [string]$Scenario) {
+    $Window.UpdateLayout()
+    $tabs = $Window.FindName('tabList')
+    foreach ($browser in $Window.ViewModel.Browsers) {
+        $header = $tabs.ItemContainerGenerator.ContainerFromItem($browser)
+        Assert-Regression ($null -ne $header -and [Math]::Abs($header.ActualWidth - $ExpectedWidth) -lt 0.01) $Scenario
+    }
+}
+
+function Test-BrowserTabAdaptiveWidth($Context) {
+    $window = New-RegressionWindow $Context -Width 1000
+    try {
+        $model = $window.ViewModel
+        $first = $model.CurrentBrowser
+        $second = New-RegressionTab $Context $window
+        $third = New-RegressionTab $Context $window
+        $tabs = $window.FindName('tabList')
+        $strip = $window.FindName('tabStrip')
+        $newButton = $window.FindName('newTabButton')
+        $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
+        Assert-TabWidths $window 250 'tabs use their default width when space is available'
+
+        $window.Width = 600
+        $window.UpdateLayout()
+        $width = $tabs.ItemContainerGenerator.ContainerFromItem($first).ActualWidth
+        Assert-Regression ($width -gt 80 -and $width -lt 250) 'resizing shrinks tabs within the width limits'
+        Assert-TabWidths $window $width 'selected and background tabs have equal widths'
+        Assert-Regression ($scroll.ScrollableWidth -lt 1) 'shrinking tabs avoids unnecessary horizontal scrolling'
+
+        $extras = @(1..3 | ForEach-Object { New-RegressionTab $Context $window })
+        $window.Width = 400
+        Assert-TabWidths $window 80 'overflowing tabs stop shrinking at the minimum width'
+        Assert-Regression ($scroll.ScrollableWidth -gt 0) 'minimum-width tabs overflow horizontally'
+        $buttonPosition = $newButton.TranslatePoint([System.Windows.Point]::new(0, 0), $strip)
+        Assert-Regression ($newButton.IsVisible -and $newButton.IsEnabled -and
+            $buttonPosition.X -ge 0 -and $buttonPosition.X + $newButton.ActualWidth -le $strip.ActualWidth + 0.01) 'overflow keeps the new tab button fully accessible'
+
+        $model.CurrentBrowser = $first
+        $window.UpdateLayout()
+        $model.CurrentBrowser = $extras[-1]
+        Wait-Regression $Context { $scroll.HorizontalOffset -gt 0 } 'selecting an overflowing tab brings it into view'
+        $lastHeader = $tabs.ItemContainerGenerator.ContainerFromItem($extras[-1])
+        $closeButton = Find-TabElement $lastHeader 'closeTabButton'
+        Assert-Regression ($closeButton.IsVisible -and $closeButton.IsEnabled -and $closeButton.ActualWidth -eq 20) 'minimum-width tab retains its close button'
+        $peer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($closeButton)
+        $peer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $model.Browsers.Count -eq 5 } 'close button works at the minimum tab width'
+        $peer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($newButton)
+        $peer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $model.Browsers.Count -eq 6 -and $model.CurrentBrowser.IsBrowserReady() } 'new tab button works while tabs overflow'
+        Assert-TabWidths $window 80 'new tabs share the minimum width while space is exhausted'
+
+        foreach ($browser in @($model.Browsers | Where-Object { $_ -ne $first -and $_ -ne $second -and $_ -ne $third })) {
+            $model.CloseBrowser($browser)
+        }
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 } 'extra overflow tabs close'
+        $window.UpdateLayout()
+        $width = $tabs.ItemContainerGenerator.ContainerFromItem($first).ActualWidth
+        Assert-Regression ($width -gt 80 -and $width -lt 250 -and $scroll.ScrollableWidth -lt 1) 'closing tabs restores space and removes overflow'
+        Assert-TabWidths $window $width 'remaining tabs expand equally after closing tabs'
+
+        $window.Width = 1000
+        Assert-TabWidths $window 250 'enlarging the window restores the default width'
+        $window.Width = 600
+        $model.CloseBrowser($third)
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'third tab closes after shrinking the window'
+        Assert-TabWidths $window 250 'closing a tab restores the default width when enough space remains'
     } finally {
         $window.ForceCloseWindow()
     }
@@ -577,6 +833,8 @@ function Test-BrowserTabReordering($Context) {
         Invoke-ViewCallback $window 'UpdateTabDrag' @([System.Windows.Point]::new(0, -10), $false)
         Assert-Regression ($model.Browsers[2] -eq $third) 'dragging outside the tab strip leaves the order unchanged'
 
+        $extras = @(1..3 | ForEach-Object { New-RegressionTab $Context $window })
+        $model.CurrentBrowser = $third
         $window.Width = 400
         $window.UpdateLayout()
         $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
@@ -591,6 +849,8 @@ function Test-BrowserTabReordering($Context) {
         Assert-Regression ($scroll.HorizontalOffset -eq 0) 'dragging at the left edge scrolls back'
         $draggedField.SetValue($window, $null)
 
+        foreach ($browser in $extras) { $model.CloseBrowser($browser) }
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 } 'extra drag overflow tabs close'
         $model.MoveBrowser($third, 2)
         $model.CloseBrowser($third)
         Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'reordered selected tab closes'
@@ -641,6 +901,9 @@ function Test-BrowserTabDragPreview($Context) {
         $model.MoveBrowser($third, 1)
         $window.UpdateLayout()
         Assert-TabDragPreview $window $third 'reordered second tab'
+        1..3 | ForEach-Object { New-RegressionTab $Context $window | Out-Null }
+        $model.MoveBrowser($third, $model.Browsers.Count - 1)
+        $model.CurrentBrowser = $third
         $window.Width = 400
         $window.UpdateLayout()
         $tabs = $window.FindName('tabList')
@@ -648,7 +911,7 @@ function Test-BrowserTabDragPreview($Context) {
         $window.UpdateLayout()
         $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
         Assert-Regression ($scroll.HorizontalOffset -gt 0) 'preview check covers a scrolled tab strip'
-        Assert-TabDragPreview $window $third 'second tab after horizontal scrolling'
+        Assert-TabDragPreview $window $third 'last tab after horizontal scrolling'
         Assert-Regression (!$window.FindName('tabDragPreview').IsOpen -and $null -eq $tabs.Tag) 'preview cleanup restores the tab strip'
     } finally {
         $window.ForceCloseWindow()

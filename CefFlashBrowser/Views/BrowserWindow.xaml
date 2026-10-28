@@ -29,6 +29,7 @@
         <!--Converters-->
         <converters:MultiplyConverter x:Key="TwoThirdConverter"
                                       Multiplier="0.6666666666666667"/>
+        <converters:BrowserTabWidthConverter x:Key="BrowserTabWidthConverter"/>
 
         <!--ConetxtMenu-->
         <!--Browser actions menu-->
@@ -396,8 +397,8 @@
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.HasBlockedSwfs}"
-                                             Value="False">
+                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.BlockedSwfs.Count}"
+                                             Value="0">
                                     <Setter Property="Visibility"
                                             Value="Collapsed"/>
                                 </DataTrigger>
@@ -639,8 +640,16 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
-                            <Setter Property="Width"
-                                    Value="250"/>
+                            <Setter Property="Width">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource BrowserTabWidthConverter}">
+                                        <Binding ElementName="tabStrip" Path="ActualWidth"/>
+                                        <Binding ElementName="newTabButton" Path="ActualWidth"/>
+                                        <Binding ElementName="newTabButton" Path="Margin"/>
+                                        <Binding RelativeSource="{RelativeSource AncestorType=ListBox}" Path="Items.Count"/>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
                             <Setter Property="MinHeight"
                                     Value="32"/>
                             <Setter Property="Padding"
@@ -651,6 +660,8 @@
                                     Value="Transparent"/>
                             <Setter Property="Foreground"
                                     Value="{DynamicResource PrimaryTextBrush}"/>
+                            <Setter Property="FocusVisualStyle"
+                                    Value="{x:Null}"/>
                             <Setter Property="Template"
                                     Value="{StaticResource tabContainerTemplate}"/>
                             <Setter Property="ToolTip"
@@ -701,7 +712,7 @@
                                          Handler="TabPreviewMouseDown"/>
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}"/>
+                                    <Setter Property="Background" Value="#20808080"/>
                                 </Trigger>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="#30808080"/>
@@ -734,13 +745,13 @@
                                     Height="20"
                                     BorderThickness="0"
                                     Focusable="False"
-                                    ToolTip="{DynamicResource browser_toolTipCloseTab}"
                                     Command="{Binding DataContext.CloseBrowserCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                     CommandParameter="{Binding}"
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
                                     <Button.Style>
                                         <Style TargetType="Button">
+                                            <Setter Property="ToolTip" Value="{DynamicResource browser_closeTab}"/>
                                             <Setter Property="Background" Value="Transparent"/>
                                             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
                                             <Setter Property="Template">
@@ -749,8 +760,8 @@
                                                         <Grid Background="{TemplateBinding Background}">
                                                             <Border x:Name="highlight"
                                                                     CornerRadius="4"
-                                                                    Background="{TemplateBinding Foreground}"
-                                                                    Opacity="0"/>
+                                                                    Opacity="0"
+                                                                    Background="{TemplateBinding Foreground}"/>
                                                             <ContentPresenter HorizontalAlignment="Center"
                                                                               VerticalAlignment="Center"/>
                                                         </Grid>
@@ -769,6 +780,11 @@
                                                     </ControlTemplate>
                                                 </Setter.Value>
                                             </Setter>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
+                                                    <Setter Property="ToolTip" Value="{DynamicResource browser_toolTipCloseTab}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
                                         </Style>
                                     </Button.Style>
                                     <svgc:SvgIcon

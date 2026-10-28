@@ -2,6 +2,8 @@
 
 These checks exercise the real WPF windows and CEF browser in an interactive Windows desktop session. They run separately from the MSTest unit tests and require Windows PowerShell 5.1 (Desktop edition).
 
+The native keyboard checks briefly bring test windows to the foreground and hold Ctrl while sending repeated W key presses. They verify the foreground window before each shortcut and release Ctrl during cleanup. Leave keyboard input to the runner while these checks execute.
+
 ## Build and run
 
 Build the solution with Visual Studio MSBuild before running the checks. `dotnet build` cannot build the C++/CLI projects. Adjust the Visual Studio edition in the path if necessary.
@@ -34,7 +36,7 @@ The runner exits with code 0 after all checks and cleanup succeed. An assertion,
 | `Run.ps1` | Parameters, process checks, file loading, ordered execution, and final cleanup. |
 | `Environment.ps1` | Run context, build output checks, assembly and WPF setup, fixtures, and CEF lifecycle. |
 | `Helpers.ps1` | Assertions, Dispatcher waits, browser commands, window creation, JavaScript, DevTools, and reflection helpers. |
-| `TestDoubles.cs` | Browser and popup proxies and the beforeunload handler, compiled at runtime with `Add-Type -Path`. Excluded from the MSTest project's compilation. |
+| `TestDoubles.cs` | Browser and popup proxies, native keyboard input helpers, and the beforeunload handler, compiled at runtime with `Add-Type -Path`. Excluded from the MSTest project's compilation. |
 | `Scenarios/BrowserWindow.ps1` | Template callbacks, DevTools, navigation and favorites, display state, closing, and saved state restoration. |
 | `Scenarios/BrowserTabs.ps1` | Tab strip buttons, middle click, keyboard cycling, drag reordering and edge scrolling, preview content for later and scrolled tabs, overflow, titles and fullscreen; localized tab menus, duplication and new-window actions; sequential close-other-tabs cancellation, retry and interruption; foreground/background new-page routing; retained browser/DevTools state; source-specific callbacks; close cancellation and retry; sequential window close; and forced disposal of initializing tabs. |
 | `Scenarios/ContextMenu.ps1` | Search and selected-URL routing for every new-page setting, explicit new-tab/new-window commands, menu composition and translations, closed-browser callbacks, and auxiliary-window routing. |

@@ -5,4 +5,8 @@
     <Platforms>x86;x64</Platforms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="CefFlashBrowser.Tests" />
+  </ItemGroup>
+
 </Project>

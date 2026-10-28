@@ -123,6 +123,12 @@ namespace CefFlashBrowser.Views
             }
         }
 
+        private static bool ShouldFocusAddressBar(BrowserViewModel browser)
+        {
+            // Selecting a blank tab prepares the address bar for entering a URL.
+            return browser.Address == "about:blank";
+        }
+
         private void TabSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Removing the selected item temporarily clears WPF's selection.
@@ -132,7 +138,7 @@ namespace CefFlashBrowser.Views
                 ViewModel.CurrentBrowser = browser;
                 tabList.ScrollIntoView(browser);
 
-                if (browser.Address == "about:blank")
+                if (ShouldFocusAddressBar(browser))
                 {
                     addressTextBox.Focus();
                     addressTextBox.SelectAll();
@@ -229,6 +235,7 @@ namespace CefFlashBrowser.Views
         {
             e.Effects = IsTabDrag(e) ? DragDropEffects.Move : DragDropEffects.None;
             e.Handled = true;
+
             if (e.Effects == DragDropEffects.Move)
             {
                 _tabDragPosition = e.GetPosition(tabList);
@@ -469,6 +476,7 @@ namespace CefFlashBrowser.Views
             else
             {
                 e.Cancel = true;
+
                 if (!_closingWindow)
                 {
                     _closingWindow = true;
@@ -533,10 +541,12 @@ namespace CefFlashBrowser.Views
 
             var operation = new object();
             _closeOtherTabsOperation = operation;
+
             try
             {
                 var browsers = ViewModel.Browsers.Where(x => x != retained).ToArray();
                 ViewModel.CurrentBrowser = retained;
+
                 foreach (var browser in browsers)
                 {
                     if (_closeOtherTabsOperation != operation || _isClosed || _closingWindow || _forceClosePending
@@ -583,6 +593,12 @@ namespace CefFlashBrowser.Views
 
             if (!_isClosed)
             {
+                // CEF's native child can own keyboard focus while WPF reports no
+                // focused element. Logical focus still identifies the closed page.
+                var focusedElement = FocusManager.GetFocusedElement(this);
+                bool restoreFocus = ReferenceEquals(ViewModel.CurrentBrowser, browser)
+                    && focusedElement != null && ReferenceEquals(focusedElement, browser.Browser);
+
                 ViewModel.RemoveBrowser(browser);
 
                 if (ViewModel.Browsers.Count == 0
@@ -590,6 +606,21 @@ namespace CefFlashBrowser.Views
                 {
                     _doClose = true;
                     Close();
+                }
+                else if (restoreFocus && ViewModel.CurrentBrowser is BrowserViewModel next
+                    && !ShouldFocusAddressBar(next))
+                {
+                    // Let bindings and layout reveal the successor before focusing it.
+                    _ = Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+                    {
+                        if (_isClosed || _closingWindow || _forceClosePending || ViewModel.IsClosing
+                            || !IsActive || !ReferenceEquals(ViewModel.CurrentBrowser, next)
+                            || !ReferenceEquals(FocusManager.GetFocusedElement(this), focusedElement))
+                            return;
+
+                        if (next.Browser is UIElement element && !next.Browser.IsDisposed && element.IsVisible)
+                            Keyboard.Focus(element);
+                    }));
                 }
             }
             return true;

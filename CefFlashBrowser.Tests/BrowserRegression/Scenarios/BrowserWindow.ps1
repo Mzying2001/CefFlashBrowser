@@ -160,7 +160,7 @@ function Test-BrowserNavigation($Context, $window, $view, $browser) {
 
 function Test-BrowserDisplay($Context, $window, $view, $browser) {
     [void](Invoke-JavaScript $Context $browser "console.info('Cross-origin plugin content from https://example.invalid/game.swf');")
-    Wait-Regression $Context { $browser.HasBlockedSwfs } 'Flash blocking notification'
+    Wait-Regression $Context { $browser.BlockedSwfs.Count -gt 0 } 'Flash blocking notification'
     $blockedItems = $window.Resources['blockedSwfsMenu'].Items[1]
     Assert-Regression ($blockedItems.Items.Contains('https://example.invalid/game.swf')) 'blocked Flash menu retains its browser binding'
     $statusMethod = [CefFlashBrowser.WinformCefSharp4WPF.ChromiumWebBrowser].GetMethod(
