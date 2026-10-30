@@ -350,3 +350,6 @@ FodyWeavers.xsd
 
 # Claude Code
 .claude/
+
+# Local notes
+local-notes/
