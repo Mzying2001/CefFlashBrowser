@@ -1,24 +1,18 @@
 ﻿using CefSharp;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows;
 
 namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumFlashBrowser : ChromiumWebBrowserEx
     {
-        public static readonly DependencyProperty BlockedSwfsProperty = DependencyProperty.Register(
-            nameof(BlockedSwfs), typeof(ObservableCollection<string>), typeof(ChromiumFlashBrowser), new PropertyMetadata(null));
-
-        public ObservableCollection<string> BlockedSwfs
-        {
-            get => (ObservableCollection<string>)GetValue(BlockedSwfsProperty);
-        }
+        public ICollection<string> BlockedSwfs { get; }
 
         public ChromiumFlashBrowser()
         {
-            SetValue(BlockedSwfsProperty, new ObservableCollection<string>());
+            BlockedSwfs = new ObservableCollection<string>();
         }
 
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
