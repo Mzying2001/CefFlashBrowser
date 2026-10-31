@@ -14,8 +14,9 @@ namespace CefFlashBrowser.Services
         private readonly ILogger _logger;
         private readonly SynchronizationContext _context;
         private readonly int _threadId = Thread.CurrentThread.ManagedThreadId;
-        private readonly Dictionary<string, string> _icons = new Dictionary<string, string>(StringComparer.Ordinal);
-        private readonly List<KeyValuePair<string, string>> _pending = new List<KeyValuePair<string, string>>();
+        private readonly Dictionary<string, IconMapping> _icons = new Dictionary<string, IconMapping>(StringComparer.Ordinal);
+        private readonly Dictionary<string, SortedSet<IconMapping>> _sites = new Dictionary<string, SortedSet<IconMapping>>(StringComparer.Ordinal);
+        private readonly List<IconMapping> _pending = new List<IconMapping>();
         private Task _initializeTask;
         private Task _work = Task.CompletedTask;
         private bool _initialized;
@@ -24,6 +25,12 @@ namespace CefFlashBrowser.Services
 
         public event PropertyChangedEventHandler PropertyChanged;
         public int Revision { get; private set; }
+
+        private static readonly IComparer<IconMapping> LatestFirst = Comparer<IconMapping>.Create((left, right) =>
+        {
+            int order = right.UpdatedAt.CompareTo(left.UpdatedAt);
+            return order != 0 ? order : StringComparer.Ordinal.Compare(left.PageUrl, right.PageUrl);
+        });
 
         public FaviconService(IDatabase database, ILogger logger = null)
         {
@@ -44,7 +51,17 @@ namespace CefFlashBrowser.Services
             if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || !IsHttp(uri))
                 return null;
 
-            return new UriBuilder(uri) { Fragment = string.Empty }.Uri;
+            return uri;
+        }
+
+        private static string GetPageKey(Uri uri)
+        {
+            return new UriBuilder(uri) { Query = string.Empty, Fragment = string.Empty }.Uri.AbsoluteUri.TrimEnd('/');
+        }
+
+        private static string GetSiteKey(Uri uri)
+        {
+            return uri.IdnHost + (uri.IsDefaultPort ? string.Empty : "|" + uri.Port);
         }
 
         private static bool IsHttp(Uri uri)
@@ -62,8 +79,74 @@ namespace CefFlashBrowser.Services
         public string GetIconUrl(string pageUrl)
         {
             VerifyAccess();
+
+            if (!_initialized || string.IsNullOrWhiteSpace(pageUrl))
+                return null;
+
+            pageUrl = pageUrl.Trim();
             var uri = GetPageUri(pageUrl);
-            return _initialized && uri != null && _icons.TryGetValue(uri.AbsoluteUri, out var iconUrl) ? iconUrl : null;
+            if (uri != null)
+                return GetPageIcon(uri)?.IconUrl;
+
+            // A host with a port can itself parse as a non-HTTP URI scheme.
+            // Validate the HTTP candidate instead of rejecting that form up front.
+            int authorityEnd = pageUrl.IndexOfAny(new[] { '/', '?', '#' });
+            int schemeEnd = pageUrl.IndexOf("://", StringComparison.Ordinal);
+            int suffixStart = pageUrl.IndexOfAny(new[] { '?', '#' });
+            var address = suffixStart < 0 ? pageUrl : pageUrl.Substring(0, suffixStart);
+            if ((schemeEnd >= 0 && schemeEnd < authorityEnd)
+                || pageUrl.StartsWith("/", StringComparison.Ordinal) || address.Contains("\\"))
+                return null;
+
+            var https = GetPageUri("https://" + pageUrl);
+            var http = GetPageUri("http://" + pageUrl);
+            if (https == null || http == null || !string.IsNullOrEmpty(https.UserInfo)
+                || !(https.HostNameType == UriHostNameType.IPv4 || https.HostNameType == UriHostNameType.IPv6
+                    || https.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || https.Host.Contains(".")))
+                return null;
+
+            var mapping = GetPageIcon(https) ?? GetPageIcon(http) ?? GetRootIcon(https) ?? GetRootIcon(http);
+            if (mapping != null)
+                return mapping.IconUrl;
+
+            var httpsLatest = GetLatestIcon(https);
+            var httpLatest = GetLatestIcon(http);
+            return (httpsLatest == null ? httpLatest
+                : httpLatest == null || LatestFirst.Compare(httpsLatest, httpLatest) <= 0 ? httpsLatest : httpLatest)?.IconUrl;
+        }
+
+        private IconMapping GetPageIcon(Uri uri)
+        {
+            return _icons.TryGetValue(GetPageKey(uri), out var mapping) ? mapping : null;
+        }
+
+        private IconMapping GetRootIcon(Uri uri)
+        {
+            return _icons.TryGetValue(uri.GetLeftPart(UriPartial.Authority), out var mapping) ? mapping : null;
+        }
+
+        private IconMapping GetLatestIcon(Uri uri)
+        {
+            return _sites.TryGetValue(GetSiteKey(uri), out var mappings) ? mappings.Min : null;
+        }
+
+        private bool ApplyMapping(IconMapping mapping)
+        {
+            if (_icons.TryGetValue(mapping.PageUrl, out var current))
+            {
+                if (current.IconUrl == mapping.IconUrl)
+                    return false;
+
+                _sites[current.SiteKey].Remove(current);
+            }
+
+            _icons[mapping.PageUrl] = mapping;
+
+            if (!_sites.TryGetValue(mapping.SiteKey, out var site))
+                _sites[mapping.SiteKey] = site = new SortedSet<IconMapping>(LatestFirst);
+
+            site.Add(mapping);
+            return true;
         }
 
         public Task InitializeAsync()
@@ -80,7 +163,7 @@ namespace CefFlashBrowser.Services
             _work = loadTask;
 
             foreach (var item in _pending)
-                _work = PersistAsync(_work, item.Key, item.Value);
+                _work = PersistAsync(_work, item);
 
             return _initializeTask = PublishAsync(loadTask);
         }
@@ -112,24 +195,29 @@ namespace CefFlashBrowser.Services
             _schemaReady = true;
         }
 
-        private async Task<List<KeyValuePair<string, string>>> LoadAsync()
+        private async Task<List<IconMapping>> LoadAsync()
         {
             try
             {
                 await EnsureSchemaAsync().ConfigureAwait(false);
 
                 return await _database.QueryAsync(
-                    "SELECT page_url, icon_url FROM website_icons WHERE deleted_at IS NULL",
-                    row => new KeyValuePair<string, string>(row.GetString(0), row.GetString(1))).ConfigureAwait(false);
+                    "SELECT page_url, icon_url, updated_at FROM website_icons WHERE deleted_at IS NULL ORDER BY updated_at, page_url DESC",
+                    row =>
+                    {
+                        var pageUri = GetPageUri(row.GetString(0));
+                        var iconUrl = pageUri == null ? null : GetAbsoluteIconUrl(pageUri, row.GetString(1));
+                        return iconUrl == null ? null : new IconMapping(pageUri, iconUrl, row.GetInt64(2));
+                    }).ConfigureAwait(false);
             }
             catch (Exception e)
             {
                 LogError("Failed to load favicon mappings", e);
-                return new List<KeyValuePair<string, string>>();
+                return new List<IconMapping>();
             }
         }
 
-        private async Task PublishAsync(Task<List<KeyValuePair<string, string>>> loadTask)
+        private async Task PublishAsync(Task<List<IconMapping>> loadTask)
         {
             var snapshot = await loadTask.ConfigureAwait(false);
             var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -142,14 +230,12 @@ namespace CefFlashBrowser.Services
                     {
                         foreach (var item in snapshot)
                         {
-                            var pageUri = GetPageUri(item.Key);
-                            var iconUrl = pageUri == null ? null : GetAbsoluteIconUrl(pageUri, item.Value);
-                            if (iconUrl != null)
-                                _icons[pageUri.AbsoluteUri] = iconUrl;
+                            if (item != null)
+                                ApplyMapping(item);
                         }
 
                         foreach (var item in _pending)
-                            _icons[item.Key] = item.Value;
+                            ApplyMapping(item);
 
                         _pending.Clear();
                         _initialized = true;
@@ -175,23 +261,19 @@ namespace CefFlashBrowser.Services
             if (absoluteIconUrl == null)
                 return Task.CompletedTask;
 
-            string key = pageUri.AbsoluteUri;
-            bool changed = false;
+            string key = GetPageKey(pageUri);
+            var current = _initialized ? GetPageIcon(pageUri) : _pending.FindLast(item => item.PageUrl == key);
+            var mapping = current != null && current.IconUrl == absoluteIconUrl ? current
+                : new IconMapping(pageUri, absoluteIconUrl, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            bool changed = _initialized && ApplyMapping(mapping);
 
             if (!_initialized)
-            {
-                _pending.Add(new KeyValuePair<string, string>(key, absoluteIconUrl));
-            }
-            else if (!_icons.TryGetValue(key, out var current) || current != absoluteIconUrl)
-            {
-                _icons[key] = absoluteIconUrl;
-                changed = true;
-            }
+                _pending.Add(mapping);
 
             // Repeated discoveries still reach SQL so a failed write can be retried.
             // The conditional upsert preserves timestamps for unchanged mappings.
             var work = _initializeTask == null ? Task.CompletedTask
-                : _work = PersistAsync(_work, key, absoluteIconUrl);
+                : _work = PersistAsync(_work, mapping);
 
             // A change notification may synchronously report another discovery.
             // Queue this write first so reentrant discoveries retain their order.
@@ -201,7 +283,7 @@ namespace CefFlashBrowser.Services
             return work;
         }
 
-        private async Task PersistAsync(Task previous, string pageUrl, string iconUrl)
+        private async Task PersistAsync(Task previous, IconMapping mapping)
         {
             await previous.ConfigureAwait(false);
             try
@@ -217,9 +299,9 @@ namespace CefFlashBrowser.Services
                     WHERE website_icons.icon_url <> excluded.icon_url OR website_icons.deleted_at IS NOT NULL",
                     new Dictionary<string, object>
                     {
-                        ["@page"] = pageUrl,
-                        ["@icon"] = iconUrl,
-                        ["@now"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                        ["@page"] = mapping.PageUrl,
+                        ["@icon"] = mapping.IconUrl,
+                        ["@now"] = mapping.UpdatedAt
                     }).ConfigureAwait(false);
             }
             catch (Exception e) { LogError("Failed to save a favicon mapping", e); }
@@ -243,6 +325,22 @@ namespace CefFlashBrowser.Services
             _stopping = true;
             // Persistence never waits for snapshot publication on the UI thread.
             return _work;
+        }
+
+        private sealed class IconMapping
+        {
+            public string PageUrl { get; }
+            public string SiteKey { get; }
+            public string IconUrl { get; }
+            public long UpdatedAt { get; }
+
+            public IconMapping(Uri pageUri, string iconUrl, long updatedAt)
+            {
+                PageUrl = GetPageKey(pageUri);
+                SiteKey = GetSiteKey(pageUri);
+                IconUrl = iconUrl;
+                UpdatedAt = updatedAt;
+            }
         }
     }
 }

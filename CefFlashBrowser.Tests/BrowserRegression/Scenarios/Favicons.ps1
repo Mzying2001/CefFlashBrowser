@@ -39,26 +39,29 @@ function Test-Favicons($Context) {
     $iconA = $fixture.BaseUrl + '/a-icon.png'
     $iconB = $fixture.BaseUrl + '/b-icon.png'
     try {
-        Invoke-BrowserCommand $browser.LoadUrlCommand $pageA
+        Invoke-BrowserCommand $browser.LoadUrlCommand ($pageA + '?visit=1#top')
         Wait-Regression $Context { $service.GetIconUrl($pageA) -eq $iconA } 'browsing an unsaved page records its reported favicon'
         Invoke-BrowserCommand $browser.LoadUrlCommand ($fixture.BaseUrl + '/redirect')
         Wait-Regression $Context { $service.GetIconUrl($pageB) -eq $iconB } 'redirect records the final page favicon'
         Assert-Regression ($null -eq $service.GetIconUrl($fixture.BaseUrl + '/redirect')) 'redirect does not create an alias for an unobserved URL'
+        [void]$service.RecordAsync($fixture.BaseUrl + '/', $iconA).GetAwaiter().GetResult()
 
         $favorites = [CefFlashBrowser.Data.GlobalData]::Favorites
         $favorites.Clear()
-        $favorite = New-Object CefFlashBrowser.Models.Website('Page A', $pageA)
+        $favorite = New-Object CefFlashBrowser.Models.Website('Page A', ($pageA + '/?saved=1#favorite'))
+        $domainFavorite = New-Object CefFlashBrowser.Models.Website('Domain fallback', ($fixture.BaseUrl.Substring('http://'.Length) + '/unvisited'))
         $favorites.Add($favorite)
         $favorites.Add((New-Object CefFlashBrowser.Models.Website('Old favorite', 'https://unvisited.invalid/')))
+        $favorites.Add($domainFavorite)
         $manager = New-Object CefFlashBrowser.Views.FavoritesManager
         $manager.Left = -10000
         $manager.ShowInTaskbar = $false
         $manager.ShowActivated = $false
         $manager.Show()
         $list = @(Find-FaviconElements $manager ([System.Windows.Controls.ListBox]))[0]
-        Wait-Regression $Context { @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon])).Count -eq 2 } 'favorites manager creates favicon controls'
+        Wait-Regression $Context { @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon])).Count -eq 3 } 'favorites manager creates favicon controls'
         $icons = @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon]))
-        Assert-Regression ($icons[0].FaviconUrl -eq $iconA -and $null -eq $icons[1].FaviconUrl) 'saved and unvisited favorites use their own mapping or default icon'
+        Assert-Regression ($icons[0].FaviconUrl -eq $iconA -and $null -eq $icons[1].FaviconUrl -and $icons[2].FaviconUrl -eq $iconA) 'favorites manager normalizes page URLs and uses the homepage for a schemeless favorite'
 
         $mainWindow = New-Object CefFlashBrowser.Views.MainWindow
         $mainWindow.Left = -10000
@@ -87,16 +90,19 @@ function Test-Favicons($Context) {
         Assert-FaviconMenuIcon $browserItem $favorite $iconA 'browser favorite while another page is active'
         Assert-FaviconMenuIcon ($mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[1])) $favorites[1] $null 'unvisited home favorite'
         Assert-FaviconMenuIcon ($browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[1])) $favorites[1] $null 'unvisited browser favorite'
+        Assert-FaviconMenuIcon ($mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($domainFavorite)) $domainFavorite $iconA 'schemeless home favorite'
+        Assert-FaviconMenuIcon ($browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($domainFavorite)) $domainFavorite $iconA 'schemeless browser favorite'
         Assert-Regression ($null -eq $mainFavoritesMenu.Items[0].Icon -and $null -eq $mainFavoritesMenu.Items[0].HeaderTemplate -and
             $mainFavoritesMenu.Items[1] -is [System.Windows.Controls.Separator]) 'home menu retains its manager entry and separator without a website icon'
 
         $manager.DataContext.SelectedWebsite = $favorite
         $manager.FindName('nameTextBox').Text = 'Edited B'
-        $manager.FindName('urlTextBox').Text = $pageB
+        $editedUrl = $pageB.Substring('http://'.Length) + '/?saved=2#favorite'
+        $manager.FindName('urlTextBox').Text = $editedUrl
         Invoke-BrowserCommand $manager.CommitEditCommand
         Wait-Regression $Context {
             $currentIcons = @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon]))
-            $currentIcons.Count -eq 2 -and $currentIcons[0].FaviconUrl -eq $iconB
+            $currentIcons.Count -eq 3 -and $currentIcons[0].FaviconUrl -eq $iconB
         } 'editing a favorite rebinds its favicon to the new URL'
         Assert-Regression (![object]::ReferenceEquals($favorite, $favorites[0]) -and $favorites[0].Name -eq 'Edited B') 'committed edit replaces the item at its original position'
         Assert-Regression ([object]::ReferenceEquals($manager.DataContext.SelectedWebsite, $favorites[0])) 'committed edit preserves logical selection'
@@ -105,13 +111,21 @@ function Test-Favicons($Context) {
         Wait-Regression $Context {
             $mainItem = $mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])
             $browserItem = $browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])
-            $null -ne $mainItem -and $null -ne $browserItem -and $browserItem.CommandParameter -eq $pageB -and
+            $null -ne $mainItem -and $null -ne $browserItem -and $browserItem.CommandParameter -eq $editedUrl -and
                 [object]::ReferenceEquals($mainItem.CommandParameter, $favorites[0]) -and
                 @(Find-FaviconElements $mainItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconB -and
                 @(Find-FaviconElements $browserItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconB
         } 'both menus rebind edited favorite command parameters'
         Assert-FaviconMenuIcon ($mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])) $favorites[0] $iconB 'edited home favorite'
         Assert-FaviconMenuIcon ($browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])) $favorites[0] $iconB 'edited browser favorite'
+        [void]$service.RecordAsync($fixture.BaseUrl + '?refresh=1', $iconB).GetAwaiter().GetResult()
+        Wait-Regression $Context {
+            $mainDomainItem = $mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($domainFavorite)
+            $browserDomainItem = $browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($domainFavorite)
+            @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon]))[2].FaviconUrl -eq $iconB -and
+                @(Find-FaviconElements $mainDomainItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconB -and
+                @(Find-FaviconElements $browserDomainItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconB
+        } 'homepage changes refresh schemeless favorites on all three surfaces'
         [void]$service.RecordAsync($pageB, $iconA).GetAwaiter().GetResult()
         Wait-Regression $Context {
             $mainItem = $mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])
