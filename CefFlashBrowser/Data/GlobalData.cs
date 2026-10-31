@@ -30,6 +30,7 @@ namespace CefFlashBrowser.Data
         public static string DataPath { get; }
         public static string FavoritesPath { get; }
         public static string SettingsPath { get; }
+        public static string DatabasePath { get; }
 
         /// <summary>
         /// true if the program is started with parameters
@@ -62,6 +63,7 @@ namespace CefFlashBrowser.Data
 
             FavoritesPath = Path.Combine(DataPath, "favorites.json");
             SettingsPath = Path.Combine(DataPath, "settings.json");
+            DatabasePath = Path.Combine(DataPath, "browser.db");
 
             Messenger.Global.Register(MessageTokens.SAVE_SETTINGS, _ => SaveSettings());
             Messenger.Global.Register(MessageTokens.SAVE_FAVORITES, _ => SaveFavorites());

@@ -10,6 +10,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         mc:Ignorable="d"
         
         DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}"
@@ -42,14 +43,25 @@
             <MenuItem Header="{DynamicResource common_favorites}">
                 <MenuItem.Resources>
                     <DataTemplate DataType="{x:Type m:Website}">
-                        <StackPanel MaxWidth="225">
-                            <TextBlock Text="{Binding Name}"
-                                       TextTrimming="CharacterEllipsis"/>
-                            <TextBlock FontSize="10"
-                                       Text="{Binding Url}"
-                                       TextTrimming="CharacterEllipsis"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        </StackPanel>
+                        <DockPanel>
+                            <c:BrowserIcon Margin="0,0,8,0">
+                                <c:BrowserIcon.FaviconUrl>
+                                    <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
+                                        <Binding Path="Url"/>
+                                        <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
+                                        <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
+                                    </MultiBinding>
+                                </c:BrowserIcon.FaviconUrl>
+                            </c:BrowserIcon>
+                            <StackPanel MaxWidth="225">
+                                <TextBlock Text="{Binding Name}"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <TextBlock FontSize="10"
+                                           Text="{Binding Url}"
+                                           TextTrimming="CharacterEllipsis"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                            </StackPanel>
+                        </DockPanel>
                     </DataTemplate>
                 </MenuItem.Resources>
 

@@ -39,6 +39,10 @@
                         </Grid>
                     </Viewbox>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="HasImageFailed" Value="True">
+                            <Setter TargetName="favicon" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="fallbackIcon" Property="Visibility" Value="Visible"/>
+                        </Trigger>
                         <DataTrigger Binding="{Binding Source, ElementName=favicon}" Value="{x:Null}">
                             <Setter TargetName="favicon" Property="Visibility" Value="Collapsed"/>
                             <Setter TargetName="fallbackIcon" Property="Visibility" Value="Visible"/>

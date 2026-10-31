@@ -25,6 +25,15 @@ For x86, build and run with the matching 32-bit PowerShell process:
 
 To test Release, build with `-p:Configuration=Release` and pass `-Configuration Release` to the runner. Defaults are `-Platform x64 -Configuration Debug`.
 
+After `publish`, validate each actual zip in a fresh process of the matching architecture:
+
+```cmd
+powershell -NoProfile -STA -ExecutionPolicy Bypass -File CefFlashBrowser.Tests\BrowserRegression\PackageSmoke.ps1 -ArchivePath bin\Publish\FlashBrowser_x64_v1.1.8.zip -Platform x64
+"%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -STA -ExecutionPolicy Bypass -File CefFlashBrowser.Tests\BrowserRegression\PackageSmoke.ps1 -ArchivePath bin\Publish\FlashBrowser_x86_v1.1.8.zip -Platform x86
+```
+
+Adjust the version in the archive names when needed. The smoke check extracts only the supplied archive into an isolated temporary directory, loads its packaged assemblies with the application's CEF DLL search path, and verifies the real IoC factories, SQLite persistence and shutdown. It also checks that unregistering unused services does not create a database. It does not start CEF or request any network resources.
+
 Always start a fresh process with `-STA`; the runner does not build the application or restart itself. Paths are resolved from `Run.ps1`, so an absolute script path also works from other working directories. The build outputs are `bin\x64\<Configuration>` for x64 and `bin\<Configuration>` for x86.
 
 The runner exits with code 0 after all checks and cleanup succeed. An assertion, timeout, setup failure, or cleanup failure produces a nonzero exit code. Cleanup attempts to close every window, shut down CEF if it started, and dispose the logger. When a check fails, cleanup warnings preserve the original error.
@@ -38,6 +47,7 @@ The runner exits with code 0 after all checks and cleanup succeed. An assertion,
 | `Helpers.ps1` | Assertions, Dispatcher waits, browser commands, window creation, JavaScript, DevTools, and reflection helpers. |
 | `TestDoubles.cs` | Browser and popup proxies, native keyboard input helpers, and the beforeunload handler, compiled at runtime with `Add-Type -Path`. Excluded from the MSTest project's compilation. |
 | `Scenarios/BrowserWindow.ps1` | Template callbacks, DevTools, navigation and favorites, display state, closing, and saved state restoration. |
+| `FaviconHttpFixture.cs`, `Scenarios/Favicons.ps1` | Local HTTP pages, redirects and failed images; discovered mappings, all three favorites surfaces, editing and live refresh, image fallback, and queued navigation and disposal callbacks. |
 | `Scenarios/BrowserTabs.ps1` | Tab strip buttons, middle click, keyboard cycling, drag reordering and edge scrolling, preview content for later and scrolled tabs, overflow, titles and fullscreen; localized tab menus, duplication and new-window actions; sequential close-other-tabs cancellation, retry and interruption; foreground/background new-page routing; retained browser/DevTools state; source-specific callbacks; close cancellation and retry; sequential window close; and forced disposal of initializing tabs. |
 | `Scenarios/ContextMenu.ps1` | Search and selected-URL routing for every new-page setting, explicit new-tab/new-window commands, menu composition and translations, closed-browser callbacks, and auxiliary-window routing. |
 | `Scenarios/AuxiliaryWindows.ps1` | Popup, SWF player, and source windows: bindings, routing, DevTools, beforeunload, and cleanup. |
@@ -49,6 +59,6 @@ The order is intentional: prepare WPF; check deferred browsers and tab managemen
 
 ## Test data and diagnostics
 
-Each run creates a directory named `%TEMP%\CefFlashBrowser-regression-<guid>` for CEF cache, HTML fixtures, `app.log`, and `cef.log`. Settings and favorites are supplied in memory instead of loading the user's profile. The directory is retained, and its path is printed as soon as it is created so diagnostics remain available even if CEF stops responding. Process and missing-build checks can fail before any directory is created.
+Each run creates a directory named `%TEMP%\CefFlashBrowser-regression-<guid>` for CEF cache, HTML fixtures, `browser.db`, `app.log`, and `cef.log`. Settings and favorites are supplied in memory instead of loading the user's profile; any data writes are redirected to this directory. The favicon fixture listens only on loopback with an automatically assigned port. The directory is retained, and its path is printed as soon as it is created so diagnostics remain available even if CEF stops responding. Process and missing-build checks can fail before any directory is created.
 
 When adding checks, put the scenario in the relevant scenario file and register any new top-level scenario explicitly in `Run.ps1`. Put reusable browser operations in `Helpers.ps1`, and keep resource ownership and initialization in `Environment.ps1`.

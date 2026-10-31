@@ -135,9 +135,21 @@
                 </MenuItem.ItemContainerStyle>
                 <MenuItem.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
-                        <TextBlock MaxWidth="200"
-                                   TextTrimming="CharacterEllipsis"
-                                   Text="{Binding Name}"/>
+                        <DockPanel>
+                            <c:BrowserIcon Margin="0,0,8,0">
+                                <c:BrowserIcon.FaviconUrl>
+                                    <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
+                                        <Binding Path="Url"/>
+                                        <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
+                                        <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
+                                    </MultiBinding>
+                                </c:BrowserIcon.FaviconUrl>
+                            </c:BrowserIcon>
+                            <TextBlock MaxWidth="200"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       Text="{Binding Name}"/>
+                        </DockPanel>
                     </DataTemplate>
                 </MenuItem.ItemTemplate>
             </MenuItem>

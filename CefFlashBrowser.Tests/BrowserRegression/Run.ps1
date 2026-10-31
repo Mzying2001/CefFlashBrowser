@@ -27,6 +27,7 @@ foreach ($file in @(
     'Scenarios\ContextMenu.ps1',
     'Scenarios\AuxiliaryWindows.ps1',
     'Scenarios\Lifecycle.ps1'
+    'Scenarios\Favicons.ps1'
 )) {
     . (Join-Path $PSScriptRoot $file)
 }
@@ -41,6 +42,7 @@ try {
     Test-NavigationBeforeHosting $context
     Test-AuxiliaryBeforeShow $context
     Test-BrowserWindow $context
+    Test-Favicons $context
     Test-BrowserCloseDuringInitialization $context
     Test-BrowserTabs $context
     Test-ContextMenu $context

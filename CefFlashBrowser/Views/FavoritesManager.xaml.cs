@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Data;
 using SimpleMvvm.Command;
+using CefFlashBrowser.ViewModels;
 using SimpleMvvm.Messaging;
 using System;
 using System.Windows;
@@ -49,7 +50,26 @@ namespace CefFlashBrowser.Views
         {
             TrimTextBoxText(urlTextBox);
             TrimTextBoxText(nameTextBox);
-            itemEditingGroup.CommitEdit();
+
+            var viewModel = DataContext as FavoritesManagerViewModel;
+            var website = viewModel?.SelectedWebsite;
+
+            if (website == null)
+                return;
+
+            string oldName = website.Name;
+            string oldUrl = website.Url;
+
+            if (!itemEditingGroup.CommitEdit() || (website.Name == oldName && website.Url == oldUrl))
+                return;
+
+            int index = viewModel.Favorites.IndexOf(website);
+            if (index >= 0)
+            {
+                var replacement = website.Clone();
+                viewModel.Favorites[index] = replacement;
+                viewModel.SelectedWebsite = replacement;
+            }
         }
     }
 }
