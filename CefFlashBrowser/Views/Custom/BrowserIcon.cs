@@ -14,6 +14,15 @@ namespace CefFlashBrowser.Views.Custom
             set { SetValue(FaviconUrlProperty, value); }
         }
 
+        public static readonly DependencyProperty DefaultIconProperty =
+            DependencyProperty.Register(nameof(DefaultIcon), typeof(object), typeof(BrowserIcon), new PropertyMetadata(null));
+
+        public object DefaultIcon
+        {
+            get { return GetValue(DefaultIconProperty); }
+            set { SetValue(DefaultIconProperty, value); }
+        }
+
         static BrowserIcon()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(BrowserIcon), new FrameworkPropertyMetadata(typeof(BrowserIcon)));

@@ -21,21 +21,32 @@
                             <Image
                                 x:Name="favicon"
                                 Source="{Binding FaviconUrl, RelativeSource={RelativeSource TemplatedParent}}"/>
-                            <svgc:SvgIcon
-                                x:Name="defaultIcon"
-                                Width="15"
-                                Height="15"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                UriSource="{DynamicResource PageIconUri}"
-                                Visibility="Collapsed"/>
+                            <Grid x:Name="fallbackIcon" Visibility="Collapsed">
+                                <ContentPresenter
+                                    x:Name="customIcon"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Content="{TemplateBinding DefaultIcon}"/>
+                                <svgc:SvgIcon
+                                    x:Name="defaultIcon"
+                                    Width="15"
+                                    Height="15"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    UriSource="{DynamicResource PageIconUri}"
+                                    Visibility="Collapsed"/>
+                            </Grid>
                         </Grid>
                     </Viewbox>
                     <ControlTemplate.Triggers>
                         <DataTrigger Binding="{Binding Source, ElementName=favicon}" Value="{x:Null}">
                             <Setter TargetName="favicon" Property="Visibility" Value="Collapsed"/>
-                            <Setter TargetName="defaultIcon" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="fallbackIcon" Property="Visibility" Value="Visible"/>
                         </DataTrigger>
+                        <Trigger Property="DefaultIcon" Value="{x:Null}">
+                            <Setter TargetName="customIcon" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="defaultIcon" Property="Visibility" Value="Visible"/>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
