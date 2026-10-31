@@ -132,64 +132,82 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public void SchemelessLookup_PrefersExactPagesThenHttpsAndHttpHomepages()
+        public void Lookup_PrefersExactPagesThenHomepages()
         {
             Initialize();
             Record("http://example.com/game", "/http-game");
             Record("http://example.com/", "/http-root");
             Record("https://example.com/", "/https-root");
             Assert.AreEqual("http://example.com/http-game", _service.GetIconUrl("example.com/game/?id=1#top"));
+            Assert.AreEqual("http://example.com/http-game", _service.GetIconUrl("http://example.com/game"));
+            Assert.AreEqual("https://example.com/https-root", _service.GetIconUrl("https://example.com/game"));
             Record("https://example.com/game", "/https-game");
             Assert.AreEqual("https://example.com/https-game", _service.GetIconUrl(" EXAMPLE.COM/game "));
+            Assert.AreEqual("https://example.com/https-game", _service.GetIconUrl("https://example.com/game"));
             Assert.AreEqual("https://example.com/https-root", _service.GetIconUrl("example.com/unvisited"));
 
             Record("http://other.example.com/", "/http-root");
             Record("https://other.example.com/game", "/latest-page");
             Assert.AreEqual("http://other.example.com/http-root", _service.GetIconUrl("other.example.com/unvisited"));
-            foreach (string page in new[] { "https://example.com/unvisited", "http://example.com/unvisited", "https://other.example.com/unvisited" })
-                Assert.IsNull(_service.GetIconUrl(page), page);
+            Assert.AreEqual("https://example.com/https-root", _service.GetIconUrl("https://example.com/unvisited"));
+            Assert.AreEqual("http://example.com/http-root", _service.GetIconUrl("http://example.com/unvisited"));
+            Assert.IsNull(_service.GetIconUrl("https://other.example.com/unvisited"));
             Restart();
             Assert.AreEqual("https://example.com/https-game", _service.GetIconUrl("example.com/game"));
             Assert.AreEqual("https://example.com/https-root", _service.GetIconUrl("example.com/unvisited"));
             Assert.AreEqual("http://other.example.com/http-root", _service.GetIconUrl("other.example.com/unvisited"));
+            Assert.AreEqual("https://example.com/https-root", _service.GetIconUrl("https://example.com/unvisited"));
+            Assert.AreEqual("http://example.com/http-root", _service.GetIconUrl("http://example.com/unvisited"));
+            Assert.IsNull(_service.GetIconUrl("https://other.example.com/unvisited"));
         }
 
         [TestMethod]
-        public void DomainFallback_UsesLatestChangeAndOrdinalTieBreak_AcrossRestarts()
+        public void Lookup_WithoutPageOrHomepage_DoesNotUseOtherPageIcons()
         {
             Initialize();
-            SeedMapping("https://example.com/z", "https://example.com/z-icon", 20);
             SeedMapping("http://example.com/b", "http://example.com/b-icon", 20);
             SeedMapping("https://example.com/a", "https://example.com/a-icon", 10);
             SeedMapping("https://example.com", "https://example.com/deleted-root", 30, 40);
             Restart();
-            Assert.AreEqual("http://example.com/b-icon", _service.GetIconUrl("example.com/unvisited"));
+            foreach (string page in new[] { "https://example.com/unvisited", "http://example.com/unvisited", "example.com/unvisited", "https://example.com/", "http://example.com/", "example.com/" })
+                Assert.IsNull(_service.GetIconUrl(page), page);
 
             Record("https://example.com/a/?id=1", "/new-a");
-            Assert.AreEqual("https://example.com/new-a", _service.GetIconUrl("example.com/unvisited"));
-            int revision = _service.Revision;
-            Record("http://example.com/b/?id=2", "/b-icon");
-            Assert.AreEqual(revision, _service.Revision);
-            Assert.AreEqual("https://example.com/new-a", _service.GetIconUrl("example.com/unvisited"));
+            Assert.AreEqual("https://example.com/new-a", _service.GetIconUrl("example.com/a"));
+            Assert.IsNull(_service.GetIconUrl("example.com/unvisited"));
             Restart();
-            Assert.AreEqual("https://example.com/new-a", _service.GetIconUrl("example.com/unvisited"));
+            Assert.AreEqual("https://example.com/new-a", _service.GetIconUrl("example.com/a"));
+            Assert.IsNull(_service.GetIconUrl("example.com/unvisited"));
         }
 
         [DataTestMethod]
-        [DataRow("http://example.com:80/a", "example.com/missing", "http://example.com/icon")]
+        [DataRow("http://example.com:80/", "example.com/missing", "http://example.com/icon")]
         [DataRow("http://example.com/a", "example.com/a/?next=https://other.example.com#top", "http://example.com/icon")]
         [DataRow("http://example.com/a", "example.com/a?path=C:\\game.swf", "http://example.com/icon")]
-        [DataRow("https://example.com:443/a", "example.com/missing", "https://example.com/icon")]
-        [DataRow("https://example.com:8080/a", "example.com:8080/missing", "https://example.com:8080/icon")]
+        [DataRow("https://example.com:443/", "example.com/missing", "https://example.com/icon")]
+        [DataRow("https://example.com:8080/", "example.com:8080/missing", "https://example.com:8080/icon")]
         [DataRow("http://localhost:8080/a", "localhost:8080/a/?q=1", "http://localhost:8080/icon")]
-        [DataRow("http://127.0.0.1:8080/a", "127.0.0.1:8080/missing", "http://127.0.0.1:8080/icon")]
-        [DataRow("http://[::1]:8080/a", "[::1]:8080/missing", "http://[::1]:8080/icon")]
-        [DataRow("https://example.com/a", "www.example.com/missing", null)]
-        [DataRow("https://example.com/a", "sub.example.com/missing", null)]
-        [DataRow("https://example.com:8080/a", "example.com/missing", null)]
-        [DataRow("https://example.com/a", "example.com:8080/missing", null)]
-        [DataRow("https://example.com:8080/a", "example.com:8081/missing", null)]
-        public void SchemelessLookup_RespectsHostsAndPorts(string recordedPage, string lookup, string expected)
+        [DataRow("http://127.0.0.1:8080/", "127.0.0.1:8080/missing", "http://127.0.0.1:8080/icon")]
+        [DataRow("http://[::1]:8080/", "[::1]:8080/missing", "http://[::1]:8080/icon")]
+        [DataRow("https://example.com/", "www.example.com/missing", null)]
+        [DataRow("https://example.com/", "sub.example.com/missing", null)]
+        [DataRow("https://example.com:8080/", "example.com/missing", null)]
+        [DataRow("https://example.com/", "example.com:8080/missing", null)]
+        [DataRow("https://example.com:8080/", "example.com:8081/missing", null)]
+        [DataRow("http://example.com:80/?q=1#top", "http://example.com/missing///?next=https://other.example.com#bottom", "http://example.com/icon")]
+        [DataRow("https://example.com:443/", "https://example.com/missing", "https://example.com/icon")]
+        [DataRow("https://example.com:8080/", "https://example.com:8080/missing", "https://example.com:8080/icon")]
+        [DataRow("https://sub.example.com/", "https://sub.example.com/missing", "https://sub.example.com/icon")]
+        [DataRow("http://localhost:8080/", "http://localhost:8080/missing", "http://localhost:8080/icon")]
+        [DataRow("http://127.0.0.1:8080/", "http://127.0.0.1:8080/missing", "http://127.0.0.1:8080/icon")]
+        [DataRow("http://[::1]:8080/", "http://[::1]:8080/missing", "http://[::1]:8080/icon")]
+        [DataRow("http://example.com/", "https://example.com/missing", null)]
+        [DataRow("https://example.com/", "http://example.com/missing", null)]
+        [DataRow("https://example.com/", "https://sub.example.com/missing", null)]
+        [DataRow("https://sub.example.com/", "https://example.com/missing", null)]
+        [DataRow("https://example.com:8080/", "https://example.com/missing", null)]
+        [DataRow("https://example.com/", "https://example.com:8080/missing", null)]
+        public void Lookup_RespectsHostsPortsAndExplicitSchemes(string recordedPage, string lookup, string expected)
         {
             Initialize();
             Record(recordedPage, "/icon");
@@ -295,12 +313,12 @@ namespace CefFlashBrowser.Tests
             _context.Complete(initialization);
             lastWrite.GetAwaiter().GetResult();
             Assert.AreEqual("https://example.com/last", _service.GetIconUrl("https://example.com/a"));
-            Assert.AreEqual("https://example.com/last", _service.GetIconUrl("example.com/unvisited"));
+            Assert.AreEqual("https://example.com/last", _service.GetIconUrl("example.com/a"));
             Assert.AreEqual("https://example.com/last", _database.ScalarAsync("SELECT icon_url FROM website_icons").GetAwaiter().GetResult());
         }
 
         [TestMethod]
-        public void Initialization_DuplicateDiscoveriesDoNotPromoteOlderPageIcons()
+        public void Initialization_DuplicateDiscoveriesPreservePersistedTimestamps()
         {
             Initialize();
             SeedMapping("https://example.com/a", "https://example.com/a-icon", 10);
@@ -315,9 +333,13 @@ namespace CefFlashBrowser.Tests
             controlled.ReleaseSnapshot.SetResult(true);
             _context.Complete(initialization);
             lastWrite.GetAwaiter().GetResult();
-            Assert.AreEqual("https://example.com/b-icon", _service.GetIconUrl("example.com/missing"));
+            Assert.AreEqual(10L, _database.ScalarAsync("SELECT updated_at FROM website_icons WHERE page_url = 'https://example.com/a'").GetAwaiter().GetResult());
+            Assert.AreEqual(20L, _database.ScalarAsync("SELECT updated_at FROM website_icons WHERE page_url = 'https://example.com/b'").GetAwaiter().GetResult());
+            Assert.AreEqual("https://example.com/a-icon", _service.GetIconUrl("example.com/a"));
+            Assert.AreEqual("https://example.com/b-icon", _service.GetIconUrl("example.com/b"));
             Restart();
-            Assert.AreEqual("https://example.com/b-icon", _service.GetIconUrl("example.com/missing"));
+            Assert.AreEqual("https://example.com/a-icon", _service.GetIconUrl("example.com/a"));
+            Assert.AreEqual("https://example.com/b-icon", _service.GetIconUrl("example.com/b"));
         }
 
         [TestMethod]
@@ -355,7 +377,7 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(revision, _service.Revision);
             Assert.AreEqual(1L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
             Restart();
-            Assert.AreEqual("https://example.com/icon", _service.GetIconUrl("example.com/missing"));
+            Assert.AreEqual("https://example.com/icon", _service.GetIconUrl("example.com/a"));
         }
 
         [TestMethod]

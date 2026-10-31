@@ -45,6 +45,7 @@ function Test-Favicons($Context) {
         Wait-Regression $Context { $service.GetIconUrl($pageB) -eq $iconB } 'redirect records the final page favicon'
         Assert-Regression ($null -eq $service.GetIconUrl($fixture.BaseUrl + '/redirect')) 'redirect does not create an alias for an unobserved URL'
         [void]$service.RecordAsync($fixture.BaseUrl + '/', $iconA).GetAwaiter().GetResult()
+        Assert-Regression ($service.GetIconUrl($fixture.BaseUrl + '/unvisited') -eq $iconA) 'absolute addresses fall back to the same-origin homepage'
 
         $favorites = [CefFlashBrowser.Data.GlobalData]::Favorites
         $favorites.Clear()

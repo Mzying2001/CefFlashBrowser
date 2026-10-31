@@ -7,8 +7,8 @@ namespace CefFlashBrowser.Services
     {
         int Revision { get; }
         Task InitializeAsync();
-        // Ignores page queries, fragments and trailing slashes. Only schemeless
-        // addresses can fall back to the site's homepage or latest updated icon.
+        // Ignores page queries, fragments and trailing slashes. Matches pages before
+        // same-origin homepages; schemeless addresses try HTTPS then HTTP at each step.
         string GetIconUrl(string pageUrl);
         Task RecordAsync(string pageUrl, string iconUrl);
         Task StopAsync();

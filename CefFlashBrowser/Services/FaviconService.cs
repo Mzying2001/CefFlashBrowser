@@ -15,7 +15,6 @@ namespace CefFlashBrowser.Services
         private readonly SynchronizationContext _context;
         private readonly int _threadId = Thread.CurrentThread.ManagedThreadId;
         private readonly Dictionary<string, IconMapping> _icons = new Dictionary<string, IconMapping>(StringComparer.Ordinal);
-        private readonly Dictionary<string, SortedSet<IconMapping>> _sites = new Dictionary<string, SortedSet<IconMapping>>(StringComparer.Ordinal);
         private readonly List<IconMapping> _pending = new List<IconMapping>();
         private Task _initializeTask;
         private Task _work = Task.CompletedTask;
@@ -25,16 +24,13 @@ namespace CefFlashBrowser.Services
         public event PropertyChangedEventHandler PropertyChanged;
         public int Revision { get; private set; }
 
-        private static readonly IComparer<IconMapping> LatestFirst = Comparer<IconMapping>.Create((left, right) =>
-        {
-            int order = right.UpdatedAt.CompareTo(left.UpdatedAt);
-            return order != 0 ? order : StringComparer.Ordinal.Compare(left.PageUrl, right.PageUrl);
-        });
-
         public FaviconService(DatabaseService database, ILogger logger = null)
         {
-            _database = database ?? throw new ArgumentNullException(nameof(database));
             _logger = logger;
+
+            _database = database
+                ?? throw new ArgumentNullException(nameof(database));
+
             _context = SynchronizationContext.Current
                 ?? throw new InvalidOperationException("Create the favicon service on the UI synchronization context.");
         }
@@ -58,11 +54,6 @@ namespace CefFlashBrowser.Services
             return new UriBuilder(uri) { Query = string.Empty, Fragment = string.Empty }.Uri.AbsoluteUri.TrimEnd('/');
         }
 
-        private static string GetSiteKey(Uri uri)
-        {
-            return uri.IdnHost + (uri.IsDefaultPort ? string.Empty : "|" + uri.Port);
-        }
-
         private static bool IsHttp(Uri uri)
         {
             return uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps;
@@ -84,8 +75,9 @@ namespace CefFlashBrowser.Services
 
             pageUrl = pageUrl.Trim();
             var uri = GetPageUri(pageUrl);
+
             if (uri != null)
-                return GetPageIcon(uri)?.IconUrl;
+                return (GetPageIcon(uri) ?? GetRootIcon(uri))?.IconUrl;
 
             // A host with a port can itself parse as a non-HTTP URI scheme.
             // Validate the HTTP candidate instead of rejecting that form up front.
@@ -93,25 +85,20 @@ namespace CefFlashBrowser.Services
             int schemeEnd = pageUrl.IndexOf("://", StringComparison.Ordinal);
             int suffixStart = pageUrl.IndexOfAny(new[] { '?', '#' });
             var address = suffixStart < 0 ? pageUrl : pageUrl.Substring(0, suffixStart);
+
             if ((schemeEnd >= 0 && schemeEnd < authorityEnd)
                 || pageUrl.StartsWith("/", StringComparison.Ordinal) || address.Contains("\\"))
                 return null;
 
             var https = GetPageUri("https://" + pageUrl);
             var http = GetPageUri("http://" + pageUrl);
+
             if (https == null || http == null || !string.IsNullOrEmpty(https.UserInfo)
                 || !(https.HostNameType == UriHostNameType.IPv4 || https.HostNameType == UriHostNameType.IPv6
                     || https.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || https.Host.Contains(".")))
                 return null;
 
-            var mapping = GetPageIcon(https) ?? GetPageIcon(http) ?? GetRootIcon(https) ?? GetRootIcon(http);
-            if (mapping != null)
-                return mapping.IconUrl;
-
-            var httpsLatest = GetLatestIcon(https);
-            var httpLatest = GetLatestIcon(http);
-            return (httpsLatest == null ? httpLatest
-                : httpLatest == null || LatestFirst.Compare(httpsLatest, httpLatest) <= 0 ? httpsLatest : httpLatest)?.IconUrl;
+            return (GetPageIcon(https) ?? GetPageIcon(http) ?? GetRootIcon(https) ?? GetRootIcon(http))?.IconUrl;
         }
 
         private IconMapping GetPageIcon(Uri uri)
@@ -124,27 +111,12 @@ namespace CefFlashBrowser.Services
             return _icons.TryGetValue(uri.GetLeftPart(UriPartial.Authority), out var mapping) ? mapping : null;
         }
 
-        private IconMapping GetLatestIcon(Uri uri)
-        {
-            return _sites.TryGetValue(GetSiteKey(uri), out var mappings) ? mappings.Min : null;
-        }
-
         private bool ApplyMapping(IconMapping mapping)
         {
-            if (_icons.TryGetValue(mapping.PageUrl, out var current))
-            {
-                if (current.IconUrl == mapping.IconUrl)
-                    return false;
-
-                _sites[current.SiteKey].Remove(current);
-            }
+            if (_icons.TryGetValue(mapping.PageUrl, out var current) && current.IconUrl == mapping.IconUrl)
+                return false;
 
             _icons[mapping.PageUrl] = mapping;
-
-            if (!_sites.TryGetValue(mapping.SiteKey, out var site))
-                _sites[mapping.SiteKey] = site = new SortedSet<IconMapping>(LatestFirst);
-
-            site.Add(mapping);
             return true;
         }
 
@@ -288,14 +260,12 @@ namespace CefFlashBrowser.Services
         private sealed class IconMapping
         {
             public string PageUrl { get; }
-            public string SiteKey { get; }
             public string IconUrl { get; }
             public long UpdatedAt { get; }
 
             public IconMapping(Uri pageUri, string iconUrl, long updatedAt)
             {
                 PageUrl = GetPageKey(pageUri);
-                SiteKey = GetSiteKey(pageUri);
                 IconUrl = iconUrl;
                 UpdatedAt = updatedAt;
             }
