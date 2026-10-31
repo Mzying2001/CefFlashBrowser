@@ -125,8 +125,24 @@
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Resources>
+                            <DataTemplate x:Key="{DataTemplateKey {x:Type m:Website}}"
+                                          DataType="{x:Type m:Website}">
+                                <c:BrowserIcon>
+                                    <c:BrowserIcon.FaviconUrl>
+                                        <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
+                                            <Binding Path="Url"/>
+                                            <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
+                                            <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
+                                        </MultiBinding>
+                                    </c:BrowserIcon.FaviconUrl>
+                                </c:BrowserIcon>
+                            </DataTemplate>
+                        </Style.Resources>
                         <!--<Setter Property="Header"
                                 Value="{Binding Name}"/>-->
+                        <Setter Property="Icon"
+                                Value="{Binding}"/>
                         <Setter Property="Command"
                                 Value="{Binding Source={x:Reference Name=window}, Path=DataContext.CurrentBrowser.Browser.LoadUrlCommand}"/>
                         <Setter Property="CommandParameter"
@@ -135,21 +151,10 @@
                 </MenuItem.ItemContainerStyle>
                 <MenuItem.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
-                        <DockPanel>
-                            <c:BrowserIcon Margin="0,0,8,0">
-                                <c:BrowserIcon.FaviconUrl>
-                                    <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
-                                        <Binding Path="Url"/>
-                                        <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
-                                        <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
-                                    </MultiBinding>
-                                </c:BrowserIcon.FaviconUrl>
-                            </c:BrowserIcon>
-                            <TextBlock MaxWidth="200"
-                                       VerticalAlignment="Center"
-                                       TextTrimming="CharacterEllipsis"
-                                       Text="{Binding Name}"/>
-                        </DockPanel>
+                        <TextBlock MaxWidth="200"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   Text="{Binding Name}"/>
                     </DataTemplate>
                 </MenuItem.ItemTemplate>
             </MenuItem>

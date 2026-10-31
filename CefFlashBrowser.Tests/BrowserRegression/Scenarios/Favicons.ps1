@@ -7,6 +7,23 @@ function Find-FaviconElements($Element, [Type]$ElementType) {
     }
 }
 
+function Assert-FaviconMenuIcon($Item, $Website, $ExpectedUrl, [string]$Surface) {
+    Assert-Regression ([object]::ReferenceEquals($Item.Icon, $Website)) "$Surface uses the MenuItem icon slot"
+    $icons = @(Find-FaviconElements $Item ([CefFlashBrowser.Views.Custom.BrowserIcon]))
+    Assert-Regression ($icons.Count -eq 1 -and $icons[0].FaviconUrl -eq $ExpectedUrl) "$Surface displays its own favicon"
+    $headers = @(Find-FaviconElements $Item ([System.Windows.Controls.ContentPresenter]) | Where-Object {
+        $null -ne $Item.HeaderTemplate -and [object]::ReferenceEquals($_.ContentTemplate, $Item.HeaderTemplate)
+    })
+    Assert-Regression ($headers.Count -eq 1 -and
+        @(Find-FaviconElements $headers[0] ([CefFlashBrowser.Views.Custom.BrowserIcon])).Count -eq 0) "$Surface keeps its header free of favicon controls"
+    Assert-Regression (@(Find-FaviconElements $headers[0] ([System.Windows.Controls.TextBlock]) | Where-Object {
+        $_.Text -eq $Website.Name
+    }).Count -eq 1) "$Surface retains its name in the header"
+    if ($null -eq $ExpectedUrl) {
+        Assert-Regression ($icons[0].Template.FindName('fallbackIcon', $icons[0]).Visibility -eq [System.Windows.Visibility]::Visible) "$Surface displays the default icon in its icon slot"
+    }
+}
+
 function Test-Favicons($Context) {
     $fixture = New-Object FaviconHttpFixture
     $window = New-RegressionWindow $Context
@@ -66,8 +83,12 @@ function Test-Favicons($Context) {
         } 'both favorites menus create favicon controls'
         $mainItem = $mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorite)
         $browserItem = $browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorite)
-        Assert-Regression (@(Find-FaviconElements $mainItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconA) 'home favorites menu uses the saved page icon'
-        Assert-Regression (@(Find-FaviconElements $browserItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconA) 'browser favorites menu uses its item URL while another page is active'
+        Assert-FaviconMenuIcon $mainItem $favorite $iconA 'home favorite'
+        Assert-FaviconMenuIcon $browserItem $favorite $iconA 'browser favorite while another page is active'
+        Assert-FaviconMenuIcon ($mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[1])) $favorites[1] $null 'unvisited home favorite'
+        Assert-FaviconMenuIcon ($browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[1])) $favorites[1] $null 'unvisited browser favorite'
+        Assert-Regression ($null -eq $mainFavoritesMenu.Items[0].Icon -and $null -eq $mainFavoritesMenu.Items[0].HeaderTemplate -and
+            $mainFavoritesMenu.Items[1] -is [System.Windows.Controls.Separator]) 'home menu retains its manager entry and separator without a website icon'
 
         $manager.DataContext.SelectedWebsite = $favorite
         $manager.FindName('nameTextBox').Text = 'Edited B'
@@ -84,12 +105,21 @@ function Test-Favicons($Context) {
         Wait-Regression $Context {
             $mainItem = $mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])
             $browserItem = $browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])
-            $null -ne $mainItem -and $null -ne $browserItem -and $browserItem.CommandParameter -eq $pageB
+            $null -ne $mainItem -and $null -ne $browserItem -and $browserItem.CommandParameter -eq $pageB -and
+                [object]::ReferenceEquals($mainItem.CommandParameter, $favorites[0]) -and
+                @(Find-FaviconElements $mainItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconB -and
+                @(Find-FaviconElements $browserItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconB
         } 'both menus rebind edited favorite command parameters'
+        Assert-FaviconMenuIcon ($mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])) $favorites[0] $iconB 'edited home favorite'
+        Assert-FaviconMenuIcon ($browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])) $favorites[0] $iconB 'edited browser favorite'
         [void]$service.RecordAsync($pageB, $iconA).GetAwaiter().GetResult()
         Wait-Regression $Context {
-            @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconA
-        } 'an open favorites manager refreshes when its mapping changes'
+            $mainItem = $mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])
+            $browserItem = $browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[0])
+            @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconA -and
+                @(Find-FaviconElements $mainItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconA -and
+                @(Find-FaviconElements $browserItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconA
+        } 'open favorites menus and manager refresh when their mapping changes'
         $missingIcon = $fixture.BaseUrl + '/missing.png'
         [void]$service.RecordAsync($pageB, $missingIcon).GetAwaiter().GetResult()
         Wait-Regression $Context {

@@ -41,38 +41,43 @@
         <Menu>
             <!--Favorites Menu-->
             <MenuItem Header="{DynamicResource common_favorites}">
-                <MenuItem.Resources>
+                <MenuItem.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
-                        <DockPanel>
-                            <c:BrowserIcon Margin="0,0,8,0">
-                                <c:BrowserIcon.FaviconUrl>
-                                    <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
-                                        <Binding Path="Url"/>
-                                        <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
-                                        <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
-                                    </MultiBinding>
-                                </c:BrowserIcon.FaviconUrl>
-                            </c:BrowserIcon>
-                            <StackPanel MaxWidth="225">
-                                <TextBlock Text="{Binding Name}"
-                                           TextTrimming="CharacterEllipsis"/>
-                                <TextBlock FontSize="10"
-                                           Text="{Binding Url}"
-                                           TextTrimming="CharacterEllipsis"
-                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
-                            </StackPanel>
-                        </DockPanel>
+                        <StackPanel MaxWidth="225">
+                            <TextBlock Text="{Binding Name}"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock FontSize="10"
+                                       Text="{Binding Url}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        </StackPanel>
                     </DataTemplate>
-                </MenuItem.Resources>
+                </MenuItem.ItemTemplate>
 
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Resources>
+                            <DataTemplate x:Key="{DataTemplateKey {x:Type m:Website}}"
+                                          DataType="{x:Type m:Website}">
+                                <c:BrowserIcon>
+                                    <c:BrowserIcon.FaviconUrl>
+                                        <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
+                                            <Binding Path="Url"/>
+                                            <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
+                                            <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
+                                        </MultiBinding>
+                                    </c:BrowserIcon.FaviconUrl>
+                                </c:BrowserIcon>
+                            </DataTemplate>
+                        </Style.Resources>
                         <Setter Property="Tag"
                                 Value="{Binding RelativeSource={RelativeSource AncestorType=Menu}, Path=DataContext}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ., Converter={StaticResource ObjectGetTypeConverter}}"
                                          Value="{x:Type m:Website}">
+                                <Setter Property="Icon"
+                                        Value="{Binding}"/>
                                 <Setter Property="Command"
                                         Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.OpenWebsiteCommand}"/>
                                 <Setter Property="CommandParameter"
