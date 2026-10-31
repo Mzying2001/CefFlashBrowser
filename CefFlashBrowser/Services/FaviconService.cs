@@ -1,5 +1,5 @@
-using CefFlashBrowser.Database;
 using CefFlashBrowser.Log;
+using CefFlashBrowser.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,7 +10,7 @@ namespace CefFlashBrowser.Services
 {
     public class FaviconService : IFaviconService
     {
-        private readonly IDatabase _database;
+        private readonly DatabaseService _database;
         private readonly ILogger _logger;
         private readonly SynchronizationContext _context;
         private readonly int _threadId = Thread.CurrentThread.ManagedThreadId;
@@ -21,7 +21,6 @@ namespace CefFlashBrowser.Services
         private Task _work = Task.CompletedTask;
         private bool _initialized;
         private bool _stopping;
-        private bool _schemaReady;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public int Revision { get; private set; }
@@ -32,7 +31,7 @@ namespace CefFlashBrowser.Services
             return order != 0 ? order : StringComparer.Ordinal.Compare(left.PageUrl, right.PageUrl);
         });
 
-        public FaviconService(IDatabase database, ILogger logger = null)
+        public FaviconService(DatabaseService database, ILogger logger = null)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
             _logger = logger;
@@ -168,47 +167,20 @@ namespace CefFlashBrowser.Services
             return _initializeTask = PublishAsync(loadTask);
         }
 
-        private async Task EnsureSchemaAsync()
-        {
-            if (_schemaReady)
-                return;
-
-            await _database.TransactionAsync(session =>
-            {
-                long version = Convert.ToInt64(session.Scalar("PRAGMA user_version"));
-
-                if (version > 1)
-                    throw new InvalidOperationException("The browser database version is not supported.");
-
-                if (version == 0)
-                {
-                    session.Execute(@"CREATE TABLE IF NOT EXISTS website_icons (
-                        page_url TEXT PRIMARY KEY NOT NULL,
-                        icon_url TEXT NOT NULL,
-                        created_at INTEGER NOT NULL,
-                        updated_at INTEGER NOT NULL,
-                        deleted_at INTEGER NULL)");
-                    session.Execute("PRAGMA user_version = 1");
-                }
-            }).ConfigureAwait(false);
-
-            _schemaReady = true;
-        }
-
         private async Task<List<IconMapping>> LoadAsync()
         {
             try
             {
-                await EnsureSchemaAsync().ConfigureAwait(false);
-
-                return await _database.QueryAsync(
-                    "SELECT page_url, icon_url, updated_at FROM website_icons WHERE deleted_at IS NULL ORDER BY updated_at, page_url DESC",
-                    row =>
-                    {
-                        var pageUri = GetPageUri(row.GetString(0));
-                        var iconUrl = pageUri == null ? null : GetAbsoluteIconUrl(pageUri, row.GetString(1));
-                        return iconUrl == null ? null : new IconMapping(pageUri, iconUrl, row.GetInt64(2));
-                    }).ConfigureAwait(false);
+                var records = await _database.GetWebsiteIconsAsync().ConfigureAwait(false);
+                var mappings = new List<IconMapping>();
+                foreach (var record in records)
+                {
+                    var pageUri = GetPageUri(record.PageUrl);
+                    var iconUrl = pageUri == null ? null : GetAbsoluteIconUrl(pageUri, record.IconUrl);
+                    if (iconUrl != null)
+                        mappings.Add(new IconMapping(pageUri, iconUrl, record.UpdatedAt));
+                }
+                return mappings;
             }
             catch (Exception e)
             {
@@ -270,8 +242,7 @@ namespace CefFlashBrowser.Services
             if (!_initialized)
                 _pending.Add(mapping);
 
-            // Repeated discoveries still reach SQL so a failed write can be retried.
-            // The conditional upsert preserves timestamps for unchanged mappings.
+            // Repeated discoveries still reach persistence so a failed write can be retried.
             var work = _initializeTask == null ? Task.CompletedTask
                 : _work = PersistAsync(_work, mapping);
 
@@ -288,21 +259,8 @@ namespace CefFlashBrowser.Services
             await previous.ConfigureAwait(false);
             try
             {
-                await EnsureSchemaAsync().ConfigureAwait(false);
-                await _database.ExecuteAsync(@"INSERT INTO website_icons
-                    (page_url, icon_url, created_at, updated_at, deleted_at)
-                    VALUES (@page, @icon, @now, @now, NULL)
-                    ON CONFLICT(page_url) DO UPDATE SET
-                        icon_url = excluded.icon_url,
-                        updated_at = excluded.updated_at,
-                        deleted_at = NULL
-                    WHERE website_icons.icon_url <> excluded.icon_url OR website_icons.deleted_at IS NOT NULL",
-                    new Dictionary<string, object>
-                    {
-                        ["@page"] = mapping.PageUrl,
-                        ["@icon"] = mapping.IconUrl,
-                        ["@now"] = mapping.UpdatedAt
-                    }).ConfigureAwait(false);
+                await _database.SaveWebsiteIconAsync(
+                    new WebsiteIconRecord(mapping.PageUrl, mapping.IconUrl, mapping.UpdatedAt)).ConfigureAwait(false);
             }
             catch (Exception e) { LogError("Failed to save a favicon mapping", e); }
         }

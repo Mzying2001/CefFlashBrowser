@@ -236,9 +236,12 @@ namespace CefFlashBrowser
             SimpleIoc.Global.Register<IDatabase>(
                 () => _database = new SqliteDatabase(GlobalData.DatabasePath), Lifetime.Singleton);
 
+            SimpleIoc.Global.Register<DatabaseService>(
+                () => new DatabaseService(SimpleIoc.Global.GetInstance<IDatabase>()), Lifetime.Singleton);
+
             SimpleIoc.Global.Register<IFaviconService>(
                 () => _faviconService = new FaviconService(
-                    SimpleIoc.Global.GetInstance<IDatabase>(), SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
+                    SimpleIoc.Global.GetInstance<DatabaseService>(), SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
         }
 
         private static async Task InitializeFaviconsAsync()
@@ -283,6 +286,7 @@ namespace CefFlashBrowser
                 LogHelper.LogWtf("Timed out waiting for favicon writes; the database will close after queued operations finish.");
 
             SimpleIoc.Global.Unregister<IFaviconService>(false);
+            SimpleIoc.Global.Unregister<DatabaseService>(false);
             SimpleIoc.Global.Unregister<IDatabase>(false);
             SimpleIoc.Global.Unregister<ILogger>(false);
         }

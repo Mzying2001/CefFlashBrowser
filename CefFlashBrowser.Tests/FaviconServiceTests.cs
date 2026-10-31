@@ -20,6 +20,7 @@ namespace CefFlashBrowser.Tests
         private SynchronizationContext _previousContext;
         private TestContextQueue _context;
         private SqliteDatabase _database;
+        private DatabaseService _databaseService;
         private FaviconService _service;
 
         [TestInitialize]
@@ -31,7 +32,8 @@ namespace CefFlashBrowser.Tests
             _context = new TestContextQueue();
             SynchronizationContext.SetSynchronizationContext(_context);
             _database = new SqliteDatabase(Path.Combine(_testDir, "browser.db"));
-            _service = new FaviconService(_database);
+            _databaseService = new DatabaseService(_database);
+            _service = new FaviconService(_databaseService);
         }
 
         [TestCleanup]
@@ -57,7 +59,7 @@ namespace CefFlashBrowser.Tests
         private void Restart()
         {
             _service.StopAsync().GetAwaiter().GetResult();
-            _service = new FaviconService(_database);
+            _service = new FaviconService(_databaseService);
             Initialize();
         }
 
@@ -114,6 +116,19 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(1L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons WHERE page_url = 'https://example.com'").GetAwaiter().GetResult());
             Restart();
             Assert.AreEqual("https://example.com/favicon.ico?v=3", _service.GetIconUrl("example.com/"));
+        }
+
+        [TestMethod]
+        public void LoadedRecords_AreValidatedAndNormalizedByFaviconService()
+        {
+            Initialize();
+            SeedMapping("HTTPS://EXAMPLE.COM:443/a/?q=1#top", "../icons/logo?v=1", 10);
+            SeedMapping("file:///C:/game.swf", "https://example.com/ignored", 20);
+            SeedMapping("https://example.com/b", "data:image/png;base64,abc", 30);
+            Restart();
+            Assert.AreEqual("https://example.com/icons/logo?v=1", _service.GetIconUrl("https://example.com/a"));
+            Assert.IsNull(_service.GetIconUrl("https://example.com/b"));
+            Assert.IsNull(_service.GetIconUrl("file:///C:/game.swf"));
         }
 
         [TestMethod]
@@ -257,7 +272,7 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(1L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
 
             _service.StopAsync().GetAwaiter().GetResult();
-            _service = new FaviconService(_database);
+            _service = new FaviconService(_databaseService);
             Initialize();
             Assert.AreEqual("https://example.com/new", _service.GetIconUrl("https://example.com/a"));
         }
@@ -269,7 +284,7 @@ namespace CefFlashBrowser.Tests
             Record("https://example.com/a", "/old");
             _service.StopAsync().GetAwaiter().GetResult();
             var controlled = new ControlledDatabase(_database) { HoldSnapshot = true };
-            _service = new FaviconService(controlled);
+            _service = new FaviconService(new DatabaseService(controlled));
             var initialization = _service.InitializeAsync();
             Assert.AreSame(initialization, _service.InitializeAsync());
             Assert.IsTrue(controlled.SnapshotCaptured.Task.Wait(TimeSpan.FromSeconds(10)));
@@ -292,7 +307,7 @@ namespace CefFlashBrowser.Tests
             SeedMapping("https://example.com/b", "https://example.com/b-icon", 20);
             _service.StopAsync().GetAwaiter().GetResult();
             var controlled = new ControlledDatabase(_database) { HoldSnapshot = true };
-            _service = new FaviconService(controlled);
+            _service = new FaviconService(new DatabaseService(controlled));
             _service.RecordAsync("https://example.com/a/?id=1", "/a-icon");
             var initialization = _service.InitializeAsync();
             Assert.IsTrue(controlled.SnapshotCaptured.Task.Wait(TimeSpan.FromSeconds(10)));
@@ -329,7 +344,7 @@ namespace CefFlashBrowser.Tests
         public void FailedWrite_KeepsMemory_AndSameDiscoveryRetries()
         {
             var controlled = new ControlledDatabase(_database);
-            _service = new FaviconService(controlled);
+            _service = new FaviconService(new DatabaseService(controlled));
             Initialize();
             controlled.FailNextWrite = true;
             Record("https://example.com/a", "/icon");
@@ -347,7 +362,7 @@ namespace CefFlashBrowser.Tests
         public void Stop_DrainsPendingWritesWithoutUiPublication_AndLeavesSharedDatabaseUsable()
         {
             var controlled = new ControlledDatabase(_database) { HoldSnapshot = true };
-            _service = new FaviconService(controlled);
+            _service = new FaviconService(new DatabaseService(controlled));
             _service.InitializeAsync();
             Assert.IsTrue(controlled.SnapshotCaptured.Task.Wait(TimeSpan.FromSeconds(10)));
             _service.RecordAsync("https://example.com/a", "/icon");

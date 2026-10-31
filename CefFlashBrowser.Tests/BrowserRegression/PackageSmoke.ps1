@@ -55,10 +55,12 @@ if (Test-Path -LiteralPath $databasePath) {
 try {
     $ioc = [SimpleMvvm.Ioc.SimpleIoc]::Global
     $database = $ioc.GetInstance([CefFlashBrowser.Database.IDatabase], @())
+    $databaseService = $ioc.GetInstance([CefFlashBrowser.Services.DatabaseService], @())
     $service = $ioc.GetInstance([CefFlashBrowser.Services.IFaviconService], @())
     if (![object]::ReferenceEquals($database, $ioc.GetInstance([CefFlashBrowser.Database.IDatabase], @())) -or
+        ![object]::ReferenceEquals($databaseService, $ioc.GetInstance([CefFlashBrowser.Services.DatabaseService], @())) -or
         ![object]::ReferenceEquals($service, $ioc.GetInstance([CefFlashBrowser.Services.IFaviconService], @()))) {
-        throw 'Database and favicon factories must return singleton instances.'
+        throw 'Database, database service and favicon factories must return singleton instances.'
     }
     if (Test-Path -LiteralPath $databasePath) {
         throw 'Resolving services performed database I/O before initialization.'
@@ -77,7 +79,8 @@ try {
     }
     [void]$initialization.GetAwaiter().GetResult()
     [void]$service.RecordAsync('https://example.invalid/a', '/icon.png').GetAwaiter().GetResult()
-    if ($database.ScalarAsync('SELECT icon_url FROM website_icons').GetAwaiter().GetResult() -ne 'https://example.invalid/icon.png') {
+    $records = $databaseService.GetWebsiteIconsAsync().GetAwaiter().GetResult()
+    if ($records.Count -ne 1 -or $records[0].IconUrl -ne 'https://example.invalid/icon.png') {
         throw 'The packaged service did not persist its mapping through the shared database.'
     }
 } finally {

@@ -14,6 +14,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         Application = $null
         Logger = $null
         Database = $null
+        DatabaseService = $null
         FaviconService = $null
         CefStarted = $false
         AuxiliaryTypes = @()
@@ -140,9 +141,12 @@ function Initialize-RegressionEnvironment($Context) {
     [Threading.SynchronizationContext]::SetSynchronizationContext(
         (New-Object System.Windows.Threading.DispatcherSynchronizationContext($Context.Application.Dispatcher)))
     $Context.Database = New-Object CefFlashBrowser.Database.SqliteDatabase((Join-Path $Context.TemporaryPath 'browser.db'))
-    $Context.FaviconService = New-Object CefFlashBrowser.Services.FaviconService($Context.Database, $Context.Logger)
+    $Context.DatabaseService = New-Object CefFlashBrowser.Services.DatabaseService($Context.Database)
+    $Context.FaviconService = New-Object CefFlashBrowser.Services.FaviconService($Context.DatabaseService, $Context.Logger)
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Database.IDatabase]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.Database.PSObject.BaseObject))
+    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.DatabaseService]).Invoke(
+        [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.DatabaseService.PSObject.BaseObject))
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.IFaviconService]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.FaviconService.PSObject.BaseObject))
     $faviconInitialization = $Context.FaviconService.InitializeAsync()
