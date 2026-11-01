@@ -4,6 +4,7 @@ using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,11 @@ namespace CefFlashBrowser.ViewModels
 {
     public class SettingsWindowViewModel : ViewModelBase
     {
+        private LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         public DelegateCommand DeleteCacheCommand { get; set; }
         public DelegateCommand PopupAboutCefCommand { get; set; }
         public DelegateCommand AskRestartAppCommand { get; set; }
@@ -325,7 +331,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void DeleteCache()
         {
-            WindowManager.Confirm(LanguageManager.GetString("message_deleteCache"), callback: result =>
+            WindowManager.Confirm(LanguageService.GetString("message_deleteCache"), callback: result =>
             {
                 if (result != true)
                     return;
@@ -345,10 +351,10 @@ namespace CefFlashBrowser.ViewModels
                         LogHelper.LogError("Delete cache failed", e);
 
                         string msg = string.Format("{0}\n\n{1}:\n{2}",
-                            LanguageManager.GetString("error_deleteCachesRetry"), LanguageManager.GetString("error_message"), e.Message);
+                            LanguageService.GetString("error_deleteCachesRetry"), LanguageService.GetString("error_message"), e.Message);
 
                         bool retry = false;
-                        WindowManager.Confirm(msg, LanguageManager.GetString("dialog_error"), tmp => retry = tmp ?? false);
+                        WindowManager.Confirm(msg, LanguageService.GetString("dialog_error"), tmp => retry = tmp ?? false);
 
                         if (!retry) { break; }
                     }
@@ -365,7 +371,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void AskRestartApp()
         {
-            WindowManager.Confirm(LanguageManager.GetString("message_restart"), callback: result =>
+            WindowManager.Confirm(LanguageService.GetString("message_restart"), callback: result =>
             {
                 if (result == true)
                 {

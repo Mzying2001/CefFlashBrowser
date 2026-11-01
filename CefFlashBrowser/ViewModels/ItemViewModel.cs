@@ -1,6 +1,7 @@
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Services;
 using SimpleMvvm;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 
@@ -16,7 +17,7 @@ namespace CefFlashBrowser.ViewModels
 
         public string Name
         {
-            get => LanguageManager.GetString(NameLanguageKey) ?? Value?.ToString();
+            get => SimpleIoc.Global.GetInstance<LanguageService>().GetString(NameLanguageKey) ?? Value?.ToString();
         }
 
         private void OnLanguageChanged(object _)

@@ -86,14 +86,14 @@ function Test-ContextMenuItems($Context) {
             $handler.OnBeforeContextMenu($null, $null, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
             Assert-Regression (($menu.Commands -join ',') -eq ($scenario.Expected -join ',')) "context menu commands and separator match $($scenario.Name)"
         }
-        foreach ($language in [CefFlashBrowser.Services.LanguageManager]::GetSupportedLanguage()) {
+        foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
             [CefFlashBrowser.Data.GlobalData]::Settings.Language = $language
             $parameters = New-Object RegressionContextMenuParamsProxy
             $parameters.LinkUrl = 'https://example.com'
             $menu = New-Object RegressionMenuModelProxy
             $handler.OnBeforeContextMenu($null, $null, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
             Assert-Regression (![string]::IsNullOrWhiteSpace($menu.Labels[0]) -and
-                $menu.Labels[0] -eq [CefFlashBrowser.Services.LanguageManager]::GetString('browser_openInNewTab')) "new tab menu has a localized label ($language)"
+                $menu.Labels[0] -eq $Context.LanguageService.GetString('browser_openInNewTab')) "new tab menu has a localized label ($language)"
         }
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $true
         $handler.OnBeforeContextMenu($null, $null, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())

@@ -1,6 +1,7 @@
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Services;
 using SimpleMvvm;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 
@@ -8,18 +9,23 @@ namespace CefFlashBrowser.ViewModels
 {
     public class LanguageItemViewModel : ViewModelBase, IDisposable
     {
+        private LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         private bool _disposed;
 
         public string Language { get; }
 
         public string LanguageName
         {
-            get => LanguageManager.GetLanguageName(Language) ?? Language;
+            get => LanguageService.GetLanguageName(Language) ?? Language;
         }
 
         public bool IsCurrentLanguage
         {
-            get => Language == LanguageManager.GetCurrentLanguage();
+            get => Language == LanguageService.GetCurrentLanguage();
         }
 
         private void OnLanguageChanged(object _)

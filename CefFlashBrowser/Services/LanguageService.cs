@@ -10,18 +10,18 @@ using System.Windows;
 
 namespace CefFlashBrowser.Services
 {
-    public static class LanguageManager
+    public class LanguageService
     {
         private const string LanguageResourceDictionaryName = "Language";
 
-        private static Dictionary<string, ResourceDictionary> LanguageDictionaries { get; }
+        private Dictionary<string, ResourceDictionary> LanguageDictionaries { get; }
 
-        static LanguageManager()
+        public LanguageService()
         {
             LanguageDictionaries = new Dictionary<string, ResourceDictionary>();
         }
 
-        public static void InitLanguage()
+        public void InitLanguage()
         {
             LanguageDictionaries.Clear();
 
@@ -45,12 +45,12 @@ namespace CefFlashBrowser.Services
 
 
 
-        private static ResourceDictionary GetCurLangResDic()
+        private ResourceDictionary GetCurLangResDic()
         {
             return ((App)Application.Current).GetNamedResourceDictionary(LanguageResourceDictionaryName);
         }
 
-        private static void SetCurLangResDic(ResourceDictionary dic)
+        private void SetCurLangResDic(ResourceDictionary dic)
         {
             var oldDic = GetCurLangResDic();
 
@@ -67,23 +67,23 @@ namespace CefFlashBrowser.Services
 
 
 
-        public static string[] GetSupportedLanguage()
+        public string[] GetSupportedLanguage()
         {
             return (from item in LanguageDictionaries orderby GetLanguageName(item.Key) select item.Key).ToArray();
         }
 
-        public static bool IsSupportedLanguage(string language)
+        public bool IsSupportedLanguage(string language)
         {
             return language != null && LanguageDictionaries.ContainsKey(language);
         }
 
-        public static string GetCurrentLanguage()
+        public string GetCurrentLanguage()
         {
             var dic = GetCurLangResDic();
             return LanguageDictionaries.FirstOrDefault(pair => pair.Value == dic).Key; // null if not found
         }
 
-        public static void SetCurrentLanguage(string language)
+        public void SetCurrentLanguage(string language)
         {
             if (!IsSupportedLanguage(language))
             {
@@ -100,7 +100,7 @@ namespace CefFlashBrowser.Services
 
 
 
-        public static string GetString(string language, string key)
+        public string GetString(string language, string key)
         {
             ResourceDictionary dic;
 
@@ -117,22 +117,22 @@ namespace CefFlashBrowser.Services
             return dic.Contains(key) ? dic[key].ToString() : string.Empty;
         }
 
-        public static string GetString(string key)
+        public string GetString(string key)
         {
             return GetString(GlobalData.Settings.Language, key);
         }
 
-        public static string GetLanguageName(string language)
+        public string GetLanguageName(string language)
         {
             return GetString(language, "language_name");
         }
 
-        public static string GetLocale(string language)
+        public string GetLocale(string language)
         {
             return GetString(language, "locale");
         }
 
-        public static string GetFormattedString(string key, params object[] args)
+        public string GetFormattedString(string key, params object[] args)
         {
             var str = GetString(GlobalData.Settings.Language, key);
             return string.IsNullOrEmpty(str) ? str : string.Format(str, args);

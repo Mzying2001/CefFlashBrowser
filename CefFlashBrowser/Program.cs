@@ -78,7 +78,7 @@ namespace CefFlashBrowser
                     app.InitializeComponent();
 
                     _dataInitialized = GlobalData.InitData();
-                    LanguageManager.InitLanguage();
+                    SimpleIoc.Global.GetInstance<LanguageService>().InitLanguage();
 
                     SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(app.Dispatcher));
                     _ = InitializeFaviconsAsync();
@@ -157,7 +157,7 @@ namespace CefFlashBrowser
 
             var settings = new CefFlashSettings()
             {
-                Locale = LanguageManager.GetLocale(GlobalData.Settings.Language),
+                Locale = SimpleIoc.Global.GetInstance<LanguageService>().GetLocale(GlobalData.Settings.Language),
                 LogFile = GlobalData.CefLogPath,
                 CachePath = GlobalData.CachesPath,
                 PpapiFlashPath = GlobalData.FlashPath,
@@ -236,6 +236,8 @@ namespace CefFlashBrowser
             SimpleIoc.Global.Register<ILogger>(
                 () => _logger = new FileLogger(GlobalData.GetAppLogPath), Lifetime.Singleton);
 
+            SimpleIoc.Global.Register<LanguageService>(Lifetime.Singleton);
+
             SimpleIoc.Global.Register<IDatabase>(
                 DatabaseFactory, Lifetime.Singleton);
 
@@ -311,6 +313,7 @@ namespace CefFlashBrowser
             if (!stopTask.Wait(TimeSpan.FromSeconds(5)))
                 LogHelper.LogWtf("Timed out waiting for favicon writes; the database will close after queued operations finish.");
 
+            SimpleIoc.Global.Unregister<LanguageService>(false);
             SimpleIoc.Global.Unregister<IFaviconService>(false);
             SimpleIoc.Global.Unregister<DatabaseService>(false);
             SimpleIoc.Global.Unregister<IDatabase>(false);

@@ -5,6 +5,7 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +14,11 @@ namespace CefFlashBrowser.Browser.Handlers
 {
     public class ContextMenuHandler : FlashBrowser.Handlers.ContextMenuHandler
     {
+        private static LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
         public const CefMenuCommand OpenSelectedUrl = CefMenuCommand.UserFirst + 3;
@@ -33,13 +39,13 @@ namespace CefFlashBrowser.Browser.Handlers
                 var selectionText = parameters.SelectionText;
                 var truncatedText = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
 
-                var header = LanguageManager.GetFormattedString("browser_searchFor", truncatedText.Replace('\n', ' '));
+                var header = LanguageService.GetFormattedString("browser_searchFor", truncatedText.Replace('\n', ' '));
                 model.InsertItemAt(0, Search, header);
                 count++;
 
                 if (UrlHelper.IsUrl(selectionText))
                 {
-                    header = LanguageManager.GetFormattedString("browser_openSelectedUrl", truncatedText);
+                    header = LanguageService.GetFormattedString("browser_openSelectedUrl", truncatedText);
                     model.InsertCheckItemAt(0, OpenSelectedUrl, header);
                     count++;
                 }
@@ -47,11 +53,11 @@ namespace CefFlashBrowser.Browser.Handlers
 
             if (!string.IsNullOrWhiteSpace(parameters.LinkUrl))
             {
-                var header = LanguageManager.GetString("browser_openInNewWindow");
+                var header = LanguageService.GetString("browser_openInNewWindow");
                 model.InsertCheckItemAt(0, OpenInNewWindow, header);
                 count++;
 
-                header = LanguageManager.GetString("browser_openInNewTab");
+                header = LanguageService.GetString("browser_openInNewTab");
                 model.InsertItemAt(0, OpenInNewTab, header);
                 count++;
             }
@@ -184,7 +190,7 @@ namespace CefFlashBrowser.Browser.Handlers
         {
             if (_menuItemHeaderKeys.TryGetValue(menuItemInfo.CommandID, out string key))
             {
-                return LanguageManager.GetString(key);
+                return LanguageService.GetString(key);
             }
             else
             {

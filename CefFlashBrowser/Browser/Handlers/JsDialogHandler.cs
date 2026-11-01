@@ -4,6 +4,7 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.Views.Dialogs;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace CefFlashBrowser.Browser.Handlers
                         return;
                 }
 
-                var msg = LanguageManager.GetString(isReload ? "message_askWhetherToReload" : "message_askWhetherToLeave");
+                var msg = SimpleIoc.Global.GetInstance<LanguageService>().GetString(isReload ? "message_askWhetherToReload" : "message_askWhetherToLeave");
                 var dialog = WindowManager.ShowWindow<JsConfirmDialog>(modal: true, initializer: window =>
                 {
                     window.Title = wpfWebBrowser.Title;

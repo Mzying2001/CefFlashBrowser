@@ -305,13 +305,13 @@ function Test-BrowserTabContextMenu($Context) {
             $menu.Items[0].InputGestureText -eq 'Ctrl+W' -and $menu.Items[3].InputGestureText -eq 'Ctrl+Shift+K') 'tab menu has the requested order, separator and shortcut hints'
         Assert-Regression (!$menu.Items[1].IsEnabled) 'close other tabs is disabled for a single tab'
         $keys = @('browser_closeTab', 'browser_closeOtherTabs', 'browser_duplicateTab', 'browser_openTabInNewWindow')
-        foreach ($language in [CefFlashBrowser.Services.LanguageManager]::GetSupportedLanguage()) {
+        foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
             $dictionary = New-Object System.Windows.ResourceDictionary
             $dictionary.set_Source([Uri]("pack://application:,,,/CefFlashBrowser;component/Assets/Language/$language.xaml"))
             $Context.Application.Resources.MergedDictionaries[0] = $dictionary
             foreach ($index in 0..3) {
                 $itemIndex = @(0, 1, 3, 4)[$index]
-                $label = [CefFlashBrowser.Services.LanguageManager]::GetString($language, $keys[$index])
+                $label = $Context.LanguageService.GetString($language, $keys[$index])
                 Assert-Regression (![string]::IsNullOrWhiteSpace($label)) "tab menu label exists: $($keys[$index]) ($language)"
                 Wait-Regression $Context { $menu.Items[$itemIndex].Header -eq $label } "tab menu language updates ($language)"
             }
@@ -640,8 +640,8 @@ function Test-BrowserTabStripSettings($Context) {
     try {
         $legacy = [Newtonsoft.Json.JsonConvert]::DeserializeObject('{"SaveZoomLevel":false}', [CefFlashBrowser.Models.Settings])
         Assert-Regression (!$legacy.AlwaysShowTabStrip -and !$legacy.SaveZoomLevel) 'older settings default to hiding a single tab without changing other values'
-        foreach ($language in [CefFlashBrowser.Services.LanguageManager]::GetSupportedLanguage()) {
-            $label = [CefFlashBrowser.Services.LanguageManager]::GetString($language, 'settings_alwaysShowTabStrip')
+        foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
+            $label = $Context.LanguageService.GetString($language, 'settings_alwaysShowTabStrip')
             Assert-Regression (![string]::IsNullOrWhiteSpace($label)) "always-show tab strip setting has a localized label ($language)"
         }
 

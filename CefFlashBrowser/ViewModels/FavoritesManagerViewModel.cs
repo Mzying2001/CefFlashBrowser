@@ -3,6 +3,7 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -10,6 +11,11 @@ namespace CefFlashBrowser.ViewModels
 {
     public class FavoritesManagerViewModel : ViewModelBase
     {
+        private LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         public DelegateCommand AddItemCommand { get; set; }
         public DelegateCommand RemoveItemCommand { get; set; }
         public DelegateCommand MoveUpCommand { get; set; }
@@ -35,7 +41,7 @@ namespace CefFlashBrowser.ViewModels
         {
             var vm = new AddFavoriteDialogViewModel
             {
-                Name = LanguageManager.GetString("favorites_defaultName"),
+                Name = LanguageService.GetString("favorites_defaultName"),
                 Url = "about:blank",
             };
 
@@ -52,7 +58,7 @@ namespace CefFlashBrowser.ViewModels
             int index = Favorites.IndexOf(item);
             if (index == -1) return;
 
-            var msg = LanguageManager.GetFormattedString("message_removeItem", item.Name);
+            var msg = LanguageService.GetFormattedString("message_removeItem", item.Name);
 
             WindowManager.Confirm(msg, callback: result =>
             {

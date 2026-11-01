@@ -3,6 +3,7 @@ using CefFlashBrowser.Services;
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
+using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,6 +21,11 @@ namespace CefFlashBrowser.ViewModels
 
     public class SolNodeViewModel : ViewModelBase
     {
+        private LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         /// <summary>
         /// Occurs when this node or any descendant node changes.
         /// This event is only raised on the root node.
@@ -41,7 +47,7 @@ namespace CefFlashBrowser.ViewModels
                         if (value is string key)
                         {
                             if (arr.AssocPortion.ContainsKey(key))
-                                throw new ArgumentException(LanguageManager.GetFormattedString("error_arrKeyAreadyExists", key));
+                                throw new ArgumentException(LanguageService.GetFormattedString("error_arrKeyAreadyExists", key));
                         }
                         else if (value is int index)
                         {
@@ -54,7 +60,7 @@ namespace CefFlashBrowser.ViewModels
                         if (value is string key)
                         {
                             if (Parent.Children.Any(node => key.Equals(node.Name)))
-                                throw new ArgumentException(LanguageManager.GetFormattedString("error_objPropAreadyExists", key));
+                                throw new ArgumentException(LanguageService.GetFormattedString("error_objPropAreadyExists", key));
                         }
                     }
                     var oldName = _name;

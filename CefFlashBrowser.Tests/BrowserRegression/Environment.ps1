@@ -13,6 +13,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         TemporaryPath = Join-Path ([IO.Path]::GetTempPath()) ('CefFlashBrowser-regression-' + [Guid]::NewGuid())
         Application = $null
         Logger = $null
+        LanguageService = $null
         Database = $null
         DatabaseService = $null
         FaviconService = $null
@@ -139,6 +140,14 @@ function Initialize-RegressionEnvironment($Context) {
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Log.ILogger]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.Logger.PSObject.BaseObject))
 
+    $Context.LanguageService = New-Object CefFlashBrowser.Services.LanguageService
+    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.LanguageService]).Invoke(
+        [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.LanguageService.PSObject.BaseObject))
+    $languageService = [SimpleMvvm.Ioc.SimpleIoc]::Global.GetInstance([CefFlashBrowser.Services.LanguageService], @())
+    Assert-Regression ([object]::ReferenceEquals($Context.LanguageService, $languageService) -and
+        [object]::ReferenceEquals($languageService, [SimpleMvvm.Ioc.SimpleIoc]::Global.GetInstance(
+            [CefFlashBrowser.Services.LanguageService], @()))) 'language lookups share the registered service instance'
+
     [Threading.SynchronizationContext]::SetSynchronizationContext(
         (New-Object System.Windows.Threading.DispatcherSynchronizationContext($Context.Application.Dispatcher)))
     [void]$applicationAssembly.GetType('CefFlashBrowser.Program').GetMethod('InitializeSQLite', $privateStatic).Invoke($null, $null)
@@ -165,16 +174,16 @@ function Initialize-RegressionEnvironment($Context) {
         $dictionary.set_Source([Uri]$dictionaryUri)
         $Context.Application.Resources.MergedDictionaries.Add($dictionary)
     }
-    # Supply LanguageManager lookups without starting App or loading the user's profile.
+    # Supply LanguageService lookups without starting App or loading the user's profile.
     $languages = New-Object System.Windows.ResourceDictionary
     $languages.set_Source([Uri]'pack://application:,,,/CefFlashBrowser;component/Assets/Language/langs.xaml')
-    $languageDictionaries = [CefFlashBrowser.Services.LanguageManager].GetProperty(
-        'LanguageDictionaries', $privateStatic).GetValue($null, $null)
+    $languageDictionaries = [CefFlashBrowser.Services.LanguageService].GetProperty(
+        'LanguageDictionaries', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($Context.LanguageService, $null)
     foreach ($language in $languages.Keys) {
         $languageDictionaries.Add($language, $languages[$language])
     }
 
-    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Up', 'Down', 'Page', 'Close')) {
+    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Up', 'Down', 'Page', 'Close', 'Language', 'Settings')) {
         $Context.Application.Resources.Add($icon + 'IconUri', [Uri]('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg', [UriKind]::Relative))
     }
     $Context.Application.Resources.Add('NewTabIconUri', [Uri]::new('/Assets/Svgs/new-tab.svg', [UriKind]::Relative))
