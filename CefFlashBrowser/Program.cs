@@ -76,10 +76,10 @@ namespace CefFlashBrowser
 
                 if (isNewInstance)
                 {
+                    _dataInitialized = GlobalData.InitData();
+
                     var app = new App();
                     app.InitializeComponent();
-
-                    _dataInitialized = GlobalData.InitData();
 
                     SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(app.Dispatcher));
                     _ = InitializeFaviconsAsync();
