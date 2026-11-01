@@ -27,10 +27,11 @@ namespace CefFlashBrowser
         private static bool _restart;
         private static bool _dataInitialized;
         private static Mutex _mutex;
-        private static IDatabase _database;
-        private static IFaviconService _faviconService;
-        private static FileLogger _logger;
+
         private static IntPtr _sqliteLibraryHandle;
+        private static IDatabase _database;
+        private static FileLogger _logger;
+        private static FaviconService _faviconService;
 
         private const string InsufficientDirectoryPermissionsMessage =
             "CefFlashBrowser 需要对程序运行目录拥有读取、写入和删除文件的权限，无法继续运行。\r\n\r\n" +
@@ -244,7 +245,7 @@ namespace CefFlashBrowser
             SimpleIoc.Global.Register<DatabaseService>(
                 () => new DatabaseService(SimpleIoc.Global.GetInstance<IDatabase>()), Lifetime.Singleton);
 
-            SimpleIoc.Global.Register<IFaviconService>(
+            SimpleIoc.Global.Register<FaviconService>(
                 () => _faviconService = new FaviconService(
                     SimpleIoc.Global.GetInstance<DatabaseService>(), SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
 
@@ -274,7 +275,7 @@ namespace CefFlashBrowser
 
         private static async Task InitializeFaviconsAsync()
         {
-            try { await SimpleIoc.Global.GetInstance<IFaviconService>().InitializeAsync(); }
+            try { await SimpleIoc.Global.GetInstance<FaviconService>().InitializeAsync(); }
             catch (Exception e) { LogHelper.LogWtf("Failed to initialize the favicon service", e); }
         }
 
@@ -313,9 +314,9 @@ namespace CefFlashBrowser
             if (!stopTask.Wait(TimeSpan.FromSeconds(5)))
                 LogHelper.LogWtf("Timed out waiting for favicon writes; the database will close after queued operations finish.");
 
-            SimpleIoc.Global.Unregister<LanguageService>(false);
-            SimpleIoc.Global.Unregister<IFaviconService>(false);
+            SimpleIoc.Global.Unregister<FaviconService>(false);
             SimpleIoc.Global.Unregister<DatabaseService>(false);
+            SimpleIoc.Global.Unregister<LanguageService>(false);
             SimpleIoc.Global.Unregister<IDatabase>(false);
             SimpleIoc.Global.Unregister<ILogger>(false);
         }

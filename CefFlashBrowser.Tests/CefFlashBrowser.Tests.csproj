@@ -25,7 +25,6 @@
   <ItemGroup>
     <Compile Include="..\CefFlashBrowser\Services\DatabaseService.cs" Link="LinkedSources\DatabaseService.cs" />
     <Compile Include="..\CefFlashBrowser\Models\WebsiteIconRecord.cs" Link="LinkedSources\WebsiteIconRecord.cs" />
-    <Compile Include="..\CefFlashBrowser\Services\IFaviconService.cs" Link="LinkedSources\IFaviconService.cs" />
     <Compile Include="..\CefFlashBrowser\Services\FaviconService.cs" Link="LinkedSources\FaviconService.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\WebsiteIconUrlConverter.cs" Link="LinkedSources\WebsiteIconUrlConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\UrlHelper.cs" Link="LinkedSources\UrlHelper.cs" />

@@ -10,7 +10,7 @@ namespace CefFlashBrowser.Views.Converters
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             return values != null && values.Length >= 3
-                && values[0] is string pageUrl && values[1] is IFaviconService service && values[2] is int
+                && values[0] is string pageUrl && values[1] is FaviconService service && values[2] is int
                 ? service.GetIconUrl(pageUrl) : null;
         }
 

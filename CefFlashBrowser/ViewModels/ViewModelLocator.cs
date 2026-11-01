@@ -51,9 +51,9 @@ namespace CefFlashBrowser.ViewModels
             get => SimpleIoc.Global.GetInstance<MainWindowViewModel>();
         }
 
-        public IFaviconService FaviconService
+        public FaviconService FaviconService
         {
-            get => SimpleIoc.Global.GetInstance<IFaviconService>();
+            get => SimpleIoc.Global.GetInstance<FaviconService>();
         }
 
         public BrowserWindowViewModel BrowserWindowViewModel

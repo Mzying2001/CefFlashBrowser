@@ -271,7 +271,7 @@ namespace CefFlashBrowser.Tests
             _service.PropertyChanged += (sender, e) =>
             {
                 Assert.AreEqual(threadId, Thread.CurrentThread.ManagedThreadId);
-                Assert.AreEqual(nameof(IFaviconService.Revision), e.PropertyName);
+                Assert.AreEqual(nameof(FaviconService.Revision), e.PropertyName);
                 notifications++;
             };
             Record("https://example.com/a", "/icon");

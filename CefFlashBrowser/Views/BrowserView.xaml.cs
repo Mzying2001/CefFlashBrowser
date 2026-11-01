@@ -225,7 +225,7 @@ namespace CefFlashBrowser.Views
         private void BrowserFaviconDiscovered(object sender, FaviconDiscoveredEventArgs e)
         {
             if (!_isClosed)
-                _ = SimpleIoc.Global.GetInstance<IFaviconService>().RecordAsync(e.PageUrl, e.IconUrl);
+                _ = SimpleIoc.Global.GetInstance<FaviconService>().RecordAsync(e.PageUrl, e.IconUrl);
         }
 
         private void InvokeOnUIThread(Action action)

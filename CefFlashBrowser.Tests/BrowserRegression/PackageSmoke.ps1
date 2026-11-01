@@ -65,10 +65,10 @@ try {
     $ioc = [SimpleMvvm.Ioc.SimpleIoc]::Global
     $database = $ioc.GetInstance([CefFlashBrowser.Database.IDatabase], @())
     $databaseService = $ioc.GetInstance([CefFlashBrowser.Services.DatabaseService], @())
-    $service = $ioc.GetInstance([CefFlashBrowser.Services.IFaviconService], @())
+    $service = $ioc.GetInstance([CefFlashBrowser.Services.FaviconService], @())
     if (![object]::ReferenceEquals($database, $ioc.GetInstance([CefFlashBrowser.Database.IDatabase], @())) -or
         ![object]::ReferenceEquals($databaseService, $ioc.GetInstance([CefFlashBrowser.Services.DatabaseService], @())) -or
-        ![object]::ReferenceEquals($service, $ioc.GetInstance([CefFlashBrowser.Services.IFaviconService], @()))) {
+        ![object]::ReferenceEquals($service, $ioc.GetInstance([CefFlashBrowser.Services.FaviconService], @()))) {
         throw 'Database, database service and favicon factories must return singleton instances.'
     }
     if (Test-Path -LiteralPath $databasePath) {

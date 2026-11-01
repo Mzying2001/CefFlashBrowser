@@ -158,7 +158,7 @@ function Initialize-RegressionEnvironment($Context) {
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.Database.PSObject.BaseObject))
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.DatabaseService]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.DatabaseService.PSObject.BaseObject))
-    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.IFaviconService]).Invoke(
+    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.FaviconService]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.FaviconService.PSObject.BaseObject))
     $faviconInitialization = $Context.FaviconService.InitializeAsync()
     Wait-Regression $Context { $faviconInitialization.IsCompleted } 'isolated favicon database initialization'

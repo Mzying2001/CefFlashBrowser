@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Services
 {
-    public class FaviconService : IFaviconService
+    public class FaviconService : INotifyPropertyChanged
     {
         private readonly DatabaseService _database;
         private readonly ILogger _logger;
@@ -66,6 +66,8 @@ namespace CefFlashBrowser.Services
                 ? uri.AbsoluteUri : null;
         }
 
+        // Ignores page queries, fragments and trailing slashes. Matches pages before
+        // same-origin homepages; schemeless addresses try HTTPS then HTTP at each step.
         public string GetIconUrl(string pageUrl)
         {
             VerifyAccess();
