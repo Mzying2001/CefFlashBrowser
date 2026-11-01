@@ -529,7 +529,7 @@ function Test-BrowserTabStrip($Context) {
         Invoke-TabShortcut $window Prior Control
         Assert-Regression ($model.CurrentBrowser -eq $third) 'Ctrl+PageDown and Ctrl+PageUp cycle tabs'
         $window.UpdateLayout()
-        $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
+        $scroll = $tabs.Template.FindName('PART_ScrollViewer', $tabs)
         Assert-Regression ($newButton.IsVisible -and $scroll.ScrollableWidth -lt 1) 'tabs shrink to fit beside the new tab button'
 
         $container = $tabs.ItemContainerGenerator.ContainerFromItem($second)
@@ -578,7 +578,7 @@ function Test-BrowserTabAdaptiveWidth($Context) {
         $tabs = $window.FindName('tabList')
         $strip = $window.FindName('tabStrip')
         $newButton = $window.FindName('newTabButton')
-        $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
+        $scroll = $tabs.Template.FindName('PART_ScrollViewer', $tabs)
         Assert-TabWidths $window 250 'tabs use their default width when space is available'
 
         $window.Width = 600
@@ -817,35 +817,35 @@ function Test-BrowserTabReordering($Context) {
         Assert-Regression ($model.CurrentBrowser -eq $third) 'keyboard cycling follows the reordered tabs'
 
         # Exercise the same midpoint and viewport logic used by DragOver without moving the desktop cursor.
-        $draggedField = $window.GetType().GetField('_draggedTab', [Reflection.BindingFlags]'Instance,NonPublic')
-        $draggedField.SetValue($window, $third)
+        $draggedField = $tabs.GetType().GetField('_draggedItem', [Reflection.BindingFlags]'Instance,NonPublic')
+        $draggedField.SetValue($tabs, $third)
         $firstHeader = $tabs.ItemContainerGenerator.ContainerFromItem($first)
         $point = $firstHeader.TranslatePoint([System.Windows.Point]::new(1, 10), $tabs)
-        Invoke-ViewCallback $window 'UpdateTabDrag' @($point, $false)
+        Invoke-ViewCallback $tabs 'UpdateTabDrag' @($point, $false)
         Assert-Regression ($model.Browsers[0] -eq $third -and $model.CurrentBrowser -eq $third) 'dragging past the left midpoint moves the tab left'
         $window.UpdateLayout()
         $secondHeader = $tabs.ItemContainerGenerator.ContainerFromItem($second)
         $point = $secondHeader.TranslatePoint([System.Windows.Point]::new($secondHeader.ActualWidth - 1, 10), $tabs)
-        Invoke-ViewCallback $window 'UpdateTabDrag' @($point, $false)
+        Invoke-ViewCallback $tabs 'UpdateTabDrag' @($point, $false)
         Assert-Regression ($model.Browsers[2] -eq $third) 'dragging past the right midpoint moves the tab right'
-        Invoke-ViewCallback $window 'UpdateTabDrag' @([System.Windows.Point]::new(0, -10), $false)
+        Invoke-ViewCallback $tabs 'UpdateTabDrag' @([System.Windows.Point]::new(0, -10), $false)
         Assert-Regression ($model.Browsers[2] -eq $third) 'dragging outside the tab strip leaves the order unchanged'
 
         $extras = @(1..3 | ForEach-Object { New-RegressionTab $Context $window })
         $model.CurrentBrowser = $third
         $window.Width = 400
         $window.UpdateLayout()
-        $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
+        $scroll = $tabs.Template.FindName('PART_ScrollViewer', $tabs)
         $scroll.ScrollToLeftEnd()
         $window.UpdateLayout()
         $offset = $scroll.HorizontalOffset
         $point = $scroll.TranslatePoint([System.Windows.Point]::new($scroll.ActualWidth - 1, 10), $tabs)
-        Invoke-ViewCallback $window 'UpdateTabDrag' @($point, $true)
+        Invoke-ViewCallback $tabs 'UpdateTabDrag' @($point, $true)
         Assert-Regression ($scroll.HorizontalOffset -gt $offset) 'dragging at the right edge scrolls overflowing tabs'
         $point = $scroll.TranslatePoint([System.Windows.Point]::new(1, 10), $tabs)
-        Invoke-ViewCallback $window 'UpdateTabDrag' @($point, $true)
+        Invoke-ViewCallback $tabs 'UpdateTabDrag' @($point, $true)
         Assert-Regression ($scroll.HorizontalOffset -eq 0) 'dragging at the left edge scrolls back'
-        $draggedField.SetValue($window, $null)
+        $draggedField.SetValue($tabs, $null)
 
         foreach ($browser in $extras) { $model.CloseBrowser($browser) }
         Wait-Regression $Context { $model.Browsers.Count -eq 3 } 'extra drag overflow tabs close'
@@ -859,11 +859,12 @@ function Test-BrowserTabReordering($Context) {
 }
 
 function Assert-TabDragPreview($Window, $Browser, [string]$Scenario) {
-    $draggedField = $Window.GetType().GetField('_draggedTab', [Reflection.BindingFlags]'Instance,NonPublic')
-    $draggedField.SetValue($Window, $Browser)
+    $tabs = $Window.FindName('tabList')
+    $draggedField = $tabs.GetType().GetField('_draggedItem', [Reflection.BindingFlags]'Instance,NonPublic')
+    $draggedField.SetValue($tabs, $Browser)
     try {
-        Invoke-ViewCallback $Window 'ShowTabDragPreview' @()
-        $snapshot = $Window.FindName('tabDragPreviewImage').Source
+        Invoke-ViewCallback $tabs 'ShowTabDragPreview' @()
+        $snapshot = $tabs.Template.FindName('PART_DragPreviewImage', $tabs).Source
         Assert-Regression ($null -ne $snapshot) "$Scenario creates a preview image"
         $stride = $snapshot.PixelWidth * 4
         $pixels = New-Object byte[] ($stride * $snapshot.PixelHeight)
@@ -875,8 +876,8 @@ function Assert-TabDragPreview($Window, $Browser, [string]$Scenario) {
         }
         Assert-Regression ($visiblePixels -gt 20) "$Scenario preview contains header content ($visiblePixels visible pixels)"
     } finally {
-        Invoke-ViewCallback $Window 'HideTabDragPreview' @()
-        $draggedField.SetValue($Window, $null)
+        Invoke-ViewCallback $tabs 'HideTabDragPreview' @()
+        $draggedField.SetValue($tabs, $null)
     }
 }
 
@@ -907,10 +908,10 @@ function Test-BrowserTabDragPreview($Context) {
         $tabs = $window.FindName('tabList')
         $tabs.ScrollIntoView($third)
         $window.UpdateLayout()
-        $scroll = $tabs.Template.FindName('tabScrollViewer', $tabs)
+        $scroll = $tabs.Template.FindName('PART_ScrollViewer', $tabs)
         Assert-Regression ($scroll.HorizontalOffset -gt 0) 'preview check covers a scrolled tab strip'
         Assert-TabDragPreview $window $third 'last tab after horizontal scrolling'
-        Assert-Regression (!$window.FindName('tabDragPreview').IsOpen -and $null -eq $tabs.Tag) 'preview cleanup restores the tab strip'
+        Assert-Regression (!$tabs.Template.FindName('PART_DragPreview', $tabs).IsOpen -and $null -eq $tabs.DraggedItem) 'preview cleanup restores the tab strip'
     } finally {
         $window.ForceCloseWindow()
     }

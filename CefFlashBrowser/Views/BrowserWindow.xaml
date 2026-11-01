@@ -28,7 +28,6 @@
         <!--Converters-->
         <converters:MultiplyConverter x:Key="TwoThirdConverter"
                                       Multiplier="0.6666666666666667"/>
-        <converters:BrowserTabWidthConverter x:Key="BrowserTabWidthConverter"/>
 
         <!--ConetxtMenu-->
         <!--Browser actions menu-->
@@ -613,73 +612,18 @@
                 </Grid.ColumnDefinitions>
 
                 <!--tabs-->
-                <ListBox x:Name="tabList"
-                         BorderThickness="0"
-                         Background="Transparent"
-                         ItemsSource="{Binding Browsers}"
-                         SelectedItem="{Binding CurrentBrowser, Mode=OneWay}"
-                         SelectionMode="Single"
-                         SelectionChanged="TabSelectionChanged"
-                         AllowDrop="True"
-                         PreviewMouseMove="TabListPreviewMouseMove"
-                         PreviewMouseLeftButtonUp="TabListPreviewMouseLeftButtonUp"
-                         DragOver="TabListDragOver"
-                         DragLeave="TabListDragLeave"
-                         Drop="TabListDrop"
-                         GiveFeedback="TabListGiveFeedback"
-                         QueryContinueDrag="TabListQueryContinueDrag"
-                         PreviewMouseWheel="TabListPreviewMouseWheel">
-                    <ListBox.Template>
-                        <ControlTemplate TargetType="ListBox">
-                            <ScrollViewer x:Name="tabScrollViewer"
-                                          Focusable="False"
-                                          CanContentScroll="False"
-                                          VerticalScrollBarVisibility="Disabled"
-                                          HorizontalScrollBarVisibility="Hidden">
-                                <ItemsPresenter/>
-                            </ScrollViewer>
-                        </ControlTemplate>
-                    </ListBox.Template>
-                    <ListBox.Resources>
-                        <ControlTemplate x:Key="tabContainerTemplate"
-                                         TargetType="ListBoxItem">
-                            <Border CornerRadius="6,6,0,0"
-                                    Background="{TemplateBinding Background}">
-                                <ContentPresenter Margin="{TemplateBinding Padding}"/>
-                            </Border>
-                        </ControlTemplate>
-                    </ListBox.Resources>
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Width">
-                                <Setter.Value>
-                                    <MultiBinding Converter="{StaticResource BrowserTabWidthConverter}">
-                                        <Binding ElementName="tabStrip" Path="ActualWidth"/>
-                                        <Binding ElementName="newTabButton" Path="ActualWidth"/>
-                                        <Binding ElementName="newTabButton" Path="Margin"/>
-                                        <Binding RelativeSource="{RelativeSource AncestorType=ListBox}" Path="Items.Count"/>
-                                    </MultiBinding>
-                                </Setter.Value>
-                            </Setter>
-                            <Setter Property="MinHeight"
-                                    Value="32"/>
-                            <Setter Property="Padding"
-                                    Value="6"/>
-                            <Setter Property="HorizontalContentAlignment"
-                                    Value="Stretch"/>
-                            <Setter Property="Background"
-                                    Value="Transparent"/>
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource PrimaryTextBrush}"/>
-                            <Setter Property="FocusVisualStyle"
-                                    Value="{x:Null}"/>
-                            <Setter Property="Template"
-                                    Value="{StaticResource tabContainerTemplate}"/>
+                <c:BrowserTab x:Name="tabList"
+                              Foreground="{DynamicResource PrimaryTextBrush}"
+                              Background="{DynamicResource RegionBrush}"
+                              BorderBrush="{DynamicResource PrimaryBrush}"
+                              ItemsSource="{Binding Browsers}"
+                              SelectedItem="{Binding CurrentBrowser, Mode=OneWay}"
+                              IsDragEnabled="True"
+                              MoveItem="TabMoveItem"
+                              SelectionChanged="TabSelectionChanged">
+                    <c:BrowserTab.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem"
+                               BasedOn="{StaticResource {x:Static c:BrowserTab.ItemContainerStyleKey}}">
                             <Setter Property="ToolTip"
                                     Value="{Binding Address}"/>
                             <Setter Property="Tag"
@@ -726,26 +670,9 @@
                             </Setter>
                             <EventSetter Event="PreviewMouseDown"
                                          Handler="TabPreviewMouseDown"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#20808080"/>
-                                </Trigger>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#30808080"/>
-                                </Trigger>
-                                <DataTrigger Value="True">
-                                    <DataTrigger.Binding>
-                                        <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
-                                            <Binding/>
-                                            <Binding Path="Tag" RelativeSource="{RelativeSource AncestorType=ListBox}"/>
-                                        </MultiBinding>
-                                    </DataTrigger.Binding>
-                                    <Setter Property="Opacity" Value="0.35"/>
-                                </DataTrigger>
-                            </Style.Triggers>
                         </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
+                    </c:BrowserTab.ItemContainerStyle>
+                    <c:BrowserTab.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
                             <DockPanel>
                                 <c:BrowserIcon
@@ -830,8 +757,8 @@
                                 </TextBlock>
                             </DockPanel>
                         </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                    </c:BrowserTab.ItemTemplate>
+                </c:BrowserTab>
 
                 <!--new tab-->
                 <Button x:Name="newTabButton"
@@ -889,29 +816,6 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Grid>
-
-        <Popup x:Name="tabDragPreview"
-               Placement="RelativePoint"
-               PlacementTarget="{Binding ElementName=tabList}"
-               AllowsTransparency="True"
-               StaysOpen="True"
-               Focusable="False"
-               IsHitTestVisible="False"
-               Opened="TabDragPreviewOpened">
-            <Border Margin="8"
-                    CornerRadius="6"
-                    BorderThickness="1"
-                    BorderBrush="{DynamicResource PrimaryBrush}"
-                    Background="{DynamicResource RegionBrush}"
-                    Opacity="0.95">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="12"
-                                      ShadowDepth="3"
-                                      Opacity="0.25"/>
-                </Border.Effect>
-                <Image x:Name="tabDragPreviewImage"/>
-            </Border>
-        </Popup>
 
         <Popup x:Name="statusPopup"
                StaysOpen="True"

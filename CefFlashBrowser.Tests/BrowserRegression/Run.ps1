@@ -26,6 +26,7 @@ foreach ($file in @(
     'Scenarios\Favorites.ps1',
     'Scenarios\BrowserWindow.ps1',
     'Scenarios\BrowserTabs.ps1',
+    'Scenarios\BrowserTabControl.ps1',
     'Scenarios\ContextMenu.ps1',
     'Scenarios\AuxiliaryWindows.ps1',
     'Scenarios\Lifecycle.ps1'
@@ -41,6 +42,7 @@ try {
     Test-LanguageService $context
     Test-FavoritesService $context
     Test-BrowserBeforeInitialization $context
+    Test-BrowserTabControl $context
     Test-BrowserTabsBeforeShow $context
     Start-RegressionCef $context
     Test-NavigationBeforeHosting $context

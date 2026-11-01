@@ -3,6 +3,7 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
+using CefFlashBrowser.Views.Custom;
 using CefSharp;
 using SimpleMvvm.Messaging;
 using System;
@@ -16,7 +17,6 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace CefFlashBrowser.Views
@@ -38,13 +38,6 @@ namespace CefFlashBrowser.Views
 
         private WindowState _windowStateBeforeFullScreen;
         private bool _windowStateRestorePending = false;
-
-        private BrowserViewModel _draggedTab;
-        private Point _tabDragStart;
-        private Point _tabDragOffset;
-        private Point _tabDragPosition;
-        private bool _isTabDragging;
-        private DispatcherTimer _tabDragScrollTimer;
 
 
 
@@ -136,7 +129,6 @@ namespace CefFlashBrowser.Views
             if (tabList.SelectedItem is BrowserViewModel browser)
             {
                 ViewModel.CurrentBrowser = browser;
-                tabList.ScrollIntoView(browser);
 
                 if (ShouldFocusAddressBar(browser))
                 {
@@ -153,247 +145,13 @@ namespace CefFlashBrowser.Views
                 e.Handled = true;
                 ViewModel.CloseBrowser(item.DataContext as BrowserViewModel);
             }
+        }
 
-            if (e.ChangedButton != MouseButton.Left || _isTabDragging)
-                return;
-
-            _draggedTab = null;
-
-            // The close button keeps its own mouse gesture, including mouse capture.
-            for (var source = e.OriginalSource as DependencyObject;
-                source != null && source != sender; source = VisualTreeHelper.GetParent(source))
+        private void TabMoveItem(object sender, MoveItemEventArgs e)
+        {
+            if (e.Item is BrowserViewModel browser)
             {
-                if (source is ButtonBase)
-                    return;
-            }
-
-            if (!ViewModel.IsClosing && sender is ListBoxItem tab)
-            {
-                _draggedTab = tab.DataContext as BrowserViewModel;
-                _tabDragStart = e.GetPosition(tabList);
-                _tabDragOffset = e.GetPosition(tab);
-            }
-        }
-
-        private void TabListPreviewMouseMove(object sender, MouseEventArgs e)
-        {
-            if (_isTabDragging || _draggedTab == null)
-                return;
-
-            if (e.LeftButton != MouseButtonState.Pressed || ViewModel.IsClosing
-                || !ViewModel.Browsers.Contains(_draggedTab))
-            {
-                _draggedTab = null;
-                return;
-            }
-
-            var position = e.GetPosition(tabList);
-
-            if (Math.Abs(position.X - _tabDragStart.X) < SystemParameters.MinimumHorizontalDragDistance
-                && Math.Abs(position.Y - _tabDragStart.Y) < SystemParameters.MinimumVerticalDragDistance)
-                return;
-
-            e.Handled = true;
-            ViewModel.CurrentBrowser = _draggedTab;
-            _isTabDragging = true;
-            _tabDragPosition = position;
-            _tabDragScrollTimer = new DispatcherTimer(
-                TimeSpan.FromMilliseconds(150), DispatcherPriority.Input,
-                (s, args) => UpdateTabDrag(_tabDragPosition, true), Dispatcher);
-
-            try
-            {
-                ShowTabDragPreview();
-                // Use the stable list as the source: a moved header can lose its container.
-                DragDrop.DoDragDrop(tabList, new DataObject(typeof(BrowserViewModel), _draggedTab), DragDropEffects.Move);
-            }
-            finally
-            {
-                HideTabDragPreview();
-                _tabDragScrollTimer.Stop();
-                _tabDragScrollTimer = null;
-                _isTabDragging = false;
-                _draggedTab = null;
-            }
-        }
-
-        private void TabListPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (!_isTabDragging)
-                _draggedTab = null;
-        }
-
-        private bool IsTabDrag(DragEventArgs e)
-        {
-            return _isTabDragging && !ViewModel.IsClosing && _draggedTab != null
-                && ViewModel.Browsers.Contains(_draggedTab)
-                && e.Data.GetDataPresent(typeof(BrowserViewModel))
-                && ReferenceEquals(e.Data.GetData(typeof(BrowserViewModel)), _draggedTab);
-        }
-
-        private void TabListDragOver(object sender, DragEventArgs e)
-        {
-            e.Effects = IsTabDrag(e) ? DragDropEffects.Move : DragDropEffects.None;
-            e.Handled = true;
-
-            if (e.Effects == DragDropEffects.Move)
-            {
-                _tabDragPosition = e.GetPosition(tabList);
-                UpdateTabDrag(_tabDragPosition, false);
-            }
-        }
-
-        private void TabListDrop(object sender, DragEventArgs e)
-        {
-            TabListDragOver(sender, e);
-        }
-
-        private void TabListDragLeave(object sender, DragEventArgs e)
-        {
-            _tabDragPosition = new Point(-1, -1);
-        }
-
-        private void ShowTabDragPreview()
-        {
-            tabList.UpdateLayout();
-
-            if (!(tabList.ItemContainerGenerator.ContainerFromItem(_draggedTab) is ListBoxItem tab))
-                return;
-
-            // Capture before dimming, so the preview survives header regeneration during moves.
-            var dpi = VisualTreeHelper.GetDpi(tab);
-            var snapshot = new RenderTargetBitmap(
-                Math.Max(1, (int)Math.Ceiling(tab.ActualWidth * dpi.DpiScaleX)),
-                Math.Max(1, (int)Math.Ceiling(tab.ActualHeight * dpi.DpiScaleY)),
-                dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
-
-            // The template root starts at (0, 0); the container includes its list layout offset.
-            snapshot.Render((Visual)VisualTreeHelper.GetChild(tab, 0));
-            snapshot.Freeze();
-
-            tabDragPreviewImage.Source = snapshot;
-            tabDragPreviewImage.Width = tab.ActualWidth;
-            tabDragPreviewImage.Height = tab.ActualHeight;
-            tabDragPreview.HorizontalOffset = _tabDragPosition.X - _tabDragOffset.X - 8;
-            tabDragPreview.VerticalOffset = _tabDragPosition.Y - _tabDragOffset.Y - 8;
-            tabDragPreview.IsOpen = true;
-            tabList.Tag = _draggedTab;
-        }
-
-        private void HideTabDragPreview()
-        {
-            tabDragPreview.IsOpen = false;
-            tabDragPreviewImage.Source = null;
-            tabList.Tag = null;
-        }
-
-        private void TabDragPreviewOpened(object sender, EventArgs e)
-        {
-            if (PresentationSource.FromVisual(tabDragPreview.Child) is HwndSource source)
-            {
-                // The native popup must let OLE drag hit testing reach the tab strip beneath it.
-                HwndHelper.SetWindowExStyle(source.Handle, HwndHelper.GetWindowExStyle(source.Handle)
-                    | Win32.WS_EX_TRANSPARENT | Win32.WS_EX_NOACTIVATE);
-                UpdateTabDragPreview();
-            }
-        }
-
-        private void UpdateTabDragPreview()
-        {
-            if (tabDragPreview.IsOpen
-                && PresentationSource.FromVisual(tabDragPreview.Child) is HwndSource source
-                && Win32.GetCursorPos(out var cursor))
-            {
-                var offset = source.CompositionTarget.TransformToDevice.Transform(
-                    new Vector(_tabDragOffset.X + 8, _tabDragOffset.Y + 8));
-
-                Win32.SetWindowPos(source.Handle, IntPtr.Zero,
-                    cursor.x - (int)offset.X, cursor.y - (int)offset.Y, 0, 0,
-                    Win32.SWP_NOSIZE | Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE);
-            }
-        }
-
-        private void TabListGiveFeedback(object sender, GiveFeedbackEventArgs e)
-        {
-            if (!_isTabDragging)
-                return;
-
-            UpdateTabDragPreview();
-
-            if (e.Effects == DragDropEffects.Move)
-            {
-                e.UseDefaultCursors = false;
-                Mouse.SetCursor(Cursors.Arrow);
-                e.Handled = true;
-            }
-        }
-
-        private void TabListQueryContinueDrag(object sender, QueryContinueDragEventArgs e)
-        {
-            if (ViewModel.IsClosing || !tabList.IsVisible)
-            {
-                e.Action = DragAction.Cancel;
-                e.Handled = true;
-            }
-        }
-
-        private void UpdateTabDrag(Point position, bool scroll)
-        {
-            if (ViewModel.IsClosing || !tabList.IsVisible || _draggedTab == null
-                || !(tabList.Template.FindName("tabScrollViewer", tabList) is ScrollViewer scrollViewer))
-                return;
-
-            var viewportPosition = tabList.TranslatePoint(position, scrollViewer);
-
-            if (viewportPosition.Y < 0 || viewportPosition.Y > scrollViewer.ActualHeight
-                || viewportPosition.X < 0 || viewportPosition.X > scrollViewer.ActualWidth)
-                return;
-
-            if (scroll)
-            {
-                const double edgeWidth = 24;
-
-                if (viewportPosition.X < edgeWidth)
-                    scrollViewer.LineLeft();
-                else if (viewportPosition.X > scrollViewer.ActualWidth - edgeWidth)
-                    scrollViewer.LineRight();
-
-                tabList.UpdateLayout();
-            }
-
-            var oldIndex = ViewModel.Browsers.IndexOf(_draggedTab);
-            var newIndex = oldIndex;
-
-            for (int i = 0; i < ViewModel.Browsers.Count; i++)
-            {
-                if (i == oldIndex || !(tabList.ItemContainerGenerator.ContainerFromIndex(i) is ListBoxItem tab))
-                    continue;
-
-                var center = tab.TranslatePoint(new Point(tab.ActualWidth / 2, 0), tabList).X;
-
-                if (i < oldIndex && position.X < center)
-                {
-                    newIndex = i;
-                    break;
-                }
-                if (i > oldIndex && position.X > center)
-                {
-                    newIndex = i;
-                }
-            }
-
-            ViewModel.MoveBrowser(_draggedTab, newIndex);
-        }
-
-        private void TabListPreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            if (tabList.Template.FindName("tabScrollViewer", tabList) is ScrollViewer scrollViewer)
-            {
-                if (e.Delta > 0)
-                    scrollViewer.LineLeft();
-                else if (e.Delta < 0)
-                    scrollViewer.LineRight();
-
+                ViewModel.MoveBrowser(browser, e.NewIndex);
                 e.Handled = true;
             }
         }
