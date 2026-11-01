@@ -9,6 +9,7 @@
         xmlns:data="clr-namespace:CefFlashBrowser.Data"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
         mc:Ignorable="d"
         
@@ -130,6 +131,11 @@
                 <MenuItem x:Name="languageMenu"
                           Header="{DynamicResource mainWindow_languages}"
                           ItemsSource="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel.LanguageList}">
+                    <MenuItem.Icon>
+                        <svgc:SvgIcon Width="13" 
+                                      Height="13" 
+                                      UriSource="{StaticResource LanguageIconUri}"/>
+                    </MenuItem.Icon>
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem"
                                BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -147,7 +153,13 @@
 
                 <!--Settings Option-->
                 <MenuItem Header="{DynamicResource common_settings}"
-                          Command="{Binding OpenSettingsWindowCommand}"/>
+                          Command="{Binding OpenSettingsWindowCommand}">
+                    <MenuItem.Icon>
+                        <svgc:SvgIcon Width="13" 
+                                      Height="13" 
+                                      UriSource="{StaticResource SettingsIconUri}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
         </Menu>
 
