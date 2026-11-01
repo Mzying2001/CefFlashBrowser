@@ -1,6 +1,6 @@
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Infrastructure.Wpf;
-using CefFlashBrowser.Utils;
+using CefFlashBrowser.Log;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections;
@@ -14,25 +14,24 @@ namespace CefFlashBrowser.Services
     {
         private const string LanguageResourceDictionaryName = "Language";
 
-        private Dictionary<string, ResourceDictionary> LanguageDictionaries { get; }
+        private readonly ILogger _logger;
+        private readonly Dictionary<string, ResourceDictionary> _languageDictionaries = new Dictionary<string, ResourceDictionary>();
+        private string _currentLanguage;
 
-        public LanguageService()
+        public LanguageService(ILogger logger)
         {
-            LanguageDictionaries = new Dictionary<string, ResourceDictionary>();
-        }
-
-        public void InitLanguage()
-        {
-            LanguageDictionaries.Clear();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             var languages = new ResourceDictionary
-            { Source = new Uri("Assets/Language/langs.xaml", UriKind.Relative) };
+            {
+                Source = new Uri("pack://application:,,,/CefFlashBrowser;component/Assets/Language/langs.xaml")
+            };
 
             foreach (DictionaryEntry entry in languages)
             {
-                if (entry.Key is string lang && entry.Value is ResourceDictionary langDic)
+                if (entry.Key is string language && entry.Value is ResourceDictionary dictionary)
                 {
-                    LanguageDictionaries.Add(lang, new NamedResourceDictionary(langDic)
+                    _languageDictionaries.Add(language, new NamedResourceDictionary(dictionary)
                     {
                         Name = LanguageResourceDictionaryName
                     });
@@ -42,79 +41,65 @@ namespace CefFlashBrowser.Services
             SetCurrentLanguage(GlobalData.Settings.Language);
         }
 
-
-
-
-        private ResourceDictionary GetCurLangResDic()
+        private ResourceDictionary GetCurrentLanguageDictionary()
         {
-            return ((App)Application.Current).GetNamedResourceDictionary(LanguageResourceDictionaryName);
+            return Application.Current.Resources.MergedDictionaries
+                .OfType<NamedResourceDictionary>()
+                .FirstOrDefault(dictionary => dictionary.Name == LanguageResourceDictionaryName);
         }
 
-        private void SetCurLangResDic(ResourceDictionary dic)
+        private void SetCurrentLanguageDictionary(ResourceDictionary dictionary)
         {
-            var oldDic = GetCurLangResDic();
+            var oldDictionary = GetCurrentLanguageDictionary();
 
-            foreach (var key in oldDic.Keys)
+            foreach (var key in oldDictionary.Keys)
             {
-                if (!dic.Contains(key))
-                    dic[key] = oldDic[key];
+                if (!dictionary.Contains(key))
+                    dictionary[key] = oldDictionary[key];
             }
 
             var mergedDictionaries = Application.Current.Resources.MergedDictionaries;
-            mergedDictionaries[mergedDictionaries.IndexOf(oldDic)] = dic;
+            mergedDictionaries[mergedDictionaries.IndexOf(oldDictionary)] = dictionary;
         }
-
-
-
 
         public string[] GetSupportedLanguage()
         {
-            return (from item in LanguageDictionaries orderby GetLanguageName(item.Key) select item.Key).ToArray();
+            return _languageDictionaries.Keys.OrderBy(GetLanguageName).ToArray();
         }
 
         public bool IsSupportedLanguage(string language)
         {
-            return language != null && LanguageDictionaries.ContainsKey(language);
+            return language != null && _languageDictionaries.ContainsKey(language);
         }
 
         public string GetCurrentLanguage()
         {
-            var dic = GetCurLangResDic();
-            return LanguageDictionaries.FirstOrDefault(pair => pair.Value == dic).Key; // null if not found
+            return _currentLanguage;
         }
 
         public void SetCurrentLanguage(string language)
         {
-            if (!IsSupportedLanguage(language))
+            if (language == null || !_languageDictionaries.TryGetValue(language, out var dictionary))
             {
-                LogHelper.LogError($"Language '{language}' is not supported.");
+                _logger.Log(LogLevel.Error, $"Language '{language}' is not supported.");
+                return;
             }
-            else
-            {
-                SetCurLangResDic(LanguageDictionaries[language]);
-                GlobalData.Settings.Language = language;
-                Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, language);
-            }
+
+            SetCurrentLanguageDictionary(dictionary);
+            _currentLanguage = language;
+            GlobalData.Settings.Language = language;
+            Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, language);
         }
-
-
-
 
         public string GetString(string language, string key)
         {
-            ResourceDictionary dic;
-
-            if (IsSupportedLanguage(language))
+            if (language == null || !_languageDictionaries.TryGetValue(language, out var dictionary))
             {
-                dic = LanguageDictionaries[language];
-            }
-            else
-            {
-                dic = GetCurLangResDic();
-                LogHelper.LogError($"Language '{language}' is not supported. Falling back to current language.");
+                dictionary = GetCurrentLanguageDictionary();
+                _logger.Log(LogLevel.Error, $"Language '{language}' is not supported. Falling back to current language.");
             }
 
-            return dic.Contains(key) ? dic[key].ToString() : string.Empty;
+            return dictionary.Contains(key) ? dictionary[key].ToString() : string.Empty;
         }
 
         public string GetString(string key)
@@ -134,7 +119,7 @@ namespace CefFlashBrowser.Services
 
         public string GetFormattedString(string key, params object[] args)
         {
-            var str = GetString(GlobalData.Settings.Language, key);
+            var str = GetString(key);
             return string.IsNullOrEmpty(str) ? str : string.Format(str, args);
         }
     }

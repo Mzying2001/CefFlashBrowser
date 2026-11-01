@@ -45,6 +45,7 @@ The runner exits with code 0 after all checks and cleanup succeed. An assertion,
 | `Run.ps1` | Parameters, process checks, file loading, ordered execution, and final cleanup. |
 | `Environment.ps1` | Run context, build output checks, assembly and WPF setup, fixtures, and CEF lifecycle. |
 | `Helpers.ps1` | Assertions, Dispatcher waits, browser commands, window creation, JavaScript, DevTools, and reflection helpers. |
+| `Scenarios/Language.ps1` | Automatic initialization, saved language selection, resource switching, settings and notifications, missing translations, invalid language fallback, and injected logging before CEF starts. |
 | `TestDoubles.cs` | Browser and popup proxies, native keyboard input helpers, and the beforeunload handler, compiled at runtime with `Add-Type -Path`. Excluded from the MSTest project's compilation. |
 | `Scenarios/BrowserWindow.ps1` | Template callbacks, DevTools, navigation and favorites, display state, closing, and saved state restoration. |
 | `FaviconHttpFixture.cs`, `Scenarios/Favicons.ps1` | Local HTTP pages, redirects and failed images; discovered mappings, all three favorites surfaces, editing and live refresh, image fallback, and queued navigation and disposal callbacks. |
@@ -55,7 +56,7 @@ The runner exits with code 0 after all checks and cleanup succeed. An assertion,
 
 Only `Run.ps1` executes the suite. The supporting PowerShell files define functions without starting WPF or CEF when loaded. Functions receive a run context explicitly when they need shared resources; individual windows and browsers remain local to their scenarios.
 
-The order is intentional: prepare WPF; check deferred browsers and tab management before CEF initialization; start CEF; check navigation before native hosting; close auxiliary windows before Show; exercise the main window and restore its saved state; close initializing main windows; exercise multiple tabs and context menus; exercise auxiliary windows; send close-all to windows with ready and initializing tabs; clean up. CEF starts once, and the checks run serially. Settings such as zoom and DevTools width carry across checks that verify persistence, so keep those checks together and in order.
+The order is intentional: prepare WPF; verify language initialization and switching; check deferred browsers and tab management before CEF initialization; start CEF; check navigation before native hosting; close auxiliary windows before Show; exercise the main window and restore its saved state; close initializing main windows; exercise multiple tabs and context menus; exercise auxiliary windows; send close-all to windows with ready and initializing tabs; clean up. CEF starts once, and the checks run serially. Settings such as zoom and DevTools width carry across checks that verify persistence, so keep those checks together and in order.
 
 ## Test data and diagnostics
 

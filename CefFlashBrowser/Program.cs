@@ -79,7 +79,6 @@ namespace CefFlashBrowser
                     app.InitializeComponent();
 
                     _dataInitialized = GlobalData.InitData();
-                    SimpleIoc.Global.GetInstance<LanguageService>().InitLanguage();
 
                     SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(app.Dispatcher));
                     _ = InitializeFaviconsAsync();
@@ -237,7 +236,8 @@ namespace CefFlashBrowser
             SimpleIoc.Global.Register<ILogger>(
                 () => _logger = new FileLogger(GlobalData.GetAppLogPath), Lifetime.Singleton);
 
-            SimpleIoc.Global.Register<LanguageService>(Lifetime.Singleton);
+            SimpleIoc.Global.Register<LanguageService>(
+                () => new LanguageService(SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
 
             SimpleIoc.Global.Register<IDatabase>(
                 DatabaseFactory, Lifetime.Singleton);

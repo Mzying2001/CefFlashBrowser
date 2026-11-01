@@ -22,6 +22,7 @@ if (([IntPtr]::Size -eq 8) -ne ($Platform -eq 'x64')) {
 foreach ($file in @(
     'Environment.ps1',
     'Helpers.ps1',
+    'Scenarios\Language.ps1',
     'Scenarios\BrowserWindow.ps1',
     'Scenarios\BrowserTabs.ps1',
     'Scenarios\ContextMenu.ps1',
@@ -36,6 +37,7 @@ $context = New-RegressionContext $PSScriptRoot $Platform $Configuration
 $failure = $null
 try {
     Initialize-RegressionEnvironment $context
+    Test-LanguageService $context
     Test-BrowserBeforeInitialization $context
     Test-BrowserTabsBeforeShow $context
     Start-RegressionCef $context

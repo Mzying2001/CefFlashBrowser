@@ -293,7 +293,7 @@ function Test-BrowserTabContextMenu($Context) {
     $savedBehavior = $settings.NewPageBehavior
     $savedShortcuts = $settings.DisableBrowserShortcuts
     $savedTabStrip = $settings.AlwaysShowTabStrip
-    $savedLanguage = $Context.Application.Resources.MergedDictionaries[0]
+    $savedLanguage = $Context.LanguageService.GetCurrentLanguage()
     $beforeWindows = @($Context.Application.Windows)
     try {
         $settings.AlwaysShowTabStrip = $true
@@ -306,9 +306,7 @@ function Test-BrowserTabContextMenu($Context) {
         Assert-Regression (!$menu.Items[1].IsEnabled) 'close other tabs is disabled for a single tab'
         $keys = @('browser_closeTab', 'browser_closeOtherTabs', 'browser_duplicateTab', 'browser_openTabInNewWindow')
         foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
-            $dictionary = New-Object System.Windows.ResourceDictionary
-            $dictionary.set_Source([Uri]("pack://application:,,,/CefFlashBrowser;component/Assets/Language/$language.xaml"))
-            $Context.Application.Resources.MergedDictionaries[0] = $dictionary
+            $Context.LanguageService.SetCurrentLanguage($language)
             foreach ($index in 0..3) {
                 $itemIndex = @(0, 1, 3, 4)[$index]
                 $label = $Context.LanguageService.GetString($language, $keys[$index])
@@ -317,7 +315,7 @@ function Test-BrowserTabContextMenu($Context) {
             }
         }
         $menu.IsOpen = $false
-        $Context.Application.Resources.MergedDictionaries[0] = $savedLanguage
+        $Context.LanguageService.SetCurrentLanguage($savedLanguage)
         $last = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
         $source.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context {
@@ -383,7 +381,7 @@ function Test-BrowserTabContextMenu($Context) {
         Wait-Regression $Context { !$disabledWindow.IsVisible } 'tab menu closes the window with its final tab'
     } finally {
         if ($null -ne $menu) { $menu.IsOpen = $false }
-        $Context.Application.Resources.MergedDictionaries[0] = $savedLanguage
+        $Context.LanguageService.SetCurrentLanguage($savedLanguage)
         $settings.NewPageBehavior = $savedBehavior
         $settings.DisableBrowserShortcuts = $savedShortcuts
         $settings.AlwaysShowTabStrip = $savedTabStrip

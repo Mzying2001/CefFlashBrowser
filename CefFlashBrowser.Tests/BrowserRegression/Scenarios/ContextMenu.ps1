@@ -62,7 +62,7 @@ function Test-ContextMenuRouting($Context) {
 
 function Test-ContextMenuItems($Context) {
     $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
-    $savedLanguage = [CefFlashBrowser.Data.GlobalData]::Settings.Language
+    $savedLanguage = $Context.LanguageService.GetCurrentLanguage()
     $handler = New-Object CefFlashBrowser.Browser.Handlers.ContextMenuHandler
     try {
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
@@ -87,7 +87,7 @@ function Test-ContextMenuItems($Context) {
             Assert-Regression (($menu.Commands -join ',') -eq ($scenario.Expected -join ',')) "context menu commands and separator match $($scenario.Name)"
         }
         foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
-            [CefFlashBrowser.Data.GlobalData]::Settings.Language = $language
+            $Context.LanguageService.SetCurrentLanguage($language)
             $parameters = New-Object RegressionContextMenuParamsProxy
             $parameters.LinkUrl = 'https://example.com'
             $menu = New-Object RegressionMenuModelProxy
@@ -100,7 +100,7 @@ function Test-ContextMenuItems($Context) {
         Assert-Regression ($menu.Commands.Count -eq 0) 'disabling context menus removes every item'
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
-        [CefFlashBrowser.Data.GlobalData]::Settings.Language = $savedLanguage
+        $Context.LanguageService.SetCurrentLanguage($savedLanguage)
     }
 }
 
