@@ -18,4 +18,6 @@
 
     <local:MultiEqualityConverter x:Key="MultiEqualityConverter"/>
 
+    <local:WebsiteIconUrlConverter x:Key="WebsiteIconUrlConverter"/>
+
 </ResourceDictionary>

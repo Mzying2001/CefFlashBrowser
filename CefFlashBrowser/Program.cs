@@ -1,4 +1,5 @@
 using CefFlashBrowser.Data;
+using CefFlashBrowser.Database;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Services;
@@ -8,13 +9,16 @@ using CefSharp;
 using Newtonsoft.Json;
 using SimpleMvvm.Ioc;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace CefFlashBrowser
 {
@@ -23,6 +27,10 @@ namespace CefFlashBrowser
         private static bool _restart;
         private static bool _dataInitialized;
         private static Mutex _mutex;
+        private static IDatabase _database;
+        private static IFaviconService _faviconService;
+        private static FileLogger _logger;
+        private static IntPtr _sqliteLibraryHandle;
 
         private const string InsufficientDirectoryPermissionsMessage =
             "CefFlashBrowser 需要对程序运行目录拥有读取、写入和删除文件的权限，无法继续运行。\r\n\r\n" +
@@ -72,6 +80,9 @@ namespace CefFlashBrowser
                     _dataInitialized = GlobalData.InitData();
                     LanguageManager.InitLanguage();
 
+                    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(app.Dispatcher));
+                    _ = InitializeFaviconsAsync();
+
                     var cts = new CancellationTokenSource();
                     var delLogsTask = LogHelper.DeleteExpiredLogsAsync(cts.Token);
                     var delCachesTask = DirectoryHelper.DeletePendingDeleteDirectoriesAsync(GlobalData.CachesPath, cts.Token);
@@ -101,8 +112,13 @@ namespace CefFlashBrowser
             }
             finally
             {
-                OnTerminate();
-                UnregisterServices();
+                try { OnTerminate(); }
+                finally { UnregisterServices(); }
+
+                if (_restart)
+                {
+                    Process.Start(Process.GetCurrentProcess().MainModule.FileName);
+                }
             }
         }
 
@@ -202,7 +218,6 @@ namespace CefFlashBrowser
             if (_restart)
             {
                 LogHelper.LogInfo("Restarting application...");
-                Process.Start(Process.GetCurrentProcess().MainModule.FileName);
             }
             else
             {
@@ -218,12 +233,88 @@ namespace CefFlashBrowser
 
         private static void RegisterServices()
         {
-            SimpleIoc.Global.Register<ILogger>(() => new FileLogger(GlobalData.GetAppLogPath));
+            SimpleIoc.Global.Register<ILogger>(
+                () => _logger = new FileLogger(GlobalData.GetAppLogPath), Lifetime.Singleton);
+
+            SimpleIoc.Global.Register<IDatabase>(
+                DatabaseFactory, Lifetime.Singleton);
+
+            SimpleIoc.Global.Register<DatabaseService>(
+                () => new DatabaseService(SimpleIoc.Global.GetInstance<IDatabase>()), Lifetime.Singleton);
+
+            SimpleIoc.Global.Register<IFaviconService>(
+                () => _faviconService = new FaviconService(
+                    SimpleIoc.Global.GetInstance<DatabaseService>(), SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
+
+            IDatabase DatabaseFactory()
+            {
+                InitializeSQLite();
+                return _database = new SqliteDatabase(GlobalData.DatabasePath);
+            }
+        }
+
+        private static void InitializeSQLite()
+        {
+            if (_sqliteLibraryHandle != IntPtr.Zero)
+                return;
+
+            string libraryPath = Path.Combine(GlobalData.SqliteDllPath, "SQLite.Interop.dll");
+
+            // Keep the native module loaded until process exit, including queued database shutdown work.
+            _sqliteLibraryHandle = Win32.LoadLibrary(libraryPath);
+
+            if (_sqliteLibraryHandle == IntPtr.Zero)
+            {
+                int error = Marshal.GetLastWin32Error();
+                throw new Win32Exception(error, $"Failed to load SQLite native library '{libraryPath}' (Win32 error {error}).");
+            }
+        }
+
+        private static async Task InitializeFaviconsAsync()
+        {
+            try { await SimpleIoc.Global.GetInstance<IFaviconService>().InitializeAsync(); }
+            catch (Exception e) { LogHelper.LogWtf("Failed to initialize the favicon service", e); }
+        }
+
+        private static async Task StopDatabaseAsync(Task faviconWork)
+        {
+            try { await faviconWork.ConfigureAwait(false); }
+            catch (Exception e) { LogShutdownError("Failed to stop the favicon service", e); }
+
+            try
+            {
+                if (_database != null)
+                    await _database.StopAsync().ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LogShutdownError("Failed to stop the browser database", e);
+            }
+            finally
+            {
+                try { _logger?.Dispose(); }
+                catch { }
+            }
+        }
+
+        private static void LogShutdownError(string message, Exception e)
+        {
+            try { _logger?.Log(LogLevel.Error, message, e); }
+            catch { }
         }
 
         private static void UnregisterServices()
         {
-            SimpleIoc.Global.Unregister<ILogger>();
+            var faviconWork = _faviconService?.StopAsync() ?? Task.CompletedTask;
+            var stopTask = StopDatabaseAsync(faviconWork);
+
+            if (!stopTask.Wait(TimeSpan.FromSeconds(5)))
+                LogHelper.LogWtf("Timed out waiting for favicon writes; the database will close after queued operations finish.");
+
+            SimpleIoc.Global.Unregister<IFaviconService>(false);
+            SimpleIoc.Global.Unregister<DatabaseService>(false);
+            SimpleIoc.Global.Unregister<IDatabase>(false);
+            SimpleIoc.Global.Unregister<ILogger>(false);
         }
     }
 }

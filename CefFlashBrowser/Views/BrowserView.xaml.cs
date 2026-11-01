@@ -1,9 +1,12 @@
 ﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.FlashBrowser.Handlers;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefSharp;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.Threading;
@@ -205,6 +208,7 @@ namespace CefFlashBrowser.Views
             browser.DownloadHandler = new Browser.Handlers.DownloadHandler();
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
+            browser.FaviconDiscovered += BrowserFaviconDiscovered;
 
             Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
@@ -216,6 +220,12 @@ namespace CefFlashBrowser.Views
             Messenger.Global.Unregister(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Unregister(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
             Messenger.Global.Unregister(MessageTokens.BROWSER_CLOSE_CANCELED, BrowserCloseCanceledHandler);
+        }
+
+        private void BrowserFaviconDiscovered(object sender, FaviconDiscoveredEventArgs e)
+        {
+            if (!_isClosed)
+                _ = SimpleIoc.Global.GetInstance<IFaviconService>().RecordAsync(e.PageUrl, e.IconUrl);
         }
 
         private void InvokeOnUIThread(Action action)
@@ -454,6 +464,7 @@ namespace CefFlashBrowser.Views
             (browser.JsDialogHandler as Browser.Handlers.JsDialogHandler)?.ForceClosePendingDialog();
 
             DataContextChanged -= BrowserDataContextChanged;
+            browser.FaviconDiscovered -= BrowserFaviconDiscovered;
             Loaded -= BrowserViewLoaded;
 
             if (_ownerWindow != null)

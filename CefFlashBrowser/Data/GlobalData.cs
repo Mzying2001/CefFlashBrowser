@@ -18,6 +18,7 @@ namespace CefFlashBrowser.Data
         public static string CachesPath { get; }
         public static string LogsPath { get; }
         public static string CefDllPath { get; }
+        public static string SqliteDllPath { get; }
         public static string PluginsPath { get; }
         public static string SharedObjectsPath { get; }
 
@@ -30,6 +31,7 @@ namespace CefFlashBrowser.Data
         public static string DataPath { get; }
         public static string FavoritesPath { get; }
         public static string SettingsPath { get; }
+        public static string DatabasePath { get; }
 
         /// <summary>
         /// true if the program is started with parameters
@@ -43,6 +45,7 @@ namespace CefFlashBrowser.Data
             CachesPath = Path.Combine(AppBaseDirectory, "Caches\\");
             LogsPath = Path.Combine(AppBaseDirectory, "Logs\\");
             CefDllPath = Path.Combine(AssetsPath, "CefSharp\\");
+            SqliteDllPath = Path.Combine(AssetsPath, "SQLite\\");
             PluginsPath = Path.Combine(AssetsPath, "Plugins\\");
             SharedObjectsPath = Path.Combine(CachesPath, "Pepper Data\\Shockwave Flash\\WritableRoot\\#SharedObjects\\");
 
@@ -62,6 +65,7 @@ namespace CefFlashBrowser.Data
 
             FavoritesPath = Path.Combine(DataPath, "favorites.json");
             SettingsPath = Path.Combine(DataPath, "settings.json");
+            DatabasePath = Path.Combine(DataPath, "browser.db");
 
             Messenger.Global.Register(MessageTokens.SAVE_SETTINGS, _ => SaveSettings());
             Messenger.Global.Register(MessageTokens.SAVE_FAVORITES, _ => SaveFavorites());

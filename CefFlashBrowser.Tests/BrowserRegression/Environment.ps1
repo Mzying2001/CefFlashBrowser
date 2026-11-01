@@ -13,6 +13,9 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         TemporaryPath = Join-Path ([IO.Path]::GetTempPath()) ('CefFlashBrowser-regression-' + [Guid]::NewGuid())
         Application = $null
         Logger = $null
+        Database = $null
+        DatabaseService = $null
+        FaviconService = $null
         CefStarted = $false
         AuxiliaryTypes = @()
         AuxiliaryAddress = $null
@@ -50,11 +53,13 @@ function Initialize-RegressionEnvironment($Context) {
         'SharpVectors.Runtime.Wpf.dll',
         'SharpVectors.Converters.Wpf.dll',
         'CefFlashBrowser.Log.dll',
+        'System.Data.SQLite.dll',
+        'CefFlashBrowser.Database.dll',
         'CefFlashBrowser.WinformCefSharp4WPF.dll',
         'CefFlashBrowser.FlashBrowser.dll'
     )
     $cefDependencies = @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.WinForms.dll')
-    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SwfPlayer\swfplayer.html') + @(
+    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SwfPlayer\swfplayer.html', 'Assets\SQLite\SQLite.Interop.dll') + @(
         ($cefDependencies + @('CefSharp.BrowserSubprocess.exe', 'libcef.dll')) | ForEach-Object { "Assets\CefSharp\$_" }
     )
     foreach ($file in $requiredFiles) {
@@ -91,7 +96,10 @@ function Initialize-RegressionEnvironment($Context) {
         $applicationAssembly.FullName,
         (Get-RegressionDependencyPath $Context 'CefFlashBrowser.FlashBrowser.dll')
     )
-    Add-Type -ReferencedAssemblies $references -Path (Join-Path $Context.ScriptPath 'TestDoubles.cs')
+    Add-Type -ReferencedAssemblies $references -Path @(
+        (Join-Path $Context.ScriptPath 'TestDoubles.cs'),
+        (Join-Path $Context.ScriptPath 'FaviconHttpFixture.cs')
+    )
     $Context.DisposedBrowser = (New-Object DisposedBrowserProxy([CefSharp.IBrowser])).GetTransparentProxy()
     $Context.AuxiliaryTypes = @(
         [CefFlashBrowser.Views.PopupWebPage],
@@ -104,6 +112,15 @@ function Initialize-RegressionEnvironment($Context) {
     $Context.Application.ShutdownMode = [System.Windows.ShutdownMode]::OnExplicitShutdown
     $globalDataType = $applicationAssembly.GetType('CefFlashBrowser.Data.GlobalData')
     $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
+    foreach ($dataPath in @{
+        DataPath = $Context.TemporaryPath
+        FavoritesPath = (Join-Path $Context.TemporaryPath 'favorites.json')
+        SettingsPath = (Join-Path $Context.TemporaryPath 'settings.json')
+        DatabasePath = (Join-Path $Context.TemporaryPath 'browser.db')
+        SqliteDllPath = (Join-Path $Context.ApplicationPath 'Assets\SQLite')
+    }.GetEnumerator()) {
+        $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
+    }
     $globalDataType.GetField('<Settings>k__BackingField', $privateStatic).SetValue($null, [CefFlashBrowser.Models.Settings]::Default)
     $globalDataType.GetField('<Favorites>k__BackingField', $privateStatic).SetValue($null,
         (New-Object 'System.Collections.ObjectModel.ObservableCollection[CefFlashBrowser.Models.Website]'))
@@ -113,6 +130,7 @@ function Initialize-RegressionEnvironment($Context) {
     [CefFlashBrowser.Data.GlobalData]::IsStartWithoutMainWindow = $true
     $locator = New-Object CefFlashBrowser.ViewModels.ViewModelLocator
     $Context.Application.Resources.Add('Locator', $locator.PSObject.BaseObject)
+    $Context.Application.Resources.Add('AppInfo', (New-Object CefFlashBrowser.Infrastructure.Wpf.AppInfo))
     $Context.Logger = New-Object CefFlashBrowser.Log.FileLogger((Join-Path $Context.TemporaryPath 'app.log'))
     $registerInstance = [SimpleMvvm.Ioc.SimpleIoc].GetMethods() | Where-Object {
         $_.Name -eq 'Register' -and $_.IsGenericMethodDefinition -and
@@ -120,6 +138,22 @@ function Initialize-RegressionEnvironment($Context) {
     }
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Log.ILogger]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.Logger.PSObject.BaseObject))
+
+    [Threading.SynchronizationContext]::SetSynchronizationContext(
+        (New-Object System.Windows.Threading.DispatcherSynchronizationContext($Context.Application.Dispatcher)))
+    [void]$applicationAssembly.GetType('CefFlashBrowser.Program').GetMethod('InitializeSQLite', $privateStatic).Invoke($null, $null)
+    $Context.Database = New-Object CefFlashBrowser.Database.SqliteDatabase((Join-Path $Context.TemporaryPath 'browser.db'))
+    $Context.DatabaseService = New-Object CefFlashBrowser.Services.DatabaseService($Context.Database)
+    $Context.FaviconService = New-Object CefFlashBrowser.Services.FaviconService($Context.DatabaseService, $Context.Logger)
+    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Database.IDatabase]).Invoke(
+        [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.Database.PSObject.BaseObject))
+    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.DatabaseService]).Invoke(
+        [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.DatabaseService.PSObject.BaseObject))
+    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.IFaviconService]).Invoke(
+        [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.FaviconService.PSObject.BaseObject))
+    $faviconInitialization = $Context.FaviconService.InitializeAsync()
+    Wait-Regression $Context { $faviconInitialization.IsCompleted } 'isolated favicon database initialization'
+    [void]$faviconInitialization.GetAwaiter().GetResult()
 
     foreach ($dictionaryUri in @(
         'pack://application:,,,/CefFlashBrowser;component/Assets/Language/zh-CN.xaml',
@@ -194,6 +228,20 @@ function Stop-RegressionEnvironment($Context) {
             $cleanupErrors.Add($_)
         } finally {
             $Context.CefStarted = $false
+        }
+    }
+    if ($null -ne $Context.FaviconService) {
+        try {
+            [void]$Context.FaviconService.StopAsync().GetAwaiter().GetResult()
+        } catch {
+            $cleanupErrors.Add($_)
+        }
+    }
+    if ($null -ne $Context.Database) {
+        try {
+            $Context.Database.Dispose()
+        } catch {
+            $cleanupErrors.Add($_)
         }
     }
     if ($null -ne $Context.Logger) {

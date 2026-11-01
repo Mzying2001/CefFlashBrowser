@@ -17,11 +17,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
+    <ProjectReference Include="..\CefFlashBrowser.Database\CefFlashBrowser.Database.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
   </ItemGroup>
 
   <!-- Link source files from the main app -->
   <ItemGroup>
+    <Compile Include="..\CefFlashBrowser\Services\DatabaseService.cs" Link="LinkedSources\DatabaseService.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\WebsiteIconRecord.cs" Link="LinkedSources\WebsiteIconRecord.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\IFaviconService.cs" Link="LinkedSources\IFaviconService.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\FaviconService.cs" Link="LinkedSources\FaviconService.cs" />
+    <Compile Include="..\CefFlashBrowser\Views\Converters\WebsiteIconUrlConverter.cs" Link="LinkedSources\WebsiteIconUrlConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\UrlHelper.cs" Link="LinkedSources\UrlHelper.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\DirectoryAccessChecker.cs" Link="LinkedSources\DirectoryAccessChecker.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\ValueConverterBase.cs" Link="LinkedSources\ValueConverterBase.cs" />

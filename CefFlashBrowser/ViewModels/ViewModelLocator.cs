@@ -1,4 +1,5 @@
-﻿using SimpleMvvm.Ioc;
+﻿using CefFlashBrowser.Services;
+using SimpleMvvm.Ioc;
 using System;
 using System.Linq;
 
@@ -48,6 +49,11 @@ namespace CefFlashBrowser.ViewModels
         public MainWindowViewModel MainWindowViewModel
         {
             get => SimpleIoc.Global.GetInstance<MainWindowViewModel>();
+        }
+
+        public IFaviconService FaviconService
+        {
+            get => SimpleIoc.Global.GetInstance<IFaviconService>();
         }
 
         public BrowserWindowViewModel BrowserWindowViewModel
