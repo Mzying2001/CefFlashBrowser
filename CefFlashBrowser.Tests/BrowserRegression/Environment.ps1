@@ -59,7 +59,7 @@ function Initialize-RegressionEnvironment($Context) {
         'CefFlashBrowser.FlashBrowser.dll'
     )
     $cefDependencies = @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.WinForms.dll')
-    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SwfPlayer\swfplayer.html') + @(
+    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SwfPlayer\swfplayer.html', 'Assets\SQLite\SQLite.Interop.dll') + @(
         ($cefDependencies + @('CefSharp.BrowserSubprocess.exe', 'libcef.dll')) | ForEach-Object { "Assets\CefSharp\$_" }
     )
     foreach ($file in $requiredFiles) {
@@ -117,6 +117,7 @@ function Initialize-RegressionEnvironment($Context) {
         FavoritesPath = (Join-Path $Context.TemporaryPath 'favorites.json')
         SettingsPath = (Join-Path $Context.TemporaryPath 'settings.json')
         DatabasePath = (Join-Path $Context.TemporaryPath 'browser.db')
+        SqliteDllPath = (Join-Path $Context.ApplicationPath 'Assets\SQLite')
     }.GetEnumerator()) {
         $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
     }
@@ -140,6 +141,7 @@ function Initialize-RegressionEnvironment($Context) {
 
     [Threading.SynchronizationContext]::SetSynchronizationContext(
         (New-Object System.Windows.Threading.DispatcherSynchronizationContext($Context.Application.Dispatcher)))
+    [void]$applicationAssembly.GetType('CefFlashBrowser.Program').GetMethod('InitializeSQLite', $privateStatic).Invoke($null, $null)
     $Context.Database = New-Object CefFlashBrowser.Database.SqliteDatabase((Join-Path $Context.TemporaryPath 'browser.db'))
     $Context.DatabaseService = New-Object CefFlashBrowser.Services.DatabaseService($Context.Database)
     $Context.FaviconService = New-Object CefFlashBrowser.Services.FaviconService($Context.DatabaseService, $Context.Logger)

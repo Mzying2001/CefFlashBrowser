@@ -19,21 +19,27 @@ $packagePath = Join-Path $temporaryPath 'package'
 $databasePath = Join-Path $temporaryPath 'browser.db'
 Write-Host "Isolated package check: $temporaryPath"
 Expand-Archive -LiteralPath $ArchivePath -DestinationPath $packagePath
-foreach ($file in @('CefFlashBrowser.exe', 'CefFlashBrowser.Database.dll', 'System.Data.SQLite.dll', "$Platform\SQLite.Interop.dll")) {
+foreach ($file in @('CefFlashBrowser.exe', 'Assets\SQLite\SQLite.Interop.dll')) {
     if (!(Test-Path -LiteralPath (Join-Path $packagePath $file) -PathType Leaf)) {
         throw "Required package file is missing: $file"
     }
 }
+$sqliteInteropPath = Join-Path $packagePath 'Assets\SQLite\SQLite.Interop.dll'
+$nativeFiles = @(Get-ChildItem -LiteralPath $packagePath -Recurse -File -Filter 'SQLite.Interop.dll')
+if ($nativeFiles.Count -ne 1 -or $nativeFiles[0].FullName -ne $sqliteInteropPath) {
+    throw 'The package must contain exactly one SQLite.Interop.dll under Assets\SQLite.'
+}
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
-[void][Reflection.Assembly]::LoadFrom((Join-Path $packagePath 'System.Data.SQLite.dll'))
-[void][Reflection.Assembly]::LoadFrom((Join-Path $packagePath 'CefFlashBrowser.Database.dll'))
 $applicationAssembly = [Reflection.Assembly]::LoadFrom((Join-Path $packagePath 'CefFlashBrowser.exe'))
+# Start Costura's embedded assembly resolver without running the application's entry point.
+[Runtime.CompilerServices.RuntimeHelpers]::RunModuleConstructor($applicationAssembly.ManifestModule.ModuleHandle)
 $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
 $globalDataType = $applicationAssembly.GetType('CefFlashBrowser.Data.GlobalData')
 foreach ($dataPath in @{
     DatabasePath = $databasePath
     LogsPath = (Join-Path $temporaryPath 'Logs')
+    SqliteDllPath = (Join-Path $packagePath 'Assets\SQLite')
 }.GetEnumerator()) {
     $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
 }
@@ -49,6 +55,9 @@ $unregister = $programType.GetMethod('UnregisterServices', $privateStatic)
 [void]$unregister.Invoke($null, $null)
 if (Test-Path -LiteralPath $databasePath) {
     throw 'Unregistering unused services opened the database.'
+}
+if (@(Get-Process -Id $PID -Module | Where-Object ModuleName -eq 'SQLite.Interop.dll').Count -ne 0) {
+    throw 'Unregistering unused services loaded the native SQLite library.'
 }
 
 [void]$register.Invoke($null, $null)
@@ -82,6 +91,10 @@ try {
     $records = $databaseService.GetWebsiteIconsAsync().GetAwaiter().GetResult()
     if ($records.Count -ne 1 -or $records[0].IconUrl -ne 'https://example.invalid/icon.png') {
         throw 'The packaged service did not persist its mapping through the shared database.'
+    }
+    $nativeModules = @(Get-Process -Id $PID -Module | Where-Object ModuleName -eq 'SQLite.Interop.dll')
+    if ($nativeModules.Count -ne 1 -or $nativeModules[0].FileName -ne $sqliteInteropPath) {
+        throw 'SQLite must load its native library from the isolated package under Assets\SQLite.'
     }
 } finally {
     [void]$unregister.Invoke($null, $null)

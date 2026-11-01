@@ -9,9 +9,11 @@ using CefSharp;
 using Newtonsoft.Json;
 using SimpleMvvm.Ioc;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +30,7 @@ namespace CefFlashBrowser
         private static IDatabase _database;
         private static IFaviconService _faviconService;
         private static FileLogger _logger;
+        private static IntPtr _sqliteLibraryHandle;
 
         private const string InsufficientDirectoryPermissionsMessage =
             "CefFlashBrowser 需要对程序运行目录拥有读取、写入和删除文件的权限，无法继续运行。\r\n\r\n" +
@@ -234,7 +237,7 @@ namespace CefFlashBrowser
                 () => _logger = new FileLogger(GlobalData.GetAppLogPath), Lifetime.Singleton);
 
             SimpleIoc.Global.Register<IDatabase>(
-                () => _database = new SqliteDatabase(GlobalData.DatabasePath), Lifetime.Singleton);
+                DatabaseFactory, Lifetime.Singleton);
 
             SimpleIoc.Global.Register<DatabaseService>(
                 () => new DatabaseService(SimpleIoc.Global.GetInstance<IDatabase>()), Lifetime.Singleton);
@@ -242,6 +245,29 @@ namespace CefFlashBrowser
             SimpleIoc.Global.Register<IFaviconService>(
                 () => _faviconService = new FaviconService(
                     SimpleIoc.Global.GetInstance<DatabaseService>(), SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
+
+            IDatabase DatabaseFactory()
+            {
+                InitializeSQLite();
+                return _database = new SqliteDatabase(GlobalData.DatabasePath);
+            }
+        }
+
+        private static void InitializeSQLite()
+        {
+            if (_sqliteLibraryHandle != IntPtr.Zero)
+                return;
+
+            string libraryPath = Path.Combine(GlobalData.SqliteDllPath, "SQLite.Interop.dll");
+
+            // Keep the native module loaded until process exit, including queued database shutdown work.
+            _sqliteLibraryHandle = Win32.LoadLibrary(libraryPath);
+
+            if (_sqliteLibraryHandle == IntPtr.Zero)
+            {
+                int error = Marshal.GetLastWin32Error();
+                throw new Win32Exception(error, $"Failed to load SQLite native library '{libraryPath}' (Win32 error {error}).");
+            }
         }
 
         private static async Task InitializeFaviconsAsync()

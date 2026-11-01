@@ -32,7 +32,7 @@ powershell -NoProfile -STA -ExecutionPolicy Bypass -File CefFlashBrowser.Tests\B
 "%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -STA -ExecutionPolicy Bypass -File CefFlashBrowser.Tests\BrowserRegression\PackageSmoke.ps1 -ArchivePath bin\Publish\FlashBrowser_x86_v1.1.8.zip -Platform x86
 ```
 
-Adjust the version in the archive names when needed. The smoke check extracts only the supplied archive into an isolated temporary directory, loads its packaged assemblies with the application's CEF DLL search path, and verifies the real IoC factories, SQLite persistence and shutdown. It also checks that unregistering unused services does not create a database. It does not start CEF or request any network resources.
+Adjust the version in the archive names when needed. The smoke check extracts only the supplied archive into an isolated temporary directory and initializes the executable's Costura resolver for embedded managed assemblies. It requires exactly one SQLite native library at `Assets\SQLite\SQLite.Interop.dll` and verifies that the process loads that file while keeping the application's CEF DLL search path. It exercises the real IoC factories, SQLite persistence and shutdown, and checks that unregistering unused services neither creates a database nor loads SQLite. It does not start CEF or request any network resources.
 
 Always start a fresh process with `-STA`; the runner does not build the application or restart itself. Paths are resolved from `Run.ps1`, so an absolute script path also works from other working directories. The build outputs are `bin\x64\<Configuration>` for x64 and `bin\<Configuration>` for x86.
 
