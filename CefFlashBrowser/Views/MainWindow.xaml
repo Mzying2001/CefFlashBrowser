@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:CefFlashBrowser"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
-        xmlns:data="clr-namespace:CefFlashBrowser.Data"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
@@ -110,7 +109,7 @@
                                 <Style TargetType="Separator"
                                        BasedOn="{StaticResource {x:Type Separator}}">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count}"
+                                        <DataTrigger Binding="{Binding Source={StaticResource Locator}, Path=FavoritesService.Favorites.Count}"
                                                      Value="0">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                         </DataTrigger>
@@ -120,7 +119,7 @@
                         </Separator>
 
                         <!--Favorites Items-->
-                        <CollectionContainer Collection="{Binding Source={x:Static data:GlobalData.Favorites}}"/>
+                        <CollectionContainer Collection="{Binding Source={StaticResource Locator}, Path=FavoritesService.Favorites}"/>
                     </CompositeCollection>
                 </MenuItem.ItemsSource>
             </MenuItem>

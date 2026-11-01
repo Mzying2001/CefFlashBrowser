@@ -1,7 +1,7 @@
-﻿using CefFlashBrowser.Data;
-using SimpleMvvm.Command;
+﻿using SimpleMvvm.Command;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels;
-using SimpleMvvm.Messaging;
+using SimpleMvvm.Ioc;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,7 +25,7 @@ namespace CefFlashBrowser.Views
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            Messenger.Global.Send(MessageTokens.SAVE_FAVORITES, null);
+            SimpleIoc.Global.GetInstance<FavoritesService>().Save();
         }
 
         private void TextChangedHandler(object sender, TextChangedEventArgs e)

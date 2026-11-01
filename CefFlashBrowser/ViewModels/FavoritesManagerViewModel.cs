@@ -1,4 +1,3 @@
-using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using SimpleMvvm;
@@ -26,7 +25,7 @@ namespace CefFlashBrowser.ViewModels
 
         public ObservableCollection<Website> Favorites
         {
-            get => GlobalData.Favorites;
+            get => SimpleIoc.Global.GetInstance<FavoritesService>().Favorites;
         }
 
         private Website _selectedWebsite;

@@ -23,6 +23,7 @@ foreach ($file in @(
     'Environment.ps1',
     'Helpers.ps1',
     'Scenarios\Language.ps1',
+    'Scenarios\Favorites.ps1',
     'Scenarios\BrowserWindow.ps1',
     'Scenarios\BrowserTabs.ps1',
     'Scenarios\ContextMenu.ps1',
@@ -38,6 +39,7 @@ $failure = $null
 try {
     Initialize-RegressionEnvironment $context
     Test-LanguageService $context
+    Test-FavoritesService $context
     Test-BrowserBeforeInitialization $context
     Test-BrowserTabsBeforeShow $context
     Start-RegressionCef $context

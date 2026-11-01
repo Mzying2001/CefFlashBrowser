@@ -4,9 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SimpleMvvm.Messaging;
 using System;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace CefFlashBrowser.Data
@@ -68,7 +66,6 @@ namespace CefFlashBrowser.Data
             DatabasePath = Path.Combine(DataPath, "browser.db");
 
             Messenger.Global.Register(MessageTokens.SAVE_SETTINGS, _ => SaveSettings());
-            Messenger.Global.Register(MessageTokens.SAVE_FAVORITES, _ => SaveFavorites());
         }
 
         public static string GetAppLogPath(DateTime time)
@@ -82,89 +79,14 @@ namespace CefFlashBrowser.Data
             DirectoryHelper.EnsureDirectoryExists(LogsPath);
             DirectoryHelper.EnsureDirectoryExists(CachesPath);
 
-            InitFavorites();
             InitSettings();
             return true;
         }
 
         public static void SaveData()
         {
-            SaveFavorites();
             SaveSettings();
         }
-
-
-
-        #region Favorites
-
-        public static ObservableCollection<Website> Favorites { get; private set; }
-
-        public static void InitFavorites()
-        {
-            Favorites = new ObservableCollection<Website>();
-
-            if (!File.Exists(FavoritesPath))
-            {
-                LogHelper.LogInfo("Favorites file does not exist, starting with empty favorites");
-                return;
-            }
-
-            try
-            {
-                var json = File.ReadAllText(FavoritesPath, Encoding.UTF8);
-                var file = JsonConvert.DeserializeObject<FavoritesFile>(json);
-
-                // Guard against both a null root (the file literally contains
-                // "null") and a null Favorites array (e.g. {"Favorites": null}
-                // or a file missing the field). Previously the code did
-                //     new ObservableCollection<Website>(file.Favorites)
-                // which threw NullReferenceException / ArgumentNullException
-                // that was silently swallowed by the outer catch, resetting
-                // the user's favorites to empty with a misleading log line.
-                if (file?.Favorites != null)
-                {
-                    Favorites = new ObservableCollection<Website>(file.Favorites);
-                }
-                else
-                {
-                    LogHelper.LogError(
-                        $"Favorites file is malformed (no Favorites array): {FavoritesPath}");
-                }
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError(
-                    $"Failed to load favorites file, starting with empty favorites: {FavoritesPath}", e);
-            }
-        }
-
-        public static bool SaveFavorites()
-        {
-            try
-            {
-                Website[] snapshot;
-
-                lock (Favorites)
-                {
-                    snapshot = Favorites.ToArray();
-                }
-
-                var file = new FavoritesFile { Favorites = snapshot };
-                var json = JsonConvert.SerializeObject(file, Formatting.Indented);
-                FileHelper.SafeWriteFile(FavoritesPath, json, Encoding.UTF8);
-                LogHelper.LogInfo("Favorites saved successfully");
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError("Failed to save favorites", e);
-                return false;
-            }
-        }
-
-        #endregion
-
-
 
         #region Settings
 
@@ -229,8 +151,6 @@ namespace CefFlashBrowser.Data
         }
 
         #endregion
-
-
 
     }
 }

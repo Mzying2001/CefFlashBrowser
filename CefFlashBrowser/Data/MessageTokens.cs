@@ -17,9 +17,6 @@ namespace CefFlashBrowser.Data
         /// <summary>Sent when the settings window closes, triggering settings persistence to file.</summary>
         public const string SAVE_SETTINGS = "SAVE_SETTINGS";
 
-        /// <summary>Sent when the favorites window closes, triggering favorites persistence to file.</summary>
-        public const string SAVE_FAVORITES = "SAVE_FAVORITES";
-
         /// <summary>Sent when DevTools opens, showing the embedded DevTools panel.</summary>
         public const string DEVTOOLS_OPENED = "DEVTOOLS_OPENED";
 

@@ -14,6 +14,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         Application = $null
         Logger = $null
         LanguageService = $null
+        FavoritesService = $null
         Database = $null
         DatabaseService = $null
         FaviconService = $null
@@ -123,8 +124,6 @@ function Initialize-RegressionEnvironment($Context) {
         $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
     }
     $globalDataType.GetField('<Settings>k__BackingField', $privateStatic).SetValue($null, [CefFlashBrowser.Models.Settings]::Default)
-    $globalDataType.GetField('<Favorites>k__BackingField', $privateStatic).SetValue($null,
-        (New-Object 'System.Collections.ObjectModel.ObservableCollection[CefFlashBrowser.Models.Website]'))
     # PowerShell has a different application base directory than the deployed executable.
     $globalDataType.GetField('<SwfPlayerPath>k__BackingField', $privateStatic).SetValue(
         $null, (Join-Path $Context.ApplicationPath 'Assets\SwfPlayer\swfplayer.html'))
@@ -139,6 +138,11 @@ function Initialize-RegressionEnvironment($Context) {
     }
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Log.ILogger]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.Logger.PSObject.BaseObject))
+
+    $Context.FavoritesService = New-Object CefFlashBrowser.Services.FavoritesService(
+        [CefFlashBrowser.Data.GlobalData]::FavoritesPath, $Context.Logger)
+    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.FavoritesService]).Invoke(
+        [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.FavoritesService.PSObject.BaseObject))
 
     [Threading.SynchronizationContext]::SetSynchronizationContext(
         (New-Object System.Windows.Threading.DispatcherSynchronizationContext($Context.Application.Dispatcher)))

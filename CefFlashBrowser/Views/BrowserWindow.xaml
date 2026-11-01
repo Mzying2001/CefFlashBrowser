@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
-        xmlns:data="clr-namespace:CefFlashBrowser.Data"
         xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -110,12 +109,12 @@
             <Separator/>
 
             <MenuItem Header="{DynamicResource common_favorites}"
-                      ItemsSource="{Binding Source={x:Static data:GlobalData.Favorites}}">
+                      ItemsSource="{Binding Source={StaticResource Locator}, Path=FavoritesService.Favorites}">
                 <MenuItem.Style>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count}"
+                            <DataTrigger Binding="{Binding Source={StaticResource Locator}, Path=FavoritesService.Favorites.Count}"
                                          Value="0">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>

@@ -33,7 +33,7 @@ function Test-Favicons($Context) {
     $mainWindow = $null
     $actionsMenu = $null
     $iconWindow = $null
-    $originalFavorites = @([CefFlashBrowser.Data.GlobalData]::Favorites)
+    $originalFavorites = @($Context.FavoritesService.Favorites)
     $pageA = $fixture.BaseUrl + '/a'
     $pageB = $fixture.BaseUrl + '/b'
     $iconA = $fixture.BaseUrl + '/a-icon.png'
@@ -47,7 +47,7 @@ function Test-Favicons($Context) {
         [void]$service.RecordAsync($fixture.BaseUrl + '/', $iconA).GetAwaiter().GetResult()
         Assert-Regression ($service.GetIconUrl($fixture.BaseUrl + '/unvisited') -eq $iconA) 'absolute addresses fall back to the same-origin homepage'
 
-        $favorites = [CefFlashBrowser.Data.GlobalData]::Favorites
+        $favorites = $Context.FavoritesService.Favorites
         $favorites.Clear()
         $favorite = New-Object CefFlashBrowser.Models.Website('Page A', ($pageA + '/?saved=1#favorite'))
         $domainFavorite = New-Object CefFlashBrowser.Models.Website('Domain fallback', ($fixture.BaseUrl.Substring('http://'.Length) + '/unvisited'))
@@ -193,6 +193,41 @@ function Test-Favicons($Context) {
         Invoke-BrowserCommand $browser.LoadUrlCommand $pageB
         Wait-Regression $Context { $service.GetIconUrl($pageB) -eq $iconB -and !$browser.IsLoading } 'queued old favicon is discarded after navigation'
         Assert-Regression ($service.GetIconUrl($pageA) -eq $iconA) 'queued page A callback never overwrites a mapping after navigation'
+
+        Assert-Regression ([object]::ReferenceEquals($favorites, $manager.DataContext.Favorites) -and
+            [object]::ReferenceEquals($favorites, $browserFavoritesMenu.ItemsSource)) 'favorites manager and browser menu bind to the shared service collection'
+        $editedFavorite = $favorites[0]
+        Invoke-BrowserCommand $manager.DataContext.MoveDownCommand $editedFavorite
+        Wait-Regression $Context {
+            [object]::ReferenceEquals($list.Items[1], $editedFavorite) -and
+                [object]::ReferenceEquals($mainFavoritesMenu.Items[3], $editedFavorite) -and
+                [object]::ReferenceEquals($browserFavoritesMenu.Items[1], $editedFavorite)
+        } 'reordering a favorite updates the manager and both menus'
+        $favorites.RemoveAt(0)
+        Wait-Regression $Context {
+            $list.Items.Count -eq 2 -and $mainFavoritesMenu.Items.Count -eq 4 -and $browserFavoritesMenu.Items.Count -eq 2
+        } 'removing a favorite updates all three surfaces'
+        $favorites.Clear()
+        Wait-Regression $Context {
+            $list.Items.Count -eq 0 -and $mainFavoritesMenu.Items.Count -eq 2 -and
+                $mainFavoritesMenu.Items[1].Visibility -eq [System.Windows.Visibility]::Collapsed -and
+                $browserFavoritesMenu.Visibility -eq [System.Windows.Visibility]::Collapsed
+        } 'empty favorites collapse the home separator and browser favorites menu'
+        $favorites.Add($domainFavorite)
+        $favorites.Add($editedFavorite)
+        Wait-Regression $Context {
+            $list.Items.Count -eq 2 -and [object]::ReferenceEquals($mainFavoritesMenu.Items[2], $domainFavorite) -and
+                [object]::ReferenceEquals($browserFavoritesMenu.Items[0], $domainFavorite) -and
+                $mainFavoritesMenu.Items[1].Visibility -eq [System.Windows.Visibility]::Visible -and
+                $browserFavoritesMenu.Visibility -eq [System.Windows.Visibility]::Visible
+        } 'adding favorites restores both menus and their shared order'
+        $manager.Close()
+        $manager = $null
+        $savedFavorites = [IO.File]::ReadAllText((Join-Path $Context.TemporaryPath 'favorites.json')) | ConvertFrom-Json
+        Assert-Regression ($savedFavorites.Favorites.Count -eq 2 -and
+            $savedFavorites.Favorites[0].Name -eq $domainFavorite.Name -and $savedFavorites.Favorites[0].Url -eq $domainFavorite.Url -and
+            $savedFavorites.Favorites[1].Name -eq $editedFavorite.Name -and $savedFavorites.Favorites[1].Url -eq $editedFavorite.Url) 'closing the manager directly saves the shared favorites in their current order'
+
         $urlList[0] = $fixture.BaseUrl + '/closed.png'
         [void]$captureMethod.Invoke($browser.PSObject.BaseObject, [object[]]@($browser.GetBrowser().PSObject.BaseObject, $urlList.PSObject.BaseObject))
         $window.ForceCloseWindow()
@@ -206,8 +241,8 @@ function Test-Favicons($Context) {
         if ($null -ne $iconWindow) { $iconWindow.Close() }
         if ($null -ne $manager) { $manager.Close() }
         $window.ForceCloseWindow()
-        [CefFlashBrowser.Data.GlobalData]::Favorites.Clear()
-        foreach ($item in $originalFavorites) { [CefFlashBrowser.Data.GlobalData]::Favorites.Add($item) }
+        $Context.FavoritesService.Favorites.Clear()
+        foreach ($item in $originalFavorites) { $Context.FavoritesService.Favorites.Add($item) }
         $fixture.Dispose()
     }
 }

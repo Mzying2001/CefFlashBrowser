@@ -31,6 +31,7 @@ namespace CefFlashBrowser
         private static IntPtr _sqliteLibraryHandle;
         private static IDatabase _database;
         private static FileLogger _logger;
+        private static FavoritesService _favoritesService;
         private static FaviconService _faviconService;
 
         private const string InsufficientDirectoryPermissionsMessage =
@@ -207,6 +208,7 @@ namespace CefFlashBrowser
 
             if (_dataInitialized)
             {
+                _favoritesService?.Save();
                 GlobalData.SaveData();
             }
 
@@ -244,6 +246,10 @@ namespace CefFlashBrowser
 
             SimpleIoc.Global.Register<DatabaseService>(
                 () => new DatabaseService(SimpleIoc.Global.GetInstance<IDatabase>()), Lifetime.Singleton);
+
+            SimpleIoc.Global.Register<FavoritesService>(
+                () => _favoritesService = new FavoritesService(
+                    GlobalData.FavoritesPath, SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
 
             SimpleIoc.Global.Register<FaviconService>(
                 () => _faviconService = new FaviconService(
@@ -315,6 +321,7 @@ namespace CefFlashBrowser
                 LogHelper.LogWtf("Timed out waiting for favicon writes; the database will close after queued operations finish.");
 
             SimpleIoc.Global.Unregister<FaviconService>(false);
+            SimpleIoc.Global.Unregister<FavoritesService>(false);
             SimpleIoc.Global.Unregister<DatabaseService>(false);
             SimpleIoc.Global.Unregister<LanguageService>(false);
             SimpleIoc.Global.Unregister<IDatabase>(false);

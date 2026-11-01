@@ -56,6 +56,11 @@ namespace CefFlashBrowser.ViewModels
             get => SimpleIoc.Global.GetInstance<FaviconService>();
         }
 
+        public FavoritesService FavoritesService
+        {
+            get => SimpleIoc.Global.GetInstance<FavoritesService>();
+        }
+
         public BrowserWindowViewModel BrowserWindowViewModel
         {
             get => SimpleIoc.Global.GetInstance<BrowserWindowViewModel>();

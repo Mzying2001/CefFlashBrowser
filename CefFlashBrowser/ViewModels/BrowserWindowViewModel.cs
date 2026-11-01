@@ -197,7 +197,7 @@ namespace CefFlashBrowser.ViewModels
 
             if (WindowManager.ShowAddFavoriteDialog(vm))
             {
-                GlobalData.Favorites.Add(vm.Website.Clone());
+                SimpleIoc.Global.GetInstance<FavoritesService>().Favorites.Add(vm.Website.Clone());
             }
         }
 
