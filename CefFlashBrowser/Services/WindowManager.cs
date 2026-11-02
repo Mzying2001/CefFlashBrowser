@@ -97,12 +97,6 @@ namespace CefFlashBrowser.Services
         {
             var window = new TWindow();
 
-            if (window.Style == null)
-            {
-                window.SetCurrentValue(FrameworkElement.StyleProperty,
-                    Application.Current.TryFindResource("CustomWindowStyle") as Style);
-            }
-
             void themeChangedHandler(object theme)
             {
                 ThemeManager.ChangeTitleBarColor(window, (Theme)theme);

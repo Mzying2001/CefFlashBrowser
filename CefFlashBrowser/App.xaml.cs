@@ -91,6 +91,9 @@ namespace CefFlashBrowser
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            var windowStyle = FindResource("DefaultWindowStyle") as Style;
+            FrameworkElement.StyleProperty.OverrideMetadata(typeof(Window), new FrameworkPropertyMetadata(windowStyle));
+
             base.OnStartup(e);
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 

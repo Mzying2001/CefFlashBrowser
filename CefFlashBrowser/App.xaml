@@ -30,8 +30,8 @@
             <infraWpf:AppInfo x:Key="AppInfo"/>
 
 
-            <!--Custom window style, WindowManager will set this for all windows-->
-            <Style x:Key="CustomWindowStyle" TargetType="Window">
+            <!--Default window style, set via StyleProperty metadata in App.OnStartup-->
+            <Style x:Key="DefaultWindowStyle" TargetType="Window">
                 <Setter Property="Background" Value="{DynamicResource RegionBrush}"/>
             </Style>
 
