@@ -26,7 +26,11 @@ function Test-ContextMenuRouting($Context) {
                     }
                     $model.ToggleFullscreen($source)
                     $handled = Invoke-ContextMenuCommand $source.Browser $command $text $url
-                    Assert-Regression ($handled -and !$model.Fullscreen) "$commandName handles the command and exits fullscreen ($behavior)"
+                    $preserveFullscreen = $effectiveBehavior -eq [CefFlashBrowser.Models.NewPageBehavior]::NewTab
+                    Assert-Regression ($handled -and $model.Fullscreen -eq $preserveFullscreen) "$commandName applies fullscreen behavior for $effectiveBehavior ($behavior)"
+                    if ($preserveFullscreen) {
+                        Assert-TabFullscreen $window "$commandName ($behavior)"
+                    }
                     if ($effectiveBehavior -eq [CefFlashBrowser.Models.NewPageBehavior]::NewTab) {
                         Assert-Regression ($model.Browsers.Count -eq 3 -and $model.Browsers[1] -eq $model.CurrentBrowser -and
                             $model.CurrentBrowser.Address -eq $url -and $model.Browsers[0] -eq $source -and

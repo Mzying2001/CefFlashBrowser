@@ -67,7 +67,10 @@ namespace CefFlashBrowser.ViewModels
                 _currentBrowser?.StopFinding(true);
                 _currentBrowser?.ExitFullScreen();
                 ShowFindPopup = false;
-                Fullscreen = false;
+
+                if (value == null)
+                    Fullscreen = false;
+
                 UpdateValue(ref _currentBrowser, value);
             }
         }

@@ -98,8 +98,16 @@ namespace CefFlashBrowser.Views
                             {
                                 if (!view._isClosed)
                                 {
-                                    view.ViewModel?.ExitFullScreen();
-                                    view.OnFullScreenChanged(false);
+                                    var opensNewTab = view._ownerWindow is BrowserWindow
+                                        && (commandId == OpenInNewTab
+                                            || ((commandId == Search || commandId == OpenSelectedUrl)
+                                                && GlobalData.Settings.NewPageBehavior == NewPageBehavior.NewTab));
+
+                                    if (!opensNewTab)
+                                    {
+                                        view.ViewModel?.ExitFullScreen();
+                                        view.OnFullScreenChanged(false);
+                                    }
                                 }
                             });
                             break;

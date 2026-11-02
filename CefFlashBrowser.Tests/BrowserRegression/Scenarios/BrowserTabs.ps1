@@ -54,6 +54,7 @@ function Test-BrowserTabs($Context) {
     Test-BrowserTabContextMenu $Context
     Test-BrowserTabCloseOthers $Context
     Test-BrowserTabCloseOthersInterrupted $Context
+    Test-BrowserTabFullscreen $Context
     Test-BrowserTabNewPageRouting $Context
     Test-BrowserTabSelection $Context
     Test-BrowserTabCloseKeyboard $Context
@@ -688,6 +689,62 @@ function Test-BrowserTabStripSettings($Context) {
     }
 }
 
+function Assert-TabFullscreen($Window, [string]$Scenario) {
+    $Window.UpdateLayout()
+    Assert-Regression ($Window.ViewModel.Fullscreen -and
+        $Window.WindowStyle -eq [System.Windows.WindowStyle]::None -and
+        $Window.WindowState -eq [System.Windows.WindowState]::Maximized -and
+        !$Window.FindName('tabStrip').IsVisible -and !$Window.FindName('addressTextBox').IsVisible
+    ) "$Scenario preserves window fullscreen and hides browser chrome"
+}
+
+function Test-BrowserTabFullscreen($Context) {
+    $savedSizeInfo = [CefFlashBrowser.Data.GlobalData]::Settings.BrowserWindowSizeInfo
+    foreach ($initialState in @([System.Windows.WindowState]::Normal, [System.Windows.WindowState]::Maximized)) {
+        $window = New-RegressionWindow $Context
+        try {
+            $model = $window.ViewModel
+            $first = $model.CurrentBrowser
+            $firstView = Find-BrowserView $window $first
+            $window.WindowState = $initialState
+            Invoke-TabShortcut $window F11 ([System.Windows.Input.ModifierKeys]::None)
+            Assert-TabFullscreen $window "F11 from $initialState"
+            Invoke-TabShortcut $window T Control
+            Wait-Regression $Context { $model.Browsers.Count -eq 2 -and $model.CurrentBrowser.IsBrowserReady() } 'fullscreen Ctrl+T initializes a new tab'
+            $second = $model.CurrentBrowser
+            Assert-TabFullscreen $window 'Ctrl+T'
+            Invoke-ViewCallback $firstView 'OnFullScreenChanged' @($false)
+            Assert-TabFullscreen $window 'late fullscreen exit from the previous tab'
+            Invoke-TabShortcut $window K ([System.Windows.Input.ModifierKeys]::Control -bor [System.Windows.Input.ModifierKeys]::Shift)
+            Wait-Regression $Context { $model.Browsers.Count -eq 3 -and $model.CurrentBrowser.IsBrowserReady() } 'fullscreen duplication initializes a new tab'
+            $duplicate = $model.CurrentBrowser
+            Assert-TabFullscreen $window 'duplicating a tab'
+            Invoke-TabShortcut $window Tab Control
+            Assert-Regression ($model.CurrentBrowser -eq $first) 'fullscreen Ctrl+Tab selects the next tab'
+            Assert-TabFullscreen $window 'Ctrl+Tab'
+            Invoke-TabShortcut $window Tab ([System.Windows.Input.ModifierKeys]::Control -bor [System.Windows.Input.ModifierKeys]::Shift)
+            Assert-Regression ($model.CurrentBrowser -eq $duplicate) 'fullscreen Ctrl+Shift+Tab selects the previous tab'
+            Assert-TabFullscreen $window 'Ctrl+Shift+Tab'
+            $model.CloseBrowser($duplicate)
+            Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'fullscreen current tab closes'
+            Assert-Regression ($model.CurrentBrowser -eq $second) 'fullscreen close selects the neighboring tab'
+            Assert-TabFullscreen $window 'closing the selected tab'
+            Invoke-TabShortcut $window F11 ([System.Windows.Input.ModifierKeys]::None)
+            Assert-Regression (!$model.Fullscreen -and
+                $window.WindowStyle -eq [System.Windows.WindowStyle]::SingleBorderWindow -and
+                $window.WindowState -eq $initialState -and $window.FindName('tabStrip').IsVisible -and
+                $window.FindName('addressTextBox').IsVisible) "F11 restores browser chrome and the original $initialState state after tab changes"
+            $model.CurrentBrowser = $first
+            Invoke-TabShortcut $window T Control
+            Wait-Regression $Context { $model.Browsers.Count -eq 3 -and $model.CurrentBrowser.IsBrowserReady() } 'normal-window new tab initializes'
+            Assert-Regression (!$model.Fullscreen -and $window.WindowState -eq $initialState) 'tab changes outside fullscreen preserve the window state'
+        } finally {
+            $window.ForceCloseWindow()
+            [CefFlashBrowser.Data.GlobalData]::Settings.BrowserWindowSizeInfo = $savedSizeInfo
+        }
+    }
+}
+
 function Test-BrowserTabNewPageRouting($Context) {
     $window = New-RegressionWindow $Context
     $savedBehavior = [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior
@@ -711,13 +768,13 @@ function Test-BrowserTabNewPageRouting($Context) {
             [CefSharp.WindowOpenDisposition]::NewForegroundTab, $true, $null, $null, $null, $false)
         Wait-Regression $Context { $model.Browsers.Count -eq 4 -and $window.Title -eq 'Second auxiliary page' } 'foreground page request selects the new tab'
         $foreground = $model.CurrentBrowser
-        Assert-Regression (!$model.Fullscreen -and $first.Address -eq 'about:blank') 'foreground tab exits fullscreen and preserves the source page'
+        Assert-Regression ($model.Fullscreen -and $first.Address -eq 'about:blank') 'foreground tab preserves fullscreen and the source page'
+        Assert-TabFullscreen $window 'foreground new-page routing'
         Assert-Regression ($model.Browsers[0] -eq $first -and $model.Browsers[1] -eq $foreground -and $model.Browsers[2] -eq $background -and $model.Browsers[3] -eq $last) 'repeated page requests insert the newest tab immediately after their source'
         Assert-Regression ($foreground.Address -eq $Context.AuxiliarySecondAddress -and $background.Address -eq $Context.AuxiliaryAddress) 'new page requests retain their target addresses'
 
         Wait-Regression $Context { $background.IsBrowserReady() } 'background source tab initialization'
         $backgroundView = Find-BrowserView $window $background
-        $model.ToggleFullscreen($foreground)
         Invoke-ViewCallback $backgroundView 'OnBrowserBeforePopup' @(
             $background.Browser, $background.Browser.GetBrowser(), $null, 'about:blank', '',
             [CefSharp.WindowOpenDisposition]::NewBackgroundTab, $true, $null, $null, $null, $false)
@@ -747,7 +804,8 @@ function Test-BrowserTabSelection($Context) {
         $model.ToggleFullscreen($first)
         $second = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
         $secondView = Find-BrowserView $window $second
-        Assert-Regression (!$model.ShowFindPopup -and !$model.Fullscreen) 'switching tabs resets find and fullscreen'
+        Assert-Regression (!$model.ShowFindPopup -and $model.Fullscreen) 'switching tabs resets find and preserves fullscreen'
+        Assert-TabFullscreen $window 'selecting a new tab'
         Assert-Regression (!$firstView.IsVisible -and $secondView.IsVisible) 'only the selected tab is visible'
         Assert-Regression (!$firstBrowser.IsDisposed -and $first.IntegratedDevToolsHandle -eq $toolsHandle) 'hidden tab retains browser and DevTools'
         $model.CurrentBrowser = $first
@@ -755,6 +813,7 @@ function Test-BrowserTabSelection($Context) {
         Assert-Regression ([object]::ReferenceEquals((Find-BrowserView $window $first), $firstView)) 'switching preserves the BrowserView instance'
         Assert-Regression ((Invoke-JavaScript $Context $firstBrowser 'window.preservedTabValue') -eq 42) 'switching preserves JavaScript state'
         Assert-Regression ($firstView.IsVisible -and !$secondView.IsVisible) 'switching restores the original view'
+        Assert-TabFullscreen $window 'selecting an existing tab'
         $third = New-RegressionTab $Context $window
         $model.CloseBrowser($second)
         Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'background tab closes'
@@ -764,17 +823,19 @@ function Test-BrowserTabSelection($Context) {
         $model.CloseBrowser($first)
         Wait-Regression $Context { $model.Browsers.Count -eq 1 } 'selected tab closes'
         Assert-Regression ([object]::ReferenceEquals($model.CurrentBrowser, $third)) 'closing selected tab selects its right neighbor'
+        Assert-TabFullscreen $window 'closing a tab with a right neighbor'
         Assert-Regression ($firstBrowser.IsDisposed -and $first.IntegratedDevToolsHandle -eq [IntPtr]::Zero) 'tab close releases its browser and DevTools'
         $fourth = New-RegressionTab $Context $window
         $model.CloseBrowser($fourth)
         Wait-Regression $Context { $model.Browsers.Count -eq 1 } 'last-position tab closes'
         Assert-Regression ([object]::ReferenceEquals($model.CurrentBrowser, $third)) 'closing final-position tab selects its left neighbor'
+        Assert-TabFullscreen $window 'closing a tab with a left neighbor'
         $closeBinding = $window.InputBindings | Where-Object {
             $_.Key -eq [System.Windows.Input.Key]::W -and $_.Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
         }
         Invoke-BrowserCommand $closeBinding.Command $closeBinding.CommandParameter
         Wait-Regression $Context { !$window.IsVisible } 'Ctrl+W on the final tab closes its window'
-        Assert-Regression ($null -eq $model.CurrentBrowser -and $third.Browser.IsDisposed) 'final tab close clears selection and releases CEF'
+        Assert-Regression ($null -eq $model.CurrentBrowser -and !$model.Fullscreen -and $third.Browser.IsDisposed) 'final tab close clears selection and fullscreen and releases CEF'
     } finally {
         $window.ForceCloseWindow()
     }
