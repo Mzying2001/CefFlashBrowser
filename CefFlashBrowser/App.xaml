@@ -6,7 +6,8 @@
              xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
              xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
-             xmlns:infraWpf="clr-namespace:CefFlashBrowser.Infrastructure.Wpf">
+             xmlns:infraWpf="clr-namespace:CefFlashBrowser.Infrastructure.Wpf"
+             xmlns:converters="clr-namespace:CefFlashBrowser.Views.Converters">
     <Application.Resources>
         <ResourceDictionary>
 
@@ -18,9 +19,6 @@
                 <!--HandyControl-->
                 <infraWpf:NamedResourceDictionary Name="Skin" Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
                 <infraWpf:NamedResourceDictionary Name="Theme" Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
-
-                <!--Converters-->
-                <infraWpf:NamedResourceDictionary Name="Converters" Source="Views/Converters/Converters.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
 
@@ -66,6 +64,19 @@
             <sys:Uri x:Key="TrashIconUri">/Assets/Svgs/trash.svg</sys:Uri>
             <sys:Uri x:Key="UpIconUri">/Assets/Svgs/up.svg</sys:Uri>
             <sys:Uri x:Key="WarningIconUri">/Assets/Svgs/warning.svg</sys:Uri>
+
+
+            <!--Converters-->
+            <converters:BinaryToSizeStringConverter x:Key="BinaryToReadableSizeStringConverter" UseReadableSize="True"/>
+            <converters:BinaryToSizeStringConverter x:Key="BinaryToSizeStringConverter"/>
+            <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
+            <converters:MultiEqualityConverter x:Key="MultiEqualityConverter"/>
+            <converters:ObjectGetTypeConverter x:Key="ObjectGetTypeConverter"/>
+            <converters:ObjectToStringConverter x:Key="ObjectToStringConverter"/>
+            <converters:MultiplyConverter x:Key="TwoThirdConverter" Multiplier="0.6666666666666667"/>
+            <converters:UrlGetFileNameConverter x:Key="UrlGetFileNameConverter"/>
+            <converters:WebsiteIconUrlConverter x:Key="WebsiteIconUrlConverter"/>
+            <converters:ZoomLevelToScaleConverter x:Key="ZoomLevelToScaleConverter"/>
 
 
         </ResourceDictionary>

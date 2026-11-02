@@ -166,13 +166,26 @@ function Initialize-RegressionEnvironment($Context) {
     $Context.Application.Resources.MergedDictionaries.Add($languageDictionary)
     foreach ($dictionaryUri in @(
         'pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml',
-        'pack://application:,,,/HandyControl;component/Themes/Theme.xaml',
-        'pack://application:,,,/CefFlashBrowser;component/Views/Converters/Converters.xaml'
+        'pack://application:,,,/HandyControl;component/Themes/Theme.xaml'
     )) {
         $dictionary = New-Object System.Windows.ResourceDictionary
         $dictionary.set_Source([Uri]$dictionaryUri)
         $Context.Application.Resources.MergedDictionaries.Add($dictionary)
     }
+
+    foreach ($converter in @(
+        'BinaryToSizeStringConverter', 'IntToDoubleConverter', 'MultiEqualityConverter',
+        'ObjectGetTypeConverter', 'ObjectToStringConverter', 'UrlGetFileNameConverter',
+        'WebsiteIconUrlConverter', 'ZoomLevelToScaleConverter'
+    )) {
+        $Context.Application.Resources.Add($converter, (New-Object "CefFlashBrowser.Views.Converters.$converter"))
+    }
+    $readableSizeConverter = New-Object CefFlashBrowser.Views.Converters.BinaryToSizeStringConverter
+    $readableSizeConverter.UseReadableSize = $true
+    $Context.Application.Resources.Add('BinaryToReadableSizeStringConverter', $readableSizeConverter)
+    $twoThirdConverter = New-Object CefFlashBrowser.Views.Converters.MultiplyConverter
+    $twoThirdConverter.Multiplier = 0.6666666666666667
+    $Context.Application.Resources.Add('TwoThirdConverter', $twoThirdConverter)
 
     # Exercise automatic initialization with a saved language different from App's default.
     $savedLanguage = [CefFlashBrowser.Data.GlobalData]::Settings.Language

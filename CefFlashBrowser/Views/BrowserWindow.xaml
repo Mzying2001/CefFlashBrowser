@@ -10,10 +10,9 @@
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
-        xmlns:converters="clr-namespace:CefFlashBrowser.Views.Converters"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
         mc:Ignorable="d"
 
         x:Name="window"
@@ -25,10 +24,6 @@
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
-        <!--Converters-->
-        <converters:MultiplyConverter x:Key="TwoThirdConverter"
-                                      Multiplier="0.6666666666666667"/>
-
         <!--ConetxtMenu-->
         <!--Browser actions menu-->
         <ContextMenu x:Key="browserActionsMenu"
