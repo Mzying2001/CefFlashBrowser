@@ -17,17 +17,20 @@ namespace CefFlashBrowser.Views.Custom
     [TemplatePart(Name = "PART_DragPreviewImage", Type = typeof(Image))]
     public class BrowserTab : ListBox
     {
-        private const double DefaultItemWidth = 250;
-        private const double MinimumItemWidth = 80;
-
         public static readonly ComponentResourceKey ItemContainerStyleKey =
             new ComponentResourceKey(typeof(BrowserTab), "ItemContainerStyle");
 
         public static readonly DependencyProperty IsDragEnabledProperty =
             DependencyProperty.Register(nameof(IsDragEnabled), typeof(bool), typeof(BrowserTab), new PropertyMetadata(false, OnIsDragEnabledChanged));
 
+        public static readonly DependencyProperty DefaultItemWidthProperty =
+            DependencyProperty.Register(nameof(DefaultItemWidth), typeof(double), typeof(BrowserTab), new FrameworkPropertyMetadata(250d, FrameworkPropertyMetadataOptions.AffectsMeasure));
+
+        public static readonly DependencyProperty MinimumItemWidthProperty =
+            DependencyProperty.Register(nameof(MinimumItemWidth), typeof(double), typeof(BrowserTab), new FrameworkPropertyMetadata(80d, FrameworkPropertyMetadataOptions.AffectsMeasure));
+
         private static readonly DependencyPropertyKey ActualItemWidthPropertyKey =
-            DependencyProperty.RegisterReadOnly(nameof(ActualItemWidth), typeof(double), typeof(BrowserTab), new FrameworkPropertyMetadata(DefaultItemWidth));
+            DependencyProperty.RegisterReadOnly(nameof(ActualItemWidth), typeof(double), typeof(BrowserTab), new FrameworkPropertyMetadata(250d));
 
         public static readonly DependencyProperty ActualItemWidthProperty =
             ActualItemWidthPropertyKey.DependencyProperty;
@@ -38,11 +41,8 @@ namespace CefFlashBrowser.Views.Custom
         public static readonly DependencyProperty DraggedItemProperty =
             DraggedItemPropertyKey.DependencyProperty;
 
-        /// <summary>
-        /// Requests a synchronous collection move. The control never modifies its items.
-        /// </summary>
-        public static readonly RoutedEvent MoveItemEvent = EventManager.RegisterRoutedEvent(
-            nameof(MoveItem), RoutingStrategy.Bubble, typeof(MoveItemEventHandler), typeof(BrowserTab));
+        public static readonly RoutedEvent RequestMoveItemEvent = EventManager.RegisterRoutedEvent(
+            nameof(RequestMoveItem), RoutingStrategy.Bubble, typeof(RequestMoveItemEventHandler), typeof(BrowserTab));
 
         /// <summary>Enables reordering gestures. Disabled by default.</summary>
         public bool IsDragEnabled
@@ -51,16 +51,37 @@ namespace CefFlashBrowser.Views.Custom
             set => SetValue(IsDragEnabledProperty, value);
         }
 
+        /// <summary>The preferred item width when enough layout space is available.</summary>
+        public double DefaultItemWidth
+        {
+            get => (double)GetValue(DefaultItemWidthProperty);
+            set => SetValue(DefaultItemWidthProperty, value);
+        }
+
+        /// <summary>The minimum item width before the items overflow.</summary>
+        public double MinimumItemWidth
+        {
+            get => (double)GetValue(MinimumItemWidthProperty);
+            set => SetValue(MinimumItemWidthProperty, value);
+        }
+
         /// <summary>The equal item width calculated from the available layout space.</summary>
-        public double ActualItemWidth => (double)GetValue(ActualItemWidthProperty);
+        public double ActualItemWidth
+        {
+            get => (double)GetValue(ActualItemWidthProperty);
+        }
 
         /// <summary>The item shown in the drag preview, or null when no preview is active.</summary>
-        public object DraggedItem => GetValue(DraggedItemProperty);
-
-        public event MoveItemEventHandler MoveItem
+        public object DraggedItem
         {
-            add => AddHandler(MoveItemEvent, value);
-            remove => RemoveHandler(MoveItemEvent, value);
+            get => GetValue(DraggedItemProperty);
+        }
+
+        /// <summary>Requests a synchronous collection move. The control never modifies its items.</summary>
+        public event RequestMoveItemEventHandler RequestMoveItem
+        {
+            add => AddHandler(RequestMoveItemEvent, value);
+            remove => RemoveHandler(RequestMoveItemEvent, value);
         }
 
         private ScrollViewer _scrollViewer;
@@ -410,7 +431,7 @@ namespace CefFlashBrowser.Views.Custom
             }
 
             if (oldIndex != newIndex)
-                RaiseEvent(new MoveItemEventArgs(MoveItemEvent, this, _draggedItem, oldIndex, newIndex));
+                RaiseEvent(new RequestMoveItemEventArgs(RequestMoveItemEvent, this, _draggedItem, oldIndex, newIndex));
         }
 
         protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
@@ -442,7 +463,7 @@ namespace CefFlashBrowser.Views.Custom
         }
     }
 
-    public class MoveItemEventArgs : RoutedEventArgs
+    public class RequestMoveItemEventArgs : RoutedEventArgs
     {
         public object Item { get; }
         public int OldIndex { get; }
@@ -450,7 +471,7 @@ namespace CefFlashBrowser.Views.Custom
         /// <summary>The item's final index, using ObservableCollection.Move semantics.</summary>
         public int NewIndex { get; }
 
-        public MoveItemEventArgs(RoutedEvent routedEvent, object source, object item, int oldIndex, int newIndex)
+        public RequestMoveItemEventArgs(RoutedEvent routedEvent, object source, object item, int oldIndex, int newIndex)
             : base(routedEvent, source)
         {
             Item = item;
@@ -459,5 +480,5 @@ namespace CefFlashBrowser.Views.Custom
         }
     }
 
-    public delegate void MoveItemEventHandler(object sender, MoveItemEventArgs e);
+    public delegate void RequestMoveItemEventHandler(object sender, RequestMoveItemEventArgs e);
 }

@@ -37,7 +37,7 @@ function Test-BrowserTabControl($Context) {
     [void]$hostGrid.Children.Add($tabs)
     $window.Content = $hostGrid
     $state = @{ Requests = New-Object 'Collections.Generic.List[object]'; Move = $false; Sender = $null }
-    $handler = [CefFlashBrowser.Views.Custom.MoveItemEventHandler]({
+    $handler = [CefFlashBrowser.Views.Custom.RequestMoveItemEventHandler]({
         param($sender, $eventArgs)
         $state.Sender = $sender
         $state.Requests.Add($eventArgs)
@@ -80,7 +80,7 @@ function Test-BrowserTabControl($Context) {
         Assert-Regression $tabs.AllowDrop 'drag dependency property enables drop handling'
         Move-ControlDragTo $tabs 'gamma' $true
         Assert-Regression ($items[0] -eq 'alpha') 'unhandled move requests leave a read-only source unchanged'
-        $hostGrid.AddHandler([CefFlashBrowser.Views.Custom.BrowserTab]::MoveItemEvent, $handler)
+        $hostGrid.AddHandler([CefFlashBrowser.Views.Custom.BrowserTab]::RequestMoveItemEvent, $handler)
         Move-ControlDragTo $tabs 'gamma' $true
         $request = $state.Requests[0]
         Assert-Regression ($state.Requests.Count -eq 1 -and $request.Item -eq 'alpha' -and
@@ -182,7 +182,7 @@ function Test-BrowserTabControl($Context) {
             Wait-Regression $Context { $tabs.IsLoaded } 'standalone tab control is ready again'
         }
     } finally {
-        $hostGrid.RemoveHandler([CefFlashBrowser.Views.Custom.BrowserTab]::MoveItemEvent, $handler)
+        $hostGrid.RemoveHandler([CefFlashBrowser.Views.Custom.BrowserTab]::RequestMoveItemEvent, $handler)
         $window.Close()
     }
 }

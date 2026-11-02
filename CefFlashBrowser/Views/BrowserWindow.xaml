@@ -614,7 +614,7 @@
                               ItemsSource="{Binding Browsers}"
                               SelectedItem="{Binding CurrentBrowser, Mode=OneWay}"
                               IsDragEnabled="True"
-                              MoveItem="TabMoveItem"
+                              RequestMoveItem="TabRequestMoveItem"
                               SelectionChanged="TabSelectionChanged">
                     <c:BrowserTab.ItemContainerStyle>
                         <Style TargetType="ListBoxItem"

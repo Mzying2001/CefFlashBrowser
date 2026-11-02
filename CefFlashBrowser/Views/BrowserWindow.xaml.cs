@@ -147,7 +147,7 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void TabMoveItem(object sender, MoveItemEventArgs e)
+        private void TabRequestMoveItem(object sender, RequestMoveItemEventArgs e)
         {
             if (e.Item is BrowserViewModel browser)
             {
