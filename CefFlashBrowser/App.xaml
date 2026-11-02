@@ -67,6 +67,7 @@
 
 
             <!--Converters-->
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:BinaryToSizeStringConverter x:Key="BinaryToReadableSizeStringConverter" UseReadableSize="True"/>
             <converters:BinaryToSizeStringConverter x:Key="BinaryToSizeStringConverter"/>
             <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
