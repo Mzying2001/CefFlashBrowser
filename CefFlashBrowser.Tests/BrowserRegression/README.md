@@ -2,7 +2,7 @@
 
 These checks exercise the real WPF windows and CEF browser in an interactive Windows desktop session. They run separately from the MSTest unit tests and require Windows PowerShell 5.1 (Desktop edition).
 
-The native keyboard checks briefly bring test windows to the foreground and hold Ctrl while sending repeated W key presses. They verify the foreground window before each shortcut and release Ctrl during cleanup. Leave keyboard input to the runner while these checks execute.
+The native keyboard checks retry initial foreground activation within a bounded wait, then hold Ctrl while sending repeated W key presses. If WPF activation fails, setup briefly attaches to the foreground input queue while requesting native activation, then detaches before focusing the page or holding Ctrl. A competing window interrupts the first activation in one scenario to verify recovery. The checks verify the foreground window before each shortcut and release Ctrl during cleanup. Leave keyboard input to the runner while these checks execute.
 
 ## Build and run
 

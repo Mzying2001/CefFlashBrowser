@@ -59,6 +59,18 @@ public static class RegressionKeyboard
     [DllImport("user32.dll")]
     private static extern bool IsChild(IntPtr parent, IntPtr child);
 
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr window, IntPtr processId);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool AttachThreadInput(uint attach, uint attachTo, bool attached);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr window);
+
     public static bool IsForegroundWindow(IntPtr window)
     {
         return GetAncestor(GetForegroundWindow(), 3) == window;
@@ -68,6 +80,24 @@ public static class RegressionKeyboard
     {
         var focused = GetFocus();
         return focused == window || IsChild(window, focused);
+    }
+
+    public static bool TryActivateWindow(IntPtr window)
+    {
+        var currentThread = GetCurrentThreadId();
+        var foregroundThread = GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero);
+        // Setup runs before Ctrl is held; attaching input queues resets key state.
+        var attached = foregroundThread != 0 && foregroundThread != currentThread
+            && AttachThreadInput(currentThread, foregroundThread, true);
+        try
+        {
+            return SetForegroundWindow(window);
+        }
+        finally
+        {
+            if (attached)
+                AttachThreadInput(currentThread, foregroundThread, false);
+        }
     }
 
     public static void SetKey(ushort virtualKey, bool released)

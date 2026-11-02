@@ -86,15 +86,25 @@ function Invoke-TabShortcut($Window, [System.Windows.Input.Key]$Key, [System.Win
     Invoke-BrowserCommand $binding.Command $binding.CommandParameter
 }
 
-function Set-TabKeyboardFocus($Context, $Window, [switch]$Address) {
+function Set-TabWindowForeground($Context, $Window) {
     $Window.Left = 100
     $Window.Top = 100
     $Window.Topmost = $true
-    [void]$Window.Activate()
     $handle = (New-Object System.Windows.Interop.WindowInteropHelper($Window)).Handle
     Wait-Regression $Context {
+        # Another window can interrupt the initial activation request.
+        if (!$Window.IsActive -or ![RegressionKeyboard]::IsForegroundWindow($handle)) {
+            [void]$Window.Activate()
+            if (![RegressionKeyboard]::IsForegroundWindow($handle)) {
+                [void][RegressionKeyboard]::TryActivateWindow($handle)
+            }
+        }
         $Window.IsActive -and [RegressionKeyboard]::IsForegroundWindow($handle)
     } 'keyboard test window is in the foreground'
+}
+
+function Set-TabKeyboardFocus($Context, $Window, [switch]$Address) {
+    Set-TabWindowForeground $Context $Window
     if ($Address) {
         [void]$Window.FindName('addressTextBox').Focus()
     } else {
@@ -113,6 +123,34 @@ function Send-TabCloseKey($Window) {
     $handle = (New-Object System.Windows.Interop.WindowInteropHelper($Window)).Handle
     Assert-Regression ([RegressionKeyboard]::IsForegroundWindow($handle)) 'Ctrl+W targets the test window'
     [RegressionKeyboard]::PressKey(0x57)
+}
+
+function Test-BrowserTabKeyboardFocusRecovery($Context, $Window) {
+    $otherWindow = $null
+    $onActivated = $null
+    try {
+        $otherWindow = New-Object System.Windows.Window
+        $otherWindow.Title = 'Keyboard focus recovery regression'
+        $otherWindow.Width = 400
+        $otherWindow.Height = 100
+        $otherWindow.ShowInTaskbar = $false
+        $otherWindow.Show()
+        Set-TabWindowForeground $Context $otherWindow
+        $state = @{ InterruptOnce = $true }
+        $onActivated = [EventHandler]({
+            param($sender, $eventArgs)
+            if ($state.InterruptOnce) {
+                $state.InterruptOnce = $false
+                [void]$otherWindow.Activate()
+            }
+        }.GetNewClosure())
+        $Window.add_Activated($onActivated)
+        Set-TabWindowForeground $Context $Window
+        Assert-Regression (!$state.InterruptOnce -and $Window.IsActive) 'keyboard setup recovers from a one-time focus interruption'
+    } finally {
+        if ($null -ne $onActivated) { $Window.remove_Activated($onActivated) }
+        if ($null -ne $otherWindow) { $otherWindow.Close() }
+    }
 }
 
 function Test-BrowserTabCloseKeyboard($Context) {
@@ -134,6 +172,9 @@ function Test-BrowserTabCloseKeyboard($Context) {
                     $model.CurrentBrowser = $second
                     $remaining = @($third, $first)
                 }
+            }
+            if ($scenario -eq 'last') {
+                Test-BrowserTabKeyboardFocusRecovery $Context $window
             }
             Set-TabKeyboardFocus $Context $window -Address:($scenario -eq 'address')
             [RegressionKeyboard]::SetKey(0x11, $false)
