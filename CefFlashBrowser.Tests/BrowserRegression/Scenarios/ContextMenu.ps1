@@ -66,7 +66,7 @@ function Test-ContextMenuRouting($Context) {
 
 function Test-ContextMenuItems($Context) {
     $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
-    $savedLanguage = $Context.LanguageService.GetCurrentLanguage()
+    $savedLanguage = $Context.LanguageService.CurrentLanguage
     $handler = New-Object CefFlashBrowser.Browser.Handlers.ContextMenuHandler
     try {
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false

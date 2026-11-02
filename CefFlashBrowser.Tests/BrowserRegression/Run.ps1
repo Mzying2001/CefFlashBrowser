@@ -40,6 +40,7 @@ $failure = $null
 try {
     Initialize-RegressionEnvironment $context
     Test-LanguageService $context
+    Test-LanguageSelectors $context
     Test-FavoritesService $context
     Test-BrowserBeforeInitialization $context
     Test-BrowserTabControl $context

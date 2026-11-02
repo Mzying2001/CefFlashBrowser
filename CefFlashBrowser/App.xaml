@@ -71,6 +71,7 @@
             <converters:BinaryToSizeStringConverter x:Key="BinaryToReadableSizeStringConverter" UseReadableSize="True"/>
             <converters:BinaryToSizeStringConverter x:Key="BinaryToSizeStringConverter"/>
             <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
+            <converters:LanguageNameConverter x:Key="LanguageNameConverter"/>
             <converters:MultiEqualityConverter x:Key="MultiEqualityConverter"/>
             <converters:ObjectGetTypeConverter x:Key="ObjectGetTypeConverter"/>
             <converters:ObjectToStringConverter x:Key="ObjectToStringConverter"/>

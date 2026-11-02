@@ -294,7 +294,7 @@ function Test-BrowserTabContextMenu($Context) {
     $savedBehavior = $settings.NewPageBehavior
     $savedShortcuts = $settings.DisableBrowserShortcuts
     $savedTabStrip = $settings.AlwaysShowTabStrip
-    $savedLanguage = $Context.LanguageService.GetCurrentLanguage()
+    $savedLanguage = $Context.LanguageService.CurrentLanguage
     $beforeWindows = @($Context.Application.Windows)
     try {
         $settings.AlwaysShowTabStrip = $true

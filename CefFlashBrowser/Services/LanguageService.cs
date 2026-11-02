@@ -5,18 +5,20 @@ using SimpleMvvm.Messaging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 
 namespace CefFlashBrowser.Services
 {
-    public class LanguageService
+    public class LanguageService : INotifyPropertyChanged
     {
-        private const string LanguageResourceDictionaryName = "Language";
-
         private readonly ILogger _logger;
         private readonly Dictionary<string, ResourceDictionary> _languageDictionaries = new Dictionary<string, ResourceDictionary>();
-        private string _currentLanguage;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string CurrentLanguage { get; private set; }
 
         public LanguageService(ILogger logger)
         {
@@ -31,10 +33,8 @@ namespace CefFlashBrowser.Services
             {
                 if (entry.Key is string language && entry.Value is ResourceDictionary dictionary)
                 {
-                    _languageDictionaries.Add(language, new NamedResourceDictionary(dictionary)
-                    {
-                        Name = LanguageResourceDictionaryName
-                    });
+                    _languageDictionaries.Add(language,
+                        new NamedResourceDictionary(dictionary) { Name = "Language" });
                 }
             }
 
@@ -45,7 +45,7 @@ namespace CefFlashBrowser.Services
         {
             return Application.Current.Resources.MergedDictionaries
                 .OfType<NamedResourceDictionary>()
-                .FirstOrDefault(dictionary => dictionary.Name == LanguageResourceDictionaryName);
+                .FirstOrDefault(dictionary => dictionary.Name == "Language");
         }
 
         private void SetCurrentLanguageDictionary(ResourceDictionary dictionary)
@@ -72,11 +72,6 @@ namespace CefFlashBrowser.Services
             return language != null && _languageDictionaries.ContainsKey(language);
         }
 
-        public string GetCurrentLanguage()
-        {
-            return _currentLanguage;
-        }
-
         public void SetCurrentLanguage(string language)
         {
             if (language == null || !_languageDictionaries.TryGetValue(language, out var dictionary))
@@ -86,8 +81,11 @@ namespace CefFlashBrowser.Services
             }
 
             SetCurrentLanguageDictionary(dictionary);
-            _currentLanguage = language;
             GlobalData.Settings.Language = language;
+
+            CurrentLanguage = language;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentLanguage)));
+
             Messenger.Global.Send(MessageTokens.LANGUAGE_CHANGED, language);
         }
 

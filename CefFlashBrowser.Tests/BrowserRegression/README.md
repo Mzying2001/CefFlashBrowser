@@ -45,7 +45,7 @@ The runner exits with code 0 after all checks and cleanup succeed. An assertion,
 | `Run.ps1` | Parameters, process checks, file loading, ordered execution, and final cleanup. |
 | `Environment.ps1` | Run context, build output checks, assembly and WPF setup, fixtures, and CEF lifecycle. |
 | `Helpers.ps1` | Assertions, Dispatcher waits, browser commands, window creation, JavaScript, DevTools, and reflection helpers. |
-| `Scenarios/Language.ps1` | Automatic initialization, saved language selection, resource switching, settings and notifications, missing translations, invalid language fallback, and injected logging before CEF starts. |
+| `Scenarios/Language.ps1` | Automatic initialization, saved language selection, resource switching, settings and notifications, missing translations, invalid language fallback, injected logging, and language names and synchronized selection in the main menu and first-start dialog before CEF starts. |
 | `Scenarios/Favorites.ps1` | Shared singleton collection, automatic loading, file compatibility, explicit saving, edits and ordering, malformed files, and failed writes before CEF starts. |
 | `TestDoubles.cs` | Browser and popup proxies, native keyboard input helpers, and the beforeunload handler, compiled at runtime with `Add-Type -Path`. Excluded from the MSTest project's compilation. |
 | `Scenarios/BrowserWindow.ps1` | Template callbacks, DevTools, navigation and favorites, display state, closing, and saved state restoration. |

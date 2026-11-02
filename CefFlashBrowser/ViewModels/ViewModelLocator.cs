@@ -46,9 +46,9 @@ namespace CefFlashBrowser.ViewModels
             return viewModel;
         }
 
-        public MainWindowViewModel MainWindowViewModel
+        public LanguageService LanguageService
         {
-            get => SimpleIoc.Global.GetInstance<MainWindowViewModel>();
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
         }
 
         public FaviconService FaviconService
@@ -59,6 +59,11 @@ namespace CefFlashBrowser.ViewModels
         public FavoritesService FavoritesService
         {
             get => SimpleIoc.Global.GetInstance<FavoritesService>();
+        }
+
+        public MainWindowViewModel MainWindowViewModel
+        {
+            get => SimpleIoc.Global.GetInstance<MainWindowViewModel>();
         }
 
         public BrowserWindowViewModel BrowserWindowViewModel

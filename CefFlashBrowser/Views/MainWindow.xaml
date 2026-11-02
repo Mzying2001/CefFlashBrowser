@@ -155,14 +155,26 @@
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem"
                                BasedOn="{StaticResource {x:Type MenuItem}}">
-                            <Setter Property="Header"
-                                    Value="{Binding LanguageName, Mode=OneWay}"/>
                             <Setter Property="Command"
                                     Value="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel.SetLanguageCommand}"/>
                             <Setter Property="CommandParameter"
-                                    Value="{Binding Language}"/>
-                            <Setter Property="IsChecked"
-                                    Value="{Binding IsCurrentLanguage, Mode=OneWay}"/>
+                                    Value="{Binding}"/>
+                            <Setter Property="Header">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource LanguageNameConverter}" Mode="OneWay">
+                                        <Binding/>
+                                        <Binding Source="{StaticResource Locator}" Path="LanguageService"/>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="IsChecked">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource MultiEqualityConverter}" Mode="OneWay">
+                                        <Binding/>
+                                        <Binding Source="{StaticResource Locator}" Path="LanguageService.CurrentLanguage"/>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
                         </Style>
                     </MenuItem.ItemContainerStyle>
                 </MenuItem>

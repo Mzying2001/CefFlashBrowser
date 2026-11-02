@@ -174,7 +174,7 @@ function Initialize-RegressionEnvironment($Context) {
     }
 
     foreach ($converter in @(
-        'BinaryToSizeStringConverter', 'IntToDoubleConverter', 'MultiEqualityConverter',
+        'BinaryToSizeStringConverter', 'IntToDoubleConverter', 'LanguageNameConverter', 'MultiEqualityConverter',
         'ObjectGetTypeConverter', 'ObjectToStringConverter', 'UrlGetFileNameConverter',
         'WebsiteIconUrlConverter', 'ZoomLevelToScaleConverter'
     )) {
@@ -197,7 +197,7 @@ function Initialize-RegressionEnvironment($Context) {
     Assert-Regression ([object]::ReferenceEquals($Context.LanguageService, $languageService) -and
         [object]::ReferenceEquals($languageService, [SimpleMvvm.Ioc.SimpleIoc]::Global.GetInstance(
             [CefFlashBrowser.Services.LanguageService], @()))) 'language lookups share the registered service instance'
-    Assert-Regression ($languageService.GetCurrentLanguage() -eq 'en-US' -and
+    Assert-Regression ($languageService.CurrentLanguage -eq 'en-US' -and
         $languageService.GetLocale('en-US') -eq 'en-US' -and
         $Context.Application.FindResource('language_name') -eq 'English') 'language construction applies the saved language before CEF starts'
     $languageService.SetCurrentLanguage($savedLanguage)
