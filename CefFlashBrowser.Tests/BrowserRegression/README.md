@@ -47,6 +47,7 @@ The runner exits with code 0 after all checks and cleanup succeed. An assertion,
 | `Helpers.ps1` | Assertions, Dispatcher waits, browser commands, window creation, JavaScript, DevTools, and reflection helpers. |
 | `Scenarios/Language.ps1` | Automatic initialization, saved language selection, resource switching, settings and notifications, missing translations, invalid language fallback, injected logging, and language names and synchronized selection in the main menu and first-start dialog before CEF starts. |
 | `Scenarios/Favorites.ps1` | Shared singleton collection, automatic loading, file compatibility, explicit saving, edits and ordering, malformed files, and failed writes before CEF starts. |
+| `Scenarios/ProxySettings.ps1` | DPAPI password persistence, legacy plaintext cleanup during settings merge, settings UI password bindings, and password-free error logging before CEF starts. |
 | `TestDoubles.cs` | Browser and popup proxies, native keyboard input helpers, and the beforeunload handler, compiled at runtime with `Add-Type -Path`. Excluded from the MSTest project's compilation. |
 | `Scenarios/BrowserWindow.ps1` | Template callbacks, DevTools, navigation and favorites, display state, closing, and saved state restoration. |
 | `FaviconHttpFixture.cs`, `Scenarios/Favicons.ps1` | Local HTTP pages, redirects and failed images; discovered mappings, all three favorites surfaces, editing, ordering, empty-state updates and saving on manager close; live refresh, image fallback, and queued navigation and disposal callbacks. |

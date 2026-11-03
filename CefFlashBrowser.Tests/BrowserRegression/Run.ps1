@@ -24,6 +24,7 @@ foreach ($file in @(
     'Helpers.ps1',
     'Scenarios\Language.ps1',
     'Scenarios\Favorites.ps1',
+    'Scenarios\ProxySettings.ps1',
     'Scenarios\BrowserWindow.ps1',
     'Scenarios\BrowserTabs.ps1',
     'Scenarios\BrowserTabControl.ps1',
@@ -42,6 +43,7 @@ try {
     Test-LanguageService $context
     Test-LanguageSelectors $context
     Test-FavoritesService $context
+    Test-ProxySettings $context
     Test-BrowserBeforeInitialization $context
     Test-BrowserTabControl $context
     Test-BrowserTabsBeforeShow $context

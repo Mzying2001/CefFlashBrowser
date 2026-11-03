@@ -180,6 +180,7 @@ function Initialize-RegressionEnvironment($Context) {
     )) {
         $Context.Application.Resources.Add($converter, (New-Object "CefFlashBrowser.Views.Converters.$converter"))
     }
+    $Context.Application.Resources.Add('BooleanToVisibilityConverter', (New-Object System.Windows.Controls.BooleanToVisibilityConverter))
     $readableSizeConverter = New-Object CefFlashBrowser.Views.Converters.BinaryToSizeStringConverter
     $readableSizeConverter.UseReadableSize = $true
     $Context.Application.Resources.Add('BinaryToReadableSizeStringConverter', $readableSizeConverter)

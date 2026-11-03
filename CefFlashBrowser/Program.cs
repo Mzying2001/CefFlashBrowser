@@ -183,7 +183,7 @@ namespace CefFlashBrowser
             if (GlobalData.Settings.ProxySettings.EnableProxy)
             {
                 var proxySettings = GlobalData.Settings.ProxySettings;
-                CefSharpSettings.Proxy = new ProxyOptions(proxySettings.IP, proxySettings.Port, proxySettings.UserName, proxySettings.Password);
+                CefSharpSettings.Proxy = new ProxyOptions(proxySettings.IP, proxySettings.Port, proxySettings.UserName, proxySettings.PlainPassword);
             }
 
             if (GlobalData.Settings.DisableGpuAcceleration)

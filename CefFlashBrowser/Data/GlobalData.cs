@@ -100,6 +100,12 @@ namespace CefFlashBrowser.Data
                 Settings = JsonConvert.DeserializeObject<Settings>(json);
                 Settings.SetNullPropertiesToDefault();
             }
+            catch (JsonException)
+            {
+                Settings = Settings.Default;
+                // JSON exception messages can include sensitive configuration values.
+                LogHelper.LogError("Settings file invalid, using default settings");
+            }
             catch (Exception e)
             {
                 Settings = Settings.Default;
@@ -123,16 +129,18 @@ namespace CefFlashBrowser.Data
                         JObject settingsJson = JObject.Parse(oldSettingsContent);
                         settingsJson.Merge(JToken.FromObject(Settings));
 
+                        // Merge preserves unknown fields, including any previously stored plaintext property.
+                        (settingsJson[nameof(Settings.ProxySettings)] as JObject)?.Remove(nameof(ProxySettings.PlainPassword));
+
                         var jsonString = settingsJson.ToString(Formatting.Indented);
                         FileHelper.SafeWriteFile(SettingsPath, jsonString, Encoding.UTF8);
 
                         LogHelper.LogInfo("Settings saved successfully, type: merge");
                         return true;
                     }
-                    catch (JsonReaderException e)
+                    catch (JsonReaderException)
                     {
-                        LogHelper.LogError("Settings merge failed, falling back to overwrite", e);
-                        LogHelper.LogInfo("Old settings content: " + oldSettingsContent);
+                        LogHelper.LogError("Settings merge failed, falling back to overwrite");
                     }
                 }
 

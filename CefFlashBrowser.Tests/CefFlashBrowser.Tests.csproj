@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +24,7 @@
 
   <!-- Link source files from the main app -->
   <ItemGroup>
+    <Compile Include="..\CefFlashBrowser\Utils\PasswordProtector.cs" Link="LinkedSources\PasswordProtector.cs" />
     <Compile Include="..\CefFlashBrowser\Services\DatabaseService.cs" Link="LinkedSources\DatabaseService.cs" />
     <Compile Include="..\CefFlashBrowser\Models\WebsiteIconRecord.cs" Link="LinkedSources\WebsiteIconRecord.cs" />
     <Compile Include="..\CefFlashBrowser\Services\FaviconService.cs" Link="LinkedSources\FaviconService.cs" />
@@ -40,6 +42,10 @@
     <Compile Include="..\CefFlashBrowser\Models\SolObject.cs" Link="LinkedSources\SolObject.cs" />
     <Compile Include="..\CefFlashBrowser\Models\SolArray.cs" Link="LinkedSources\SolArray.cs" />
     <Compile Include="..\CefFlashBrowser\Models\SolTypeDesc.cs" Link="LinkedSources\SolTypeDesc.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Security" />
   </ItemGroup>
 
   <!-- Compiled at runtime by the standalone browser regression runner. -->
