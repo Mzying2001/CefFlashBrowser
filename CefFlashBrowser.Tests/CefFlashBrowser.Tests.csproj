@@ -48,10 +48,10 @@
     <Reference Include="System.Security" />
   </ItemGroup>
 
-  <!-- Compiled at runtime by the standalone browser regression runner. -->
+  <!-- Compiled at runtime by the standalone regression runners. -->
   <ItemGroup>
-    <Compile Remove="BrowserRegression\**\*.cs" />
-    <None Include="BrowserRegression\**\*.cs" />
+    <Compile Remove="BrowserRegression\**\*.cs;CommandProxyRegression\**\*.cs" />
+    <None Include="BrowserRegression\**\*.cs;CommandProxyRegression\**\*.cs" />
   </ItemGroup>
 
   <!-- Test fixture files -->

@@ -19,6 +19,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         DatabaseService = $null
         FaviconService = $null
         CefStarted = $false
+        OriginalComSpec = [Environment]::GetEnvironmentVariable('ComSpec')
         AuxiliaryTypes = @()
         AuxiliaryAddress = $null
         AuxiliarySecondAddress = $null
@@ -61,7 +62,8 @@ function Initialize-RegressionEnvironment($Context) {
         'CefFlashBrowser.FlashBrowser.dll'
     )
     $cefDependencies = @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.WinForms.dll')
-    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SwfPlayer\swfplayer.html', 'Assets\SQLite\SQLite.Interop.dll') + @(
+    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SwfPlayer\swfplayer.html', 'Assets\SQLite\SQLite.Interop.dll',
+        'Assets\CommandProxy\CefFlashBrowser.CommandProxy.exe') + @(
         ($cefDependencies + @('CefSharp.BrowserSubprocess.exe', 'libcef.dll')) | ForEach-Object { "Assets\CefSharp\$_" }
     )
     foreach ($file in $requiredFiles) {
@@ -217,6 +219,8 @@ function Initialize-RegressionEnvironment($Context) {
 }
 
 function Start-RegressionCef($Context) {
+    [Environment]::SetEnvironmentVariable('ComSpec',
+        (Join-Path $Context.ApplicationPath 'Assets\CommandProxy\CefFlashBrowser.CommandProxy.exe'))
     $cefSettings = New-Object CefFlashBrowser.FlashBrowser.CefFlashSettings
     $cefSettings.BrowserSubprocessPath = Join-Path $Context.CefPath 'CefSharp.BrowserSubprocess.exe'
     $cefSettings.ResourcesDirPath = $Context.CefPath
@@ -280,5 +284,6 @@ function Stop-RegressionEnvironment($Context) {
             $cleanupErrors.Add($_)
         }
     }
+    [Environment]::SetEnvironmentVariable('ComSpec', $Context.OriginalComSpec)
     return $cleanupErrors.ToArray()
 }

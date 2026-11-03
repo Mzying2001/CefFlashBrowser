@@ -7,9 +7,9 @@
     <Platform Solution="*|x64" Project="x64" />
     <Platform Solution="*|x86" Project="x86" />
   </Project>
-  <Project Path="CefFlashBrowser.EmptyExe/CefFlashBrowser.EmptyExe.csproj">
+  <Project Path="CefFlashBrowser.CommandProxy/CefFlashBrowser.CommandProxy.vcxproj" Id="897c4f40-ced0-4d96-a5bc-cef1a973bd44">
     <Platform Solution="*|x64" Project="x64" />
-    <Platform Solution="*|x86" Project="x86" />
+    <Platform Solution="*|x86" Project="Win32" />
   </Project>
   <Project Path="CefFlashBrowser.FlashBrowser/CefFlashBrowser.FlashBrowser.csproj">
     <Platform Solution="*|x64" Project="x64" />
@@ -26,7 +26,7 @@
     <Platform Solution="*|x86" Project="x86" />
   </Project>
   <Project Path="CefFlashBrowser/CefFlashBrowser.csproj">
-    <BuildDependency Project="CefFlashBrowser.EmptyExe/CefFlashBrowser.EmptyExe.csproj" />
+    <BuildDependency Project="CefFlashBrowser.CommandProxy/CefFlashBrowser.CommandProxy.vcxproj" />
     <Platform Solution="*|x64" Project="x64" />
     <Platform Solution="*|x86" Project="x86" />
   </Project>

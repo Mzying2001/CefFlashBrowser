@@ -22,7 +22,7 @@ namespace CefFlashBrowser.Data
 
         public static string CefLogPath { get; }
         public static string FlashPath { get; }
-        public static string EmptyExePath { get; }
+        public static string CommandProxyPath { get; }
         public static string SwfPlayerPath { get; }
         public static string SubprocessPath { get; }
 
@@ -49,7 +49,7 @@ namespace CefFlashBrowser.Data
 
             CefLogPath = Path.Combine(LogsPath, $"cef_{DateTime.Now:yyyyMMdd}.log");
             FlashPath = Path.Combine(PluginsPath, "pepflashplayer.dll");
-            EmptyExePath = Path.Combine(AssetsPath, "EmptyExe\\CefFlashBrowser.EmptyExe.exe");
+            CommandProxyPath = Path.Combine(AssetsPath, "CommandProxy\\CefFlashBrowser.CommandProxy.exe");
             SwfPlayerPath = Path.Combine(AssetsPath, "SwfPlayer\\swfplayer.html");
             SubprocessPath = Path.Combine(CefDllPath, "CefSharp.BrowserSubprocess.exe");
 

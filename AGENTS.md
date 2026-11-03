@@ -64,9 +64,10 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - **CefFlashBrowser.Singleton/**: C++/CLI library for single-instance and IPC support.
 - **CefFlashBrowser.Database/**: Database interfaces and SQLite implementation.
 - **CefFlashBrowser.Log/**: Shared file logging library.
-- **CefFlashBrowser.EmptyExe/**: Minimal subprocess executable used by CefSharp.
+- **CefFlashBrowser.CommandProxy/**: Native command proxy with Flash diagnostic filtering.
 - **CefFlashBrowser.Tests/**: MSTest project for linked application code and supporting libraries.
   - **BrowserRegression/**: PowerShell checks for WPF/CEF behavior and packaged releases.
+  - **CommandProxyRegression/**: Regression checks for command forwarding and diagnostic filtering.
   - **TestData/**: SOL fixtures for serialization tests.
 - **Docs/**: Reference specifications for AMF and SOL-related implementation work.
 

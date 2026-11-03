@@ -154,7 +154,7 @@ namespace CefFlashBrowser
 
         private static void InitCefFlash()
         {
-            Environment.SetEnvironmentVariable("ComSpec", GlobalData.EmptyExePath); //Remove black popup window
+            Environment.SetEnvironmentVariable("ComSpec", GlobalData.CommandProxyPath); // Filter the Flash diagnostic; forward other commands to cmd.
 
             var settings = new CefFlashSettings()
             {
