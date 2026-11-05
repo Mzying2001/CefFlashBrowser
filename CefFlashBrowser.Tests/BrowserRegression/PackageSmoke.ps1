@@ -19,18 +19,24 @@ $packagePath = Join-Path $temporaryPath 'package'
 $databasePath = Join-Path $temporaryPath 'browser.db'
 Write-Host "Isolated package check: $temporaryPath"
 Expand-Archive -LiteralPath $ArchivePath -DestinationPath $packagePath
-foreach ($file in @('CefFlashBrowser.exe', 'Assets\SQLite\SQLite.Interop.dll',
-    'Assets\CmdProxy\CmdProxy.exe')) {
+foreach ($file in @('CefFlashBrowser.exe', 'Binaries\SQLite\SQLite.Interop.dll',
+    'Binaries\CmdProxy\CmdProxy.exe', 'Binaries\CefSharp\libcef.dll',
+    'Binaries\CefSharp\CefSharp.BrowserSubprocess.exe', 'Binaries\Plugins\pepflashplayer.dll',
+    'Binaries\Plugins\readme.txt')) {
     if (!(Test-Path -LiteralPath (Join-Path $packagePath $file) -PathType Leaf)) {
         throw "Required package file is missing: $file"
     }
 }
+if ((Test-Path -LiteralPath (Join-Path $packagePath 'Assets')) -or
+    @(Get-ChildItem -LiteralPath $packagePath -Recurse -File -Filter '*.tar.gz').Count -ne 0) {
+    throw 'The package must deploy dependencies under Binaries without Assets or dependency archives.'
+}
 & (Join-Path $PSScriptRoot '..\CommandProxyRegression\Run.ps1') -Platform $Platform -Configuration Release `
-    -ProxyPath (Join-Path $packagePath 'Assets\CmdProxy\CmdProxy.exe')
-$sqliteInteropPath = Join-Path $packagePath 'Assets\SQLite\SQLite.Interop.dll'
+    -ProxyPath (Join-Path $packagePath 'Binaries\CmdProxy\CmdProxy.exe')
+$sqliteInteropPath = Join-Path $packagePath 'Binaries\SQLite\SQLite.Interop.dll'
 $nativeFiles = @(Get-ChildItem -LiteralPath $packagePath -Recurse -File -Filter 'SQLite.Interop.dll')
 if ($nativeFiles.Count -ne 1 -or $nativeFiles[0].FullName -ne $sqliteInteropPath) {
-    throw 'The package must contain exactly one SQLite.Interop.dll under Assets\SQLite.'
+    throw 'The package must contain exactly one SQLite.Interop.dll under Binaries\SQLite.'
 }
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
@@ -46,11 +52,11 @@ $globalDataType = $applicationAssembly.GetType('CefFlashBrowser.Data.GlobalData'
 foreach ($dataPath in @{
     DatabasePath = $databasePath
     LogsPath = (Join-Path $temporaryPath 'Logs')
-    SqliteDllPath = (Join-Path $packagePath 'Assets\SQLite')
+    SqliteDllPath = (Join-Path $packagePath 'Binaries\SQLite')
 }.GetEnumerator()) {
     $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
 }
-[void][CefFlashBrowser.Utils.Win32]::SetDllDirectory((Join-Path $packagePath 'Assets\CefSharp'))
+[void][CefFlashBrowser.Utils.Win32]::SetDllDirectory((Join-Path $packagePath 'Binaries\CefSharp'))
 [Threading.SynchronizationContext]::SetSynchronizationContext(
     (New-Object System.Windows.Threading.DispatcherSynchronizationContext))
 $programType = $applicationAssembly.GetType('CefFlashBrowser.Program')
@@ -101,7 +107,7 @@ try {
     }
     $nativeModules = @(Get-Process -Id $PID -Module | Where-Object ModuleName -eq 'SQLite.Interop.dll')
     if ($nativeModules.Count -ne 1 -or $nativeModules[0].FileName -ne $sqliteInteropPath) {
-        throw 'SQLite must load its native library from the isolated package under Assets\SQLite.'
+        throw 'SQLite must load its native library from the isolated package under Binaries\SQLite.'
     }
 } finally {
     [void]$unregister.Invoke($null, $null)

@@ -353,3 +353,6 @@ FodyWeavers.xsd
 
 # Local notes
 local-notes/
+
+# Temporary dependency extraction
+/CefFlashBrowser/Assets/.postbuild/

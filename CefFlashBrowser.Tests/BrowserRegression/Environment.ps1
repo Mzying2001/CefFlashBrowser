@@ -9,7 +9,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         Platform = $Platform
         Configuration = $Configuration
         ApplicationPath = $applicationPath
-        CefPath = Join-Path $applicationPath 'Assets\CefSharp'
+        CefPath = Join-Path $applicationPath 'Binaries\CefSharp'
         TemporaryPath = Join-Path ([IO.Path]::GetTempPath()) ('CefFlashBrowser-regression-' + [Guid]::NewGuid())
         Application = $null
         Logger = $null
@@ -62,9 +62,10 @@ function Initialize-RegressionEnvironment($Context) {
         'CefFlashBrowser.FlashBrowser.dll'
     )
     $cefDependencies = @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.WinForms.dll')
-    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SQLite\SQLite.Interop.dll',
-        'Assets\CmdProxy\CmdProxy.exe') + @(
-        ($cefDependencies + @('CefSharp.BrowserSubprocess.exe', 'libcef.dll')) | ForEach-Object { "Assets\CefSharp\$_" }
+    $requiredFiles = @('CefFlashBrowser.exe', 'Binaries\SQLite\SQLite.Interop.dll',
+        'Binaries\CmdProxy\CmdProxy.exe', 'Binaries\Plugins\pepflashplayer.dll',
+        'Binaries\Plugins\readme.txt') + @(
+        ($cefDependencies + @('CefSharp.BrowserSubprocess.exe', 'libcef.dll')) | ForEach-Object { "Binaries\CefSharp\$_" }
     )
     foreach ($file in $requiredFiles) {
         $path = Join-Path $Context.ApplicationPath $file
@@ -79,7 +80,8 @@ function Initialize-RegressionEnvironment($Context) {
         }
     }
 
-    Assert-Regression (!(Test-Path -LiteralPath (Join-Path $Context.ApplicationPath 'Assets\SwfPlayer'))) 'build output has no external SWF player directory'
+    Assert-Regression (!(Test-Path -LiteralPath (Join-Path $Context.ApplicationPath 'Assets'))) 'build output has no external Assets directory'
+    Assert-Regression (@(Get-ChildItem -LiteralPath $Context.ApplicationPath -Recurse -File -Filter '*.tar.gz').Count -eq 0) 'build output has no dependency archives'
 
     [void][IO.Directory]::CreateDirectory($Context.TemporaryPath)
     Write-Host "Isolated test data: $($Context.TemporaryPath)"
@@ -124,7 +126,7 @@ function Initialize-RegressionEnvironment($Context) {
         FavoritesPath = (Join-Path $Context.TemporaryPath 'favorites.json')
         SettingsPath = (Join-Path $Context.TemporaryPath 'settings.json')
         DatabasePath = (Join-Path $Context.TemporaryPath 'browser.db')
-        SqliteDllPath = (Join-Path $Context.ApplicationPath 'Assets\SQLite')
+        SqliteDllPath = (Join-Path $Context.ApplicationPath 'Binaries\SQLite')
     }.GetEnumerator()) {
         $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
     }
@@ -223,7 +225,7 @@ function Initialize-RegressionEnvironment($Context) {
 
 function Start-RegressionCef($Context) {
     [Environment]::SetEnvironmentVariable('ComSpec',
-        (Join-Path $Context.ApplicationPath 'Assets\CmdProxy\CmdProxy.exe'))
+        (Join-Path $Context.ApplicationPath 'Binaries\CmdProxy\CmdProxy.exe'))
     $cefSettings = New-Object CefFlashBrowser.FlashBrowser.CefFlashSettings
     $cefSettings.BrowserSubprocessPath = Join-Path $Context.CefPath 'CefSharp.BrowserSubprocess.exe'
     $cefSettings.ResourcesDirPath = $Context.CefPath

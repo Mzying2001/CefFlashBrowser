@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <Platforms>x86;x64</Platforms>
     <NuGetAudit>False</NuGetAudit>
-    <CefSharpTargetDir>Assets\CefSharp</CefSharpTargetDir>
+    <CefSharpTargetDir>Binaries\CefSharp</CefSharpTargetDir>
     <CopySQLiteInteropFiles>false</CopySQLiteInteropFiles>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
@@ -81,24 +81,6 @@
     <Reference Include="System.Security" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Assets\CefSharp\libcef_x64.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\CefSharp\libcef_x86.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Plugins\pepflashplayer_x64.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Plugins\pepflashplayer_x86.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Plugins\readme.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
   <Target Name="PrepareSQLiteInterop" BeforeTargets="AssignTargetPaths" Condition="'$(DesignTimeBuild)' != 'true'">
     <ItemGroup>
       <_SQLiteInteropForPlatform Include="@(SQLiteInteropFiles)" Condition="'%(SQLiteInteropFiles.RecursiveDir)' == '$(Platform)\' And '%(SQLiteInteropFiles.Filename)%(SQLiteInteropFiles.Extension)' == 'SQLite.Interop.dll'" />
@@ -108,7 +90,7 @@
     <Error Condition="!Exists('%(_SQLiteInteropForPlatform.Identity)')" Text="SQLite native library not found: %(_SQLiteInteropForPlatform.Identity)" />
     <ItemGroup>
       <Content Include="@(_SQLiteInteropForPlatform)">
-        <Link>Assets\SQLite\SQLite.Interop.dll</Link>
+        <Link>Binaries\SQLite\SQLite.Interop.dll</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

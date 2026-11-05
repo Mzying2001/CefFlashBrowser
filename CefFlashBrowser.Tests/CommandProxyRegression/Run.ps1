@@ -11,7 +11,7 @@ $ErrorActionPreference = 'Stop'
 if (!$ProxyPath) {
     $repositoryPath = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
     $buildPath = if ($Platform -eq 'x64') { "bin\x64\$Configuration" } else { "bin\$Configuration" }
-    $ProxyPath = Join-Path $repositoryPath "$buildPath\Assets\CmdProxy\CmdProxy.exe"
+    $ProxyPath = Join-Path $repositoryPath "$buildPath\Binaries\CmdProxy\CmdProxy.exe"
 }
 $ProxyPath = (Resolve-Path -LiteralPath $ProxyPath).Path
 $image = [IO.File]::ReadAllBytes($ProxyPath)

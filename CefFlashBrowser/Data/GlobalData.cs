@@ -13,6 +13,7 @@ namespace CefFlashBrowser.Data
     {
         public static string AppBaseDirectory { get; }
         public static string AssetsPath { get; }
+        public static string BinariesPath { get; }
         public static string CachesPath { get; }
         public static string LogsPath { get; }
         public static string CefDllPath { get; }
@@ -42,16 +43,17 @@ namespace CefFlashBrowser.Data
         {
             AppBaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             AssetsPath = Path.Combine(AppBaseDirectory, "Assets\\");
+            BinariesPath = Path.Combine(AppBaseDirectory, "Binaries\\");
             CachesPath = Path.Combine(AppBaseDirectory, "Caches\\");
             LogsPath = Path.Combine(AppBaseDirectory, "Logs\\");
-            CefDllPath = Path.Combine(AssetsPath, "CefSharp\\");
-            SqliteDllPath = Path.Combine(AssetsPath, "SQLite\\");
-            PluginsPath = Path.Combine(AssetsPath, "Plugins\\");
+            CefDllPath = Path.Combine(BinariesPath, "CefSharp\\");
+            SqliteDllPath = Path.Combine(BinariesPath, "SQLite\\");
+            PluginsPath = Path.Combine(BinariesPath, "Plugins\\");
             SharedObjectsPath = Path.Combine(CachesPath, "Pepper Data\\Shockwave Flash\\WritableRoot\\#SharedObjects\\");
 
             CefLogPath = Path.Combine(LogsPath, $"cef_{DateTime.Now:yyyyMMdd}.log");
             FlashPath = Path.Combine(PluginsPath, "pepflashplayer.dll");
-            CommandProxyPath = Path.Combine(AssetsPath, "CmdProxy\\CmdProxy.exe");
+            CommandProxyPath = Path.Combine(BinariesPath, "CmdProxy\\CmdProxy.exe");
             SwfPlayerPath = Path.Combine(AssetsPath, "SwfPlayer\\swfplayer.html");
             SubprocessPath = Path.Combine(CefDllPath, "CefSharp.BrowserSubprocess.exe");
 

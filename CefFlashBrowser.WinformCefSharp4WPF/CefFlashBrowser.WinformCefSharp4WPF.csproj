@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <NuGetAudit>False</NuGetAudit>
-    <CefSharpTargetDir>Assets\CefSharp</CefSharpTargetDir>
+    <CefSharpTargetDir>Binaries\CefSharp</CefSharpTargetDir>
   </PropertyGroup>
 
   <ItemGroup>

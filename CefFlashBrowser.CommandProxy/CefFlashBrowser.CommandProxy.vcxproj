@@ -37,8 +37,8 @@
   <PropertyGroup>
     <TargetName>CmdProxy</TargetName>
     <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Platform)' == 'Win32'">$(ProjectDir)..\bin\$(Configuration)\Assets\CmdProxy\</OutDir>
-    <OutDir Condition="'$(Platform)' == 'x64'">$(ProjectDir)..\bin\x64\$(Configuration)\Assets\CmdProxy\</OutDir>
+    <OutDir Condition="'$(Platform)' == 'Win32'">$(ProjectDir)..\bin\$(Configuration)\Binaries\CmdProxy\</OutDir>
+    <OutDir Condition="'$(Platform)' == 'x64'">$(ProjectDir)..\bin\x64\$(Configuration)\Binaries\CmdProxy\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
