@@ -48,6 +48,9 @@
     <Resource Include="Assets\Svgs\trash.svg" />
     <Resource Include="Assets\Svgs\up.svg" />
     <Resource Include="Assets\Svgs\warning.svg" />
+    <EmbeddedResource Include="Assets\SwfPlayer\swfplayer.html">
+      <LogicalName>CefFlashBrowser.Assets.SwfPlayer.swfplayer.html</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -91,9 +94,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Plugins\readme.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\SwfPlayer\swfplayer.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

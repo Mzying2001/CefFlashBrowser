@@ -35,6 +35,10 @@ if ($nativeFiles.Count -ne 1 -or $nativeFiles[0].FullName -ne $sqliteInteropPath
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 $applicationAssembly = [Reflection.Assembly]::LoadFrom((Join-Path $packagePath 'CefFlashBrowser.exe'))
+if ((Test-Path -LiteralPath (Join-Path $packagePath 'Assets\SwfPlayer')) -or
+    $applicationAssembly.GetManifestResourceNames() -notcontains 'CefFlashBrowser.Assets.SwfPlayer.swfplayer.html') {
+    throw 'The package must embed the SWF player page without an Assets\SwfPlayer directory.'
+}
 # Start Costura's embedded assembly resolver without running the application's entry point.
 [Runtime.CompilerServices.RuntimeHelpers]::RunModuleConstructor($applicationAssembly.ManifestModule.ModuleHandle)
 $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'

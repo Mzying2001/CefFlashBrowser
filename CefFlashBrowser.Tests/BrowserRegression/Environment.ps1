@@ -62,7 +62,7 @@ function Initialize-RegressionEnvironment($Context) {
         'CefFlashBrowser.FlashBrowser.dll'
     )
     $cefDependencies = @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.WinForms.dll')
-    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SwfPlayer\swfplayer.html', 'Assets\SQLite\SQLite.Interop.dll',
+    $requiredFiles = @('CefFlashBrowser.exe', 'Assets\SQLite\SQLite.Interop.dll',
         'Assets\CommandProxy\CefFlashBrowser.CommandProxy.exe') + @(
         ($cefDependencies + @('CefSharp.BrowserSubprocess.exe', 'libcef.dll')) | ForEach-Object { "Assets\CefSharp\$_" }
     )
@@ -79,6 +79,8 @@ function Initialize-RegressionEnvironment($Context) {
         }
     }
 
+    Assert-Regression (!(Test-Path -LiteralPath (Join-Path $Context.ApplicationPath 'Assets\SwfPlayer'))) 'build output has no external SWF player directory'
+
     [void][IO.Directory]::CreateDirectory($Context.TemporaryPath)
     Write-Host "Isolated test data: $($Context.TemporaryPath)"
     Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml, System.Windows.Forms
@@ -90,6 +92,7 @@ function Initialize-RegressionEnvironment($Context) {
     }
     [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.CefPath 'CefSharp.dll'))
     $applicationAssembly = [Reflection.Assembly]::LoadFrom((Join-Path $Context.ApplicationPath 'CefFlashBrowser.exe'))
+    Assert-Regression ($applicationAssembly.GetManifestResourceNames() -contains 'CefFlashBrowser.Assets.SwfPlayer.swfplayer.html') 'SWF player page is embedded in the application'
     [void][CefFlashBrowser.Utils.Win32]::SetDllDirectory($Context.CefPath)
     foreach ($dependency in @('CefSharp.Core.dll', 'CefSharp.WinForms.dll')) {
         [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.CefPath $dependency))
@@ -126,7 +129,7 @@ function Initialize-RegressionEnvironment($Context) {
         $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
     }
     $globalDataType.GetField('<Settings>k__BackingField', $privateStatic).SetValue($null, [CefFlashBrowser.Models.Settings]::Default)
-    # PowerShell has a different application base directory than the deployed executable.
+    # Keep the embedded page's virtual file address consistent with the deployed executable.
     $globalDataType.GetField('<SwfPlayerPath>k__BackingField', $privateStatic).SetValue(
         $null, (Join-Path $Context.ApplicationPath 'Assets\SwfPlayer\swfplayer.html'))
     [CefFlashBrowser.Data.GlobalData]::IsStartWithoutMainWindow = $true

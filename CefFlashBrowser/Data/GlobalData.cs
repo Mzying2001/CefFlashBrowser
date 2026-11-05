@@ -23,8 +23,10 @@ namespace CefFlashBrowser.Data
         public static string CefLogPath { get; }
         public static string FlashPath { get; }
         public static string CommandProxyPath { get; }
-        public static string SwfPlayerPath { get; }
         public static string SubprocessPath { get; }
+
+        // Virtual file address for the embedded page; no physical HTML file is required.
+        public static string SwfPlayerPath { get; }
 
         public static string DataPath { get; }
         public static string FavoritesPath { get; }
