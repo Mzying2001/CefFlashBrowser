@@ -20,13 +20,13 @@ $databasePath = Join-Path $temporaryPath 'browser.db'
 Write-Host "Isolated package check: $temporaryPath"
 Expand-Archive -LiteralPath $ArchivePath -DestinationPath $packagePath
 foreach ($file in @('CefFlashBrowser.exe', 'Assets\SQLite\SQLite.Interop.dll',
-    'Assets\CommandProxy\CefFlashBrowser.CommandProxy.exe')) {
+    'Assets\CmdProxy\CmdProxy.exe')) {
     if (!(Test-Path -LiteralPath (Join-Path $packagePath $file) -PathType Leaf)) {
         throw "Required package file is missing: $file"
     }
 }
 & (Join-Path $PSScriptRoot '..\CommandProxyRegression\Run.ps1') -Platform $Platform -Configuration Release `
-    -ProxyPath (Join-Path $packagePath 'Assets\CommandProxy\CefFlashBrowser.CommandProxy.exe')
+    -ProxyPath (Join-Path $packagePath 'Assets\CmdProxy\CmdProxy.exe')
 $sqliteInteropPath = Join-Path $packagePath 'Assets\SQLite\SQLite.Interop.dll'
 $nativeFiles = @(Get-ChildItem -LiteralPath $packagePath -Recurse -File -Filter 'SQLite.Interop.dll')
 if ($nativeFiles.Count -ne 1 -or $nativeFiles[0].FullName -ne $sqliteInteropPath) {

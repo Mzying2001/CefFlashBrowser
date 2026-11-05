@@ -51,7 +51,7 @@ namespace CefFlashBrowser.Data
 
             CefLogPath = Path.Combine(LogsPath, $"cef_{DateTime.Now:yyyyMMdd}.log");
             FlashPath = Path.Combine(PluginsPath, "pepflashplayer.dll");
-            CommandProxyPath = Path.Combine(AssetsPath, "CommandProxy\\CefFlashBrowser.CommandProxy.exe");
+            CommandProxyPath = Path.Combine(AssetsPath, "CmdProxy\\CmdProxy.exe");
             SwfPlayerPath = Path.Combine(AssetsPath, "SwfPlayer\\swfplayer.html");
             SubprocessPath = Path.Combine(CefDllPath, "CefSharp.BrowserSubprocess.exe");
 

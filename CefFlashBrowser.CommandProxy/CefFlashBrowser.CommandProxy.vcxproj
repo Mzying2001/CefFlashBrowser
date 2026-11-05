@@ -35,9 +35,10 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
-    <OutDir Condition="'$(Platform)' == 'Win32'">$(ProjectDir)..\bin\$(Configuration)\Assets\CommandProxy\</OutDir>
-    <OutDir Condition="'$(Platform)' == 'x64'">$(ProjectDir)..\bin\x64\$(Configuration)\Assets\CommandProxy\</OutDir>
+    <TargetName>CmdProxy</TargetName>
     <IntDir>$(ProjectDir)obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Platform)' == 'Win32'">$(ProjectDir)..\bin\$(Configuration)\Assets\CmdProxy\</OutDir>
+    <OutDir Condition="'$(Platform)' == 'x64'">$(ProjectDir)..\bin\x64\$(Configuration)\Assets\CmdProxy\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

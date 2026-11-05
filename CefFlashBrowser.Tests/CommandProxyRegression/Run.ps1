@@ -11,7 +11,7 @@ $ErrorActionPreference = 'Stop'
 if (!$ProxyPath) {
     $repositoryPath = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
     $buildPath = if ($Platform -eq 'x64') { "bin\x64\$Configuration" } else { "bin\$Configuration" }
-    $ProxyPath = Join-Path $repositoryPath "$buildPath\Assets\CommandProxy\CefFlashBrowser.CommandProxy.exe"
+    $ProxyPath = Join-Path $repositoryPath "$buildPath\Assets\CmdProxy\CmdProxy.exe"
 }
 $ProxyPath = (Resolve-Path -LiteralPath $ProxyPath).Path
 $image = [IO.File]::ReadAllBytes($ProxyPath)
@@ -31,7 +31,7 @@ $installationPath = Join-Path $temporaryPath ('installation with spaces ' + [cha
 [void][IO.Directory]::CreateDirectory($installationPath)
 Write-Host "Isolated command proxy checks: $temporaryPath"
 # Exercise Unicode and spaces in COMSPEC even when the normal build path is simple.
-$proxyCopy = Join-Path $installationPath 'CefFlashBrowser.CommandProxy.exe'
+$proxyCopy = Join-Path $installationPath 'CmdProxy.exe'
 Copy-Item -LiteralPath $ProxyPath -Destination $proxyCopy
 $fixture = Join-Path $temporaryPath 'runner.exe'
 $compiler = New-Object CodeDom.Compiler.CompilerParameters
