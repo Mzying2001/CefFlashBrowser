@@ -148,6 +148,8 @@
     <sys:String x:Key="browser_closeTab">Fermer l’onglet</sys:String>
     <sys:String x:Key="browser_closeOtherTabs">Fermer les autres onglets</sys:String>
     <sys:String x:Key="browser_duplicateTab">Dupliquer l’onglet</sys:String>
+    <sys:String x:Key="browser_muteSite">Couper le son du site</sys:String>
+    <sys:String x:Key="browser_unmuteSite">Réactiver le son du site</sys:String>
     <sys:String x:Key="browser_openTabInNewWindow">Ouvrir l’onglet dans une nouvelle fenêtre</sys:String>
 
     <!--Save Manager-->

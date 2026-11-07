@@ -148,6 +148,8 @@
     <sys:String x:Key="browser_closeTab">關閉分頁</sys:String>
     <sys:String x:Key="browser_closeOtherTabs">關閉其他分頁</sys:String>
     <sys:String x:Key="browser_duplicateTab">複製分頁</sys:String>
+    <sys:String x:Key="browser_muteSite">靜音網站</sys:String>
+    <sys:String x:Key="browser_unmuteSite">取消網站靜音</sys:String>
     <sys:String x:Key="browser_openTabInNewWindow">在新視窗中開啟分頁</sys:String>
 
     <!--存檔管理員-->

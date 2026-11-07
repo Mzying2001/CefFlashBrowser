@@ -148,6 +148,8 @@
     <sys:String x:Key="browser_closeTab">Close tab</sys:String>
     <sys:String x:Key="browser_closeOtherTabs">Close other tabs</sys:String>
     <sys:String x:Key="browser_duplicateTab">Duplicate tab</sys:String>
+    <sys:String x:Key="browser_muteSite">Mute site</sys:String>
+    <sys:String x:Key="browser_unmuteSite">Unmute site</sys:String>
     <sys:String x:Key="browser_openTabInNewWindow">Open tab in new window</sys:String>
 
     <!--Save Manager-->
