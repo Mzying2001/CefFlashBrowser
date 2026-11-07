@@ -35,6 +35,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand SelectPreviousBrowserCommand { get; set; }
         public DelegateCommand ToggleDevToolsCommand { get; set; }
         public DelegateCommand ToggleFullscreenCommand { get; set; }
+        public DelegateCommand ToggleMuteCommand { get; set; }
         public DelegateCommand OpenFindPopupCommand { get; set; }
         public DelegateCommand CloseFindPopupCommand { get; set; }
         public DelegateCommand FindNextTextCommand { get; set; }
@@ -334,6 +335,14 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public void ToggleMute(BrowserViewModel browser)
+        {
+            if (IsBrowserReady(browser))
+            {
+                browser.ToggleMute();
+            }
+        }
+
         public void ToggleFullscreen(BrowserViewModel browser)
         {
             if (!IsBrowserReady(browser))
@@ -456,6 +465,7 @@ namespace CefFlashBrowser.ViewModels
             SelectPreviousBrowserCommand = new DelegateCommand(() => SelectBrowser(-1));
             ToggleDevToolsCommand = new DelegateCommand<BrowserViewModel>(ToggleDevTools);
             ToggleFullscreenCommand = new DelegateCommand<BrowserViewModel>(ToggleFullscreen);
+            ToggleMuteCommand = new DelegateCommand<BrowserViewModel>(ToggleMute);
             OpenFindPopupCommand = new DelegateCommand(OpenFindPopup);
             CloseFindPopupCommand = new DelegateCommand(() => ShowFindPopup = false);
             FindNextTextCommand = new DelegateCommand<BrowserViewModel>(b => FindText(b, true));
