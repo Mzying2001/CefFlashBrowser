@@ -39,6 +39,7 @@
     <Resource Include="Assets\Svgs\forward.svg" />
     <Resource Include="Assets\Svgs\import.svg" />
     <Resource Include="Assets\Svgs\more.svg" />
+    <Resource Include="Assets\Svgs\mute.svg" />
     <Resource Include="Assets\Svgs\new-tab.svg" />
     <Resource Include="Assets\Svgs\page.svg" />
     <Resource Include="Assets\Svgs\reload.svg" />
@@ -47,6 +48,7 @@
     <Resource Include="Assets\Svgs\sub.svg" />
     <Resource Include="Assets\Svgs\trash.svg" />
     <Resource Include="Assets\Svgs\up.svg" />
+    <Resource Include="Assets\Svgs\volume.svg" />
     <Resource Include="Assets\Svgs\warning.svg" />
   </ItemGroup>
 
