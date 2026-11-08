@@ -153,6 +153,20 @@ function Find-MuteTabIcon($Element) {
     }
 }
 
+function Find-ToolbarMuteButton($Element, $Command) {
+    if ($Element -is [System.Windows.Controls.Button] -and
+        [object]::ReferenceEquals($Element.Command, $Command)) {
+        return $Element
+    }
+
+    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
+        $button = Find-ToolbarMuteButton ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index)) $Command
+        if ($null -ne $button) {
+            return $button
+        }
+    }
+}
+
 function Test-ContextMenuMute($Context) {
     $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
     $savedTabStrip = [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip
@@ -175,6 +189,11 @@ function Test-ContextMenuMute($Context) {
         $icon = Find-MuteTabIcon $window
         Assert-Regression ($null -ne $icon -and $icon.Visibility -eq [System.Windows.Visibility]::Visible) 'muted tab shows the mute icon'
 
+        $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
+        Assert-Regression ($null -ne $muteButton -and
+            "$($muteButton.Content.UriSource)" -like '*mute.svg*' -and
+            $muteButton.ToolTip -eq [CefFlashBrowser.Services.LanguageManager]::GetString('browser_unmuteSite')) 'muted toolbar shows the muted icon and unmute tooltip'
+
         $handler = $browser.MenuHandler.PSObject.BaseObject
         $parameters = New-Object RegressionContextMenuParamsProxy
         $menu = New-Object RegressionMenuModelProxy
@@ -193,10 +212,15 @@ function Test-ContextMenuMute($Context) {
         $icon = Find-MuteTabIcon $window
         Assert-Regression ($null -ne $icon -and $icon.Visibility -eq [System.Windows.Visibility]::Collapsed) 'unmuted tab hides the mute icon'
 
-        Assert-Regression (Invoke-ContextMenuCommand $browser $mutePage) 'mute context menu command is handled'
+        $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
+        Assert-Regression ($null -ne $muteButton -and
+            "$($muteButton.Content.UriSource)" -like '*volume.svg*' -and
+            $muteButton.ToolTip -eq [CefFlashBrowser.Services.LanguageManager]::GetString('browser_muteSite')) 'unmuted toolbar shows the volume icon and mute tooltip'
+
+        Invoke-BrowserCommand $muteButton.Command $muteButton.CommandParameter
         Wait-Regression $Context {
             $source.Browser.IsMuted
-        } 'context menu command mutes through the control'
+        } 'toolbar button mutes through its command'
 
         $menu = New-Object RegressionMenuModelProxy
         $mutedBrowser = (New-Object RegressionAudioBrowserProxy((New-Object RegressionAudioHostProxy($true)).GetTransparentProxy())).GetTransparentProxy()
