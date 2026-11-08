@@ -28,3 +28,14 @@
 
 ## UI 范围（用户已确认）
 标签页右键菜单「静音网站」、网页右键菜单「静音/取消静音」、静音后标签页显示 🔇 图标；静音为会话级不持久化；不加工具栏按钮和快捷键；交互参照 Chrome。
+
+## 后续教训（2026-11-09）
+
+1. **嵌入过期事故**：负验证改动源码后只重建了依赖 DLL，exe 内嵌的旧副本（Costura）未更新，
+   导致回归全绿而用户手上的 exe 静音无反应。对策：Debug 构建 `DisableFody=true`（exe 与磁盘
+   DLL 同源），负验证后必须重建全部下游（见 AGENTS.md）。
+   注意：Fody 6.8.2 不支持 FodyWeavers.Debug.xml 按配置覆盖，空配置/ExcludeAssemblies=*
+   均无法关闭 Costura，最终采用官方 `DisableFody` MSBuild 属性。
+2. **SVG 资源清单坑**：新增 SVG 必须登记进 csproj 的 `<Resource Include>` 列表，否则
+   编译进不了 exe、SvgIcon 渲染空白且不报错（回归断言了元素存在也拦不住渲染缺失）。
+   已登记 mute.svg / volume.svg，规则记录于 AGENTS.md。
