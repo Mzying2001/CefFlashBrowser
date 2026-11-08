@@ -82,6 +82,11 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
   instantiation with XamlParseException during the checks.
 - IBrowserHost.IsAudioMuted must be called on the CEF UI thread (CefSharp enforces this);
   use the ChromiumFlashBrowser.IsMuted property when reading mute state off-thread.
+- After a negative test modifies source, rebuild every downstream project before re-running
+  checks: Debug builds load dependencies from disk (DisableFody=true), but the executable
+  itself is still relinked, and a half-rebuilt tree can mask the regression.
+- When adding an SVG under Assets/Svgs, also add it to the <Resource Include> list in
+  CefFlashBrowser.csproj; unregistered SVGs render blank inside SvgIcon without any error.
 
 ## Git Commit Conventions
 
