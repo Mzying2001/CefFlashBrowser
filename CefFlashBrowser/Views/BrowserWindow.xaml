@@ -434,6 +434,43 @@
                                   UriSource="{StaticResource SearchIconUri}"/>
                 </ToggleButton>
 
+                <!--mute button-->
+                <Button Margin="0,0,10,0"
+                        Width="30"
+                        Height="30"
+                        Padding="0"
+                        Command="{Binding ToggleMuteCommand}"
+                        CommandParameter="{Binding CurrentBrowser}">
+                    <Button.Resources>
+                        <svgc:SvgIcon x:Key="volumeIcon"
+                                      Width="14"
+                                      Height="14"
+                                      UriSource="{StaticResource VolumeIconUri}"/>
+                        <svgc:SvgIcon x:Key="muteIcon"
+                                      Width="12"
+                                      Height="12"
+                                      UriSource="{StaticResource MuteIconUri}"/>
+                    </Button.Resources>
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Content"
+                                    Value="{StaticResource muteIcon}"/>
+                            <Setter Property="ToolTip"
+                                    Value="{DynamicResource browser_unmuteSite}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.IsMuted}"
+                                             Value="False">
+                                    <Setter Property="Content"
+                                            Value="{StaticResource volumeIcon}"/>
+                                    <Setter Property="ToolTip"
+                                            Value="{DynamicResource browser_muteSite}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
                 <!--menu button-->
                 <Button ToolTip="{DynamicResource browser_toolTipMore}">
                     <i:Interaction.Behaviors>

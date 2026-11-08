@@ -142,7 +142,7 @@ function Initialize-RegressionEnvironment($Context) {
 
     # Keep this list in sync with the <sys:Uri> icon resources declared in App.xaml;
     # a missing icon here crashes template instantiation with XamlParseException.
-    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Mute', 'Up', 'Down', 'Page', 'Close')) {
+    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Mute', 'Volume', 'Up', 'Down', 'Page', 'Close')) {
         $Context.Application.Resources.Add($icon + 'IconUri', [Uri]('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg', [UriKind]::Relative))
     }
     $Context.Application.Resources.Add('NewTabIconUri', [Uri]::new('/Assets/Svgs/new-tab.svg', [UriKind]::Relative))

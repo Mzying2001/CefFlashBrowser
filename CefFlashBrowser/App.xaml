@@ -63,6 +63,7 @@
             <sys:Uri x:Key="SubIconUri">/Assets/Svgs/sub.svg</sys:Uri>
             <sys:Uri x:Key="TrashIconUri">/Assets/Svgs/trash.svg</sys:Uri>
             <sys:Uri x:Key="UpIconUri">/Assets/Svgs/up.svg</sys:Uri>
+            <sys:Uri x:Key="VolumeIconUri">/Assets/Svgs/volume.svg</sys:Uri>
             <sys:Uri x:Key="WarningIconUri">/Assets/Svgs/warning.svg</sys:Uri>
 
 
