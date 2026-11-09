@@ -35,28 +35,54 @@
 
             <MenuItem Header="{DynamicResource browser_newTab}"
                       Command="{Binding AddBrowserCommand}"
-                      InputGestureText="Ctrl+T"/>
+                      InputGestureText="Ctrl+T">
+                <MenuItem.Icon>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource NewTabIconUri}"/>
+                </MenuItem.Icon>
+            </MenuItem>
 
             <MenuItem Header="{DynamicResource browser_newBrowserWindow}"
                       Command="{Binding NewBrowserWindowCommand}"
                       CommandParameter="{Binding CurrentBrowser.Address}"
-                      InputGestureText="Ctrl+N"/>
+                      InputGestureText="Ctrl+N">
+                <MenuItem.Icon>
+                    <svgc:SvgIcon Width="14"
+                                  Height="14"
+                                  UriSource="{StaticResource PageIconUri}"/>
+                </MenuItem.Icon>
+            </MenuItem>
 
             <Separator/>
 
             <MenuItem Command="{Binding ToggleMuteCommand}"
                       CommandParameter="{Binding CurrentBrowser}"
                       InputGestureText="Ctrl+M">
+                <MenuItem.Resources>
+                    <svgc:SvgIcon x:Key="muteIcon"
+                                  Width="14"
+                                  Height="14"
+                                  UriSource="{StaticResource MuteIconUri}"/>
+                    <svgc:SvgIcon x:Key="volumeIcon"
+                                  Width="14"
+                                  Height="14"
+                                  UriSource="{StaticResource VolumeIconUri}"/>
+                </MenuItem.Resources>
                 <MenuItem.Style>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Setter Property="Header"
                                 Value="{DynamicResource browser_muteSite}"/>
+                        <Setter Property="Icon"
+                                Value="{StaticResource muteIcon}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding CurrentBrowser.IsMuted}"
                                          Value="True">
                                 <Setter Property="Header"
                                         Value="{DynamicResource browser_unmuteSite}"/>
+                                <Setter Property="Icon"
+                                        Value="{StaticResource volumeIcon}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -683,21 +709,41 @@
                                                   InputGestureText="Ctrl+Shift+K"/>
                                         <MenuItem Header="{DynamicResource browser_openTabInNewWindow}"
                                                   Command="{Binding Tag.NewBrowserWindowCommand, RelativeSource={RelativeSource Self}}"
-                                                  CommandParameter="{Binding Address}"/>
+                                                  CommandParameter="{Binding Address}">
+                                            <MenuItem.Icon>
+                                                <svgc:SvgIcon Width="14"
+                                                              Height="14"
+                                                              UriSource="{StaticResource PageIconUri}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
                                         <Separator/>
                                         <MenuItem Command="{Binding Tag.ToggleMuteCommand, RelativeSource={RelativeSource Self}}"
                                                   CommandParameter="{Binding}"
                                                   InputGestureText="Ctrl+M">
+                                            <MenuItem.Resources>
+                                                <svgc:SvgIcon x:Key="muteIcon"
+                                                              Width="14"
+                                                              Height="14"
+                                                              UriSource="{StaticResource MuteIconUri}"/>
+                                                <svgc:SvgIcon x:Key="volumeIcon"
+                                                              Width="14"
+                                                              Height="14"
+                                                              UriSource="{StaticResource VolumeIconUri}"/>
+                                            </MenuItem.Resources>
                                             <MenuItem.Style>
                                                 <Style TargetType="MenuItem"
                                                        BasedOn="{StaticResource {x:Type MenuItem}}">
                                                     <Setter Property="Header"
                                                             Value="{DynamicResource browser_muteSite}"/>
+                                                    <Setter Property="Icon"
+                                                            Value="{StaticResource muteIcon}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsMuted}"
                                                                      Value="True">
                                                             <Setter Property="Header"
                                                                     Value="{DynamicResource browser_unmuteSite}"/>
+                                                            <Setter Property="Icon"
+                                                                    Value="{StaticResource volumeIcon}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>

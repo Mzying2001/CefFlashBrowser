@@ -6,6 +6,8 @@ using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
 using SimpleMvvm.Ioc;
+using SharpVectors.Converters;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -173,6 +175,7 @@ namespace CefFlashBrowser.Browser.Handlers
                 yield return new MenuItem
                 {
                     Header = GetHeader(item),
+                    Icon = GetIcon(item.CommandID),
                     Padding = new Thickness(10, 5, 10, 5),
                     IsChecked = item.IsChecked,
                     ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback),
@@ -184,6 +187,32 @@ namespace CefFlashBrowser.Browser.Handlers
                     }
                 };
             }
+        }
+
+        private static SvgIcon GetIcon(CefMenuCommand commandId)
+        {
+            string resourceKey;
+            double size;
+            switch (commandId)
+            {
+                case OpenInNewTab:
+                    resourceKey = "NewTabIconUri";
+                    size = 12;
+                    break;
+                case OpenInNewWindow:
+                    resourceKey = "PageIconUri";
+                    size = 14;
+                    break;
+                default:
+                    return null;
+            }
+
+            return new SvgIcon
+            {
+                Width = size,
+                Height = size,
+                UriSource = (Uri)Application.Current.FindResource(resourceKey)
+            };
         }
 
         private static string GetHeader(CefMenuItemInfo menuItemInfo)
