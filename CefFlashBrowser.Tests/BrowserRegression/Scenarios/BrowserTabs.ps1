@@ -347,7 +347,8 @@ function Test-BrowserTabContextMenu($Context) {
             $menu.Items[0].InputGestureText -eq 'Ctrl+W' -and $menu.Items[3].InputGestureText -eq 'Ctrl+Shift+K') 'tab menu has the requested order, separator and shortcut hints'
         Assert-Regression (!$menu.Items[1].IsEnabled) 'close other tabs is disabled for a single tab'
         Assert-Regression ($menu.Items[4].Command -eq $model.ToggleMuteCommand -and
-            $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_muteSite')) 'tab menu mute item toggles the current tab'
+            $menu.Items[4].CommandParameter -eq $source -and
+            $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_muteSite')) 'tab menu mute item binds its command and target tab'
         $keys = @('browser_closeTab', 'browser_closeOtherTabs', 'browser_duplicateTab', 'browser_muteSite', 'browser_openTabInNewWindow')
         foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
             $Context.LanguageService.SetCurrentLanguage($language)
@@ -361,9 +362,31 @@ function Test-BrowserTabContextMenu($Context) {
         $menu.IsOpen = $false
         $Context.LanguageService.SetCurrentLanguage($savedLanguage)
         $last = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
+        Assert-Regression (!$source.Browser.IsMuted -and !$last.Browser.IsMuted) 'both tabs start independently unmuted'
+        $menu = Open-TabContextMenu $Context $window $source
+        Assert-Regression ($menu.Items[4].CommandParameter -eq $source -and
+            $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_muteSite')) 'background tab mute menu targets its source tab'
+        Invoke-TabMenuItem $menu 4
+        Wait-Regression $Context { $source.Browser.IsMuted } 'tab menu mutes its background source tab'
+        Assert-Regression ($model.CurrentBrowser -eq $last -and !$last.Browser.IsMuted) 'muting a background tab preserves selection and the selected tab audio'
+        $menu = Open-TabContextMenu $Context $window $source
+        Assert-Regression ($menu.Items[4].CommandParameter -eq $source -and
+            $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_unmuteSite')) 'muted background tab offers its unmute action'
+        $menu.IsOpen = $false
+        $menu = Open-TabContextMenu $Context $window $last
+        Assert-Regression ($menu.Items[4].CommandParameter -eq $last -and
+            $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_muteSite')) 'reopening the shared mute menu updates its target and mute state'
+        $menu.IsOpen = $false
+        $menu = Open-TabContextMenu $Context $window $source
+        Assert-Regression ($menu.Items[4].CommandParameter -eq $source -and
+            $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_unmuteSite')) 'reopening the muted background tab restores its unmute action'
+        Invoke-TabMenuItem $menu 4
+        Wait-Regression $Context { !$source.Browser.IsMuted } 'tab menu unmutes its background source tab'
+        Assert-Regression ($model.CurrentBrowser -eq $last -and !$last.Browser.IsMuted) 'unmuting a background tab preserves selection and the selected tab audio'
         $source.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context {
-            $source.Browser.Address -eq $Context.AuxiliaryAddress -and !$source.Browser.IsLoading -and
+            $source.Browser.Address -eq $Context.AuxiliaryAddress -and $source.Browser.Title -eq 'Auxiliary regression' -and
+            !$source.Browser.IsLoading -and
             $source.Browser.CanExecuteJavascriptInMainFrame
         } 'source page loads'
         [void](Invoke-JavaScript $Context $source.Browser 'window.tabDuplicateToken = 42;')

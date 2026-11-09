@@ -144,19 +144,6 @@ function Test-AuxiliaryContextMenu($Context) {
     }
 }
 
-function Find-MuteTabIcon($Element) {
-    if ($Element -is [SharpVectors.Converters.SvgIcon] -and "$($Element.UriSource)" -like '*mute.svg*') {
-        return $Element
-    }
-
-    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
-        $icon = Find-MuteTabIcon ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index))
-        if ($null -ne $icon) {
-            return $icon
-        }
-    }
-}
-
 function Find-ToolbarMuteButton($Element, $Command) {
     if ($Element -is [System.Windows.Controls.Button] -and
         [object]::ReferenceEquals($Element.Command, $Command)) {
@@ -174,29 +161,32 @@ function Find-ToolbarMuteButton($Element, $Command) {
 function Test-ContextMenuMute($Context) {
     $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
     $savedTabStrip = [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip
-    [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
-    [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip = $true
-    $window = New-RegressionWindow $Context
+    $window = $null
     try {
+        [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
+        [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip = $true
+        $window = New-RegressionWindow $Context
         $model = $window.ViewModel
         $source = $model.CurrentBrowser
         $browser = $source.Browser
         $mutePage = [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::MutePage
+        $icon = Get-TabMuteIcon $window $source
+        Assert-SvgIconLoaded $icon 'tab mute SVG loads a nonempty drawing from the application resources'
 
-        Assert-Regression (!$browser.IsMuted) 'tab starts unmuted'
+        Assert-Regression (!$browser.IsMuted -and $icon.Visibility -eq [System.Windows.Visibility]::Collapsed) 'tab starts unmuted with its mute icon hidden'
 
         $model.ToggleMute($source)
         Wait-Regression $Context {
             $source.Browser.IsMuted
         } 'ToggleMute mutes the browser and updates IsMuted'
 
-        $icon = Find-MuteTabIcon $window
-        Assert-Regression ($null -ne $icon -and $icon.Visibility -eq [System.Windows.Visibility]::Visible) 'muted tab shows the mute icon'
+        Assert-Regression ($icon.Visibility -eq [System.Windows.Visibility]::Visible) 'muted tab shows the same tab mute icon'
 
         $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
         Assert-Regression ($null -ne $muteButton -and
             "$($muteButton.Content.UriSource)" -like '*mute.svg*' -and
             $muteButton.ToolTip -eq $Context.LanguageService.GetString('browser_unmuteSite')) 'muted toolbar shows the muted icon and unmute tooltip'
+        Assert-SvgIconLoaded $muteButton.Content 'toolbar mute SVG loads a nonempty drawing from the application resources'
 
         $handler = $browser.MenuHandler.PSObject.BaseObject
         $parameters = New-Object RegressionContextMenuParamsProxy
@@ -213,13 +203,14 @@ function Test-ContextMenuMute($Context) {
             !$source.Browser.IsMuted
         } 'ToggleMute restores audio and clears IsMuted'
 
-        $icon = Find-MuteTabIcon $window
-        Assert-Regression ($null -ne $icon -and $icon.Visibility -eq [System.Windows.Visibility]::Collapsed) 'unmuted tab hides the mute icon'
+        Assert-Regression ($icon.Visibility -eq [System.Windows.Visibility]::Collapsed) 'unmuted tab hides the same tab mute icon'
 
         $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
         Assert-Regression ($null -ne $muteButton -and
             "$($muteButton.Content.UriSource)" -like '*volume.svg*' -and
             $muteButton.ToolTip -eq $Context.LanguageService.GetString('browser_muteSite')) 'unmuted toolbar shows the volume icon and mute tooltip'
+        Assert-SvgIconLoaded $muteButton.Content 'toolbar volume SVG loads a nonempty drawing from the application resources'
+        Assert-Regression ($muteButton.CommandParameter -eq $source) 'toolbar mute command targets the selected tab'
 
         Invoke-BrowserCommand $muteButton.Command $muteButton.CommandParameter
         Wait-Regression $Context {
@@ -238,7 +229,7 @@ function Test-ContextMenuMute($Context) {
             !$source.Browser.IsMuted
         } 'context menu command restores audio'
     } finally {
-        $window.ForceCloseWindow()
+        if ($null -ne $window) { $window.ForceCloseWindow() }
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
         [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip = $savedTabStrip
     }
