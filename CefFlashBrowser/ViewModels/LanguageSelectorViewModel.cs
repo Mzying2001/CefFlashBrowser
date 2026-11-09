@@ -1,29 +1,34 @@
 using CefFlashBrowser.Services;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
 {
     public class LanguageSelectorViewModel : ViewModelBase
     {
+        private LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         public DelegateCommand SetLanguageCommand { get; set; }
 
-        public List<LanguageItemViewModel> LanguageList { get; }
-            = LanguageManager.GetSupportedLanguage().Select(item => new LanguageItemViewModel(item)).ToList();
+        public ICollection<string> LanguageList { get; }
+
+        public LanguageSelectorViewModel()
+        {
+            LanguageList = LanguageService.GetSupportedLanguage();
+            SetLanguageCommand = new DelegateCommand<string>(SetLanguage);
+        }
 
         private void SetLanguage(string language)
         {
             if (language != null)
             {
-                LanguageManager.SetCurrentLanguage(language);
+                LanguageService.SetCurrentLanguage(language);
             }
-        }
-
-        public LanguageSelectorViewModel()
-        {
-            SetLanguageCommand = new DelegateCommand<string>(SetLanguage);
         }
     }
 }

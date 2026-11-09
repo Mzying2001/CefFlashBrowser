@@ -1,11 +1,13 @@
 using CefFlashBrowser.Data;
-using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
+using SharpVectors.Converters;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,11 +16,15 @@ namespace CefFlashBrowser.Browser.Handlers
 {
     public class ContextMenuHandler : FlashBrowser.Handlers.ContextMenuHandler
     {
+        private static LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
         public const CefMenuCommand OpenSelectedUrl = CefMenuCommand.UserFirst + 3;
         public const CefMenuCommand OpenInNewTab = CefMenuCommand.UserFirst + 4;
-        public const CefMenuCommand MutePage = CefMenuCommand.UserFirst + 5;
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
@@ -35,13 +41,13 @@ namespace CefFlashBrowser.Browser.Handlers
                 var selectionText = parameters.SelectionText;
                 var truncatedText = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
 
-                var header = LanguageManager.GetFormattedString("browser_searchFor", truncatedText.Replace('\n', ' '));
+                var header = LanguageService.GetFormattedString("browser_searchFor", truncatedText.Replace('\n', ' '));
                 model.InsertItemAt(0, Search, header);
                 count++;
 
                 if (UrlHelper.IsUrl(selectionText))
                 {
-                    header = LanguageManager.GetFormattedString("browser_openSelectedUrl", truncatedText);
+                    header = LanguageService.GetFormattedString("browser_openSelectedUrl", truncatedText);
                     model.InsertCheckItemAt(0, OpenSelectedUrl, header);
                     count++;
                 }
@@ -49,22 +55,12 @@ namespace CefFlashBrowser.Browser.Handlers
 
             if (!string.IsNullOrWhiteSpace(parameters.LinkUrl))
             {
-                var header = LanguageManager.GetString("browser_openInNewWindow");
+                var header = LanguageService.GetString("browser_openInNewWindow");
                 model.InsertCheckItemAt(0, OpenInNewWindow, header);
                 count++;
 
-                header = LanguageManager.GetString("browser_openInNewTab");
+                header = LanguageService.GetString("browser_openInNewTab");
                 model.InsertItemAt(0, OpenInNewTab, header);
-                count++;
-            }
-
-            var host = browser?.GetHost();
-            if (host != null && !host.IsDisposed)
-            {
-                var isMuted = host.IsAudioMuted;
-                var header = LanguageManager.GetString(isMuted ? "browser_unmuteSite" : "browser_muteSite");
-                model.InsertCheckItemAt(count, MutePage, header);
-                model.SetChecked(MutePage, isMuted);
                 count++;
             }
 
@@ -113,15 +109,6 @@ namespace CefFlashBrowser.Browser.Handlers
                         {
                             OpenPage(chromiumWebBrowser, browser, selectionText);
                             result = true;
-                            break;
-                        }
-                    case MutePage:
-                        {
-                            if (chromiumWebBrowser is ChromiumFlashBrowser flashBrowser && !flashBrowser.IsDisposed)
-                            {
-                                flashBrowser.ToggleMute();
-                                result = true;
-                            }
                             break;
                         }
                 }
@@ -188,6 +175,7 @@ namespace CefFlashBrowser.Browser.Handlers
                 yield return new MenuItem
                 {
                     Header = GetHeader(item),
+                    Icon = GetIcon(item.CommandID),
                     Padding = new Thickness(10, 5, 10, 5),
                     IsChecked = item.IsChecked,
                     ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback),
@@ -201,11 +189,37 @@ namespace CefFlashBrowser.Browser.Handlers
             }
         }
 
+        private static SvgIcon GetIcon(CefMenuCommand commandId)
+        {
+            string resourceKey;
+            double size;
+            switch (commandId)
+            {
+                case OpenInNewTab:
+                    resourceKey = "NewTabIconUri";
+                    size = 12;
+                    break;
+                case OpenInNewWindow:
+                    resourceKey = "PageIconUri";
+                    size = 14;
+                    break;
+                default:
+                    return null;
+            }
+
+            return new SvgIcon
+            {
+                Width = size,
+                Height = size,
+                UriSource = (Uri)Application.Current.FindResource(resourceKey)
+            };
+        }
+
         private static string GetHeader(CefMenuItemInfo menuItemInfo)
         {
             if (_menuItemHeaderKeys.TryGetValue(menuItemInfo.CommandID, out string key))
             {
-                return LanguageManager.GetString(key);
+                return LanguageService.GetString(key);
             }
             else
             {

@@ -1,6 +1,7 @@
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Services;
 using SimpleMvvm;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 
@@ -9,20 +10,11 @@ namespace CefFlashBrowser.ViewModels
     public class ItemViewModel<TValue> : ViewModelBase, IDisposable
     {
         private bool _disposed = false;
+        private string _nameLanguageKey = null;
 
         public TValue Value { get; set; }
 
-        public string NameLanguageKey { get; } = null;
-
-        public string Name
-        {
-            get => LanguageManager.GetString(NameLanguageKey) ?? Value?.ToString();
-        }
-
-        private void OnLanguageChanged(object _)
-        {
-            RaisePropertyChanged(nameof(Name));
-        }
+        public string Name => GetName();
 
         public ItemViewModel()
         {
@@ -35,8 +27,19 @@ namespace CefFlashBrowser.ViewModels
 
         public ItemViewModel(TValue value, string nameLanguageKey) : this(value)
         {
-            NameLanguageKey = nameLanguageKey;
+            _nameLanguageKey = nameLanguageKey ?? throw new ArgumentNullException(nameof(nameLanguageKey));
             Messenger.Global.Register(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
+        }
+
+        private void OnLanguageChanged(object _)
+        {
+            RaisePropertyChanged(nameof(Name));
+        }
+
+        private string GetName()
+        {
+            var languageService = SimpleIoc.Global.GetInstance<LanguageService>();
+            return languageService?.GetString(_nameLanguageKey) ?? Value?.ToString();
         }
 
         ~ItemViewModel()
@@ -51,7 +54,7 @@ namespace CefFlashBrowser.ViewModels
                 if (disposing)
                 {
                 }
-                if (NameLanguageKey != null)
+                if (_nameLanguageKey != null)
                 {
                     Messenger.Global.Unregister(MessageTokens.LANGUAGE_CHANGED, OnLanguageChanged);
                 }

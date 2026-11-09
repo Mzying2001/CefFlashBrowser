@@ -9,6 +9,7 @@
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         mc:Ignorable="d"
         
         Width="700"
@@ -58,9 +59,24 @@
             </StackPanel>
 
             <ListBox Grid.Row="1"
-                     DisplayMemberPath="Name"
                      ItemsSource="{Binding Favorites}"
                      SelectedItem="{Binding SelectedWebsite}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel>
+                            <c:BrowserIcon Margin="0,0,8,0">
+                                <c:BrowserIcon.FaviconUrl>
+                                    <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
+                                        <Binding Path="Url"/>
+                                        <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
+                                        <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
+                                    </MultiBinding>
+                                </c:BrowserIcon.FaviconUrl>
+                            </c:BrowserIcon>
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                        </DockPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem"
                            BasedOn="{StaticResource ListBoxItemBaseStyle}">

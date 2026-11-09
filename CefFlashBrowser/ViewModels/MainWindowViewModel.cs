@@ -4,6 +4,7 @@ using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.Diagnostics;
@@ -12,6 +13,11 @@ namespace CefFlashBrowser.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase, IDisposable
     {
+        private LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         private bool _disposed;
 
         public DelegateCommand OpenUrlCommand { get; set; }
@@ -27,7 +33,7 @@ namespace CefFlashBrowser.ViewModels
         public string WelcomeText
         {
             get => string.Format("{0}  {1}",
-                LanguageManager.GetString("mainWindow_title"), EmoticonsHelper.GetNextEmoticon());
+                LanguageService.GetString("mainWindow_title"), EmoticonsHelper.GetNextEmoticon());
         }
 
         private string _inputText = string.Empty;
@@ -49,7 +55,7 @@ namespace CefFlashBrowser.ViewModels
         {
             if (string.IsNullOrWhiteSpace(url))
             {
-                WindowManager.Alert(LanguageManager.GetString("message_emptyUrl"));
+                WindowManager.Alert(LanguageService.GetString("message_emptyUrl"));
                 return;
             }
 
@@ -104,7 +110,7 @@ namespace CefFlashBrowser.ViewModels
         {
             var ofd = new Microsoft.Win32.OpenFileDialog()
             {
-                Filter = $"{LanguageManager.GetString("common_swfFile")}|*.swf"
+                Filter = $"{LanguageService.GetString("common_swfFile")}|*.swf"
             };
             if (ofd.ShowDialog() == true)
             {
@@ -158,7 +164,7 @@ namespace CefFlashBrowser.ViewModels
         {
             var ofd = new Microsoft.Win32.OpenFileDialog()
             {
-                Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol"
+                Filter = $"{LanguageService.GetString("common_solFile")}|*.sol"
             };
 
             if (ofd.ShowDialog() == true)

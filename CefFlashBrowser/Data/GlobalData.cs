@@ -4,9 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SimpleMvvm.Messaging;
 using System;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace CefFlashBrowser.Data
@@ -15,21 +13,26 @@ namespace CefFlashBrowser.Data
     {
         public static string AppBaseDirectory { get; }
         public static string AssetsPath { get; }
+        public static string BinariesPath { get; }
         public static string CachesPath { get; }
         public static string LogsPath { get; }
         public static string CefDllPath { get; }
+        public static string SqliteDllPath { get; }
         public static string PluginsPath { get; }
         public static string SharedObjectsPath { get; }
 
         public static string CefLogPath { get; }
         public static string FlashPath { get; }
-        public static string EmptyExePath { get; }
-        public static string SwfPlayerPath { get; }
+        public static string CommandProxyPath { get; }
         public static string SubprocessPath { get; }
+
+        // Virtual file address for the embedded page; no physical HTML file is required.
+        public static string SwfPlayerPath { get; }
 
         public static string DataPath { get; }
         public static string FavoritesPath { get; }
         public static string SettingsPath { get; }
+        public static string DatabasePath { get; }
 
         /// <summary>
         /// true if the program is started with parameters
@@ -40,15 +43,17 @@ namespace CefFlashBrowser.Data
         {
             AppBaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             AssetsPath = Path.Combine(AppBaseDirectory, "Assets\\");
+            BinariesPath = Path.Combine(AppBaseDirectory, "Binaries\\");
             CachesPath = Path.Combine(AppBaseDirectory, "Caches\\");
             LogsPath = Path.Combine(AppBaseDirectory, "Logs\\");
-            CefDllPath = Path.Combine(AssetsPath, "CefSharp\\");
-            PluginsPath = Path.Combine(AssetsPath, "Plugins\\");
+            CefDllPath = Path.Combine(BinariesPath, "CefSharp\\");
+            SqliteDllPath = Path.Combine(BinariesPath, "SQLite\\");
+            PluginsPath = Path.Combine(BinariesPath, "Plugins\\");
             SharedObjectsPath = Path.Combine(CachesPath, "Pepper Data\\Shockwave Flash\\WritableRoot\\#SharedObjects\\");
 
             CefLogPath = Path.Combine(LogsPath, $"cef_{DateTime.Now:yyyyMMdd}.log");
             FlashPath = Path.Combine(PluginsPath, "pepflashplayer.dll");
-            EmptyExePath = Path.Combine(AssetsPath, "EmptyExe\\CefFlashBrowser.EmptyExe.exe");
+            CommandProxyPath = Path.Combine(BinariesPath, "CmdProxy\\CmdProxy.exe");
             SwfPlayerPath = Path.Combine(AssetsPath, "SwfPlayer\\swfplayer.html");
             SubprocessPath = Path.Combine(CefDllPath, "CefSharp.BrowserSubprocess.exe");
 
@@ -62,9 +67,9 @@ namespace CefFlashBrowser.Data
 
             FavoritesPath = Path.Combine(DataPath, "favorites.json");
             SettingsPath = Path.Combine(DataPath, "settings.json");
+            DatabasePath = Path.Combine(DataPath, "browser.db");
 
             Messenger.Global.Register(MessageTokens.SAVE_SETTINGS, _ => SaveSettings());
-            Messenger.Global.Register(MessageTokens.SAVE_FAVORITES, _ => SaveFavorites());
         }
 
         public static string GetAppLogPath(DateTime time)
@@ -78,89 +83,14 @@ namespace CefFlashBrowser.Data
             DirectoryHelper.EnsureDirectoryExists(LogsPath);
             DirectoryHelper.EnsureDirectoryExists(CachesPath);
 
-            InitFavorites();
             InitSettings();
             return true;
         }
 
         public static void SaveData()
         {
-            SaveFavorites();
             SaveSettings();
         }
-
-
-
-        #region Favorites
-
-        public static ObservableCollection<Website> Favorites { get; private set; }
-
-        public static void InitFavorites()
-        {
-            Favorites = new ObservableCollection<Website>();
-
-            if (!File.Exists(FavoritesPath))
-            {
-                LogHelper.LogInfo("Favorites file does not exist, starting with empty favorites");
-                return;
-            }
-
-            try
-            {
-                var json = File.ReadAllText(FavoritesPath, Encoding.UTF8);
-                var file = JsonConvert.DeserializeObject<FavoritesFile>(json);
-
-                // Guard against both a null root (the file literally contains
-                // "null") and a null Favorites array (e.g. {"Favorites": null}
-                // or a file missing the field). Previously the code did
-                //     new ObservableCollection<Website>(file.Favorites)
-                // which threw NullReferenceException / ArgumentNullException
-                // that was silently swallowed by the outer catch, resetting
-                // the user's favorites to empty with a misleading log line.
-                if (file?.Favorites != null)
-                {
-                    Favorites = new ObservableCollection<Website>(file.Favorites);
-                }
-                else
-                {
-                    LogHelper.LogError(
-                        $"Favorites file is malformed (no Favorites array): {FavoritesPath}");
-                }
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError(
-                    $"Failed to load favorites file, starting with empty favorites: {FavoritesPath}", e);
-            }
-        }
-
-        public static bool SaveFavorites()
-        {
-            try
-            {
-                Website[] snapshot;
-
-                lock (Favorites)
-                {
-                    snapshot = Favorites.ToArray();
-                }
-
-                var file = new FavoritesFile { Favorites = snapshot };
-                var json = JsonConvert.SerializeObject(file, Formatting.Indented);
-                FileHelper.SafeWriteFile(FavoritesPath, json, Encoding.UTF8);
-                LogHelper.LogInfo("Favorites saved successfully");
-                return true;
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError("Failed to save favorites", e);
-                return false;
-            }
-        }
-
-        #endregion
-
-
 
         #region Settings
 
@@ -173,6 +103,12 @@ namespace CefFlashBrowser.Data
                 var json = File.ReadAllText(SettingsPath, Encoding.UTF8);
                 Settings = JsonConvert.DeserializeObject<Settings>(json);
                 Settings.SetNullPropertiesToDefault();
+            }
+            catch (JsonException)
+            {
+                Settings = Settings.Default;
+                // JSON exception messages can include sensitive configuration values.
+                LogHelper.LogError("Settings file invalid, using default settings");
             }
             catch (Exception e)
             {
@@ -197,16 +133,18 @@ namespace CefFlashBrowser.Data
                         JObject settingsJson = JObject.Parse(oldSettingsContent);
                         settingsJson.Merge(JToken.FromObject(Settings));
 
+                        // Merge preserves unknown fields, including any previously stored plaintext property.
+                        (settingsJson[nameof(Settings.ProxySettings)] as JObject)?.Remove(nameof(ProxySettings.PlainPassword));
+
                         var jsonString = settingsJson.ToString(Formatting.Indented);
                         FileHelper.SafeWriteFile(SettingsPath, jsonString, Encoding.UTF8);
 
                         LogHelper.LogInfo("Settings saved successfully, type: merge");
                         return true;
                     }
-                    catch (JsonReaderException e)
+                    catch (JsonReaderException)
                     {
-                        LogHelper.LogError("Settings merge failed, falling back to overwrite", e);
-                        LogHelper.LogInfo("Old settings content: " + oldSettingsContent);
+                        LogHelper.LogError("Settings merge failed, falling back to overwrite");
                     }
                 }
 
@@ -225,8 +163,6 @@ namespace CefFlashBrowser.Data
         }
 
         #endregion
-
-
 
     }
 }

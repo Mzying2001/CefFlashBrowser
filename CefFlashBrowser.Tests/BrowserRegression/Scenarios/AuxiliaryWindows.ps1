@@ -31,6 +31,37 @@ function Test-AuxiliaryRouting($Context, $AuxWindow, $AuxView) {
     }
 }
 
+function Test-EmbeddedSwfPlayer($Context, $Window, $Browser) {
+    $playerUrl = ([Uri][CefFlashBrowser.Data.GlobalData]::SwfPlayerPath).AbsoluteUri
+    Assert-Regression ($Browser.Address -eq $playerUrl) 'embedded player retains its virtual file address'
+
+    [void](Invoke-JavaScript $Context $Browser "document.title='reload-pending';")
+    Wait-Regression $Context { $Window.Title -eq 'reload-pending' } 'player title changes before reload'
+    [CefSharp.WebBrowserExtensions]::Reload($Browser)
+    Wait-Regression $Context { $Window.Title -eq 'second.swf' } 'reload serves the embedded page and restores the current SWF'
+    Assert-Regression ((Invoke-JavaScript $Context $Browser "document.getElementById('flash-player').getAttribute('src')") -eq 'second.swf') 'reload restores the SWF embed source'
+
+    $localName = ([char]0x6E38).ToString() + ([char]0x620F).ToString() + ' test.swf'
+    $localPath = Join-Path $Context.TemporaryPath $localName
+    foreach ($source in @($localPath, ([Uri]$localPath).AbsoluteUri, 'https://example.invalid/network.swf?version=1')) {
+        $Window.FileName = $source
+        $expectedTitle = ($source -replace '\\', '/').Split('/')[-1].Split('?')[0]
+        Wait-Regression $Context { $Window.Title -eq $expectedTitle } 'local and network SWF filenames update the player title'
+        Assert-Regression ((Invoke-JavaScript $Context $Browser "document.getElementById('flash-player').getAttribute('src')") -eq $source) 'player preserves local paths, encoded file URLs and network URLs'
+    }
+
+    $otherWindow = New-AuxiliaryWindow $Context ([CefFlashBrowser.Views.SwfPlayerWindow]) -WaitForLoad
+    $otherView = $otherWindow.FindName('browserView')
+    try {
+        Wait-Regression $Context { $otherWindow.Title -eq 'first.swf' } 'another player independently loads the embedded page'
+        Assert-Regression ($Window.Title -eq 'network.swf') 'opening another player preserves the original SWF'
+    } finally {
+        $otherWindow.ForceCloseWindow()
+        Assert-AuxiliaryClosed $Context $otherWindow $otherView
+    }
+    Assert-Regression (!(Test-Path -LiteralPath (Join-Path $Context.ApplicationPath 'Assets\SwfPlayer'))) 'player navigation never writes the embedded page to disk'
+}
+
 function Test-AuxiliaryWindows($Context) {
     foreach ($auxType in $Context.AuxiliaryTypes) {
         $auxWindow = New-AuxiliaryWindow $Context $auxType -WaitForLoad
@@ -55,6 +86,7 @@ function Test-AuxiliaryWindows($Context) {
             $auxWindow.FileName = 'second.swf'
             Wait-Regression $Context { $auxWindow.Title -eq 'second.swf' } 'SWF FileName updates reach loadSwf'
             Assert-Regression ((Invoke-JavaScript $Context $auxBrowser "document.getElementById('flash-player').getAttribute('src')") -eq 'second.swf') 'changed SWF embed source is set'
+            Test-EmbeddedSwfPlayer $Context $auxWindow $auxBrowser
             $auxWindow.Width = 910
             $auxWindow.Height = 610
         } else {

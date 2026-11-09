@@ -5,6 +5,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Proxies;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using CefSharp;
 
 public static class RegressionKeyboard
@@ -59,6 +60,18 @@ public static class RegressionKeyboard
     [DllImport("user32.dll")]
     private static extern bool IsChild(IntPtr parent, IntPtr child);
 
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr window, IntPtr processId);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool AttachThreadInput(uint attach, uint attachTo, bool attached);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr window);
+
     public static bool IsForegroundWindow(IntPtr window)
     {
         return GetAncestor(GetForegroundWindow(), 3) == window;
@@ -68,6 +81,24 @@ public static class RegressionKeyboard
     {
         var focused = GetFocus();
         return focused == window || IsChild(window, focused);
+    }
+
+    public static bool TryActivateWindow(IntPtr window)
+    {
+        var currentThread = GetCurrentThreadId();
+        var foregroundThread = GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero);
+        // Setup runs before Ctrl is held; attaching input queues resets key state.
+        var attached = foregroundThread != 0 && foregroundThread != currentThread
+            && AttachThreadInput(currentThread, foregroundThread, true);
+        try
+        {
+            return SetForegroundWindow(window);
+        }
+        finally
+        {
+            if (attached)
+                AttachThreadInput(currentThread, foregroundThread, false);
+        }
     }
 
     public static void SetKey(ushort virtualKey, bool released)
@@ -320,6 +351,14 @@ public sealed class RegressionJsDialogHandler : CefFlashBrowser.Browser.Handlers
         var callback = Interlocked.Exchange(ref pendingCallback, null);
         if (callback != null)
             CompleteBeforeUnloadDialog(pendingBrowser, callback, pendingIsReload, accepted);
+    }
+}
+
+public static class RegressionAudio
+{
+    public static Task<bool> IsMutedAsync(IBrowser browser, TaskFactory cefTaskFactory)
+    {
+        return cefTaskFactory.StartNew(() => browser.GetHost().IsAudioMuted);
     }
 }
 

@@ -1,6 +1,7 @@
-﻿using CefFlashBrowser.Data;
-using SimpleMvvm.Command;
-using SimpleMvvm.Messaging;
+﻿using SimpleMvvm.Command;
+using CefFlashBrowser.Services;
+using CefFlashBrowser.ViewModels;
+using SimpleMvvm.Ioc;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,7 +25,7 @@ namespace CefFlashBrowser.Views
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            Messenger.Global.Send(MessageTokens.SAVE_FAVORITES, null);
+            SimpleIoc.Global.GetInstance<FavoritesService>().Save();
         }
 
         private void TextChangedHandler(object sender, TextChangedEventArgs e)
@@ -49,7 +50,26 @@ namespace CefFlashBrowser.Views
         {
             TrimTextBoxText(urlTextBox);
             TrimTextBoxText(nameTextBox);
-            itemEditingGroup.CommitEdit();
+
+            var viewModel = DataContext as FavoritesManagerViewModel;
+            var website = viewModel?.SelectedWebsite;
+
+            if (website == null)
+                return;
+
+            string oldName = website.Name;
+            string oldUrl = website.Url;
+
+            if (!itemEditingGroup.CommitEdit() || (website.Name == oldName && website.Url == oldUrl))
+                return;
+
+            int index = viewModel.Favorites.IndexOf(website);
+            if (index >= 0)
+            {
+                var replacement = website.Clone();
+                viewModel.Favorites[index] = replacement;
+                viewModel.SelectedWebsite = replacement;
+            }
         }
     }
 }

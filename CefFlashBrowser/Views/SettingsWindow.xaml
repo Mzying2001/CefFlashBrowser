@@ -169,7 +169,7 @@
 
                     <hc:Card Margin="5"
                              Background="{DynamicResource SecondaryRegionBrush}"
-                             Visibility="{Binding EnableProxy, Converter={StaticResource Boolean2VisibilityConverter}}">
+                             Visibility="{Binding EnableProxy, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid Margin="10">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
@@ -217,11 +217,12 @@
                             <TextBlock Grid.Row="2"
                                        Grid.Column="0"
                                        Text="{DynamicResource settings_password}"/>
-                            <hc:TextBox Grid.Row="2"
-                                        Grid.Column="2"
-                                        Margin="5"
-                                        Text="{Binding ProxySettings.Password, UpdateSourceTrigger=PropertyChanged}"
-                                        hc:InfoElement.Placeholder="{DynamicResource settings_optional}"/>
+                            <hc:PasswordBox Grid.Row="2"
+                                            Grid.Column="2"
+                                            Margin="5"
+                                            IsSafeEnabled="False"
+                                            UnsafePassword="{Binding ProxySettings.PlainPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            hc:InfoElement.Placeholder="{DynamicResource settings_optional}"/>
                         </Grid>
                     </hc:Card>
 
@@ -232,7 +233,7 @@
 
                     <hc:Card Margin="5"
                              Background="{DynamicResource SecondaryRegionBrush}"
-                             Visibility="{Binding EnableCustomUserAgent, Converter={StaticResource Boolean2VisibilityConverter}}">
+                             Visibility="{Binding EnableCustomUserAgent, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid Margin="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -271,7 +272,7 @@
 
                     <hc:Card Margin="5"
                              Background="{DynamicResource SecondaryRegionBrush}"
-                             Visibility="{Binding EnableFakeFlashVersion, Converter={StaticResource Boolean2VisibilityConverter}}">
+                             Visibility="{Binding EnableFakeFlashVersion, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid Margin="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>

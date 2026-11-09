@@ -1,5 +1,6 @@
 using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels;
+using SimpleMvvm.Ioc;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -27,7 +28,7 @@ namespace CefFlashBrowser.Views
                     return;
                 }
 
-                var message = LanguageManager.GetFormattedString("message_askSaveChange", vm.FilePath);
+                var message = SimpleIoc.Global.GetInstance<LanguageService>().GetFormattedString("message_askSaveChange", vm.FilePath);
                 var result = MessageBox.Show(message, Title, MessageBoxButton.YesNoCancel);
 
                 if (result == MessageBoxResult.Cancel)

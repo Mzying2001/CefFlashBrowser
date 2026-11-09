@@ -1,59 +1,18 @@
 ﻿using CefSharp;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows;
 
 namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumFlashBrowser : ChromiumWebBrowserEx
     {
-        public static readonly DependencyProperty BlockedSwfsProperty = DependencyProperty.Register(
-            nameof(BlockedSwfs), typeof(ObservableCollection<string>), typeof(ChromiumFlashBrowser), new PropertyMetadata(null));
-
-        public static readonly DependencyProperty IsMutedProperty = DependencyProperty.Register(
-            nameof(IsMuted), typeof(bool), typeof(ChromiumFlashBrowser), new PropertyMetadata(false));
-
-        public ObservableCollection<string> BlockedSwfs
-        {
-            get => (ObservableCollection<string>)GetValue(BlockedSwfsProperty);
-        }
-
-        public bool IsMuted
-        {
-            get { return (bool)GetValue(IsMutedProperty); }
-        }
+        public ICollection<string> BlockedSwfs { get; }
 
         public ChromiumFlashBrowser()
         {
-            SetValue(BlockedSwfsProperty, new ObservableCollection<string>());
-        }
-
-        public void SetAudioMuted(bool mute)
-        {
-            Cef.UIThreadTaskFactory.StartNew(() =>
-            { // mute or unmute the browser audio on the CEF UI thread
-                var browser = GetBrowser();
-                if (browser == null || browser.IsDisposed)
-                {
-                    return;
-                }
-
-                var host = browser.GetHost();
-                if (host == null)
-                {
-                    return;
-                }
-
-                host.SetAudioMuted(mute);
-                var isMuted = host.IsAudioMuted;
-                Dispatcher.BeginInvoke(new Action(() => SetCurrentValue(IsMutedProperty, isMuted)));
-            });
-        }
-
-        public void ToggleMute()
-        {
-            SetAudioMuted(!IsMuted);
+            BlockedSwfs = new ObservableCollection<string>();
         }
 
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)

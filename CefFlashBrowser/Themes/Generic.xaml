@@ -2,7 +2,128 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:CefFlashBrowser.Views.Custom"
-    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/">
+    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+    xmlns:converters="clr-namespace:CefFlashBrowser.Views.Converters">
+
+
+
+
+
+    <!--BrowserTab-->
+    <Style x:Key="{x:Static local:BrowserTab.ItemContainerStyleKey}"
+           TargetType="ListBoxItem">
+        <Setter Property="Width"
+                Value="{Binding ActualItemWidth, RelativeSource={RelativeSource AncestorType=local:BrowserTab}}"/>
+        <Setter Property="MinHeight"
+                Value="32"/>
+        <Setter Property="Padding"
+                Value="6"/>
+        <Setter Property="HorizontalContentAlignment"
+                Value="Stretch"/>
+        <Setter Property="Background"
+                Value="Transparent"/>
+        <Setter Property="Foreground"
+                Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=local:BrowserTab}}"/>
+        <Setter Property="FocusVisualStyle"
+                Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border CornerRadius="6,6,0,0"
+                            Background="{TemplateBinding Background}">
+                        <ContentPresenter
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#20808080"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#30808080"/>
+            </Trigger>
+            <DataTrigger Value="True">
+                <DataTrigger.Binding>
+                    <MultiBinding>
+                        <MultiBinding.Converter>
+                            <converters:MultiEqualityConverter/>
+                        </MultiBinding.Converter>
+                        <Binding/>
+                        <Binding Path="DraggedItem" RelativeSource="{RelativeSource AncestorType=local:BrowserTab}"/>
+                    </MultiBinding>
+                </DataTrigger.Binding>
+                <Setter Property="Opacity" Value="0.35"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding DraggedItem, RelativeSource={RelativeSource AncestorType=local:BrowserTab}}" Value="{x:Null}">
+                <Setter Property="Opacity" Value="1"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type local:BrowserTab}">
+        <Setter Property="BorderThickness"
+                Value="0"/>
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"/>
+        <Setter Property="Background"
+                Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+        <Setter Property="SelectionMode"
+                Value="Single"/>
+        <Setter Property="AllowDrop"
+                Value="{Binding IsDragEnabled, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="ItemContainerStyle"
+                Value="{StaticResource {x:Static local:BrowserTab.ItemContainerStyleKey}}"/>
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:BrowserTab}">
+                    <Grid>
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ScrollViewer"
+                                          Focusable="False"
+                                          CanContentScroll="False"
+                                          VerticalScrollBarVisibility="Disabled"
+                                          HorizontalScrollBarVisibility="Hidden">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </Border>
+                        <Popup x:Name="PART_DragPreview"
+                               Placement="RelativePoint"
+                               PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                               AllowsTransparency="True"
+                               StaysOpen="True"
+                               Focusable="False"
+                               IsHitTestVisible="False">
+                            <Border Margin="8"
+                                    CornerRadius="6"
+                                    BorderThickness="1"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    Background="{TemplateBinding Background}"
+                                    Opacity="0.95">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="12" ShadowDepth="3" Opacity="0.25"/>
+                                </Border.Effect>
+                                <Image x:Name="PART_DragPreviewImage"/>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
 
 
@@ -21,21 +142,36 @@
                             <Image
                                 x:Name="favicon"
                                 Source="{Binding FaviconUrl, RelativeSource={RelativeSource TemplatedParent}}"/>
-                            <svgc:SvgIcon
-                                x:Name="defaultIcon"
-                                Width="15"
-                                Height="15"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                UriSource="{DynamicResource PageIconUri}"
-                                Visibility="Collapsed"/>
+                            <Grid x:Name="fallbackIcon" Visibility="Collapsed">
+                                <ContentPresenter
+                                    x:Name="customIcon"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Content="{TemplateBinding DefaultIcon}"/>
+                                <svgc:SvgIcon
+                                    x:Name="defaultIcon"
+                                    Width="15"
+                                    Height="15"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    UriSource="{DynamicResource PageIconUri}"
+                                    Visibility="Collapsed"/>
+                            </Grid>
                         </Grid>
                     </Viewbox>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="HasImageFailed" Value="True">
+                            <Setter TargetName="favicon" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="fallbackIcon" Property="Visibility" Value="Visible"/>
+                        </Trigger>
                         <DataTrigger Binding="{Binding Source, ElementName=favicon}" Value="{x:Null}">
                             <Setter TargetName="favicon" Property="Visibility" Value="Collapsed"/>
-                            <Setter TargetName="defaultIcon" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="fallbackIcon" Property="Visibility" Value="Visible"/>
                         </DataTrigger>
+                        <Trigger Property="DefaultIcon" Value="{x:Null}">
+                            <Setter TargetName="customIcon" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="defaultIcon" Property="Visibility" Value="Visible"/>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

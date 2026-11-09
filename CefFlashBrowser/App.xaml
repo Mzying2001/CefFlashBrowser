@@ -6,7 +6,8 @@
              xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
              xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
              xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
-             xmlns:infraWpf="clr-namespace:CefFlashBrowser.Infrastructure.Wpf">
+             xmlns:infraWpf="clr-namespace:CefFlashBrowser.Infrastructure.Wpf"
+             xmlns:converters="clr-namespace:CefFlashBrowser.Views.Converters">
     <Application.Resources>
         <ResourceDictionary>
 
@@ -18,9 +19,6 @@
                 <!--HandyControl-->
                 <infraWpf:NamedResourceDictionary Name="Skin" Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
                 <infraWpf:NamedResourceDictionary Name="Theme" Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
-
-                <!--Converters-->
-                <infraWpf:NamedResourceDictionary Name="Converters" Source="Views/Converters/Converters.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
 
@@ -32,8 +30,8 @@
             <infraWpf:AppInfo x:Key="AppInfo"/>
 
 
-            <!--Custom window style, WindowManager will set this for all windows-->
-            <Style x:Key="CustomWindowStyle" TargetType="Window">
+            <!--Default window style, set via StyleProperty metadata in App.OnStartup-->
+            <Style x:Key="DefaultWindowStyle" TargetType="Window">
                 <Setter Property="Background" Value="{DynamicResource RegionBrush}"/>
             </Style>
 
@@ -53,18 +51,40 @@
             <sys:Uri x:Key="ExportIconUri">/Assets/Svgs/export.svg</sys:Uri>
             <sys:Uri x:Key="ForwardIconUri">/Assets/Svgs/forward.svg</sys:Uri>
             <sys:Uri x:Key="ImportIconUri">/Assets/Svgs/import.svg</sys:Uri>
+            <sys:Uri x:Key="LanguageIconUri">/Assets/Svgs/language.svg</sys:Uri>
             <sys:Uri x:Key="MoreIconUri">/Assets/Svgs/more.svg</sys:Uri>
             <sys:Uri x:Key="MuteIconUri">/Assets/Svgs/mute.svg</sys:Uri>
+            <sys:Uri x:Key="MuteModeIconUri">/Assets/Svgs/mute-mode.svg</sys:Uri>
             <sys:Uri x:Key="NewTabIconUri">/Assets/Svgs/new-tab.svg</sys:Uri>
             <sys:Uri x:Key="PageIconUri">/Assets/Svgs/page.svg</sys:Uri>
+            <sys:Uri x:Key="PluginIconUri">/Assets/Svgs/plugin.svg</sys:Uri>
             <sys:Uri x:Key="ReloadIconUri">/Assets/Svgs/reload.svg</sys:Uri>
             <sys:Uri x:Key="SearchIconUri">/Assets/Svgs/search.svg</sys:Uri>
+            <sys:Uri x:Key="SettingsIconUri">/Assets/Svgs/settings.svg</sys:Uri>
+            <sys:Uri x:Key="StarIconUri">/Assets/Svgs/star.svg</sys:Uri>
             <sys:Uri x:Key="StopIconUri">/Assets/Svgs/stop.svg</sys:Uri>
             <sys:Uri x:Key="SubIconUri">/Assets/Svgs/sub.svg</sys:Uri>
             <sys:Uri x:Key="TrashIconUri">/Assets/Svgs/trash.svg</sys:Uri>
             <sys:Uri x:Key="UpIconUri">/Assets/Svgs/up.svg</sys:Uri>
             <sys:Uri x:Key="VolumeIconUri">/Assets/Svgs/volume.svg</sys:Uri>
             <sys:Uri x:Key="WarningIconUri">/Assets/Svgs/warning.svg</sys:Uri>
+            <sys:Uri x:Key="ZoomInIconUri">/Assets/Svgs/zoom-in.svg</sys:Uri>
+            <sys:Uri x:Key="ZoomOutIconUri">/Assets/Svgs/zoom-out.svg</sys:Uri>
+
+
+            <!--Converters-->
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:BinaryToSizeStringConverter x:Key="BinaryToReadableSizeStringConverter" UseReadableSize="True"/>
+            <converters:BinaryToSizeStringConverter x:Key="BinaryToSizeStringConverter"/>
+            <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
+            <converters:LanguageNameConverter x:Key="LanguageNameConverter"/>
+            <converters:MultiEqualityConverter x:Key="MultiEqualityConverter"/>
+            <converters:ObjectGetTypeConverter x:Key="ObjectGetTypeConverter"/>
+            <converters:ObjectToStringConverter x:Key="ObjectToStringConverter"/>
+            <converters:MultiplyConverter x:Key="TwoThirdConverter" Multiplier="0.6666666666666667"/>
+            <converters:UrlGetFileNameConverter x:Key="UrlGetFileNameConverter"/>
+            <converters:WebsiteIconUrlConverter x:Key="WebsiteIconUrlConverter"/>
+            <converters:ZoomLevelToScaleConverter x:Key="ZoomLevelToScaleConverter"/>
 
 
         </ResourceDictionary>

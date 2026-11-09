@@ -4,6 +4,7 @@ using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,11 @@ namespace CefFlashBrowser.ViewModels
 
     public class SolEditorWindowViewModel : ViewModelBase
     {
+        private LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         public DelegateCommand SelectNodeCommand { get; set; }
         public DelegateCommand SaveFileCommand { get; set; }
         public DelegateCommand SaveAsFileCommand { get; set; }
@@ -160,9 +166,9 @@ namespace CefFlashBrowser.ViewModels
 
                 var sfd = new Microsoft.Win32.SaveFileDialog
                 {
-                    Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol|" +
-                             $"{LanguageManager.GetString("solEditor_amf0SolFile")}|*.sol|" +
-                             $"{LanguageManager.GetString("solEditor_amf3SolFile")}|*.sol",
+                    Filter = $"{LanguageService.GetString("common_solFile")}|*.sol|" +
+                             $"{LanguageService.GetString("solEditor_amf0SolFile")}|*.sol|" +
+                             $"{LanguageService.GetString("solEditor_amf3SolFile")}|*.sol",
                     FileName = SolName,
                 };
 
@@ -189,7 +195,7 @@ namespace CefFlashBrowser.ViewModels
 
         private void RemoveItem(SolNodeViewModel target)
         {
-            var msg = LanguageManager.GetFormattedString("message_removeItem", target.DisplayName);
+            var msg = LanguageService.GetFormattedString("message_removeItem", target.DisplayName);
 
             WindowManager.Confirm(msg, callback: result =>
             {
@@ -204,12 +210,12 @@ namespace CefFlashBrowser.ViewModels
             {
                 if (string.IsNullOrEmpty(name))
                 {
-                    WindowManager.ShowError(LanguageManager.GetString("error_keyOrPropEmpty"));
+                    WindowManager.ShowError(LanguageService.GetString("error_keyOrPropEmpty"));
                     return false;
                 }
                 if (target.Children.Any(item => item.Name is string itemName && itemName == name))
                 {
-                    WindowManager.ShowError(LanguageManager.GetFormattedString("error_keyOrPropAreadyExists", name));
+                    WindowManager.ShowError(LanguageService.GetFormattedString("error_keyOrPropAreadyExists", name));
                     return false;
                 }
                 return true;
@@ -323,7 +329,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 var ofd = new Microsoft.Win32.OpenFileDialog
                 {
-                    Filter = $"{LanguageManager.GetString("common_allFiles")}|*.*"
+                    Filter = $"{LanguageService.GetString("common_allFiles")}|*.*"
                 };
 
                 if (ofd.ShowDialog() == true)
@@ -350,7 +356,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 var sfd = new Microsoft.Win32.SaveFileDialog
                 {
-                    Filter = $"{LanguageManager.GetString("common_allFiles")}|*.*",
+                    Filter = $"{LanguageService.GetString("common_allFiles")}|*.*",
                     FileName = target.DisplayName
                 };
 
@@ -371,7 +377,7 @@ namespace CefFlashBrowser.ViewModels
         {
             if (target.Name is string name)
             {
-                var msg = LanguageManager.GetFormattedString("message_renameItem", target.DisplayName);
+                var msg = LanguageService.GetFormattedString("message_renameItem", target.DisplayName);
 
                 WindowManager.Prompt(message: msg, defaultInputText: name, callback: (result, newName) =>
                 {

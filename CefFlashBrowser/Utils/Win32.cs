@@ -89,6 +89,9 @@ namespace CefFlashBrowser.Utils
         [DllImport("kernel32.dll")]
         public static extern bool SetDllDirectory(string lpPathName);
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr LoadLibrary(string lpFileName);
+
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindowLong(IntPtr hWnd, int nIndex);
 

@@ -4,6 +4,7 @@ using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +16,11 @@ namespace CefFlashBrowser.ViewModels
 {
     public class SaveMgrWorkspaceViewModel : ViewModelBase
     {
+        private LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
         private CancellationTokenSource
             _reloadCancellationTokenSource = new CancellationTokenSource();
 
@@ -142,13 +148,13 @@ namespace CefFlashBrowser.ViewModels
                 var sfd = new Microsoft.Win32.SaveFileDialog
                 {
                     FileName = solFile.FileName,
-                    Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol",
+                    Filter = $"{LanguageService.GetString("common_solFile")}|*.sol",
                 };
 
                 if (sfd.ShowDialog() == true)
                 {
                     File.Copy(solFile.FilePath, sfd.FileName, true);
-                    WindowManager.Alert(LanguageManager.GetString("message_exported"));
+                    WindowManager.Alert(LanguageService.GetString("message_exported"));
                 }
             }
             catch (Exception e)
@@ -162,7 +168,7 @@ namespace CefFlashBrowser.ViewModels
         {
             var ofd = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = $"{LanguageManager.GetString("common_solFile")}|*.sol",
+                Filter = $"{LanguageService.GetString("common_solFile")}|*.sol",
             };
 
             if (ofd.ShowDialog() == true)
@@ -182,11 +188,11 @@ namespace CefFlashBrowser.ViewModels
 
                 if (!UrlHelper.IsLocalSolFile(importFile))
                 {
-                    var errmsg = LanguageManager.GetFormattedString("error_notSolFile", importFile);
+                    var errmsg = LanguageService.GetFormattedString("error_notSolFile", importFile);
                     throw new ArgumentException(errmsg, nameof(importFile));
                 }
 
-                var msg = LanguageManager.GetFormattedString(
+                var msg = LanguageService.GetFormattedString(
                         "message_askImportFile", importFile, solFile.FileName);
 
                 WindowManager.Confirm(msg, callback: result =>
@@ -194,7 +200,7 @@ namespace CefFlashBrowser.ViewModels
                     if (result == true)
                     {
                         File.Copy(importFile, solFile.FilePath, true);
-                        WindowManager.Alert(LanguageManager.GetString("message_imported"));
+                        WindowManager.Alert(LanguageService.GetString("message_imported"));
                     }
                 });
 
@@ -212,7 +218,7 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                string msg = LanguageManager.GetFormattedString("message_deleteFile", solFile.FileName);
+                string msg = LanguageService.GetFormattedString("message_deleteFile", solFile.FileName);
 
                 WindowManager.Confirm(msg, callback: result =>
                 {
@@ -220,7 +226,7 @@ namespace CefFlashBrowser.ViewModels
                     {
                         File.Delete(solFile.FilePath);
                         SolFiles.Remove(solFile);
-                        WindowManager.Alert(LanguageManager.GetString("message_deleted"));
+                        WindowManager.Alert(LanguageService.GetString("message_deleted"));
                     }
                 });
             }

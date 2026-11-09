@@ -11,8 +11,13 @@ namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumWebBrowserEx : ChromiumWebBrowser
     {
+        private readonly object _navigationLock = new object();
+        private long _navigationVersion;
+        private string _pageUrl;
+
         public event EventHandler FullscreenModeChanged;
         public event EventHandler FaviconUrlChanged;
+        public event EventHandler<FaviconDiscoveredEventArgs> FaviconDiscovered;
         public event EventHandler LoadingProgressChanged;
         public event EventHandler StatusTextChanged;
         public event EventHandler<JsContextEventArgs> JsContextCreated;
@@ -140,6 +145,33 @@ namespace CefFlashBrowser.FlashBrowser
             GetBrowser().CloseDevTools();
         }
 
+        public void SetAudioMuted(bool mute)
+        {
+            if (IsDisposed || !IsBrowserInitialized)
+                return;
+
+            Cef.UIThreadTaskFactory.StartNew(() =>
+            {
+                try
+                {
+                    if (IsDisposed)
+                        return;
+
+                    var browser = GetBrowser();
+                    if (browser == null || browser.IsDisposed)
+                        return;
+
+                    var host = browser.GetHost();
+                    if (host != null && !host.IsDisposed)
+                        host.SetAudioMuted(mute);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // The browser may finish closing while the audio update is queued.
+                }
+            });
+        }
+
         protected virtual void OnFullscreenModeChanged(bool fullscreen)
         {
             SetCurrentValue(FullscreenModeProperty, fullscreen);
@@ -176,12 +208,79 @@ namespace CefFlashBrowser.FlashBrowser
 
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
         {
-            base.OnFrameLoadStart(e);
-
             if (e.Frame.IsMain)
             {
-                OnFaviconUrlChanged(null);
+                UpdateNavigation(e.Frame.Url);
             }
+
+            base.OnFrameLoadStart(e);
+
+            if (!IsDisposed && e.Frame.IsMain)
+                OnFaviconUrlChanged(null);
+        }
+
+        private void UpdateNavigation(string pageUrl)
+        {
+            lock (_navigationLock)
+            {
+                _navigationVersion++;
+                _pageUrl = pageUrl;
+            }
+        }
+
+        private void CaptureFavicon(IBrowser browser, IList<string> urls)
+        {
+            string iconUrl = urls != null && urls.Count > 0 ? urls[0] : null;
+            long version;
+
+            lock (_navigationLock)
+                version = _navigationVersion;
+
+            string pageUrl;
+            try
+            {
+                if (IsDisposed || browser == null)
+                    return;
+
+                using (var frame = browser.MainFrame)
+                    pageUrl = frame?.Url;
+            }
+            catch (ObjectDisposedException) { return; }
+
+            lock (_navigationLock)
+            {
+                if (version != _navigationVersion || pageUrl != _pageUrl)
+                    return;
+            }
+
+            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                return;
+
+            Dispatcher.InvokeAsync(() =>
+            {
+                lock (_navigationLock)
+                {
+                    if (IsDisposed || version != _navigationVersion || pageUrl != _pageUrl)
+                        return;
+                }
+
+                OnFaviconUrlChanged(iconUrl == null ? null : new[] { iconUrl });
+
+                lock (_navigationLock)
+                {
+                    if (IsDisposed || version != _navigationVersion || pageUrl != _pageUrl)
+                        return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(iconUrl))
+                    FaviconDiscovered?.Invoke(this, new FaviconDiscoveredEventArgs(pageUrl, iconUrl));
+            });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            UpdateNavigation(null);
+            base.Dispose(disposing);
         }
 
 
@@ -197,6 +296,10 @@ namespace CefFlashBrowser.FlashBrowser
 
             public void OnAddressChanged(IWebBrowser chromiumWebBrowser, AddressChangedEventArgs addressChangedArgs)
             {
+                if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
+                {
+                    browserEx.UpdateNavigation(addressChangedArgs.Address);
+                }
                 InnerHandler?.OnAddressChanged(chromiumWebBrowser, addressChangedArgs);
             }
 
@@ -214,7 +317,7 @@ namespace CefFlashBrowser.FlashBrowser
             {
                 if (chromiumWebBrowser is ChromiumWebBrowserEx browserEx)
                 {
-                    browserEx.Dispatcher.InvokeAsync(() => browserEx.OnFaviconUrlChanged(urls));
+                    browserEx.CaptureFavicon(browser, urls);
                 }
                 InnerHandler?.OnFaviconUrlChange(chromiumWebBrowser, browser, urls);
             }

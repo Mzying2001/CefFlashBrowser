@@ -20,6 +20,8 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class SwfPlayerWindow : Window
     {
+        private const string PlayerResourceName = "CefFlashBrowser.Assets.SwfPlayer.swfplayer.html";
+
         private bool _doClose = false;
         private bool _isClosed = false;
         private ChromiumWebBrowser _browserPendingClose;
@@ -68,6 +70,14 @@ namespace CefFlashBrowser.Views
             browserView.ViewModel = SimpleIoc.Global.GetInstance<BrowserViewModel>(GlobalData.SwfPlayerPath);
             ViewModel.Browser.FrameLoadEnd += OnBrowserFrameLoadEnd;
             ViewModel.Browser.DragHandler = new Browser.Handlers.DisableDragHandler();
+
+            using (var stream = typeof(SwfPlayerWindow).Assembly.GetManifestResourceStream(PlayerResourceName))
+            {
+                if (stream == null)
+                    throw new InvalidOperationException($"Embedded SWF player page not found: {PlayerResourceName}");
+
+                ViewModel.Browser.RegisterResourceHandler(new Uri(GlobalData.SwfPlayerPath).AbsoluteUri, stream, "text/html");
+            }
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
         }

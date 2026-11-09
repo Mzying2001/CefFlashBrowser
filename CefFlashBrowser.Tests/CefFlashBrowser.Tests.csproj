@@ -13,15 +13,22 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
+    <ProjectReference Include="..\CefFlashBrowser.Database\CefFlashBrowser.Database.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
   </ItemGroup>
 
   <!-- Link source files from the main app -->
   <ItemGroup>
+    <Compile Include="..\CefFlashBrowser\Utils\PasswordProtector.cs" Link="LinkedSources\PasswordProtector.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\DatabaseService.cs" Link="LinkedSources\DatabaseService.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\WebsiteIconRecord.cs" Link="LinkedSources\WebsiteIconRecord.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\FaviconService.cs" Link="LinkedSources\FaviconService.cs" />
+    <Compile Include="..\CefFlashBrowser\Views\Converters\WebsiteIconUrlConverter.cs" Link="LinkedSources\WebsiteIconUrlConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\UrlHelper.cs" Link="LinkedSources\UrlHelper.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\DirectoryAccessChecker.cs" Link="LinkedSources\DirectoryAccessChecker.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\ValueConverterBase.cs" Link="LinkedSources\ValueConverterBase.cs" />
@@ -37,10 +44,14 @@
     <Compile Include="..\CefFlashBrowser\Models\SolTypeDesc.cs" Link="LinkedSources\SolTypeDesc.cs" />
   </ItemGroup>
 
-  <!-- Compiled at runtime by the standalone browser regression runner. -->
   <ItemGroup>
-    <Compile Remove="BrowserRegression\**\*.cs" />
-    <None Include="BrowserRegression\**\*.cs" />
+    <Reference Include="System.Security" />
+  </ItemGroup>
+
+  <!-- Compiled at runtime by the standalone regression runners. -->
+  <ItemGroup>
+    <Compile Remove="BrowserRegression\**\*.cs;CommandProxyRegression\**\*.cs" />
+    <None Include="BrowserRegression\**\*.cs;CommandProxyRegression\**\*.cs" />
   </ItemGroup>
 
   <!-- Test fixture files -->

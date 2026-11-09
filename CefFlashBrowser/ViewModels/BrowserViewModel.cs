@@ -45,6 +45,13 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _title, value);
         }
 
+        private bool _isMuted;
+        public bool IsMuted
+        {
+            get => _isMuted;
+            private set => UpdateValue(ref _isMuted, value);
+        }
+
         private IntPtr _integratedDevToolsHandle = IntPtr.Zero;
         public IntPtr IntegratedDevToolsHandle
         {
@@ -120,9 +127,11 @@ namespace CefFlashBrowser.ViewModels
             if (!IsBrowserReady())
                 return;
 
-            if (Browser is ChromiumFlashBrowser flashBrowser)
+            if (Browser is ChromiumWebBrowserEx browser)
             {
-                flashBrowser.ToggleMute();
+                var isMuted = !IsMuted;
+                browser.SetAudioMuted(isMuted);
+                IsMuted = isMuted;
             }
         }
 

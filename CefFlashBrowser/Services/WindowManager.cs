@@ -5,6 +5,7 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
+using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
@@ -95,12 +96,6 @@ namespace CefFlashBrowser.Services
         private static TWindow NewWindow<TWindow>() where TWindow : Window, new()
         {
             var window = new TWindow();
-
-            if (window.Style == null)
-            {
-                window.SetCurrentValue(FrameworkElement.StyleProperty,
-                    Application.Current.TryFindResource("CustomWindowStyle") as Style);
-            }
 
             void themeChangedHandler(object theme)
             {
@@ -268,7 +263,7 @@ namespace CefFlashBrowser.Services
             string title = "Error";
             try
             {
-                title = LanguageManager.GetString("dialog_error");
+                title = SimpleIoc.Global.GetInstance<LanguageService>().GetString("dialog_error");
             }
             catch { }
             MessageBox.Show(errMsg, title, MessageBoxButton.OK, MessageBoxImage.Error);

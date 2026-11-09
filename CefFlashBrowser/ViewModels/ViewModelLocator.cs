@@ -1,4 +1,5 @@
-﻿using SimpleMvvm.Ioc;
+﻿using CefFlashBrowser.Services;
+using SimpleMvvm.Ioc;
 using System;
 using System.Linq;
 
@@ -43,6 +44,21 @@ namespace CefFlashBrowser.ViewModels
                 viewModel.Address = address;
 
             return viewModel;
+        }
+
+        public LanguageService LanguageService
+        {
+            get => SimpleIoc.Global.GetInstance<LanguageService>();
+        }
+
+        public FaviconService FaviconService
+        {
+            get => SimpleIoc.Global.GetInstance<FaviconService>();
+        }
+
+        public FavoritesService FavoritesService
+        {
+            get => SimpleIoc.Global.GetInstance<FavoritesService>();
         }
 
         public MainWindowViewModel MainWindowViewModel

@@ -6,18 +6,23 @@
     <UseWPF>true</UseWPF>
     <Platforms>x86;x64</Platforms>
     <NuGetAudit>False</NuGetAudit>
+    <CefSharpTargetDir>Binaries\CefSharp</CefSharpTargetDir>
+    <CopySQLiteInteropFiles>false</CopySQLiteInteropFiles>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <StartupObject>CefFlashBrowser.Program</StartupObject>
-    <!-- Disable Fody (and thus Costura embedding) for Debug builds so the executable always
-         loads its dependencies from disk and can never embed a stale dependency DLL.
-         Release keeps Costura embedding for single-file distribution. -->
-    <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
     <ApplicationIcon>Assets\Icons\icon.ico</ApplicationIcon>
     <Version>1.1.8</Version>
     <Authors>Mzying2001</Authors>
     <Copyright>Copyright © 2021-2026</Copyright>
     <ApplicationManifest>App.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <!-- Disable Fody (and thus Costura embedding) for Debug builds so the executable always
+         loads its dependencies from disk and can never embed a stale dependency DLL.
+         Release keeps Costura embedding for single-file distribution. -->
+    <DisableFody>true</DisableFody>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)' == 'x86'">
@@ -38,18 +43,28 @@
     <Resource Include="Assets\Svgs\export.svg" />
     <Resource Include="Assets\Svgs\forward.svg" />
     <Resource Include="Assets\Svgs\import.svg" />
+    <Resource Include="Assets\Svgs\language.svg" />
     <Resource Include="Assets\Svgs\more.svg" />
+    <Resource Include="Assets\Svgs\mute-mode.svg" />
     <Resource Include="Assets\Svgs\mute.svg" />
     <Resource Include="Assets\Svgs\new-tab.svg" />
     <Resource Include="Assets\Svgs\page.svg" />
+    <Resource Include="Assets\Svgs\plugin.svg" />
     <Resource Include="Assets\Svgs\reload.svg" />
     <Resource Include="Assets\Svgs\search.svg" />
+    <Resource Include="Assets\Svgs\settings.svg" />
+    <Resource Include="Assets\Svgs\star.svg" />
     <Resource Include="Assets\Svgs\stop.svg" />
     <Resource Include="Assets\Svgs\sub.svg" />
     <Resource Include="Assets\Svgs\trash.svg" />
     <Resource Include="Assets\Svgs\up.svg" />
     <Resource Include="Assets\Svgs\volume.svg" />
     <Resource Include="Assets\Svgs\warning.svg" />
+    <Resource Include="Assets\Svgs\zoom-in.svg" />
+    <Resource Include="Assets\Svgs\zoom-out.svg" />
+    <EmbeddedResource Include="Assets\SwfPlayer\swfplayer.html">
+      <LogicalName>CefFlashBrowser.Assets.SwfPlayer.swfplayer.html</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -66,6 +81,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CefFlashBrowser.Database\CefFlashBrowser.Database.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Singleton\CefFlashBrowser.Singleton.vcxproj" />
@@ -75,31 +91,30 @@
 
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Security" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Assets\CefSharp\libcef_x64.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\CefSharp\libcef_x86.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Plugins\pepflashplayer_x64.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Plugins\pepflashplayer_x86.tar.gz">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Plugins\readme.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\SwfPlayer\swfplayer.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  <Target Name="PrepareSQLiteInterop" BeforeTargets="AssignTargetPaths" Condition="'$(DesignTimeBuild)' != 'true'">
+    <ItemGroup>
+      <_SQLiteInteropForPlatform Include="@(SQLiteInteropFiles)" Condition="'%(SQLiteInteropFiles.RecursiveDir)' == '$(Platform)\' And '%(SQLiteInteropFiles.Filename)%(SQLiteInteropFiles.Extension)' == 'SQLite.Interop.dll'" />
+      <_LegacySQLiteDirectories Include="$(OutDir)x86;$(OutDir)x64" />
+    </ItemGroup>
+    <Error Condition="'@(_SQLiteInteropForPlatform->Count())' != '1'" Text="Expected one SQLite.Interop.dll for platform '$(Platform)', found @(_SQLiteInteropForPlatform->Count())." />
+    <Error Condition="!Exists('%(_SQLiteInteropForPlatform.Identity)')" Text="SQLite native library not found: %(_SQLiteInteropForPlatform.Identity)" />
+    <ItemGroup>
+      <Content Include="@(_SQLiteInteropForPlatform)">
+        <Link>Binaries\SQLite\SQLite.Interop.dll</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+    <Delete Files="@(_LegacySQLiteDirectories->'%(Identity)\SQLite.Interop.dll')" />
+    <RemoveDir Directories="@(_LegacySQLiteDirectories)" Condition="Exists('%(_LegacySQLiteDirectories.Identity)') And $([System.IO.Directory]::GetFiles('%(_LegacySQLiteDirectories.Identity)').Length) == 0 And $([System.IO.Directory]::GetDirectories('%(_LegacySQLiteDirectories.Identity)').Length) == 0" />
+  </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="cd &quot;$(TargetDir)&quot;&#xD;&#xA;&#xD;&#xA;set ASSETS_PATH=Assets\&#xD;&#xA;set CEF_PATH=%25ASSETS_PATH%25CefSharp\&#xD;&#xA;set PLUGINS_PATH=%25ASSETS_PATH%25Plugins\&#xD;&#xA;set EMPTYEXE_PATH=%25ASSETS_PATH%25EmptyExe\&#xD;&#xA;&#xD;&#xA;if &quot;$(Configuration)&quot;==&quot;Release&quot; (&#xD;&#xA;    del *.pdb&#xD;&#xA;    del *.xml&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;rd /s /q %25CEF_PATH%25locales&#xD;&#xA;rd /s /q %25CEF_PATH%25swiftshader&#xD;&#xA;&#xD;&#xA;move CefSharp.* %25CEF_PATH%25&#xD;&#xA;move cef.pak %25CEF_PATH%25&#xD;&#xA;move cef_100_percent.pak %25CEF_PATH%25&#xD;&#xA;move cef_200_percent.pak %25CEF_PATH%25&#xD;&#xA;move cef_extensions.pak %25CEF_PATH%25&#xD;&#xA;move chrome_elf.dll %25CEF_PATH%25&#xD;&#xA;move d3dcompiler_47.dll %25CEF_PATH%25&#xD;&#xA;move devtools_resources.pak %25CEF_PATH%25&#xD;&#xA;move icudtl.dat %25CEF_PATH%25&#xD;&#xA;move libcef.dll %25CEF_PATH%25&#xD;&#xA;move libEGL.dll %25CEF_PATH%25&#xD;&#xA;move libGLESv2.dll %25CEF_PATH%25&#xD;&#xA;move locales %25CEF_PATH%25&#xD;&#xA;move README.txt %25CEF_PATH%25&#xD;&#xA;move snapshot_blob.bin %25CEF_PATH%25&#xD;&#xA;move swiftshader %25CEF_PATH%25&#xD;&#xA;move v8_context_snapshot.bin %25CEF_PATH%25&#xD;&#xA;&#xD;&#xA;tar -xvf %25CEF_PATH%25libcef_$(PlatformName).tar.gz -C %25CEF_PATH%25&#xD;&#xA;del %25CEF_PATH%25libcef_*.tar.gz&#xD;&#xA;&#xD;&#xA;tar -xvf %25PLUGINS_PATH%25pepflashplayer_$(PlatformName).tar.gz -C %25PLUGINS_PATH%25&#xD;&#xA;del %25PLUGINS_PATH%25pepflashplayer_*.tar.gz&#xD;&#xA;&#xD;&#xA;rd /s /q %25EMPTYEXE_PATH%25&#xD;&#xA;mkdir %25EMPTYEXE_PATH%25&#xD;&#xA;move CefFlashBrowser.EmptyExe.* %25EMPTYEXE_PATH%25" />
+    <Exec Command="call &quot;$(MSBuildProjectDirectory)\..\postbuild.bat&quot;"
+          WorkingDirectory="$(TargetDir)"
+          EnvironmentVariables="CFB_BUILD_CONFIGURATION=$(Configuration);CFB_BUILD_PLATFORM=$(PlatformName)" />
   </Target>
 
 </Project>

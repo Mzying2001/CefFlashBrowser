@@ -26,7 +26,11 @@ function Test-ContextMenuRouting($Context) {
                     }
                     $model.ToggleFullscreen($source)
                     $handled = Invoke-ContextMenuCommand $source.Browser $command $text $url
-                    Assert-Regression ($handled -and !$model.Fullscreen) "$commandName handles the command and exits fullscreen ($behavior)"
+                    $preserveFullscreen = $effectiveBehavior -eq [CefFlashBrowser.Models.NewPageBehavior]::NewTab
+                    Assert-Regression ($handled -and $model.Fullscreen -eq $preserveFullscreen) "$commandName applies fullscreen behavior for $effectiveBehavior ($behavior)"
+                    if ($preserveFullscreen) {
+                        Assert-TabFullscreen $window "$commandName ($behavior)"
+                    }
                     if ($effectiveBehavior -eq [CefFlashBrowser.Models.NewPageBehavior]::NewTab) {
                         Assert-Regression ($model.Browsers.Count -eq 3 -and $model.Browsers[1] -eq $model.CurrentBrowser -and
                             $model.CurrentBrowser.Address -eq $url -and $model.Browsers[0] -eq $source -and
@@ -62,7 +66,7 @@ function Test-ContextMenuRouting($Context) {
 
 function Test-ContextMenuItems($Context) {
     $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
-    $savedLanguage = [CefFlashBrowser.Data.GlobalData]::Settings.Language
+    $savedLanguage = $Context.LanguageService.CurrentLanguage
     $handler = New-Object CefFlashBrowser.Browser.Handlers.ContextMenuHandler
     try {
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
@@ -72,35 +76,38 @@ function Test-ContextMenuItems($Context) {
         $selectedUrl = [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::OpenSelectedUrl
         $separator = [CefSharp.CefMenuCommand]::NotFound
         $copy = [CefSharp.CefMenuCommand]::Copy
-        foreach ($scenario in @(
-            @{ Name = 'plain page'; Text = ''; Link = ''; Expected = @($copy) },
-            @{ Name = 'link'; Text = ''; Link = 'https://example.com'; Expected = @($newTab, $newWindow, $separator, $copy) },
-            @{ Name = 'selected text'; Text = 'search text'; Link = ''; Expected = @($search, $separator, $copy) },
-            @{ Name = 'selected URL'; Text = 'https://example.com'; Link = ''; Expected = @($selectedUrl, $search, $separator, $copy) },
-            @{ Name = 'link and selected URL'; Text = 'https://example.com'; Link = 'https://example.org'; Expected = @($newTab, $newWindow, $selectedUrl, $search, $separator, $copy) }
-        )) {
-            $parameters = New-Object RegressionContextMenuParamsProxy
-            $parameters.SelectionText = $scenario.Text
-            $parameters.LinkUrl = $scenario.Link
-            $menu = New-Object RegressionMenuModelProxy
-            $handler.OnBeforeContextMenu($null, $null, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
-            Assert-Regression (($menu.Commands -join ',') -eq ($scenario.Expected -join ',')) "context menu commands and separator match $($scenario.Name)"
+        foreach ($isMuted in @($false, $true)) {
+            $cefBrowser = (New-Object RegressionAudioBrowserProxy((New-Object RegressionAudioHostProxy($isMuted)).GetTransparentProxy())).GetTransparentProxy()
+            foreach ($scenario in @(
+                @{ Name = 'plain page'; Text = ''; Link = ''; Expected = @($copy) },
+                @{ Name = 'link'; Text = ''; Link = 'https://example.com'; Expected = @($newTab, $newWindow, $separator, $copy) },
+                @{ Name = 'selected text'; Text = 'search text'; Link = ''; Expected = @($search, $separator, $copy) },
+                @{ Name = 'selected URL'; Text = 'https://example.com'; Link = ''; Expected = @($selectedUrl, $search, $separator, $copy) },
+                @{ Name = 'link and selected URL'; Text = 'https://example.com'; Link = 'https://example.org'; Expected = @($newTab, $newWindow, $selectedUrl, $search, $separator, $copy) }
+            )) {
+                $parameters = New-Object RegressionContextMenuParamsProxy
+                $parameters.SelectionText = $scenario.Text
+                $parameters.LinkUrl = $scenario.Link
+                $menu = New-Object RegressionMenuModelProxy
+                $handler.OnBeforeContextMenu($null, $cefBrowser, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
+                Assert-Regression (($menu.Commands -join ',') -eq ($scenario.Expected -join ',')) "page menu has only the expected commands ($($scenario.Name), muted=$isMuted)"
+            }
         }
-        foreach ($language in [CefFlashBrowser.Services.LanguageManager]::GetSupportedLanguage()) {
-            [CefFlashBrowser.Data.GlobalData]::Settings.Language = $language
+        foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
+            $Context.LanguageService.SetCurrentLanguage($language)
             $parameters = New-Object RegressionContextMenuParamsProxy
             $parameters.LinkUrl = 'https://example.com'
             $menu = New-Object RegressionMenuModelProxy
             $handler.OnBeforeContextMenu($null, $null, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
             Assert-Regression (![string]::IsNullOrWhiteSpace($menu.Labels[0]) -and
-                $menu.Labels[0] -eq [CefFlashBrowser.Services.LanguageManager]::GetString('browser_openInNewTab')) "new tab menu has a localized label ($language)"
+                $menu.Labels[0] -eq $Context.LanguageService.GetString('browser_openInNewTab')) "new tab menu has a localized label ($language)"
         }
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $true
         $handler.OnBeforeContextMenu($null, $null, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
         Assert-Regression ($menu.Commands.Count -eq 0) 'disabling context menus removes every item'
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
-        [CefFlashBrowser.Data.GlobalData]::Settings.Language = $savedLanguage
+        $Context.LanguageService.SetCurrentLanguage($savedLanguage)
     }
 }
 
@@ -140,109 +147,8 @@ function Test-AuxiliaryContextMenu($Context) {
     }
 }
 
-function Find-MuteTabIcon($Element) {
-    if ($Element -is [SharpVectors.Converters.SvgIcon] -and "$($Element.UriSource)" -like '*mute.svg*') {
-        return $Element
-    }
-
-    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
-        $icon = Find-MuteTabIcon ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index))
-        if ($null -ne $icon) {
-            return $icon
-        }
-    }
-}
-
-function Find-ToolbarMuteButton($Element, $Command) {
-    if ($Element -is [System.Windows.Controls.Button] -and
-        [object]::ReferenceEquals($Element.Command, $Command)) {
-        return $Element
-    }
-
-    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
-        $button = Find-ToolbarMuteButton ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index)) $Command
-        if ($null -ne $button) {
-            return $button
-        }
-    }
-}
-
-function Test-ContextMenuMute($Context) {
-    $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
-    $savedTabStrip = [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip
-    [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
-    [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip = $true
-    $window = New-RegressionWindow $Context
-    try {
-        $model = $window.ViewModel
-        $source = $model.CurrentBrowser
-        $browser = $source.Browser
-        $mutePage = [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::MutePage
-
-        Assert-Regression (!$browser.IsMuted) 'tab starts unmuted'
-
-        $model.ToggleMute($source)
-        Wait-Regression $Context {
-            $source.Browser.IsMuted
-        } 'ToggleMute mutes the browser and updates IsMuted'
-
-        $icon = Find-MuteTabIcon $window
-        Assert-Regression ($null -ne $icon -and $icon.Visibility -eq [System.Windows.Visibility]::Visible) 'muted tab shows the mute icon'
-
-        $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
-        Assert-Regression ($null -ne $muteButton -and
-            "$($muteButton.Content.UriSource)" -like '*mute.svg*' -and
-            $muteButton.ToolTip -eq [CefFlashBrowser.Services.LanguageManager]::GetString('browser_unmuteSite')) 'muted toolbar shows the muted icon and unmute tooltip'
-
-        $handler = $browser.MenuHandler.PSObject.BaseObject
-        $parameters = New-Object RegressionContextMenuParamsProxy
-        $menu = New-Object RegressionMenuModelProxy
-        $unmutedBrowser = (New-Object RegressionAudioBrowserProxy((New-Object RegressionAudioHostProxy($false)).GetTransparentProxy())).GetTransparentProxy()
-        $handler.OnBeforeContextMenu($null, $unmutedBrowser, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
-        Assert-Regression ($menu.Commands.Count -eq 3 -and $menu.Commands[0] -eq $mutePage -and
-            $menu.Commands[1] -eq [CefSharp.CefMenuCommand]::NotFound -and
-            $menu.Labels[0] -eq [CefFlashBrowser.Services.LanguageManager]::GetString('browser_muteSite') -and
-            !$menu.Checked.Contains($mutePage)) 'context menu shows the localized unmuted mute entry'
-
-        $model.ToggleMute($source)
-        Wait-Regression $Context {
-            !$source.Browser.IsMuted
-        } 'ToggleMute restores audio and clears IsMuted'
-
-        $icon = Find-MuteTabIcon $window
-        Assert-Regression ($null -ne $icon -and $icon.Visibility -eq [System.Windows.Visibility]::Collapsed) 'unmuted tab hides the mute icon'
-
-        $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
-        Assert-Regression ($null -ne $muteButton -and
-            "$($muteButton.Content.UriSource)" -like '*volume.svg*' -and
-            $muteButton.ToolTip -eq [CefFlashBrowser.Services.LanguageManager]::GetString('browser_muteSite')) 'unmuted toolbar shows the volume icon and mute tooltip'
-
-        Invoke-BrowserCommand $muteButton.Command $muteButton.CommandParameter
-        Wait-Regression $Context {
-            $source.Browser.IsMuted
-        } 'toolbar button mutes through its command'
-
-        $menu = New-Object RegressionMenuModelProxy
-        $mutedBrowser = (New-Object RegressionAudioBrowserProxy((New-Object RegressionAudioHostProxy($true)).GetTransparentProxy())).GetTransparentProxy()
-        $handler.OnBeforeContextMenu($null, $mutedBrowser, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
-        Assert-Regression ($menu.Commands[0] -eq $mutePage -and
-            $menu.Labels[0] -eq [CefFlashBrowser.Services.LanguageManager]::GetString('browser_unmuteSite') -and
-            $menu.Checked.Contains($mutePage)) 'context menu shows the localized muted entry as checked'
-
-        Assert-Regression (Invoke-ContextMenuCommand $browser $mutePage) 'unmute context menu command is handled'
-        Wait-Regression $Context {
-            !$source.Browser.IsMuted
-        } 'context menu command restores audio'
-    } finally {
-        $window.ForceCloseWindow()
-        [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
-        [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip = $savedTabStrip
-    }
-}
-
 function Test-ContextMenu($Context) {
     Test-ContextMenuRouting $Context
     Test-ContextMenuItems $Context
-    Test-ContextMenuMute $Context
     Test-AuxiliaryContextMenu $Context
 }

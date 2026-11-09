@@ -31,8 +31,8 @@
 
     <Window.Resources>
         <svgc:SvgIcon x:Key="ExportIcon"
-                      Width="13.5"
-                      Height="13.5"
+                      Width="14"
+                      Height="14"
                       UriSource="{StaticResource ExportIconUri}"/>
 
         <svgc:SvgIcon x:Key="ImportIcon"

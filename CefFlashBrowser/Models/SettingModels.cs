@@ -1,4 +1,7 @@
-﻿namespace CefFlashBrowser.Models
+﻿using CefFlashBrowser.Utils;
+using Newtonsoft.Json;
+
+namespace CefFlashBrowser.Models
 {
     /// <summary>
     /// Specifies how navigation input is handled.
@@ -59,11 +62,31 @@
     /// </summary>
     public class ProxySettings
     {
+        private string _password = string.Empty;
+
         public bool EnableProxy { get; set; } = false;
         public string IP { get; set; } = string.Empty;
         public string Port { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+
+        /// <summary>
+        /// The stored DPAPI ciphertext. Legacy plaintext and unreadable values are discarded.
+        /// </summary>
+        public string Password
+        {
+            get => _password;
+            set => _password = string.IsNullOrEmpty(PasswordProtector.UnprotectOrEmpty(value)) ? string.Empty : value;
+        }
+
+        /// <summary>
+        /// The password used by the settings UI and proxy authentication, or empty if unavailable.
+        /// </summary>
+        [JsonIgnore]
+        public string PlainPassword
+        {
+            get => PasswordProtector.UnprotectOrEmpty(_password);
+            set => _password = PasswordProtector.Protect(value);
+        }
     }
 
     /// <summary>

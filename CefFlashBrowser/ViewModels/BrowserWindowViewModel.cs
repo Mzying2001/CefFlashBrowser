@@ -68,7 +68,10 @@ namespace CefFlashBrowser.ViewModels
                 _currentBrowser?.StopFinding(true);
                 _currentBrowser?.ExitFullScreen();
                 ShowFindPopup = false;
-                Fullscreen = false;
+
+                if (value == null)
+                    Fullscreen = false;
+
                 UpdateValue(ref _currentBrowser, value);
             }
         }
@@ -164,7 +167,7 @@ namespace CefFlashBrowser.ViewModels
             var sfd = new Microsoft.Win32.SaveFileDialog()
             {
                 FileName = title,
-                Filter = $"{LanguageManager.GetString("common_shortcut")}|*.lnk",
+                Filter = $"{SimpleIoc.Global.GetInstance<LanguageService>().GetString("common_shortcut")}|*.lnk",
             };
 
             if (sfd.ShowDialog() == true)
@@ -198,7 +201,7 @@ namespace CefFlashBrowser.ViewModels
 
             if (WindowManager.ShowAddFavoriteDialog(vm))
             {
-                GlobalData.Favorites.Add(vm.Website.Clone());
+                SimpleIoc.Global.GetInstance<FavoritesService>().Favorites.Add(vm.Website.Clone());
             }
         }
 

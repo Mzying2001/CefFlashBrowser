@@ -6,15 +6,13 @@
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
-        xmlns:data="clr-namespace:CefFlashBrowser.Data"
         xmlns:flash="clr-namespace:CefFlashBrowser.FlashBrowser;assembly=CefFlashBrowser.FlashBrowser"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
-        xmlns:converters="clr-namespace:CefFlashBrowser.Views.Converters"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
         mc:Ignorable="d"
 
         x:Name="window"
@@ -26,11 +24,6 @@
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
-        <!--Converters-->
-        <converters:MultiplyConverter x:Key="TwoThirdConverter"
-                                      Multiplier="0.6666666666666667"/>
-        <converters:BrowserTabWidthConverter x:Key="BrowserTabWidthConverter"/>
-
         <!--ConetxtMenu-->
         <!--Browser actions menu-->
         <ContextMenu x:Key="browserActionsMenu"
@@ -38,16 +31,63 @@
                      HorizontalOffset="8">
             <MenuItem Header="{DynamicResource browser_showMainWindow}"
                       Command="{Binding ShowMainWindowCommand}"
-                      InputGestureText="Ctrl+M"/>
+                      InputGestureText="Alt+Home"/>
 
             <MenuItem Header="{DynamicResource browser_newTab}"
                       Command="{Binding AddBrowserCommand}"
-                      InputGestureText="Ctrl+T"/>
+                      InputGestureText="Ctrl+T">
+                <MenuItem.Icon>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource NewTabIconUri}"/>
+                </MenuItem.Icon>
+            </MenuItem>
 
             <MenuItem Header="{DynamicResource browser_newBrowserWindow}"
                       Command="{Binding NewBrowserWindowCommand}"
                       CommandParameter="{Binding CurrentBrowser.Address}"
-                      InputGestureText="Ctrl+N"/>
+                      InputGestureText="Ctrl+N">
+                <MenuItem.Icon>
+                    <svgc:SvgIcon Width="14"
+                                  Height="14"
+                                  UriSource="{StaticResource PageIconUri}"/>
+                </MenuItem.Icon>
+            </MenuItem>
+
+            <Separator/>
+
+            <MenuItem Command="{Binding ToggleMuteCommand}"
+                      CommandParameter="{Binding CurrentBrowser}"
+                      InputGestureText="Ctrl+M">
+                <MenuItem.Resources>
+                    <svgc:SvgIcon x:Key="muteIcon"
+                                  Width="14"
+                                  Height="14"
+                                  UriSource="{StaticResource MuteModeIconUri}"/>
+                    <svgc:SvgIcon x:Key="volumeIcon"
+                                  Width="14"
+                                  Height="14"
+                                  UriSource="{StaticResource VolumeIconUri}"/>
+                </MenuItem.Resources>
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="Header"
+                                Value="{DynamicResource browser_muteSite}"/>
+                        <Setter Property="Icon"
+                                Value="{StaticResource muteIcon}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding CurrentBrowser.IsMuted}"
+                                         Value="True">
+                                <Setter Property="Header"
+                                        Value="{DynamicResource browser_unmuteSite}"/>
+                                <Setter Property="Icon"
+                                        Value="{StaticResource volumeIcon}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
 
             <Separator/>
 
@@ -110,12 +150,17 @@
             <Separator/>
 
             <MenuItem Header="{DynamicResource common_favorites}"
-                      ItemsSource="{Binding Source={x:Static data:GlobalData.Favorites}}">
+                      ItemsSource="{Binding Source={StaticResource Locator}, Path=FavoritesService.Favorites}">
+                <MenuItem.Icon>
+                    <svgc:SvgIcon Width="15"
+                                  Height="15"
+                                  UriSource="{StaticResource StarIconUri}"/>
+                </MenuItem.Icon>
                 <MenuItem.Style>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count}"
+                            <DataTrigger Binding="{Binding Source={StaticResource Locator}, Path=FavoritesService.Favorites.Count}"
                                          Value="0">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
@@ -125,8 +170,24 @@
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Resources>
+                            <DataTemplate x:Key="{DataTemplateKey {x:Type m:Website}}"
+                                          DataType="{x:Type m:Website}">
+                                <c:BrowserIcon>
+                                    <c:BrowserIcon.FaviconUrl>
+                                        <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
+                                            <Binding Path="Url"/>
+                                            <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
+                                            <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
+                                        </MultiBinding>
+                                    </c:BrowserIcon.FaviconUrl>
+                                </c:BrowserIcon>
+                            </DataTemplate>
+                        </Style.Resources>
                         <!--<Setter Property="Header"
                                 Value="{Binding Name}"/>-->
+                        <Setter Property="Icon"
+                                Value="{Binding}"/>
                         <Setter Property="Command"
                                 Value="{Binding Source={x:Reference Name=window}, Path=DataContext.CurrentBrowser.Browser.LoadUrlCommand}"/>
                         <Setter Property="CommandParameter"
@@ -136,6 +197,7 @@
                 <MenuItem.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
                         <TextBlock MaxWidth="200"
+                                   VerticalAlignment="Center"
                                    TextTrimming="CharacterEllipsis"
                                    Text="{Binding Name}"/>
                     </DataTemplate>
@@ -246,7 +308,8 @@
         <KeyBinding Gesture="Ctrl+F"
                     Command="{Binding OpenFindPopupCommand}"/>
         <KeyBinding Gesture="Ctrl+M"
-                    Command="{Binding ShowMainWindowCommand}"/>
+                    Command="{Binding ToggleMuteCommand}"
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Ctrl+N"
                     Command="{Binding NewBrowserWindowCommand}"
                     CommandParameter="{Binding CurrentBrowser.Address}"/>
@@ -281,6 +344,8 @@
                     Command="{Binding CurrentBrowser.Browser.BackCommand}"/>
         <KeyBinding Gesture="Alt+Right"
                     Command="{Binding CurrentBrowser.Browser.ForwardCommand}"/>
+        <KeyBinding Gesture="Alt+Home"
+                    Command="{Binding ShowMainWindowCommand}"/>
     </Window.InputBindings>
 
 
@@ -433,44 +498,6 @@
                                   Height="13"
                                   UriSource="{StaticResource SearchIconUri}"/>
                 </ToggleButton>
-
-                <!--mute button-->
-                <Button x:Name="muteButton"
-                        Margin="0,0,10,0"
-                        Width="30"
-                        Height="30"
-                        Padding="0"
-                        Command="{Binding ToggleMuteCommand}"
-                        CommandParameter="{Binding CurrentBrowser}">
-                    <Button.Resources>
-                        <svgc:SvgIcon x:Key="volumeIcon"
-                                      Width="14"
-                                      Height="14"
-                                      UriSource="{StaticResource VolumeIconUri}"/>
-                        <svgc:SvgIcon x:Key="muteIcon"
-                                      Width="12"
-                                      Height="12"
-                                      UriSource="{StaticResource MuteIconUri}"/>
-                    </Button.Resources>
-                    <Button.Style>
-                        <Style TargetType="Button"
-                               BasedOn="{StaticResource {x:Type Button}}">
-                            <Setter Property="Content"
-                                    Value="{StaticResource muteIcon}"/>
-                            <Setter Property="ToolTip"
-                                    Value="{DynamicResource browser_unmuteSite}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.IsMuted}"
-                                             Value="False">
-                                    <Setter Property="Content"
-                                            Value="{StaticResource volumeIcon}"/>
-                                    <Setter Property="ToolTip"
-                                            Value="{DynamicResource browser_muteSite}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
 
                 <!--menu button-->
                 <Button ToolTip="{DynamicResource browser_toolTipMore}">
@@ -635,73 +662,18 @@
                 </Grid.ColumnDefinitions>
 
                 <!--tabs-->
-                <ListBox x:Name="tabList"
-                         BorderThickness="0"
-                         Background="Transparent"
-                         ItemsSource="{Binding Browsers}"
-                         SelectedItem="{Binding CurrentBrowser, Mode=OneWay}"
-                         SelectionMode="Single"
-                         SelectionChanged="TabSelectionChanged"
-                         AllowDrop="True"
-                         PreviewMouseMove="TabListPreviewMouseMove"
-                         PreviewMouseLeftButtonUp="TabListPreviewMouseLeftButtonUp"
-                         DragOver="TabListDragOver"
-                         DragLeave="TabListDragLeave"
-                         Drop="TabListDrop"
-                         GiveFeedback="TabListGiveFeedback"
-                         QueryContinueDrag="TabListQueryContinueDrag"
-                         PreviewMouseWheel="TabListPreviewMouseWheel">
-                    <ListBox.Template>
-                        <ControlTemplate TargetType="ListBox">
-                            <ScrollViewer x:Name="tabScrollViewer"
-                                          Focusable="False"
-                                          CanContentScroll="False"
-                                          VerticalScrollBarVisibility="Disabled"
-                                          HorizontalScrollBarVisibility="Hidden">
-                                <ItemsPresenter/>
-                            </ScrollViewer>
-                        </ControlTemplate>
-                    </ListBox.Template>
-                    <ListBox.Resources>
-                        <ControlTemplate x:Key="tabContainerTemplate"
-                                         TargetType="ListBoxItem">
-                            <Border CornerRadius="6,6,0,0"
-                                    Background="{TemplateBinding Background}">
-                                <ContentPresenter Margin="{TemplateBinding Padding}"/>
-                            </Border>
-                        </ControlTemplate>
-                    </ListBox.Resources>
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Width">
-                                <Setter.Value>
-                                    <MultiBinding Converter="{StaticResource BrowserTabWidthConverter}">
-                                        <Binding ElementName="tabStrip" Path="ActualWidth"/>
-                                        <Binding ElementName="newTabButton" Path="ActualWidth"/>
-                                        <Binding ElementName="newTabButton" Path="Margin"/>
-                                        <Binding RelativeSource="{RelativeSource AncestorType=ListBox}" Path="Items.Count"/>
-                                    </MultiBinding>
-                                </Setter.Value>
-                            </Setter>
-                            <Setter Property="MinHeight"
-                                    Value="32"/>
-                            <Setter Property="Padding"
-                                    Value="6"/>
-                            <Setter Property="HorizontalContentAlignment"
-                                    Value="Stretch"/>
-                            <Setter Property="Background"
-                                    Value="Transparent"/>
-                            <Setter Property="Foreground"
-                                    Value="{DynamicResource PrimaryTextBrush}"/>
-                            <Setter Property="FocusVisualStyle"
-                                    Value="{x:Null}"/>
-                            <Setter Property="Template"
-                                    Value="{StaticResource tabContainerTemplate}"/>
+                <c:BrowserTab x:Name="tabList"
+                              Foreground="{DynamicResource PrimaryTextBrush}"
+                              Background="{DynamicResource RegionBrush}"
+                              BorderBrush="{DynamicResource PrimaryBrush}"
+                              ItemsSource="{Binding Browsers}"
+                              SelectedItem="{Binding CurrentBrowser, Mode=OneWay}"
+                              IsDragEnabled="True"
+                              RequestMoveItem="TabRequestMoveItem"
+                              SelectionChanged="TabSelectionChanged">
+                    <c:BrowserTab.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem"
+                               BasedOn="{StaticResource {x:Static c:BrowserTab.ItemContainerStyleKey}}">
                             <Setter Property="ToolTip"
                                     Value="{Binding Address}"/>
                             <Setter Property="Tag"
@@ -740,51 +712,56 @@
                                                   Command="{Binding Tag.DuplicateBrowserCommand, RelativeSource={RelativeSource Self}}"
                                                   CommandParameter="{Binding}"
                                                   InputGestureText="Ctrl+Shift+K"/>
+                                        <MenuItem Header="{DynamicResource browser_openTabInNewWindow}"
+                                                  Command="{Binding Tag.NewBrowserWindowCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding Address}">
+                                            <MenuItem.Icon>
+                                                <svgc:SvgIcon Width="14"
+                                                              Height="14"
+                                                              UriSource="{StaticResource PageIconUri}"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator/>
                                         <MenuItem Command="{Binding Tag.ToggleMuteCommand, RelativeSource={RelativeSource Self}}"
-                                                  CommandParameter="{Binding}">
+                                                  CommandParameter="{Binding}"
+                                                  InputGestureText="Ctrl+M">
+                                            <MenuItem.Resources>
+                                                <svgc:SvgIcon x:Key="muteIcon"
+                                                              Width="14"
+                                                              Height="14"
+                                                              UriSource="{StaticResource MuteModeIconUri}"/>
+                                                <svgc:SvgIcon x:Key="volumeIcon"
+                                                              Width="14"
+                                                              Height="14"
+                                                              UriSource="{StaticResource VolumeIconUri}"/>
+                                            </MenuItem.Resources>
                                             <MenuItem.Style>
                                                 <Style TargetType="MenuItem"
                                                        BasedOn="{StaticResource {x:Type MenuItem}}">
                                                     <Setter Property="Header"
                                                             Value="{DynamicResource browser_muteSite}"/>
+                                                    <Setter Property="Icon"
+                                                            Value="{StaticResource muteIcon}"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Browser.IsMuted}"
+                                                        <DataTrigger Binding="{Binding IsMuted}"
                                                                      Value="True">
                                                             <Setter Property="Header"
                                                                     Value="{DynamicResource browser_unmuteSite}"/>
+                                                            <Setter Property="Icon"
+                                                                    Value="{StaticResource volumeIcon}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </MenuItem.Style>
                                         </MenuItem>
-                                        <MenuItem Header="{DynamicResource browser_openTabInNewWindow}"
-                                                  Command="{Binding Tag.NewBrowserWindowCommand, RelativeSource={RelativeSource Self}}"
-                                                  CommandParameter="{Binding Address}"/>
                                     </ContextMenu>
                                 </Setter.Value>
                             </Setter>
                             <EventSetter Event="PreviewMouseDown"
                                          Handler="TabPreviewMouseDown"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#20808080"/>
-                                </Trigger>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#30808080"/>
-                                </Trigger>
-                                <DataTrigger Value="True">
-                                    <DataTrigger.Binding>
-                                        <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
-                                            <Binding/>
-                                            <Binding Path="Tag" RelativeSource="{RelativeSource AncestorType=ListBox}"/>
-                                        </MultiBinding>
-                                    </DataTrigger.Binding>
-                                    <Setter Property="Opacity" Value="0.35"/>
-                                </DataTrigger>
-                            </Style.Triggers>
                         </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
+                    </c:BrowserTab.ItemContainerStyle>
+                    <c:BrowserTab.ItemTemplate>
                         <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
                             <DockPanel>
                                 <c:BrowserIcon
@@ -793,17 +770,17 @@
                                     FaviconUrl="{Binding Browser.FaviconUrl}"/>
                                 <svgc:SvgIcon
                                     DockPanel.Dock="Left"
-                                    Width="12"
-                                    Height="12"
-                                    Margin="0,0,4,0"
+                                    Width="14"
+                                    Height="14"
+                                    Margin="0,0,6,0"
                                     VerticalAlignment="Center"
                                     UriSource="{StaticResource MuteIconUri}">
                                     <svgc:SvgIcon.Style>
-                                        <Style TargetType="svgc:SvgIcon">
+                                        <Style TargetType="svgc:SvgIcon"
+                                               BasedOn="{StaticResource {x:Type svgc:SvgIcon}}">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Browser.IsMuted}"
-                                                             Value="True">
+                                                <DataTrigger Binding="{Binding IsMuted}" Value="True">
                                                     <Setter Property="Visibility" Value="Visible"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -888,8 +865,8 @@
                                 </TextBlock>
                             </DockPanel>
                         </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                    </c:BrowserTab.ItemTemplate>
+                </c:BrowserTab>
 
                 <!--new tab-->
                 <Button x:Name="newTabButton"
@@ -947,29 +924,6 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Grid>
-
-        <Popup x:Name="tabDragPreview"
-               Placement="RelativePoint"
-               PlacementTarget="{Binding ElementName=tabList}"
-               AllowsTransparency="True"
-               StaysOpen="True"
-               Focusable="False"
-               IsHitTestVisible="False"
-               Opened="TabDragPreviewOpened">
-            <Border Margin="8"
-                    CornerRadius="6"
-                    BorderThickness="1"
-                    BorderBrush="{DynamicResource PrimaryBrush}"
-                    Background="{DynamicResource RegionBrush}"
-                    Opacity="0.95">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="12"
-                                      ShadowDepth="3"
-                                      Opacity="0.25"/>
-                </Border.Effect>
-                <Image x:Name="tabDragPreviewImage"/>
-            </Border>
-        </Popup>
 
         <Popup x:Name="statusPopup"
                StaysOpen="True"

@@ -22,11 +22,16 @@ if (([IntPtr]::Size -eq 8) -ne ($Platform -eq 'x64')) {
 foreach ($file in @(
     'Environment.ps1',
     'Helpers.ps1',
+    'Scenarios\Language.ps1',
+    'Scenarios\Favorites.ps1',
+    'Scenarios\ProxySettings.ps1',
     'Scenarios\BrowserWindow.ps1',
     'Scenarios\BrowserTabs.ps1',
+    'Scenarios\BrowserTabControl.ps1',
     'Scenarios\ContextMenu.ps1',
     'Scenarios\AuxiliaryWindows.ps1',
     'Scenarios\Lifecycle.ps1'
+    'Scenarios\Favicons.ps1'
 )) {
     . (Join-Path $PSScriptRoot $file)
 }
@@ -35,12 +40,18 @@ $context = New-RegressionContext $PSScriptRoot $Platform $Configuration
 $failure = $null
 try {
     Initialize-RegressionEnvironment $context
+    Test-LanguageService $context
+    Test-LanguageSelectors $context
+    Test-FavoritesService $context
+    Test-ProxySettings $context
     Test-BrowserBeforeInitialization $context
+    Test-BrowserTabControl $context
     Test-BrowserTabsBeforeShow $context
     Start-RegressionCef $context
     Test-NavigationBeforeHosting $context
     Test-AuxiliaryBeforeShow $context
     Test-BrowserWindow $context
+    Test-Favicons $context
     Test-BrowserCloseDuringInitialization $context
     Test-BrowserTabs $context
     Test-ContextMenu $context

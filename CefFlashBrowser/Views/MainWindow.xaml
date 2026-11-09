@@ -6,10 +6,11 @@
         xmlns:local="clr-namespace:CefFlashBrowser"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
-        xmlns:data="clr-namespace:CefFlashBrowser.Data"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         mc:Ignorable="d"
         
         DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}"
@@ -40,7 +41,7 @@
         <Menu>
             <!--Favorites Menu-->
             <MenuItem Header="{DynamicResource common_favorites}">
-                <MenuItem.Resources>
+                <MenuItem.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
                         <StackPanel MaxWidth="225">
                             <TextBlock Text="{Binding Name}"
@@ -51,16 +52,32 @@
                                        Foreground="{DynamicResource SecondaryTextBrush}"/>
                         </StackPanel>
                     </DataTemplate>
-                </MenuItem.Resources>
+                </MenuItem.ItemTemplate>
 
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Resources>
+                            <DataTemplate x:Key="{DataTemplateKey {x:Type m:Website}}"
+                                          DataType="{x:Type m:Website}">
+                                <c:BrowserIcon>
+                                    <c:BrowserIcon.FaviconUrl>
+                                        <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
+                                            <Binding Path="Url"/>
+                                            <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
+                                            <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
+                                        </MultiBinding>
+                                    </c:BrowserIcon.FaviconUrl>
+                                </c:BrowserIcon>
+                            </DataTemplate>
+                        </Style.Resources>
                         <Setter Property="Tag"
                                 Value="{Binding RelativeSource={RelativeSource AncestorType=Menu}, Path=DataContext}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ., Converter={StaticResource ObjectGetTypeConverter}}"
                                          Value="{x:Type m:Website}">
+                                <Setter Property="Icon"
+                                        Value="{Binding}"/>
                                 <Setter Property="Command"
                                         Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.OpenWebsiteCommand}"/>
                                 <Setter Property="CommandParameter"
@@ -92,7 +109,7 @@
                                 <Style TargetType="Separator"
                                        BasedOn="{StaticResource {x:Type Separator}}">
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Source={x:Static data:GlobalData.Favorites}, Path=Count}"
+                                        <DataTrigger Binding="{Binding Source={StaticResource Locator}, Path=FavoritesService.Favorites.Count}"
                                                      Value="0">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                         </DataTrigger>
@@ -102,7 +119,7 @@
                         </Separator>
 
                         <!--Favorites Items-->
-                        <CollectionContainer Collection="{Binding Source={x:Static data:GlobalData.Favorites}}"/>
+                        <CollectionContainer Collection="{Binding Source={StaticResource Locator}, Path=FavoritesService.Favorites}"/>
                     </CompositeCollection>
                 </MenuItem.ItemsSource>
             </MenuItem>
@@ -130,24 +147,47 @@
                 <MenuItem x:Name="languageMenu"
                           Header="{DynamicResource mainWindow_languages}"
                           ItemsSource="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel.LanguageList}">
+                    <MenuItem.Icon>
+                        <svgc:SvgIcon Width="13" 
+                                      Height="13" 
+                                      UriSource="{StaticResource LanguageIconUri}"/>
+                    </MenuItem.Icon>
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem"
                                BasedOn="{StaticResource {x:Type MenuItem}}">
-                            <Setter Property="Header"
-                                    Value="{Binding LanguageName, Mode=OneWay}"/>
                             <Setter Property="Command"
                                     Value="{Binding Source={StaticResource Locator}, Path=LanguageSelectorViewModel.SetLanguageCommand}"/>
                             <Setter Property="CommandParameter"
-                                    Value="{Binding Language}"/>
-                            <Setter Property="IsChecked"
-                                    Value="{Binding IsCurrentLanguage, Mode=OneWay}"/>
+                                    Value="{Binding}"/>
+                            <Setter Property="Header">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource LanguageNameConverter}" Mode="OneWay">
+                                        <Binding/>
+                                        <Binding Source="{StaticResource Locator}" Path="LanguageService"/>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="IsChecked">
+                                <Setter.Value>
+                                    <MultiBinding Converter="{StaticResource MultiEqualityConverter}" Mode="OneWay">
+                                        <Binding/>
+                                        <Binding Source="{StaticResource Locator}" Path="LanguageService.CurrentLanguage"/>
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
                         </Style>
                     </MenuItem.ItemContainerStyle>
                 </MenuItem>
 
                 <!--Settings Option-->
                 <MenuItem Header="{DynamicResource common_settings}"
-                          Command="{Binding OpenSettingsWindowCommand}"/>
+                          Command="{Binding OpenSettingsWindowCommand}">
+                    <MenuItem.Icon>
+                        <svgc:SvgIcon Width="13" 
+                                      Height="13" 
+                                      UriSource="{StaticResource SettingsIconUri}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
         </Menu>
 

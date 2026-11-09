@@ -154,7 +154,7 @@ function Test-BrowserNavigation($Context, $window, $view, $browser) {
         $favoriteTimer.Stop()
     }
 
-    $favorite = [CefFlashBrowser.Data.GlobalData]::Favorites | Select-Object -Last 1
+    $favorite = $Context.FavoritesService.Favorites | Select-Object -Last 1
     Assert-Regression ($favorite.Name -eq 'Browser regression' -and $favorite.Url -eq $secondAddress) 'favorite dialog preserves the current title and address'
 }
 

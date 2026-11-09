@@ -107,8 +107,8 @@ namespace CefFlashBrowser.Utils
 #if CEFFLASHBROWSER_TESTS
                     throw new ArgumentOutOfRangeException(nameof(engine));
 #else
-                    throw new ArgumentException(
-                        CefFlashBrowser.Services.LanguageManager.GetString("error_unknownSearchEngine"), nameof(engine));
+                    var languageService = SimpleMvvm.Ioc.SimpleIoc.Global.GetInstance<CefFlashBrowser.Services.LanguageService>();
+                    throw new ArgumentException(languageService.GetString("error_unknownSearchEngine"), nameof(engine));
 #endif
             }
         }

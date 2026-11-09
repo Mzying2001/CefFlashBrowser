@@ -52,7 +52,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
   - **Data/**: Shared application state, paths, configuration, and MVVM messaging data.
   - **Infrastructure/**: Reusable infrastructure helpers for collections and WPF integration.
   - **Models/**: Domain models and persisted user settings.
-  - **Services/**: Application-level services for language, theme, and window coordination.
+  - **Services/**: Application services for language, theme, windows, database access, and favicons.
   - **ViewModels/**: MVVM presentation logic for windows and dialogs.
   - **Views/**: WPF windows, dialogs, and reusable UI controls.
   - **Utils/**: Utility helpers and cross-cutting support code.
@@ -62,9 +62,13 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - **CefFlashBrowser.WinformCefSharp4WPF/**: WPF hosting bridge for WinForms-based CefSharp controls.
 - **CefFlashBrowser.Sol/**: C++/CLI library for SOL and AMF serialization.
 - **CefFlashBrowser.Singleton/**: C++/CLI library for single-instance and IPC support.
+- **CefFlashBrowser.Database/**: Database interfaces and SQLite implementation.
 - **CefFlashBrowser.Log/**: Shared file logging library.
-- **CefFlashBrowser.EmptyExe/**: Minimal subprocess executable used by CefSharp.
+- **CefFlashBrowser.CommandProxy/**: Native command proxy with Flash diagnostic filtering.
 - **CefFlashBrowser.Tests/**: MSTest project for linked application code and supporting libraries.
+  - **BrowserRegression/**: PowerShell checks for WPF/CEF behavior and packaged releases.
+  - **CommandProxyRegression/**: Regression checks for command forwarding and diagnostic filtering.
+  - **TestData/**: SOL fixtures for serialization tests.
 - **Docs/**: Reference specifications for AMF and SOL-related implementation work.
 
 ## Notes
@@ -75,23 +79,8 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - Follow the project's existing code style when modifying or adding code
 - Keep text and source files using CRLF line endings to match the repository's Windows/WPF conventions
 
-## Browser Regression Notes
-
-- When adding an icon <sys:Uri> resource to App.xaml, also register it in the icon list in
-  CefFlashBrowser.Tests/BrowserRegression/Environment.ps1; a missing entry crashes template
-  instantiation with XamlParseException during the checks.
-- IBrowserHost.IsAudioMuted must be called on the CEF UI thread (CefSharp enforces this);
-  use the ChromiumFlashBrowser.IsMuted property when reading mute state off-thread.
-- After a negative test modifies source, rebuild every downstream project before re-running
-  checks: Debug builds load dependencies from disk (DisableFody=true), but the executable
-  itself is still relinked, and a half-rebuilt tree can mask the regression.
-- When adding an SVG under Assets/Svgs, also add it to the <Resource Include> list in
-  CefFlashBrowser.csproj; unregistered SVGs render blank inside SvgIcon without any error.
-
 ## Git Commit Conventions
 
-- Use Conventional Commits: `<type>(<scope>): <summary>`
-- Example types: `feat`, `fix`, `refactor`, `build`, `docs`, `test`, `chore`
-- Use an optional scope for the affected project, area, class, or file
-- Write concise English summaries
-- For non-trivial changes, include a body explaining the reason and implementation/fix approach
+- Use Conventional Commits: `<type>(<scope>): <summary>`, with concise English summaries.
+- Optional scope: affected project, area, class, or file.
+- For non-trivial changes, explain why and how in the body.

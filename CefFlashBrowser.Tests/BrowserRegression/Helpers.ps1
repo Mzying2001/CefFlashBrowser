@@ -55,6 +55,12 @@ function Invoke-ContextMenuCommand($Browser, [CefSharp.CefMenuCommand]$Command, 
             $Command, [CefSharp.CefEventFlags]::None))
 }
 
+function Assert-BrowserAudioMuted($Context, $Browser, [bool]$Expected, [string]$Message) {
+    $state = [RegressionAudio]::IsMutedAsync($Browser.GetBrowser(), [CefSharp.Cef]::UIThreadTaskFactory)
+    Wait-Regression $Context { $state.IsCompleted } 'native browser audio state is read on the CEF UI thread'
+    Assert-Regression ($state.GetAwaiter().GetResult() -eq $Expected) $Message
+}
+
 function Find-BrowserView($Element, $BrowserViewModel = $null) {
     if ($Element -is [CefFlashBrowser.Views.BrowserView] -and
         ($null -eq $BrowserViewModel -or [object]::ReferenceEquals($Element.ViewModel, $BrowserViewModel))) {
@@ -66,6 +72,73 @@ function Find-BrowserView($Element, $BrowserViewModel = $null) {
         if ($null -ne $view) {
             return $view
         }
+    }
+}
+
+function Find-CommandButton($Element, $Command) {
+    if ($Element -is [System.Windows.Controls.Button] -and [object]::ReferenceEquals($Element.Command, $Command)) {
+        return $Element
+    }
+    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
+        $button = Find-CommandButton ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index)) $Command
+        if ($null -ne $button) { return $button }
+    }
+}
+
+function Open-BrowserActionsMenu($Context, $Window) {
+    $menu = $Window.Resources['browserActionsMenu']
+    $menu.PlacementTarget = $Window
+    $menu.IsOpen = $true
+    Wait-Regression $Context {
+        $muteItems = @($menu.Items | Where-Object {
+            $_ -is [System.Windows.Controls.MenuItem] -and $_.Command -eq $Window.ViewModel.ToggleMuteCommand
+        })
+        $muteItems.Count -eq 1 -and $muteItems[0].CommandParameter -eq $Window.ViewModel.CurrentBrowser
+    } 'actions mute menu binds to the selected tab'
+    return $menu
+}
+
+function Get-TabMuteIcon($Window, $Browser) {
+    $Window.UpdateLayout()
+    $tabs = $Window.FindName('tabList')
+    $container = $tabs.ItemContainerGenerator.ContainerFromItem($Browser)
+    Assert-Regression ($null -ne $container) 'mute icon lookup targets an existing tab container'
+    $elements = New-Object 'System.Collections.Generic.Queue[System.Windows.DependencyObject]'
+    $elements.Enqueue($container)
+    while ($elements.Count -gt 0) {
+        $element = $elements.Dequeue()
+        if ($element -is [SharpVectors.Converters.SvgIcon] -and "$($element.UriSource)" -like '*mute.svg*') {
+            return $element
+        }
+        for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($element); $index++) {
+            $elements.Enqueue([System.Windows.Media.VisualTreeHelper]::GetChild($element, $index))
+        }
+    }
+    throw 'Tab mute icon not found in its tab container'
+}
+
+function Assert-SvgIconLoaded($Icon, [string]$Message) {
+    $resource = $null
+    try {
+        if ($null -ne $Icon -and $null -ne $Icon.UriSource) {
+            # SvgIcon can retain an earlier drawing when the current URI cannot be loaded.
+            try { $resource = [System.Windows.Application]::GetResourceStream($Icon.UriSource) } catch [IO.IOException] { }
+        }
+        Assert-Regression ($null -ne $resource -and $resource.Stream.Length -gt 0 -and
+            $Icon.Source -is [System.Windows.Media.DrawingImage] -and $null -ne $Icon.Source.Drawing -and
+            !$Icon.Source.Drawing.Bounds.IsEmpty -and $Icon.Source.Drawing.Bounds.Width -gt 0 -and
+            $Icon.Source.Drawing.Bounds.Height -gt 0) $Message
+    } finally {
+        if ($null -ne $resource) { $resource.Stream.Dispose() }
+    }
+}
+
+function Get-DrawingColors($Drawing) {
+    if ($Drawing -is [System.Windows.Media.DrawingGroup]) {
+        foreach ($child in $Drawing.Children) { Get-DrawingColors $child }
+    } elseif ($Drawing -is [System.Windows.Media.GeometryDrawing]) {
+        if ($Drawing.Brush -is [System.Windows.Media.SolidColorBrush]) { $Drawing.Brush.Color }
+        if ($null -ne $Drawing.Pen -and $Drawing.Pen.Brush -is [System.Windows.Media.SolidColorBrush]) { $Drawing.Pen.Brush.Color }
     }
 }
 
