@@ -454,8 +454,8 @@
                         CommandParameter="{Binding CurrentBrowser}">
                     <Button.Resources>
                         <svgc:SvgIcon x:Key="volumeIcon"
-                                      Width="14"
-                                      Height="14"
+                                      Width="12"
+                                      Height="12"
                                       UriSource="{StaticResource VolumeIconUri}"/>
                         <svgc:SvgIcon x:Key="muteIcon"
                                       Width="12"
