@@ -221,11 +221,13 @@ function Initialize-RegressionEnvironment($Context) {
 
     # Keep this list in sync with the <sys:Uri> icon resources declared in App.xaml;
     # a missing icon here crashes template instantiation with XamlParseException.
-    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Mute', 'Volume', 'Up', 'Down', 'Page', 'Close', 'Language', 'Settings')) {
+    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Mute', 'Volume', 'Up', 'Down', 'Page', 'Close', 'Language', 'Settings', 'Star')) {
         $Context.Application.Resources.Add($icon + 'IconUri', [Uri]::new(('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg'), [UriKind]::Relative))
     }
     $Context.Application.Resources.Add('NewTabIconUri', [Uri]::new('/Assets/Svgs/new-tab.svg', [UriKind]::Relative))
     $Context.Application.Resources.Add('MuteModeIconUri', [Uri]::new('/Assets/Svgs/mute-mode.svg', [UriKind]::Relative))
+    $Context.Application.Resources.Add('ZoomInIconUri', [Uri]::new('/Assets/Svgs/zoom-in.svg', [UriKind]::Relative))
+    $Context.Application.Resources.Add('ZoomOutIconUri', [Uri]::new('/Assets/Svgs/zoom-out.svg', [UriKind]::Relative))
 
     $auxiliaryFile = Join-Path $Context.TemporaryPath 'auxiliary.html'
     $auxiliarySecondFile = Join-Path $Context.TemporaryPath 'auxiliary-second.html'

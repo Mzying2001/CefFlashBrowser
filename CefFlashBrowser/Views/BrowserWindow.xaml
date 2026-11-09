@@ -151,6 +151,11 @@
 
             <MenuItem Header="{DynamicResource common_favorites}"
                       ItemsSource="{Binding Source={StaticResource Locator}, Path=FavoritesService.Favorites}">
+                <MenuItem.Icon>
+                    <svgc:SvgIcon Width="15"
+                                  Height="15"
+                                  UriSource="{StaticResource StarIconUri}"/>
+                </MenuItem.Icon>
                 <MenuItem.Style>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
