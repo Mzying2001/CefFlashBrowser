@@ -516,6 +516,25 @@ function Test-BrowserMute($Context) {
         Assert-BrowserAudioMuted $Context $other.Browser $false 'actions mute leaves the other native browser unmuted'
         Assert-Regression ($icon.Visibility -eq [System.Windows.Visibility]::Visible -and !$other.IsMuted) 'actions mute shows the same tab icon without changing the other tab'
 
+        $skin = @($Context.Application.Resources.MergedDictionaries | Where-Object {
+            "$($_.Source)" -like '*HandyControl;component/Themes/Skin*.xaml'
+        })[0]
+        $savedSkin = $skin.Source
+        try {
+            foreach ($skinName in @('SkinDark', 'SkinDefault', 'SkinDark')) {
+                $skin.Source = [Uri]"pack://application:,,,/HandyControl;component/Themes/$skinName.xaml"
+                $window.UpdateLayout()
+                $expectedColor = $Context.Application.FindResource('PrimaryTextBrush').Color
+                Assert-Regression ($icon.Fill -is [System.Windows.Media.SolidColorBrush] -and
+                    $icon.Fill.Color -eq $expectedColor) "existing tab mute icon follows the theme text brush ($skinName)"
+                $colors = @(Get-DrawingColors $icon.Source.Drawing)
+                Assert-Regression ($colors.Count -gt 0 -and @($colors | Where-Object { $_ -ne $expectedColor }).Count -eq 0) "rendered mute drawing uses the theme text color ($skinName)"
+                Assert-Regression ($icon.Visibility -eq [System.Windows.Visibility]::Visible -and $source.IsMuted) 'theme switching preserves the muted tab icon and state'
+            }
+        } finally {
+            $skin.Source = $savedSkin
+        }
+
         $tabMenu = Open-TabContextMenu $Context $window $source
         $tabMuteItem = $tabMenu.Items[6]
         Assert-Regression ($tabMuteItem.Header -eq $Context.LanguageService.GetString('browser_unmuteSite') -and

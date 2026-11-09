@@ -133,6 +133,15 @@ function Assert-SvgIconLoaded($Icon, [string]$Message) {
     }
 }
 
+function Get-DrawingColors($Drawing) {
+    if ($Drawing -is [System.Windows.Media.DrawingGroup]) {
+        foreach ($child in $Drawing.Children) { Get-DrawingColors $child }
+    } elseif ($Drawing -is [System.Windows.Media.GeometryDrawing]) {
+        if ($Drawing.Brush -is [System.Windows.Media.SolidColorBrush]) { $Drawing.Brush.Color }
+        if ($null -ne $Drawing.Pen -and $Drawing.Pen.Brush -is [System.Windows.Media.SolidColorBrush]) { $Drawing.Pen.Brush.Color }
+    }
+}
+
 function New-RegressionWindow($Context, [switch]$SkipWait, [double]$Width = 900, [double]$Height = 600) {
     $window = New-Object CefFlashBrowser.Views.BrowserWindow
     $window.Width = $Width

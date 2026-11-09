@@ -180,6 +180,15 @@ function Initialize-RegressionEnvironment($Context) {
         $Context.Application.Resources.MergedDictionaries.Add($dictionary)
     }
 
+    # Match App.xaml's implicit SVG style so local icon styles are tested with theme colors.
+    $svgStyle = [System.Windows.Markup.XamlReader]::Parse(@'
+<Style xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:svgc="http://sharpvectors.codeplex.com/svgc/" TargetType="svgc:SvgIcon">
+    <Setter Property="Fill" Value="{DynamicResource PrimaryTextBrush}"/>
+</Style>
+'@)
+    $Context.Application.Resources.Add([SharpVectors.Converters.SvgIcon], $svgStyle)
+
     foreach ($converter in @(
         'BinaryToSizeStringConverter', 'IntToDoubleConverter', 'LanguageNameConverter', 'MultiEqualityConverter',
         'ObjectGetTypeConverter', 'ObjectToStringConverter', 'UrlGetFileNameConverter',

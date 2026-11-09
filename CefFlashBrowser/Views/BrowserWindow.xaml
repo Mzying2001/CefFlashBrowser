@@ -719,17 +719,17 @@
                                     FaviconUrl="{Binding Browser.FaviconUrl}"/>
                                 <svgc:SvgIcon
                                     DockPanel.Dock="Left"
-                                    Width="12"
-                                    Height="12"
-                                    Margin="0,0,4,0"
+                                    Width="14"
+                                    Height="14"
+                                    Margin="0,0,6,0"
                                     VerticalAlignment="Center"
                                     UriSource="{StaticResource MuteIconUri}">
                                     <svgc:SvgIcon.Style>
-                                        <Style TargetType="svgc:SvgIcon">
+                                        <Style TargetType="svgc:SvgIcon"
+                                               BasedOn="{StaticResource {x:Type svgc:SvgIcon}}">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsMuted}"
-                                                             Value="True">
+                                                <DataTrigger Binding="{Binding IsMuted}" Value="True">
                                                     <Setter Property="Visibility" Value="Visible"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
