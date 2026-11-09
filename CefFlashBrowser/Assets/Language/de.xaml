@@ -148,6 +148,8 @@
     <sys:String x:Key="browser_closeTab">Tab schließen</sys:String>
     <sys:String x:Key="browser_closeOtherTabs">Andere Tabs schließen</sys:String>
     <sys:String x:Key="browser_duplicateTab">Tab duplizieren</sys:String>
+    <sys:String x:Key="browser_muteSite">Website stummschalten</sys:String>
+    <sys:String x:Key="browser_unmuteSite">Stummschaltung aufheben</sys:String>
     <sys:String x:Key="browser_openTabInNewWindow">Tab in neuem Fenster öffnen</sys:String>
 
     <!--Save Manager-->

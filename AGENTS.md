@@ -79,6 +79,19 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - Follow the project's existing code style when modifying or adding code
 - Keep text and source files using CRLF line endings to match the repository's Windows/WPF conventions
 
+## Browser Regression Notes
+
+- When adding an icon <sys:Uri> resource to App.xaml, also register it in the icon list in
+  CefFlashBrowser.Tests/BrowserRegression/Environment.ps1; a missing entry crashes template
+  instantiation with XamlParseException during the checks.
+- IBrowserHost.IsAudioMuted must be called on the CEF UI thread (CefSharp enforces this);
+  use the ChromiumFlashBrowser.IsMuted property when reading mute state off-thread.
+- After a negative test modifies source, rebuild every downstream project before re-running
+  checks: Debug builds load dependencies from disk (DisableFody=true), but the executable
+  itself is still relinked, and a half-rebuilt tree can mask the regression.
+- When adding an SVG under Assets/Svgs, also add it to the <Resource Include> list in
+  CefFlashBrowser.csproj; unregistered SVGs render blank inside SvgIcon without any error.
+
 ## Git Commit Conventions
 
 - Use Conventional Commits: `<type>(<scope>): <summary>`, with concise English summaries.

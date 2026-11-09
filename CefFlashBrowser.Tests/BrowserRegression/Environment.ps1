@@ -210,7 +210,9 @@ function Initialize-RegressionEnvironment($Context) {
         $Context.Application.FindResource('language_name') -eq 'English') 'language construction applies the saved language before CEF starts'
     $languageService.SetCurrentLanguage($savedLanguage)
 
-    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Up', 'Down', 'Page', 'Close', 'Language', 'Settings')) {
+    # Keep this list in sync with the <sys:Uri> icon resources declared in App.xaml;
+    # a missing icon here crashes template instantiation with XamlParseException.
+    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Stop', 'Warning', 'Search', 'More', 'Mute', 'Volume', 'Up', 'Down', 'Page', 'Close', 'Language', 'Settings')) {
         $Context.Application.Resources.Add($icon + 'IconUri', [Uri]('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg', [UriKind]::Relative))
     }
     $Context.Application.Resources.Add('NewTabIconUri', [Uri]::new('/Assets/Svgs/new-tab.svg', [UriKind]::Relative))

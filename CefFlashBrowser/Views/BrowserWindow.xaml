@@ -444,6 +444,44 @@
                                   UriSource="{StaticResource SearchIconUri}"/>
                 </ToggleButton>
 
+                <!--mute button-->
+                <Button x:Name="muteButton"
+                        Margin="0,0,10,0"
+                        Width="30"
+                        Height="30"
+                        Padding="0"
+                        Command="{Binding ToggleMuteCommand}"
+                        CommandParameter="{Binding CurrentBrowser}">
+                    <Button.Resources>
+                        <svgc:SvgIcon x:Key="volumeIcon"
+                                      Width="14"
+                                      Height="14"
+                                      UriSource="{StaticResource VolumeIconUri}"/>
+                        <svgc:SvgIcon x:Key="muteIcon"
+                                      Width="12"
+                                      Height="12"
+                                      UriSource="{StaticResource MuteIconUri}"/>
+                    </Button.Resources>
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Content"
+                                    Value="{StaticResource muteIcon}"/>
+                            <Setter Property="ToolTip"
+                                    Value="{DynamicResource browser_unmuteSite}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.IsMuted}"
+                                             Value="False">
+                                    <Setter Property="Content"
+                                            Value="{StaticResource volumeIcon}"/>
+                                    <Setter Property="ToolTip"
+                                            Value="{DynamicResource browser_muteSite}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
                 <!--menu button-->
                 <Button ToolTip="{DynamicResource browser_toolTipMore}">
                     <i:Interaction.Behaviors>
@@ -657,6 +695,23 @@
                                                   Command="{Binding Tag.DuplicateBrowserCommand, RelativeSource={RelativeSource Self}}"
                                                   CommandParameter="{Binding}"
                                                   InputGestureText="Ctrl+Shift+K"/>
+                                        <MenuItem Command="{Binding Tag.ToggleMuteCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding}">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem"
+                                                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                                                    <Setter Property="Header"
+                                                            Value="{DynamicResource browser_muteSite}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Browser.IsMuted}"
+                                                                     Value="True">
+                                                            <Setter Property="Header"
+                                                                    Value="{DynamicResource browser_unmuteSite}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
                                         <MenuItem Header="{DynamicResource browser_openTabInNewWindow}"
                                                   Command="{Binding Tag.NewBrowserWindowCommand, RelativeSource={RelativeSource Self}}"
                                                   CommandParameter="{Binding Address}"/>
@@ -674,6 +729,25 @@
                                     DockPanel.Dock="Left"
                                     Margin="0,0,6,0"
                                     FaviconUrl="{Binding Browser.FaviconUrl}"/>
+                                <svgc:SvgIcon
+                                    DockPanel.Dock="Left"
+                                    Width="12"
+                                    Height="12"
+                                    Margin="0,0,4,0"
+                                    VerticalAlignment="Center"
+                                    UriSource="{StaticResource MuteIconUri}">
+                                    <svgc:SvgIcon.Style>
+                                        <Style TargetType="svgc:SvgIcon">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Browser.IsMuted}"
+                                                             Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </svgc:SvgIcon.Style>
+                                </svgc:SvgIcon>
                                 <Button
                                     x:Name="closeTabButton"
                                     DockPanel.Dock="Right"

@@ -343,14 +343,16 @@ function Test-BrowserTabContextMenu($Context) {
         $model = $window.ViewModel
         $source = $model.CurrentBrowser
         $menu = Open-TabContextMenu $Context $window $source
-        Assert-Regression ($menu.Items.Count -eq 5 -and $menu.Items[2] -is [System.Windows.Controls.Separator] -and
+        Assert-Regression ($menu.Items.Count -eq 6 -and $menu.Items[2] -is [System.Windows.Controls.Separator] -and
             $menu.Items[0].InputGestureText -eq 'Ctrl+W' -and $menu.Items[3].InputGestureText -eq 'Ctrl+Shift+K') 'tab menu has the requested order, separator and shortcut hints'
         Assert-Regression (!$menu.Items[1].IsEnabled) 'close other tabs is disabled for a single tab'
-        $keys = @('browser_closeTab', 'browser_closeOtherTabs', 'browser_duplicateTab', 'browser_openTabInNewWindow')
+        Assert-Regression ($menu.Items[4].Command -eq $model.ToggleMuteCommand -and
+            $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_muteSite')) 'tab menu mute item toggles the current tab'
+        $keys = @('browser_closeTab', 'browser_closeOtherTabs', 'browser_duplicateTab', 'browser_muteSite', 'browser_openTabInNewWindow')
         foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
             $Context.LanguageService.SetCurrentLanguage($language)
-            foreach ($index in 0..3) {
-                $itemIndex = @(0, 1, 3, 4)[$index]
+            foreach ($index in 0..4) {
+                $itemIndex = @(0, 1, 3, 4, 5)[$index]
                 $label = $Context.LanguageService.GetString($language, $keys[$index])
                 Assert-Regression (![string]::IsNullOrWhiteSpace($label)) "tab menu label exists: $($keys[$index]) ($language)"
                 Wait-Regression $Context { $menu.Items[$itemIndex].Header -eq $label } "tab menu language updates ($language)"
@@ -369,7 +371,7 @@ function Test-BrowserTabContextMenu($Context) {
             $settings.NewPageBehavior = $behavior
             $model.CurrentBrowser = $last
             $menu = Open-TabContextMenu $Context $window $source
-            Assert-Regression ($menu.Items[1].IsEnabled -and $menu.Items[4].CommandParameter -eq $source.Address) 'tab menu enables close others and targets the source address'
+            Assert-Regression ($menu.Items[1].IsEnabled -and $menu.Items[5].CommandParameter -eq $source.Address) 'tab menu enables close others and targets the source address'
             Invoke-TabMenuItem $menu 3
             $duplicate = $model.CurrentBrowser
             Wait-Regression $Context {
@@ -379,7 +381,7 @@ function Test-BrowserTabContextMenu($Context) {
                 $duplicate.Address -eq $source.Address -and $model.Browsers[2] -eq $last) "menu duplication inserts and selects a copy beside its source ($behavior)"
             Assert-Regression (Invoke-JavaScript $Context $duplicate.Browser "typeof window.tabDuplicateToken === 'undefined'") 'duplicated page starts with fresh runtime state'
             $menu = Open-TabContextMenu $Context $window $last
-            Assert-Regression ($menu.Items[4].CommandParameter -eq $last.Address -and $menu.Items[3].CommandParameter -eq $last) 'reopening a shared menu updates its target'
+            Assert-Regression ($menu.Items[5].CommandParameter -eq $last.Address -and $menu.Items[3].CommandParameter -eq $last) 'reopening a shared menu updates its target'
             $menu.IsOpen = $false
             $menu = Open-TabContextMenu $Context $window $duplicate
             Invoke-TabMenuItem $menu 0
@@ -395,7 +397,7 @@ function Test-BrowserTabContextMenu($Context) {
 
         $menu = Open-TabContextMenu $Context $window $source
         $existing = @($Context.Application.Windows)
-        Invoke-TabMenuItem $menu 4
+        Invoke-TabMenuItem $menu 5
         $child = @($Context.Application.Windows | Where-Object { !$existing.Contains($_) })
         Assert-Regression ($child.Count -eq 1 -and $child[0] -is [CefFlashBrowser.Views.BrowserWindow] -and
             $child[0].ViewModel.CurrentBrowser.Address -eq $source.Address -and $model.Browsers.Count -eq 2 -and

@@ -144,8 +144,109 @@ function Test-AuxiliaryContextMenu($Context) {
     }
 }
 
+function Find-MuteTabIcon($Element) {
+    if ($Element -is [SharpVectors.Converters.SvgIcon] -and "$($Element.UriSource)" -like '*mute.svg*') {
+        return $Element
+    }
+
+    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
+        $icon = Find-MuteTabIcon ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index))
+        if ($null -ne $icon) {
+            return $icon
+        }
+    }
+}
+
+function Find-ToolbarMuteButton($Element, $Command) {
+    if ($Element -is [System.Windows.Controls.Button] -and
+        [object]::ReferenceEquals($Element.Command, $Command)) {
+        return $Element
+    }
+
+    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
+        $button = Find-ToolbarMuteButton ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index)) $Command
+        if ($null -ne $button) {
+            return $button
+        }
+    }
+}
+
+function Test-ContextMenuMute($Context) {
+    $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
+    $savedTabStrip = [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip
+    [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
+    [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip = $true
+    $window = New-RegressionWindow $Context
+    try {
+        $model = $window.ViewModel
+        $source = $model.CurrentBrowser
+        $browser = $source.Browser
+        $mutePage = [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::MutePage
+
+        Assert-Regression (!$browser.IsMuted) 'tab starts unmuted'
+
+        $model.ToggleMute($source)
+        Wait-Regression $Context {
+            $source.Browser.IsMuted
+        } 'ToggleMute mutes the browser and updates IsMuted'
+
+        $icon = Find-MuteTabIcon $window
+        Assert-Regression ($null -ne $icon -and $icon.Visibility -eq [System.Windows.Visibility]::Visible) 'muted tab shows the mute icon'
+
+        $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
+        Assert-Regression ($null -ne $muteButton -and
+            "$($muteButton.Content.UriSource)" -like '*mute.svg*' -and
+            $muteButton.ToolTip -eq $Context.LanguageService.GetString('browser_unmuteSite')) 'muted toolbar shows the muted icon and unmute tooltip'
+
+        $handler = $browser.MenuHandler.PSObject.BaseObject
+        $parameters = New-Object RegressionContextMenuParamsProxy
+        $menu = New-Object RegressionMenuModelProxy
+        $unmutedBrowser = (New-Object RegressionAudioBrowserProxy((New-Object RegressionAudioHostProxy($false)).GetTransparentProxy())).GetTransparentProxy()
+        $handler.OnBeforeContextMenu($null, $unmutedBrowser, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
+        Assert-Regression ($menu.Commands.Count -eq 3 -and $menu.Commands[0] -eq $mutePage -and
+            $menu.Commands[1] -eq [CefSharp.CefMenuCommand]::NotFound -and
+            $menu.Labels[0] -eq $Context.LanguageService.GetString('browser_muteSite') -and
+            !$menu.Checked.Contains($mutePage)) 'context menu shows the localized unmuted mute entry'
+
+        $model.ToggleMute($source)
+        Wait-Regression $Context {
+            !$source.Browser.IsMuted
+        } 'ToggleMute restores audio and clears IsMuted'
+
+        $icon = Find-MuteTabIcon $window
+        Assert-Regression ($null -ne $icon -and $icon.Visibility -eq [System.Windows.Visibility]::Collapsed) 'unmuted tab hides the mute icon'
+
+        $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
+        Assert-Regression ($null -ne $muteButton -and
+            "$($muteButton.Content.UriSource)" -like '*volume.svg*' -and
+            $muteButton.ToolTip -eq $Context.LanguageService.GetString('browser_muteSite')) 'unmuted toolbar shows the volume icon and mute tooltip'
+
+        Invoke-BrowserCommand $muteButton.Command $muteButton.CommandParameter
+        Wait-Regression $Context {
+            $source.Browser.IsMuted
+        } 'toolbar button mutes through its command'
+
+        $menu = New-Object RegressionMenuModelProxy
+        $mutedBrowser = (New-Object RegressionAudioBrowserProxy((New-Object RegressionAudioHostProxy($true)).GetTransparentProxy())).GetTransparentProxy()
+        $handler.OnBeforeContextMenu($null, $mutedBrowser, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
+        Assert-Regression ($menu.Commands[0] -eq $mutePage -and
+            $menu.Labels[0] -eq $Context.LanguageService.GetString('browser_unmuteSite') -and
+            $menu.Checked.Contains($mutePage)) 'context menu shows the localized muted entry as checked'
+
+        Assert-Regression (Invoke-ContextMenuCommand $browser $mutePage) 'unmute context menu command is handled'
+        Wait-Regression $Context {
+            !$source.Browser.IsMuted
+        } 'context menu command restores audio'
+    } finally {
+        $window.ForceCloseWindow()
+        [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
+        [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip = $savedTabStrip
+    }
+}
+
 function Test-ContextMenu($Context) {
     Test-ContextMenuRouting $Context
     Test-ContextMenuItems $Context
+    Test-ContextMenuMute $Context
     Test-AuxiliaryContextMenu $Context
 }

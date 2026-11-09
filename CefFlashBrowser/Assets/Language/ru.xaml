@@ -148,6 +148,8 @@
     <sys:String x:Key="browser_closeTab">Закрыть вкладку</sys:String>
     <sys:String x:Key="browser_closeOtherTabs">Закрыть другие вкладки</sys:String>
     <sys:String x:Key="browser_duplicateTab">Дублировать вкладку</sys:String>
+    <sys:String x:Key="browser_muteSite">Отключить звук на сайте</sys:String>
+    <sys:String x:Key="browser_unmuteSite">Включить звук на сайте</sys:String>
     <sys:String x:Key="browser_openTabInNewWindow">Открыть вкладку в новом окне</sys:String>
 
     <!--Save Manager-->
