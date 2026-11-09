@@ -145,6 +145,33 @@ namespace CefFlashBrowser.FlashBrowser
             GetBrowser().CloseDevTools();
         }
 
+        public void SetAudioMuted(bool mute)
+        {
+            if (IsDisposed || !IsBrowserInitialized)
+                return;
+
+            Cef.UIThreadTaskFactory.StartNew(() =>
+            {
+                try
+                {
+                    if (IsDisposed)
+                        return;
+
+                    var browser = GetBrowser();
+                    if (browser == null || browser.IsDisposed)
+                        return;
+
+                    var host = browser.GetHost();
+                    if (host != null && !host.IsDisposed)
+                        host.SetAudioMuted(mute);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // The browser may finish closing while the audio update is queued.
+                }
+            });
+        }
+
         protected virtual void OnFullscreenModeChanged(bool fullscreen)
         {
             SetCurrentValue(FullscreenModeProperty, fullscreen);

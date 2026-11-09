@@ -20,8 +20,9 @@ function Test-BrowserBeforeInitialization($Context) {
     }
     $model.ToggleDevTools($model.CurrentBrowser)
     $model.ToggleFullscreen($model.CurrentBrowser)
+    $model.CurrentBrowser.ToggleMute()
     $model.CurrentBrowser.ExitFullScreen()
-    Assert-Regression (!$model.Fullscreen) 'commands tolerate missing browsers'
+    Assert-Regression (!$model.Fullscreen -and !$model.CurrentBrowser.IsMuted) 'commands tolerate missing browsers'
 }
 
 function Test-NavigationBeforeHosting($Context) {

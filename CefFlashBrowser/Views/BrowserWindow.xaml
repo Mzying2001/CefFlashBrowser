@@ -470,7 +470,7 @@
                             <Setter Property="ToolTip"
                                     Value="{DynamicResource browser_unmuteSite}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.IsMuted}"
+                                <DataTrigger Binding="{Binding CurrentBrowser.IsMuted}"
                                              Value="False">
                                     <Setter Property="Content"
                                             Value="{StaticResource volumeIcon}"/>
@@ -703,7 +703,7 @@
                                                     <Setter Property="Header"
                                                             Value="{DynamicResource browser_muteSite}"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Browser.IsMuted}"
+                                                        <DataTrigger Binding="{Binding IsMuted}"
                                                                      Value="True">
                                                             <Setter Property="Header"
                                                                     Value="{DynamicResource browser_unmuteSite}"/>
@@ -740,7 +740,7 @@
                                         <Style TargetType="svgc:SvgIcon">
                                             <Setter Property="Visibility" Value="Collapsed"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Browser.IsMuted}"
+                                                <DataTrigger Binding="{Binding IsMuted}"
                                                              Value="True">
                                                     <Setter Property="Visibility" Value="Visible"/>
                                                 </DataTrigger>

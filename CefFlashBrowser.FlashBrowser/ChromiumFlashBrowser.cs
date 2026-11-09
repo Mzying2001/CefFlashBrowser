@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows;
 
 namespace CefFlashBrowser.FlashBrowser
 {
@@ -11,44 +10,9 @@ namespace CefFlashBrowser.FlashBrowser
     {
         public ICollection<string> BlockedSwfs { get; }
 
-        public static readonly DependencyProperty IsMutedProperty = DependencyProperty.Register(
-            nameof(IsMuted), typeof(bool), typeof(ChromiumFlashBrowser), new PropertyMetadata(false));
-
-        public bool IsMuted
-        {
-            get { return (bool)GetValue(IsMutedProperty); }
-        }
-
         public ChromiumFlashBrowser()
         {
             BlockedSwfs = new ObservableCollection<string>();
-        }
-
-        public void SetAudioMuted(bool mute)
-        {
-            Cef.UIThreadTaskFactory.StartNew(() =>
-            { // mute or unmute the browser audio on the CEF UI thread
-                var browser = GetBrowser();
-                if (browser == null || browser.IsDisposed)
-                {
-                    return;
-                }
-
-                var host = browser.GetHost();
-                if (host == null)
-                {
-                    return;
-                }
-
-                host.SetAudioMuted(mute);
-                var isMuted = host.IsAudioMuted;
-                Dispatcher.BeginInvoke(new Action(() => SetCurrentValue(IsMutedProperty, isMuted)));
-            });
-        }
-
-        public void ToggleMute()
-        {
-            SetAudioMuted(!IsMuted);
         }
 
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)

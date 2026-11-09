@@ -26,7 +26,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         DisposedBrowser = $null
         BrowserCommandNames = @(
             'CreateShortcutCommand', 'AddFavoriteCommand', 'ToggleLoadingStateCommand',
-            'FindNextTextCommand', 'FindPrevTextCommand'
+            'FindNextTextCommand', 'FindPrevTextCommand', 'ToggleMuteCommand'
         )
     }
 }

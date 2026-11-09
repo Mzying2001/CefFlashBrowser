@@ -1,8 +1,8 @@
 using CefFlashBrowser.Data;
-using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
+using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
@@ -123,9 +123,11 @@ namespace CefFlashBrowser.Browser.Handlers
                         }
                     case MutePage:
                         {
-                            if (chromiumWebBrowser is ChromiumFlashBrowser flashBrowser && !flashBrowser.IsDisposed)
+                            if (!chromiumWebBrowser.IsDisposed
+                                && (chromiumWebBrowser as FrameworkElement)?.DataContext is BrowserViewModel viewModel
+                                && viewModel.IsBrowserReady())
                             {
-                                flashBrowser.ToggleMute();
+                                viewModel.ToggleMute();
                                 result = true;
                             }
                             break;

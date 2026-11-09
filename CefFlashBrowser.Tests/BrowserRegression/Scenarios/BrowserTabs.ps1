@@ -362,13 +362,15 @@ function Test-BrowserTabContextMenu($Context) {
         $menu.IsOpen = $false
         $Context.LanguageService.SetCurrentLanguage($savedLanguage)
         $last = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
-        Assert-Regression (!$source.Browser.IsMuted -and !$last.Browser.IsMuted) 'both tabs start independently unmuted'
+        Assert-Regression (!$source.IsMuted -and !$last.IsMuted) 'both tabs start independently unmuted'
         $menu = Open-TabContextMenu $Context $window $source
         Assert-Regression ($menu.Items[4].CommandParameter -eq $source -and
             $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_muteSite')) 'background tab mute menu targets its source tab'
         Invoke-TabMenuItem $menu 4
-        Wait-Regression $Context { $source.Browser.IsMuted } 'tab menu mutes its background source tab'
-        Assert-Regression ($model.CurrentBrowser -eq $last -and !$last.Browser.IsMuted) 'muting a background tab preserves selection and the selected tab audio'
+        Wait-Regression $Context { $source.IsMuted } 'tab menu mutes its background source tab'
+        Assert-BrowserAudioMuted $Context $source.Browser $true 'background tab menu mutes its native CEF browser'
+        Assert-BrowserAudioMuted $Context $last.Browser $false 'background tab muting leaves the selected native browser unmuted'
+        Assert-Regression ($model.CurrentBrowser -eq $last -and !$last.IsMuted) 'muting a background tab preserves selection and the selected tab audio'
         $menu = Open-TabContextMenu $Context $window $source
         Assert-Regression ($menu.Items[4].CommandParameter -eq $source -and
             $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_unmuteSite')) 'muted background tab offers its unmute action'
@@ -381,8 +383,10 @@ function Test-BrowserTabContextMenu($Context) {
         Assert-Regression ($menu.Items[4].CommandParameter -eq $source -and
             $menu.Items[4].Header -eq $Context.LanguageService.GetString('browser_unmuteSite')) 'reopening the muted background tab restores its unmute action'
         Invoke-TabMenuItem $menu 4
-        Wait-Regression $Context { !$source.Browser.IsMuted } 'tab menu unmutes its background source tab'
-        Assert-Regression ($model.CurrentBrowser -eq $last -and !$last.Browser.IsMuted) 'unmuting a background tab preserves selection and the selected tab audio'
+        Wait-Regression $Context { !$source.IsMuted } 'tab menu unmutes its background source tab'
+        Assert-BrowserAudioMuted $Context $source.Browser $false 'background tab menu restores its native CEF audio'
+        Assert-BrowserAudioMuted $Context $last.Browser $false 'background tab unmuting leaves the selected native browser unchanged'
+        Assert-Regression ($model.CurrentBrowser -eq $last -and !$last.IsMuted) 'unmuting a background tab preserves selection and the selected tab audio'
         $source.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context {
             $source.Browser.Address -eq $Context.AuxiliaryAddress -and $source.Browser.Title -eq 'Auxiliary regression' -and

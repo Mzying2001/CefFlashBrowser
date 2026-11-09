@@ -5,6 +5,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Proxies;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using CefSharp;
 
 public static class RegressionKeyboard
@@ -350,6 +351,14 @@ public sealed class RegressionJsDialogHandler : CefFlashBrowser.Browser.Handlers
         var callback = Interlocked.Exchange(ref pendingCallback, null);
         if (callback != null)
             CompleteBeforeUnloadDialog(pendingBrowser, callback, pendingIsReload, accepted);
+    }
+}
+
+public static class RegressionAudio
+{
+    public static Task<bool> IsMutedAsync(IBrowser browser, TaskFactory cefTaskFactory)
+    {
+        return cefTaskFactory.StartNew(() => browser.GetHost().IsAudioMuted);
     }
 }
 

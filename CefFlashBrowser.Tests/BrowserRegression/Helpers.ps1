@@ -55,6 +55,12 @@ function Invoke-ContextMenuCommand($Browser, [CefSharp.CefMenuCommand]$Command, 
             $Command, [CefSharp.CefEventFlags]::None))
 }
 
+function Assert-BrowserAudioMuted($Context, $Browser, [bool]$Expected, [string]$Message) {
+    $state = [RegressionAudio]::IsMutedAsync($Browser.GetBrowser(), [CefSharp.Cef]::UIThreadTaskFactory)
+    Wait-Regression $Context { $state.IsCompleted } 'native browser audio state is read on the CEF UI thread'
+    Assert-Regression ($state.GetAwaiter().GetResult() -eq $Expected) $Message
+}
+
 function Find-BrowserView($Element, $BrowserViewModel = $null) {
     if ($Element -is [CefFlashBrowser.Views.BrowserView] -and
         ($null -eq $BrowserViewModel -or [object]::ReferenceEquals($Element.ViewModel, $BrowserViewModel))) {
