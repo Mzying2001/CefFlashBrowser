@@ -148,6 +148,8 @@
     <sys:String x:Key="browser_closeTab">탭 닫기</sys:String>
     <sys:String x:Key="browser_closeOtherTabs">다른 탭 닫기</sys:String>
     <sys:String x:Key="browser_duplicateTab">탭 복제</sys:String>
+    <sys:String x:Key="browser_muteSite">사이트 음소거</sys:String>
+    <sys:String x:Key="browser_unmuteSite">사이트 음소거 해제</sys:String>
     <sys:String x:Key="browser_openTabInNewWindow">새 창에서 탭 열기</sys:String>
 
     <!--Save Manager-->

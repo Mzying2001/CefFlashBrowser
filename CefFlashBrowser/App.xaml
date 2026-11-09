@@ -54,6 +54,7 @@
             <sys:Uri x:Key="ForwardIconUri">/Assets/Svgs/forward.svg</sys:Uri>
             <sys:Uri x:Key="ImportIconUri">/Assets/Svgs/import.svg</sys:Uri>
             <sys:Uri x:Key="MoreIconUri">/Assets/Svgs/more.svg</sys:Uri>
+            <sys:Uri x:Key="MuteIconUri">/Assets/Svgs/mute.svg</sys:Uri>
             <sys:Uri x:Key="NewTabIconUri">/Assets/Svgs/new-tab.svg</sys:Uri>
             <sys:Uri x:Key="PageIconUri">/Assets/Svgs/page.svg</sys:Uri>
             <sys:Uri x:Key="ReloadIconUri">/Assets/Svgs/reload.svg</sys:Uri>
@@ -62,6 +63,7 @@
             <sys:Uri x:Key="SubIconUri">/Assets/Svgs/sub.svg</sys:Uri>
             <sys:Uri x:Key="TrashIconUri">/Assets/Svgs/trash.svg</sys:Uri>
             <sys:Uri x:Key="UpIconUri">/Assets/Svgs/up.svg</sys:Uri>
+            <sys:Uri x:Key="VolumeIconUri">/Assets/Svgs/volume.svg</sys:Uri>
             <sys:Uri x:Key="WarningIconUri">/Assets/Svgs/warning.svg</sys:Uri>
 
 

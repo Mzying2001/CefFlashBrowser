@@ -1,4 +1,5 @@
 using CefFlashBrowser.Data;
+using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
@@ -17,6 +18,7 @@ namespace CefFlashBrowser.Browser.Handlers
         public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
         public const CefMenuCommand OpenSelectedUrl = CefMenuCommand.UserFirst + 3;
         public const CefMenuCommand OpenInNewTab = CefMenuCommand.UserFirst + 4;
+        public const CefMenuCommand MutePage = CefMenuCommand.UserFirst + 5;
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
@@ -53,6 +55,16 @@ namespace CefFlashBrowser.Browser.Handlers
 
                 header = LanguageManager.GetString("browser_openInNewTab");
                 model.InsertItemAt(0, OpenInNewTab, header);
+                count++;
+            }
+
+            var host = browser?.GetHost();
+            if (host != null && !host.IsDisposed)
+            {
+                var isMuted = host.IsAudioMuted;
+                var header = LanguageManager.GetString(isMuted ? "browser_unmuteSite" : "browser_muteSite");
+                model.InsertCheckItemAt(count, MutePage, header);
+                model.SetChecked(MutePage, isMuted);
                 count++;
             }
 
@@ -101,6 +113,15 @@ namespace CefFlashBrowser.Browser.Handlers
                         {
                             OpenPage(chromiumWebBrowser, browser, selectionText);
                             result = true;
+                            break;
+                        }
+                    case MutePage:
+                        {
+                            if (chromiumWebBrowser is ChromiumFlashBrowser flashBrowser && !flashBrowser.IsDisposed)
+                            {
+                                flashBrowser.ToggleMute();
+                                result = true;
+                            }
                             break;
                         }
                 }

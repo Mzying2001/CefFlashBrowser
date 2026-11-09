@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using SimpleMvvm;
@@ -111,6 +112,17 @@ namespace CefFlashBrowser.ViewModels
             else
             {
                 Browser.CloseDevTools();
+            }
+        }
+
+        public void ToggleMute()
+        {
+            if (!IsBrowserReady())
+                return;
+
+            if (Browser is ChromiumFlashBrowser flashBrowser)
+            {
+                flashBrowser.ToggleMute();
             }
         }
 

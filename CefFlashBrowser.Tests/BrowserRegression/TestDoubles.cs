@@ -122,6 +122,7 @@ public sealed class RegressionMenuModelProxy : RealProxy
 {
     public readonly List<CefMenuCommand> Commands = new List<CefMenuCommand> { CefMenuCommand.Copy };
     public readonly List<string> Labels = new List<string> { "Copy" };
+    public readonly HashSet<CefMenuCommand> Checked = new HashSet<CefMenuCommand>();
 
     public RegressionMenuModelProxy() : base(typeof(IMenuModel)) { }
 
@@ -139,6 +140,16 @@ public sealed class RegressionMenuModelProxy : RealProxy
             case "InsertSeparatorAt":
                 Commands.Insert((int)call.Args[0], CefMenuCommand.NotFound);
                 Labels.Insert((int)call.Args[0], null);
+                break;
+            case "SetChecked":
+                if ((bool)call.Args[1]) {
+                    Checked.Add((CefMenuCommand)call.Args[0]);
+                } else {
+                    Checked.Remove((CefMenuCommand)call.Args[0]);
+                }
+                break;
+            case "IsChecked":
+                result = Checked.Contains((CefMenuCommand)call.Args[0]);
                 break;
             case "Clear":
                 Commands.Clear();
@@ -309,5 +320,82 @@ public sealed class RegressionJsDialogHandler : CefFlashBrowser.Browser.Handlers
         var callback = Interlocked.Exchange(ref pendingCallback, null);
         if (callback != null)
             CompleteBeforeUnloadDialog(pendingBrowser, callback, pendingIsReload, accepted);
+    }
+}
+
+public sealed class RegressionAudioHostProxy : RealProxy
+{
+    private readonly bool _muted;
+
+    public RegressionAudioHostProxy(bool muted) : base(typeof(IBrowserHost))
+    {
+        _muted = muted;
+    }
+
+    public override IMessage Invoke(IMessage message)
+    {
+        var call = (IMethodCallMessage)message;
+        object result = true;
+        switch (call.MethodName)
+        {
+            case "get_IsAudioMuted":
+                result = _muted;
+                break;
+            case "get_IsDisposed":
+                result = false;
+                break;
+            case "GetType":
+                result = typeof(IBrowserHost);
+                break;
+            case "ToString":
+                result = "Regression audio host proxy";
+                break;
+            case "GetHashCode":
+                result = GetHashCode();
+                break;
+            case "Equals":
+                result = ReferenceEquals(GetTransparentProxy(), call.Args[0]);
+                break;
+            default:
+                return new ReturnMessage(new InvalidOperationException(call.MethodName), call);
+        }
+        return new ReturnMessage(result, null, 0, call.LogicalCallContext, call);
+    }
+}
+
+public sealed class RegressionAudioBrowserProxy : RealProxy
+{
+    private readonly object _host;
+
+    public RegressionAudioBrowserProxy(object host) : base(typeof(IBrowser))
+    {
+        _host = host;
+    }
+
+    public override IMessage Invoke(IMessage message)
+    {
+        var call = (IMethodCallMessage)message;
+        object result = true;
+        switch (call.MethodName)
+        {
+            case "GetHost":
+                result = _host;
+                break;
+            case "GetType":
+                result = typeof(IBrowser);
+                break;
+            case "ToString":
+                result = "Regression audio browser proxy";
+                break;
+            case "GetHashCode":
+                result = GetHashCode();
+                break;
+            case "Equals":
+                result = ReferenceEquals(GetTransparentProxy(), call.Args[0]);
+                break;
+            default:
+                return new ReturnMessage(new InvalidOperationException(call.MethodName), call);
+        }
+        return new ReturnMessage(result, null, 0, call.LogicalCallContext, call);
     }
 }

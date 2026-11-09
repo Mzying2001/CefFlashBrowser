@@ -148,6 +148,8 @@
     <sys:String x:Key="browser_closeTab">タブを閉じる</sys:String>
     <sys:String x:Key="browser_closeOtherTabs">他のタブを閉じる</sys:String>
     <sys:String x:Key="browser_duplicateTab">タブを複製</sys:String>
+    <sys:String x:Key="browser_muteSite">サイトをミュート</sys:String>
+    <sys:String x:Key="browser_unmuteSite">サイトのミュートを解除</sys:String>
     <sys:String x:Key="browser_openTabInNewWindow">タブを新しいウィンドウで開く</sys:String>
 
     <!--Save Manager-->

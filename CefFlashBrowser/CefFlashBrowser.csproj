@@ -9,6 +9,10 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <StartupObject>CefFlashBrowser.Program</StartupObject>
+    <!-- Disable Fody (and thus Costura embedding) for Debug builds so the executable always
+         loads its dependencies from disk and can never embed a stale dependency DLL.
+         Release keeps Costura embedding for single-file distribution. -->
+    <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
     <ApplicationIcon>Assets\Icons\icon.ico</ApplicationIcon>
     <Version>1.1.8</Version>
     <Authors>Mzying2001</Authors>
@@ -35,6 +39,7 @@
     <Resource Include="Assets\Svgs\forward.svg" />
     <Resource Include="Assets\Svgs\import.svg" />
     <Resource Include="Assets\Svgs\more.svg" />
+    <Resource Include="Assets\Svgs\mute.svg" />
     <Resource Include="Assets\Svgs\new-tab.svg" />
     <Resource Include="Assets\Svgs\page.svg" />
     <Resource Include="Assets\Svgs\reload.svg" />
@@ -43,6 +48,7 @@
     <Resource Include="Assets\Svgs\sub.svg" />
     <Resource Include="Assets\Svgs\trash.svg" />
     <Resource Include="Assets\Svgs\up.svg" />
+    <Resource Include="Assets\Svgs\volume.svg" />
     <Resource Include="Assets\Svgs\warning.svg" />
   </ItemGroup>
 

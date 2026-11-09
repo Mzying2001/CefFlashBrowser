@@ -148,6 +148,8 @@
     <sys:String x:Key="browser_closeTab">Chiudi scheda</sys:String>
     <sys:String x:Key="browser_closeOtherTabs">Chiudi le altre schede</sys:String>
     <sys:String x:Key="browser_duplicateTab">Duplica scheda</sys:String>
+    <sys:String x:Key="browser_muteSite">Disattiva l’audio del sito</sys:String>
+    <sys:String x:Key="browser_unmuteSite">Riattiva l’audio del sito</sys:String>
     <sys:String x:Key="browser_openTabInNewWindow">Apri scheda in una nuova finestra</sys:String>
 
     <!--Gestore dei salvataggi-->
