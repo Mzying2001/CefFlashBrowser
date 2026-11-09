@@ -11,15 +11,18 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <StartupObject>CefFlashBrowser.Program</StartupObject>
-    <!-- Disable Fody (and thus Costura embedding) for Debug builds so the executable always
-         loads its dependencies from disk and can never embed a stale dependency DLL.
-         Release keeps Costura embedding for single-file distribution. -->
-    <DisableFody Condition="'$(Configuration)' == 'Debug'">true</DisableFody>
     <ApplicationIcon>Assets\Icons\icon.ico</ApplicationIcon>
     <Version>1.1.8</Version>
     <Authors>Mzying2001</Authors>
     <Copyright>Copyright © 2021-2026</Copyright>
     <ApplicationManifest>App.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <!-- Disable Fody (and thus Costura embedding) for Debug builds so the executable always
+         loads its dependencies from disk and can never embed a stale dependency DLL.
+         Release keeps Costura embedding for single-file distribution. -->
+    <DisableFody>true</DisableFody>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)' == 'x86'">
