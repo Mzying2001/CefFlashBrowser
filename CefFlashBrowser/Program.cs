@@ -198,6 +198,11 @@ namespace CefFlashBrowser
 #endif
 
             settings.CefCommandLineArgs["autoplay-policy"] = "no-user-gesture-required";
+
+            // Chromium 80+ throttles very small Flash instances through the plugin power saver,
+            // so 1x1 "heartbeat" SWFs that some sites use to probe Flash availability never run.
+            // Disabling the power saver lets those small instances start as well.
+            settings.CefCommandLineArgs["override-plugin-power-saver-for-testing"] = "never";
             Cef.Initialize(settings);
         }
 
