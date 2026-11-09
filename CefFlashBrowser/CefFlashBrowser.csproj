@@ -42,6 +42,7 @@
     <Resource Include="Assets\Svgs\import.svg" />
     <Resource Include="Assets\Svgs\language.svg" />
     <Resource Include="Assets\Svgs\more.svg" />
+    <Resource Include="Assets\Svgs\mute-mode.svg" />
     <Resource Include="Assets\Svgs\mute.svg" />
     <Resource Include="Assets\Svgs\new-tab.svg" />
     <Resource Include="Assets\Svgs\page.svg" />

@@ -63,7 +63,7 @@
                     <svgc:SvgIcon x:Key="muteIcon"
                                   Width="14"
                                   Height="14"
-                                  UriSource="{StaticResource MuteIconUri}"/>
+                                  UriSource="{StaticResource MuteModeIconUri}"/>
                     <svgc:SvgIcon x:Key="volumeIcon"
                                   Width="14"
                                   Height="14"
@@ -724,7 +724,7 @@
                                                 <svgc:SvgIcon x:Key="muteIcon"
                                                               Width="14"
                                                               Height="14"
-                                                              UriSource="{StaticResource MuteIconUri}"/>
+                                                              UriSource="{StaticResource MuteModeIconUri}"/>
                                                 <svgc:SvgIcon x:Key="volumeIcon"
                                                               Width="14"
                                                               Height="14"

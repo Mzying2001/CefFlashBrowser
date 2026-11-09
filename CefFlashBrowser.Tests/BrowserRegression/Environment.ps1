@@ -225,6 +225,7 @@ function Initialize-RegressionEnvironment($Context) {
         $Context.Application.Resources.Add($icon + 'IconUri', [Uri]::new(('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg'), [UriKind]::Relative))
     }
     $Context.Application.Resources.Add('NewTabIconUri', [Uri]::new('/Assets/Svgs/new-tab.svg', [UriKind]::Relative))
+    $Context.Application.Resources.Add('MuteModeIconUri', [Uri]::new('/Assets/Svgs/mute-mode.svg', [UriKind]::Relative))
 
     $auxiliaryFile = Join-Path $Context.TemporaryPath 'auxiliary.html'
     $auxiliarySecondFile = Join-Path $Context.TemporaryPath 'auxiliary-second.html'
