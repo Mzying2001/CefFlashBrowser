@@ -31,7 +31,7 @@
                      HorizontalOffset="8">
             <MenuItem Header="{DynamicResource browser_showMainWindow}"
                       Command="{Binding ShowMainWindowCommand}"
-                      InputGestureText="Ctrl+M"/>
+                      InputGestureText="Alt+Home"/>
 
             <MenuItem Header="{DynamicResource browser_newTab}"
                       Command="{Binding AddBrowserCommand}"
@@ -41,6 +41,27 @@
                       Command="{Binding NewBrowserWindowCommand}"
                       CommandParameter="{Binding CurrentBrowser.Address}"
                       InputGestureText="Ctrl+N"/>
+
+            <Separator/>
+
+            <MenuItem Command="{Binding ToggleMuteCommand}"
+                      CommandParameter="{Binding CurrentBrowser}"
+                      InputGestureText="Ctrl+M">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="Header"
+                                Value="{DynamicResource browser_muteSite}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding CurrentBrowser.IsMuted}"
+                                         Value="True">
+                                <Setter Property="Header"
+                                        Value="{DynamicResource browser_unmuteSite}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+            </MenuItem>
 
             <Separator/>
 
@@ -256,7 +277,8 @@
         <KeyBinding Gesture="Ctrl+F"
                     Command="{Binding OpenFindPopupCommand}"/>
         <KeyBinding Gesture="Ctrl+M"
-                    Command="{Binding ShowMainWindowCommand}"/>
+                    Command="{Binding ToggleMuteCommand}"
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Ctrl+N"
                     Command="{Binding NewBrowserWindowCommand}"
                     CommandParameter="{Binding CurrentBrowser.Address}"/>
@@ -291,6 +313,8 @@
                     Command="{Binding CurrentBrowser.Browser.BackCommand}"/>
         <KeyBinding Gesture="Alt+Right"
                     Command="{Binding CurrentBrowser.Browser.ForwardCommand}"/>
+        <KeyBinding Gesture="Alt+Home"
+                    Command="{Binding ShowMainWindowCommand}"/>
     </Window.InputBindings>
 
 
@@ -443,44 +467,6 @@
                                   Height="13"
                                   UriSource="{StaticResource SearchIconUri}"/>
                 </ToggleButton>
-
-                <!--mute button-->
-                <Button x:Name="muteButton"
-                        Margin="0,0,10,0"
-                        Width="30"
-                        Height="30"
-                        Padding="0"
-                        Command="{Binding ToggleMuteCommand}"
-                        CommandParameter="{Binding CurrentBrowser}">
-                    <Button.Resources>
-                        <svgc:SvgIcon x:Key="volumeIcon"
-                                      Width="12"
-                                      Height="12"
-                                      UriSource="{StaticResource VolumeIconUri}"/>
-                        <svgc:SvgIcon x:Key="muteIcon"
-                                      Width="12"
-                                      Height="12"
-                                      UriSource="{StaticResource MuteIconUri}"/>
-                    </Button.Resources>
-                    <Button.Style>
-                        <Style TargetType="Button"
-                               BasedOn="{StaticResource {x:Type Button}}">
-                            <Setter Property="Content"
-                                    Value="{StaticResource muteIcon}"/>
-                            <Setter Property="ToolTip"
-                                    Value="{DynamicResource browser_unmuteSite}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentBrowser.IsMuted}"
-                                             Value="False">
-                                    <Setter Property="Content"
-                                            Value="{StaticResource volumeIcon}"/>
-                                    <Setter Property="ToolTip"
-                                            Value="{DynamicResource browser_muteSite}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
 
                 <!--menu button-->
                 <Button ToolTip="{DynamicResource browser_toolTipMore}">
@@ -695,8 +681,13 @@
                                                   Command="{Binding Tag.DuplicateBrowserCommand, RelativeSource={RelativeSource Self}}"
                                                   CommandParameter="{Binding}"
                                                   InputGestureText="Ctrl+Shift+K"/>
+                                        <MenuItem Header="{DynamicResource browser_openTabInNewWindow}"
+                                                  Command="{Binding Tag.NewBrowserWindowCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding Address}"/>
+                                        <Separator/>
                                         <MenuItem Command="{Binding Tag.ToggleMuteCommand, RelativeSource={RelativeSource Self}}"
-                                                  CommandParameter="{Binding}">
+                                                  CommandParameter="{Binding}"
+                                                  InputGestureText="Ctrl+M">
                                             <MenuItem.Style>
                                                 <Style TargetType="MenuItem"
                                                        BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -712,9 +703,6 @@
                                                 </Style>
                                             </MenuItem.Style>
                                         </MenuItem>
-                                        <MenuItem Header="{DynamicResource browser_openTabInNewWindow}"
-                                                  Command="{Binding Tag.NewBrowserWindowCommand, RelativeSource={RelativeSource Self}}"
-                                                  CommandParameter="{Binding Address}"/>
                                     </ContextMenu>
                                 </Setter.Value>
                             </Setter>

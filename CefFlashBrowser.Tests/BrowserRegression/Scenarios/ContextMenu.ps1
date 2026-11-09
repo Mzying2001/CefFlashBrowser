@@ -76,19 +76,22 @@ function Test-ContextMenuItems($Context) {
         $selectedUrl = [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::OpenSelectedUrl
         $separator = [CefSharp.CefMenuCommand]::NotFound
         $copy = [CefSharp.CefMenuCommand]::Copy
-        foreach ($scenario in @(
-            @{ Name = 'plain page'; Text = ''; Link = ''; Expected = @($copy) },
-            @{ Name = 'link'; Text = ''; Link = 'https://example.com'; Expected = @($newTab, $newWindow, $separator, $copy) },
-            @{ Name = 'selected text'; Text = 'search text'; Link = ''; Expected = @($search, $separator, $copy) },
-            @{ Name = 'selected URL'; Text = 'https://example.com'; Link = ''; Expected = @($selectedUrl, $search, $separator, $copy) },
-            @{ Name = 'link and selected URL'; Text = 'https://example.com'; Link = 'https://example.org'; Expected = @($newTab, $newWindow, $selectedUrl, $search, $separator, $copy) }
-        )) {
-            $parameters = New-Object RegressionContextMenuParamsProxy
-            $parameters.SelectionText = $scenario.Text
-            $parameters.LinkUrl = $scenario.Link
-            $menu = New-Object RegressionMenuModelProxy
-            $handler.OnBeforeContextMenu($null, $null, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
-            Assert-Regression (($menu.Commands -join ',') -eq ($scenario.Expected -join ',')) "context menu commands and separator match $($scenario.Name)"
+        foreach ($isMuted in @($false, $true)) {
+            $cefBrowser = (New-Object RegressionAudioBrowserProxy((New-Object RegressionAudioHostProxy($isMuted)).GetTransparentProxy())).GetTransparentProxy()
+            foreach ($scenario in @(
+                @{ Name = 'plain page'; Text = ''; Link = ''; Expected = @($copy) },
+                @{ Name = 'link'; Text = ''; Link = 'https://example.com'; Expected = @($newTab, $newWindow, $separator, $copy) },
+                @{ Name = 'selected text'; Text = 'search text'; Link = ''; Expected = @($search, $separator, $copy) },
+                @{ Name = 'selected URL'; Text = 'https://example.com'; Link = ''; Expected = @($selectedUrl, $search, $separator, $copy) },
+                @{ Name = 'link and selected URL'; Text = 'https://example.com'; Link = 'https://example.org'; Expected = @($newTab, $newWindow, $selectedUrl, $search, $separator, $copy) }
+            )) {
+                $parameters = New-Object RegressionContextMenuParamsProxy
+                $parameters.SelectionText = $scenario.Text
+                $parameters.LinkUrl = $scenario.Link
+                $menu = New-Object RegressionMenuModelProxy
+                $handler.OnBeforeContextMenu($null, $cefBrowser, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
+                Assert-Regression (($menu.Commands -join ',') -eq ($scenario.Expected -join ',')) "page menu has only the expected commands ($($scenario.Name), muted=$isMuted)"
+            }
         }
         foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
             $Context.LanguageService.SetCurrentLanguage($language)
@@ -117,13 +120,6 @@ function Test-AuxiliaryContextMenu($Context) {
             try {
                 $source = $window.FindName('browserView').ViewModel
                 $originalAddress = $source.Address
-                $mutePage = [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::MutePage
-                Assert-Regression (Invoke-ContextMenuCommand $source.Browser $mutePage) "$($auxType.Name) handles the mute menu command"
-                Assert-Regression $source.IsMuted "$($auxType.Name) stores mute state in its view model"
-                Assert-BrowserAudioMuted $Context $source.Browser $true "$($auxType.Name) mutes its native CEF browser"
-                Assert-Regression (Invoke-ContextMenuCommand $source.Browser $mutePage) "$($auxType.Name) handles the unmute menu command"
-                Assert-Regression (!$source.IsMuted) "$($auxType.Name) clears its view model mute state"
-                Assert-BrowserAudioMuted $Context $source.Browser $false "$($auxType.Name) restores its native CEF audio"
                 foreach ($commandName in @('Search', 'OpenSelectedUrl', 'OpenInNewTab')) {
                     [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior = if ($commandName -eq 'OpenInNewTab') {
                         [CefFlashBrowser.Models.NewPageBehavior]::NewTab
@@ -151,114 +147,8 @@ function Test-AuxiliaryContextMenu($Context) {
     }
 }
 
-function Find-ToolbarMuteButton($Element, $Command) {
-    if ($Element -is [System.Windows.Controls.Button] -and
-        [object]::ReferenceEquals($Element.Command, $Command)) {
-        return $Element
-    }
-
-    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
-        $button = Find-ToolbarMuteButton ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index)) $Command
-        if ($null -ne $button) {
-            return $button
-        }
-    }
-}
-
-function Test-ContextMenuMute($Context) {
-    $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
-    $savedTabStrip = [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip
-    $window = $null
-    try {
-        [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
-        [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip = $true
-        $window = New-RegressionWindow $Context
-        $model = $window.ViewModel
-        $source = $model.CurrentBrowser
-        $browser = $source.Browser
-        $mutePage = [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::MutePage
-        $icon = Get-TabMuteIcon $window $source
-        Assert-SvgIconLoaded $icon 'tab mute SVG loads a nonempty drawing from the application resources'
-
-        Assert-Regression (!$source.IsMuted -and $icon.Visibility -eq [System.Windows.Visibility]::Collapsed) 'tab starts unmuted with its mute icon hidden'
-        Assert-BrowserAudioMuted $Context $browser $false 'tab starts with native CEF audio unmuted'
-
-        $model.ToggleMute($source)
-        Wait-Regression $Context {
-            $source.IsMuted
-        } 'ToggleMute mutes the browser and updates IsMuted'
-        Assert-BrowserAudioMuted $Context $browser $true 'view model mute state is applied to the native CEF browser'
-
-        Assert-Regression ($icon.Visibility -eq [System.Windows.Visibility]::Visible) 'muted tab shows the same tab mute icon'
-
-        $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
-        Assert-Regression ($null -ne $muteButton -and
-            "$($muteButton.Content.UriSource)" -like '*mute.svg*' -and
-            $muteButton.ToolTip -eq $Context.LanguageService.GetString('browser_unmuteSite')) 'muted toolbar shows the muted icon and unmute tooltip'
-        Assert-SvgIconLoaded $muteButton.Content 'toolbar mute SVG loads a nonempty drawing from the application resources'
-
-        $handler = $browser.MenuHandler.PSObject.BaseObject
-        $parameters = New-Object RegressionContextMenuParamsProxy
-        $menu = New-Object RegressionMenuModelProxy
-        $unmutedBrowser = (New-Object RegressionAudioBrowserProxy((New-Object RegressionAudioHostProxy($false)).GetTransparentProxy())).GetTransparentProxy()
-        $handler.OnBeforeContextMenu($null, $unmutedBrowser, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
-        Assert-Regression ($menu.Commands.Count -eq 3 -and $menu.Commands[0] -eq $mutePage -and
-            $menu.Commands[1] -eq [CefSharp.CefMenuCommand]::NotFound -and
-            $menu.Labels[0] -eq $Context.LanguageService.GetString('browser_muteSite') -and
-            !$menu.Checked.Contains($mutePage)) 'context menu shows the localized unmuted mute entry'
-
-        $model.ToggleMute($source)
-        Wait-Regression $Context {
-            !$source.IsMuted
-        } 'ToggleMute restores audio and clears IsMuted'
-        Assert-BrowserAudioMuted $Context $browser $false 'view model unmute state is applied to the native CEF browser'
-
-        Assert-Regression ($icon.Visibility -eq [System.Windows.Visibility]::Collapsed) 'unmuted tab hides the same tab mute icon'
-
-        $muteButton = Find-ToolbarMuteButton $window $model.ToggleMuteCommand
-        Assert-Regression ($null -ne $muteButton -and
-            "$($muteButton.Content.UriSource)" -like '*volume.svg*' -and
-            $muteButton.ToolTip -eq $Context.LanguageService.GetString('browser_muteSite')) 'unmuted toolbar shows the volume icon and mute tooltip'
-        Assert-SvgIconLoaded $muteButton.Content 'toolbar volume SVG loads a nonempty drawing from the application resources'
-        Assert-Regression ($muteButton.CommandParameter -eq $source) 'toolbar mute command targets the selected tab'
-
-        Invoke-BrowserCommand $muteButton.Command $muteButton.CommandParameter
-        Wait-Regression $Context {
-            $source.IsMuted
-        } 'toolbar button mutes through its command'
-        Assert-BrowserAudioMuted $Context $browser $true 'toolbar mute command changes native CEF audio'
-
-        $menu = New-Object RegressionMenuModelProxy
-        $mutedBrowser = (New-Object RegressionAudioBrowserProxy((New-Object RegressionAudioHostProxy($true)).GetTransparentProxy())).GetTransparentProxy()
-        $handler.OnBeforeContextMenu($null, $mutedBrowser, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
-        Assert-Regression ($menu.Commands[0] -eq $mutePage -and
-            $menu.Labels[0] -eq $Context.LanguageService.GetString('browser_unmuteSite') -and
-            $menu.Checked.Contains($mutePage)) 'context menu shows the localized muted entry as checked'
-
-        Assert-Regression (Invoke-ContextMenuCommand $browser $mutePage) 'unmute context menu command is handled'
-        Wait-Regression $Context {
-            !$source.IsMuted
-        } 'context menu command restores audio'
-        Assert-BrowserAudioMuted $Context $browser $false 'page context menu restores native CEF audio'
-
-        $source.ToggleMute()
-        $source.ToggleMute()
-        Assert-Regression (!$source.IsMuted) 'two immediate mute toggles preserve the view model state'
-        Assert-BrowserAudioMuted $Context $browser $false 'two immediate mute toggles preserve native CEF audio'
-
-        $window.ForceCloseWindow()
-        $source.ToggleMute()
-        Assert-Regression (!$source.IsMuted -and !(Invoke-ContextMenuCommand $browser $mutePage)) 'mute operations ignore a closed browser without changing view model state'
-    } finally {
-        if ($null -ne $window) { $window.ForceCloseWindow() }
-        [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
-        [CefFlashBrowser.Data.GlobalData]::Settings.AlwaysShowTabStrip = $savedTabStrip
-    }
-}
-
 function Test-ContextMenu($Context) {
     Test-ContextMenuRouting $Context
     Test-ContextMenuItems $Context
-    Test-ContextMenuMute $Context
     Test-AuxiliaryContextMenu $Context
 }

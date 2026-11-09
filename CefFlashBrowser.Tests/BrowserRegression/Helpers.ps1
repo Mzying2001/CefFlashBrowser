@@ -75,6 +75,29 @@ function Find-BrowserView($Element, $BrowserViewModel = $null) {
     }
 }
 
+function Find-CommandButton($Element, $Command) {
+    if ($Element -is [System.Windows.Controls.Button] -and [object]::ReferenceEquals($Element.Command, $Command)) {
+        return $Element
+    }
+    for ($index = 0; $index -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($Element); $index++) {
+        $button = Find-CommandButton ([System.Windows.Media.VisualTreeHelper]::GetChild($Element, $index)) $Command
+        if ($null -ne $button) { return $button }
+    }
+}
+
+function Open-BrowserActionsMenu($Context, $Window) {
+    $menu = $Window.Resources['browserActionsMenu']
+    $menu.PlacementTarget = $Window
+    $menu.IsOpen = $true
+    Wait-Regression $Context {
+        $muteItems = @($menu.Items | Where-Object {
+            $_ -is [System.Windows.Controls.MenuItem] -and $_.Command -eq $Window.ViewModel.ToggleMuteCommand
+        })
+        $muteItems.Count -eq 1 -and $muteItems[0].CommandParameter -eq $Window.ViewModel.CurrentBrowser
+    } 'actions mute menu binds to the selected tab'
+    return $menu
+}
+
 function Get-TabMuteIcon($Window, $Browser) {
     $Window.UpdateLayout()
     $tabs = $Window.FindName('tabList')
