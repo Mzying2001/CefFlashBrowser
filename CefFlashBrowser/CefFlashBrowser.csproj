@@ -54,7 +54,6 @@
     <Resource Include="Assets\Svgs\search.svg" />
     <Resource Include="Assets\Svgs\settings.svg" />
     <Resource Include="Assets\Svgs\star.svg" />
-    <Resource Include="Assets\Svgs\stop.svg" />
     <Resource Include="Assets\Svgs\sub.svg" />
     <Resource Include="Assets\Svgs\trash.svg" />
     <Resource Include="Assets\Svgs\up.svg" />

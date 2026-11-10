@@ -403,13 +403,13 @@
                         CommandParameter="{Binding CurrentBrowser}">
                     <Button.Resources>
                         <svgc:SvgIcon x:Key="reloadIcon"
-                                      Width="14"
-                                      Height="14"
-                                      UriSource="{StaticResource ReloadIconUri}"/>
-                        <svgc:SvgIcon x:Key="stopIcon"
                                       Width="12"
                                       Height="12"
-                                      UriSource="{StaticResource StopIconUri}"/>
+                                      UriSource="{StaticResource ReloadIconUri}"/>
+                        <svgc:SvgIcon x:Key="stopIcon"
+                                      Width="10"
+                                      Height="10"
+                                      UriSource="{StaticResource CloseIconUri}"/>
                     </Button.Resources>
                     <Button.Style>
                         <Style TargetType="Button"
@@ -700,7 +700,7 @@
                                                 <svgc:SvgIcon x:Key="stopIcon"
                                                               Width="10"
                                                               Height="10"
-                                                              UriSource="{StaticResource StopIconUri}"/>
+                                                              UriSource="{StaticResource CloseIconUri}"/>
                                             </MenuItem.Resources>
                                             <MenuItem.Style>
                                                 <Style TargetType="MenuItem"
