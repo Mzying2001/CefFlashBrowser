@@ -133,7 +133,7 @@
     <sys:String x:Key="browser_tipsBlockedSwfs">일부 Flash 콘텐츠가 Chromium 커널에 의해 차단된 것 같습니다. SWF 플레이어에서 재생할 수 있습니다:</sys:String>
     <sys:String x:Key="browser_toolTipBack">뒤로(Alt+Left)</sys:String>
     <sys:String x:Key="browser_toolTipForward">앞으로(Alt+Right)</sys:String>
-    <sys:String x:Key="browser_toolTipReload">새로 고침(F5)</sys:String>
+    <sys:String x:Key="browser_toolTipReload">새로 고침(Ctrl+R)</sys:String>
     <sys:String x:Key="browser_toolTipStop">중지(Esc)</sys:String>
     <sys:String x:Key="browser_toolTipNewTab">새 탭(Ctrl+T)</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">탭 닫기(Ctrl+W)</sys:String>

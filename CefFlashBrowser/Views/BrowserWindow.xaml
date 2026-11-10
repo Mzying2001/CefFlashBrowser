@@ -313,6 +313,8 @@
         <KeyBinding Gesture="Ctrl+N"
                     Command="{Binding NewBrowserWindowCommand}"
                     CommandParameter="{Binding CurrentBrowser.Address}"/>
+        <KeyBinding Gesture="Ctrl+R"
+                    Command="{Binding CurrentBrowser.Browser.ReloadCommand}"/>
         <KeyBinding Gesture="Ctrl+T"
                     Command="{Binding AddBrowserCommand}"/>
         <KeyBinding Gesture="Ctrl+Tab"

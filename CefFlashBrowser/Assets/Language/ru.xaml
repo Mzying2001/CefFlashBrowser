@@ -133,7 +133,7 @@
     <sys:String x:Key="browser_tipsBlockedSwfs">Некоторое Flash-содержимое, похоже, заблокировано ядром Chromium. Его можно воспроизвести в SWF-плеере:</sys:String>
     <sys:String x:Key="browser_toolTipBack">Назад (Alt+Left)</sys:String>
     <sys:String x:Key="browser_toolTipForward">Вперед (Alt+Right)</sys:String>
-    <sys:String x:Key="browser_toolTipReload">Обновить (F5)</sys:String>
+    <sys:String x:Key="browser_toolTipReload">Обновить (Ctrl+R)</sys:String>
     <sys:String x:Key="browser_toolTipStop">Остановить (Esc)</sys:String>
     <sys:String x:Key="browser_toolTipNewTab">Новая вкладка (Ctrl+T)</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">Закрыть вкладку (Ctrl+W)</sys:String>
