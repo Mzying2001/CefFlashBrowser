@@ -690,40 +690,41 @@
                                                         Value="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                             </Style>
                                         </ContextMenu.Resources>
-                                        <MenuItem Header="{DynamicResource browser_closeTab}"
-                                                  Command="{Binding Tag.CloseBrowserCommand, RelativeSource={RelativeSource Self}}"
-                                                  CommandParameter="{Binding}"
-                                                  InputGestureText="Ctrl+W"/>
-                                        <MenuItem Header="{DynamicResource browser_closeOtherTabs}"
-                                                  Command="{Binding Tag.CloseOtherBrowsersCommand, RelativeSource={RelativeSource Self}}"
+                                        <MenuItem Command="{Binding Tag.ToggleLoadingStateCommand, RelativeSource={RelativeSource Self}}"
                                                   CommandParameter="{Binding}">
+                                            <MenuItem.Resources>
+                                                <svgc:SvgIcon x:Key="reloadIcon"
+                                                              Width="12"
+                                                              Height="12"
+                                                              UriSource="{StaticResource ReloadIconUri}"/>
+                                                <svgc:SvgIcon x:Key="stopIcon"
+                                                              Width="10"
+                                                              Height="10"
+                                                              UriSource="{StaticResource StopIconUri}"/>
+                                            </MenuItem.Resources>
                                             <MenuItem.Style>
                                                 <Style TargetType="MenuItem"
                                                        BasedOn="{StaticResource {x:Type MenuItem}}">
+                                                    <Setter Property="Header"
+                                                            Value="{DynamicResource browser_reload}"/>
+                                                    <Setter Property="Icon"
+                                                            Value="{StaticResource reloadIcon}"/>
+                                                    <Setter Property="InputGestureText"
+                                                            Value="Ctrl+R"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Tag.Browsers.Count, RelativeSource={RelativeSource Self}}"
-                                                                     Value="1">
-                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        <DataTrigger Binding="{Binding Browser.IsLoading}"
+                                                                     Value="True">
+                                                            <Setter Property="Header"
+                                                                    Value="{DynamicResource browser_stop}"/>
+                                                            <Setter Property="Icon"
+                                                                    Value="{StaticResource stopIcon}"/>
+                                                            <Setter Property="InputGestureText"
+                                                                    Value="Esc"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </MenuItem.Style>
                                         </MenuItem>
-                                        <Separator/>
-                                        <MenuItem Header="{DynamicResource browser_duplicateTab}"
-                                                  Command="{Binding Tag.DuplicateBrowserCommand, RelativeSource={RelativeSource Self}}"
-                                                  CommandParameter="{Binding}"
-                                                  InputGestureText="Ctrl+Shift+K"/>
-                                        <MenuItem Header="{DynamicResource browser_openTabInNewWindow}"
-                                                  Command="{Binding Tag.NewBrowserWindowCommand, RelativeSource={RelativeSource Self}}"
-                                                  CommandParameter="{Binding Address}">
-                                            <MenuItem.Icon>
-                                                <svgc:SvgIcon Width="14"
-                                                              Height="14"
-                                                              UriSource="{StaticResource PageIconUri}"/>
-                                            </MenuItem.Icon>
-                                        </MenuItem>
-                                        <Separator/>
                                         <MenuItem Command="{Binding Tag.ToggleMuteCommand, RelativeSource={RelativeSource Self}}"
                                                   CommandParameter="{Binding}"
                                                   InputGestureText="Ctrl+M">
@@ -755,6 +756,39 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </MenuItem.Style>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="{DynamicResource browser_closeTab}"
+                                                  Command="{Binding Tag.CloseBrowserCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding}"
+                                                  InputGestureText="Ctrl+W"/>
+                                        <MenuItem Header="{DynamicResource browser_closeOtherTabs}"
+                                                  Command="{Binding Tag.CloseOtherBrowsersCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding}">
+                                            <MenuItem.Style>
+                                                <Style TargetType="MenuItem"
+                                                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Tag.Browsers.Count, RelativeSource={RelativeSource Self}}" Value="1">
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </MenuItem.Style>
+                                        </MenuItem>
+                                        <Separator/>
+                                        <MenuItem Header="{DynamicResource browser_duplicateTab}"
+                                                  Command="{Binding Tag.DuplicateBrowserCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding}"
+                                                  InputGestureText="Ctrl+Shift+K"/>
+                                        <MenuItem Header="{DynamicResource browser_openTabInNewWindow}"
+                                                  Command="{Binding Tag.NewBrowserWindowCommand, RelativeSource={RelativeSource Self}}"
+                                                  CommandParameter="{Binding Address}">
+                                            <MenuItem.Icon>
+                                                <svgc:SvgIcon Width="14"
+                                                              Height="14"
+                                                              UriSource="{StaticResource PageIconUri}"/>
+                                            </MenuItem.Icon>
                                         </MenuItem>
                                     </ContextMenu>
                                 </Setter.Value>
