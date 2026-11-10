@@ -114,9 +114,18 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowMainWindow();
         }
 
-        public void ViewSource(string url)
+        public void ViewSource(BrowserViewModel browser)
         {
-            WindowManager.ShowViewSourceWindow(url);
+            if (IsClosing || !IsBrowserReady(browser) || !_browsers.Contains(browser))
+                return;
+
+            var behavior = GlobalData.Settings.NewPageBehavior == NewPageBehavior.NewWindow
+                ? NewPageBehavior.NewWindow : NewPageBehavior.NewTab;
+
+            if (behavior == NewPageBehavior.NewWindow)
+                browser.ExitFullScreen();
+
+            OnNewPage(browser, UrlHelper.GetViewSourceAddress(browser.Address), behaviorOverride: behavior);
         }
 
         public void OpenInDefaultBrowser(string url)
@@ -453,7 +462,7 @@ namespace CefFlashBrowser.ViewModels
             AddBrowser(null);
 
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
-            ViewSourceCommand = new DelegateCommand<string>(ViewSource);
+            ViewSourceCommand = new DelegateCommand<BrowserViewModel>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<BrowserViewModel>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<BrowserViewModel>(AddFavorite);

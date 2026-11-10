@@ -230,7 +230,7 @@
 
             <MenuItem Header="{DynamicResource browser_viewSource}"
                       Command="{Binding ViewSourceCommand}"
-                      CommandParameter="{Binding CurrentBrowser.Address}"
+                      CommandParameter="{Binding CurrentBrowser}"
                       InputGestureText="Ctrl+U"/>
         </ContextMenu>
 
@@ -330,7 +330,7 @@
                     Command="{Binding CurrentBrowser.Browser.PrintCommand}"/>
         <KeyBinding Gesture="Ctrl+U"
                     Command="{Binding ViewSourceCommand}"
-                    CommandParameter="{Binding CurrentBrowser.Address}"/>
+                    CommandParameter="{Binding CurrentBrowser}"/>
         <KeyBinding Gesture="Ctrl+Shift+S"
                     Command="{Binding CreateShortcutCommand}"
                     CommandParameter="{Binding CurrentBrowser}"/>

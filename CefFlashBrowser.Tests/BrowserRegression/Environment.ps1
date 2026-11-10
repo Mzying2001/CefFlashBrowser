@@ -26,7 +26,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         DisposedBrowser = $null
         BrowserCommandNames = @(
             'CreateShortcutCommand', 'AddFavoriteCommand', 'ToggleLoadingStateCommand',
-            'FindNextTextCommand', 'FindPrevTextCommand', 'ToggleMuteCommand'
+            'FindNextTextCommand', 'FindPrevTextCommand', 'ToggleMuteCommand', 'ViewSourceCommand'
         )
     }
 }
@@ -112,8 +112,7 @@ function Initialize-RegressionEnvironment($Context) {
     $Context.DisposedBrowser = (New-Object DisposedBrowserProxy([CefSharp.IBrowser])).GetTransparentProxy()
     $Context.AuxiliaryTypes = @(
         [CefFlashBrowser.Views.PopupWebPage],
-        [CefFlashBrowser.Views.SwfPlayerWindow],
-        [CefFlashBrowser.Views.ViewSourceWindow]
+        [CefFlashBrowser.Views.SwfPlayerWindow]
     )
 
     [System.Windows.Application]::ResourceAssembly = $applicationAssembly

@@ -8,6 +8,12 @@ namespace CefFlashBrowser.Utils
 {
     public static class UrlHelper
     {
+        public static string GetViewSourceAddress(string address)
+        {
+            address = string.IsNullOrEmpty(address) ? "about:blank" : address;
+            return address.StartsWith("view-source:", StringComparison.OrdinalIgnoreCase) ? address : $"view-source:{address}";
+        }
+
         /// <summary>
         /// Determines whether the input string looks like a URL (similar to Chrome's address bar behavior).
         /// Returns true for URLs with explicit schemes, localhost, IP addresses, and domain-like strings.

@@ -200,11 +200,6 @@ namespace CefFlashBrowser.Services
             });
         }
 
-        public static void ShowViewSourceWindow(string address)
-        {
-            ShowWindow<ViewSourceWindow>(initializer: window => window.Address = address);
-        }
-
         public static void ShowFavoritesManager()
         {
             ShowWindow<FavoritesManager>(singleton: true);
