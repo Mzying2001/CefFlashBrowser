@@ -48,7 +48,7 @@ namespace CefFlashBrowser
         {
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            if (DirectoryAccessChecker.CanReadAndWrite(appDirectory))
+            if (DirectoryHelper.CanReadAndWriteDirectory(appDirectory))
             {
                 Run(args);
             }

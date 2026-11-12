@@ -7,6 +7,38 @@ namespace CefFlashBrowser.Utils
 {
     public static class DirectoryHelper
     {
+        public static bool CanReadAndWriteDirectory(string dir)
+        {
+            if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir))
+                return false;
+
+            string probePath = Path.Combine(
+                dir, ".CefFlashBrowser.AccessTest." + Guid.NewGuid().ToString("N") + ".tmp");
+
+            byte probeValue = 0xA5;
+
+            try
+            {
+                using (var stream = new FileStream(
+                    probePath,
+                    FileMode.CreateNew,
+                    FileAccess.ReadWrite,
+                    FileShare.None,
+                    1,
+                    FileOptions.DeleteOnClose))
+                {
+                    stream.WriteByte(probeValue);
+                    stream.Flush(true);
+                    stream.Position = 0;
+                    return stream.ReadByte() == probeValue;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public static void EnsureDirectoryExists(string dir)
         {
             if (!Directory.Exists(dir))

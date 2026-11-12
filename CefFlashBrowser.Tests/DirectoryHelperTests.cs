@@ -6,7 +6,7 @@ using System.IO;
 namespace CefFlashBrowser.Tests
 {
     [TestClass]
-    public class DirectoryAccessCheckerTests
+    public class DirectoryHelperTests
     {
         private string _testDirectory;
 
@@ -15,7 +15,7 @@ namespace CefFlashBrowser.Tests
         {
             _testDirectory = Path.Combine(
                 Path.GetTempPath(),
-                "DirectoryAccessCheckerTests_" + Guid.NewGuid().ToString("N"));
+                "DirectoryHelperTests_" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(_testDirectory);
         }
 
@@ -27,32 +27,32 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public void CanReadAndWrite_WritableDirectory_ReturnsTrueWithoutLeavingProbeFile()
+        public void CanReadAndWriteDirectory_WritableDirectory_ReturnsTrueWithoutLeavingProbeFile()
         {
-            bool result = DirectoryAccessChecker.CanReadAndWrite(_testDirectory);
+            bool result = DirectoryHelper.CanReadAndWriteDirectory(_testDirectory);
 
             Assert.IsTrue(result);
             Assert.AreEqual(0, Directory.GetFileSystemEntries(_testDirectory).Length);
         }
 
         [TestMethod]
-        public void CanReadAndWrite_MissingDirectory_ReturnsFalseWithoutCreatingDirectory()
+        public void CanReadAndWriteDirectory_MissingDirectory_ReturnsFalseWithoutCreatingDirectory()
         {
             string missingDirectory = Path.Combine(_testDirectory, "missing");
 
-            bool result = DirectoryAccessChecker.CanReadAndWrite(missingDirectory);
+            bool result = DirectoryHelper.CanReadAndWriteDirectory(missingDirectory);
 
             Assert.IsFalse(result);
             Assert.IsFalse(Directory.Exists(missingDirectory));
         }
 
         [TestMethod]
-        public void CanReadAndWrite_FilePath_ReturnsFalse()
+        public void CanReadAndWriteDirectory_FilePath_ReturnsFalse()
         {
             string filePath = Path.Combine(_testDirectory, "file.txt");
             File.WriteAllText(filePath, "test");
 
-            Assert.IsFalse(DirectoryAccessChecker.CanReadAndWrite(filePath));
+            Assert.IsFalse(DirectoryHelper.CanReadAndWriteDirectory(filePath));
         }
     }
 }
