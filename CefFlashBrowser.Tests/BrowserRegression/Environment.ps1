@@ -95,7 +95,15 @@ function Initialize-RegressionEnvironment($Context) {
     [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.CefPath 'CefSharp.dll'))
     $applicationAssembly = [Reflection.Assembly]::LoadFrom((Join-Path $Context.ApplicationPath 'CefFlashBrowser.exe'))
     Assert-Regression ($applicationAssembly.GetManifestResourceNames() -contains 'CefFlashBrowser.Assets.SwfPlayer.swfplayer.html') 'SWF player page is embedded in the application'
-    [void][CefFlashBrowser.Utils.Win32]::SetDllDirectory($Context.CefPath)
+    $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
+    $globalDataType = $applicationAssembly.GetType('CefFlashBrowser.Data.GlobalData')
+    foreach ($nativePath in @{
+        CefDllPath = $Context.CefPath
+        SqliteDllPath = (Join-Path $Context.ApplicationPath 'Binaries\SQLite')
+    }.GetEnumerator()) {
+        $globalDataType.GetField('<' + $nativePath.Key + '>k__BackingField', $privateStatic).SetValue($null, $nativePath.Value)
+    }
+    [void]$applicationAssembly.GetType('CefFlashBrowser.Program').GetMethod('InitializeDllDirectories', $privateStatic).Invoke($null, $null)
     foreach ($dependency in @('CefSharp.Core.dll', 'CefSharp.WinForms.dll')) {
         [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.CefPath $dependency))
     }
@@ -118,14 +126,11 @@ function Initialize-RegressionEnvironment($Context) {
     [System.Windows.Application]::ResourceAssembly = $applicationAssembly
     $Context.Application = New-Object System.Windows.Application
     $Context.Application.ShutdownMode = [System.Windows.ShutdownMode]::OnExplicitShutdown
-    $globalDataType = $applicationAssembly.GetType('CefFlashBrowser.Data.GlobalData')
-    $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
     foreach ($dataPath in @{
         DataPath = $Context.TemporaryPath
         FavoritesPath = (Join-Path $Context.TemporaryPath 'favorites.json')
         SettingsPath = (Join-Path $Context.TemporaryPath 'settings.json')
         DatabasePath = (Join-Path $Context.TemporaryPath 'browser.db')
-        SqliteDllPath = (Join-Path $Context.ApplicationPath 'Binaries\SQLite')
     }.GetEnumerator()) {
         $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
     }
@@ -152,7 +157,6 @@ function Initialize-RegressionEnvironment($Context) {
 
     [Threading.SynchronizationContext]::SetSynchronizationContext(
         (New-Object System.Windows.Threading.DispatcherSynchronizationContext($Context.Application.Dispatcher)))
-    [void]$applicationAssembly.GetType('CefFlashBrowser.Program').GetMethod('InitializeSQLite', $privateStatic).Invoke($null, $null)
     $Context.Database = New-Object CefFlashBrowser.Database.SqliteDatabase((Join-Path $Context.TemporaryPath 'browser.db'))
     $Context.DatabaseService = New-Object CefFlashBrowser.Services.DatabaseService($Context.Database)
     $Context.FaviconService = New-Object CefFlashBrowser.Services.FaviconService($Context.DatabaseService, $Context.Logger)
