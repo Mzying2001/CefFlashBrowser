@@ -77,12 +77,7 @@ function Test-AuxiliaryBeforeShow($Context) {
             $auxView = $auxWindow.FindName('browserView')
             if ($auxWindow -isnot [CefFlashBrowser.Views.SwfPlayerWindow]) {
                 $auxWindow.Address = $Context.AuxiliaryAddress
-                $expectedAddress = if ($auxWindow -is [CefFlashBrowser.Views.ViewSourceWindow]) {
-                    'view-source:' + $Context.AuxiliaryAddress
-                } else {
-                    $Context.AuxiliaryAddress
-                }
-                Assert-Regression ($auxView.ViewModel.Address -eq $expectedAddress) "$($auxType.Name) accepts an address before Show"
+                Assert-Regression ($auxView.ViewModel.Address -eq $Context.AuxiliaryAddress) "$($auxType.Name) accepts an address before Show"
             }
             if ($force) { $auxWindow.ForceCloseWindow() } else { $auxWindow.Close() }
             Assert-AuxiliaryClosed $Context $auxWindow $auxView
@@ -110,9 +105,12 @@ function Test-CloseAllBrowsers($Context) {
     $readyWindow = New-RegressionWindow $Context
     New-RegressionTab $Context $readyWindow $Context.AuxiliaryAddress | Out-Null
     New-RegressionTab $Context $readyWindow $Context.AuxiliarySecondAddress | Out-Null
+    $readyWindow.ViewModel.ViewSource($readyWindow.ViewModel.CurrentBrowser)
+    Assert-ViewSourcePage $Context $readyWindow.ViewModel.CurrentBrowser ('view-source:' + $Context.AuxiliarySecondAddress) 'Second auxiliary page'
     $pendingWindow = New-RegressionWindow $Context -SkipWait
     $pendingWindow.ViewModel.AddBrowser('about:blank', $false) | Out-Null
     $pendingWindow.ViewModel.AddBrowser('about:blank', $true) | Out-Null
+    $pendingWindow.ViewModel.AddBrowser(('view-source:' + $Context.AuxiliaryAddress), $false) | Out-Null
     $pendingWindow.UpdateLayout()
     $browsers = @($readyWindow.ViewModel.Browsers) + @($pendingWindow.ViewModel.Browsers) |
         ForEach-Object { $_.Browser }

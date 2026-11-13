@@ -69,7 +69,6 @@ function Test-AuxiliaryWindows($Context) {
         $auxBrowser = $auxView.ViewModel.Browser
         Assert-Regression ($auxView -is [CefFlashBrowser.Views.BrowserView] -and $auxBrowser.IsBrowserInitialized) "$($auxType.Name) hosts BrowserView with its own initialized model"
         $expectedTitle = $auxView.ViewModel.Title
-        if ($null -eq $expectedTitle) { $expectedTitle = 'view-source' }
         Assert-Regression ($auxWindow.Title -eq $expectedTitle) "$($auxType.Name) binds its title to BrowserViewModel"
         $closeBinding = $auxWindow.InputBindings | Where-Object {
             $_.Key -eq [System.Windows.Input.Key]::W -and
@@ -89,14 +88,6 @@ function Test-AuxiliaryWindows($Context) {
             Test-EmbeddedSwfPlayer $Context $auxWindow $auxBrowser
             $auxWindow.Width = 910
             $auxWindow.Height = 610
-        } else {
-            # CEF reports source-view addresses without their prefix after navigation.
-            Assert-Regression ($auxWindow.Address -eq $Context.AuxiliaryAddress) 'source window retains its requested URL'
-            Assert-Regression ((Get-RegressionText $Context $auxBrowser).Contains('<title>Auxiliary regression</title>')) 'source window renders source markup'
-            Assert-Regression ((Get-RegressionSource $Context $auxBrowser).Contains('auxiliary-source-token')) 'source window displays the requested source'
-            $auxWindow.Address = $Context.AuxiliarySecondAddress
-            Wait-Regression $Context { (Get-RegressionSource $Context $auxBrowser).Contains('second-source-token') } 'source Address updates navigate to the requested source'
-            Assert-Regression ((Get-RegressionText $Context $auxBrowser).Contains('<title>Second auxiliary page</title>')) 'updated source address continues to render markup'
         }
         if ($auxWindow -isnot [CefFlashBrowser.Views.PopupWebPage]) {
             Assert-Regression ($auxBrowser.DragHandler -is [CefFlashBrowser.Browser.Handlers.DisableDragHandler]) "$($auxType.Name) keeps drag disabled"
@@ -123,21 +114,15 @@ function Test-AuxiliaryWindows($Context) {
         Wait-Regression $Context { $auxView.ViewModel.IntegratedDevToolsHandle -eq [IntPtr]::Zero } 'integrated DevTools closes'
         Assert-Regression ($auxWindow.IsVisible -and [CefFlashBrowser.Data.GlobalData]::Settings.IntegratedDevToolsWidth -eq 350) 'auxiliary DevTools closes independently and saves its width'
 
-        # Use an HTML document to exercise the source window's forced-close policy too.
         $auxView.ViewModel.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context { $auxWindow.Title -eq 'Auxiliary regression' -and $auxBrowser.CanExecuteJavascriptInMainFrame } 'beforeunload fixture ready'
         $dialogHandler = Set-RegressionBeforeUnload $Context $auxBrowser
         $auxWindow.Close()
-        if ($auxWindow -is [CefFlashBrowser.Views.ViewSourceWindow]) {
-            Wait-Regression $Context { !$auxWindow.IsVisible } 'source window force closes normally'
-            Assert-Regression ($dialogHandler.Count -eq 0) 'source window skips beforeunload confirmation'
-        } else {
-            Wait-Regression $Context { $dialogHandler.Count -gt 0 } "$($auxType.Name) requests beforeunload confirmation"
-            Assert-Regression $auxWindow.IsVisible "$($auxType.Name) stays open when beforeunload is cancelled"
-            $dialogHandler.Accept = $true
-            Invoke-BrowserCommand $closeBinding.Command ([bool]$closeBinding.CommandParameter)
-            Wait-Regression $Context { !$auxWindow.IsVisible } "$($auxType.Name) Ctrl+W closes after confirmation"
-        }
+        Wait-Regression $Context { $dialogHandler.Count -gt 0 } "$($auxType.Name) requests beforeunload confirmation"
+        Assert-Regression $auxWindow.IsVisible "$($auxType.Name) stays open when beforeunload is cancelled"
+        $dialogHandler.Accept = $true
+        Invoke-BrowserCommand $closeBinding.Command ([bool]$closeBinding.CommandParameter)
+        Wait-Regression $Context { !$auxWindow.IsVisible } "$($auxType.Name) Ctrl+W closes after confirmation"
         Assert-AuxiliaryClosed $Context $auxWindow $auxView
         if ($auxWindow -is [CefFlashBrowser.Views.SwfPlayerWindow]) {
             $size = [CefFlashBrowser.Data.GlobalData]::Settings.SwfWindowSizeInfo

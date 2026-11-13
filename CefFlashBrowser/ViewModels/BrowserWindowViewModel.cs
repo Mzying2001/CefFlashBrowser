@@ -46,6 +46,8 @@ namespace CefFlashBrowser.ViewModels
         private readonly ObservableCollection<BrowserViewModel> _browsers;
         public ReadOnlyObservableCollection<BrowserViewModel> Browsers { get; }
 
+        private readonly Dictionary<BrowserViewModel, BrowserViewModel> _browserOpeners;
+
         private bool _isClosing;
         public bool IsClosing
         {
@@ -114,9 +116,18 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowMainWindow();
         }
 
-        public void ViewSource(string url)
+        public void ViewSource(BrowserViewModel browser)
         {
-            WindowManager.ShowViewSourceWindow(url);
+            if (IsClosing || !IsBrowserReady(browser) || !_browsers.Contains(browser))
+                return;
+
+            var behavior = GlobalData.Settings.NewPageBehavior == NewPageBehavior.NewWindow
+                ? NewPageBehavior.NewWindow : NewPageBehavior.NewTab;
+
+            if (behavior == NewPageBehavior.NewWindow)
+                browser.ExitFullScreen();
+
+            OnNewPage(browser, UrlHelper.GetViewSourceAddress(browser.Address), behaviorOverride: behavior);
         }
 
         public void OpenInDefaultBrowser(string url)
@@ -233,7 +244,7 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private BrowserViewModel InsertBrowser(int index, string address, bool activate)
+        private BrowserViewModel InsertBrowser(int index, string address, bool activate, BrowserViewModel source = null)
         {
             if (IsClosing)
             {
@@ -242,6 +253,12 @@ namespace CefFlashBrowser.ViewModels
             }
 
             var browser = SimpleIoc.Global.GetInstance<BrowserViewModel>(address);
+
+            if (source != null)
+            {
+                _browserOpeners.Add(browser, source);
+            }
+
             _browsers.Insert(index, browser);
 
             if (activate || CurrentBrowser == null)
@@ -287,7 +304,7 @@ namespace CefFlashBrowser.ViewModels
                 return;
 
             InsertBrowser(_browsers.IndexOf(browser) + 1,
-                string.IsNullOrEmpty(browser.Address) ? "about:blank" : browser.Address, true);
+                string.IsNullOrEmpty(browser.Address) ? "about:blank" : browser.Address, true, browser);
         }
 
         public void MoveBrowser(BrowserViewModel browser, int index)
@@ -322,11 +339,23 @@ namespace CefFlashBrowser.ViewModels
                 return;
 
             bool wasCurrent = ReferenceEquals(CurrentBrowser, browser);
+            _browserOpeners.TryGetValue(browser, out var opener);
+
             _browsers.RemoveAt(index);
+            _browserOpeners.Remove(browser);
+
+            foreach (var child in _browsers)
+            {
+                if (_browserOpeners.TryGetValue(child, out var source) && ReferenceEquals(source, browser))
+                {
+                    _browserOpeners.Remove(child);
+                }
+            }
 
             if (wasCurrent)
             {
-                CurrentBrowser = _browsers.Count == 0 ? null : _browsers[Math.Min(index, _browsers.Count - 1)];
+                CurrentBrowser = (opener != null && _browsers.Contains(opener)) ? opener
+                    : (_browsers.Count == 0 ? null : _browsers[Math.Min(index, _browsers.Count - 1)]);
             }
         }
 
@@ -371,7 +400,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 case NewPageBehavior.NewTab:
                     {
-                        InsertBrowser(_browsers.IndexOf(source) + 1, url, activate);
+                        InsertBrowser(_browsers.IndexOf(source) + 1, url, activate, source);
                         break;
                     }
                 case NewPageBehavior.NewWindow:
@@ -447,13 +476,15 @@ namespace CefFlashBrowser.ViewModels
         public BrowserWindowViewModel()
         {
             _browsers = new ObservableCollection<BrowserViewModel>();
+            _browserOpeners = new Dictionary<BrowserViewModel, BrowserViewModel>();
+
             _browsers.CollectionChanged += OnBrowserCollectionChanged;
 
             Browsers = new ReadOnlyObservableCollection<BrowserViewModel>(_browsers);
             AddBrowser(null);
 
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
-            ViewSourceCommand = new DelegateCommand<string>(ViewSource);
+            ViewSourceCommand = new DelegateCommand<BrowserViewModel>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<BrowserViewModel>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<BrowserViewModel>(AddFavorite);

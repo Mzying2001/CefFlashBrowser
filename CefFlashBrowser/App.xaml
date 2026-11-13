@@ -62,7 +62,6 @@
             <sys:Uri x:Key="SearchIconUri">/Assets/Svgs/search.svg</sys:Uri>
             <sys:Uri x:Key="SettingsIconUri">/Assets/Svgs/settings.svg</sys:Uri>
             <sys:Uri x:Key="StarIconUri">/Assets/Svgs/star.svg</sys:Uri>
-            <sys:Uri x:Key="StopIconUri">/Assets/Svgs/stop.svg</sys:Uri>
             <sys:Uri x:Key="SubIconUri">/Assets/Svgs/sub.svg</sys:Uri>
             <sys:Uri x:Key="TrashIconUri">/Assets/Svgs/trash.svg</sys:Uri>
             <sys:Uri x:Key="UpIconUri">/Assets/Svgs/up.svg</sys:Uri>

@@ -100,6 +100,8 @@ namespace CefFlashBrowser.Views
                                 {
                                     var opensNewTab = view._ownerWindow is BrowserWindow
                                         && (commandId == OpenInNewTab
+                                            || (commandId == CefMenuCommand.ViewSource
+                                                && GlobalData.Settings.NewPageBehavior != NewPageBehavior.NewWindow)
                                             || ((commandId == Search || commandId == OpenSelectedUrl)
                                                 && GlobalData.Settings.NewPageBehavior == NewPageBehavior.NewTab));
 

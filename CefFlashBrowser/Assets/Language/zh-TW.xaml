@@ -133,7 +133,7 @@
     <sys:String x:Key="browser_tipsBlockedSwfs">部分Flash內容可能被Chromium核心封鎖，您可以在SWF播放器中播放：</sys:String>
     <sys:String x:Key="browser_toolTipBack">上一頁（Alt+向左鍵）</sys:String>
     <sys:String x:Key="browser_toolTipForward">下一頁（Alt+向右鍵）</sys:String>
-    <sys:String x:Key="browser_toolTipReload">重新整理（F5）</sys:String>
+    <sys:String x:Key="browser_toolTipReload">重新整理（Ctrl+R）</sys:String>
     <sys:String x:Key="browser_toolTipStop">停止（Esc）</sys:String>
     <sys:String x:Key="browser_toolTipNewTab">新分頁（Ctrl+T）</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">關閉分頁（Ctrl+W）</sys:String>

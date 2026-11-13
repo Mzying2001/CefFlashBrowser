@@ -52,14 +52,15 @@ $globalDataType = $applicationAssembly.GetType('CefFlashBrowser.Data.GlobalData'
 foreach ($dataPath in @{
     DatabasePath = $databasePath
     LogsPath = (Join-Path $temporaryPath 'Logs')
+    CefDllPath = (Join-Path $packagePath 'Binaries\CefSharp')
     SqliteDllPath = (Join-Path $packagePath 'Binaries\SQLite')
 }.GetEnumerator()) {
     $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
 }
-[void][CefFlashBrowser.Utils.Win32]::SetDllDirectory((Join-Path $packagePath 'Binaries\CefSharp'))
 [Threading.SynchronizationContext]::SetSynchronizationContext(
     (New-Object System.Windows.Threading.DispatcherSynchronizationContext))
 $programType = $applicationAssembly.GetType('CefFlashBrowser.Program')
+[void]$programType.GetMethod('InitializeDllDirectories', $privateStatic).Invoke($null, $null)
 $register = $programType.GetMethod('RegisterServices', $privateStatic)
 $unregister = $programType.GetMethod('UnregisterServices', $privateStatic)
 

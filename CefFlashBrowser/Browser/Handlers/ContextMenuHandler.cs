@@ -82,7 +82,14 @@ namespace CefFlashBrowser.Browser.Handlers
                 {
                     case CefMenuCommand.ViewSource:
                         {
-                            WindowManager.ShowViewSourceWindow(chromiumWebBrowser.Address);
+                            if (!chromiumWebBrowser.IsBrowserInitialized)
+                                break;
+
+                            var behavior = GlobalData.Settings.NewPageBehavior == NewPageBehavior.NewWindow
+                                ? NewPageBehavior.NewWindow : NewPageBehavior.NewTab;
+
+                            OpenPage(chromiumWebBrowser, browser,
+                                UrlHelper.GetViewSourceAddress(chromiumWebBrowser.Address), behavior);
                             result = true;
                             break;
                         }

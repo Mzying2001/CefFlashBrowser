@@ -133,7 +133,7 @@
     <sys:String x:Key="browser_tipsBlockedSwfs">一部の Flash コンテンツは Chromium カーネルによってブロックされているようです。SWF プレーヤーで再生できます:</sys:String>
     <sys:String x:Key="browser_toolTipBack">戻る (Alt+Left)</sys:String>
     <sys:String x:Key="browser_toolTipForward">進む (Alt+Right)</sys:String>
-    <sys:String x:Key="browser_toolTipReload">再読み込み (F5)</sys:String>
+    <sys:String x:Key="browser_toolTipReload">再読み込み (Ctrl+R)</sys:String>
     <sys:String x:Key="browser_toolTipStop">停止 (Esc)</sys:String>
     <sys:String x:Key="browser_toolTipNewTab">新しいタブ (Ctrl+T)</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">タブを閉じる (Ctrl+W)</sys:String>

@@ -30,7 +30,7 @@
     <Compile Include="..\CefFlashBrowser\Services\FaviconService.cs" Link="LinkedSources\FaviconService.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\WebsiteIconUrlConverter.cs" Link="LinkedSources\WebsiteIconUrlConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\UrlHelper.cs" Link="LinkedSources\UrlHelper.cs" />
-    <Compile Include="..\CefFlashBrowser\Utils\DirectoryAccessChecker.cs" Link="LinkedSources\DirectoryAccessChecker.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\DirectoryHelper.cs" Link="LinkedSources\DirectoryHelper.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\ValueConverterBase.cs" Link="LinkedSources\ValueConverterBase.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\BinaryToSizeStringConverter.cs" Link="LinkedSources\BinaryToSizeStringConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\ZoomLevelToScaleConverter.cs" Link="LinkedSources\ZoomLevelToScaleConverter.cs" />

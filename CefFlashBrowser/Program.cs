@@ -11,7 +11,6 @@ using SimpleMvvm.Ioc;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -28,7 +27,6 @@ namespace CefFlashBrowser
         private static bool _dataInitialized;
         private static Mutex _mutex;
 
-        private static IntPtr _sqliteLibraryHandle;
         private static IDatabase _database;
         private static FileLogger _logger;
         private static FavoritesService _favoritesService;
@@ -50,7 +48,7 @@ namespace CefFlashBrowser
         {
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            if (DirectoryAccessChecker.CanReadAndWrite(appDirectory))
+            if (DirectoryHelper.CanReadAndWriteDirectory(appDirectory))
             {
                 Run(args);
             }
@@ -68,11 +66,10 @@ namespace CefFlashBrowser
         {
             try
             {
+                InitializeDllDirectories();
+
                 RegisterServices();
                 _mutex = new Mutex(true, "CefFlashBrowser", out bool isNewInstance);
-
-                Win32.SetDllDirectory(GlobalData.CefDllPath);
-                AppDomain.CurrentDomain.AssemblyResolve += ResolveCefSharpAssembly;
 
                 if (isNewInstance)
                 {
@@ -129,6 +126,18 @@ namespace CefFlashBrowser
             catch (Exception e) { LogHelper.LogError("Exception occurred while waiting for tasks", e); }
         }
 
+        private static void InitializeDllDirectories()
+        {
+            if (!Win32.SetDefaultDllDirectories(Win32.LOAD_LIBRARY_SEARCH_DEFAULT_DIRS))
+                throw new Win32Exception(Marshal.GetLastWin32Error(), "Failed to configure native DLL search directories.");
+
+            foreach (string directory in new[] { GlobalData.CefDllPath, GlobalData.SqliteDllPath })
+            {
+                if (Win32.AddDllDirectory(directory) == IntPtr.Zero)
+                    throw new Win32Exception(Marshal.GetLastWin32Error(), $"Failed to add native DLL search directory '{directory}'.");
+            }
+        }
+
         private static void InitTheme()
         {
             ThemeManager.ChangeTheme(GlobalData.Settings.FollowSystemTheme ? ThemeManager.GetSystemTheme() : GlobalData.Settings.Theme);
@@ -142,14 +151,6 @@ namespace CefFlashBrowser
                 var theme = ThemeManager.GetSystemTheme();
                 ThemeManager.ChangeTheme(theme);
             }
-        }
-
-        private static Assembly ResolveCefSharpAssembly(object sender, ResolveEventArgs e)
-        {
-            // Load CefSharp dlls
-            string assemblyName = new AssemblyName(e.Name).Name;
-            string assemblyPath = Path.Combine(GlobalData.CefDllPath, assemblyName + ".dll");
-            return File.Exists(assemblyPath) ? Assembly.LoadFrom(assemblyPath) : null;
         }
 
         private static void InitCefFlash()
@@ -203,6 +204,7 @@ namespace CefFlashBrowser
             // so 1x1 "heartbeat" SWFs that some sites use to probe Flash availability never run.
             // Disabling the power saver lets those small instances start as well.
             settings.CefCommandLineArgs["override-plugin-power-saver-for-testing"] = "never";
+
             Cef.Initialize(settings);
         }
 
@@ -247,7 +249,7 @@ namespace CefFlashBrowser
                 () => new LanguageService(SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
 
             SimpleIoc.Global.Register<IDatabase>(
-                DatabaseFactory, Lifetime.Singleton);
+                () => _database = new SqliteDatabase(GlobalData.DatabasePath), Lifetime.Singleton);
 
             SimpleIoc.Global.Register<DatabaseService>(
                 () => new DatabaseService(SimpleIoc.Global.GetInstance<IDatabase>()), Lifetime.Singleton);
@@ -259,29 +261,6 @@ namespace CefFlashBrowser
             SimpleIoc.Global.Register<FaviconService>(
                 () => _faviconService = new FaviconService(
                     SimpleIoc.Global.GetInstance<DatabaseService>(), SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
-
-            IDatabase DatabaseFactory()
-            {
-                InitializeSQLite();
-                return _database = new SqliteDatabase(GlobalData.DatabasePath);
-            }
-        }
-
-        private static void InitializeSQLite()
-        {
-            if (_sqliteLibraryHandle != IntPtr.Zero)
-                return;
-
-            string libraryPath = Path.Combine(GlobalData.SqliteDllPath, "SQLite.Interop.dll");
-
-            // Keep the native module loaded until process exit, including queued database shutdown work.
-            _sqliteLibraryHandle = Win32.LoadLibrary(libraryPath);
-
-            if (_sqliteLibraryHandle == IntPtr.Zero)
-            {
-                int error = Marshal.GetLastWin32Error();
-                throw new Win32Exception(error, $"Failed to load SQLite native library '{libraryPath}' (Win32 error {error}).");
-            }
         }
 
         private static async Task InitializeFaviconsAsync()

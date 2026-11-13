@@ -699,6 +699,26 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnAddressChanged(object sender, AddressChangedEventArgs e)
         {
+            try
+            {
+                if (browser.IsDisposed || e.Browser.IsDisposed)
+                    return;
+
+                var entry = e.Browser.GetHost()?.GetVisibleNavigationEntry();
+
+                // CEF reports the underlying URL for source pages. Read the visible
+                // entry on the CEF UI thread before dispatching to WPF.
+                if (entry != null && entry.IsValid && entry.Url == e.Address
+                    && entry.DisplayUrl?.StartsWith("view-source:", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    e = new AddressChangedEventArgs(e.Browser, entry.DisplayUrl);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
+
             InvokeOnUIThread(delegate { OnAddressChanged(e); });
         }
 

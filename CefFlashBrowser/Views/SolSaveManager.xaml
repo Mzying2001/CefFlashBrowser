@@ -237,8 +237,8 @@
             <Button Margin="0,0,10,0"
                     Command="{Binding CurrentWorkspace.ReloadSolFilesCommand}"
                     ToolTip="{DynamicResource solSaveManager_toolTipReload}">
-                <svgc:SvgIcon Width="14"
-                              Height="14"
+                <svgc:SvgIcon Width="12"
+                              Height="12"
                               UriSource="{StaticResource ReloadIconUri}"/>
             </Button>
 

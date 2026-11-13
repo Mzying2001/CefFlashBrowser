@@ -29,6 +29,7 @@ foreach ($file in @(
     'Scenarios\BrowserTabs.ps1',
     'Scenarios\BrowserTabControl.ps1',
     'Scenarios\ContextMenu.ps1',
+    'Scenarios\ViewSource.ps1',
     'Scenarios\AuxiliaryWindows.ps1',
     'Scenarios\Lifecycle.ps1'
     'Scenarios\Favicons.ps1'
@@ -55,6 +56,7 @@ try {
     Test-BrowserCloseDuringInitialization $context
     Test-BrowserTabs $context
     Test-ContextMenu $context
+    Test-ViewSource $context
     Test-AuxiliaryWindows $context
     Test-CloseAllBrowsers $context
 } catch {
