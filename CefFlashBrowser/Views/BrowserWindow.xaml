@@ -836,7 +836,7 @@
                                     x:Name="closeTabButton"
                                     DockPanel.Dock="Right"
                                     Padding="0"
-                                    Margin="6,0,0,0"
+                                    Margin="4,0,0,0"
                                     Width="20"
                                     Height="20"
                                     BorderThickness="0"
