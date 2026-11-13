@@ -125,7 +125,7 @@ namespace CefFlashBrowser.Views
         private void TabSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Removing the selected item temporarily clears WPF's selection.
-            // The view model chooses its neighbor once collection removal finishes.
+            // The view model chooses the successor once collection removal finishes.
             if (tabList.SelectedItem is BrowserViewModel browser)
             {
                 ViewModel.CurrentBrowser = browser;

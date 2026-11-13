@@ -45,6 +45,70 @@ function Test-BrowserTabsBeforeShow($Context) {
     $window.Close()
     Assert-Regression ($model.Browsers.Count -eq 0) 'closing before Show removes all unrealized tabs'
     $window.ForceCloseWindow()
+    Test-BrowserTabOpenersBeforeShow $Context
+}
+
+function Test-BrowserTabOpenersBeforeShow($Context) {
+    $newTab = [CefFlashBrowser.Models.NewPageBehavior]::NewTab
+    foreach ($activate in @($true, $false)) {
+        $window = New-Object CefFlashBrowser.Views.BrowserWindow
+        try {
+            $model = $window.ViewModel
+            $source = $model.CurrentBrowser
+            $other = $model.AddBrowser('about:blank', $true)
+            $last = $model.AddBrowser('about:blank', $true)
+            $model.OnNewPage($source, 'about:blank', $activate, $newTab)
+            $child = $model.Browsers[1]
+            if (!$activate) {
+                Assert-Regression ($model.CurrentBrowser -eq $last) 'background child creation preserves the selected unrelated tab'
+                $model.CloseBrowser($child)
+                Assert-Regression ($model.CurrentBrowser -eq $last) 'closing a background child preserves the selected unrelated tab'
+                $model.OnNewPage($source, 'about:blank', $false, $newTab)
+                $child = $model.Browsers[1]
+            }
+
+            $source.Address = 'about:blank#source'
+            $child.Address = 'about:blank#child'
+            $model.MoveBrowser($child, 2)
+            $model.MoveBrowser($source, 3)
+            $model.CurrentBrowser = $child
+            $model.CloseBrowser($child)
+            Assert-Regression ($model.CurrentBrowser -eq $source -and $model.Browsers[1] -eq $last) "closing a reordered and navigated child returns to its opener instead of its right neighbor (activate=$activate)"
+
+            Invoke-BrowserCommand $model.AddBrowserCommand
+            $blank = $model.CurrentBrowser
+            $model.MoveBrowser($blank, 1)
+            $model.CloseBrowser($blank)
+            Assert-Regression ($model.CurrentBrowser -eq $last) 'manually created blank tabs use their original index instead of the previously selected tab'
+        } finally {
+            $window.ForceCloseWindow()
+        }
+    }
+
+    foreach ($lastPosition in @($false, $true)) {
+        $window = New-Object CefFlashBrowser.Views.BrowserWindow
+        try {
+            $model = $window.ViewModel
+            $ancestor = $model.CurrentBrowser
+            $other = $model.AddBrowser('about:blank', $false)
+            $last = $model.AddBrowser('about:blank', $false)
+            $model.OnNewPage($ancestor, 'about:blank', $true, $newTab)
+            $source = $model.CurrentBrowser
+            $model.OnNewPage($source, 'about:blank', $true, $newTab)
+            $child = $model.CurrentBrowser
+            $model.CloseBrowser($source)
+            Assert-Regression ($model.CurrentBrowser -eq $child) 'closing an opener in the background preserves its selected child'
+            $expected = $other
+            if ($lastPosition) {
+                $model.MoveBrowser($child, $model.Browsers.Count - 1)
+                $expected = $last
+            }
+            $model.CloseBrowser($child)
+            Assert-Regression ($model.CurrentBrowser -eq $expected -and $model.Browsers.Contains($ancestor)) "a closed direct opener falls back to the original index or final tab without returning to its ancestor (lastPosition=$lastPosition)"
+        } finally {
+            $window.ForceCloseWindow()
+        }
+    }
 }
 
 function Test-BrowserTabs($Context) {
@@ -66,6 +130,7 @@ function Test-BrowserTabs($Context) {
     Test-BrowserTabDragPreview $Context
     Test-BrowserTabCallbacks $Context
     Test-BrowserTabCloseCancellation $Context
+    Test-BrowserTabOpenerClosePending $Context
     Test-BrowserTabsReloadClose $Context
     Test-BrowserTabsWindowClose $Context
     Test-BrowserTabsForceClose $Context
@@ -156,7 +221,7 @@ function Test-BrowserTabKeyboardFocusRecovery($Context, $Window) {
 }
 
 function Test-BrowserTabCloseKeyboard($Context) {
-    foreach ($scenario in @('last', 'middle', 'address', 'blank')) {
+    foreach ($scenario in @('last', 'middle', 'address', 'blank', 'opener')) {
         $window = New-RegressionWindow $Context
         try {
             $model = $window.ViewModel
@@ -168,11 +233,19 @@ function Test-BrowserTabCloseKeyboard($Context) {
             $second = New-RegressionTab $Context $window $Context.AuxiliarySecondAddress
             $remaining = @($first)
             if ($scenario -ne 'blank') {
-                $third = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+                if ($scenario -eq 'opener') {
+                    $model.OnNewPage($first, $Context.AuxiliaryAddress, $true, [CefFlashBrowser.Models.NewPageBehavior]::NewTab)
+                    $third = $model.CurrentBrowser
+                    Wait-Regression $Context { $third.IsBrowserReady() -and $third.Browser.CanExecuteJavascriptInMainFrame } 'keyboard close child page loads'
+                } else {
+                    $third = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+                }
                 $remaining = @($second, $first)
                 if ($scenario -eq 'middle') {
                     $model.CurrentBrowser = $second
                     $remaining = @($third, $first)
+                } elseif ($scenario -eq 'opener') {
+                    $remaining = @($first, $second)
                 }
             }
             if ($scenario -eq 'last') {
@@ -188,7 +261,7 @@ function Test-BrowserTabCloseKeyboard($Context) {
                 $expectedCount = $model.Browsers.Count - 1
                 Send-TabCloseKey $window
                 Wait-Regression $Context { $model.Browsers.Count -eq $expectedCount } "real Ctrl+W closes a tab ($scenario, remaining=$expectedCount)" 5
-                Assert-Regression ($model.CurrentBrowser -eq $next) "Ctrl+W selects the expected neighbor ($scenario)"
+                Assert-Regression ($model.CurrentBrowser -eq $next) "Ctrl+W selects the expected successor ($scenario)"
             }
             if ($scenario -eq 'address' -or $scenario -eq 'blank') {
                 $address = $window.FindName('addressTextBox')
@@ -197,7 +270,7 @@ function Test-BrowserTabCloseKeyboard($Context) {
                     Assert-Regression ($address.SelectionLength -eq $address.Text.Length) 'blank successor selects the whole address'
                 }
             } else {
-                Assert-Regression (Invoke-JavaScript $Context $first.Browser 'document.hasFocus()') 'surviving page receives native focus'
+                Assert-Regression (Invoke-JavaScript $Context $model.CurrentBrowser.Browser 'document.hasFocus()') 'surviving page receives native focus'
             }
             Send-TabCloseKey $window
             Wait-Regression $Context { !$window.IsVisible } "real Ctrl+W closes the final tab and window ($scenario)" 5
@@ -416,7 +489,8 @@ function Test-BrowserTabContextMenu($Context) {
             $menu = Open-TabContextMenu $Context $window $duplicate
             Invoke-TabMenuItem $menu 3
             Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'tab menu closes its target'
-            Assert-Regression ($duplicate.Browser.IsDisposed -and $model.Browsers.Contains($last)) 'menu close releases only the target browser'
+            Assert-Regression ($duplicate.Browser.IsDisposed -and $model.Browsers.Contains($last) -and
+                $model.CurrentBrowser -eq $source) 'menu close releases the duplicate and returns to its source instead of its right neighbor'
         }
         $model.CurrentBrowser = $source
         Invoke-TabShortcut $window K ([System.Windows.Input.ModifierKeys]::Control -bor [System.Windows.Input.ModifierKeys]::Shift)
@@ -1078,6 +1152,16 @@ function Test-BrowserTabNewPageRouting($Context) {
         Wait-Regression $Context { $model.Browsers.Count -eq 5 } 'background source opens a new tab'
         Assert-Regression ($model.Browsers[1] -eq $foreground -and $model.Browsers[2] -eq $background -and $model.Browsers[3].Address -eq 'about:blank' -and $model.Browsers[4] -eq $last) 'background source inserts after itself instead of the selected tab'
         Assert-Regression ($model.CurrentBrowser -eq $foreground -and $model.Fullscreen) 'background source request preserves selection and fullscreen'
+
+        $nested = $model.Browsers[3]
+        $model.CurrentBrowser = $nested
+        $model.CloseBrowser($nested)
+        Wait-Regression $Context { $model.Browsers.Count -eq 4 } 'background-created nested tab closes'
+        Assert-Regression ($model.CurrentBrowser -eq $background) 'closing a background-created tab returns to its actual opener instead of the selected tab at creation'
+        $model.CurrentBrowser = $foreground
+        $model.CloseBrowser($foreground)
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 } 'foreground-created tab closes'
+        Assert-Regression ($model.CurrentBrowser -eq $first -and $model.Fullscreen) 'closing a foreground-created tab returns to its opener and preserves window fullscreen'
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior = $savedBehavior
         $window.ForceCloseWindow()
@@ -1314,7 +1398,10 @@ function Test-BrowserTabCloseCancellation($Context) {
     try {
         $model = $window.ViewModel
         $first = $model.CurrentBrowser
-        $second = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+        $last = New-RegressionTab $Context $window
+        $model.OnNewPage($first, $Context.AuxiliaryAddress, $true, [CefFlashBrowser.Models.NewPageBehavior]::NewTab)
+        $second = $model.CurrentBrowser
+        Wait-Regression $Context { $second.IsBrowserReady() -and $second.Browser.CanExecuteJavascriptInMainFrame } 'close cancellation child page loads'
         $view = Find-BrowserView $window $second
         $handler = Set-RegressionBeforeUnload $Context $second.Browser
         $model.CloseBrowser($second)
@@ -1322,13 +1409,40 @@ function Test-BrowserTabCloseCancellation($Context) {
         Wait-Regression $Context {
             $handler.Count -eq 1 -and $null -eq $view.GetType().GetField('_closeCompletion', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
         } 'single-tab close cancellation finishes'
-        Assert-Regression ($model.Browsers.Count -eq 2 -and !$second.Browser.IsDisposed) 'cancelled tab close preserves the tab'
+        Assert-Regression ($model.Browsers.Count -eq 3 -and $model.CurrentBrowser -eq $second -and !$second.Browser.IsDisposed) 'cancelled tab close preserves the tab and its selection'
         Assert-Regression ($handler.Count -eq 1) 'repeated tab close requests share one confirmation'
         $handler.Accept = $true
         $model.CloseBrowser($second)
-        Wait-Regression $Context { $model.Browsers.Count -eq 1 } 'cancelled tab can be closed again'
-        Assert-Regression ($model.CurrentBrowser -eq $first) 'retry selects the surviving tab'
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'cancelled tab can be closed again'
+        Assert-Regression ($model.CurrentBrowser -eq $first -and $model.Browsers[1] -eq $last) 'retry preserves the opener relationship and selects it instead of the right neighbor'
     } finally {
+        $window.ForceCloseWindow()
+    }
+}
+
+function Test-BrowserTabOpenerClosePending($Context) {
+    $window = New-RegressionWindow $Context
+    $handler = $null
+    try {
+        $model = $window.ViewModel
+        $source = $model.CurrentBrowser
+        $other = New-RegressionTab $Context $window
+        $last = New-RegressionTab $Context $window
+        $model.OnNewPage($source, $Context.AuxiliaryAddress, $true, [CefFlashBrowser.Models.NewPageBehavior]::NewTab)
+        $child = $model.CurrentBrowser
+        Wait-Regression $Context { $child.IsBrowserReady() -and $child.Browser.CanExecuteJavascriptInMainFrame } 'pending close child page loads'
+        $handler = Set-RegressionBeforeUnload $Context $child.Browser
+        $handler.Hold = $true
+        $model.CloseBrowser($child)
+        Wait-Regression $Context { $handler.Count -eq 1 } 'child close awaits confirmation'
+        $model.CloseBrowser($source)
+        Wait-Regression $Context { $model.Browsers.Count -eq 3 } 'opener closes while child confirmation is pending'
+        Assert-Regression ($model.CurrentBrowser -eq $child) 'closing the opener preserves the pending child selection'
+        $handler.CompletePending($true)
+        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'child closes after its opener was removed'
+        Assert-Regression ($model.CurrentBrowser -eq $other -and $model.Browsers[1] -eq $last) 'pending close uses the current collection index when its opener no longer exists'
+    } finally {
+        if ($null -ne $handler) { $handler.CompletePending($true) }
         $window.ForceCloseWindow()
     }
 }

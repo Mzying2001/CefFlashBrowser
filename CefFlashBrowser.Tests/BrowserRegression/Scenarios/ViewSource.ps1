@@ -65,6 +65,11 @@ function Test-ViewSourceRouting($Context) {
                     Wait-Regression $Context { !(Invoke-JavaScript $Context $source.Browser '!!document.fullscreenElement') } 'source command exits original HTML fullscreen'
                     Assert-Regression ($source.Address -eq $Context.AuxiliaryAddress -and
                         (Invoke-JavaScript $Context $source.Browser 'window.sourcePageToken') -eq 42) 'viewing source preserves the original page and its JavaScript state'
+                    if ($behavior -ne [CefFlashBrowser.Models.NewPageBehavior]::NewWindow) {
+                        $model.CloseBrowser($model.CurrentBrowser)
+                        Wait-Regression $Context { $model.Browsers.Count -eq 2 } 'source tab closes'
+                        Assert-Regression ($model.CurrentBrowser -eq $source) "$entryPoint source tab returns to its opener instead of its right neighbor ($behavior)"
+                    }
                 } finally {
                     foreach ($created in @($Context.Application.Windows | Where-Object { !$beforeWindows.Contains($_) })) {
                         $created.ForceCloseWindow()
