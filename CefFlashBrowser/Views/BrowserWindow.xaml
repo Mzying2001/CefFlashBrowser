@@ -676,8 +676,17 @@
                     <c:BrowserTab.ItemContainerStyle>
                         <Style TargetType="ListBoxItem"
                                BasedOn="{StaticResource {x:Static c:BrowserTab.ItemContainerStyleKey}}">
-                            <Setter Property="ToolTip"
-                                    Value="{Binding Address}"/>
+                            <Setter Property="ToolTip">
+                                <Setter.Value>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding Address}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                    </StackPanel>
+                                </Setter.Value>
+                            </Setter>
                             <Setter Property="Tag"
                                     Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
                             <Setter Property="ContextMenu">
@@ -881,10 +890,8 @@
                                 </Button>
                                 <TextBlock
                                     x:Name="tabTitle"
-                                    TextTrimming="CharacterEllipsis"
                                     VerticalAlignment="Center"
-                                    HorizontalAlignment="Left"
-                                    ToolTip="{Binding Title}">
+                                    TextTrimming="CharacterEllipsis">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Text" Value="{Binding Title}"/>
