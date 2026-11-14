@@ -79,6 +79,14 @@
     <PackageReference Include="SharpVectors" Version="1.8.4.2" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(Platform)' == 'x86'">
+    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x86" Version="3.0.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Platform)' == 'x64'">
+    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x64" Version="3.0.1" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\CefFlashBrowser.Database\CefFlashBrowser.Database.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj" />
@@ -98,7 +106,7 @@
       <_SQLiteInteropForPlatform Include="@(SQLiteInteropFiles)" Condition="'%(SQLiteInteropFiles.RecursiveDir)' == '$(Platform)\' And '%(SQLiteInteropFiles.Filename)%(SQLiteInteropFiles.Extension)' == 'SQLite.Interop.dll'" />
       <_LegacySQLiteDirectories Include="$(OutDir)x86;$(OutDir)x64" />
     </ItemGroup>
-    <Error Condition="'@(_SQLiteInteropForPlatform->Count())' != '1'" Text="Expected one SQLite.Interop.dll for platform '$(Platform)', found @(_SQLiteInteropForPlatform->Count())." />
+    <Error Condition="'@(_SQLiteInteropForPlatform-&gt;Count())' != '1'" Text="Expected one SQLite.Interop.dll for platform '$(Platform)', found @(_SQLiteInteropForPlatform-&gt;Count())." />
     <Error Condition="!Exists('%(_SQLiteInteropForPlatform.Identity)')" Text="SQLite native library not found: %(_SQLiteInteropForPlatform.Identity)" />
     <ItemGroup>
       <Content Include="@(_SQLiteInteropForPlatform)">
@@ -111,9 +119,7 @@
   </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="call &quot;$(MSBuildProjectDirectory)\..\postbuild.bat&quot;"
-          WorkingDirectory="$(TargetDir)"
-          EnvironmentVariables="CFB_BUILD_CONFIGURATION=$(Configuration);CFB_BUILD_PLATFORM=$(PlatformName)" />
+    <Exec Command="call &quot;$(MSBuildProjectDirectory)\..\postbuild.bat&quot;" WorkingDirectory="$(TargetDir)" EnvironmentVariables="CFB_BUILD_CONFIGURATION=$(Configuration);CFB_BUILD_PLATFORM=$(PlatformName)" />
   </Target>
 
 </Project>
