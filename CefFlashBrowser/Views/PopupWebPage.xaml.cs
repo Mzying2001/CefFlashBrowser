@@ -60,6 +60,11 @@ namespace CefFlashBrowser.Views
             {
                 // BrowserView releases the hosted browser when this window closes.
             }
+            else if (browser is ChromiumWebBrowser unhosted && !unhosted.IsNativeControlCreated)
+            {
+                browserView.Dispose();
+                _doClose = true;
+            }
             else if (browser is ChromiumWebBrowser wpfBrowser && !browser.IsBrowserInitialized)
             {
                 DeferCloseUntilBrowserInitialized(wpfBrowser);
@@ -164,6 +169,14 @@ namespace CefFlashBrowser.Views
                 return;
 
             var browser = ViewModel?.Browser;
+            if (browser is ChromiumWebBrowser unhosted && !unhosted.IsNativeControlCreated)
+            {
+                browserView.Dispose();
+                _doClose = true;
+                Close();
+                return;
+            }
+
             if (browser != null && !browser.IsDisposed)
             {
                 // Keep the native parent alive until asynchronous CEF creation finishes.

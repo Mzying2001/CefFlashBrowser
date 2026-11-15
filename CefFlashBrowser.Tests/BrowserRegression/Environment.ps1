@@ -18,6 +18,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         Database = $null
         DatabaseService = $null
         FaviconService = $null
+        UserScriptService = $null
         CefStarted = $false
         OriginalComSpec = [Environment]::GetEnvironmentVariable('ComSpec')
         AuxiliaryTypes = @()
@@ -181,6 +182,13 @@ function Initialize-RegressionEnvironment($Context) {
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.DatabaseService.PSObject.BaseObject))
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.FaviconService]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.FaviconService.PSObject.BaseObject))
+    $scriptStorage = New-Object CefFlashBrowser.Services.UserScripts.Persistence.UserScriptStorage($Context.Database, $Context.DatabaseService)
+    $scriptContent = New-Object CefFlashBrowser.Services.UserScripts.UserScriptContentService($null, $null, 10485760, $null)
+    $scriptPrompt = New-Object CefFlashBrowser.Browser.UserScripts.UserScriptPermissionPrompt
+    $Context.UserScriptService = New-Object CefFlashBrowser.Services.UserScripts.UserScriptService(
+        $scriptStorage, (Join-Path $Context.TemporaryPath 'MonkeySharp'), $scriptContent, $scriptPrompt, $null)
+    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.UserScripts.UserScriptService]).Invoke(
+        [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.UserScriptService.PSObject.BaseObject))
     $faviconInitialization = $Context.FaviconService.InitializeAsync()
     Wait-Regression $Context { $faviconInitialization.IsCompleted } 'isolated favicon database initialization'
     [void]$faviconInitialization.GetAwaiter().GetResult()
@@ -287,6 +295,15 @@ function Stop-RegressionEnvironment($Context) {
                     $cleanupErrors.Add($_)
                 }
             }
+        } catch {
+            $cleanupErrors.Add($_)
+        }
+    }
+    if ($null -ne $Context.UserScriptService) {
+        try {
+            $scripts = $Context.UserScriptService.StopAsync()
+            Wait-Regression $Context { $scripts.IsCompleted } 'userscript runtime shutdown'
+            [void]$scripts.GetAwaiter().GetResult()
         } catch {
             $cleanupErrors.Add($_)
         }

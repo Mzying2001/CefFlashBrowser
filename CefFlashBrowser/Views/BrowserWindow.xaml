@@ -941,7 +941,8 @@
             <ItemsControl x:Name="browsersControl" ItemsSource="{Binding Browsers}">
                 <ItemsControl.Resources>
                     <Style TargetType="{x:Type local:BrowserView}">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <!-- Hidden tabs still participate in native hosting and preparation. -->
+                        <Setter Property="Visibility" Value="Hidden"/>
                         <Style.Triggers>
                             <DataTrigger Value="True">
                                 <DataTrigger.Binding>

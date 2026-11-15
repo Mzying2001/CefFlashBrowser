@@ -23,7 +23,25 @@ function Wait-Regression($Context, [scriptblock]$Condition, [string]$Message, [i
 }
 
 function Invoke-JavaScript($Context, $Browser, [string]$Code) {
-    $evaluation = [CefSharp.WebBrowserExtensions]::EvaluateScriptAsync($Browser, $Code, [TimeSpan]::FromSeconds(5))
+    $deadline = [Diagnostics.Stopwatch]::StartNew()
+    while ($true) {
+        Wait-Regression $Context { $Browser.CanExecuteJavascriptInMainFrame } 'JavaScript context availability' 5
+        try {
+            $evaluation = [CefSharp.WebBrowserExtensions]::EvaluateScriptAsync($Browser, $Code, [TimeSpan]::FromSeconds(5))
+            break
+        } catch {
+            if ($deadline.Elapsed.TotalSeconds -ge 5 -or
+                !$_.Exception.GetBaseException().Message.StartsWith('Unable to execute javascript at this time', [StringComparison]::Ordinal)) {
+                throw
+            }
+            # Navigation can release the context between the readiness check and
+            # the extension's own check. Pump callbacks before a bounded retry.
+            $frame = New-Object System.Windows.Threading.DispatcherFrame
+            $stopFrame = [Action]({ $frame.Continue = $false }.GetNewClosure())
+            [void]$Context.Application.Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Background, $stopFrame)
+            [System.Windows.Threading.Dispatcher]::PushFrame($frame)
+        }
+    }
     Wait-Regression $Context { $evaluation.IsCompleted } 'JavaScript result'
     $response = $evaluation.GetAwaiter().GetResult()
 

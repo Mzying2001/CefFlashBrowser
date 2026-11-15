@@ -195,3 +195,14 @@ function Test-ViewSource($Context) {
     Test-ViewSourceNavigation $Context
     Test-AuxiliaryViewSource $Context
 }
+
+function Test-ViewSourceMinimal($Context) {
+    $window = New-RegressionWindow $Context
+    try {
+        $model = $window.ViewModel
+        $model.CurrentBrowser.Address = $Context.AuxiliarySecondAddress
+        Wait-Regression $Context { $model.CurrentBrowser.Title -eq 'Second auxiliary page' } 'source origin'
+        $model.ViewSource($model.CurrentBrowser)
+        Assert-ViewSourcePage $Context $model.CurrentBrowser ('view-source:' + $Context.AuxiliarySecondAddress) 'Second auxiliary page'
+    } finally { $window.ForceCloseWindow() }
+}

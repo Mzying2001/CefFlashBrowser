@@ -26,15 +26,19 @@ namespace CefFlashBrowser.Services.UserScripts
         public Task<PermissionDecision> AuthorizeAsync(ApiAuthorizationRequest request, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            var metadata = request.Installation.Definition.Metadata;
-            var world = UserScriptEngine.RequestedWorld(metadata);
-            var needsBridge = metadata.GrantDeclarationState == GrantDeclarationState.ExplicitList
-                && metadata.Grants.Any(grant => grant != "none" && grant != "GM.info");
-            if (world == null || metadata.Unwrap || world == "isolated" && metadata.Capabilities.Contains("unsafeWindow")
-                || world == "page" && needsBridge && !_trusted()
+            if (!IsWorldAvailable(request.Installation.Definition.Metadata, _trusted())
                 || _allowedPage != null && !_allowedPage(request.Frame.Url))
                 return Task.FromResult(PermissionDecision.Deny);
             return _inner.AuthorizeAsync(request, token);
+        }
+
+        public static bool IsWorldAvailable(UserScriptMetadata metadata, bool trusted)
+        {
+            var world = UserScriptEngine.RequestedWorld(metadata);
+            var needsBridge = metadata.GrantDeclarationState == GrantDeclarationState.ExplicitList
+                && metadata.Grants.Any(grant => grant != "none" && grant != "GM.info");
+            return world != null && !metadata.Unwrap && !(world == "isolated" && metadata.Capabilities.Contains("unsafeWindow"))
+                && !(world == "page" && needsBridge && !trusted);
         }
     }
 }

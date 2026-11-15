@@ -227,4 +227,6 @@ Allow this script to use this capability?</sys:String>
     <sys:String x:Key="userscript_denyRemember" xml:space="preserve">Deny and remember</sys:String>
     <sys:String x:Key="userscript_allowOnce" xml:space="preserve">Allow once</sys:String>
     <sys:String x:Key="userscript_allowRemember" xml:space="preserve">Allow and remember</sys:String>
+    <sys:String x:Key="userscript_unavailable">Userscripts are unavailable for this page</sys:String>
+    <sys:String x:Key="userscript_retry">Retry and navigate again</sys:String>
 </ResourceDictionary>

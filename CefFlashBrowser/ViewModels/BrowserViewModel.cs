@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.FlashBrowser;
+using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using SimpleMvvm;
@@ -10,6 +11,39 @@ namespace CefFlashBrowser.ViewModels
 {
     public class BrowserViewModel : ViewModelBase
     {
+        public string BrowserId { get; } = Guid.NewGuid().ToString("D");
+
+        private UserScriptState _userScriptState;
+        public UserScriptState UserScriptState
+        {
+            get => _userScriptState;
+            internal set => UpdateValue(ref _userScriptState, value);
+        }
+
+        private string _userScriptError;
+        public string UserScriptError
+        {
+            get => _userScriptError;
+            internal set => UpdateValue(ref _userScriptError, value);
+        }
+
+        private bool _userScriptsUnavailable;
+        public bool UserScriptsUnavailable
+        {
+            get => _userScriptsUnavailable;
+            internal set => UpdateValue(ref _userScriptsUnavailable, value);
+        }
+
+        private int _userScriptMatchCount;
+        public int UserScriptMatchCount
+        {
+            get => _userScriptMatchCount;
+            internal set => UpdateValue(ref _userScriptMatchCount, value);
+        }
+
+        public bool IsClosing { get; internal set; }
+        public bool HasDocument { get; internal set; }
+
         private IWebBrowser _browser;
         public IWebBrowser Browser
         {
@@ -87,7 +121,8 @@ namespace CefFlashBrowser.ViewModels
 
         public bool IsBrowserReady()
         {
-            return Browser != null && !Browser.IsDisposed && Browser.IsBrowserInitialized;
+            return !IsClosing && Browser != null && !Browser.IsDisposed && Browser.IsBrowserInitialized
+                && (HasDocument || Browser.IsLoading || Browser.CanExecuteJavascriptInMainFrame);
         }
 
         public void OnDevToolsOpened(IntPtr hDevTools)

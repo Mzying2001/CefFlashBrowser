@@ -29,6 +29,11 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         private volatile bool isBrowserInitialized;
         private CancellationTokenSource navigationCancellation;
         private long navigationVersion;
+        private Task disposalTask;
+        private bool disposalPrepared;
+
+        public Func<Task> BeforeDisposeAsync { get; set; }
+        public Task DisposalCompletion => disposalTask ?? Task.CompletedTask;
 
         // Set before hosting. The callback owns preparation and navigation; history
         // and page-initiated navigation continue to be handled by CEF.
@@ -477,6 +482,22 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected override void Dispose(bool disposing)
         {
+            if (disposing && !disposalPrepared && BeforeDisposeAsync != null)
+            {
+                if (disposalTask != null)
+                    return;
+                var preparation = BeforeDisposeAsync();
+                if (!preparation.IsCompleted)
+                {
+                    // A CEF callback can be waiting for this Dispatcher. Return
+                    // from it before awaiting native cleanup or destroying HWNDs.
+                    disposalTask = CompleteDisposalAsync(preparation);
+                    return;
+                }
+                preparation.GetAwaiter().GetResult();
+                disposalPrepared = true;
+            }
+
             isHosted = false;
             isBrowserInitialized = false;
             pendingAddress = null;
@@ -501,6 +522,19 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
             Cef.RemoveDisposable(this);
             base.Dispose(disposing);
+        }
+
+        private async Task CompleteDisposalAsync(Task preparation)
+        {
+            await preparation;
+            disposalPrepared = true;
+            Dispose(true);
+        }
+
+        public Task DisposeAsync()
+        {
+            Dispose();
+            return DisposalCompletion;
         }
 
         protected override bool TabIntoCore(TraversalRequest request)
@@ -756,6 +790,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                     return;
 
                 var entry = e.Browser.GetHost()?.GetVisibleNavigationEntry();
+
 
                 // CEF reports the underlying URL for source pages. Read the visible
                 // entry on the CEF UI thread before dispatching to WPF.

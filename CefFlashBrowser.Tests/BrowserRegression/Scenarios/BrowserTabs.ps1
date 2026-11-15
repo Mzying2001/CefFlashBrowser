@@ -600,6 +600,7 @@ function Test-BrowserTabLoadingMenu($Context) {
             }
             Invoke-TabMenuItem $menu 0
             Wait-Regression $Context { !$target.Browser.IsLoading } 'tab menu stops the pending request'
+            Assert-Regression ($fixture.SlowRequests -eq $requests + 1) 'stopping a CDP navigation does not retry the request'
             $menu = Open-TabContextMenu $Context $window $target
             Assert-Regression ($menu.Items[0].Header -eq $Context.LanguageService.GetString('browser_reload') -and
                 $menu.Items[0].Icon -eq $reloadIcon -and $menu.Items[0].InputGestureText -eq 'Ctrl+R' -and

@@ -227,4 +227,6 @@
     <sys:String x:Key="userscript_denyRemember" xml:space="preserve">拒绝并记住</sys:String>
     <sys:String x:Key="userscript_allowOnce" xml:space="preserve">允许一次</sys:String>
     <sys:String x:Key="userscript_allowRemember" xml:space="preserve">允许并记住</sys:String>
+    <sys:String x:Key="userscript_unavailable">本次页面未启用用户脚本</sys:String>
+    <sys:String x:Key="userscript_retry">重试并重新导航</sys:String>
 </ResourceDictionary>

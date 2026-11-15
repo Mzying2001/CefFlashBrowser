@@ -81,3 +81,11 @@ The full browser runner stopped at `status popup avoids the cursor using the ver
 before userscript changes; this remains a separately recorded baseline failure, not a passing suite.
 
 Use `Run.ps1 -Scenario UserScriptSeams` for the focused real-CEF creation, preparation, worker-readiness, async binding and native audio checks. The default runs the full suite. The initial status-popup failure did not recur in the subsequent full Debug x64 run.
+
+The runtime scenarios can be selected with `-Scenario UserScripts`, `BrowserDisposal`, `Loading`,
+`TabRouting`, `ViewSource`, or `Lifecycle`. They use the same isolated environment as the full suite.
+`UserScripts` installs temporary persistent fixtures through the repository and verifies first-page
+DOM execution, isolated synchronous storage bootstrap, SQLite writes, reload and stable tab identity.
+The disposal checks also cover direct disposal from a frame callback. Loading checks assert that
+stopping a CDP navigation never restarts its request. Background browser views remain hidden while
+participating in native hosting; SWF's application-owned page and source-view pages exclude scripts.
