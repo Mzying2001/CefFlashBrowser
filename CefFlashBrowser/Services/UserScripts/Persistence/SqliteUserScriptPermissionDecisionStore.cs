@@ -32,6 +32,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                         var encoded = Convert.ToInt64(value);
                         if (encoded != 1 && encoded != 2)
                             throw new InvalidOperationException("Invalid remembered permission decision.");
+
                         result = encoded == 1 ? PermissionDecision.Allow : PermissionDecision.Deny;
                     }
                 }).ConfigureAwait(false);
@@ -52,6 +53,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 token.ThrowIfCancellationRequested();
                 if (Convert.ToInt64(session.Scalar("SELECT COUNT(*) FROM monkeysharp_scripts WHERE script_id = @id", parameters)) == 0)
                     throw new KeyNotFoundException("The script installation has been removed.");
+
                 session.Execute(@"INSERT INTO monkeysharp_permission_decisions (script_id, kind, target, decision, updated_at)
                     VALUES (@id, @kind, @target, @decision, @updated)
                     ON CONFLICT(script_id, kind, target) DO UPDATE SET decision = excluded.decision, updated_at = excluded.updated_at", parameters);

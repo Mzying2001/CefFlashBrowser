@@ -30,6 +30,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 {
                     if (token.IsCancellationRequested || dispatcher.HasShutdownStarted)
                         return;
+
                     var language = SimpleIoc.Global.GetInstance<LanguageService>();
                     var message = language.GetFormattedString("userscript_permissionMessage",
                         request.Installation.Definition.Metadata.Name, scope.Kind, scope.Target);

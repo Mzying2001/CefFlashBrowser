@@ -43,7 +43,9 @@ namespace CefFlashBrowser.Browser.UserScripts
         {
             lock (_lock)
             {
-                if (_stopping) throw new ObjectDisposedException(nameof(UserScriptNotificationService));
+                if (_stopping)
+                    throw new ObjectDisposedException(nameof(UserScriptNotificationService));
+
                 var handle = new NotificationHandle(this, request, token);
                 _handles.Add(handle);
                 return handle;
@@ -64,21 +66,28 @@ namespace CefFlashBrowser.Browser.UserScripts
         {
             await Task.Yield();
             NotificationHandle[] handles;
-            lock (_lock) handles = _handles.ToArray();
-            foreach (var handle in handles) handle.Dispose();
+            lock (_lock)
+                handles = _handles.ToArray();
+
+            foreach (var handle in handles)
+                handle.Dispose();
+
             await Task.WhenAll(handles.Select(handle => handle.DrainAsync()));
         }
 
         private void RegisterTag(NotificationHandle handle, string tag)
         {
             _dispatcher.VerifyAccess();
-            if (tag == null) return;
+            if (tag == null)
+                return;
+
             NotificationHandle old;
             lock (_lock)
             {
                 _tags.TryGetValue(tag, out old);
                 _tags[tag] = handle;
             }
+
             old?.Dispose();
         }
 
@@ -89,11 +98,20 @@ namespace CefFlashBrowser.Browser.UserScripts
                 if (tag != null && _tags.TryGetValue(tag, out var current) && ReferenceEquals(current, handle))
                     _tags.Remove(tag);
             }
+
             await handle.DrainAsync();
-            lock (_lock) _handles.Remove(handle);
+            lock (_lock)
+                _handles.Remove(handle);
         }
 
-        private void Report() { try { _report?.Invoke(); } catch { } }
+        private void Report()
+        {
+            try
+            {
+                _report?.Invoke();
+            }
+            catch { }
+        }
 
         private sealed class NotificationHandle : INotificationHandle
         {
@@ -106,10 +124,17 @@ namespace CefFlashBrowser.Browser.UserScripts
             private UserScriptNotificationWindow _window;
             private DispatcherTimer _timer;
             private Task _imageTask;
-            private int _started, _closed, _clicked, _resolved;
+            private int _started;
+            private int _closed;
+            private int _clicked;
+            private int _resolved;
+
             private string Tag => string.IsNullOrEmpty(_request.Tag) ? null : _request.ScriptKey + "\n" + _request.Tag;
+
             public Task Completion => _completion.Task;
-            public event EventHandler Clicked, Closed;
+
+            public event EventHandler Clicked;
+            public event EventHandler Closed;
 
             public NotificationHandle(UserScriptNotificationService owner, UserScriptNotificationRequest request, CancellationToken token)
             {
@@ -121,9 +146,13 @@ namespace CefFlashBrowser.Browser.UserScripts
 
             public void Start()
             {
-                if (Interlocked.Exchange(ref _started, 1) != 0 || Volatile.Read(ref _closed) != 0) return;
+                if (Interlocked.Exchange(ref _started, 1) != 0 || Volatile.Read(ref _closed) != 0)
+                    return;
+
                 _registration = _token.Register(Dispose);
-                if (Volatile.Read(ref _closed) != 0) _registration.Dispose();
+                if (Volatile.Read(ref _closed) != 0)
+                    _registration.Dispose();
+
                 if (!_owner._dispatcher.HasShutdownStarted)
                     _owner._dispatcher.BeginInvoke(new Action(Show));
                 else
@@ -132,39 +161,42 @@ namespace CefFlashBrowser.Browser.UserScripts
 
             private async void Show()
             {
-                if (Volatile.Read(ref _closed) != 0) return;
+                if (Volatile.Read(ref _closed) != 0)
+                    return;
+
                 try
                 {
                     _token.ThrowIfCancellationRequested();
                     _owner.RegisterTag(this, Tag);
-                    if (_request.Highlight) await _owner._tabs.FocusAsync(null, _token);
+
+                    if (_request.Highlight)
+                        await _owner._tabs.FocusAsync(null, _token);
+
                     _token.ThrowIfCancellationRequested();
-                    if (string.IsNullOrEmpty(_request.Text)) { Finish(); return; }
-                    _window = WindowManager.CreateWindow<UserScriptNotificationWindow>();
-                    _window.SetMessage(_request.Title, _request.Text);
-                    _window.Owner = _owner._owner();
-                    _window.Clicked += (sender, e) =>
+                    if (string.IsNullOrEmpty(_request.Text))
                     {
-                        if (Interlocked.Exchange(ref _clicked, 1) == 0)
-                        {
-                            try { Clicked?.Invoke(this, EventArgs.Empty); }
-                            catch { _owner.Report(); Dispose(); }
-                        }
-                    };
-                    _window.Closed += (sender, e) => Finish();
-                    _window.Show();
-                    if (Volatile.Read(ref _closed) != 0) return;
-                    if (!_request.Silent) System.Media.SystemSounds.Asterisk.Play();
-                    if (_request.Timeout > 0)
-                    {
-                        _timer = new DispatcherTimer(DispatcherPriority.Normal, _owner._dispatcher)
-                        { Interval = TimeSpan.FromMilliseconds(_request.Timeout.Value) };
-                        _timer.Tick += Timeout;
-                        _timer.Start();
+                        Finish();
+                        return;
                     }
-                    if (!string.IsNullOrEmpty(_request.ImageUrl)) _imageTask = LoadImageAsync();
+
+                    CreateWindow();
+                    _window.Show();
+                    if (Volatile.Read(ref _closed) != 0)
+                        return;
+
+                    if (!_request.Silent)
+                        System.Media.SystemSounds.Asterisk.Play();
+
+                    if (_request.Timeout > 0)
+                        StartTimeout();
+
+                    if (!string.IsNullOrEmpty(_request.ImageUrl))
+                        _imageTask = LoadImageAsync();
                 }
-                catch (OperationCanceledException) { Dispose(); }
+                catch (OperationCanceledException)
+                {
+                    Dispose();
+                }
                 catch (Exception e)
                 {
                     _completion.TrySetException(e);
@@ -173,11 +205,46 @@ namespace CefFlashBrowser.Browser.UserScripts
                 }
             }
 
+            private void CreateWindow()
+            {
+                _window = WindowManager.CreateWindow<UserScriptNotificationWindow>();
+                _window.SetMessage(_request.Title, _request.Text);
+                _window.Owner = _owner._owner();
+
+                _window.Clicked += (sender, e) =>
+                {
+                    if (Interlocked.Exchange(ref _clicked, 1) == 0)
+                    {
+                        try
+                        {
+                            Clicked?.Invoke(this, EventArgs.Empty);
+                        }
+                        catch
+                        {
+                            _owner.Report();
+                            Dispose();
+                        }
+                    }
+                };
+                _window.Closed += (sender, e) => Finish();
+            }
+
+            private void StartTimeout()
+            {
+                _timer = new DispatcherTimer(DispatcherPriority.Normal, _owner._dispatcher)
+                {
+                    Interval = TimeSpan.FromMilliseconds(_request.Timeout.Value)
+                };
+                _timer.Tick += Timeout;
+                _timer.Start();
+            }
+
             private async Task LoadImageAsync()
             {
                 try
                 {
                     var content = await _owner._content.FetchAsync(_request.ImageUrl, false, false, _token).ConfigureAwait(false);
+
                     BitmapImage bitmap;
                     using (var stream = new MemoryStream(content.Bytes))
                     {
@@ -190,19 +257,26 @@ namespace CefFlashBrowser.Browser.UserScripts
                         bitmap.EndInit();
                         bitmap.Freeze();
                     }
+
                     _token.ThrowIfCancellationRequested();
                     await _owner._dispatcher.InvokeAsync(() =>
                     {
-                        if (Volatile.Read(ref _closed) == 0) _window.SetImage(bitmap);
+                        if (Volatile.Read(ref _closed) == 0)
+                            _window.SetImage(bitmap);
                     });
                 }
                 catch (OperationCanceledException) { }
-                catch (Exception) { _owner.Report(); }
+                catch (Exception)
+                {
+                    _owner.Report();
+                }
             }
 
             public void ResolveClick(bool preventDefault)
             {
-                if (Volatile.Read(ref _clicked) == 0 || Volatile.Read(ref _closed) != 0 || Interlocked.Exchange(ref _resolved, 1) != 0) return;
+                if (Volatile.Read(ref _clicked) == 0 || Volatile.Read(ref _closed) != 0 || Interlocked.Exchange(ref _resolved, 1) != 0)
+                    return;
+
                 _owner._dispatcher.BeginInvoke(new Action(async () =>
                 {
                     try
@@ -215,22 +289,43 @@ namespace CefFlashBrowser.Browser.UserScripts
                         }
                     }
                     catch (OperationCanceledException) { }
-                    catch (Exception) { _owner.Report(); }
-                    finally { Dispose(); }
+                    catch (Exception)
+                    {
+                        _owner.Report();
+                    }
+                    finally
+                    {
+                        Dispose();
+                    }
                 }));
             }
 
             private void Timeout(object sender, EventArgs e) => Dispose();
+
             public Task DrainAsync() => _imageTask ?? Task.CompletedTask;
 
             private void Finish()
             {
-                if (Interlocked.Exchange(ref _closed, 1) != 0) return;
-                if (_timer != null) { _timer.Stop(); _timer.Tick -= Timeout; }
+                if (Interlocked.Exchange(ref _closed, 1) != 0)
+                    return;
+
+                if (_timer != null)
+                {
+                    _timer.Stop();
+                    _timer.Tick -= Timeout;
+                }
+
                 _cancellation.Cancel();
                 _registration.Dispose();
-                try { Closed?.Invoke(this, EventArgs.Empty); }
-                catch { _owner.Report(); }
+                try
+                {
+                    Closed?.Invoke(this, EventArgs.Empty);
+                }
+                catch
+                {
+                    _owner.Report();
+                }
+
                 _completion.TrySetResult(null);
                 _ = ReleaseAsync();
             }
@@ -245,7 +340,9 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 if (_owner._dispatcher.CheckAccess())
                 {
-                    if (Volatile.Read(ref _closed) != 0) return;
+                    if (Volatile.Read(ref _closed) != 0)
+                        return;
+
                     _window?.Close();
                     Finish();
                 }
@@ -253,10 +350,21 @@ namespace CefFlashBrowser.Browser.UserScripts
                     _owner._dispatcher.BeginInvoke(new Action(Dispose));
                 else
                 {
-                    if (Interlocked.Exchange(ref _closed, 1) != 0) return;
+                    if (Interlocked.Exchange(ref _closed, 1) != 0)
+                        return;
+
                     _cancellation.Cancel();
                     _registration.Dispose();
-                    try { Closed?.Invoke(this, EventArgs.Empty); } catch { _owner.Report(); }
+                    try
+                    {
+                        Closed?.Invoke(this, EventArgs.Empty);
+                    }
+                    catch
+                    {
+                        _owner.Report();
+                    }
+
+
                     _completion.TrySetResult(null);
                     _ = ReleaseAsync();
                 }

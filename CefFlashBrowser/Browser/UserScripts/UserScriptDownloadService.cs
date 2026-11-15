@@ -26,9 +26,19 @@ namespace CefFlashBrowser.Browser.UserScripts
         private readonly Dispatcher _dispatcher;
         private readonly string _directory;
         private readonly CancellationToken _lifetime;
-        private bool _accepting = true, _disposed;
+        private bool _accepting = true;
+        private bool _disposed;
+
         public string DownloadMode => _pipeline.DownloadMode;
-        public int ActiveCount { get { lock (_lock) return _operations.Count; } }
+
+        public int ActiveCount
+        {
+            get
+            {
+                lock (_lock)
+                    return _operations.Count;
+            }
+        }
 
         public UserScriptDownloadService(IHttpRequestService http, BrowserViewModel model, Func<Window> owner,
             Dispatcher dispatcher, string directory, CancellationToken lifetime)
@@ -45,9 +55,12 @@ namespace CefFlashBrowser.Browser.UserScripts
         {
             lock (_lock)
             {
-                if (!_accepting) throw new ObjectDisposedException(nameof(UserScriptDownloadService));
+                if (!_accepting)
+                    throw new ObjectDisposedException(nameof(UserScriptDownloadService));
+
                 _lifetime.ThrowIfCancellationRequested();
                 var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, _lifetime);
+
                 try
                 {
                     // The pinned FileDownloadService only allocates an unstarted
@@ -59,7 +72,11 @@ namespace CefFlashBrowser.Browser.UserScripts
                     _ = operation.ObserveAsync();
                     return Task.FromResult<IDownloadOperation>(operation);
                 }
-                catch { cancellation.Dispose(); throw; }
+                catch
+                {
+                    cancellation.Dispose();
+                    throw;
+                }
             }
         }
 
@@ -74,7 +91,9 @@ namespace CefFlashBrowser.Browser.UserScripts
             var path = Path.Combine(_directory, name);
             var prompt = request.SaveAs || request.ConflictAction == "prompt"
                 || request.ConflictAction == "overwrite" && File.Exists(path);
-            if (!prompt) return new DownloadDestination(path, false);
+            if (!prompt)
+                return new DownloadDestination(path, false);
+
             var window = await _dispatcher.InvokeAsync(() =>
             {
                 token.ThrowIfCancellationRequested();
@@ -92,26 +111,47 @@ namespace CefFlashBrowser.Browser.UserScripts
                 });
                 return selected == null ? null : new DownloadDestination(selected, true);
             }
-            finally { picker.Release(); }
+            finally
+            {
+                picker.Release();
+            }
         }
 
         private void Post(Action action)
         {
-            if (_lifetime.IsCancellationRequested || _dispatcher.HasShutdownStarted) return;
-            _dispatcher.BeginInvoke(new Action(() => { if (!_lifetime.IsCancellationRequested && !_model.IsClosed) action(); }));
+            if (_lifetime.IsCancellationRequested || _dispatcher.HasShutdownStarted)
+                return;
+
+            _dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (!_lifetime.IsCancellationRequested && !_model.IsClosed)
+                    action();
+            }));
         }
 
-        public void Retire() { lock (_lock) _accepting = false; }
-        public Task DrainAsync() { lock (_lock) return Task.WhenAll(_operations.Values.Select(operation => operation.Drained).ToArray()); }
+        public void Retire()
+        {
+            lock (_lock)
+                _accepting = false;
+        }
+
+        public Task DrainAsync()
+        {
+            lock (_lock)
+                return Task.WhenAll(_operations.Values.Select(operation => operation.Drained).ToArray());
+        }
 
         public void Dispose()
         {
             lock (_lock)
             {
-                if (_disposed) return;
+                if (_disposed)
+                    return;
+
                 _disposed = true;
                 _accepting = false;
             }
+
             _pipeline.Dispose();
         }
 
@@ -123,12 +163,19 @@ namespace CefFlashBrowser.Browser.UserScripts
             private readonly CancellationTokenSource _cancellation;
             private readonly TaskCompletionSource<bool> _drained = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             private int _started;
+
             public Task Drained => _drained.Task;
+
             public string DownloadId => _inner.DownloadId;
+
             public DownloadResult Result => _inner.Result;
+
             public Task Completion => _inner.Completion;
+
             public event EventHandler<UserScriptDownloadProgress> Progress;
-            public event EventHandler Completed, Aborted, TimedOut;
+            public event EventHandler Completed;
+            public event EventHandler Aborted;
+            public event EventHandler TimedOut;
             public event EventHandler<UserScriptDownloadFailure> Failed;
 
             public Operation(UserScriptDownloadService owner, IDownloadOperation inner, string name, CancellationTokenSource cancellation)
@@ -137,40 +184,80 @@ namespace CefFlashBrowser.Browser.UserScripts
                 _inner = inner;
                 _cancellation = cancellation;
                 _item = new UserScriptDownloadItem(name, inner.Abort);
+
                 inner.Progress += (sender, value) =>
                 {
-                    owner.Post(() => { _item.Received = value.Loaded; _item.State = UserScriptDownloadState.Downloading; });
+                    owner.Post(() =>
+                    {
+                        _item.Received = value.Loaded;
+                        _item.State = UserScriptDownloadState.Downloading;
+                    });
+
                     Progress?.Invoke(this, value);
                 };
+
                 inner.Completed += (sender, e) =>
                 {
-                    owner.Post(() => { _item.FileName = inner.Result.Name; _item.Received = inner.Result.BytesReceived; _item.State = UserScriptDownloadState.Completed; });
+                    owner.Post(() =>
+                    {
+                        _item.FileName = inner.Result.Name;
+                        _item.Received = inner.Result.BytesReceived;
+                        _item.State = UserScriptDownloadState.Completed;
+                    });
+
                     Completed?.Invoke(this, EventArgs.Empty);
                 };
-                inner.Aborted += (sender, e) => { owner.Post(() => _item.State = UserScriptDownloadState.Cancelled); Aborted?.Invoke(this, EventArgs.Empty); };
-                inner.TimedOut += (sender, e) => { owner.Post(() => _item.State = UserScriptDownloadState.TimedOut); TimedOut?.Invoke(this, EventArgs.Empty); };
-                inner.Failed += (sender, e) => { owner.Post(() => _item.State = UserScriptDownloadState.Failed); Failed?.Invoke(this, e); };
+
+                inner.Aborted += (sender, e) =>
+                {
+                    owner.Post(() => _item.State = UserScriptDownloadState.Cancelled);
+                    Aborted?.Invoke(this, EventArgs.Empty);
+                };
+
+                inner.TimedOut += (sender, e) =>
+                {
+                    owner.Post(() => _item.State = UserScriptDownloadState.TimedOut);
+                    TimedOut?.Invoke(this, EventArgs.Empty);
+                };
+
+                inner.Failed += (sender, e) =>
+                {
+                    owner.Post(() => _item.State = UserScriptDownloadState.Failed);
+                    Failed?.Invoke(this, e);
+                };
             }
 
             public void Start()
             {
-                if (Interlocked.Exchange(ref _started, 1) != 0) return;
+                if (Interlocked.Exchange(ref _started, 1) != 0)
+                    return;
+
                 _owner.Post(() => _owner._model.UserScriptDownloads.Add(_item));
                 _inner.Start();
             }
 
             public async Task ObserveAsync()
             {
-                try { await _inner.Completion.ConfigureAwait(false); }
-                catch (Exception) { /* Terminal events already carry the outcome. */ }
+                try
+                {
+                    await _inner.Completion.ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    // Terminal events already carry the outcome.
+                }
                 finally
                 {
                     _cancellation.Dispose();
-                    lock (_owner._lock) _owner._operations.Remove(DownloadId);
+                    lock (_owner._lock)
+                        _owner._operations.Remove(DownloadId);
+
                     _drained.TrySetResult(true);
                 }
             }
+
             public void Abort() => _inner.Abort();
+
             public void Dispose() => _inner.Dispose();
         }
     }

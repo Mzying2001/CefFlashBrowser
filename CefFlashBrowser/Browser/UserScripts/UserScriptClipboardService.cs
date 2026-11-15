@@ -26,6 +26,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             var html = string.Equals(mediaType, "text/html", StringComparison.OrdinalIgnoreCase);
             if (!html && !string.Equals(mediaType, "text/plain", StringComparison.OrdinalIgnoreCase))
                 throw new NotSupportedException("Only text and HTML clipboard formats are supported.");
+
             using (var linked = CancellationTokenSource.CreateLinkedTokenSource(token, _lifetime))
             {
                 for (var attempt = 0; ; attempt++)
@@ -38,7 +39,9 @@ namespace CefFlashBrowser.Browser.UserScripts
                             linked.Token.ThrowIfCancellationRequested();
                             var data = new DataObject();
                             data.SetText(text ?? string.Empty, TextDataFormat.UnicodeText);
-                            if (html) data.SetData(DataFormats.Html, BuildHtml(text ?? string.Empty));
+                            if (html)
+                                data.SetData(DataFormats.Html, BuildHtml(text ?? string.Empty));
+
                             Clipboard.SetDataObject(data, true);
                         });
                         return;
@@ -56,11 +59,13 @@ namespace CefFlashBrowser.Browser.UserScripts
             const string header = "Version:1.0\r\nStartHTML:{0:D10}\r\nEndHTML:{1:D10}\r\nStartFragment:{2:D10}\r\nEndFragment:{3:D10}\r\n";
             const string prefix = "<html><body><!--StartFragment-->";
             const string suffix = "<!--EndFragment--></body></html>";
-            var start = Encoding.UTF8.GetByteCount(string.Format(CultureInfo.InvariantCulture, header, 0, 0, 0, 0));
-            var fragmentStart = start + Encoding.UTF8.GetByteCount(prefix);
+            var htmlStart = Encoding.UTF8.GetByteCount(string.Format(CultureInfo.InvariantCulture, header, 0, 0, 0, 0));
+            var fragmentStart = htmlStart + Encoding.UTF8.GetByteCount(prefix);
             var fragmentEnd = fragmentStart + Encoding.UTF8.GetByteCount(fragment);
-            return string.Format(CultureInfo.InvariantCulture, header, start,
-                fragmentEnd + Encoding.UTF8.GetByteCount(suffix), fragmentStart, fragmentEnd) + prefix + fragment + suffix;
+            var htmlEnd = fragmentEnd + Encoding.UTF8.GetByteCount(suffix);
+
+            return string.Format(CultureInfo.InvariantCulture, header, htmlStart, htmlEnd, fragmentStart, fragmentEnd)
+                + prefix + fragment + suffix;
         }
     }
 }

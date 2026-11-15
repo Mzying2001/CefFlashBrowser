@@ -55,6 +55,7 @@ namespace CefFlashBrowser.Services.UserScripts
         {
             lock (_lock)
                 ThrowIfStopping();
+
             return new SqliteUserScriptTabStateService(_storage, browserId);
         }
 
@@ -65,6 +66,7 @@ namespace CefFlashBrowser.Services.UserScripts
                 ThrowIfStopping();
                 if (_initializeTask == null || _initializeTask.IsFaulted || _initializeTask.IsCanceled)
                     _initializeTask = Task.Run(() => InitializeCoreAsync(null, null, _lifetime.Token));
+
                 return _initializeTask;
             }
         }
@@ -73,6 +75,7 @@ namespace CefFlashBrowser.Services.UserScripts
         {
             lock (_lock)
                 ThrowIfStopping();
+
             return _persistence.ReadMaintenanceAsync(token);
         }
 
@@ -129,6 +132,7 @@ namespace CefFlashBrowser.Services.UserScripts
                         _report?.Invoke("Userscript initialization failed; maintenance records remain available.", e);
                     }
                     catch { }
+
                     throw;
                 }
             }

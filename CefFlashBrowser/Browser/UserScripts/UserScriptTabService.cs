@@ -4,8 +4,8 @@ using CefFlashBrowser.Views;
 using Mzying2001.MonkeySharp.Core.Apis;
 using Mzying2001.MonkeySharp.Core.Runtime;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -38,17 +38,23 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         public async Task<ITabHandle> OpenAsync(OpenTabRequest request, CancellationToken token)
         {
-            if (request.Incognito == true) throw new NotSupportedException("Private script tabs are not supported.");
+            if (request.Incognito == true)
+                throw new NotSupportedException("Private script tabs are not supported.");
+
             if (!request.Url.IsAbsoluteUri || request.Url.Scheme != "http" && request.Url.Scheme != "https" && request.Url.AbsoluteUri != "about:blank")
                 throw new ArgumentException("Script tabs require HTTP(S) or about:blank.", nameof(request));
+
             return await _dispatcher.InvokeAsync(() =>
             {
                 token.ThrowIfCancellationRequested();
                 _lifetime.ThrowIfCancellationRequested();
-                if (_source.IsClosed || _source.IsClosing) throw new OperationCanceledException("The source tab is closing.");
+                if (_source.IsClosed || _source.IsClosing)
+                    throw new OperationCanceledException("The source tab is closing.");
+
                 var owner = _owner();
                 if (IsOwnerClosing(owner))
                     throw new InvalidOperationException("The source window is closing.");
+
                 var window = owner as BrowserWindow ?? Application.Current.Windows.OfType<BrowserWindow>()
                     .LastOrDefault(candidate => !candidate.ViewModel.IsClosing);
                 BrowserViewModel tab;
@@ -63,6 +69,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     tab = window.ViewModel.OpenUserScriptTab(opener, request.Url.AbsoluteUri, request.Active,
                         request.Insert, request.SetParent, request.InsertIndex);
                 }
+
                 return (ITabHandle)new TabHandle(window, tab);
             });
         }
@@ -73,8 +80,12 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 token.ThrowIfCancellationRequested();
                 _lifetime.ThrowIfCancellationRequested();
-                if (_source.IsClosed) return Task.FromResult(true);
-                if (_source.IsClosing) return Task.FromResult(false);
+                if (_source.IsClosed)
+                    return Task.FromResult(true);
+
+                if (_source.IsClosing)
+                    return Task.FromResult(false);
+
                 return ReserveClose(_source, () => _owner() is BrowserWindow window
                     ? window.CloseScriptTabAsync(_source) : _close());
             });
@@ -90,13 +101,20 @@ namespace CefFlashBrowser.Browser.UserScripts
                 token.ThrowIfCancellationRequested();
                 _lifetime.ThrowIfCancellationRequested();
                 var owner = _owner();
-                if (_source.IsClosed || _source.IsClosing || owner == null || IsOwnerClosing(owner)) return false;
+                if (_source.IsClosed || _source.IsClosing || owner == null || IsOwnerClosing(owner))
+                    return false;
+
                 if (owner is BrowserWindow window)
                 {
-                    if (window.ViewModel.IsClosing) return false;
+                    if (window.ViewModel.IsClosing)
+                        return false;
+
                     window.ViewModel.CurrentBrowser = _source;
                 }
-                if (owner.WindowState == WindowState.Minimized) owner.WindowState = WindowState.Normal;
+
+                if (owner.WindowState == WindowState.Minimized)
+                    owner.WindowState = WindowState.Normal;
+
                 return owner.Activate();
             });
         }
@@ -106,7 +124,9 @@ namespace CefFlashBrowser.Browser.UserScripts
             var count = 0;
             foreach (Window window in Application.Current.Windows)
             {
-                if (IsOwnerClosing(window)) continue;
+                if (IsOwnerClosing(window))
+                    continue;
+
                 if (window is BrowserWindow browserWindow)
                     count += browserWindow.ViewModel.Browsers.Count(tab => !tab.IsClosed && !tab.IsClosing && !_pendingCloses.ContainsKey(tab));
                 else if ((window is PopupWebPage || window is SwfPlayerWindow)
@@ -114,6 +134,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     && !_pendingCloses.ContainsKey(view.ViewModel))
                     count++;
             }
+
             return count > 1;
         }
 
@@ -126,9 +147,15 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         private static Task<bool> ReserveClose(BrowserViewModel tab, Func<Task<bool>> close)
         {
-            if (tab.IsClosed) return Task.FromResult(true);
-            if (_pendingCloses.TryGetValue(tab, out var pending)) return pending;
-            if (!CanCloseBrowser()) return Task.FromResult(false);
+            if (tab.IsClosed)
+                return Task.FromResult(true);
+
+            if (_pendingCloses.TryGetValue(tab, out var pending))
+                return pending;
+
+            if (!CanCloseBrowser())
+                return Task.FromResult(false);
+
             var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             _pendingCloses.Add(tab, completion.Task);
             _ = CompleteReservedCloseAsync(tab, close, completion);
@@ -137,9 +164,18 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         private static async Task CompleteReservedCloseAsync(BrowserViewModel tab, Func<Task<bool>> close, TaskCompletionSource<bool> completion)
         {
-            try { completion.TrySetResult(await close()); }
-            catch (Exception e) { completion.TrySetException(e); }
-            finally { _pendingCloses.Remove(tab); }
+            try
+            {
+                completion.TrySetResult(await close());
+            }
+            catch (Exception e)
+            {
+                completion.TrySetException(e);
+            }
+            finally
+            {
+                _pendingCloses.Remove(tab);
+            }
         }
 
         private static async Task<bool> WaitForCloseAsync(Task<bool> work, CancellationToken token)
@@ -158,8 +194,11 @@ namespace CefFlashBrowser.Browser.UserScripts
             private readonly BrowserWindow _window;
             private readonly BrowserViewModel _tab;
             private int _disposed;
+
             public string TabId => _tab.BrowserId;
+
             public bool Closed => _tab.IsClosed;
+
             public event EventHandler OnClose;
 
             public TabHandle(BrowserWindow window, BrowserViewModel tab)
@@ -176,7 +215,9 @@ namespace CefFlashBrowser.Browser.UserScripts
                 var close = await _window.Dispatcher.InvokeAsync(() =>
                 {
                     token.ThrowIfCancellationRequested();
-                    if (Closed) return Task.FromResult(true);
+                    if (Closed)
+                        return Task.FromResult(true);
+
                     return ReserveClose(_tab, () => _window.CloseScriptTabAsync(_tab));
                 });
                 await WaitForCloseAsync(close, token);
@@ -184,7 +225,8 @@ namespace CefFlashBrowser.Browser.UserScripts
 
             public void Dispose()
             {
-                if (Interlocked.Exchange(ref _disposed, 1) == 0) _tab.Closed -= TabClosed;
+                if (Interlocked.Exchange(ref _disposed, 1) == 0)
+                    _tab.Closed -= TabClosed;
             }
         }
     }

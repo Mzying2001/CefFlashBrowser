@@ -19,8 +19,14 @@ namespace CefFlashBrowser.Browser.UserScripts
             // Cancellation can arrive before the native dialog creates its HWND.
             // Its modal loop pumps this timer as well as the queued close attempt.
             var timer = new DispatcherTimer(DispatcherPriority.Normal, owner.Dispatcher)
-            { Interval = TimeSpan.FromMilliseconds(50) };
-            EventHandler tick = (sender, e) => { if (token.IsCancellationRequested) Close(handle, title); };
+            {
+                Interval = TimeSpan.FromMilliseconds(50)
+            };
+            EventHandler tick = (sender, e) =>
+            {
+                if (token.IsCancellationRequested)
+                    Close(handle, title);
+            };
             timer.Tick += tick;
             timer.Start();
             try
@@ -30,13 +36,20 @@ namespace CefFlashBrowser.Browser.UserScripts
                     token.ThrowIfCancellationRequested();
                     var dialog = new SaveFileDialog
                     {
-                        Title = title, FileName = name, InitialDirectory = directory,
-                        OverwritePrompt = true, AddExtension = false
+                        Title = title,
+                        FileName = name,
+                        InitialDirectory = directory,
+                        OverwritePrompt = true,
+                        AddExtension = false
                     };
                     return dialog.ShowDialog(owner) == true ? dialog.FileName : null;
                 }
             }
-            finally { timer.Stop(); timer.Tick -= tick; }
+            finally
+            {
+                timer.Stop();
+                timer.Tick -= tick;
+            }
         }
 
         private static void Close(IntPtr owner, string title)
@@ -44,23 +57,39 @@ namespace CefFlashBrowser.Browser.UserScripts
             EnumWindows((window, parameter) =>
             {
                 GetWindowThreadProcessId(window, out var process);
-                if (process != (uint)Process.GetCurrentProcess().Id || GetWindow(window, 4) != owner) return true;
+                if (process != (uint)Process.GetCurrentProcess().Id || GetWindow(window, 4) != owner)
+                    return true;
+
                 var text = new StringBuilder(256);
                 var className = new StringBuilder(64);
                 GetWindowText(window, text, text.Capacity);
                 GetClassName(window, className, className.Capacity);
-                if (text.ToString() != title || className.ToString() != "#32770") return true;
+                if (text.ToString() != title || className.ToString() != "#32770")
+                    return true;
+
                 PostMessage(window, 0x10, IntPtr.Zero, IntPtr.Zero);
                 return false;
             }, IntPtr.Zero);
         }
 
         private delegate bool WindowCallback(IntPtr window, IntPtr parameter);
-        [DllImport("user32.dll")] private static extern bool EnumWindows(WindowCallback callback, IntPtr parameter);
-        [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
-        [DllImport("user32.dll")] private static extern IntPtr GetWindow(IntPtr window, uint command);
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetWindowText(IntPtr window, StringBuilder text, int count);
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr window, StringBuilder text, int count);
-        [DllImport("user32.dll")] private static extern bool PostMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumWindows(WindowCallback callback, IntPtr parameter);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetWindow(IntPtr window, uint command);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern int GetWindowText(IntPtr window, StringBuilder text, int count);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern int GetClassName(IntPtr window, StringBuilder text, int count);
+
+        [DllImport("user32.dll")]
+        private static extern bool PostMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
     }
 }

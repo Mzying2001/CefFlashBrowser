@@ -24,7 +24,8 @@ namespace CefFlashBrowser.Browser.UserScripts
         private bool _disposed;
         private readonly Action _reportFailure;
 
-        public UserScriptMenuService(BrowserViewModel model, Dispatcher dispatcher, IUserScriptRepository repository, Func<CefSharpUserScriptHost> host, Action reportFailure = null)
+        public UserScriptMenuService(BrowserViewModel model, Dispatcher dispatcher, IUserScriptRepository repository,
+            Func<CefSharpUserScriptHost> host, Action reportFailure = null)
         {
             _model = model;
             _dispatcher = dispatcher;
@@ -33,15 +34,19 @@ namespace CefFlashBrowser.Browser.UserScripts
             _reportFailure = reportFailure;
         }
 
-        public async Task<IMenuRegistration> RegisterAsync(MenuCommandRequest request, Action<MenuCommandInvocation> invoked, CancellationToken token)
+        public async Task<IMenuRegistration> RegisterAsync(MenuCommandRequest request,
+            Action<MenuCommandInvocation> invoked, CancellationToken token)
         {
             var installation = await _repository.GetAsync(request.ScriptKey, token).ConfigureAwait(false);
+
             return await _dispatcher.InvokeAsync(() =>
             {
                 token.ThrowIfCancellationRequested();
                 lock (_lock)
                 {
-                    if (_disposed || _model.IsClosing) throw new OperationCanceledException();
+                    if (_disposed || _model.IsClosing)
+                        throw new OperationCanceledException();
+
                     var key = Tuple.Create(request.ScriptKey.ToString(), request.Name, request.Title ?? "", request.AccessKey ?? "");
                     if (!_groups.TryGetValue(key, out var group))
                     {
@@ -53,9 +58,15 @@ namespace CefFlashBrowser.Browser.UserScripts
                         _groups.Add(key, group);
                         _model.UserScriptMenus.Add(group.Command);
                     }
-                    var subscription = new Subscription { Request = request, Invoked = invoked };
+
+                    var subscription = new Subscription
+                    {
+                        Request = request,
+                        Invoked = invoked
+                    };
                     group.Subscriptions.Add(subscription);
                     Refresh(group);
+
                     return (IMenuRegistration)new Registration(() => _dispatcher.BeginInvoke(new Action(() =>
                     {
                         lock (_lock)
@@ -75,7 +86,8 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         public UserScriptMenuCommand[] GetCommands()
         {
-            lock (_lock) return _groups.Values.Select(group => group.Command).ToArray();
+            lock (_lock)
+                return _groups.Values.Select(group => group.Command).ToArray();
         }
 
         private static void Refresh(Group group)
@@ -94,27 +106,46 @@ namespace CefFlashBrowser.Browser.UserScripts
             Subscription[] subscriptions;
             lock (_lock)
             {
-                if (_disposed || _model.IsClosing || _model.IsClosed) return false;
+                if (_disposed || _model.IsClosing || _model.IsClosed)
+                    return false;
+
                 var group = _groups.Values.FirstOrDefault(item => ReferenceEquals(item.Command, command));
-                if (group == null) return false;
+                if (group == null)
+                    return false;
+
                 subscriptions = group.Subscriptions.ToArray();
             }
+
             foreach (var subscription in subscriptions)
             {
                 // Resolve while still inside the native callback. Never retain the
                 // borrowed IFrame for a later WPF click or toolbar invocation.
                 var frame = nativeFrame == null ? null : _host()?.ResolveMenuFrame(nativeFrame, subscription.Request);
-                if (subscription.Request.ClickedFrame && frame == null) continue;
+                if (subscription.Request.ClickedFrame && frame == null)
+                    continue;
+
                 var invocation = new MenuCommandInvocation
                 {
-                    Kind = "unknown", Frame = frame,
+                    Kind = "unknown",
+                    Frame = frame,
                     CtrlKey = nativeFrame != null ? flags.HasFlag(CefEventFlags.ControlDown) : Keyboard.Modifiers.HasFlag(ModifierKeys.Control),
                     ShiftKey = nativeFrame != null ? flags.HasFlag(CefEventFlags.ShiftDown) : Keyboard.Modifiers.HasFlag(ModifierKeys.Shift),
                     AltKey = nativeFrame != null ? flags.HasFlag(CefEventFlags.AltDown) : Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)
                 };
-                try { subscription.Invoked(invocation); }
-                catch { try { _reportFailure?.Invoke(); } catch { } }
+                try
+                {
+                    subscription.Invoked(invocation);
+                }
+                catch
+                {
+                    try
+                    {
+                        _reportFailure?.Invoke();
+                    }
+                    catch { }
+                }
             }
+
             return true;
         }
 
@@ -133,15 +164,22 @@ namespace CefFlashBrowser.Browser.UserScripts
             public UserScriptMenuCommand Command;
             public readonly List<Subscription> Subscriptions = new List<Subscription>();
         }
+
         private sealed class Subscription
         {
             public MenuCommandRequest Request;
             public Action<MenuCommandInvocation> Invoked;
         }
+
         private sealed class Registration : IMenuRegistration
         {
             private Action _remove;
-            public Registration(Action remove) { _remove = remove; }
+
+            public Registration(Action remove)
+            {
+                _remove = remove;
+            }
+
             public void Dispose() => Interlocked.Exchange(ref _remove, null)?.Invoke();
         }
     }

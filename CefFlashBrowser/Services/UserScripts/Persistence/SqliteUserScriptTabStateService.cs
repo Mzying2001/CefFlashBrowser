@@ -53,6 +53,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 };
                 if (Convert.ToInt64(session.Scalar("SELECT COUNT(*) FROM monkeysharp_scripts WHERE script_id = @id", parameters)) == 0)
                     throw new KeyNotFoundException("The script installation has been removed.");
+
                 session.Execute(@"INSERT INTO monkeysharp_tab_states (script_id, tab_id, json_value, updated_at)
                     VALUES (@id, @tab, @value, @updated)
                     ON CONFLICT(script_id, tab_id) DO UPDATE SET json_value = excluded.json_value, updated_at = excluded.updated_at", parameters);
@@ -84,6 +85,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             {
                 if (_close != null)
                     return _close;
+
                 _alive = false;
                 return _close = _storage.RunAsync(() => _storage.Database.ExecuteAsync(
                     "DELETE FROM monkeysharp_tab_states WHERE tab_id = @tab", new Dictionary<string, object> { ["@tab"] = _tabId }), CancellationToken.None);

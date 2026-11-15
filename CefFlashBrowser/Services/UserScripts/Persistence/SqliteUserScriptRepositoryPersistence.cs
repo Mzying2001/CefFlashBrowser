@@ -67,6 +67,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                         var bytes = ReadBounded(path);
                         if (Hash(bytes) != row.Hash)
                             throw new IOException("Source changed while reading the committed revision.");
+
                         source = Decode(bytes);
                     }
                     catch (Exception e) when (IsFileError(e))
@@ -74,11 +75,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                         diagnostics.Add(e.Message);
                         Report("Source unavailable for " + row.Key, e);
                     }
+
                     if (string.IsNullOrWhiteSpace(row.Prepared))
                         diagnostics.Add("Prepared revision is missing; explicit repair is required.");
+
                     result.Add(new UserScriptMaintenanceRecord(new UserScriptPersistenceRecord(row.Key,
                         source, row.Origin, row.Enabled, row.Installed, row.Updated, row.Prepared), diagnostics.AsReadOnly()));
                 }
+
                 CleanupOrphans(new HashSet<string>(stored.Select(row => row.Key.ToString()), StringComparer.OrdinalIgnoreCase));
                 _recoveryRequired = false;
                 return result.AsReadOnly();
@@ -97,6 +101,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             // Preserve a literal leading BOM in the logical source after BOM-aware decoding.
             if (record.Source.StartsWith("\uFEFF", StringComparison.Ordinal))
                 bytes = new byte[] { 239, 187, 191 }.Concat(bytes).ToArray();
+
             if (bytes.Length > MaximumSourceBytes)
                 throw new IOException("Source exceeds the 10 MiB limit.");
 
@@ -110,6 +115,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 if (old != null)
                     Recover(path, old.Hash);
+
                 if (HasTransitions(path))
                     throw new IOException("Unresolved source recovery files must be repaired before saving.");
 
@@ -131,8 +137,10 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                             stream.Write(bytes, 0, bytes.Length);
                             stream.Flush(true);
                         }
+
                         _checkpoint?.Invoke("pending");
                     }
+
                     await _storage.Database.TransactionAsync(session =>
                     {
                         token.ThrowIfCancellationRequested();
@@ -150,6 +158,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                                 File.Replace(path + ".pending", path, path + ".backup");
                             else
                                 File.Move(path + ".pending", path);
+
                             replaced = true;
                             _checkpoint?.Invoke("replaced");
                         }
@@ -161,6 +170,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     Rollback(path, replaced, existed, false, failure);
                     throw;
                 }
+
                 CleanupCommitted(path, false);
             }, token);
         }
@@ -188,6 +198,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                         var parameters = new Dictionary<string, object> { ["@id"] = key.ToString() };
                         foreach (var table in new[] { "monkeysharp_values", "monkeysharp_permission_decisions", "monkeysharp_tab_states", "monkeysharp_scripts" })
                             session.Execute("DELETE FROM " + table + " WHERE script_id = @id", parameters);
+
                         token.ThrowIfCancellationRequested();
                         if (File.Exists(path))
                         {
@@ -202,6 +213,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     Rollback(path, renamed, true, true, failure);
                     throw;
                 }
+
                 CleanupCommitted(path, true);
             }, token);
         }
@@ -220,6 +232,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     else
                         File.Delete(path);
                 }
+
                 CleanupFile(path + ".pending");
             }
             catch (Exception recoveryFailure)
@@ -242,6 +255,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 else
                     File.Move(candidate, path);
             }
+
             CleanupCommitted(path, false);
             return true;
         }
@@ -253,6 +267,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 _checkpoint?.Invoke("cleanup");
                 foreach (var suffix in new[] { ".pending", ".backup", ".deleted" })
                     CleanupFile(path + suffix);
+
                 if (deleting && Directory.Exists(Path.GetDirectoryName(path))
                     && !Directory.EnumerateFileSystemEntries(Path.GetDirectoryName(path)).Any())
                     Directory.Delete(Path.GetDirectoryName(path));
@@ -267,12 +282,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             if (!Directory.Exists(_root))
                 return;
+
             CheckReparse(_root);
             foreach (var directory in Directory.EnumerateDirectories(_root))
             {
                 var name = Path.GetFileName(directory);
                 if (known.Contains(name) || !ScriptKey.TryParse(name, out var key))
                     continue;
+
                 try
                 {
                     var path = SourcePath(key);
@@ -296,10 +313,12 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             var path = Path.GetFullPath(Path.Combine(_root, id, "userscript.js"));
             if (!path.StartsWith(_root.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
                 throw new IOException("Script path escaped the data directory.");
+
             CheckReparse(_root);
             CheckReparse(Path.GetDirectoryName(path));
             foreach (var suffix in new[] { "", ".pending", ".backup", ".deleted" })
                 CheckReparse(path + suffix);
+
             return path;
         }
 
@@ -320,6 +339,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 {
                     if (output.Length + count > MaximumSourceBytes)
                         throw new IOException("Source exceeds the 10 MiB limit.");
+
                     output.Write(buffer, 0, count);
                 }
 

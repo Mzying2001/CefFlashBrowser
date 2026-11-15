@@ -23,6 +23,7 @@ namespace CefFlashBrowser.Services.UserScripts
         {
             if (maximumBytes <= 0)
                 throw new ArgumentOutOfRangeException(nameof(maximumBytes));
+
             _maximumBytes = maximumBytes;
             _timeout = timeout ?? TimeSpan.FromSeconds(30);
             if (handler == null)
@@ -45,8 +46,10 @@ namespace CefFlashBrowser.Services.UserScripts
                         Credentials = string.IsNullOrEmpty(proxy.UserName) ? null : new NetworkCredential(proxy.UserName, proxy.PlainPassword)
                     };
                 }
+
                 handler = http;
             }
+
             _client = new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan };
         }
 
@@ -75,12 +78,15 @@ namespace CefFlashBrowser.Services.UserScripts
                         {
                             if (redirects == 10 || response.Headers.Location == null)
                                 throw new HttpRequestException("Invalid or excessive installation-content redirects.");
+
                             uri = RequireHttp(new Uri(uri, response.Headers.Location).AbsoluteUri);
                             continue;
                         }
+
                         response.EnsureSuccessStatusCode();
                         if (response.Content.Headers.ContentLength > _maximumBytes)
                             throw new IOException("Installation content exceeds its size limit.");
+
                         using (var input = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                         using (var output = new MemoryStream())
                         {
@@ -90,6 +96,7 @@ namespace CefFlashBrowser.Services.UserScripts
                             {
                                 if (output.Length + count > _maximumBytes)
                                     throw new IOException("Installation content exceeds its size limit.");
+
                                 output.Write(buffer, 0, count);
                             }
 

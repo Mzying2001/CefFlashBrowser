@@ -13,6 +13,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         private readonly Func<int> _originalCount;
         private readonly Action _reportLimit;
         private readonly Dictionary<CefMenuCommand, UserScriptMenuCommand> _commands = new Dictionary<CefMenuCommand, UserScriptMenuCommand>();
+
         public IContextMenuHandler Inner { get; }
 
         public UserScriptContextMenuHandler(IContextMenuHandler inner, UserScriptMenuService menus, Func<int> originalCount, Action reportLimit)
@@ -32,6 +33,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 model.Clear();
                 return;
             }
+
             var first = (int)CefMenuCommand.UserFirst;
             var last = (int)CefMenuCommand.UserLast - 4;
             var limit = Math.Min(ManualLimit, Math.Max(0, last - first + 1));
@@ -45,11 +47,18 @@ namespace CefFlashBrowser.Browser.UserScripts
                     removed = true;
                 }
             }
-            if (removed) _reportLimit();
+            if (removed)
+                _reportLimit();
+
             var command = first + limit;
             foreach (var item in _menus.GetCommands())
             {
-                if (command > last) { _reportLimit(); break; }
+                if (command > last)
+                {
+                    _reportLimit();
+                    break;
+                }
+
                 var id = (CefMenuCommand)command++;
                 _commands.Add(id, item);
                 model.AddItem(id, item.Name);
@@ -58,7 +67,9 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         public bool OnContextMenuCommand(IWebBrowser browser, IBrowser native, IFrame frame, IContextMenuParams parameters, CefMenuCommand id, CefEventFlags flags)
         {
-            if (GlobalData.Settings.DisableBrowserContextMenu) return true;
+            if (GlobalData.Settings.DisableBrowserContextMenu)
+                return true;
+
             return _commands.TryGetValue(id, out var command) ? _menus.Invoke(command, frame, flags)
                 : Inner.OnContextMenuCommand(browser, native, frame, parameters, id, flags);
         }
@@ -76,6 +87,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 callback.Cancel();
                 return true;
             }
+
             return Inner.RunContextMenu(browser, native, frame, parameters, model, callback);
         }
     }

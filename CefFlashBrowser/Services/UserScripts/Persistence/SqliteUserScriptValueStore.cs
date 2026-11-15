@@ -122,8 +122,10 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                             session.Execute(@"INSERT INTO monkeysharp_values (script_id, value_key, encoded_value, value_order, updated_at)
                                 VALUES (@id, @key, @value, (SELECT COALESCE(MAX(value_order), -1) + 1 FROM monkeysharp_values WHERE script_id = @id), @updated)
                                 ON CONFLICT(script_id, value_key) DO UPDATE SET encoded_value = excluded.encoded_value, updated_at = excluded.updated_at", parameters);
+
                         pending.Add(Tuple.Create(mutation.Key, old, value == null ? StoredValue.Missing : new StoredValue(true, value)));
                     }
+
                     token.ThrowIfCancellationRequested();
                 }).ConfigureAwait(false);
 
@@ -132,6 +134,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 var changes = pending.Select(item => _journal.Append(id, item.Item1, item.Item2, item.Item3, origin)).ToList();
                 foreach (var change in changes)
                     Publish(change);
+
                 return new UserScriptValueCommit(changes, _journal.Sequence(id));
             }, token);
         }
