@@ -5,6 +5,8 @@
     <Platforms>x86;x64</Platforms>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <UseWPF>true</UseWPF>
     <DefineConstants>$(DefineConstants);CEFFLASHBROWSER_TESTS</DefineConstants>
   </PropertyGroup>
@@ -13,6 +15,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
+    <PackageReference Include="Mzying2001.MonkeySharp.Core" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
@@ -20,6 +23,11 @@
     <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Database\CefFlashBrowser.Database.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\CefFlashBrowser\Services\UserScripts\Persistence\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
+    <Compile Include="..\CefFlashBrowser\Models\UserScripts\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <!-- Link source files from the main app -->
