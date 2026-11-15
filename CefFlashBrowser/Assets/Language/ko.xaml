@@ -192,6 +192,28 @@
     <sys:String x:Key="dialog_itemName">이름</sys:String>
     <sys:String x:Key="dialog_assocArray">연관 배열</sys:String>
 
+    <!--Userscripts-->
+    <sys:String x:Key="userscript_permissionTitle">사용자 스크립트 권한</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">스크립트: {0}&#xA;기능: {1}&#xA;대상: {2}&#xA;&#xA;이 스크립트에서 이 기능을 사용하도록 허용하시겠습니까?</sys:String>
+    <sys:String x:Key="userscript_denyRemember">거부하고 기억</sys:String>
+    <sys:String x:Key="userscript_allowOnce">한 번만 허용</sys:String>
+    <sys:String x:Key="userscript_allowRemember">허용하고 기억</sys:String>
+    <sys:String x:Key="userscript_unavailable">이 페이지에서는 사용자 스크립트를 사용할 수 없습니다</sys:String>
+    <sys:String x:Key="userscript_retry">다시 시도하고 페이지 새로 고침</sys:String>
+    <sys:String x:Key="userscript_commands">스크립트 명령</sys:String>
+    <sys:String x:Key="userscript_notification">사용자 스크립트 알림</sys:String>
+    <sys:String x:Key="userscript_notificationClose">닫기</sys:String>
+    <sys:String x:Key="userscript_notificationClick">알림 클릭</sys:String>
+    <sys:String x:Key="userscript_downloads">스크립트 다운로드</sys:String>
+    <sys:String x:Key="userscript_saveDownload">스크립트 다운로드 저장</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">대기 중</sys:String>
+    <sys:String x:Key="userscript_downloading">다운로드 중</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">완료</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">취소됨</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">시간 초과</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">실패</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">취소</sys:String>
+
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">URL을 입력하세요.</sys:String>
     <sys:String x:Key="message_deleteCache">모든 캐시를 삭제하시겠습니까? 브라우저가 다시 시작됩니다.</sys:String>
@@ -218,28 +240,4 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" 이름의 키/속성이 이미 있습니다.</sys:String>
     <sys:String x:Key="error_notSolFile">파일 "{0}"은(는) SOL 파일이 아닙니다.</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">알 수 없는 검색 엔진입니다.</sys:String>
-    <sys:String x:Key="userscript_permissionTitle" xml:space="preserve">Userscript permission</sys:String>
-    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script: {0}
-Capability: {1}
-Target: {2}
-
-Allow this script to use this capability?</sys:String>
-    <sys:String x:Key="userscript_denyRemember" xml:space="preserve">Deny and remember</sys:String>
-    <sys:String x:Key="userscript_allowOnce" xml:space="preserve">Allow once</sys:String>
-    <sys:String x:Key="userscript_allowRemember" xml:space="preserve">Allow and remember</sys:String>
-    <sys:String x:Key="userscript_unavailable">Userscripts are unavailable for this page</sys:String>
-    <sys:String x:Key="userscript_retry">Retry and navigate again</sys:String>
-    <sys:String x:Key="userscript_commands">Script commands</sys:String>
-    <sys:String x:Key="userscript_notification">Userscript notification</sys:String>
-    <sys:String x:Key="userscript_notificationClose">Close</sys:String>
-    <sys:String x:Key="userscript_notificationClick">Click notification</sys:String>
-    <sys:String x:Key="userscript_downloads">Script downloads</sys:String>
-    <sys:String x:Key="userscript_saveDownload">Save script download</sys:String>
-    <sys:String x:Key="userscript_downloadWaiting">Waiting</sys:String>
-    <sys:String x:Key="userscript_downloading">Downloading</sys:String>
-    <sys:String x:Key="userscript_downloadCompleted">Completed</sys:String>
-    <sys:String x:Key="userscript_downloadCancelled">Cancelled</sys:String>
-    <sys:String x:Key="userscript_downloadTimedOut">Timed out</sys:String>
-    <sys:String x:Key="userscript_downloadFailed">Failed</sys:String>
-    <sys:String x:Key="userscript_downloadCancel">Cancel</sys:String>
 </ResourceDictionary>

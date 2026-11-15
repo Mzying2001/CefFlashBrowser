@@ -192,6 +192,28 @@
     <sys:String x:Key="dialog_itemName">名称</sys:String>
     <sys:String x:Key="dialog_assocArray">关联数组</sys:String>
 
+    <!--用户脚本-->
+    <sys:String x:Key="userscript_permissionTitle">用户脚本权限</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">脚本：{0}&#xA;能力：{1}&#xA;目标：{2}&#xA;&#xA;是否允许此脚本使用该能力？</sys:String>
+    <sys:String x:Key="userscript_denyRemember">拒绝并记住</sys:String>
+    <sys:String x:Key="userscript_allowOnce">允许一次</sys:String>
+    <sys:String x:Key="userscript_allowRemember">允许并记住</sys:String>
+    <sys:String x:Key="userscript_unavailable">本次页面未启用用户脚本</sys:String>
+    <sys:String x:Key="userscript_retry">重试并重新导航</sys:String>
+    <sys:String x:Key="userscript_commands">脚本命令</sys:String>
+    <sys:String x:Key="userscript_notification">用户脚本通知</sys:String>
+    <sys:String x:Key="userscript_notificationClose">关闭</sys:String>
+    <sys:String x:Key="userscript_notificationClick">点击通知</sys:String>
+    <sys:String x:Key="userscript_downloads">脚本下载</sys:String>
+    <sys:String x:Key="userscript_saveDownload">保存脚本下载</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">等待中</sys:String>
+    <sys:String x:Key="userscript_downloading">下载中</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">已完成</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">已取消</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">已超时</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">失败</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">取消</sys:String>
+
     <!--提示信息-->
     <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
     <sys:String x:Key="message_deleteCache">确定要清除所有缓存吗？浏览器将会重启。</sys:String>
@@ -218,28 +240,4 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
     <sys:String x:Key="error_notSolFile">文件“{0}”不是SOL文件。</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">未知的搜索引擎。</sys:String>
-    <sys:String x:Key="userscript_permissionTitle" xml:space="preserve">用户脚本权限</sys:String>
-    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">脚本：{0}
-能力：{1}
-目标：{2}
-
-是否允许此脚本使用该能力？</sys:String>
-    <sys:String x:Key="userscript_denyRemember" xml:space="preserve">拒绝并记住</sys:String>
-    <sys:String x:Key="userscript_allowOnce" xml:space="preserve">允许一次</sys:String>
-    <sys:String x:Key="userscript_allowRemember" xml:space="preserve">允许并记住</sys:String>
-    <sys:String x:Key="userscript_unavailable">本次页面未启用用户脚本</sys:String>
-    <sys:String x:Key="userscript_retry">重试并重新导航</sys:String>
-    <sys:String x:Key="userscript_commands">脚本命令</sys:String>
-    <sys:String x:Key="userscript_notification">用户脚本通知</sys:String>
-    <sys:String x:Key="userscript_notificationClose">关闭</sys:String>
-    <sys:String x:Key="userscript_notificationClick">点击通知</sys:String>
-    <sys:String x:Key="userscript_downloads">脚本下载</sys:String>
-    <sys:String x:Key="userscript_saveDownload">保存脚本下载</sys:String>
-    <sys:String x:Key="userscript_downloadWaiting">等待中</sys:String>
-    <sys:String x:Key="userscript_downloading">下载中</sys:String>
-    <sys:String x:Key="userscript_downloadCompleted">已完成</sys:String>
-    <sys:String x:Key="userscript_downloadCancelled">已取消</sys:String>
-    <sys:String x:Key="userscript_downloadTimedOut">已超时</sys:String>
-    <sys:String x:Key="userscript_downloadFailed">失败</sys:String>
-    <sys:String x:Key="userscript_downloadCancel">取消</sys:String>
 </ResourceDictionary>

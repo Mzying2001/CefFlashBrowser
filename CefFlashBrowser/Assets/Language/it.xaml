@@ -192,6 +192,28 @@
     <sys:String x:Key="dialog_itemName">Nome</sys:String>
     <sys:String x:Key="dialog_assocArray">Array associativo</sys:String>
 
+    <!--Script utente-->
+    <sys:String x:Key="userscript_permissionTitle">Autorizzazione script utente</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script: {0}&#xA;Funzionalità: {1}&#xA;Destinazione: {2}&#xA;&#xA;Consentire a questo script di usare questa funzionalità?</sys:String>
+    <sys:String x:Key="userscript_denyRemember">Nega e ricorda</sys:String>
+    <sys:String x:Key="userscript_allowOnce">Consenti una volta</sys:String>
+    <sys:String x:Key="userscript_allowRemember">Consenti e ricorda</sys:String>
+    <sys:String x:Key="userscript_unavailable">Gli script utente non sono disponibili per questa pagina</sys:String>
+    <sys:String x:Key="userscript_retry">Riprova e ricarica la pagina</sys:String>
+    <sys:String x:Key="userscript_commands">Comandi degli script</sys:String>
+    <sys:String x:Key="userscript_notification">Notifica script utente</sys:String>
+    <sys:String x:Key="userscript_notificationClose">Chiudi</sys:String>
+    <sys:String x:Key="userscript_notificationClick">Fai clic sulla notifica</sys:String>
+    <sys:String x:Key="userscript_downloads">Download degli script</sys:String>
+    <sys:String x:Key="userscript_saveDownload">Salva il download dello script</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">In attesa</sys:String>
+    <sys:String x:Key="userscript_downloading">Download in corso</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">Completato</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">Annullato</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">Tempo scaduto</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">Non riuscito</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">Annulla</sys:String>
+
     <!--Messaggi-->
     <sys:String x:Key="message_emptyUrl">Prego, inserisci l'url.</sys:String>
     <sys:String x:Key="message_deleteCache">Sei sicuro di voler eliminare la cache? Il browser si riavvierà.</sys:String>
@@ -218,28 +240,4 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">Esiste già una chiave/proprietà con il nome "{0}".</sys:String>
     <sys:String x:Key="error_notSolFile">Il file "{0}" non è un file SOL.</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">Motore di ricerca sconosciuto.</sys:String>
-    <sys:String x:Key="userscript_permissionTitle" xml:space="preserve">Userscript permission</sys:String>
-    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script: {0}
-Capability: {1}
-Target: {2}
-
-Allow this script to use this capability?</sys:String>
-    <sys:String x:Key="userscript_denyRemember" xml:space="preserve">Deny and remember</sys:String>
-    <sys:String x:Key="userscript_allowOnce" xml:space="preserve">Allow once</sys:String>
-    <sys:String x:Key="userscript_allowRemember" xml:space="preserve">Allow and remember</sys:String>
-    <sys:String x:Key="userscript_unavailable">Userscripts are unavailable for this page</sys:String>
-    <sys:String x:Key="userscript_retry">Retry and navigate again</sys:String>
-    <sys:String x:Key="userscript_commands">Script commands</sys:String>
-    <sys:String x:Key="userscript_notification">Userscript notification</sys:String>
-    <sys:String x:Key="userscript_notificationClose">Close</sys:String>
-    <sys:String x:Key="userscript_notificationClick">Click notification</sys:String>
-    <sys:String x:Key="userscript_downloads">Script downloads</sys:String>
-    <sys:String x:Key="userscript_saveDownload">Save script download</sys:String>
-    <sys:String x:Key="userscript_downloadWaiting">Waiting</sys:String>
-    <sys:String x:Key="userscript_downloading">Downloading</sys:String>
-    <sys:String x:Key="userscript_downloadCompleted">Completed</sys:String>
-    <sys:String x:Key="userscript_downloadCancelled">Cancelled</sys:String>
-    <sys:String x:Key="userscript_downloadTimedOut">Timed out</sys:String>
-    <sys:String x:Key="userscript_downloadFailed">Failed</sys:String>
-    <sys:String x:Key="userscript_downloadCancel">Cancel</sys:String>
 </ResourceDictionary>

@@ -192,6 +192,28 @@
     <sys:String x:Key="dialog_itemName">Nom</sys:String>
     <sys:String x:Key="dialog_assocArray">Tableau associatif</sys:String>
 
+    <!--Userscripts-->
+    <sys:String x:Key="userscript_permissionTitle">Autorisation de script utilisateur</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script : {0}&#xA;Fonctionnalité : {1}&#xA;Cible : {2}&#xA;&#xA;Autoriser ce script à utiliser cette fonctionnalité ?</sys:String>
+    <sys:String x:Key="userscript_denyRemember">Refuser et mémoriser</sys:String>
+    <sys:String x:Key="userscript_allowOnce">Autoriser une fois</sys:String>
+    <sys:String x:Key="userscript_allowRemember">Autoriser et mémoriser</sys:String>
+    <sys:String x:Key="userscript_unavailable">Les scripts utilisateur ne sont pas disponibles sur cette page</sys:String>
+    <sys:String x:Key="userscript_retry">Réessayer et recharger la page</sys:String>
+    <sys:String x:Key="userscript_commands">Commandes de script</sys:String>
+    <sys:String x:Key="userscript_notification">Notification de script utilisateur</sys:String>
+    <sys:String x:Key="userscript_notificationClose">Fermer</sys:String>
+    <sys:String x:Key="userscript_notificationClick">Cliquer sur la notification</sys:String>
+    <sys:String x:Key="userscript_downloads">Téléchargements de scripts</sys:String>
+    <sys:String x:Key="userscript_saveDownload">Enregistrer le téléchargement du script</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">En attente</sys:String>
+    <sys:String x:Key="userscript_downloading">Téléchargement en cours</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">Terminé</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">Annulé</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">Délai dépassé</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">Échec</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">Annuler</sys:String>
+
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">Veuillez saisir l'url.</sys:String>
     <sys:String x:Key="message_deleteCache">Êtes-vous sûr de vouloir supprimer les caches ? Le navigateur devra redémarrer.</sys:String>
@@ -218,28 +240,4 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">La clé ou propriété "{0}" existe déjà.</sys:String>
     <sys:String x:Key="error_notSolFile">Le fichier "{0}" n'est pas un fichier SOL.</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">Moteur de recherche inconnu.</sys:String>
-    <sys:String x:Key="userscript_permissionTitle" xml:space="preserve">Userscript permission</sys:String>
-    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script: {0}
-Capability: {1}
-Target: {2}
-
-Allow this script to use this capability?</sys:String>
-    <sys:String x:Key="userscript_denyRemember" xml:space="preserve">Deny and remember</sys:String>
-    <sys:String x:Key="userscript_allowOnce" xml:space="preserve">Allow once</sys:String>
-    <sys:String x:Key="userscript_allowRemember" xml:space="preserve">Allow and remember</sys:String>
-    <sys:String x:Key="userscript_unavailable">Userscripts are unavailable for this page</sys:String>
-    <sys:String x:Key="userscript_retry">Retry and navigate again</sys:String>
-    <sys:String x:Key="userscript_commands">Script commands</sys:String>
-    <sys:String x:Key="userscript_notification">Userscript notification</sys:String>
-    <sys:String x:Key="userscript_notificationClose">Close</sys:String>
-    <sys:String x:Key="userscript_notificationClick">Click notification</sys:String>
-    <sys:String x:Key="userscript_downloads">Script downloads</sys:String>
-    <sys:String x:Key="userscript_saveDownload">Save script download</sys:String>
-    <sys:String x:Key="userscript_downloadWaiting">Waiting</sys:String>
-    <sys:String x:Key="userscript_downloading">Downloading</sys:String>
-    <sys:String x:Key="userscript_downloadCompleted">Completed</sys:String>
-    <sys:String x:Key="userscript_downloadCancelled">Cancelled</sys:String>
-    <sys:String x:Key="userscript_downloadTimedOut">Timed out</sys:String>
-    <sys:String x:Key="userscript_downloadFailed">Failed</sys:String>
-    <sys:String x:Key="userscript_downloadCancel">Cancel</sys:String>
 </ResourceDictionary>

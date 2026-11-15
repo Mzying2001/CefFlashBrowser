@@ -192,6 +192,28 @@
     <sys:String x:Key="dialog_itemName">名前</sys:String>
     <sys:String x:Key="dialog_assocArray">連想配列</sys:String>
 
+    <!--Userscripts-->
+    <sys:String x:Key="userscript_permissionTitle">ユーザースクリプトの権限</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">スクリプト：{0}&#xA;機能：{1}&#xA;対象：{2}&#xA;&#xA;このスクリプトにこの機能の使用を許可しますか？</sys:String>
+    <sys:String x:Key="userscript_denyRemember">拒否して記憶</sys:String>
+    <sys:String x:Key="userscript_allowOnce">今回のみ許可</sys:String>
+    <sys:String x:Key="userscript_allowRemember">許可して記憶</sys:String>
+    <sys:String x:Key="userscript_unavailable">このページではユーザースクリプトを利用できません</sys:String>
+    <sys:String x:Key="userscript_retry">再試行してページを再読み込み</sys:String>
+    <sys:String x:Key="userscript_commands">スクリプトコマンド</sys:String>
+    <sys:String x:Key="userscript_notification">ユーザースクリプトの通知</sys:String>
+    <sys:String x:Key="userscript_notificationClose">閉じる</sys:String>
+    <sys:String x:Key="userscript_notificationClick">通知をクリック</sys:String>
+    <sys:String x:Key="userscript_downloads">スクリプトのダウンロード</sys:String>
+    <sys:String x:Key="userscript_saveDownload">スクリプトのダウンロードを保存</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">待機中</sys:String>
+    <sys:String x:Key="userscript_downloading">ダウンロード中</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">完了</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">キャンセル済み</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">タイムアウト</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">失敗</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">キャンセル</sys:String>
+
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">URL を入力してください。</sys:String>
     <sys:String x:Key="message_deleteCache">すべてのキャッシュを削除しますか？ブラウザーが再起動します。</sys:String>
@@ -218,28 +240,4 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" という名前のキー/プロパティは既に存在します。</sys:String>
     <sys:String x:Key="error_notSolFile">ファイル "{0}" は SOL ファイルではありません。</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">不明な検索エンジンです。</sys:String>
-    <sys:String x:Key="userscript_permissionTitle" xml:space="preserve">Userscript permission</sys:String>
-    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script: {0}
-Capability: {1}
-Target: {2}
-
-Allow this script to use this capability?</sys:String>
-    <sys:String x:Key="userscript_denyRemember" xml:space="preserve">Deny and remember</sys:String>
-    <sys:String x:Key="userscript_allowOnce" xml:space="preserve">Allow once</sys:String>
-    <sys:String x:Key="userscript_allowRemember" xml:space="preserve">Allow and remember</sys:String>
-    <sys:String x:Key="userscript_unavailable">Userscripts are unavailable for this page</sys:String>
-    <sys:String x:Key="userscript_retry">Retry and navigate again</sys:String>
-    <sys:String x:Key="userscript_commands">Script commands</sys:String>
-    <sys:String x:Key="userscript_notification">Userscript notification</sys:String>
-    <sys:String x:Key="userscript_notificationClose">Close</sys:String>
-    <sys:String x:Key="userscript_notificationClick">Click notification</sys:String>
-    <sys:String x:Key="userscript_downloads">Script downloads</sys:String>
-    <sys:String x:Key="userscript_saveDownload">Save script download</sys:String>
-    <sys:String x:Key="userscript_downloadWaiting">Waiting</sys:String>
-    <sys:String x:Key="userscript_downloading">Downloading</sys:String>
-    <sys:String x:Key="userscript_downloadCompleted">Completed</sys:String>
-    <sys:String x:Key="userscript_downloadCancelled">Cancelled</sys:String>
-    <sys:String x:Key="userscript_downloadTimedOut">Timed out</sys:String>
-    <sys:String x:Key="userscript_downloadFailed">Failed</sys:String>
-    <sys:String x:Key="userscript_downloadCancel">Cancel</sys:String>
 </ResourceDictionary>

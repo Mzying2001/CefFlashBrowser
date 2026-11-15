@@ -192,6 +192,28 @@
     <sys:String x:Key="dialog_itemName">Имя</sys:String>
     <sys:String x:Key="dialog_assocArray">Ассоциативный массив</sys:String>
 
+    <!--Userscripts-->
+    <sys:String x:Key="userscript_permissionTitle">Разрешение для пользовательского скрипта</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Скрипт: {0}&#xA;Функция: {1}&#xA;Цель: {2}&#xA;&#xA;Разрешить этому скрипту использовать эту функцию?</sys:String>
+    <sys:String x:Key="userscript_denyRemember">Запретить и запомнить</sys:String>
+    <sys:String x:Key="userscript_allowOnce">Разрешить один раз</sys:String>
+    <sys:String x:Key="userscript_allowRemember">Разрешить и запомнить</sys:String>
+    <sys:String x:Key="userscript_unavailable">Пользовательские скрипты недоступны на этой странице</sys:String>
+    <sys:String x:Key="userscript_retry">Повторить попытку и перезагрузить страницу</sys:String>
+    <sys:String x:Key="userscript_commands">Команды скриптов</sys:String>
+    <sys:String x:Key="userscript_notification">Уведомление пользовательского скрипта</sys:String>
+    <sys:String x:Key="userscript_notificationClose">Закрыть</sys:String>
+    <sys:String x:Key="userscript_notificationClick">Нажать на уведомление</sys:String>
+    <sys:String x:Key="userscript_downloads">Загрузки скриптов</sys:String>
+    <sys:String x:Key="userscript_saveDownload">Сохранить загрузку скрипта</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">Ожидание</sys:String>
+    <sys:String x:Key="userscript_downloading">Загрузка</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">Завершено</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">Отменено</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">Время ожидания истекло</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">Ошибка</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">Отмена</sys:String>
+
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">Введите URL.</sys:String>
     <sys:String x:Key="message_deleteCache">Удалить весь кэш? Браузер будет перезапущен.</sys:String>
@@ -218,28 +240,4 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">Ключ/свойство с именем "{0}" уже существует.</sys:String>
     <sys:String x:Key="error_notSolFile">Файл "{0}" не является SOL-файлом.</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">Неизвестная поисковая система.</sys:String>
-    <sys:String x:Key="userscript_permissionTitle" xml:space="preserve">Userscript permission</sys:String>
-    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script: {0}
-Capability: {1}
-Target: {2}
-
-Allow this script to use this capability?</sys:String>
-    <sys:String x:Key="userscript_denyRemember" xml:space="preserve">Deny and remember</sys:String>
-    <sys:String x:Key="userscript_allowOnce" xml:space="preserve">Allow once</sys:String>
-    <sys:String x:Key="userscript_allowRemember" xml:space="preserve">Allow and remember</sys:String>
-    <sys:String x:Key="userscript_unavailable">Userscripts are unavailable for this page</sys:String>
-    <sys:String x:Key="userscript_retry">Retry and navigate again</sys:String>
-    <sys:String x:Key="userscript_commands">Script commands</sys:String>
-    <sys:String x:Key="userscript_notification">Userscript notification</sys:String>
-    <sys:String x:Key="userscript_notificationClose">Close</sys:String>
-    <sys:String x:Key="userscript_notificationClick">Click notification</sys:String>
-    <sys:String x:Key="userscript_downloads">Script downloads</sys:String>
-    <sys:String x:Key="userscript_saveDownload">Save script download</sys:String>
-    <sys:String x:Key="userscript_downloadWaiting">Waiting</sys:String>
-    <sys:String x:Key="userscript_downloading">Downloading</sys:String>
-    <sys:String x:Key="userscript_downloadCompleted">Completed</sys:String>
-    <sys:String x:Key="userscript_downloadCancelled">Cancelled</sys:String>
-    <sys:String x:Key="userscript_downloadTimedOut">Timed out</sys:String>
-    <sys:String x:Key="userscript_downloadFailed">Failed</sys:String>
-    <sys:String x:Key="userscript_downloadCancel">Cancel</sys:String>
 </ResourceDictionary>
