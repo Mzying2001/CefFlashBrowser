@@ -29,13 +29,16 @@ namespace CefFlashBrowser.Services.UserScripts
             {
                 var http = new HttpClientHandler
                 {
-                    AllowAutoRedirect = false, UseCookies = false, UseDefaultCredentials = false,
+                    AllowAutoRedirect = false,
+                    UseCookies = false,
+                    UseDefaultCredentials = false,
                     AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
                 };
                 if (proxy?.EnableProxy == true)
                 {
                     if (!int.TryParse(proxy.Port, out var port) || port <= 0 || port > 65535)
                         throw new ArgumentException("Invalid installation-content proxy port.", nameof(proxy));
+
                     var address = new UriBuilder("http", proxy.IP, port).Uri;
                     http.Proxy = new WebProxy(address)
                     {
@@ -89,6 +92,7 @@ namespace CefFlashBrowser.Services.UserScripts
                                     throw new IOException("Installation content exceeds its size limit.");
                                 output.Write(buffer, 0, count);
                             }
+
                             var bytes = output.ToArray();
                             var charset = response.Content.Headers.ContentType?.CharSet?.Trim('"');
                             string text = null;
@@ -98,8 +102,10 @@ namespace CefFlashBrowser.Services.UserScripts
                                     ? new UTF8Encoding(false, true)
                                     : Encoding.GetEncoding(charset, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
                                 text = encoding.GetString(bytes);
-                                if (text.StartsWith("\uFEFF", StringComparison.Ordinal)) text = text.Substring(1);
+                                if (text.StartsWith("\uFEFF", StringComparison.Ordinal))
+                                    text = text.Substring(1);
                             }
+
                             return new ResourceContent(bytes, response.Content.Headers.ContentType?.MediaType, text, charset);
                         }
                     }
@@ -112,6 +118,7 @@ namespace CefFlashBrowser.Services.UserScripts
             if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
                 (uri.Scheme != "http" && uri.Scheme != "https") || !string.IsNullOrEmpty(uri.UserInfo))
                 throw new ArgumentException("Installation content requires an HTTP(S) URL without embedded credentials.", nameof(url));
+
             return new UriBuilder(uri) { Fragment = string.Empty }.Uri;
         }
 

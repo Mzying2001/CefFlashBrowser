@@ -18,6 +18,7 @@ namespace CefFlashBrowser.Services.UserScripts
         private readonly object _lock = new object();
         private readonly Dictionary<ScriptKey, Guid> _reported = new Dictionary<ScriptKey, Guid>();
         private readonly Action<UserScriptInstallation> _unavailable;
+
         public event EventHandler<UserScriptRepositoryChangedEventArgs> Changed;
 
         public UserScriptRuntimeRepository(IUserScriptRepository inner, bool trusted, Action<UserScriptInstallation> unavailable = null)
@@ -30,7 +31,9 @@ namespace CefFlashBrowser.Services.UserScripts
 
         private bool Allows(UserScriptInstallation installation)
         {
-            if (UserScriptExecutionPolicy.IsWorldAvailable(installation.Definition.Metadata, _trusted)) return true;
+            if (UserScriptExecutionPolicy.IsWorldAvailable(installation.Definition.Metadata, _trusted))
+                return true;
+
             var report = false;
             lock (_lock)
             {
@@ -40,7 +43,16 @@ namespace CefFlashBrowser.Services.UserScripts
                     report = true;
                 }
             }
-            if (report) { try { _unavailable?.Invoke(installation); } catch { } }
+
+            if (report)
+            {
+                try
+                {
+                    _unavailable?.Invoke(installation);
+                }
+                catch { }
+            }
+
             return false;
         }
 
@@ -53,7 +65,9 @@ namespace CefFlashBrowser.Services.UserScripts
         public async Task<UserScriptInstallation> GetAsync(ScriptKey key, CancellationToken token)
         {
             var installation = await _inner.GetAsync(key, token).ConfigureAwait(false);
-            if (!Allows(installation)) throw new KeyNotFoundException("The installation's execution world is unavailable in this host.");
+            if (!Allows(installation))
+                throw new KeyNotFoundException("The installation's execution world is unavailable in this host.");
+
             return installation;
         }
 
@@ -61,23 +75,42 @@ namespace CefFlashBrowser.Services.UserScripts
         {
             if (e.Kind == RepositoryChangeKind.Removed)
             {
-                lock (_lock) _reported.Remove(e.Installation.ScriptKey);
+                lock (_lock)
+                    _reported.Remove(e.Installation.ScriptKey);
             }
+
             var forwarded = e.Kind == RepositoryChangeKind.Removed || Allows(e.Installation) ? e
                 : new UserScriptRepositoryChangedEventArgs(RepositoryChangeKind.Removed, e.Installation);
             var handlers = Changed;
-            if (handlers == null) return;
+            if (handlers == null)
+                return;
+
             foreach (EventHandler<UserScriptRepositoryChangedEventArgs> handler in handlers.GetInvocationList())
             {
-                try { handler(this, forwarded); } catch { }
+                try
+                {
+                    handler(this, forwarded);
+                }
+                catch { }
             }
         }
 
-        public Task<UserScriptInstallation> InstallAsync(string source, string origin, bool enabled, CancellationToken token) => _inner.InstallAsync(source, origin, enabled, token);
-        public Task<UserScriptInstallation> UpdateAsync(ScriptKey key, string source, string origin, CancellationToken token) => _inner.UpdateAsync(key, source, origin, token);
-        public Task<UserScriptInstallation> UpdateIfUnchangedAsync(ScriptKey key, Guid revision, string source, string origin, CancellationToken token) => _inner.UpdateIfUnchangedAsync(key, revision, source, origin, token);
-        public Task<UserScriptInstallation> SetEnabledAsync(ScriptKey key, bool enabled, CancellationToken token) => _inner.SetEnabledAsync(key, enabled, token);
-        public Task<bool> RemoveAsync(ScriptKey key, CancellationToken token) => _inner.RemoveAsync(key, token);
+        public Task<UserScriptInstallation> InstallAsync(string source, string origin, bool enabled, CancellationToken token)
+            => _inner.InstallAsync(source, origin, enabled, token);
+
+        public Task<UserScriptInstallation> UpdateAsync(ScriptKey key, string source, string origin, CancellationToken token)
+            => _inner.UpdateAsync(key, source, origin, token);
+
+        public Task<UserScriptInstallation> UpdateIfUnchangedAsync(ScriptKey key, Guid revision, string source, string origin,
+            CancellationToken token)
+            => _inner.UpdateIfUnchangedAsync(key, revision, source, origin, token);
+
+        public Task<UserScriptInstallation> SetEnabledAsync(ScriptKey key, bool enabled, CancellationToken token)
+            => _inner.SetEnabledAsync(key, enabled, token);
+
+        public Task<bool> RemoveAsync(ScriptKey key, CancellationToken token)
+            => _inner.RemoveAsync(key, token);
+
         public void Dispose() => _inner.Changed -= InnerChanged;
     }
 }

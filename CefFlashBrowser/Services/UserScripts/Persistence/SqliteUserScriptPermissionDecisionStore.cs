@@ -30,7 +30,8 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     if (value != null && value != DBNull.Value)
                     {
                         var encoded = Convert.ToInt64(value);
-                        if (encoded != 1 && encoded != 2) throw new InvalidOperationException("Invalid remembered permission decision.");
+                        if (encoded != 1 && encoded != 2)
+                            throw new InvalidOperationException("Invalid remembered permission decision.");
                         result = encoded == 1 ? PermissionDecision.Allow : PermissionDecision.Deny;
                     }
                 }).ConfigureAwait(false);
@@ -42,6 +43,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             if (decision != PermissionDecision.Allow && decision != PermissionDecision.Deny)
                 throw new ArgumentException("Only terminal permission decisions may be stored.", nameof(decision));
+
             var parameters = Parameters(scope);
             parameters["@decision"] = decision == PermissionDecision.Allow ? 1 : 2;
             parameters["@updated"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture);
@@ -71,10 +73,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
         private static Dictionary<string, object> Parameters(UserScriptPermissionScope scope)
         {
-            if (scope == null) throw new ArgumentNullException(nameof(scope));
+            if (scope == null)
+                throw new ArgumentNullException(nameof(scope));
+
             return new Dictionary<string, object>
             {
-                ["@id"] = ScriptKey.Parse(scope.ScriptKey).ToString(), ["@kind"] = scope.Kind, ["@target"] = scope.Target
+                ["@id"] = ScriptKey.Parse(scope.ScriptKey).ToString(),
+                ["@kind"] = scope.Kind,
+                ["@target"] = scope.Target
             };
         }
     }

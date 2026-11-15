@@ -63,6 +63,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                         var path = SourcePath(row.Key);
                         if (!Recover(path, row.Hash))
                             throw new IOException("No readable source matches the committed SHA-256.");
+
                         var bytes = ReadBounded(path);
                         if (Hash(bytes) != row.Hash)
                             throw new IOException("Source changed while reading the committed revision.");
@@ -88,6 +89,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             if (record == null)
                 throw new ArgumentNullException(nameof(record));
+
             if (record.Source == null || string.IsNullOrWhiteSpace(record.PreparedRevisionJson))
                 throw new ArgumentException("A saved installation needs source and a prepared revision.", nameof(record));
 
@@ -97,6 +99,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 bytes = new byte[] { 239, 187, 191 }.Concat(bytes).ToArray();
             if (bytes.Length > MaximumSourceBytes)
                 throw new IOException("Source exceeds the 10 MiB limit.");
+
             var hash = Hash(bytes);
 
             return _storage.RunAsync(async () =>
@@ -109,6 +112,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     Recover(path, old.Hash);
                 if (HasTransitions(path))
                     throw new IOException("Unresolved source recovery files must be repaired before saving.");
+
                 if (old == null && File.Exists(path))
                     throw new IOException("An unregistered source already occupies the installation directory.");
 
@@ -169,10 +173,12 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 var old = await FindAsync(key).ConfigureAwait(false);
                 if (old == null)
                     return;
+
                 var path = SourcePath(key);
                 Recover(path, old.Hash);
                 if (HasTransitions(path))
                     throw new IOException("Unresolved source recovery files must be repaired before removal.");
+
                 var renamed = false;
                 try
                 {
@@ -230,6 +236,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 var candidate = new[] { path + ".backup", path + ".deleted" }.FirstOrDefault(file => Matches(file, hash));
                 if (candidate == null)
                     return false;
+
                 if (File.Exists(path))
                     File.Replace(candidate, path, null);
                 else
@@ -315,6 +322,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                         throw new IOException("Source exceeds the 10 MiB limit.");
                     output.Write(buffer, 0, count);
                 }
+
                 return output.ToArray();
             }
         }
@@ -327,8 +335,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
         private static bool Matches(string path, string hash)
         {
-            try { return File.Exists(path) && Hash(ReadBounded(path)) == hash; }
-            catch (Exception e) when (IsFileError(e)) { return false; }
+            try
+            {
+                return File.Exists(path) && Hash(ReadBounded(path)) == hash;
+            }
+            catch (Exception e) when (IsFileError(e))
+            {
+                return false;
+            }
         }
 
         private static string Hash(byte[] bytes)
@@ -337,11 +351,33 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 return BitConverter.ToString(algorithm.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant();
         }
 
-        private static bool HasTransitions(string path) => new[] { ".pending", ".backup", ".deleted" }.Any(suffix => File.Exists(path + suffix));
+        private static bool HasTransitions(string path)
+        {
+            return new[] { ".pending", ".backup", ".deleted" }.Any(suffix => File.Exists(path + suffix));
+        }
+
         private static bool IsFileError(Exception e) => e is IOException || e is UnauthorizedAccessException || e is DecoderFallbackException;
-        private static void CleanupFile(string path) { if (File.Exists(path)) File.Delete(path); }
-        private void Report(string message, Exception exception) { try { _report?.Invoke(message, exception); } catch { } }
-        private void EnsureRecovered() { if (_recoveryRequired) throw new IOException("Persistence requires recovery before another mutation."); }
+
+        private static void CleanupFile(string path)
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+
+        private void Report(string message, Exception exception)
+        {
+            try
+            {
+                _report?.Invoke(message, exception);
+            }
+            catch { }
+        }
+
+        private void EnsureRecovered()
+        {
+            if (_recoveryRequired)
+                throw new IOException("Persistence requires recovery before another mutation.");
+        }
 
         private const string SelectSql = "SELECT script_id, source_origin, is_enabled, installed_at, updated_at, source_sha256, prepared_revision_json FROM monkeysharp_scripts";
 
@@ -354,27 +390,35 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
         private static StoredRecord ReadRow(System.Data.IDataRecord row) => new StoredRecord
         {
-            Key = ScriptKey.Parse(row.GetString(0)), Origin = row.IsDBNull(1) ? null : row.GetString(1),
+            Key = ScriptKey.Parse(row.GetString(0)),
+            Origin = row.IsDBNull(1) ? null : row.GetString(1),
             Enabled = row.GetInt64(2) != 0,
             Installed = DateTimeOffset.ParseExact(row.GetString(3), "O", CultureInfo.InvariantCulture),
             Updated = DateTimeOffset.ParseExact(row.GetString(4), "O", CultureInfo.InvariantCulture),
-            Hash = row.GetString(5), Prepared = row.IsDBNull(6) ? null : row.GetString(6)
+            Hash = row.GetString(5),
+            Prepared = row.IsDBNull(6) ? null : row.GetString(6)
         };
 
         private static Dictionary<string, object> Parameters(UserScriptPersistenceRecord record, string hash) => new Dictionary<string, object>
         {
-            ["@id"] = record.ScriptKey.ToString(), ["@origin"] = record.SourceOrigin, ["@enabled"] = record.IsEnabled ? 1 : 0,
+            ["@id"] = record.ScriptKey.ToString(),
+            ["@origin"] = record.SourceOrigin,
+            ["@enabled"] = record.IsEnabled ? 1 : 0,
             ["@installed"] = record.InstalledAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
             ["@updated"] = record.UpdatedAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
-            ["@hash"] = hash, ["@prepared"] = record.PreparedRevisionJson
+            ["@hash"] = hash,
+            ["@prepared"] = record.PreparedRevisionJson
         };
 
         private sealed class StoredRecord
         {
             public ScriptKey Key;
-            public string Origin, Hash, Prepared;
+            public string Origin;
+            public string Hash;
+            public string Prepared;
             public bool Enabled;
-            public DateTimeOffset Installed, Updated;
+            public DateTimeOffset Installed;
+            public DateTimeOffset Updated;
         }
     }
 }

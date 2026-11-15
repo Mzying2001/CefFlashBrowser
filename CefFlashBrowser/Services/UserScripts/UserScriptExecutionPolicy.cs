@@ -29,6 +29,7 @@ namespace CefFlashBrowser.Services.UserScripts
             if (!IsWorldAvailable(request.Installation.Definition.Metadata, _trusted())
                 || _allowedPage != null && !_allowedPage(request.Frame.Url))
                 return Task.FromResult(PermissionDecision.Deny);
+
             return _inner.AuthorizeAsync(request, token);
         }
 

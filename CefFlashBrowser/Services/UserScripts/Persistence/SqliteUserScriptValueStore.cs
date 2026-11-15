@@ -31,6 +31,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             var id = ScriptKey.Parse(scriptKey).ToString();
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
+
             return _storage.RunAsync(async () =>
             {
                 var value = StoredValue.Missing;
@@ -47,12 +48,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
+
             return ApplyAsync(scriptKey, new[] { new UserScriptValueMutation(key, value) }, null, token);
         }
 
         public async Task<bool> DeleteAsync(string scriptKey, string key, CancellationToken token)
         {
-            return (await ApplyAsync(scriptKey, new[] { new UserScriptValueMutation(key, null) }, null, token).ConfigureAwait(false)).Count != 0;
+            var commit = await ApplyAsync(scriptKey, new[] { new UserScriptValueMutation(key, null) }, null, token).ConfigureAwait(false);
+            return commit.Count != 0;
         }
 
         public async Task<IReadOnlyList<string>> ListKeysAsync(string scriptKey, CancellationToken token)
@@ -105,9 +108,12 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                         var value = mutation.Value;
                         if (value == null && !old.Exists || value != null && old.Exists && old.Value.Equals(value))
                             continue;
+
                         var parameters = new Dictionary<string, object>
                         {
-                            ["@id"] = id, ["@key"] = mutation.Key, ["@value"] = value?.EncodedValue,
+                            ["@id"] = id,
+                            ["@key"] = mutation.Key,
+                            ["@value"] = value?.EncodedValue,
                             ["@updated"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture)
                         };
                         if (value == null)
@@ -133,7 +139,11 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         private static StoredValue Read(IDatabaseSession session, string id, string key)
         {
             var encoded = session.Scalar("SELECT encoded_value FROM monkeysharp_values WHERE script_id = @id AND value_key = @key",
-                new Dictionary<string, object> { ["@id"] = id, ["@key"] = key });
+                new Dictionary<string, object>
+                {
+                    ["@id"] = id,
+                    ["@key"] = key
+                });
             return encoded == null || encoded == DBNull.Value ? StoredValue.Missing
                 : new StoredValue(true, UserScriptValue.FromEncoded((string)encoded));
         }
@@ -143,12 +153,20 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             var handlers = ValueChanged;
             if (handlers == null)
                 return;
+
             foreach (EventHandler<UserScriptValueChangedEventArgs> handler in handlers.GetInvocationList())
             {
-                try { handler(this, change); }
+                try
+                {
+                    handler(this, change);
+                }
                 catch (Exception e)
                 {
-                    try { _report?.Invoke("A value-change subscriber failed after commit.", e); } catch { }
+                    try
+                    {
+                        _report?.Invoke("A value-change subscriber failed after commit.", e);
+                    }
+                    catch { }
                 }
             }
         }

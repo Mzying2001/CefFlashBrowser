@@ -37,13 +37,18 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             using (var document = JsonDocument.Parse(jsonValue))
                 if (document.RootElement.ValueKind != JsonValueKind.Object)
                     throw new ArgumentException("Tab state must be a JSON object.", nameof(jsonValue));
+
             return _storage.RunAsync(() => _storage.Database.TransactionAsync(session =>
             {
                 token.ThrowIfCancellationRequested();
-                if (!_alive) throw new OperationCanceledException("The tab has closed.");
+                if (!_alive)
+                    throw new OperationCanceledException("The tab has closed.");
+
                 var parameters = new Dictionary<string, object>
                 {
-                    ["@id"] = id, ["@tab"] = _tabId, ["@value"] = jsonValue,
+                    ["@id"] = id,
+                    ["@tab"] = _tabId,
+                    ["@value"] = jsonValue,
                     ["@updated"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture)
                 };
                 if (Convert.ToInt64(session.Scalar("SELECT COUNT(*) FROM monkeysharp_scripts WHERE script_id = @id", parameters)) == 0)
@@ -77,7 +82,8 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             lock (_lock)
             {
-                if (_close != null) return _close;
+                if (_close != null)
+                    return _close;
                 _alive = false;
                 return _close = _storage.RunAsync(() => _storage.Database.ExecuteAsync(
                     "DELETE FROM monkeysharp_tab_states WHERE tab_id = @tab", new Dictionary<string, object> { ["@tab"] = _tabId }), CancellationToken.None);
