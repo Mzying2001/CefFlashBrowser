@@ -36,7 +36,7 @@ namespace CefFlashBrowser.Services
             {
                 long version = Convert.ToInt64(session.Scalar("PRAGMA user_version"));
 
-                if (version > 1)
+                if (version > 2)
                     throw new InvalidOperationException("The browser database version is not supported.");
 
                 if (version == 0)
@@ -48,6 +48,43 @@ namespace CefFlashBrowser.Services
                         updated_at INTEGER NOT NULL,
                         deleted_at INTEGER NULL)");
                     session.Execute("PRAGMA user_version = 1");
+                    version = 1;
+                }
+
+                if (version == 1)
+                {
+                    session.Execute(@"CREATE TABLE monkeysharp_scripts (
+                        script_id TEXT PRIMARY KEY NOT NULL,
+                        install_order INTEGER NOT NULL UNIQUE,
+                        source_origin TEXT NULL,
+                        is_enabled INTEGER NOT NULL,
+                        installed_at TEXT NOT NULL,
+                        updated_at TEXT NOT NULL,
+                        source_sha256 TEXT NOT NULL,
+                        prepared_revision_json TEXT NOT NULL,
+                        display_name TEXT NULL)");
+                    session.Execute(@"CREATE TABLE monkeysharp_values (
+                        script_id TEXT NOT NULL,
+                        value_key TEXT COLLATE BINARY NOT NULL,
+                        encoded_value TEXT NOT NULL,
+                        value_order INTEGER NOT NULL,
+                        updated_at TEXT NOT NULL,
+                        PRIMARY KEY (script_id, value_key),
+                        UNIQUE (script_id, value_order))");
+                    session.Execute(@"CREATE TABLE monkeysharp_permission_decisions (
+                        script_id TEXT NOT NULL,
+                        kind TEXT NOT NULL,
+                        target TEXT NOT NULL,
+                        decision INTEGER NOT NULL,
+                        updated_at TEXT NOT NULL,
+                        PRIMARY KEY (script_id, kind, target))");
+                    session.Execute(@"CREATE TABLE monkeysharp_tab_states (
+                        script_id TEXT NOT NULL,
+                        tab_id TEXT NOT NULL,
+                        json_value TEXT NOT NULL,
+                        updated_at TEXT NOT NULL,
+                        PRIMARY KEY (script_id, tab_id))");
+                    session.Execute("PRAGMA user_version = 2");
                 }
             }).ConfigureAwait(false);
         }

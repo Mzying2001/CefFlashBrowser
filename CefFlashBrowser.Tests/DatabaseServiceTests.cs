@@ -60,7 +60,7 @@ namespace CefFlashBrowser.Tests
                 await Task.WhenAll(initialization, read, write);
                 Assert.AreSame(initialization, _service.InitializeAsync());
                 Assert.AreEqual(1, controlled.InitializationCount);
-                Assert.AreEqual(1L, await _database.ScalarAsync("PRAGMA user_version"));
+                Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
                 Assert.AreEqual(1, (await _service.GetWebsiteIconsAsync()).Count);
             }
             finally { controlled.ReleaseInitialization.TrySetResult(true); }
@@ -103,19 +103,47 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(20L, icon.UpdatedAt);
             Assert.AreEqual(10L, await _database.ScalarAsync("SELECT created_at FROM website_icons"));
             Assert.AreEqual(schema, await _database.ScalarAsync("SELECT sql FROM sqlite_master WHERE name = 'website_icons'"));
-            Assert.AreEqual(1L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]
         public async Task UnsupportedVersion_RejectsReadsAndWrites_WithoutChangingDatabase()
         {
-            await _database.ExecuteAsync("PRAGMA user_version = 2");
+            await _database.ExecuteAsync("PRAGMA user_version = 3");
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.InitializeAsync());
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.GetWebsiteIconsAsync());
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.SaveWebsiteIconAsync(
                 new WebsiteIconRecord("https://example.com/a", "https://example.com/icon", 10)));
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
             Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'website_icons'"));
+        }
+
+        [TestMethod]
+        public async Task LatestSchema_HasAllScriptTables_AndReinitializesWithoutChanges()
+        {
+            await _service.InitializeAsync();
+            var names = await _database.QueryAsync("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name",
+                row => row.GetString(0));
+            CollectionAssert.AreEquivalent(new[] { "website_icons", "monkeysharp_scripts", "monkeysharp_values",
+                "monkeysharp_permission_decisions", "monkeysharp_tab_states" }, names);
+            await new DatabaseService(_database).InitializeAsync();
+            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+        }
+
+        [TestMethod]
+        public async Task MigrationFailure_RollsBackNewTables_AndPreservesVersionAndIcons()
+        {
+            await _database.ExecuteAsync("CREATE TABLE website_icons (page_url TEXT PRIMARY KEY, icon_url TEXT, created_at INTEGER, updated_at INTEGER, deleted_at INTEGER)");
+            await _database.ExecuteAsync("INSERT INTO website_icons VALUES ('page', 'icon', 1, 2, NULL)");
+            await _database.ExecuteAsync("CREATE TABLE monkeysharp_values (existing TEXT)");
+            await _database.ExecuteAsync("PRAGMA user_version = 1");
+            await Assert.ThrowsExceptionAsync<System.Data.SQLite.SQLiteException>(() => _service.InitializeAsync());
+            Assert.AreEqual(1L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual("icon", await _database.ScalarAsync("SELECT icon_url FROM website_icons"));
+            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'monkeysharp_scripts'"));
+            await _database.ExecuteAsync("DROP TABLE monkeysharp_values");
+            await _service.InitializeAsync();
+            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]

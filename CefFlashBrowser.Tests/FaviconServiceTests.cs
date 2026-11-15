@@ -399,11 +399,11 @@ namespace CefFlashBrowser.Tests
         [TestMethod]
         public void UnsupportedVersion_LeavesDatabaseUntouched_AndAcceptsMemoryMappings()
         {
-            _database.ExecuteAsync("PRAGMA user_version = 2").GetAwaiter().GetResult();
+            _database.ExecuteAsync("PRAGMA user_version = 3").GetAwaiter().GetResult();
             Initialize();
             Record("https://example.com/a", "/icon");
             Assert.AreEqual("https://example.com/icon", _service.GetIconUrl("https://example.com/a"));
-            Assert.AreEqual(2L, _database.ScalarAsync("PRAGMA user_version").GetAwaiter().GetResult());
+            Assert.AreEqual(3L, _database.ScalarAsync("PRAGMA user_version").GetAwaiter().GetResult());
             Assert.AreEqual(0L, _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'website_icons'").GetAwaiter().GetResult());
         }
 
