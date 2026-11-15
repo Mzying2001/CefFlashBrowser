@@ -149,6 +149,7 @@
 
         public bool EnableUserScripts { get; set; }
         public bool TrustedUserScriptPageWorld { get; set; }
+        public string UserScriptDownloadDirectory { get; set; }
 
 
         /// <summary>

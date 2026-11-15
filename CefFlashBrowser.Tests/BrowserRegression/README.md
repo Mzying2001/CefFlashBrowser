@@ -108,3 +108,16 @@ UTF-8 fragment offsets. The original clipboard is privately snapshotted in memor
 `finally` after the source stops. It exercises unstarted notification handles, real WPF buttons,
 click acknowledgement/preventDefault, source-bound URL actions, tag replacement, native close,
 timeout, bounded image loading and cancellation of an in-flight image request during shutdown.
+
+`-Scenario Downloads` verifies unstarted operations, CEF response bytes, one terminal event,
+real permission choices, filename uniquification, Blob staging, cancellation of the native save
+picker, history cancellation, failed/aborted/timed-out cleanup, document navigation, replacement
+of a host by source viewing, and tab-close draining. Downloads go only to the isolated profile's
+Downloads directory. It also verifies bidirectional GM/native/UI mute. `-Scenario Audio` retains
+the original menu, icon, keyboard, background-tab and rapid-toggle mute regression.
+
+The browser session owns the actual CEF request context, CEF HTTP/rule services and mute service
+across host replacements. A detached host with accepted downloads retires until those transfers
+finish; its callbacks are revoked immediately. Closing cancels and drains active/retired downloads
+before disposing the HTTP context and native browser. This keeps GM traffic on CEF, including its
+actual cookie jar, while installation content remains on the separate credential-free client.

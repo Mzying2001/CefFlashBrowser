@@ -233,4 +233,13 @@
     <sys:String x:Key="userscript_notification">用户脚本通知</sys:String>
     <sys:String x:Key="userscript_notificationClose">关闭</sys:String>
     <sys:String x:Key="userscript_notificationClick">点击通知</sys:String>
+    <sys:String x:Key="userscript_downloads">脚本下载</sys:String>
+    <sys:String x:Key="userscript_saveDownload">保存脚本下载</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">等待中</sys:String>
+    <sys:String x:Key="userscript_downloading">下载中</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">已完成</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">已取消</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">已超时</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">失败</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">取消</sys:String>
 </ResourceDictionary>

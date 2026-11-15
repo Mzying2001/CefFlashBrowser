@@ -7,6 +7,7 @@ using SimpleMvvm;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -41,6 +42,8 @@ namespace CefFlashBrowser.ViewModels
             get => _userScriptMatchCount;
             internal set => UpdateValue(ref _userScriptMatchCount, value);
         }
+
+        public ObservableCollection<UserScriptDownloadItem> UserScriptDownloads { get; } = new ObservableCollection<UserScriptDownloadItem>();
 
         public ObservableCollection<UserScriptMenuCommand> UserScriptMenus { get; } = new ObservableCollection<UserScriptMenuCommand>();
         private volatile bool _isClosed;
@@ -97,6 +100,7 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _title, value);
         }
 
+        private int _muteRequestVersion;
         private bool _isMuted;
         public bool IsMuted
         {
@@ -175,16 +179,34 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void ToggleMute()
+        internal void UpdateMuteState(bool isMuted)
+        {
+            IsMuted = isMuted;
+        }
+
+        public async void ToggleMute()
         {
             if (!IsBrowserReady())
                 return;
 
             if (Browser is ChromiumWebBrowserEx browser)
             {
-                var isMuted = !IsMuted;
-                browser.SetAudioMuted(isMuted);
-                IsMuted = isMuted;
+                var version = ++_muteRequestVersion;
+                var previous = IsMuted;
+                IsMuted = !previous;
+                try
+                {
+                    var isMuted = await browser.ToggleAudioMutedAsync();
+                    if (version == _muteRequestVersion && !IsClosing && !IsClosed) IsMuted = isMuted;
+                }
+                catch (ObjectDisposedException)
+                {
+                    if (version == _muteRequestVersion && !IsClosing && !IsClosed) IsMuted = previous;
+                }
+                catch (InvalidOperationException)
+                {
+                    if (version == _muteRequestVersion && !IsClosing && !IsClosed) IsMuted = previous;
+                }
             }
         }
 

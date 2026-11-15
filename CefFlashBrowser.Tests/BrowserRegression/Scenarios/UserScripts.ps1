@@ -4,6 +4,178 @@ function Complete-UserScriptTask($Context, $Task, [string]$Message) {
     if ($null -ne $result -and $result.GetType().FullName -ne 'System.Threading.Tasks.VoidTaskResult') { return $result }
 }
 
+function Test-UserScriptDownloadsAndAudio($Context) {
+    Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'download runtime'
+    $fixture = New-Object UserScriptHttpFixture
+    $directory = [CefFlashBrowser.Data.GlobalData]::Settings.UserScriptDownloadDirectory
+    $source = @'
+// ==UserScript==
+// @name Download and audio probe
+// @match file:///*
+// @noframes
+// @sandbox DOM
+// @grant GM.download
+// @grant GM.audio
+// ==/UserScript==
+(async function() {
+    var pending;
+    function start(path, name, timeout) {
+        document.documentElement.setAttribute('data-download-state', 'pending');
+        var options = {url:'__BASE__' + path, name:name};
+        if (timeout) options.timeout = timeout;
+        pending = GM.download(options);
+        pending.then(function() { document.documentElement.setAttribute('data-download-state', 'completed'); },
+            function(error) { document.documentElement.setAttribute('data-download-state', error.name); });
+    }
+    document.addEventListener('downloadSimple', function() { start('/download', 'actual.bin'); });
+    document.addEventListener('downloadFailed', function() { start('/failed', 'failed.bin'); });
+    document.addEventListener('downloadBlob', function() {
+        document.documentElement.setAttribute('data-download-state', 'pending');
+        var url = URL.createObjectURL(new Blob([new Uint8Array([0,1,2,3,127,128,254,255,42,17,9,0])]));
+        pending = GM.download({url:url, name:'blob.bin'});
+        pending.then(function() { URL.revokeObjectURL(url); document.documentElement.setAttribute('data-download-state', 'completed'); }, function(error) { document.documentElement.setAttribute('data-blob-error', (error.code || '') + ': ' + error.details); });
+    });
+    document.addEventListener('downloadSaveAs', function() {
+        document.documentElement.setAttribute('data-download-state', 'pending');
+        pending = GM.download({url:'__BASE__/download', name:'saveas.bin', saveAs:true});
+        pending.catch(function(error) { document.documentElement.setAttribute('data-download-state', error.name); });
+        var saveOperation = pending;
+        setTimeout(function() { saveOperation.abort(); }, 5000);
+    });
+    document.addEventListener('downloadUiCancel', function() { start('/slow-ui-cancel', 'ui-cancel.bin'); });
+
+    document.addEventListener('downloadAbort', function() { start('/slow-abort', 'abort.bin'); });
+    document.addEventListener('downloadCancel', function() { pending.abort(); });
+    document.addEventListener('downloadTimeout', function() { start('/slow-timeout', 'timeout.bin', 250); });
+    document.addEventListener('downloadNavigation', function() { start('/slow-navigation', 'navigation.bin'); });
+    document.addEventListener('downloadRetire', function() { start('/slow-retire', 'retired.bin'); });
+    document.addEventListener('downloadClose', function() { start('/slow-close', 'close.bin'); });
+    document.addEventListener('audioMute', async function() {
+        await GM.audio.setMute({isMuted:true});
+        document.documentElement.setAttribute('data-audio-set', 'yes');
+    });
+    document.addEventListener('audioRead', async function() {
+        document.documentElement.setAttribute('data-audio-read', String((await GM.audio.getState()).isMuted));
+    });
+    await GM.audio.addStateChangeListener(function(state) {
+        document.documentElement.setAttribute('data-audio-change', String(state.muted));
+    });
+    document.documentElement.setAttribute('data-download-ready', 'yes');
+})();
+'@
+    $source = $source.Replace('__BASE__', $fixture.BaseUrl)
+    $repository = $Context.UserScriptService.Repository
+    $installation = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None)) 'install download fixture'
+    $window = $null
+    try {
+        $window = New-RegressionWindow $Context
+        $model = $window.ViewModel.CurrentBrowser
+        $model.Address = $Context.AuxiliaryAddress
+        Wait-Regression $Context { $model.Browser.Title -eq 'Auxiliary regression' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-ready')") -eq 'yes' } 'download source ready'
+        $view = Find-BrowserView $window
+        $session = $view.GetType().GetField('_userScriptSession', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
+        $downloads = $session.GetType().GetField('_downloads', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($session)
+        $probe = New-Object UserScriptDownloadProbe($downloads, $installation.ScriptKey, ($fixture.BaseUrl + '/download'))
+        Assert-Regression ($fixture.RequestsFor('/download') -eq 0 -and !$probe.Operation.Completion.IsCompleted -and $model.UserScriptDownloads.Count -eq 0) 'download creation starts neither UI nor network work'
+        $probe.Operation.Start()
+        $probe.Operation.Start()
+        Complete-UserScriptTask $Context $probe.Operation.Completion 'unstarted download commit'
+        $probe.Operation.Abort()
+        Assert-Regression ($probe.Completed -eq 1 -and $probe.Aborted -eq 0 -and $probe.Failed -eq 0 -and $fixture.RequestsFor('/download') -eq 1) 'download terminal event is published once after commit'
+        Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'contract.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'CEF download commits the exact response bytes'
+
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('audioMute'))")
+        Wait-Regression $Context { $model.IsMuted -and (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-audio-set')") -eq 'yes' } 'GM mute updates tab UI'
+        Assert-BrowserAudioMuted $Context $model.Browser $true 'GM mute matches the native CEF state'
+        $model.ToggleMute()
+        Wait-Regression $Context { !$model.IsMuted } 'UI mute toggle reads back native state'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('audioRead'))")
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-audio-read')") -eq 'false' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-audio-change')") -eq 'false' } 'GM observes UI mute changes'
+        Assert-BrowserAudioMuted $Context $model.Browser $false 'UI mute readback matches native CEF'
+
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadSimple'))")
+        Wait-Regression $Context { @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptPermissionDialog] }).Count -eq 1 } 'download permission prompt'
+        $permission = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptPermissionDialog] })[0]
+        $permission.FindName('allowRememberButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Button]::ClickEvent)))
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-state')") -eq 'completed' } 'modern download completion acknowledgement'
+        Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'actual.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'modern GM download resolves after bytes are committed'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadSimple'))")
+        Wait-Regression $Context { [IO.File]::Exists((Join-Path $directory 'actual (1).bin')) -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-state')") -eq 'completed' } 'default collision uniquifies the file'
+        Assert-Regression ([IO.File]::Exists((Join-Path $directory 'actual.bin'))) 'uniquify preserves the existing download'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadBlob'))")
+        Wait-Regression $Context {
+            $blobPrompt = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptPermissionDialog] })
+            if ($blobPrompt.Count -eq 1) {
+                $blobPrompt[0].FindName('allowRememberButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Button]::ClickEvent)))
+            }
+            $errorText = Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-blob-error')"
+            if ($errorText) { throw $errorText }
+            [IO.File]::Exists((Join-Path $directory 'blob.bin')) -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-state')") -eq 'completed'
+        } 'renderer Blob download is committed'
+        Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'blob.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'Blob download preserves staged bytes'
+        $picker = New-Object UserScriptSaveDialogProbe($model.Browser, $Context.LanguageService.GetString('userscript_saveDownload'))
+        try {
+            [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadSaveAs'))")
+            Wait-Regression $Context { $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].FileName -eq 'saveas.bin' -and
+                $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::Cancelled } 'abort closes the native save picker'
+            Assert-Regression ($picker.Seen -and ![IO.File]::Exists((Join-Path $directory 'saveas.bin'))) 'saveAs starts native UI and aborts without committing'
+        } finally { $picker.Dispose() }
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadUiCancel'))")
+        Wait-Regression $Context { $fixture.RequestsFor('/slow-ui-cancel') -eq 1 -and $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].FileName -eq 'ui-cancel.bin' } 'download history exposes an active cancel action'
+        $cancelItem = $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1]
+        Invoke-BrowserCommand $cancelItem.CancelCommand
+        Wait-Regression $Context { $cancelItem.State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::Cancelled } 'download UI cancels the accepted operation'
+
+
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadFailed'))")
+        Wait-Regression $Context { $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::Failed } 'failed response reaches terminal UI state'
+        Assert-Regression (![IO.File]::Exists((Join-Path $directory 'failed.bin'))) 'failed download does not commit a file'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadAbort'))")
+        Wait-Regression $Context { $fixture.RequestsFor('/slow-abort') -eq 1 } 'abort fixture starts transfer'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadCancel'))")
+        Wait-Regression $Context { $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::Cancelled } 'explicit abort reaches terminal UI state'
+        Assert-Regression (![IO.File]::Exists((Join-Path $directory 'abort.bin'))) 'aborted download does not commit a file'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadTimeout'))")
+        Wait-Regression $Context { $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::TimedOut } 'timeout reaches terminal UI state'
+        Assert-Regression (![IO.File]::Exists((Join-Path $directory 'timeout.bin'))) 'timed-out download does not commit a file'
+
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadNavigation'))")
+        Wait-Regression $Context { $fixture.RequestsFor('/slow-navigation') -eq 1 } 'accepted transfer before navigation'
+        $model.Browser.Load('about:blank')
+        Wait-Regression $Context { $model.Address -eq 'about:blank' -and $model.Browser.CanExecuteJavascriptInMainFrame } 'source navigates while accepted download runs'
+        $fixture.Release('/slow-navigation')
+        Wait-Regression $Context { [IO.File]::Exists((Join-Path $directory 'navigation.bin')) } 'accepted download completes after document navigation'
+        Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'navigation.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'navigation retains the accepted transfer and its network context'
+
+        $model.Address = $Context.AuxiliaryAddress
+        Wait-Regression $Context { $model.Browser.Title -eq 'Auxiliary regression' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-ready')") -eq 'yes' } 'download source reloads'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadRetire'))")
+        Wait-Regression $Context { $fixture.RequestsFor('/slow-retire') -eq 1 } 'accepted transfer before host replacement'
+        $model.Address = 'view-source:' + $Context.AuxiliaryAddress
+        Assert-ViewSourcePage $Context $model ('view-source:' + $Context.AuxiliaryAddress)
+        $fixture.Release('/slow-retire')
+        Wait-Regression $Context { [IO.File]::Exists((Join-Path $directory 'retired.bin')) } 'retired host drains its accepted transfer'
+        Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'retired.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'host replacement keeps accepted download bytes intact'
+
+        $model.Address = $Context.AuxiliaryAddress
+        Wait-Regression $Context { $model.Browser.Title -eq 'Auxiliary regression' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-ready')") -eq 'yes' } 'source returns after host replacement'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadClose'))")
+        Wait-Regression $Context { $fixture.RequestsFor('/slow-close') -eq 1 } 'pending transfer before close'
+        $window.ForceCloseWindow()
+        Assert-Regression (![IO.File]::Exists((Join-Path $directory 'close.bin')) -and @(Get-ChildItem -LiteralPath $directory -Filter '*.part').Count -eq 0) 'tab close cancels transfers and drains partial-file cleanup'
+    } finally {
+        if ($null -ne $window) { $window.ForceCloseWindow() }
+        $fixture.Dispose()
+        Complete-UserScriptTask $Context ($repository.RemoveAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'remove download fixture' | Out-Null
+    }
+}
+
 function Find-UserScriptNotification($Context, [string]$Title) {
     return @($Context.Application.Windows | Where-Object {
         $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptNotificationWindow] -and $_.Title -eq $Title -and $_.IsVisible

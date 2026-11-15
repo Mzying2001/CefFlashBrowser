@@ -1,6 +1,7 @@
 using CefFlashBrowser.Data;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
+using CefFlashBrowser.Utils;
 using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.Services.UserScripts.Persistence;
@@ -41,6 +42,13 @@ namespace CefFlashBrowser.Browser.UserScripts
         private readonly UserScriptTabService _tabs;
         private readonly Func<Window> _ownerWindow;
         private UserScriptNotificationService _notifications;
+        private UserScriptDownloadService _downloads;
+        private readonly CefSharpTabAudioService _audio;
+        private CefSharpHttpRequestService _http;
+        private InMemoryWebRequestService _webRequests;
+        private IRequestContext _requestContext;
+        private bool _ownsRequestContext;
+        private readonly List<RetiredHost> _retiredHosts = new List<RetiredHost>();
         private UserScriptMenuService _menus;
         private UserScriptContextMenuHandler _contextMenu;
         private SqliteUserScriptTabStateService _tabState;
@@ -59,6 +67,8 @@ namespace CefFlashBrowser.Browser.UserScripts
             _dispatcher = browser.Dispatcher;
             _ownerWindow = owner;
             _tabs = new UserScriptTabService(model, owner, close, _dispatcher, _lifetime.Token);
+            _audio = new CefSharpTabAudioService(() => _browser.IsDisposed || !_browser.IsBrowserInitialized ? null : _browser.GetBrowser()?.GetHost());
+            _audio.StateChanged += AudioStateChanged;
             _registration = service.RegisterSession(model.BrowserId, StopAsync);
             _browser.AddressChanged += AddressChanged;
             _browser.NavigationHandler = NavigateAsync;
@@ -104,6 +114,8 @@ namespace CefFlashBrowser.Browser.UserScripts
                     await WaitForNativeAsync(_lifetime.Token);
                     SetState(UserScriptState.Disabled);
                 }
+                var audio = await _audio.GetStateAsync(_lifetime.Token);
+                if (!_lifetime.IsCancellationRequested) _model.UpdateMuteState(audio.IsMuted);
             }
             catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
             {
@@ -137,6 +149,16 @@ namespace CefFlashBrowser.Browser.UserScripts
                 _browser.RequestHandler = multiplexer;
             }
 
+            // A browser session owns its network context across host replacements.
+            // Accepted downloads may outlive their originating document/host.
+            if (_http == null)
+            {
+                _requestContext = _browser.RequestContext;
+                _ownsRequestContext = _requestContext == null;
+                if (_requestContext == null) _requestContext = Cef.GetGlobalRequestContext();
+                _webRequests = new InMemoryWebRequestService();
+                _http = new CefSharpHttpRequestService(_requestContext, _webRequests);
+            }
             var applicationMenu = _browser.MenuHandler as Handlers.ContextMenuHandler;
             _menus = new UserScriptMenuService(_model, _dispatcher, _service.Repository, () => _host,
                 () => Log(LogLevel.Warning, "Userscript menu callback failed for tab " + _model.BrowserId));
@@ -145,6 +167,12 @@ namespace CefFlashBrowser.Browser.UserScripts
                 () => Log(LogLevel.Warning, "Userscript notification content or interaction was unavailable for tab " + _model.BrowserId));
             var builder = new CefSharpUserScriptHostBuilder(_service.Repository)
                 .UseValueStore(_service.ValueStore)
+                .UseHttpRequestService(_http)
+                .UseWebRequestService(_webRequests)
+                .UseTabAudioService(_audio)
+                .UseDownloadServiceFactory(http => _downloads = new UserScriptDownloadService(http, _model, _ownerWindow,
+                    _dispatcher, string.IsNullOrWhiteSpace(GlobalData.Settings.UserScriptDownloadDirectory)
+                        ? UserScriptDownloadPaths.DefaultDirectory() : GlobalData.Settings.UserScriptDownloadDirectory, _lifetime.Token))
                 .UseMenuService(_menus)
                 .UseClipboardService(new UserScriptClipboardService(_dispatcher, _lifetime.Token))
                 .UseNotificationService(_notifications)
@@ -183,6 +211,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     if (!GlobalData.Settings.EnableUserScripts || !AllowsScripts(address))
                     {
                         await DetachHostAsync();
+                        linked.Token.ThrowIfCancellationRequested();
                         SetState(UserScriptState.Disabled);
                         _browser.LoadPrepared(address);
                     }
@@ -271,6 +300,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             await Task.Yield();
             SetState(UserScriptState.Stopping);
             _lifetime.Cancel();
+            foreach (var retired in _retiredHosts.ToArray()) retired.Downloads.Dispose();
             if (_initialization != null)
             {
                 try { await _initialization; }
@@ -284,26 +314,46 @@ namespace CefFlashBrowser.Browser.UserScripts
                     _service.Repository.Changed -= RepositoryChanged;
                 if (!_browser.IsDisposed && _browser.IsBrowserInitialized)
                     CefSharp.WebBrowserExtensions.Stop(_browser);
-                await DetachHostAsync();
+                await DetachHostAsync(true);
             }
             finally
             {
-                try { if (_tabState != null) await _tabState.CloseAsync(); }
+                try
+                {
+                    await Task.WhenAll(_retiredHosts.Select(retired => retired.Drain).ToArray());
+                    _audio.StateChanged -= AudioStateChanged;
+                    _audio.Dispose();
+                    _http?.Dispose();
+                    if (_http != null) await Cef.UIThreadTaskFactory.StartNew(() => { });
+                }
                 finally
                 {
-                    _registration.Dispose();
-                    SetState(UserScriptState.Stopped);
-                    _navigation.Release();
+                    _webRequests?.Dispose();
+                    if (_ownsRequestContext) _requestContext?.Dispose();
+                    try { if (_tabState != null) await _tabState.CloseAsync(); }
+                    finally
+                    {
+                        _registration.Dispose();
+                        SetState(UserScriptState.Stopped);
+                        _navigation.Release();
+                    }
                 }
             }
         }
 
-        private async Task DetachHostAsync()
+        private async Task DetachHostAsync(bool closing = false)
         {
             var host = _host;
-            if (host == null)
-                return;
+            if (host == null) return;
+            var downloads = _downloads;
+            var notifications = _notifications;
+            var menus = _menus;
             _host = null;
+            _downloads = null;
+            _notifications = null;
+            _menus = null;
+            downloads?.Retire();
+            if (closing) downloads?.Dispose();
             host.Diagnostic -= Diagnostic;
             if (_contextMenu != null && ReferenceEquals(_browser.MenuHandler, _contextMenu))
                 _browser.MenuHandler = _contextMenu.Inner;
@@ -311,15 +361,52 @@ namespace CefFlashBrowser.Browser.UserScripts
             try { await host.DetachAsync(CancellationToken.None); }
             finally
             {
-                try { if (_notifications != null) await _notifications.StopAsync(); }
+                try { if (notifications != null) await notifications.StopAsync(); }
                 finally
                 {
-                    host.Dispose();
-                    _menus?.Dispose();
-                    _menus = null;
-                    _notifications = null;
+                    menus?.Dispose();
+                    if (!closing && downloads != null && downloads.ActiveCount != 0)
+                    {
+                        var retired = new RetiredHost { Host = host, Downloads = downloads };
+                        _retiredHosts.Add(retired);
+                        retired.Drain = DrainRetiredHostAsync(retired);
+                    }
+                    else
+                    {
+                        downloads?.Dispose();
+                        if (downloads != null) await downloads.DrainAsync();
+                        host.Dispose();
+                    }
                 }
             }
+        }
+
+        private async Task DrainRetiredHostAsync(RetiredHost retired)
+        {
+            try
+            {
+                await retired.Downloads.DrainAsync();
+                retired.Host.Dispose();
+            }
+            catch (Exception) { Log(LogLevel.Error, "Retired userscript host cleanup failed for tab " + _model.BrowserId); }
+            finally { _retiredHosts.Remove(retired); }
+        }
+
+        private sealed class RetiredHost
+        {
+            public CefSharpUserScriptHost Host;
+            public UserScriptDownloadService Downloads;
+            public Task Drain;
+        }
+
+        private void AudioStateChanged(object sender, TabAudioState state)
+        {
+            if (_lifetime.IsCancellationRequested || _dispatcher.HasShutdownStarted) return;
+            _dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (!_lifetime.IsCancellationRequested && !_model.IsClosing)
+                    _model.UpdateMuteState(state.IsMuted);
+            }));
         }
 
         private async void AddressChanged(object sender, AddressChangedEventArgs e)

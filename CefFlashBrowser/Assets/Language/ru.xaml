@@ -233,4 +233,13 @@ Allow this script to use this capability?</sys:String>
     <sys:String x:Key="userscript_notification">Userscript notification</sys:String>
     <sys:String x:Key="userscript_notificationClose">Close</sys:String>
     <sys:String x:Key="userscript_notificationClick">Click notification</sys:String>
+    <sys:String x:Key="userscript_downloads">Script downloads</sys:String>
+    <sys:String x:Key="userscript_saveDownload">Save script download</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">Waiting</sys:String>
+    <sys:String x:Key="userscript_downloading">Downloading</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">Completed</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">Cancelled</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">Timed out</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">Failed</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">Cancel</sys:String>
 </ResourceDictionary>

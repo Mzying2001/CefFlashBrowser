@@ -4,6 +4,7 @@ using CefSharp;
 using SimpleMvvm.Command;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -147,6 +148,24 @@ namespace CefFlashBrowser.FlashBrowser
         public void CloseDevTools()
         {
             GetBrowser().CloseDevTools();
+        }
+
+        public Task<bool> ToggleAudioMutedAsync()
+        {
+            return Cef.UIThreadTaskFactory.StartNew(() =>
+            {
+                if (IsDisposed || !IsBrowserInitialized) return false;
+                try
+                {
+                    var native = GetBrowser();
+                    if (native == null || native.IsDisposed) return false;
+                    var host = native.GetHost();
+                    if (host == null || host.IsDisposed) return false;
+                    host.SetAudioMuted(!host.IsAudioMuted);
+                    return host.IsAudioMuted;
+                }
+                catch (ObjectDisposedException) { return false; }
+            });
         }
 
         public void SetAudioMuted(bool mute)
