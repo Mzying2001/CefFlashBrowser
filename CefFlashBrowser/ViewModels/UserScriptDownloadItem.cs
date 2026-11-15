@@ -22,12 +22,14 @@ namespace CefFlashBrowser.ViewModels
             get => _fileName;
             internal set => UpdateValue(ref _fileName, value);
         }
+
         private long _received;
         public long Received
         {
             get => _received;
             internal set => UpdateValue(ref _received, value);
         }
+
         private UserScriptDownloadState _state;
         public UserScriptDownloadState State
         {
@@ -38,6 +40,7 @@ namespace CefFlashBrowser.ViewModels
                     CancelCommand.CanExecute = value == UserScriptDownloadState.Waiting || value == UserScriptDownloadState.Downloading;
             }
         }
+
         public DelegateCommand CancelCommand { get; }
 
         public UserScriptDownloadItem(string name, Action cancel)

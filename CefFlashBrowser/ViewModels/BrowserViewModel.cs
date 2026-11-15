@@ -46,19 +46,30 @@ namespace CefFlashBrowser.ViewModels
         public ObservableCollection<UserScriptDownloadItem> UserScriptDownloads { get; } = new ObservableCollection<UserScriptDownloadItem>();
 
         public ObservableCollection<UserScriptMenuCommand> UserScriptMenus { get; } = new ObservableCollection<UserScriptMenuCommand>();
+
         private volatile bool _isClosed;
         public bool IsClosed => _isClosed;
+
         public event EventHandler Closed;
 
         internal void MarkClosed()
         {
-            if (_isClosed) return;
+            if (_isClosed)
+                return;
+
             _isClosed = true;
+
             var handlers = Closed;
-            if (handlers == null) return;
+            if (handlers == null)
+                return;
+
             foreach (EventHandler handler in handlers.GetInvocationList())
             {
-                try { handler(this, EventArgs.Empty); } catch { }
+                try
+                {
+                    handler(this, EventArgs.Empty);
+                }
+                catch { }
             }
         }
 
@@ -194,18 +205,22 @@ namespace CefFlashBrowser.ViewModels
                 var version = ++_muteRequestVersion;
                 var previous = IsMuted;
                 IsMuted = !previous;
+
                 try
                 {
                     var isMuted = await browser.ToggleAudioMutedAsync();
-                    if (version == _muteRequestVersion && !IsClosing && !IsClosed) IsMuted = isMuted;
+                    if (version == _muteRequestVersion && !IsClosing && !IsClosed)
+                        IsMuted = isMuted;
                 }
                 catch (ObjectDisposedException)
                 {
-                    if (version == _muteRequestVersion && !IsClosing && !IsClosed) IsMuted = previous;
+                    if (version == _muteRequestVersion && !IsClosing && !IsClosed)
+                        IsMuted = previous;
                 }
                 catch (InvalidOperationException)
                 {
-                    if (version == _muteRequestVersion && !IsClosing && !IsClosed) IsMuted = previous;
+                    if (version == _muteRequestVersion && !IsClosing && !IsClosed)
+                        IsMuted = previous;
                 }
             }
         }

@@ -26,6 +26,7 @@ namespace CefFlashBrowser.Views
         private bool _isClosed = false;
         private Task _windowCloseTask;
         private bool _forceClosePending;
+
         internal bool IsClosing => _doClose || _forceClosePending || _windowCloseTask != null && !_windowCloseTask.IsCompleted;
 
         private BrowserViewModel ViewModel => browserView?.ViewModel;
@@ -96,6 +97,7 @@ namespace CefFlashBrowser.Views
                 if (_windowCloseTask == null || _windowCloseTask.IsCompleted)
                     _windowCloseTask = CloseBrowserAsync(false);
             }
+
             base.OnClosing(e);
         }
 
@@ -103,6 +105,7 @@ namespace CefFlashBrowser.Views
         {
             // Leave WPF's Closing event before requesting or completing a close.
             await Task.Yield();
+
             if (await browserView.RequestCloseAsync(force) && !_isClosed)
             {
                 _doClose = true;
@@ -157,9 +160,13 @@ namespace CefFlashBrowser.Views
                     closing.GetAwaiter().OnCompleted(() => Dispatcher.InvokeAsync(() => frame.Continue = false));
                     Dispatcher.PushFrame(frame);
                 }
+
                 closing.GetAwaiter().GetResult();
             }
-            finally { _forceClosePending = false; }
+            finally
+            {
+                _forceClosePending = false;
+            }
         }
 
         private void DevToolsOpened(object sender, RoutedEventArgs e)

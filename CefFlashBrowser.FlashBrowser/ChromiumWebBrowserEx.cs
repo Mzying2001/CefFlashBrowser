@@ -154,17 +154,26 @@ namespace CefFlashBrowser.FlashBrowser
         {
             return Cef.UIThreadTaskFactory.StartNew(() =>
             {
-                if (IsDisposed || !IsBrowserInitialized) return false;
+                if (IsDisposed || !IsBrowserInitialized)
+                    return false;
+
                 try
                 {
                     var native = GetBrowser();
-                    if (native == null || native.IsDisposed) return false;
+                    if (native == null || native.IsDisposed)
+                        return false;
+
                     var host = native.GetHost();
-                    if (host == null || host.IsDisposed) return false;
+                    if (host == null || host.IsDisposed)
+                        return false;
+
                     host.SetAudioMuted(!host.IsAudioMuted);
                     return host.IsAudioMuted;
                 }
-                catch (ObjectDisposedException) { return false; }
+                catch (ObjectDisposedException)
+                {
+                    return false;
+                }
             });
         }
 

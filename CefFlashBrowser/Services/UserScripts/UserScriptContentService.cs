@@ -53,7 +53,8 @@ namespace CefFlashBrowser.Services.UserScripts
             _client = new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan };
         }
 
-        public Task<ResourceContent> GetScriptAsync(UserScriptInstallation installation, UserScriptDependencyDeclaration dependency, CancellationToken token)
+        public Task<ResourceContent> GetScriptAsync(UserScriptInstallation installation,
+            UserScriptDependencyDeclaration dependency, CancellationToken token)
             => FetchAsync(dependency.Url, true, false, token);
 
         public Task<ResourceContent> GetAsync(UserScriptInstallation installation, ResourceDeclaration resource, CancellationToken token)
@@ -71,7 +72,8 @@ namespace CefFlashBrowser.Services.UserScripts
                 for (var redirects = 0; ; redirects++)
                 {
                     using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
-                    using (var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, deadline.Token).ConfigureAwait(false))
+                    using (var response = await _client.SendAsync(request,
+                        HttpCompletionOption.ResponseHeadersRead, deadline.Token).ConfigureAwait(false))
                     {
                         var status = (int)response.StatusCode;
                         if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308)

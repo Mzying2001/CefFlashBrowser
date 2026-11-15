@@ -12,11 +12,17 @@ namespace CefFlashBrowser.Views.Dialogs
         {
             InitializeComponent();
             message.Text = description;
-            PreviewKeyDown += (sender, e) => { if (e.Key == Key.Escape) Close(); };
+            PreviewKeyDown += (sender, e) =>
+            {
+                if (e.Key == Key.Escape)
+                    Close();
+            };
         }
 
         private void DenyClick(object sender, RoutedEventArgs e) => Complete(PermissionDecision.Deny, true);
+
         private void AllowOnceClick(object sender, RoutedEventArgs e) => Complete(PermissionDecision.Allow, false);
+
         private void AllowRememberClick(object sender, RoutedEventArgs e) => Complete(PermissionDecision.Allow, true);
 
         private void Complete(PermissionDecision decision, bool remember)

@@ -196,7 +196,13 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     {
                         token.ThrowIfCancellationRequested();
                         var parameters = new Dictionary<string, object> { ["@id"] = key.ToString() };
-                        foreach (var table in new[] { "monkeysharp_values", "monkeysharp_permission_decisions", "monkeysharp_tab_states", "monkeysharp_scripts" })
+                        foreach (var table in new[]
+                        {
+                            "monkeysharp_values",
+                            "monkeysharp_permission_decisions",
+                            "monkeysharp_tab_states",
+                            "monkeysharp_scripts"
+                        })
                             session.Execute("DELETE FROM " + table + " WHERE script_id = @id", parameters);
 
                         token.ThrowIfCancellationRequested();

@@ -1,11 +1,11 @@
-using CefFlashBrowser.Data;
 using CefFlashBrowser.Browser.UserScripts;
-using CefFlashBrowser.Services.UserScripts;
-using CefFlashBrowser.Services.UserScripts.Persistence;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Database;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Services.UserScripts;
+using CefFlashBrowser.Services.UserScripts.Persistence;
 using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using CefSharp;
@@ -254,6 +254,7 @@ namespace CefFlashBrowser
                 work.GetAwaiter().OnCompleted(() => dispatcher.InvokeAsync(() => frame.Continue = false));
                 Dispatcher.PushFrame(frame);
             }
+
             work.GetAwaiter().GetResult();
         }
 
@@ -285,8 +286,10 @@ namespace CefFlashBrowser
 
             SimpleIoc.Global.Register<UserScriptService>(
                 () => _userScriptService = new UserScriptService(
-                    new UserScriptStorage(SimpleIoc.Global.GetInstance<IDatabase>(), SimpleIoc.Global.GetInstance<DatabaseService>()),
-                    GlobalData.MonkeySharpPath, new UserScriptContentService(GlobalData.Settings.ProxySettings),
+                    new UserScriptStorage(
+                        SimpleIoc.Global.GetInstance<IDatabase>(), SimpleIoc.Global.GetInstance<DatabaseService>()),
+                    GlobalData.MonkeySharpPath,
+                    new UserScriptContentService(GlobalData.Settings.ProxySettings),
                     new UserScriptPermissionPrompt(), LogShutdownError), Lifetime.Singleton);
 
             SimpleIoc.Global.Register<FaviconService>(
@@ -302,8 +305,14 @@ namespace CefFlashBrowser
 
         private static async Task StopDatabaseAsync(Task faviconWork)
         {
-            try { await faviconWork.ConfigureAwait(false); }
-            catch (Exception e) { LogShutdownError("Failed to stop application storage consumers", e); }
+            try
+            {
+                await faviconWork.ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LogShutdownError("Failed to stop application storage consumers", e);
+            }
 
             try
             {
@@ -316,7 +325,10 @@ namespace CefFlashBrowser
             }
             finally
             {
-                try { _logger?.Dispose(); }
+                try
+                {
+                    _logger?.Dispose();
+                }
                 catch { }
             }
         }

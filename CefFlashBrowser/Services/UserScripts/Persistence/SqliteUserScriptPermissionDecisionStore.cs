@@ -26,7 +26,9 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 await _storage.Database.TransactionAsync(session =>
                 {
                     token.ThrowIfCancellationRequested();
-                    var value = session.Scalar("SELECT decision FROM monkeysharp_permission_decisions WHERE script_id = @id AND kind = @kind AND target = @target", parameters);
+                    var value = session.Scalar(
+                        "SELECT decision FROM monkeysharp_permission_decisions WHERE script_id = @id AND kind = @kind AND target = @target",
+                        parameters);
                     if (value != null && value != DBNull.Value)
                     {
                         var encoded = Convert.ToInt64(value);

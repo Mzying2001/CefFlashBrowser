@@ -163,7 +163,8 @@ namespace CefFlashBrowser.Browser.UserScripts
 
             var trusted = GlobalData.Settings.TrustedUserScriptPageWorld;
             _runtimeRepository = new UserScriptRuntimeRepository(_service.Repository, trusted,
-                installation => Log(LogLevel.Info, "MSR215_EXECUTION_WORLD_UNAVAILABLE tab=" + _model.BrowserId + " script=" + installation.ScriptKey));
+                installation => Log(LogLevel.Info, "MSR215_EXECUTION_WORLD_UNAVAILABLE tab=" + _model.BrowserId
+                    + " script=" + installation.ScriptKey));
 
             var applicationMenu = _browser.MenuHandler as Handlers.ContextMenuHandler;
             _menus = new UserScriptMenuService(_model, _dispatcher, _service.Repository, () => _host,

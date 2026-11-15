@@ -16,7 +16,12 @@ namespace CefFlashBrowser.Utils
                 if (SHGetKnownFolderPath(ref id, 0, IntPtr.Zero, out path) == 0 && path != IntPtr.Zero)
                     return Marshal.PtrToStringUni(path);
             }
-            finally { if (path != IntPtr.Zero) Marshal.FreeCoTaskMem(path); }
+            finally
+            {
+                if (path != IntPtr.Zero)
+                    Marshal.FreeCoTaskMem(path);
+            }
+
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
         }
 
@@ -26,12 +31,17 @@ namespace CefFlashBrowser.Utils
             name = name.Substring(name.LastIndexOf('/') + 1);
             var invalid = Path.GetInvalidFileNameChars();
             name = new string(name.Select(character => invalid.Contains(character) ? '_' : character).ToArray()).Trim().TrimEnd('.');
-            if (name.Length > 150) name = name.Substring(0, 150).TrimEnd('.');
+            if (name.Length > 150)
+                name = name.Substring(0, 150).TrimEnd('.');
+
             var stem = name.Split('.')[0].ToUpperInvariant();
             if (new[] { "CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$" }.Contains(stem)
                 || Enumerable.Range(1, 9).Any(index => stem == "COM" + index || stem == "LPT" + index))
                 name = "_" + name;
-            if (name.Length > 150) name = name.Substring(0, 150).TrimEnd('.');
+
+            if (name.Length > 150)
+                name = name.Substring(0, 150).TrimEnd('.');
+
             return string.IsNullOrEmpty(name) ? "download.bin" : name;
         }
 

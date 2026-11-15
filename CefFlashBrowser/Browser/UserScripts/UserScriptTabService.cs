@@ -41,7 +41,8 @@ namespace CefFlashBrowser.Browser.UserScripts
             if (request.Incognito == true)
                 throw new NotSupportedException("Private script tabs are not supported.");
 
-            if (!request.Url.IsAbsoluteUri || request.Url.Scheme != "http" && request.Url.Scheme != "https" && request.Url.AbsoluteUri != "about:blank")
+            if (!request.Url.IsAbsoluteUri
+                || request.Url.Scheme != "http" && request.Url.Scheme != "https" && request.Url.AbsoluteUri != "about:blank")
                 throw new ArgumentException("Script tabs require HTTP(S) or about:blank.", nameof(request));
 
             return await _dispatcher.InvokeAsync(() =>

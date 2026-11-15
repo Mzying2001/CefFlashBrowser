@@ -339,6 +339,7 @@ namespace CefFlashBrowser.Views
         {
             if (_isClosed || _closingWindow || _forceClosePending || ViewModel.IsClosing)
                 return Task.FromResult(false);
+
             return CloseTabAsync(model);
         }
 

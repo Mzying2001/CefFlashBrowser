@@ -9,6 +9,7 @@ namespace CefFlashBrowser.ViewModels
         public string Name { get; }
         public string Description { get; }
         public DelegateCommand InvokeCommand { get; }
+
         private bool _staysOpenOnClick;
         public bool StaysOpenOnClick
         {

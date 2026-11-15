@@ -15,7 +15,9 @@ namespace CefFlashBrowser.Views.Dialogs
 
         internal void SetMessage(string title, string text)
         {
-            if (!string.IsNullOrWhiteSpace(title)) Title = title;
+            if (!string.IsNullOrWhiteSpace(title))
+                Title = title;
+
             notificationText.Text = text;
         }
 
@@ -26,6 +28,7 @@ namespace CefFlashBrowser.Views.Dialogs
         }
 
         private void NotificationClick(object sender, RoutedEventArgs e) => Clicked?.Invoke(this, EventArgs.Empty);
+
         private void CloseClick(object sender, RoutedEventArgs e) => Close();
     }
 }

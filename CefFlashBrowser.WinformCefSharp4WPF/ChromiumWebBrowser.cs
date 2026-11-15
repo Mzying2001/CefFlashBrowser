@@ -33,12 +33,15 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         private bool disposalPrepared;
 
         public Func<Task> BeforeDisposeAsync { get; set; }
+
         public Task DisposalCompletion => disposalTask ?? Task.CompletedTask;
 
         // Set before hosting. The callback owns preparation and navigation; history
         // and page-initiated navigation continue to be handled by CEF.
         public Func<string, CancellationToken, Task> NavigationHandler { get; set; }
+
         public event EventHandler<NavigationFailedEventArgs> NavigationFailed;
+
         public bool IsNativeControlCreated => browser.IsHandleCreated;
 
 
@@ -486,6 +489,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             {
                 if (disposalTask != null)
                     return;
+
                 var preparation = BeforeDisposeAsync();
                 if (!preparation.IsCompleted)
                 {
@@ -494,6 +498,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                     disposalTask = CompleteDisposalAsync(preparation);
                     return;
                 }
+
                 preparation.GetAwaiter().GetResult();
                 disposalPrepared = true;
             }
@@ -660,6 +665,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             navigationCancellation?.Dispose();
             var cancellation = navigationCancellation = new CancellationTokenSource();
             var token = cancellation.Token;
+
             try
             {
                 if (NavigationHandler == null)
@@ -791,7 +797,6 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
                 var entry = e.Browser.GetHost()?.GetVisibleNavigationEntry();
 
-
                 // CEF reports the underlying URL for source pages. Read the visible
                 // entry on the CEF UI thread before dispatching to WPF.
                 if (entry != null && entry.IsValid && entry.Url == e.Address
@@ -852,6 +857,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         {
             if (browser.IsDisposed)
                 return;
+
             SetCurrentValue(IsBrowserInitializedProperty, isBrowserInitialized);
             IsBrowserInitializedChanged?.Invoke(this, e);
         }

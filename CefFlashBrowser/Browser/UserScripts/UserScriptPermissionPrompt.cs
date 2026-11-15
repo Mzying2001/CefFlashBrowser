@@ -11,7 +11,8 @@ namespace CefFlashBrowser.Browser.UserScripts
 {
     public sealed class UserScriptPermissionPrompt : IUserScriptPermissionPrompt
     {
-        public async Task<UserScriptPermissionChoice> PromptAsync(ApiAuthorizationRequest request, UserScriptPermissionScope scope, CancellationToken token)
+        public async Task<UserScriptPermissionChoice> PromptAsync(ApiAuthorizationRequest request,
+            UserScriptPermissionScope scope, CancellationToken token)
         {
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher == null || dispatcher.HasShutdownStarted)

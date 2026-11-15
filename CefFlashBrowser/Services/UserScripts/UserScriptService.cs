@@ -110,6 +110,7 @@ namespace CefFlashBrowser.Services.UserScripts
                         linked.Token.ThrowIfCancellationRequested();
                         session.Execute("DELETE FROM monkeysharp_tab_states");
                     }), linked.Token).ConfigureAwait(false);
+
                     IUserScriptRepositoryPersistence persistence = repairKey.HasValue
                         ? new RepairPersistence(_persistence, repairKey.Value, source)
                         : (IUserScriptRepositoryPersistence)_persistence;
@@ -117,6 +118,7 @@ namespace CefFlashBrowser.Services.UserScripts
                         preparer: new UserScriptPreparer(Content, Content));
                     await repository.InitializeAsync(linked.Token).ConfigureAwait(false);
                     linked.Token.ThrowIfCancellationRequested();
+
                     lock (_lock)
                     {
                         ThrowIfStopping();

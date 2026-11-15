@@ -88,7 +88,8 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
                 _alive = false;
                 return _close = _storage.RunAsync(() => _storage.Database.ExecuteAsync(
-                    "DELETE FROM monkeysharp_tab_states WHERE tab_id = @tab", new Dictionary<string, object> { ["@tab"] = _tabId }), CancellationToken.None);
+                    "DELETE FROM monkeysharp_tab_states WHERE tab_id = @tab",
+                    new Dictionary<string, object> { ["@tab"] = _tabId }), CancellationToken.None);
             }
         }
     }

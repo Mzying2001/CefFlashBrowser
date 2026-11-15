@@ -204,9 +204,11 @@
                 </MenuItem.ItemTemplate>
             </MenuItem>
 
-            <MenuItem Header="{DynamicResource userscript_commands}" ItemsSource="{Binding CurrentBrowser.UserScriptMenus}">
+            <MenuItem Header="{DynamicResource userscript_commands}"
+                      ItemsSource="{Binding CurrentBrowser.UserScriptMenus}">
                 <MenuItem.Style>
-                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding CurrentBrowser.UserScriptMenus.Count}" Value="0">
                                 <Setter Property="IsEnabled" Value="False"/>
@@ -214,8 +216,10 @@
                         </Style.Triggers>
                     </Style>
                 </MenuItem.Style>
+
                 <MenuItem.ItemContainerStyle>
-                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Setter Property="Header" Value="{Binding Name}"/>
                         <Setter Property="ToolTip" Value="{Binding Description}"/>
                         <Setter Property="Command" Value="{Binding InvokeCommand}"/>
@@ -224,9 +228,11 @@
                 </MenuItem.ItemContainerStyle>
             </MenuItem>
 
-            <MenuItem Header="{DynamicResource userscript_downloads}" ItemsSource="{Binding CurrentBrowser.UserScriptDownloads}">
+            <MenuItem Header="{DynamicResource userscript_downloads}"
+                      ItemsSource="{Binding CurrentBrowser.UserScriptDownloads}">
                 <MenuItem.Style>
-                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding CurrentBrowser.UserScriptDownloads.Count}" Value="0">
                                 <Setter Property="IsEnabled" Value="False"/>
@@ -234,42 +240,64 @@
                         </Style.Triggers>
                     </Style>
                 </MenuItem.Style>
+
                 <MenuItem.ItemContainerStyle>
-                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Style TargetType="MenuItem"
+                           BasedOn="{StaticResource {x:Type MenuItem}}">
                         <Setter Property="StaysOpenOnClick" Value="True"/>
                     </Style>
                 </MenuItem.ItemContainerStyle>
+
                 <MenuItem.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel MinWidth="220" MaxWidth="360">
-                            <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                <TextBlock Text="{Binding Received, Converter={StaticResource BinaryToSizeStringConverter}}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock VerticalAlignment="Center" Margin="0,0,10,0">
+                        <StackPanel MinWidth="220"
+                                    MaxWidth="360">
+                            <TextBlock Text="{Binding FileName}"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0,4,0,0">
+                                <TextBlock Text="{Binding Received, Converter={StaticResource BinaryToSizeStringConverter}}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"/>
+                                <TextBlock VerticalAlignment="Center"
+                                           Margin="0,0,10,0">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="{DynamicResource userscript_downloadWaiting}"/>
+                                            <Setter Property="Text"
+                                                    Value="{DynamicResource userscript_downloadWaiting}"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding State}" Value="{x:Static vm:UserScriptDownloadState.Downloading}">
-                                                    <Setter Property="Text" Value="{DynamicResource userscript_downloading}"/>
+                                                <DataTrigger Binding="{Binding State}"
+                                                             Value="{x:Static vm:UserScriptDownloadState.Downloading}">
+                                                    <Setter Property="Text"
+                                                            Value="{DynamicResource userscript_downloading}"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding State}" Value="{x:Static vm:UserScriptDownloadState.Completed}">
-                                                    <Setter Property="Text" Value="{DynamicResource userscript_downloadCompleted}"/>
+                                                <DataTrigger Binding="{Binding State}"
+                                                             Value="{x:Static vm:UserScriptDownloadState.Completed}">
+                                                    <Setter Property="Text"
+                                                            Value="{DynamicResource userscript_downloadCompleted}"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding State}" Value="{x:Static vm:UserScriptDownloadState.Cancelled}">
-                                                    <Setter Property="Text" Value="{DynamicResource userscript_downloadCancelled}"/>
+                                                <DataTrigger Binding="{Binding State}"
+                                                             Value="{x:Static vm:UserScriptDownloadState.Cancelled}">
+                                                    <Setter Property="Text"
+                                                            Value="{DynamicResource userscript_downloadCancelled}"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding State}" Value="{x:Static vm:UserScriptDownloadState.TimedOut}">
-                                                    <Setter Property="Text" Value="{DynamicResource userscript_downloadTimedOut}"/>
+                                                <DataTrigger Binding="{Binding State}"
+                                                             Value="{x:Static vm:UserScriptDownloadState.TimedOut}">
+                                                    <Setter Property="Text"
+                                                            Value="{DynamicResource userscript_downloadTimedOut}"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding State}" Value="{x:Static vm:UserScriptDownloadState.Failed}">
-                                                    <Setter Property="Text" Value="{DynamicResource userscript_downloadFailed}"/>
+                                                <DataTrigger Binding="{Binding State}"
+                                                             Value="{x:Static vm:UserScriptDownloadState.Failed}">
+                                                    <Setter Property="Text"
+                                                            Value="{DynamicResource userscript_downloadFailed}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-                                <Button Content="{DynamicResource userscript_downloadCancel}" Command="{Binding CancelCommand}" Padding="6,2"/>
+                                <Button Content="{DynamicResource userscript_downloadCancel}"
+                                        Command="{Binding CancelCommand}"
+                                        Padding="6,2"/>
                             </StackPanel>
                         </StackPanel>
                     </DataTemplate>

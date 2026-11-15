@@ -364,7 +364,6 @@ namespace CefFlashBrowser.Browser.UserScripts
                         _owner.Report();
                     }
 
-
                     _completion.TrySetResult(null);
                     _ = ReleaseAsync();
                 }

@@ -65,7 +65,8 @@ namespace CefFlashBrowser.Browser.UserScripts
             }
         }
 
-        public bool OnContextMenuCommand(IWebBrowser browser, IBrowser native, IFrame frame, IContextMenuParams parameters, CefMenuCommand id, CefEventFlags flags)
+        public bool OnContextMenuCommand(IWebBrowser browser, IBrowser native, IFrame frame,
+            IContextMenuParams parameters, CefMenuCommand id, CefEventFlags flags)
         {
             if (GlobalData.Settings.DisableBrowserContextMenu)
                 return true;
@@ -80,7 +81,8 @@ namespace CefFlashBrowser.Browser.UserScripts
             Inner.OnContextMenuDismissed(browser, native, frame);
         }
 
-        public bool RunContextMenu(IWebBrowser browser, IBrowser native, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
+        public bool RunContextMenu(IWebBrowser browser, IBrowser native, IFrame frame,
+            IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
         {
             if (GlobalData.Settings.DisableBrowserContextMenu || model.Count == 0)
             {

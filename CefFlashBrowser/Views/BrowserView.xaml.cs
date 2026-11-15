@@ -1,11 +1,11 @@
-﻿using CefFlashBrowser.Data;
-using CefFlashBrowser.Browser.UserScripts;
-using CefFlashBrowser.Services.UserScripts;
-using CefFlashBrowser.Log;
+﻿using CefFlashBrowser.Browser.UserScripts;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.FlashBrowser.Handlers;
+using CefFlashBrowser.Log;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefSharp;
@@ -219,10 +219,14 @@ namespace CefFlashBrowser.Views
         {
             _closeToken = _closeCancellation.Token;
             InitializeComponent();
+
             browser = new ChromiumFlashBrowser(true) { ZoomLevelIncrement = 0.25 };
             RegisterName("browser", browser);
-            browser.SetBinding(ChromiumFlashBrowser.AddressProperty, new Binding(nameof(BrowserViewModel.Address)) { Mode = BindingMode.TwoWay });
-            browser.SetBinding(ChromiumFlashBrowser.ZoomLevelProperty, new Binding(nameof(BrowserViewModel.ZoomLevel)) { Mode = BindingMode.TwoWay });
+            browser.SetBinding(ChromiumFlashBrowser.AddressProperty,
+                new Binding(nameof(BrowserViewModel.Address)) { Mode = BindingMode.TwoWay });
+            browser.SetBinding(ChromiumFlashBrowser.ZoomLevelProperty,
+                new Binding(nameof(BrowserViewModel.ZoomLevel)) { Mode = BindingMode.TwoWay });
+
             browser.TitleChanged += BrowserTitleChanged;
             browser.FullscreenModeChanged += BrowserFullscreenModeChanged;
             browser.FrameLoadStart += BrowserFrameLoadStart;
@@ -240,6 +244,7 @@ namespace CefFlashBrowser.Views
             Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
             Messenger.Global.Register(MessageTokens.BROWSER_CLOSE_CANCELED, BrowserCloseCanceledHandler);
+
             AttachBrowser();
         }
 
@@ -292,6 +297,7 @@ namespace CefFlashBrowser.Views
         private async void BrowserViewLoaded(object sender, RoutedEventArgs e)
         {
             AttachBrowser();
+
             if (_userScriptSession != null)
                 await _userScriptSession.StartAsync();
         }
@@ -300,7 +306,10 @@ namespace CefFlashBrowser.Views
         {
             if (!_isClosed && _userScriptSession != null)
             {
-                try { await _userScriptSession.RetryAsync(); }
+                try
+                {
+                    await _userScriptSession.RetryAsync();
+                }
                 catch (OperationCanceledException) { }
             }
         }
@@ -315,14 +324,12 @@ namespace CefFlashBrowser.Views
                 ViewModel.Browser = browser;
                 ViewModel.Title = browser.Title;
                 browser.DataContext = ViewModel;
+
                 if (_userScriptSession == null)
                 {
                     _userScriptSession = new UserScriptBrowserSession(browser, ViewModel,
-                        SimpleIoc.Global.GetInstance<UserScriptService>(), SimpleIoc.Global.GetInstance<ILogger>(), () =>
-                        {
-                            if (!_isClosed && !browser.IsDisposed && browserContainer.Content != browser)
-                                browserContainer.Content = browser;
-                        }, () => _ownerWindow ?? Window.GetWindow(this), () => RequestCloseAsync(false));
+                        SimpleIoc.Global.GetInstance<UserScriptService>(), SimpleIoc.Global.GetInstance<ILogger>(),
+                        MountBrowser, () => _ownerWindow ?? Window.GetWindow(this), () => RequestCloseAsync(false));
                 }
             }
 
@@ -337,6 +344,12 @@ namespace CefFlashBrowser.Views
                 if (_ownerWindow != null)
                     _ownerWindow.Closed += OwnerWindowClosed;
             }
+        }
+
+        private void MountBrowser()
+        {
+            if (!_isClosed && !browser.IsDisposed && browserContainer.Content != browser)
+                browserContainer.Content = browser;
         }
 
         private void SaveDevToolsWidth()
@@ -457,11 +470,14 @@ namespace CefFlashBrowser.Views
             if (!_closeAccepted)
             {
                 _closeAccepted = true;
-                if (ViewModel != null) ViewModel.IsClosing = true;
+                if (ViewModel != null)
+                    ViewModel.IsClosing = true;
+
                 InvokeAfterCefCallback(async () =>
                 {
                     if (_userScriptSession != null)
                         await _userScriptSession.StopAsync();
+
                     if (_devToolsOpen && !browser.IsDisposed)
                         browser.CloseDevTools();
                     else
@@ -543,6 +559,7 @@ namespace CefFlashBrowser.Views
                 scripts.GetAwaiter().OnCompleted(() => Dispatcher.InvokeAsync(() => frame.Continue = false));
                 Dispatcher.PushFrame(frame);
             }
+
             scripts?.GetAwaiter().GetResult();
 
             _closeCancellation.Cancel();
