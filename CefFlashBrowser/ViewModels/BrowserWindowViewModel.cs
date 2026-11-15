@@ -274,6 +274,16 @@ namespace CefFlashBrowser.ViewModels
             return InsertBrowser(_browsers.Count, address, activate);
         }
 
+        internal BrowserViewModel OpenUserScriptTab(BrowserViewModel source, string address, bool active,
+            bool insert, bool setParent, int? insertIndex)
+        {
+            if (source != null && !_browsers.Contains(source))
+                throw new InvalidOperationException("The source tab is no longer available.");
+            var index = insertIndex.HasValue ? Math.Min(insertIndex.Value, _browsers.Count)
+                : insert && source != null ? _browsers.IndexOf(source) + 1 : _browsers.Count;
+            return InsertBrowser(index, address, active, setParent ? source : null);
+        }
+
         private void AddBrowserCommandImpl(string address)
         {
             if (!IsClosing)
@@ -357,6 +367,7 @@ namespace CefFlashBrowser.ViewModels
                 CurrentBrowser = (opener != null && _browsers.Contains(opener)) ? opener
                     : (_browsers.Count == 0 ? null : _browsers[Math.Min(index, _browsers.Count - 1)]);
             }
+            browser.MarkClosed();
         }
 
         public void ToggleDevTools(BrowserViewModel browser)

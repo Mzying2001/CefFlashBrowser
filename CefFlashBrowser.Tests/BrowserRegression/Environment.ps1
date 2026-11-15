@@ -121,6 +121,7 @@ function Initialize-RegressionEnvironment($Context) {
         [System.Windows.DependencyObject].Assembly.Location,
         [System.Windows.Media.Visual].Assembly.Location,
         (Join-Path $Context.CefPath 'CefSharp.dll'),
+        (Join-Path $Context.CefPath 'CefSharp.Core.dll'),
         $applicationAssembly.FullName,
         (Get-RegressionDependencyPath $Context 'CefFlashBrowser.FlashBrowser.dll'),
         (Get-RegressionDependencyPath $Context 'CefFlashBrowser.WinformCefSharp4WPF.dll'),
@@ -130,7 +131,8 @@ function Initialize-RegressionEnvironment($Context) {
     Add-Type -ReferencedAssemblies $references -Path @(
         (Join-Path $Context.ScriptPath 'TestDoubles.cs'),
         (Join-Path $Context.ScriptPath 'FaviconHttpFixture.cs'),
-        (Join-Path $Context.ScriptPath 'UserScriptSeamProbe.cs')
+        (Join-Path $Context.ScriptPath 'UserScriptSeamProbe.cs'),
+        (Join-Path $Context.ScriptPath 'UserScriptMenuProbe.cs')
     )
     $Context.DisposedBrowser = (New-Object DisposedBrowserProxy([CefSharp.IBrowser])).GetTransparentProxy()
     $Context.AuxiliaryTypes = @(

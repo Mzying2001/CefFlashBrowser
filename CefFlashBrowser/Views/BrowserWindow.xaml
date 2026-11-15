@@ -204,6 +204,26 @@
                 </MenuItem.ItemTemplate>
             </MenuItem>
 
+            <MenuItem Header="{DynamicResource userscript_commands}" ItemsSource="{Binding CurrentBrowser.UserScriptMenus}">
+                <MenuItem.Style>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding CurrentBrowser.UserScriptMenus.Count}" Value="0">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </MenuItem.Style>
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                        <Setter Property="Header" Value="{Binding Name}"/>
+                        <Setter Property="ToolTip" Value="{Binding Description}"/>
+                        <Setter Property="Command" Value="{Binding InvokeCommand}"/>
+                        <Setter Property="StaysOpenOnClick" Value="{Binding StaysOpenOnClick}"/>
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+            </MenuItem>
+
             <MenuItem Header="{DynamicResource browser_addFavorite}"
                       Command="{Binding AddFavoriteCommand}"
                       CommandParameter="{Binding CurrentBrowser}"

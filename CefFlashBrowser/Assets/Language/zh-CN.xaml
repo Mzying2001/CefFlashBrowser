@@ -229,4 +229,5 @@
     <sys:String x:Key="userscript_allowRemember" xml:space="preserve">允许并记住</sys:String>
     <sys:String x:Key="userscript_unavailable">本次页面未启用用户脚本</sys:String>
     <sys:String x:Key="userscript_retry">重试并重新导航</sys:String>
+    <sys:String x:Key="userscript_commands">脚本命令</sys:String>
 </ResourceDictionary>

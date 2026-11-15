@@ -335,6 +335,13 @@ namespace CefFlashBrowser.Views
             return null;
         }
 
+        internal Task<bool> CloseScriptTabAsync(BrowserViewModel model)
+        {
+            if (_isClosed || _closingWindow || _forceClosePending || ViewModel.IsClosing)
+                return Task.FromResult(false);
+            return CloseTabAsync(model);
+        }
+
         private async Task<bool> CloseTabAsync(BrowserViewModel browser, BrowserView approvedView = null, bool forceClose = false)
         {
             if (_isClosed || !ViewModel.Browsers.Contains(browser))

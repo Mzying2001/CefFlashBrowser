@@ -21,16 +21,19 @@ namespace CefFlashBrowser.Browser.Handlers
             get => SimpleIoc.Global.GetInstance<LanguageService>();
         }
 
-        public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
-        public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
-        public const CefMenuCommand OpenSelectedUrl = CefMenuCommand.UserFirst + 3;
-        public const CefMenuCommand OpenInNewTab = CefMenuCommand.UserFirst + 4;
+        public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserLast - 3;
+        public const CefMenuCommand Search = CefMenuCommand.UserLast - 2;
+        public const CefMenuCommand OpenSelectedUrl = CefMenuCommand.UserLast - 1;
+        public const CefMenuCommand OpenInNewTab = CefMenuCommand.UserLast;
+
+        public int LastMenuItemCount { get; private set; }
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
             if (GlobalData.Settings.DisableBrowserContextMenu)
             {
                 model.Clear();
+                LastMenuItemCount = 0;
                 return;
             }
 
@@ -68,6 +71,7 @@ namespace CefFlashBrowser.Browser.Handlers
             {
                 model.InsertSeparatorAt(count);
             }
+            LastMenuItemCount = model.Count;
         }
 
         public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)

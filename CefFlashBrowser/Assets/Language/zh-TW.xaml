@@ -229,4 +229,5 @@ Allow this script to use this capability?</sys:String>
     <sys:String x:Key="userscript_allowRemember" xml:space="preserve">Allow and remember</sys:String>
     <sys:String x:Key="userscript_unavailable">Userscripts are unavailable for this page</sys:String>
     <sys:String x:Key="userscript_retry">Retry and navigate again</sys:String>
+    <sys:String x:Key="userscript_commands">Script commands</sys:String>
 </ResourceDictionary>

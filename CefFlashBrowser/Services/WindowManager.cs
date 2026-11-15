@@ -169,7 +169,12 @@ namespace CefFlashBrowser.Services
 
         public static void ShowBrowser(string address)
         {
-            ShowWindow<BrowserWindow>(initializer: window =>
+            OpenBrowser(address);
+        }
+
+        internal static BrowserWindow OpenBrowser(string address, bool activate = true)
+        {
+            var browserWindow = CreateWindow<BrowserWindow>(initializer: window =>
             {
                 _browserWindows.Add(window);
                 ((BrowserWindowViewModel)window.DataContext).CurrentBrowser.Address = address;
@@ -184,6 +189,9 @@ namespace CefFlashBrowser.Services
                     { ShowMainWindow(); }
                 });
             });
+            browserWindow.ShowActivated = activate;
+            browserWindow.Show();
+            return browserWindow;
         }
 
         public static void ShowSwfPlayer(string fileName)

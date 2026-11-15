@@ -26,6 +26,7 @@ namespace CefFlashBrowser.Views
         private bool _isClosed = false;
         private Task _windowCloseTask;
         private bool _forceClosePending;
+        internal bool IsClosing => _doClose || _forceClosePending || _windowCloseTask != null && !_windowCloseTask.IsCompleted;
 
         private BrowserViewModel ViewModel => browserView?.ViewModel;
 
@@ -112,6 +113,7 @@ namespace CefFlashBrowser.Views
         protected override void OnClosed(EventArgs e)
         {
             _isClosed = true;
+            ViewModel?.MarkClosed();
 
             Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
             base.OnClosed(e);

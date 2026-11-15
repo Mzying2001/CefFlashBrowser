@@ -46,6 +46,12 @@ namespace CefFlashBrowser.Services.UserScripts
             PermissionPolicy = new InteractiveUserScriptPermissionPolicy(new SensitiveUserScriptPermissionsPolicy(), Decisions, prompt);
         }
 
+        public SqliteUserScriptTabStateService CreateTabStateService(string browserId)
+        {
+            lock (_lock) ThrowIfStopping();
+            return new SqliteUserScriptTabStateService(_storage, browserId);
+        }
+
         public Task InitializeAsync()
         {
             lock (_lock)

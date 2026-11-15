@@ -163,6 +163,20 @@ public sealed class RegressionMenuModelProxy : RealProxy
         object result = true;
         switch (call.MethodName)
         {
+            case "get_Count": result = Commands.Count; break;
+            case "GetCommandIdAt": result = Commands[(int)call.Args[0]]; break;
+            case "AddItem":
+                Commands.Add((CefMenuCommand)call.Args[0]);
+                Labels.Add((string)call.Args[1]);
+                break;
+            case "AddSeparator":
+                Commands.Add(CefMenuCommand.NotFound);
+                Labels.Add(null);
+                break;
+            case "RemoveAt":
+                Commands.RemoveAt((int)call.Args[0]);
+                Labels.RemoveAt((int)call.Args[0]);
+                break;
             case "InsertItemAt":
             case "InsertCheckItemAt":
                 Commands.Insert((int)call.Args[0], (CefMenuCommand)call.Args[1]);

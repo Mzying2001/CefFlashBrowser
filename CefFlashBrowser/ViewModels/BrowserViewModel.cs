@@ -6,6 +6,7 @@ using CefSharp;
 using SimpleMvvm;
 using SimpleMvvm.Messaging;
 using System;
+using System.Collections.ObjectModel;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -39,6 +40,23 @@ namespace CefFlashBrowser.ViewModels
         {
             get => _userScriptMatchCount;
             internal set => UpdateValue(ref _userScriptMatchCount, value);
+        }
+
+        public ObservableCollection<UserScriptMenuCommand> UserScriptMenus { get; } = new ObservableCollection<UserScriptMenuCommand>();
+        private volatile bool _isClosed;
+        public bool IsClosed => _isClosed;
+        public event EventHandler Closed;
+
+        internal void MarkClosed()
+        {
+            if (_isClosed) return;
+            _isClosed = true;
+            var handlers = Closed;
+            if (handlers == null) return;
+            foreach (EventHandler handler in handlers.GetInvocationList())
+            {
+                try { handler(this, EventArgs.Empty); } catch { }
+            }
         }
 
         public bool IsClosing { get; internal set; }

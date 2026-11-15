@@ -322,7 +322,7 @@ namespace CefFlashBrowser.Views
                         {
                             if (!_isClosed && !browser.IsDisposed && browserContainer.Content != browser)
                                 browserContainer.Content = browser;
-                        });
+                        }, () => _ownerWindow ?? Window.GetWindow(this), () => RequestCloseAsync(false));
                 }
             }
 

@@ -156,6 +156,19 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
+        public async Task Startup_ClearsTabStateLeftByAPreviousProcess()
+        {
+            var first = Create();
+            await first.InitializeAsync();
+            var installation = await first.Repository.InstallAsync(Source, null, true, CancellationToken.None);
+            await first.CreateTabStateService("previous-process-tab").SaveAsync(installation.ScriptKey, null, "{}", CancellationToken.None);
+            await first.StopAsync();
+            var restored = Create();
+            await restored.InitializeAsync();
+            Assert.AreEqual(0, (await restored.CreateTabStateService("current-tab").GetAllAsync(installation.ScriptKey, CancellationToken.None)).Count);
+        }
+
+        [TestMethod]
         public async Task SharedPermissionBatch_OneCancelledWaiterDoesNotCancelTheOther()
         {
             var service = Create();

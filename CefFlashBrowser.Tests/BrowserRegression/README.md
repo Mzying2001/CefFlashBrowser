@@ -94,3 +94,11 @@ participating in native hosting; SWF's application-owned page and source-view pa
 popup and SWF windows, followed by accepted-close cleanup. `-Scenario Auxiliary` runs the existing
 auxiliary routing, embedded player, DevTools, confirmation and force-close checks. Window helpers
 wait for the actual target document rather than the runtime's temporary blank document.
+
+`-Scenario Menus` verifies five real manual scripts alongside application commands, dynamic GM
+callbacks, native frame attestation, the manual-menu cap, global menu suppression and registration
+cleanup. `-Scenario ScriptTabs` covers actual GM tab handles, rejected/accepted closes, independent
+auxiliary sources, tab-state navigation and cleanup, unsupported privacy options and concurrent
+last-browser protection. `-Scenario ContextMenu` retains the existing application menu regression.
+The pinned library keeps JavaScript window actions void and dispatches a handle's close once;
+rejected closes remain open and later user closes still produce the handle's actual close notification.

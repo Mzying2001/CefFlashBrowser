@@ -193,6 +193,41 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
+        public async Task TabState_IsStableAcrossFrames_AndCloseRejectsQueuedWrites()
+        {
+            var key = Mzying2001.MonkeySharp.Core.Domain.ScriptKey.Parse(_id);
+            var first = new SqliteUserScriptTabStateService(_storage, "first-tab");
+            var second = new SqliteUserScriptTabStateService(_storage, "second-tab");
+            await first.SaveAsync(key, null, "{\"count\":1}", CancellationToken.None);
+            await second.SaveAsync(key, null, "{\"count\":2}", CancellationToken.None);
+            Assert.AreEqual("{\"count\":1}", await first.GetAsync(key, null, CancellationToken.None));
+            Assert.AreEqual(2, (await second.GetAllAsync(key, CancellationToken.None)).Count);
+            var release = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var held = _storage.RunAsync(() => release.Task, CancellationToken.None);
+            var late = first.SaveAsync(key, null, "{\"late\":true}", CancellationToken.None);
+            var close = first.CloseAsync();
+            release.TrySetResult(true);
+            await held;
+            try { await late; Assert.Fail("A closed tab must not save queued state."); }
+            catch (OperationCanceledException) { }
+            await close;
+            Assert.AreEqual("{}", await first.GetAsync(key, null, CancellationToken.None));
+            Assert.AreEqual(1, (await second.GetAllAsync(key, CancellationToken.None)).Count);
+            Assert.AreSame(close, first.CloseAsync());
+        }
+
+        [TestMethod]
+        public async Task TabState_RejectsNonObjectsAndWritesAfterUninstall()
+        {
+            var key = Mzying2001.MonkeySharp.Core.Domain.ScriptKey.Parse(_id);
+            var state = new SqliteUserScriptTabStateService(_storage, "tab");
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => state.SaveAsync(key, null, "[]", CancellationToken.None));
+            await _repository.RemoveAsync(key, CancellationToken.None);
+            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() => state.SaveAsync(key, null, "{}", CancellationToken.None));
+            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_tab_states"));
+        }
+
+        [TestMethod]
         public async Task Stop_DrainsAcceptedWrites_AndRejectsNewWork()
         {
             var release = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);

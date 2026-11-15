@@ -3,6 +3,7 @@ using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Services.UserScripts;
+using CefFlashBrowser.Services.UserScripts.Persistence;
 using CefFlashBrowser.ViewModels;
 using CefSharp;
 using Mzying2001.MonkeySharp.CefSharp;
@@ -16,6 +17,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using System.Windows;
 
 namespace CefFlashBrowser.Browser.UserScripts
 {
@@ -35,12 +37,17 @@ namespace CefFlashBrowser.Browser.UserScripts
         private Task _initialization, _stop;
         private CefSharpUserScriptHost _host;
         private bool _repositorySubscribed;
+        private bool _initialBlankTarget;
+        private readonly UserScriptTabService _tabs;
+        private UserScriptMenuService _menus;
+        private UserScriptContextMenuHandler _contextMenu;
+        private SqliteUserScriptTabStateService _tabState;
 
         public CefSharpUserScriptHost Host => _host;
         public bool IsStopped => _stop?.IsCompleted == true;
 
         public UserScriptBrowserSession(ChromiumFlashBrowser browser, BrowserViewModel model,
-            UserScriptService service, ILogger logger, Action mount)
+            UserScriptService service, ILogger logger, Action mount, Func<Window> owner, Func<Task<bool>> close)
         {
             _browser = browser;
             _model = model;
@@ -48,6 +55,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             _logger = logger;
             _mount = mount;
             _dispatcher = browser.Dispatcher;
+            _tabs = new UserScriptTabService(model, owner, close, _dispatcher, _lifetime.Token);
             _registration = service.RegisterSession(model.BrowserId, StopAsync);
             _browser.AddressChanged += AddressChanged;
             _browser.NavigationHandler = NavigateAsync;
@@ -81,7 +89,10 @@ namespace CefFlashBrowser.Browser.UserScripts
                 {
                     await WaitForNativeAsync(_lifetime.Token);
                     if (needsBlankDocument)
+                    {
+                        _initialBlankTarget = _model.Address == "about:blank";
                         _browser.LoadPrepared("about:blank");
+                    }
                     await _host.PrepareAsync(_lifetime.Token);
                     SetState(UserScriptState.Ready);
                 }
@@ -123,8 +134,16 @@ namespace CefFlashBrowser.Browser.UserScripts
                 _browser.RequestHandler = multiplexer;
             }
 
+            var applicationMenu = _browser.MenuHandler as Handlers.ContextMenuHandler;
+            _menus = new UserScriptMenuService(_model, _dispatcher, _service.Repository, () => _host,
+                () => Log(LogLevel.Warning, "Userscript menu callback failed for tab " + _model.BrowserId));
+            if (_tabState == null) _tabState = _service.CreateTabStateService(_model.BrowserId);
             var builder = new CefSharpUserScriptHostBuilder(_service.Repository)
                 .UseValueStore(_service.ValueStore)
+                .UseMenuService(_menus)
+                .UseTabService(_tabs)
+                .UseWindowService(_tabs)
+                .UseTabStateService(_tabState)
                 .UsePermissionPolicy(new UserScriptExecutionPolicy(_service.PermissionPolicy,
                     () => GlobalData.Settings.TrustedUserScriptPageWorld, url => AllowsScripts(url.AbsoluteUri)))
                 .Configure(new CefSharpHostOptions
@@ -138,6 +157,10 @@ namespace CefFlashBrowser.Browser.UserScripts
             _host = builder.Build();
             _host.Diagnostic += Diagnostic;
             _host.Attach(_browser);
+            _contextMenu = new UserScriptContextMenuHandler(_browser.MenuHandler, _menus,
+                () => applicationMenu?.LastMenuItemCount ?? 0,
+                () => Log(LogLevel.Warning, "Userscript native menu limit reached for tab " + _model.BrowserId));
+            _browser.MenuHandler = _contextMenu;
         }
 
         public async Task NavigateAsync(string address, CancellationToken token)
@@ -171,11 +194,16 @@ namespace CefFlashBrowser.Browser.UserScripts
                         linked.Token.ThrowIfCancellationRequested();
                         SetState(UserScriptState.Ready);
                         navigationStarted = true;
-                        if (Uri.TryCreate(address, UriKind.Absolute, out var url)
-                            && (url.Scheme == "http" || url.Scheme == "https" || address == "about:blank"))
-                            await _host.NavigateAsync(address, linked.Token);
-                        else
-                            _browser.LoadPrepared(address);
+                        var alreadyAtInitialTarget = _initialBlankTarget && address == "about:blank";
+                        _initialBlankTarget = false;
+                        if (!alreadyAtInitialTarget)
+                        {
+                            if (Uri.TryCreate(address, UriKind.Absolute, out var url)
+                                && (url.Scheme == "http" || url.Scheme == "https" || address == "about:blank"))
+                                await _host.NavigateAsync(address, linked.Token);
+                            else
+                                _browser.LoadPrepared(address);
+                        }
                         SetState(UserScriptState.Ready);
                     }
                     await UpdateMatchCountAsync(address);
@@ -253,9 +281,13 @@ namespace CefFlashBrowser.Browser.UserScripts
             }
             finally
             {
-                _registration.Dispose();
-                SetState(UserScriptState.Stopped);
-                _navigation.Release();
+                try { if (_tabState != null) await _tabState.CloseAsync(); }
+                finally
+                {
+                    _registration.Dispose();
+                    SetState(UserScriptState.Stopped);
+                    _navigation.Release();
+                }
             }
         }
 
@@ -266,8 +298,16 @@ namespace CefFlashBrowser.Browser.UserScripts
                 return;
             _host = null;
             host.Diagnostic -= Diagnostic;
+            if (_contextMenu != null && ReferenceEquals(_browser.MenuHandler, _contextMenu))
+                _browser.MenuHandler = _contextMenu.Inner;
+            _contextMenu = null;
             try { await host.DetachAsync(CancellationToken.None); }
-            finally { host.Dispose(); }
+            finally
+            {
+                host.Dispose();
+                _menus?.Dispose();
+                _menus = null;
+            }
         }
 
         private async void AddressChanged(object sender, AddressChangedEventArgs e)
