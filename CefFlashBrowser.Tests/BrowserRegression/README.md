@@ -79,3 +79,5 @@ or its Costura resources, never from the developer NuGet cache.
 The initial Debug x64 baseline on 2026-11-15 built successfully and passed all 295 unit tests.
 The full browser runner stopped at `status popup avoids the cursor using the vertical interval`
 before userscript changes; this remains a separately recorded baseline failure, not a passing suite.
+
+Use `Run.ps1 -Scenario UserScriptSeams` for the focused real-CEF creation, preparation, worker-readiness, async binding and native audio checks. The default runs the full suite. The initial status-popup failure did not recur in the subsequent full Debug x64 run.

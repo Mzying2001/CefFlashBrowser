@@ -62,7 +62,11 @@ namespace CefFlashBrowser.FlashBrowser
         }
 
 
-        public ChromiumWebBrowserEx()
+        public ChromiumWebBrowserEx() : this(false)
+        {
+        }
+
+        public ChromiumWebBrowserEx(bool deferNativeCreation) : base(deferNativeCreation)
         {
             // Apply decorator handlers
             FocusHandler = null;

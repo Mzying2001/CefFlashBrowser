@@ -8,7 +8,8 @@ See README.md for x86 and Release commands.
 [CmdletBinding()]
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
-    [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug'
+    [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
+    [ValidateSet('All', 'UserScriptSeams')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -41,24 +42,30 @@ $context = New-RegressionContext $PSScriptRoot $Platform $Configuration
 $failure = $null
 try {
     Initialize-RegressionEnvironment $context
-    Test-LanguageService $context
-    Test-LanguageSelectors $context
-    Test-FavoritesService $context
-    Test-ProxySettings $context
-    Test-BrowserBeforeInitialization $context
-    Test-BrowserTabControl $context
-    Test-BrowserTabsBeforeShow $context
-    Start-RegressionCef $context
-    Test-NavigationBeforeHosting $context
-    Test-AuxiliaryBeforeShow $context
-    Test-BrowserWindow $context
-    Test-Favicons $context
-    Test-BrowserCloseDuringInitialization $context
-    Test-BrowserTabs $context
-    Test-ContextMenu $context
-    Test-ViewSource $context
-    Test-AuxiliaryWindows $context
-    Test-CloseAllBrowsers $context
+    if ($Scenario -eq 'UserScriptSeams') {
+        Start-RegressionCef $context
+        Test-UserScriptSeams $context
+    } else {
+        Test-LanguageService $context
+        Test-LanguageSelectors $context
+        Test-FavoritesService $context
+        Test-ProxySettings $context
+        Test-BrowserBeforeInitialization $context
+        Test-BrowserTabControl $context
+        Test-BrowserTabsBeforeShow $context
+        Start-RegressionCef $context
+        Test-UserScriptSeams $context
+        Test-NavigationBeforeHosting $context
+        Test-AuxiliaryBeforeShow $context
+        Test-BrowserWindow $context
+        Test-Favicons $context
+        Test-BrowserCloseDuringInitialization $context
+        Test-BrowserTabs $context
+        Test-ContextMenu $context
+        Test-ViewSource $context
+        Test-AuxiliaryWindows $context
+        Test-CloseAllBrowsers $context
+    }
 } catch {
     $failure = $_
     throw

@@ -155,6 +155,8 @@ namespace CefFlashBrowser
 
         private static void InitCefFlash()
         {
+            CefSharpSettings.ConcurrentTaskExecution = true;
+            CefSharpSettings.WcfEnabled = false;
             Environment.SetEnvironmentVariable("ComSpec", GlobalData.CommandProxyPath); // Filter the Flash diagnostic; forward other commands to cmd.
 
             var settings = new CefFlashSettings()

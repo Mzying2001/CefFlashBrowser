@@ -48,6 +48,8 @@ function Get-RegressionDependencyPath($Context, [string]$Dependency) {
 
 function Initialize-RegressionEnvironment($Context) {
     $dependencies = @(
+        'Mzying2001.MonkeySharp.Core.dll',
+        'Mzying2001.MonkeySharp.CefSharp.dll',
         'SimpleMvvm.dll',
         'Microsoft.Xaml.Behaviors.dll',
         'HandyControl.dll',
@@ -95,6 +97,8 @@ function Initialize-RegressionEnvironment($Context) {
         [void][Reflection.Assembly]::LoadFrom((Get-RegressionDependencyPath $Context $dependency))
     }
     [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.CefPath 'CefSharp.dll'))
+    [CefSharp.CefSharpSettings]::ConcurrentTaskExecution = $true
+    [CefSharp.CefSharpSettings]::WcfEnabled = $false
     $applicationAssembly = [Reflection.Assembly]::LoadFrom((Join-Path $Context.ApplicationPath 'CefFlashBrowser.exe'))
     Assert-Regression ($applicationAssembly.GetManifestResourceNames() -contains 'CefFlashBrowser.Assets.SwfPlayer.swfplayer.html') 'SWF player page is embedded in the application'
     $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
@@ -111,13 +115,21 @@ function Initialize-RegressionEnvironment($Context) {
     }
 
     $references = @(
+        [System.Xaml.XamlReader].Assembly.Location,
+        [System.Windows.Interop.HwndHost].Assembly.Location,
+        [System.Windows.DependencyObject].Assembly.Location,
+        [System.Windows.Media.Visual].Assembly.Location,
         (Join-Path $Context.CefPath 'CefSharp.dll'),
         $applicationAssembly.FullName,
-        (Get-RegressionDependencyPath $Context 'CefFlashBrowser.FlashBrowser.dll')
+        (Get-RegressionDependencyPath $Context 'CefFlashBrowser.FlashBrowser.dll'),
+        (Get-RegressionDependencyPath $Context 'CefFlashBrowser.WinformCefSharp4WPF.dll'),
+        (Get-RegressionDependencyPath $Context 'Mzying2001.MonkeySharp.Core.dll'),
+        (Get-RegressionDependencyPath $Context 'Mzying2001.MonkeySharp.CefSharp.dll')
     )
     Add-Type -ReferencedAssemblies $references -Path @(
         (Join-Path $Context.ScriptPath 'TestDoubles.cs'),
-        (Join-Path $Context.ScriptPath 'FaviconHttpFixture.cs')
+        (Join-Path $Context.ScriptPath 'FaviconHttpFixture.cs'),
+        (Join-Path $Context.ScriptPath 'UserScriptSeamProbe.cs')
     )
     $Context.DisposedBrowser = (New-Object DisposedBrowserProxy([CefSharp.IBrowser])).GetTransparentProxy()
     $Context.AuxiliaryTypes = @(
