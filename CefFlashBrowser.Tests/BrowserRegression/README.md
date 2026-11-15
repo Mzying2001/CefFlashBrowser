@@ -89,3 +89,8 @@ DOM execution, isolated synchronous storage bootstrap, SQLite writes, reload and
 The disposal checks also cover direct disposal from a frame callback. Loading checks assert that
 stopping a CDP navigation never restarts its request. Background browser views remain hidden while
 participating in native hosting; SWF's application-owned page and source-view pages exclude scripts.
+
+`-Scenario Closing` verifies real isolated GM calls after rejected beforeunload in browser,
+popup and SWF windows, followed by accepted-close cleanup. `-Scenario Auxiliary` runs the existing
+auxiliary routing, embedded player, DevTools, confirmation and force-close checks. Window helpers
+wait for the actual target document rather than the runtime's temporary blank document.

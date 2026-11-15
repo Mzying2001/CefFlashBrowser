@@ -237,18 +237,26 @@ namespace CefFlashBrowser.Browser.UserScripts
             SetState(UserScriptState.Stopping);
             _lifetime.Cancel();
             if (_initialization != null)
-                await _initialization;
+            {
+                try { await _initialization; }
+                catch (Exception) { Log(LogLevel.Warning, "Userscript initialization ended during close for tab " + _model.BrowserId); }
+            }
             await _navigation.WaitAsync();
             try
             {
                 _browser.AddressChanged -= AddressChanged;
                 if (_repositorySubscribed)
                     _service.Repository.Changed -= RepositoryChanged;
+                if (!_browser.IsDisposed && _browser.IsBrowserInitialized)
+                    CefSharp.WebBrowserExtensions.Stop(_browser);
                 await DetachHostAsync();
+            }
+            finally
+            {
                 _registration.Dispose();
                 SetState(UserScriptState.Stopped);
+                _navigation.Release();
             }
-            finally { _navigation.Release(); }
         }
 
         private async Task DetachHostAsync()
@@ -258,8 +266,8 @@ namespace CefFlashBrowser.Browser.UserScripts
                 return;
             _host = null;
             host.Diagnostic -= Diagnostic;
-            await host.DetachAsync(CancellationToken.None);
-            host.Dispose();
+            try { await host.DetachAsync(CancellationToken.None); }
+            finally { host.Dispose(); }
         }
 
         private async void AddressChanged(object sender, AddressChangedEventArgs e)

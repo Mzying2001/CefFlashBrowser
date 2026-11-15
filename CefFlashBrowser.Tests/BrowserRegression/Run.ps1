@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource')][string]$Scenario = 'All'
+    [ValidateSet('All', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -46,6 +46,12 @@ try {
     if ($Scenario -eq 'BrowserDisposal') {
         Start-RegressionCef $context
         Test-BrowserFrameLoadStartAfterDisposal $context
+    } elseif ($Scenario -eq 'Closing') {
+        Start-RegressionCef $context
+        Test-UserScriptCloseCancellation $context
+    } elseif ($Scenario -eq 'Auxiliary') {
+        Start-RegressionCef $context
+        Test-AuxiliaryWindows $context
     } elseif ($Scenario -eq 'ViewSource') {
         Start-RegressionCef $context
         Test-ViewSourceMinimal $context
@@ -77,6 +83,7 @@ try {
         Start-RegressionCef $context
         Test-UserScriptSeams $context
         Test-UserScripts $context
+        Test-UserScriptCloseCancellation $context
         Test-NavigationBeforeHosting $context
         Test-AuxiliaryBeforeShow $context
         Test-BrowserWindow $context

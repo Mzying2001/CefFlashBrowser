@@ -4,6 +4,70 @@ function Complete-UserScriptTask($Context, $Task, [string]$Message) {
     if ($null -ne $result -and $result.GetType().FullName -ne 'System.Threading.Tasks.VoidTaskResult') { return $result }
 }
 
+function Test-UserScriptCloseCancellation($Context) {
+    Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'close-probe runtime'
+    $source = @'
+// ==UserScript==
+// @name Close lifecycle probe
+// @match file:///*
+// @noframes
+// @sandbox DOM
+// @grant GM.setValue
+// @run-at document-end
+// ==/UserScript==
+var count = 0;
+document.addEventListener('userscriptCloseProbe', async function() {
+    await GM.setValue('alive', ++count);
+    document.documentElement.setAttribute('data-close-alive', String(count));
+});
+document.documentElement.setAttribute('data-close-ready', 'yes');
+'@
+    $repository = $Context.UserScriptService.Repository
+    $installation = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None)) 'install close fixture'
+    $savedDialog = [CefFlashBrowser.Data.GlobalData]::Settings.DisableOnBeforeUnloadDialog
+    try {
+        foreach ($kind in @('Browser', 'Popup', 'Swf')) {
+            if ($kind -eq 'Browser') {
+                $window = New-RegressionWindow $Context
+                $view = Find-BrowserView $window
+            } else {
+                $type = if ($kind -eq 'Popup') { [CefFlashBrowser.Views.PopupWebPage] } else { [CefFlashBrowser.Views.SwfPlayerWindow] }
+                $window = New-AuxiliaryWindow $Context $type -WaitForLoad
+                $view = $window.FindName('browserView')
+            }
+            try {
+                $model = $view.ViewModel
+                $model.Address = $Context.AuxiliaryAddress
+                Wait-Regression $Context {
+                    $model.Browser.Title -eq 'Auxiliary regression' -and
+                    (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-close-ready')") -eq 'yes'
+                } 'close-probe source ready'
+                $session = $view.GetType().GetField('_userScriptSession', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
+                $scriptHost = $session.Host
+                $handler = Set-RegressionBeforeUnload $Context $model.Browser
+                $window.Close()
+                Wait-Regression $Context {
+                    $handler.Count -eq 1 -and $null -eq $view.GetType().GetField('_closeCompletion', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
+                } 'beforeunload rejection completes'
+                Assert-Regression ($window.IsVisible -and [object]::ReferenceEquals($session.Host, $scriptHost) -and !$model.IsClosing) "$kind keeps its host after rejected close"
+                [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptCloseProbe'))")
+                Wait-Regression $Context {
+                    (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-close-alive')") -eq '1'
+                } 'bridge remains live after rejected close'
+                $value = Complete-UserScriptTask $Context ($Context.UserScriptService.ValueStore.GetAsync($installation.ScriptKey.ToString(), 'alive', [Threading.CancellationToken]::None)) 'post-rejection GM commit'
+                Assert-Regression ($value.Value.EncodedValue -eq 'n1') "$kind keeps GM storage live after rejected close"
+                $handler.Accept = $true
+                $window.Close()
+                Wait-Regression $Context { !$window.IsVisible -and $model.Browser.IsDisposed } 'accepted close drains scripts and native browser'
+                Assert-Regression ($session.IsStopped -and $null -eq $session.Host) "$kind stops scripts before native cleanup finishes"
+            } finally { $window.ForceCloseWindow() }
+        }
+    } finally {
+        [CefFlashBrowser.Data.GlobalData]::Settings.DisableOnBeforeUnloadDialog = $savedDialog
+        Complete-UserScriptTask $Context ($repository.RemoveAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'remove close fixture' | Out-Null
+    }
+}
+
 function Test-UserScripts($Context) {
     Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'shared userscript initialization'
     $source = @'

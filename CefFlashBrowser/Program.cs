@@ -11,6 +11,7 @@ using CefFlashBrowser.Utils;
 using CefSharp;
 using Newtonsoft.Json;
 using SimpleMvvm.Ioc;
+using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -225,7 +226,7 @@ namespace CefFlashBrowser
                 GlobalData.SaveData();
             }
 
-            _userScriptService?.StopAsync().GetAwaiter().GetResult();
+            StopUserScriptsForExit();
 
             if (Cef.IsInitialized)
             {
@@ -242,9 +243,25 @@ namespace CefFlashBrowser
             }
         }
 
+        internal static void StopUserScriptsForExit()
+        {
+            // Do not resolve an unused service during failed/forwarding startup.
+            var work = _userScriptService?.StopAsync() ?? Task.CompletedTask;
+            if (!work.IsCompleted && Application.Current?.Dispatcher is Dispatcher dispatcher
+                && dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
+            {
+                var frame = new DispatcherFrame();
+                work.GetAwaiter().OnCompleted(() => dispatcher.InvokeAsync(() => frame.Continue = false));
+                Dispatcher.PushFrame(frame);
+            }
+            work.GetAwaiter().GetResult();
+        }
+
         public static void Restart()
         {
             _restart = true;
+            Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
+            StopUserScriptsForExit();
             Application.Current.Shutdown();
         }
 
@@ -286,7 +303,7 @@ namespace CefFlashBrowser
         private static async Task StopDatabaseAsync(Task faviconWork)
         {
             try { await faviconWork.ConfigureAwait(false); }
-            catch (Exception e) { LogShutdownError("Failed to stop the favicon service", e); }
+            catch (Exception e) { LogShutdownError("Failed to stop application storage consumers", e); }
 
             try
             {
