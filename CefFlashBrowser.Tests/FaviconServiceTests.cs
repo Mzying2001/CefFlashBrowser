@@ -63,16 +63,15 @@ namespace CefFlashBrowser.Tests
             Initialize();
         }
 
-        private void SeedMapping(string pageUrl, string iconUrl, long updatedAt, long? deletedAt = null)
+        private void SeedMapping(string pageUrl, string iconUrl, long updatedAt)
         {
             _database.ExecuteAsync(@"INSERT INTO website_icons
-                (page_url, icon_url, created_at, updated_at, deleted_at) VALUES (@page, @icon, 1, @updated, @deleted)",
+                (page_url, icon_url, updated_at) VALUES (@page, @icon, @updated)",
                 new Dictionary<string, object>
                 {
                     ["@page"] = pageUrl,
                     ["@icon"] = iconUrl,
-                    ["@updated"] = updatedAt,
-                    ["@deleted"] = deletedAt
+                    ["@updated"] = updatedAt
                 }).GetAwaiter().GetResult();
         }
 
@@ -167,7 +166,8 @@ namespace CefFlashBrowser.Tests
             Initialize();
             SeedMapping("http://example.com/b", "http://example.com/b-icon", 20);
             SeedMapping("https://example.com/a", "https://example.com/a-icon", 10);
-            SeedMapping("https://example.com", "https://example.com/deleted-root", 30, 40);
+            SeedMapping("https://example.com", "https://example.com/deleted-root", 30);
+            _database.ExecuteAsync("DELETE FROM website_icons WHERE page_url = 'https://example.com'").GetAwaiter().GetResult();
             Restart();
             foreach (string page in new[] { "https://example.com/unvisited", "http://example.com/unvisited", "example.com/unvisited", "https://example.com/", "http://example.com/", "example.com/" })
                 Assert.IsNull(_service.GetIconUrl(page), page);
@@ -263,7 +263,7 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public void DuplicateAndEmptyDiscovery_PreserveTimestamps_ChangedIconAndRestorePreserveCreation()
+        public void Discovery_PreservesUnchangedTimestamp_UpdatesAndReinsertsMappings()
         {
             Initialize();
             int threadId = Thread.CurrentThread.ManagedThreadId;
@@ -275,7 +275,7 @@ namespace CefFlashBrowser.Tests
                 notifications++;
             };
             Record("https://example.com/a", "/icon");
-            _database.ExecuteAsync("UPDATE website_icons SET created_at = 10, updated_at = 20").GetAwaiter().GetResult();
+            _database.ExecuteAsync("UPDATE website_icons SET updated_at = 20").GetAwaiter().GetResult();
             Record("https://example.com/a/?id=1#fragment", "/icon");
             Record("https://example.com/a", null);
             Assert.AreEqual(1, notifications);
@@ -283,10 +283,13 @@ namespace CefFlashBrowser.Tests
 
             Record("https://example.com/a", "/new");
             Assert.AreEqual(2, notifications);
-            Assert.AreEqual(10L, _database.ScalarAsync("SELECT created_at FROM website_icons").GetAwaiter().GetResult());
-            _database.ExecuteAsync("UPDATE website_icons SET deleted_at = 30").GetAwaiter().GetResult();
+            long updatedAt = (long)_database.ScalarAsync("SELECT updated_at FROM website_icons").GetAwaiter().GetResult();
+            Assert.IsTrue(updatedAt > 20);
+            _database.ExecuteAsync("DELETE FROM website_icons").GetAwaiter().GetResult();
+            Assert.AreEqual(0L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
             Record("https://example.com/a", "/new");
-            Assert.AreEqual(DBNull.Value, _database.ScalarAsync("SELECT deleted_at FROM website_icons").GetAwaiter().GetResult());
+            Assert.AreEqual(2, notifications);
+            Assert.AreEqual(updatedAt, _database.ScalarAsync("SELECT updated_at FROM website_icons").GetAwaiter().GetResult());
             Assert.AreEqual(1L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
 
             _service.StopAsync().GetAwaiter().GetResult();

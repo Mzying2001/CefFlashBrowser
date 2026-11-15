@@ -58,9 +58,7 @@ namespace CefFlashBrowser.Services
                         "CREATE TABLE IF NOT EXISTS website_icons ( " +
                         "page_url TEXT PRIMARY KEY NOT NULL, " +
                         "icon_url TEXT NOT NULL, " +
-                        "created_at INTEGER NOT NULL, " +
-                        "updated_at INTEGER NOT NULL, " +
-                        "deleted_at INTEGER NULL)");
+                        "updated_at INTEGER NOT NULL)");
                     session.Execute("PRAGMA user_version = 1");
                     version = 1;
                 }
@@ -115,7 +113,7 @@ namespace CefFlashBrowser.Services
             await InitializeAsync().ConfigureAwait(false);
 
             return await _database.QueryAsync(
-                "SELECT page_url, icon_url, updated_at FROM website_icons WHERE deleted_at IS NULL ORDER BY updated_at, page_url DESC",
+                "SELECT page_url, icon_url, updated_at FROM website_icons ORDER BY updated_at, page_url DESC",
                 row => new WebsiteIconRecord(row.GetString(0), row.GetString(1), row.GetInt64(2))).ConfigureAwait(false);
         }
 
@@ -128,14 +126,12 @@ namespace CefFlashBrowser.Services
             await InitializeAsync().ConfigureAwait(false);
 
             await _database.ExecuteAsync(
-                "INSERT INTO website_icons " +
-                "(page_url, icon_url, created_at, updated_at, deleted_at) " +
-                "VALUES (@page, @icon, @now, @now, NULL) " +
+                "INSERT INTO website_icons (page_url, icon_url, updated_at) " +
+                "VALUES (@page, @icon, @now) " +
                 "ON CONFLICT(page_url) DO UPDATE SET " +
                 "icon_url = excluded.icon_url, " +
-                "updated_at = excluded.updated_at, " +
-                "deleted_at = NULL " +
-                "WHERE website_icons.icon_url <> excluded.icon_url OR website_icons.deleted_at IS NOT NULL",
+                "updated_at = excluded.updated_at " +
+                "WHERE website_icons.icon_url <> excluded.icon_url",
                 new Dictionary<string, object>
                 {
                     ["@page"] = icon.PageUrl,

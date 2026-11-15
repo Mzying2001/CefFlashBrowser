@@ -93,10 +93,8 @@ namespace CefFlashBrowser.Tests
                 session.Execute(@"CREATE TABLE website_icons (
                     page_url TEXT PRIMARY KEY NOT NULL,
                     icon_url TEXT NOT NULL,
-                    created_at INTEGER NOT NULL,
-                    updated_at INTEGER NOT NULL,
-                    deleted_at INTEGER NULL)");
-                session.Execute("INSERT INTO website_icons VALUES ('https://example.com/a', 'https://example.com/icon', 10, 20, NULL)");
+                    updated_at INTEGER NOT NULL)");
+                session.Execute("INSERT INTO website_icons VALUES ('https://example.com/a', 'https://example.com/icon', 20)");
                 session.Execute("PRAGMA user_version = " + version);
             });
             string schema = (string)await _database.ScalarAsync("SELECT sql FROM sqlite_master WHERE name = 'website_icons'");
@@ -105,7 +103,6 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual("https://example.com/a", icon.PageUrl);
             Assert.AreEqual("https://example.com/icon", icon.IconUrl);
             Assert.AreEqual(20L, icon.UpdatedAt);
-            Assert.AreEqual(10L, await _database.ScalarAsync("SELECT created_at FROM website_icons"));
             Assert.AreEqual(schema, await _database.ScalarAsync("SELECT sql FROM sqlite_master WHERE name = 'website_icons'"));
             Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
         }
@@ -130,6 +127,8 @@ namespace CefFlashBrowser.Tests
                 row => row.GetString(0));
             CollectionAssert.AreEquivalent(new[] { "website_icons", "monkeysharp_scripts", "monkeysharp_values",
                 "monkeysharp_permission_decisions", "monkeysharp_tab_states" }, names);
+            var columns = await _database.QueryAsync("PRAGMA table_info(website_icons)", row => row.GetString(1));
+            CollectionAssert.AreEqual(new[] { "page_url", "icon_url", "updated_at" }, columns);
             await new DatabaseService(_database).InitializeAsync();
             Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
         }
@@ -137,8 +136,8 @@ namespace CefFlashBrowser.Tests
         [TestMethod]
         public async Task MigrationFailure_RollsBackNewTables_AndPreservesVersionAndIcons()
         {
-            await _database.ExecuteAsync("CREATE TABLE website_icons (page_url TEXT PRIMARY KEY, icon_url TEXT, created_at INTEGER, updated_at INTEGER, deleted_at INTEGER)");
-            await _database.ExecuteAsync("INSERT INTO website_icons VALUES ('page', 'icon', 1, 2, NULL)");
+            await _database.ExecuteAsync("CREATE TABLE website_icons (page_url TEXT PRIMARY KEY, icon_url TEXT, updated_at INTEGER)");
+            await _database.ExecuteAsync("INSERT INTO website_icons VALUES ('page', 'icon', 2)");
             await _database.ExecuteAsync("CREATE TABLE monkeysharp_values (existing TEXT)");
             await _database.ExecuteAsync("PRAGMA user_version = 1");
             await Assert.ThrowsExceptionAsync<System.Data.SQLite.SQLiteException>(() => _service.InitializeAsync());
@@ -151,14 +150,14 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public async Task Query_FiltersDeletedRows_PreservesValuesAndSnapshotOrder()
+        public async Task Query_PreservesValuesAndSnapshotOrder_AfterPhysicalDeletion()
         {
             var first = new WebsiteIconRecord("https://example.com/a", "https://example.com/icon?v=1", 10);
             await _service.SaveWebsiteIconAsync(first);
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord("https://example.com/z", "https://example.com/z-icon", 10));
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord("https://example.com/b", "https://example.com/b-icon", 20));
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord("https://example.com/deleted", "https://example.com/deleted-icon", 30));
-            await _database.ExecuteAsync("UPDATE website_icons SET deleted_at = 40 WHERE page_url = 'https://example.com/deleted'");
+            await _database.ExecuteAsync("DELETE FROM website_icons WHERE page_url = 'https://example.com/deleted'");
 
             var records = await _service.GetWebsiteIconsAsync();
             CollectionAssert.AreEqual(new[] { "https://example.com/z", first.PageUrl, "https://example.com/b" },
@@ -168,24 +167,21 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public async Task Save_PreservesCreationAndUnchangedTimestamps_UpdatesAndRestoresMappings()
+        public async Task Save_PreservesUnchangedTimestamp_UpdatesAndReinsertsMappings()
         {
             const string page = "https://example.com/a";
             const string icon = "https://example.com/icon?q=';--";
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, icon, 10));
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, icon, 20));
-            Assert.AreEqual(10L, await _database.ScalarAsync("SELECT created_at FROM website_icons"));
             Assert.AreEqual(10L, await _database.ScalarAsync("SELECT updated_at FROM website_icons"));
             Assert.AreEqual(icon, (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
 
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, "https://example.com/new", 30));
             Assert.AreEqual(30L, await _database.ScalarAsync("SELECT updated_at FROM website_icons"));
-            await _database.ExecuteAsync("UPDATE website_icons SET deleted_at = 40");
+            await _database.ExecuteAsync("DELETE FROM website_icons");
             Assert.AreEqual(0, (await _service.GetWebsiteIconsAsync()).Count);
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, "https://example.com/new", 50));
-            Assert.AreEqual(10L, await _database.ScalarAsync("SELECT created_at FROM website_icons"));
             Assert.AreEqual(50L, await _database.ScalarAsync("SELECT updated_at FROM website_icons"));
-            Assert.AreEqual(DBNull.Value, await _database.ScalarAsync("SELECT deleted_at FROM website_icons"));
             Assert.AreEqual("https://example.com/new", (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
             Assert.AreEqual(1L, await _database.ScalarAsync("SELECT COUNT(*) FROM website_icons"));
         }
