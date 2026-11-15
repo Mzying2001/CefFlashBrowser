@@ -39,6 +39,8 @@ namespace CefFlashBrowser.Browser.UserScripts
         private bool _repositorySubscribed;
         private bool _initialBlankTarget;
         private readonly UserScriptTabService _tabs;
+        private readonly Func<Window> _ownerWindow;
+        private UserScriptNotificationService _notifications;
         private UserScriptMenuService _menus;
         private UserScriptContextMenuHandler _contextMenu;
         private SqliteUserScriptTabStateService _tabState;
@@ -55,6 +57,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             _logger = logger;
             _mount = mount;
             _dispatcher = browser.Dispatcher;
+            _ownerWindow = owner;
             _tabs = new UserScriptTabService(model, owner, close, _dispatcher, _lifetime.Token);
             _registration = service.RegisterSession(model.BrowserId, StopAsync);
             _browser.AddressChanged += AddressChanged;
@@ -138,9 +141,13 @@ namespace CefFlashBrowser.Browser.UserScripts
             _menus = new UserScriptMenuService(_model, _dispatcher, _service.Repository, () => _host,
                 () => Log(LogLevel.Warning, "Userscript menu callback failed for tab " + _model.BrowserId));
             if (_tabState == null) _tabState = _service.CreateTabStateService(_model.BrowserId);
+            _notifications = new UserScriptNotificationService(_dispatcher, _ownerWindow, _tabs, _service.Content, _lifetime.Token,
+                () => Log(LogLevel.Warning, "Userscript notification content or interaction was unavailable for tab " + _model.BrowserId));
             var builder = new CefSharpUserScriptHostBuilder(_service.Repository)
                 .UseValueStore(_service.ValueStore)
                 .UseMenuService(_menus)
+                .UseClipboardService(new UserScriptClipboardService(_dispatcher, _lifetime.Token))
+                .UseNotificationService(_notifications)
                 .UseTabService(_tabs)
                 .UseWindowService(_tabs)
                 .UseTabStateService(_tabState)
@@ -304,9 +311,14 @@ namespace CefFlashBrowser.Browser.UserScripts
             try { await host.DetachAsync(CancellationToken.None); }
             finally
             {
-                host.Dispose();
-                _menus?.Dispose();
-                _menus = null;
+                try { if (_notifications != null) await _notifications.StopAsync(); }
+                finally
+                {
+                    host.Dispose();
+                    _menus?.Dispose();
+                    _menus = null;
+                    _notifications = null;
+                }
             }
         }
 

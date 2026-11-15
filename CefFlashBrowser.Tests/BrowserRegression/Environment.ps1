@@ -132,7 +132,8 @@ function Initialize-RegressionEnvironment($Context) {
         (Join-Path $Context.ScriptPath 'TestDoubles.cs'),
         (Join-Path $Context.ScriptPath 'FaviconHttpFixture.cs'),
         (Join-Path $Context.ScriptPath 'UserScriptSeamProbe.cs'),
-        (Join-Path $Context.ScriptPath 'UserScriptMenuProbe.cs')
+        (Join-Path $Context.ScriptPath 'UserScriptMenuProbe.cs'),
+        (Join-Path $Context.ScriptPath 'UserScriptInteractionProbe.cs')
     )
     $Context.DisposedBrowser = (New-Object DisposedBrowserProxy([CefSharp.IBrowser])).GetTransparentProxy()
     $Context.AuxiliaryTypes = @(

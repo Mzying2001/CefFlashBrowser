@@ -4,6 +4,144 @@ function Complete-UserScriptTask($Context, $Task, [string]$Message) {
     if ($null -ne $result -and $result.GetType().FullName -ne 'System.Threading.Tasks.VoidTaskResult') { return $result }
 }
 
+function Find-UserScriptNotification($Context, [string]$Title) {
+    return @($Context.Application.Windows | Where-Object {
+        $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptNotificationWindow] -and $_.Title -eq $Title -and $_.IsVisible
+    })[0]
+}
+
+function Invoke-UserScriptNotificationButton($Window, [string]$Name) {
+    $Window.FindName($Name).RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Button]::ClickEvent)))
+}
+
+function Test-UserScriptInteractions($Context) {
+    Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'interaction runtime'
+    $fixture = New-Object FaviconHttpFixture
+    $source = @'
+// ==UserScript==
+// @name Native interaction probe
+// @match file:///*
+// @noframes
+// @sandbox DOM
+// @grant GM.setClipboard
+// @grant GM.notification
+// ==/UserScript==
+document.addEventListener('userscriptClipboardText', async function() {
+    await GM.setClipboard('\u7528\u6237\u811a\u672c \u2713', 'text');
+    document.documentElement.setAttribute('data-clipboard', 'text');
+});
+document.addEventListener('userscriptClipboardHtml', async function() {
+    await GM.setClipboard('\u4e2d\u6587<b>\u03c0</b>', {type:'html'});
+    document.documentElement.setAttribute('data-clipboard', 'html');
+});
+document.addEventListener('userscriptNotifyPrevent', function() {
+    GM.notification({title:'Prevented notice', text:'Click acknowledgement fixture', silent:true, image:'__IMAGE_URL__',
+        url:'__DEFAULT_URL__', onclick:function(event) {
+            event.preventDefault();
+            document.documentElement.setAttribute('data-notice-clicked', 'yes');
+        }}).then(function() { document.documentElement.setAttribute('data-notice-done', 'yes'); });
+});
+document.addEventListener('userscriptNotifyDefault', function() {
+    GM.notification({title:'Default notice', text:'Default navigation fixture', silent:true, url:'__DEFAULT_URL__'})
+        .then(function() { document.documentElement.setAttribute('data-default-notice-done', 'yes'); });
+});
+document.addEventListener('userscriptNotifyTag', function() {
+    GM.notification({title:'Tag first', text:'First tag fixture', tag:'replace', silent:true})
+        .then(function() { document.documentElement.setAttribute('data-tag-first-done', 'yes'); });
+    GM.notification({title:'Tag second', text:'Second tag fixture', tag:'replace', silent:true})
+        .then(function() { document.documentElement.setAttribute('data-tag-second-done', 'yes'); });
+});
+document.addEventListener('userscriptNotifyPending', function() {
+    GM.notification({title:'Pending notice', text:'Close cancellation fixture', silent:true, image:'__SLOW_IMAGE_URL__'});
+});
+document.addEventListener('userscriptNotifyTimeout', function() {
+    GM.notification({title:'Timed notice', text:'Timeout fixture', silent:true, timeout:250})
+        .then(function() { document.documentElement.setAttribute('data-timeout-notice-done', 'yes'); });
+});
+document.documentElement.setAttribute('data-interaction-ready', 'yes');
+'@
+    $source = $source.Replace('__DEFAULT_URL__', $fixture.BaseUrl + '/a').Replace('__IMAGE_URL__', $fixture.BaseUrl + '/a-icon.png').Replace('__SLOW_IMAGE_URL__', $fixture.BaseUrl + '/slow-bad.png')
+    $repository = $Context.UserScriptService.Repository
+    $installation = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None)) 'install interaction fixture'
+    $window = $null
+    $clipboard = $null
+    $clipboardCaptured = $false
+    try {
+        $window = New-RegressionWindow $Context
+        $model = $window.ViewModel.CurrentBrowser
+        $model.Address = $Context.AuxiliaryAddress
+        Wait-Regression $Context { $model.Browser.Title -eq 'Auxiliary regression' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-interaction-ready')") -eq 'yes' } 'native interaction fixture ready'
+        # Snapshot privately in memory; never print the user's clipboard contents.
+        $clipboard = [UserScriptClipboardProbe]::Capture()
+        $clipboardCaptured = $true
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptClipboardText'))")
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-clipboard')") -eq 'text' } 'text clipboard commit'
+        $expectedText = -join ([char[]]@(0x7528,0x6237,0x811a,0x672c,0x20,0x2713))
+        Assert-Regression ([System.Windows.Clipboard]::GetText() -eq $expectedText) 'GM clipboard writes real Unicode text'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptClipboardHtml'))")
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-clipboard')") -eq 'html' } 'HTML clipboard commit'
+        $html = [string][System.Windows.Clipboard]::GetData([System.Windows.DataFormats]::Html)
+        $bytes = [Text.Encoding]::UTF8.GetBytes($html)
+        $start = [int][regex]::Match($html, 'StartFragment:(\d+)').Groups[1].Value
+        $end = [int][regex]::Match($html, 'EndFragment:(\d+)').Groups[1].Value
+        $expectedHtml = (-join ([char[]]@(0x4e2d,0x6587))) + '<b>' + [char]0x03c0 + '</b>'
+        Assert-Regression ([Text.Encoding]::UTF8.GetString($bytes, $start, $end - $start) -eq $expectedHtml) 'CF_HTML offsets identify the exact UTF-8 fragment'
+
+        $view = Find-BrowserView $window
+        $session = $view.GetType().GetField('_userScriptSession', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
+        $notifications = $session.GetType().GetField('_notifications', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($session)
+        $probe = New-Object UserScriptNotificationProbe($notifications, $installation.ScriptKey)
+        Assert-Regression (!$probe.Handle.Completion.IsCompleted -and $probe.Closes -eq 0 -and $null -eq (Find-UserScriptNotification $Context 'Unstarted notification probe')) 'notification creation has no UI or terminal event before Start'
+        $probe.Handle.Start()
+        $probe.Handle.Start()
+        Wait-Regression $Context { $null -ne (Find-UserScriptNotification $Context 'Unstarted notification probe') } 'unstarted notification begins on Start'
+        $probe.Handle.Dispose()
+        $probe.Handle.Dispose()
+        Complete-UserScriptTask $Context $probe.Handle.Completion 'notification terminal completion'
+        Assert-Regression ($probe.Closes -eq 1) 'notification disposal publishes one closed event'
+
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptNotifyPrevent'))")
+        Wait-Regression $Context { $null -ne (Find-UserScriptNotification $Context 'Prevented notice') } 'native notification is shown'
+        Assert-Regression $window.IsEnabled 'native notification is non-modal'
+        Wait-Regression $Context { (Find-UserScriptNotification $Context 'Prevented notice').FindName('notificationImage').Visibility -eq [System.Windows.Visibility]::Visible } 'bounded notification image content is displayed'
+
+        Invoke-UserScriptNotificationButton (Find-UserScriptNotification $Context 'Prevented notice') 'clickButton'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-notice-done')") -eq 'yes' } 'notification click acknowledgement completes'
+        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-notice-clicked')") -eq 'yes' -and $window.ViewModel.Browsers.Count -eq 1) 'preventDefault blocks the notification URL action'
+
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptNotifyDefault'))")
+        Wait-Regression $Context { $null -ne (Find-UserScriptNotification $Context 'Default notice') } 'default-action notification is shown'
+        Invoke-UserScriptNotificationButton (Find-UserScriptNotification $Context 'Default notice') 'clickButton'
+        Wait-Regression $Context { $window.ViewModel.Browsers.Count -eq 2 -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-default-notice-done')") -eq 'yes' } 'notification default action opens a tab'
+        $child = $window.ViewModel.CurrentBrowser
+        Assert-Regression ($child -ne $model -and $child.Address -eq $fixture.BaseUrl + '/a') 'notification URL uses its real source window'
+        $window.ViewModel.CloseBrowser($child)
+        Wait-Regression $Context { $child.IsClosed -and $window.ViewModel.CurrentBrowser -eq $model } 'notification child closes and returns to source'
+
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptNotifyTag'))")
+        Wait-Regression $Context { $null -ne (Find-UserScriptNotification $Context 'Tag second') -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-tag-first-done')") -eq 'yes' } 'tag replacement completes the first notification'
+        Assert-Regression ($null -eq (Find-UserScriptNotification $Context 'Tag first')) 'script-scoped tags replace the previous notification'
+        Invoke-UserScriptNotificationButton (Find-UserScriptNotification $Context 'Tag second') 'closeButton'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-tag-second-done')") -eq 'yes' } 'native close completes notification promise'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptNotifyTimeout'))")
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-timeout-notice-done')") -eq 'yes' } 'notification timeout completes its promise'
+        Assert-Regression ($null -eq (Find-UserScriptNotification $Context 'Timed notice')) 'notification timeout closes native UI'
+        [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptNotifyPending'))")
+        Wait-Regression $Context { $null -ne (Find-UserScriptNotification $Context 'Pending notice') } 'pending notification before close'
+        Wait-Regression $Context { $fixture.SlowRequests -gt 0 } 'notification image fetch is pending before shutdown'
+        $window.ForceCloseWindow()
+        Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptNotificationWindow] }).Count -eq 0) 'source shutdown closes and drains notification UI'
+    } finally {
+        if ($null -ne $window) { $window.ForceCloseWindow() }
+        if ($clipboardCaptured) { [UserScriptClipboardProbe]::Restore($clipboard) }
+        $fixture.Dispose()
+        Complete-UserScriptTask $Context ($repository.RemoveAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'remove interaction fixture' | Out-Null
+    }
+}
+
 function Test-UserScriptTabs($Context) {
     Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'tab runtime'
     $source = @'

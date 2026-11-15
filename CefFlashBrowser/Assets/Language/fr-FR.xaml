@@ -230,4 +230,7 @@ Allow this script to use this capability?</sys:String>
     <sys:String x:Key="userscript_unavailable">Userscripts are unavailable for this page</sys:String>
     <sys:String x:Key="userscript_retry">Retry and navigate again</sys:String>
     <sys:String x:Key="userscript_commands">Script commands</sys:String>
+    <sys:String x:Key="userscript_notification">Userscript notification</sys:String>
+    <sys:String x:Key="userscript_notificationClose">Close</sys:String>
+    <sys:String x:Key="userscript_notificationClick">Click notification</sys:String>
 </ResourceDictionary>

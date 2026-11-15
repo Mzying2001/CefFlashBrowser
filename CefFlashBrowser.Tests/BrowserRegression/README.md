@@ -102,3 +102,9 @@ auxiliary sources, tab-state navigation and cleanup, unsupported privacy options
 last-browser protection. `-Scenario ContextMenu` retains the existing application menu regression.
 The pinned library keeps JavaScript window actions void and dispatches a handle's close once;
 rejected closes remain open and later user closes still produce the handle's actual close notification.
+
+`-Scenario Interactions` writes known Unicode text and CF_HTML through real GM calls and checks
+UTF-8 fragment offsets. The original clipboard is privately snapshotted in memory and restored in
+`finally` after the source stops. It exercises unstarted notification handles, real WPF buttons,
+click acknowledgement/preventDefault, source-bound URL actions, tag replacement, native close,
+timeout, bounded image loading and cancellation of an in-flight image request during shutdown.

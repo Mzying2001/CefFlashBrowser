@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu')][string]$Scenario = 'All'
+    [ValidateSet('All', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -46,6 +46,9 @@ try {
     if ($Scenario -eq 'BrowserDisposal') {
         Start-RegressionCef $context
         Test-BrowserFrameLoadStartAfterDisposal $context
+    } elseif ($Scenario -eq 'Interactions') {
+        Start-RegressionCef $context
+        Test-UserScriptInteractions $context
     } elseif ($Scenario -eq 'ContextMenu') {
         Start-RegressionCef $context
         Test-ContextMenu $context
@@ -95,6 +98,7 @@ try {
         Test-UserScriptCloseCancellation $context
         Test-UserScriptMenus $context
         Test-UserScriptTabs $context
+        Test-UserScriptInteractions $context
         Test-NavigationBeforeHosting $context
         Test-AuxiliaryBeforeShow $context
         Test-BrowserWindow $context

@@ -18,9 +18,9 @@
         <TextBox x:Name="message" IsReadOnly="True" BorderThickness="0"
                  TextWrapping="Wrap" MaxHeight="240" VerticalScrollBarVisibility="Auto"/>
         <StackPanel Grid.Row="1" Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button MinWidth="100" Margin="0,0,10,0" Content="{DynamicResource userscript_denyRemember}" Click="DenyClick"/>
-            <Button MinWidth="100" Margin="0,0,10,0" Content="{DynamicResource userscript_allowOnce}" Click="AllowOnceClick"/>
-            <Button MinWidth="100" Content="{DynamicResource userscript_allowRemember}" Click="AllowRememberClick" Style="{StaticResource ButtonPrimary}"/>
+            <Button x:Name="denyRememberButton" MinWidth="100" Margin="0,0,10,0" Content="{DynamicResource userscript_denyRemember}" Click="DenyClick"/>
+            <Button x:Name="allowOnceButton" MinWidth="100" Margin="0,0,10,0" Content="{DynamicResource userscript_allowOnce}" Click="AllowOnceClick"/>
+            <Button x:Name="allowRememberButton" MinWidth="100" Content="{DynamicResource userscript_allowRemember}" Click="AllowRememberClick" Style="{StaticResource ButtonPrimary}"/>
         </StackPanel>
     </Grid>
 </Window>

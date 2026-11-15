@@ -230,4 +230,7 @@
     <sys:String x:Key="userscript_unavailable">本次页面未启用用户脚本</sys:String>
     <sys:String x:Key="userscript_retry">重试并重新导航</sys:String>
     <sys:String x:Key="userscript_commands">脚本命令</sys:String>
+    <sys:String x:Key="userscript_notification">用户脚本通知</sys:String>
+    <sys:String x:Key="userscript_notificationClose">关闭</sys:String>
+    <sys:String x:Key="userscript_notificationClick">点击通知</sys:String>
 </ResourceDictionary>
