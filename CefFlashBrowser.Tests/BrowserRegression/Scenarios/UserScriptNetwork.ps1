@@ -32,7 +32,7 @@ function Invoke-UserScriptFrame($Context, $Browser, [string]$Url, [string]$Code)
 
 function Reset-UserScriptRuntime($Context) {
     Complete-UserScriptTask $Context ($Context.UserScriptService.StopAsync()) 'previous runtime stops'
-    $Context.UserScriptService = [UserScriptRuntimeProbe]::Create($Context.Database, $Context.DatabaseService, $Context.TemporaryPath)
+    $Context.UserScriptService = [UserScriptRuntimeProbe]::Create($Context.DatabaseService, $Context.TemporaryPath)
 }
 
 function Test-UserScriptOfflineRecovery($Context) {

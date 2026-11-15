@@ -1,10 +1,8 @@
-using CefFlashBrowser.Database;
 using CefFlashBrowser.Models.UserScripts;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Repository;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -51,7 +49,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             return _storage.RunAsync<IReadOnlyList<UserScriptMaintenanceRecord>>(async () =>
             {
-                var stored = await _storage.Database.QueryAsync(SelectSql + " ORDER BY install_order", ReadRow).ConfigureAwait(false);
+                var stored = await _storage.Database.GetUserScriptsAsync().ConfigureAwait(false);
                 var result = new List<UserScriptMaintenanceRecord>();
                 foreach (var row in stored)
                 {
@@ -60,12 +58,12 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     string source = null;
                     try
                     {
-                        var path = SourcePath(row.Key);
-                        if (!Recover(path, row.Hash))
+                        var path = SourcePath(row.ScriptKey);
+                        if (!Recover(path, row.SourceSha256))
                             throw new IOException("No readable source matches the committed SHA-256.");
 
                         var bytes = ReadBounded(path);
-                        if (Hash(bytes) != row.Hash)
+                        if (Hash(bytes) != row.SourceSha256)
                             throw new IOException("Source changed while reading the committed revision.");
 
                         source = Decode(bytes);
@@ -73,17 +71,17 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     catch (Exception e) when (IsFileError(e))
                     {
                         diagnostics.Add(e.Message);
-                        Report("Source unavailable for " + row.Key, e);
+                        Report("Source unavailable for " + row.ScriptKey, e);
                     }
 
-                    if (string.IsNullOrWhiteSpace(row.Prepared))
+                    if (string.IsNullOrWhiteSpace(row.PreparedRevisionJson))
                         diagnostics.Add("Prepared revision is missing; explicit repair is required.");
 
-                    result.Add(new UserScriptMaintenanceRecord(new UserScriptPersistenceRecord(row.Key,
-                        source, row.Origin, row.Enabled, row.Installed, row.Updated, row.Prepared), diagnostics.AsReadOnly()));
+                    result.Add(new UserScriptMaintenanceRecord(new UserScriptPersistenceRecord(row.ScriptKey,
+                        source, row.SourceOrigin, row.IsEnabled, row.InstalledAt, row.UpdatedAt, row.PreparedRevisionJson), diagnostics.AsReadOnly()));
                 }
 
-                CleanupOrphans(new HashSet<string>(stored.Select(row => row.Key.ToString()), StringComparer.OrdinalIgnoreCase));
+                CleanupOrphans(new HashSet<string>(stored.Select(row => row.ScriptKey.ToString()), StringComparer.OrdinalIgnoreCase));
                 _recoveryRequired = false;
                 return result.AsReadOnly();
             }, token);
@@ -110,11 +108,11 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             return _storage.RunAsync(async () =>
             {
                 EnsureRecovered();
-                var old = await FindAsync(record.ScriptKey).ConfigureAwait(false);
+                var old = await _storage.Database.GetUserScriptAsync(record.ScriptKey).ConfigureAwait(false);
                 var path = SourcePath(record.ScriptKey);
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 if (old != null)
-                    Recover(path, old.Hash);
+                    Recover(path, old.SourceSha256);
 
                 if (HasTransitions(path))
                     throw new IOException("Unresolved source recovery files must be repaired before saving.");
@@ -122,8 +120,8 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 if (old == null && File.Exists(path))
                     throw new IOException("An unregistered source already occupies the installation directory.");
 
-                var sameContent = old != null && old.Hash == hash && old.Prepared == record.PreparedRevisionJson;
-                if (sameContent && !Matches(path, old.Hash))
+                var sameContent = old != null && old.SourceSha256 == hash && old.PreparedRevisionJson == record.PreparedRevisionJson;
+                if (sameContent && !Matches(path, old.SourceSha256))
                     throw new IOException("The installed source changed outside the repository.");
 
                 var replaced = false;
@@ -141,17 +139,10 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                         _checkpoint?.Invoke("pending");
                     }
 
-                    await _storage.Database.TransactionAsync(session =>
+                    var stored = new UserScriptDatabaseRecord(record.ScriptKey, record.SourceOrigin, record.IsEnabled,
+                        record.InstalledAt, record.UpdatedAt, hash, record.PreparedRevisionJson);
+                    await _storage.Database.SaveUserScriptAsync(stored, () =>
                     {
-                        token.ThrowIfCancellationRequested();
-                        session.Execute(@"INSERT INTO monkeysharp_scripts
-                            (script_id, install_order, source_origin, is_enabled, installed_at, updated_at, source_sha256, prepared_revision_json)
-                            VALUES (@id, (SELECT COALESCE(MAX(install_order), -1) + 1 FROM monkeysharp_scripts), @origin, @enabled, @installed, @updated, @hash, @prepared)
-                            ON CONFLICT(script_id) DO UPDATE SET source_origin = excluded.source_origin,
-                                is_enabled = excluded.is_enabled, updated_at = excluded.updated_at,
-                                source_sha256 = excluded.source_sha256, prepared_revision_json = excluded.prepared_revision_json",
-                            Parameters(record, hash));
-                        token.ThrowIfCancellationRequested();
                         if (!sameContent)
                         {
                             if (existed)
@@ -162,8 +153,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                             replaced = true;
                             _checkpoint?.Invoke("replaced");
                         }
-                        // No cancellation checks after the file switch: commit is next.
-                    }).ConfigureAwait(false);
+                    }, token).ConfigureAwait(false);
                 }
                 catch (Exception failure)
                 {
@@ -180,39 +170,27 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             return _storage.RunAsync(async () =>
             {
                 EnsureRecovered();
-                var old = await FindAsync(key).ConfigureAwait(false);
+                var old = await _storage.Database.GetUserScriptAsync(key).ConfigureAwait(false);
                 if (old == null)
                     return;
 
                 var path = SourcePath(key);
-                Recover(path, old.Hash);
+                Recover(path, old.SourceSha256);
                 if (HasTransitions(path))
                     throw new IOException("Unresolved source recovery files must be repaired before removal.");
 
                 var renamed = false;
                 try
                 {
-                    await _storage.Database.TransactionAsync(session =>
+                    await _storage.Database.DeleteUserScriptAsync(key, () =>
                     {
-                        token.ThrowIfCancellationRequested();
-                        var parameters = new Dictionary<string, object> { ["@id"] = key.ToString() };
-                        foreach (var table in new[]
-                        {
-                            "monkeysharp_values",
-                            "monkeysharp_permission_decisions",
-                            "monkeysharp_tab_states",
-                            "monkeysharp_scripts"
-                        })
-                            session.Execute("DELETE FROM " + table + " WHERE script_id = @id", parameters);
-
-                        token.ThrowIfCancellationRequested();
                         if (File.Exists(path))
                         {
                             File.Move(path, path + ".deleted");
                             renamed = true;
                             _checkpoint?.Invoke("deleted");
                         }
-                    }).ConfigureAwait(false);
+                    }, token).ConfigureAwait(false);
                 }
                 catch (Exception failure)
                 {
@@ -405,46 +383,5 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 throw new IOException("Persistence requires recovery before another mutation.");
         }
 
-        private const string SelectSql = "SELECT script_id, source_origin, is_enabled, installed_at, updated_at, source_sha256, prepared_revision_json FROM monkeysharp_scripts";
-
-        private async Task<StoredRecord> FindAsync(ScriptKey key)
-        {
-            var rows = await _storage.Database.QueryAsync(SelectSql + " WHERE script_id = @id", ReadRow,
-                new Dictionary<string, object> { ["@id"] = key.ToString() }).ConfigureAwait(false);
-            return rows.SingleOrDefault();
-        }
-
-        private static StoredRecord ReadRow(System.Data.IDataRecord row) => new StoredRecord
-        {
-            Key = ScriptKey.Parse(row.GetString(0)),
-            Origin = row.IsDBNull(1) ? null : row.GetString(1),
-            Enabled = row.GetInt64(2) != 0,
-            Installed = DateTimeOffset.ParseExact(row.GetString(3), "O", CultureInfo.InvariantCulture),
-            Updated = DateTimeOffset.ParseExact(row.GetString(4), "O", CultureInfo.InvariantCulture),
-            Hash = row.GetString(5),
-            Prepared = row.IsDBNull(6) ? null : row.GetString(6)
-        };
-
-        private static Dictionary<string, object> Parameters(UserScriptPersistenceRecord record, string hash) => new Dictionary<string, object>
-        {
-            ["@id"] = record.ScriptKey.ToString(),
-            ["@origin"] = record.SourceOrigin,
-            ["@enabled"] = record.IsEnabled ? 1 : 0,
-            ["@installed"] = record.InstalledAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
-            ["@updated"] = record.UpdatedAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
-            ["@hash"] = hash,
-            ["@prepared"] = record.PreparedRevisionJson
-        };
-
-        private sealed class StoredRecord
-        {
-            public ScriptKey Key;
-            public string Origin;
-            public string Hash;
-            public string Prepared;
-            public bool Enabled;
-            public DateTimeOffset Installed;
-            public DateTimeOffset Updated;
-        }
     }
 }

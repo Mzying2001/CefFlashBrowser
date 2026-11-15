@@ -286,8 +286,7 @@ namespace CefFlashBrowser
 
             SimpleIoc.Global.Register<UserScriptService>(
                 () => _userScriptService = new UserScriptService(
-                    new UserScriptStorage(
-                        SimpleIoc.Global.GetInstance<IDatabase>(), SimpleIoc.Global.GetInstance<DatabaseService>()),
+                    new UserScriptStorage(SimpleIoc.Global.GetInstance<DatabaseService>()),
                     GlobalData.MonkeySharpPath,
                     new UserScriptContentService(GlobalData.Settings.ProxySettings),
                     new UserScriptPermissionPrompt(), LogShutdownError), Lifetime.Singleton);

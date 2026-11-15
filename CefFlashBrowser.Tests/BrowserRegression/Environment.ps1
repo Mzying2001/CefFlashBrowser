@@ -226,7 +226,7 @@ function Initialize-RegressionEnvironment($Context) {
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.DatabaseService.PSObject.BaseObject))
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.FaviconService]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.FaviconService.PSObject.BaseObject))
-    $scriptStorage = New-Object CefFlashBrowser.Services.UserScripts.Persistence.UserScriptStorage($Context.Database, $Context.DatabaseService)
+    $scriptStorage = New-Object CefFlashBrowser.Services.UserScripts.Persistence.UserScriptStorage($Context.DatabaseService)
     $scriptContent = New-Object CefFlashBrowser.Services.UserScripts.UserScriptContentService($null, $null, 10485760, $null)
     $scriptPrompt = New-Object CefFlashBrowser.Browser.UserScripts.UserScriptPermissionPrompt
     $Context.UserScriptService = New-Object CefFlashBrowser.Services.UserScripts.UserScriptService(

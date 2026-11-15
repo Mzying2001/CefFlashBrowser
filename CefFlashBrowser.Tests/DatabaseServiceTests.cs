@@ -1,7 +1,11 @@
 using CefFlashBrowser.Database;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Services.UserScripts.Persistence;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Mzying2001.MonkeySharp.Core.Domain;
+using Mzying2001.MonkeySharp.Core.Permissions;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -201,6 +205,101 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(1, controlled.InitializationCount);
         }
 
+        [DataTestMethod]
+        [DataRow("scripts")]
+        [DataRow("values")]
+        [DataRow("permissions")]
+        [DataRow("tabs")]
+        public async Task UserScriptReads_InitializeWithoutStorageQueue(string operation)
+        {
+            var key = ScriptKey.Parse(Guid.NewGuid().ToString());
+            switch (operation)
+            {
+                case "scripts":
+                    Assert.AreEqual(0, (await _service.GetUserScriptsAsync()).Count);
+                    break;
+                case "values":
+                    Assert.AreEqual(0, (await _service.GetUserScriptValuesAsync(key.ToString(), CancellationToken.None)).Count);
+                    break;
+                case "permissions":
+                    var scope = new UserScriptPermissionScope(key.ToString(), "GM.cookie", "https://example.com");
+                    Assert.IsNull(await _service.GetUserScriptPermissionDecisionAsync(scope, CancellationToken.None));
+                    break;
+                case "tabs":
+                    Assert.AreEqual(0, (await _service.GetUserScriptTabStatesAsync(key.ToString(), CancellationToken.None)).Count);
+                    break;
+                default:
+                    Assert.Fail("Unknown userscript operation.");
+                    break;
+            }
+
+            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+        }
+
+        [TestMethod]
+        public async Task UserScriptSave_InitializesAndRollsBackWhenSourceCommitFails()
+        {
+            var key = ScriptKey.Parse(Guid.NewGuid().ToString());
+            var now = DateTimeOffset.UtcNow;
+            var record = new UserScriptDatabaseRecord(key, null, true, now, now, "source digest", "prepared payload");
+            await Assert.ThrowsExceptionAsync<IOException>(() => _service.SaveUserScriptAsync(record,
+                () => throw new IOException("source switch failed"), CancellationToken.None));
+            Assert.IsNull(await _service.GetUserScriptAsync(key));
+            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+
+            await _service.SaveUserScriptAsync(record, null, CancellationToken.None);
+            var restored = await _service.GetUserScriptAsync(key);
+            Assert.AreEqual(key, restored.ScriptKey);
+            Assert.AreEqual(now, restored.InstalledAt);
+            Assert.AreEqual(record.SourceSha256, restored.SourceSha256);
+            Assert.AreEqual(record.PreparedRevisionJson, restored.PreparedRevisionJson);
+        }
+
+        [TestMethod]
+        public async Task TabState_CloseRejectsWriteAlreadyWaitingForDatabase()
+        {
+            var controlled = new ControlledDatabase(_database);
+            var database = new DatabaseService(controlled);
+            var storage = new UserScriptStorage(database);
+            await database.InitializeAsync();
+
+            using (var entered = new ManualResetEventSlim())
+            using (var release = new ManualResetEventSlim())
+            {
+                var queued = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                controlled.TransactionQueued = () => queued.TrySetResult(true);
+                var blocker = _database.TransactionAsync(session =>
+                {
+                    entered.Set();
+                    if (!release.Wait(TimeSpan.FromSeconds(10)))
+                        throw new TimeoutException();
+                });
+
+                try
+                {
+                    Assert.IsTrue(entered.Wait(TimeSpan.FromSeconds(10)));
+                    var state = new SqliteUserScriptTabStateService(storage, "closing-tab");
+                    var pending = state.SaveAsync(ScriptKey.Parse(Guid.NewGuid().ToString()), null, "{}", CancellationToken.None);
+                    Assert.AreSame(queued.Task, await Task.WhenAny(queued.Task, Task.Delay(TimeSpan.FromSeconds(10))));
+                    Assert.IsFalse(pending.IsCompleted);
+
+                    var close = state.CloseAsync();
+                    release.Set();
+                    await blocker;
+                    try { await pending; Assert.Fail("A closed tab must not save queued state."); }
+                    catch (OperationCanceledException) { }
+                    await close;
+                    Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_tab_states"));
+                }
+                finally
+                {
+                    release.Set();
+                    await blocker;
+                    await storage.StopAsync();
+                }
+            }
+        }
+
         private sealed class ControlledDatabase : IDatabase
         {
             private readonly IDatabase _inner;
@@ -209,6 +308,7 @@ namespace CefFlashBrowser.Tests
             public bool HoldInitialization { get; set; }
             public bool FailNextInitialization { get; set; }
             public bool FailNextWrite { get; set; }
+            public Action TransactionQueued { get; set; }
             public TaskCompletionSource<bool> ReleaseInitialization { get; } = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             public ControlledDatabase(IDatabase inner)
@@ -226,7 +326,9 @@ namespace CefFlashBrowser.Tests
                 }
                 if (HoldInitialization)
                     await ReleaseInitialization.Task.ConfigureAwait(false);
-                await _inner.TransactionAsync(action).ConfigureAwait(false);
+                var transaction = _inner.TransactionAsync(action);
+                TransactionQueued?.Invoke();
+                await transaction.ConfigureAwait(false);
             }
 
             public Task<int> ExecuteAsync(string sql, IDictionary<string, object> parameters = null)

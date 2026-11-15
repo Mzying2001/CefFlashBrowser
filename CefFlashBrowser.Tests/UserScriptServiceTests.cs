@@ -43,7 +43,7 @@ namespace CefFlashBrowser.Tests
 
         private UserScriptService Create()
         {
-            var storage = new UserScriptStorage(_database, new DatabaseService(_database));
+            var storage = new UserScriptStorage(new DatabaseService(_database));
             var service = new UserScriptService(storage, Path.Combine(_root, "MonkeySharp"),
                 new UserScriptContentService(handler: new ContentHandler()), new RejectUserScriptPermissionPrompt());
             _services.Add(service);

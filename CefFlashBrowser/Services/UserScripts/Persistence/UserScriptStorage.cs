@@ -1,25 +1,22 @@
-using CefFlashBrowser.Database;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Services.UserScripts.Persistence
 {
-    // Lock order: service lifecycle, storage queue, IDatabase queue. A database
+    // Lock order: service lifecycle, storage queue, database queue. A database
     // transaction must never enter this queue or wait for UI work.
     public sealed class UserScriptStorage
     {
-        private readonly DatabaseService _schema;
         private readonly object _lock = new object();
         private Task _work = Task.CompletedTask;
         private Task _stopTask;
 
-        public IDatabase Database { get; }
+        public DatabaseService Database { get; }
 
-        public UserScriptStorage(IDatabase database, DatabaseService schema)
+        public UserScriptStorage(DatabaseService database)
         {
             Database = database ?? throw new ArgumentNullException(nameof(database));
-            _schema = schema ?? throw new ArgumentNullException(nameof(schema));
         }
 
         public Task<T> RunAsync<T>(Func<Task<T>> action, CancellationToken token)
@@ -36,7 +33,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 {
                     _ = previous.Exception;
                     token.ThrowIfCancellationRequested();
-                    await _schema.InitializeAsync().ConfigureAwait(false);
+                    await Database.InitializeAsync().ConfigureAwait(false);
                     token.ThrowIfCancellationRequested();
                     return await action().ConfigureAwait(false);
                 }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();

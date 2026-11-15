@@ -30,7 +30,7 @@ namespace CefFlashBrowser.Tests
         {
             _root = Path.Combine(Path.GetTempPath(), "CefFlashBrowserScripts_" + Guid.NewGuid().ToString("N"));
             _database = new SqliteDatabase(Path.Combine(_root, "browser.db"));
-            _storage = new UserScriptStorage(_database, new DatabaseService(_database));
+            _storage = new UserScriptStorage(new DatabaseService(_database));
             _persistence = CreatePersistence();
             _repository = new PersistentUserScriptRepository(_persistence);
             await _repository.InitializeAsync(CancellationToken.None);
