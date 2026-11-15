@@ -89,6 +89,8 @@ function Initialize-RegressionEnvironment($Context) {
     if ($null -ne [System.Windows.Application]::Current) {
         throw 'Run the regression in a fresh Windows PowerShell process.'
     }
+    Add-Type -Path (Join-Path $Context.ScriptPath 'AssemblyResolver.cs')
+    [RegressionAssemblyResolver]::Install($Context.ApplicationPath)
     foreach ($dependency in $dependencies) {
         [void][Reflection.Assembly]::LoadFrom((Get-RegressionDependencyPath $Context $dependency))
     }

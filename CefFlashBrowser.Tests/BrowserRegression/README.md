@@ -67,3 +67,15 @@ The order is intentional: prepare WPF; verify language initialization and switch
 Each run creates a directory named `%TEMP%\CefFlashBrowser-regression-<guid>` for CEF cache, HTML fixtures, `browser.db`, `app.log`, and `cef.log`. Settings and favorites are supplied in memory instead of loading the user's profile; any data writes are redirected to this directory. The favicon fixture listens only on loopback with an automatically assigned port. The directory is retained, and its path is printed as soon as it is created so diagnostics remain available even if CEF stops responding. Process and missing-build checks can fail before any directory is created.
 
 When adding checks, put the scenario in the relevant scenario file and register any new top-level scenario explicitly in `Run.ps1`. Put reusable browser operations in `Helpers.ps1`, and keep resource ownership and initialization in `Environment.ps1`.
+
+## Userscript dependency baseline
+
+Run `Dependencies.ps1` in a fresh architecture-matched Windows PowerShell process after building.
+It validates MonkeySharp 3.0.1, the CefSharp 84 reference, typed JSON and embedded bridge assets
+without starting CEF. Pass `-Platform x86` or `-Configuration Release` as appropriate;
+`-ApplicationPath` also supports an extracted release. Dependencies must resolve from that output
+or its Costura resources, never from the developer NuGet cache.
+
+The initial Debug x64 baseline on 2026-11-15 built successfully and passed all 295 unit tests.
+The full browser runner stopped at `status popup avoids the cursor using the vertical interval`
+before userscript changes; this remains a separately recorded baseline failure, not a passing suite.
