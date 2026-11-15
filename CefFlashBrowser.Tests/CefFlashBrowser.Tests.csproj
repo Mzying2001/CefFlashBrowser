@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\CefFlashBrowser\Services\UserScripts\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
     <Compile Include="..\CefFlashBrowser\Services\UserScripts\Persistence\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
     <Compile Include="..\CefFlashBrowser\Models\UserScripts\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
   </ItemGroup>
@@ -54,6 +55,7 @@
 
   <ItemGroup>
     <Reference Include="System.Security" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <!-- Compiled at runtime by the standalone regression runners. -->

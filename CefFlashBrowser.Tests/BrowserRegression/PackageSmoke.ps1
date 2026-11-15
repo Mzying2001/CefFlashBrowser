@@ -51,6 +51,7 @@ $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
 $globalDataType = $applicationAssembly.GetType('CefFlashBrowser.Data.GlobalData')
 foreach ($dataPath in @{
     DatabasePath = $databasePath
+    MonkeySharpPath = (Join-Path $temporaryPath 'MonkeySharp')
     LogsPath = (Join-Path $temporaryPath 'Logs')
     CefDllPath = (Join-Path $packagePath 'Binaries\CefSharp')
     SqliteDllPath = (Join-Path $packagePath 'Binaries\SQLite')

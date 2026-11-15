@@ -218,4 +218,13 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">La clé ou propriété "{0}" existe déjà.</sys:String>
     <sys:String x:Key="error_notSolFile">Le fichier "{0}" n'est pas un fichier SOL.</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">Moteur de recherche inconnu.</sys:String>
+    <sys:String x:Key="userscript_permissionTitle" xml:space="preserve">Userscript permission</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script: {0}
+Capability: {1}
+Target: {2}
+
+Allow this script to use this capability?</sys:String>
+    <sys:String x:Key="userscript_denyRemember" xml:space="preserve">Deny and remember</sys:String>
+    <sys:String x:Key="userscript_allowOnce" xml:space="preserve">Allow once</sys:String>
+    <sys:String x:Key="userscript_allowRemember" xml:space="preserve">Allow and remember</sys:String>
 </ResourceDictionary>

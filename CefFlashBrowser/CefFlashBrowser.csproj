@@ -99,6 +99,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <Target Name="PrepareSQLiteInterop" BeforeTargets="AssignTargetPaths" Condition="'$(DesignTimeBuild)' != 'true'">

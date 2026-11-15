@@ -1,4 +1,7 @@
 using CefFlashBrowser.Data;
+using CefFlashBrowser.Browser.UserScripts;
+using CefFlashBrowser.Services.UserScripts;
+using CefFlashBrowser.Services.UserScripts.Persistence;
 using CefFlashBrowser.Database;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
@@ -31,6 +34,7 @@ namespace CefFlashBrowser
         private static FileLogger _logger;
         private static FavoritesService _favoritesService;
         private static FaviconService _faviconService;
+        private static UserScriptService _userScriptService;
 
         private const string InsufficientDirectoryPermissionsMessage =
             "CefFlashBrowser 需要对程序运行目录拥有读取、写入和删除文件的权限，无法继续运行。\r\n\r\n" +
@@ -221,6 +225,8 @@ namespace CefFlashBrowser
                 GlobalData.SaveData();
             }
 
+            _userScriptService?.StopAsync().GetAwaiter().GetResult();
+
             if (Cef.IsInitialized)
             {
                 Cef.Shutdown();
@@ -259,6 +265,12 @@ namespace CefFlashBrowser
             SimpleIoc.Global.Register<FavoritesService>(
                 () => _favoritesService = new FavoritesService(
                     GlobalData.FavoritesPath, SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
+
+            SimpleIoc.Global.Register<UserScriptService>(
+                () => _userScriptService = new UserScriptService(
+                    new UserScriptStorage(SimpleIoc.Global.GetInstance<IDatabase>(), SimpleIoc.Global.GetInstance<DatabaseService>()),
+                    GlobalData.MonkeySharpPath, new UserScriptContentService(GlobalData.Settings.ProxySettings),
+                    new UserScriptPermissionPrompt(), LogShutdownError), Lifetime.Singleton);
 
             SimpleIoc.Global.Register<FaviconService>(
                 () => _faviconService = new FaviconService(
@@ -301,11 +313,13 @@ namespace CefFlashBrowser
         private static void UnregisterServices()
         {
             var faviconWork = _faviconService?.StopAsync() ?? Task.CompletedTask;
-            var stopTask = StopDatabaseAsync(faviconWork);
+            var scriptWork = _userScriptService?.StopAsync() ?? Task.CompletedTask;
+            var stopTask = StopDatabaseAsync(Task.WhenAll(faviconWork, scriptWork));
 
             if (!stopTask.Wait(TimeSpan.FromSeconds(5)))
                 LogHelper.LogWtf("Timed out waiting for favicon writes; the database will close after queued operations finish.");
 
+            SimpleIoc.Global.Unregister<UserScriptService>(false);
             SimpleIoc.Global.Unregister<FaviconService>(false);
             SimpleIoc.Global.Unregister<FavoritesService>(false);
             SimpleIoc.Global.Unregister<DatabaseService>(false);

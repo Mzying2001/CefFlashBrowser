@@ -145,6 +145,7 @@ function Initialize-RegressionEnvironment($Context) {
         FavoritesPath = (Join-Path $Context.TemporaryPath 'favorites.json')
         SettingsPath = (Join-Path $Context.TemporaryPath 'settings.json')
         DatabasePath = (Join-Path $Context.TemporaryPath 'browser.db')
+        MonkeySharpPath = (Join-Path $Context.TemporaryPath 'MonkeySharp')
     }.GetEnumerator()) {
         $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
     }

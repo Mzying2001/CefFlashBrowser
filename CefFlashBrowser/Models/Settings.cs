@@ -147,6 +147,9 @@
         /// </summary>
         public bool DisableBrowserContextMenu { get; set; }
 
+        public bool EnableUserScripts { get; set; }
+        public bool TrustedUserScriptPageWorld { get; set; }
+
 
         /// <summary>
         /// Default settings
@@ -188,6 +191,8 @@
             DisableGpuAcceleration = false;
             CustomEmoticon = null;
             DisableBrowserContextMenu = false;
+            EnableUserScripts = true;
+            TrustedUserScriptPageWorld = false;
         }
 
         /// <summary>

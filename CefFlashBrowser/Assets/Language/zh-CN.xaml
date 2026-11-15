@@ -218,4 +218,13 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
     <sys:String x:Key="error_notSolFile">文件“{0}”不是SOL文件。</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">未知的搜索引擎。</sys:String>
+    <sys:String x:Key="userscript_permissionTitle" xml:space="preserve">用户脚本权限</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">脚本：{0}
+能力：{1}
+目标：{2}
+
+是否允许此脚本使用该能力？</sys:String>
+    <sys:String x:Key="userscript_denyRemember" xml:space="preserve">拒绝并记住</sys:String>
+    <sys:String x:Key="userscript_allowOnce" xml:space="preserve">允许一次</sys:String>
+    <sys:String x:Key="userscript_allowRemember" xml:space="preserve">允许并记住</sys:String>
 </ResourceDictionary>
