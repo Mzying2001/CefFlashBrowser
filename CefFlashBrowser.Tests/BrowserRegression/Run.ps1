@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio')][string]$Scenario = 'All'
+    [ValidateSet('All', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -33,6 +33,7 @@ foreach ($file in @(
     'Scenarios\ViewSource.ps1',
     'Scenarios\AuxiliaryWindows.ps1',
     'Scenarios\UserScripts.ps1',
+    'Scenarios\UserScriptNetwork.ps1',
     'Scenarios\Lifecycle.ps1'
     'Scenarios\Favicons.ps1'
 )) {
@@ -46,6 +47,20 @@ try {
     if ($Scenario -eq 'BrowserDisposal') {
         Start-RegressionCef $context
         Test-BrowserFrameLoadStartAfterDisposal $context
+    } elseif ($Scenario -eq 'TabClosing') {
+        Start-RegressionCef $context
+        Test-BrowserTabCloseKeyboardCancellation $context
+        Test-BrowserTabOpenerClosePending $context
+        Test-BrowserTabsReloadClose $context
+    } elseif ($Scenario -eq 'Recovery') {
+        Start-RegressionCef $context
+        Test-UserScriptOfflineRecovery $context
+    } elseif ($Scenario -eq 'Frames') {
+        Start-RegressionCef $context
+        Test-UserScriptFrames $context
+    } elseif ($Scenario -eq 'Network') {
+        Start-RegressionCef $context
+        Test-UserScriptNetwork $context
     } elseif ($Scenario -eq 'Audio') {
         Start-RegressionCef $context
         Test-BrowserMute $context
@@ -106,6 +121,9 @@ try {
         Test-UserScriptTabs $context
         Test-UserScriptInteractions $context
         Test-UserScriptDownloadsAndAudio $context
+        Test-UserScriptNetwork $context
+        Test-UserScriptFrames $context
+        Test-UserScriptOfflineRecovery $context
         Test-NavigationBeforeHosting $context
         Test-AuxiliaryBeforeShow $context
         Test-BrowserWindow $context

@@ -58,6 +58,7 @@ foreach ($dataPath in @{
 }.GetEnumerator()) {
     $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
 }
+$globalDataType.GetField('<Settings>k__BackingField', $privateStatic).SetValue($null, [CefFlashBrowser.Models.Settings]::Default)
 [Threading.SynchronizationContext]::SetSynchronizationContext(
     (New-Object System.Windows.Threading.DispatcherSynchronizationContext))
 $programType = $applicationAssembly.GetType('CefFlashBrowser.Program')
@@ -81,6 +82,7 @@ try {
     $database = $ioc.GetInstance([CefFlashBrowser.Database.IDatabase], @())
     $databaseService = $ioc.GetInstance([CefFlashBrowser.Services.DatabaseService], @())
     $service = $ioc.GetInstance([CefFlashBrowser.Services.FaviconService], @())
+    $scripts = $ioc.GetInstance([CefFlashBrowser.Services.UserScripts.UserScriptService], @())
     if (![object]::ReferenceEquals($database, $ioc.GetInstance([CefFlashBrowser.Database.IDatabase], @())) -or
         ![object]::ReferenceEquals($databaseService, $ioc.GetInstance([CefFlashBrowser.Services.DatabaseService], @())) -or
         ![object]::ReferenceEquals($service, $ioc.GetInstance([CefFlashBrowser.Services.FaviconService], @()))) {
@@ -107,6 +109,19 @@ try {
     if ($records.Count -ne 1 -or $records[0].IconUrl -ne 'https://example.invalid/icon.png') {
         throw 'The packaged service did not persist its mapping through the shared database.'
     }
+    [void]$scripts.InitializeAsync().GetAwaiter().GetResult()
+    $source = "// ==UserScript==`n// @name Packaged persistence`n// @match https://example.invalid/*`n// @grant none`n// ==/UserScript=="
+    $installation = $scripts.Repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None).GetAwaiter().GetResult()
+    [void]$scripts.ValueStore.SetAsync($installation.ScriptKey.ToString(), 'packaged',
+        [Mzying2001.MonkeySharp.Core.Storage.UserScriptValue]::Undefined, [Threading.CancellationToken]::None).GetAwaiter().GetResult()
+    $stored = $scripts.ValueStore.GetAsync($installation.ScriptKey.ToString(), 'packaged', [Threading.CancellationToken]::None).GetAwaiter().GetResult()
+    if (!$stored.Exists -or $stored.Value.EncodedValue -ne 'u' -or
+        !(Test-Path -LiteralPath (Join-Path $temporaryPath ('MonkeySharp\' + $installation.ScriptKey + '\userscript.js')))) {
+        throw 'Packaged userscript services did not persist their source/prepared content and typed values.'
+    }
+    . (Join-Path $PSScriptRoot 'Helpers.ps1')
+    . (Join-Path $PSScriptRoot 'PackageBrowserSmoke.ps1')
+    Test-PackagedUserScripts $packagePath $temporaryPath $scripts $installation
     $nativeModules = @(Get-Process -Id $PID -Module | Where-Object ModuleName -eq 'SQLite.Interop.dll')
     if ($nativeModules.Count -ne 1 -or $nativeModules[0].FileName -ne $sqliteInteropPath) {
         throw 'SQLite must load its native library from the isolated package under Binaries\SQLite.'
@@ -117,4 +132,4 @@ try {
 
 $exclusiveFile = [IO.File]::Open($databasePath, [IO.FileMode]::Open, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
 $exclusiveFile.Dispose()
-Write-Host "Package smoke check passed ($Platform): native SQLite loading, lazy singletons, persistence and shutdown."
+Write-Host "Package smoke check passed ($Platform): native SQLite loading, lazy singletons, favicon/userscript persistence, real CEF injection and shutdown."

@@ -32,7 +32,7 @@ powershell -NoProfile -STA -ExecutionPolicy Bypass -File CefFlashBrowser.Tests\B
 "%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -STA -ExecutionPolicy Bypass -File CefFlashBrowser.Tests\BrowserRegression\PackageSmoke.ps1 -ArchivePath bin\Publish\FlashBrowser_x86_v1.1.8.zip -Platform x86
 ```
 
-Adjust the version in the archive names when needed. The smoke check extracts only the supplied archive into an isolated temporary directory and initializes the executable's Costura resolver for embedded managed assemblies. It verifies that runtime dependencies are deployed under `Binaries\CefSharp`, `Binaries\CmdProxy`, `Binaries\SQLite`, and `Binaries\Plugins`, with no external `Assets` directory or dependency archives. It requires exactly one SQLite native library at `Binaries\SQLite\SQLite.Interop.dll` and verifies that the process loads that file using the application's native DLL search-directory initialization. It exercises the real IoC factories, SQLite persistence and shutdown, and checks that unregistering unused services neither creates a database nor loads SQLite. It also runs the [command proxy regression checks](../CommandProxyRegression/README.md) against the packaged native executable. It does not start CEF or request any network resources.
+Adjust the version in the archive names when needed. The smoke check extracts only the supplied archive into an isolated temporary directory and initializes the executable's Costura resolver for embedded managed assemblies. It verifies that runtime dependencies are deployed under `Binaries\CefSharp`, `Binaries\CmdProxy`, `Binaries\SQLite`, and `Binaries\Plugins`, with no external `Assets` directory or dependency archives. It requires exactly one SQLite native library at `Binaries\SQLite\SQLite.Interop.dll` and verifies that the process loads that file using the application's native DLL search-directory initialization. It exercises the real IoC factories, SQLite persistence and shutdown, and checks that unregistering unused services neither creates a database nor loads SQLite. It also runs the [command proxy regression checks](../CommandProxyRegression/README.md) against the packaged native executable. It then starts the packaged CEF in a temporary profile, attaches a host before native creation, prepares the isolated world and navigates to a local fixture. The fixture verifies synchronous restoration of stored undefined and a committed asynchronous GM write through the real bridge. Native CEF must load from that extracted archive. No project-output or NuGet fallback is used, and no external network resources are requested.
 
 Always start a fresh process with `-STA`; the runner does not build the application or restart itself. Paths are resolved from `Run.ps1`, so an absolute script path also works from other working directories. The build outputs are `bin\x64\<Configuration>` for x64 and `bin\<Configuration>` for x86.
 
@@ -56,11 +56,15 @@ The runner exits with code 0 after all checks and cleanup succeed. An assertion,
 | `Scenarios/ContextMenu.ps1` | Search and selected-URL routing for every new-page setting, explicit new-tab/new-window commands, page-menu composition without mute actions in either audio state, translations, closed-browser callbacks, and auxiliary-window routing. |
 | `Scenarios/ViewSource.ps1` | Source viewing from the actions menu, Ctrl+U and page context menu for every new-page setting; native HTML and window fullscreen, tab ordering, source-address preservation, reload, duplication, history, DevTools, ordinary closing, late callbacks, and auxiliary-window routing. |
 | `Scenarios/AuxiliaryWindows.ps1` | Popup and SWF player windows: bindings, routing, DevTools, beforeunload, and cleanup; embedded SWF player reloads, local and network source assignment, and independent player windows without external HTML files. |
+| `Scenarios/UserScripts.ps1` | Persistent fixture installation, navigation and disposal, real menus and tab handles, clipboard restoration, notification interactions, committed downloads and native mute synchronization. |
+| `Scenarios/UserScriptNetwork.ps1` | Loopback network/cookie and static-rule evidence, main/same-origin/cross-port frames, cross-window storage events, offline prepared replay and explicit recovery. |
+| `UserScriptHttpFixture.cs`, `UserScriptFrameProbe.cs`, `UserScriptRuntimeProbe.cs` | Isolated HTTP evidence and native-frame evaluation; restart the shared runtime against the same temporary database for offline/recovery checks. |
+| `PackageBrowserSmoke.ps1` | Real CEF injection and storage through assemblies resolved only from the supplied release zip. |
 | `Scenarios/Lifecycle.ps1` | Operations before CEF initialization, navigation before native hosting, closing before Show or during initialization, and the close-all message. |
 
 Only `Run.ps1` executes the suite. The supporting PowerShell files define functions without starting WPF or CEF when loaded. Functions receive a run context explicitly when they need shared resources; individual windows and browsers remain local to their scenarios.
 
-The order is intentional: prepare WPF; verify language initialization and switching and favorites persistence; check deferred browsers, the standalone tab control and tab management before CEF initialization; start CEF; check navigation before native hosting; close auxiliary windows before Show; exercise the main window, favorites surfaces and favicons; restore saved state; close initializing main windows; exercise multiple tabs and context menus; exercise auxiliary windows; send close-all to windows with ready and initializing tabs; clean up. CEF starts once, and the checks run serially. Settings such as zoom and DevTools width carry across checks that verify persistence, so keep those checks together and in order.
+The order is intentional: prepare WPF; verify language initialization and switching and favorites persistence; check deferred browsers, the standalone tab control and tab management before CEF initialization; start CEF; run userscript runtime, host-interaction, network, frame and recovery fixtures; check navigation before native hosting; close auxiliary windows before Show; exercise the main window, favorites surfaces and favicons; restore saved state; close initializing main windows; exercise multiple tabs and context menus; exercise auxiliary windows; send close-all to windows with ready and initializing tabs; clean up. CEF starts once, and the checks run serially. Settings such as zoom and DevTools width carry across checks that verify persistence, so keep those checks together and in order.
 
 ## Test data and diagnostics
 
@@ -121,3 +125,44 @@ across host replacements. A detached host with accepted downloads retires until 
 finish; its callbacks are revoked immediately. Closing cancels and drains active/retired downloads
 before disposing the HTTP context and native browser. This keeps GM traffic on CEF, including its
 actual cookie jar, while installation content remains on the separate credential-free client.
+
+
+`-Scenario Network` checks first-request static rules, including a blocked execution world that
+must leave ordinary resources untouched. The host uses a filtered view of the shared repository,
+because denying a registered rule in MonkeySharp 3.0.1 cancels its request. Installations remain
+in the shared repository for maintenance. The fixture also verifies the actual CEF login jar,
+anonymous requests, redirect permissions, undeclared destinations, native cookie CRUD and
+rejection of unsupported partition/explicit-Cookie options before server-side effects.
+
+`-Scenario Frames` verifies first-statement bootstrap in main, same-origin and cross-port frames,
+source execution once, noframes, SPA URL notifications without reinjection, and actual local/remote
+storage events across frames, a background tab and a second window. `-Scenario Recovery` restarts
+the runtime against the same temporary database, replays prepared dependencies/resources offline,
+retains stable identity/timestamps/values, exercises unavailable-runtime fallback on corrupt
+prepared content, and repairs only the explicitly selected installation.
+
+`-Scenario TabClosing` isolates native Ctrl+W cancellation/retry, removing an opener while its
+child awaits confirmation, and reload/close confirmation ordering. Helpers wait for the actual
+target document before installing beforeunload; the runtime's warm-up blank can already execute
+JavaScript while its public Address still names a pending navigation.
+
+
+For Release, runtime-compiled probe references are extracted from the built executable's
+compressed Costura resources into the temporary test directory. Release resolution does not
+fall back to project outputs or the NuGet cache. The separate package smoke leaves those
+resources embedded and verifies Costura resolution while running the real browser.
+
+
+## Stage A acceptance (2026-11-15)
+
+| Configuration | VS MSBuild | Unit tests | Full browser regression |
+| --- | --- | --- | --- |
+| Debug x64 | Passed | 357 passed | Passed |
+| Debug x86 | Passed | 357 passed | Passed |
+| Release x64 | Passed | 357 passed | Passed |
+| Release x86 | Passed | 357 passed | Passed |
+
+`publish.ps1` created both version 1.1.8 archives. Dependency checks passed for both architectures
+in Debug and Release. Both actual archives passed native deployment/command-proxy checks,
+lazy-service and SQLite persistence checks, real isolated-world injection and GM read/write,
+and orderly CEF/storage shutdown. The existing Costura IncludeAssets warning remains.

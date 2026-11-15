@@ -37,6 +37,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         private readonly Dictionary<ScriptKey, Tuple<long, int>> _logCounts = new Dictionary<ScriptKey, Tuple<long, int>>();
         private Task _initialization, _stop;
         private CefSharpUserScriptHost _host;
+        private UserScriptRuntimeRepository _runtimeRepository;
         private bool _repositorySubscribed;
         private bool _initialBlankTarget;
         private readonly UserScriptTabService _tabs;
@@ -159,13 +160,16 @@ namespace CefFlashBrowser.Browser.UserScripts
                 _webRequests = new InMemoryWebRequestService();
                 _http = new CefSharpHttpRequestService(_requestContext, _webRequests);
             }
+            var trusted = GlobalData.Settings.TrustedUserScriptPageWorld;
+            _runtimeRepository = new UserScriptRuntimeRepository(_service.Repository, trusted,
+                installation => Log(LogLevel.Info, "MSR215_EXECUTION_WORLD_UNAVAILABLE tab=" + _model.BrowserId + " script=" + installation.ScriptKey));
             var applicationMenu = _browser.MenuHandler as Handlers.ContextMenuHandler;
             _menus = new UserScriptMenuService(_model, _dispatcher, _service.Repository, () => _host,
                 () => Log(LogLevel.Warning, "Userscript menu callback failed for tab " + _model.BrowserId));
             if (_tabState == null) _tabState = _service.CreateTabStateService(_model.BrowserId);
             _notifications = new UserScriptNotificationService(_dispatcher, _ownerWindow, _tabs, _service.Content, _lifetime.Token,
                 () => Log(LogLevel.Warning, "Userscript notification content or interaction was unavailable for tab " + _model.BrowserId));
-            var builder = new CefSharpUserScriptHostBuilder(_service.Repository)
+            var builder = new CefSharpUserScriptHostBuilder(_runtimeRepository)
                 .UseValueStore(_service.ValueStore)
                 .UseHttpRequestService(_http)
                 .UseWebRequestService(_webRequests)
@@ -180,10 +184,10 @@ namespace CefFlashBrowser.Browser.UserScripts
                 .UseWindowService(_tabs)
                 .UseTabStateService(_tabState)
                 .UsePermissionPolicy(new UserScriptExecutionPolicy(_service.PermissionPolicy,
-                    () => GlobalData.Settings.TrustedUserScriptPageWorld, url => AllowsScripts(url.AbsoluteUri)))
+                    () => trusted, url => AllowsScripts(url.AbsoluteUri)))
                 .Configure(new CefSharpHostOptions
                 {
-                    TrustedPageWorld = GlobalData.Settings.TrustedUserScriptPageWorld,
+                    TrustedPageWorld = trusted,
                     // This application only creates the normal global CEF context.
                     IsIncognito = context => false,
                     AutomaticallyUpdatesScripts = false
@@ -348,6 +352,8 @@ namespace CefFlashBrowser.Browser.UserScripts
             var downloads = _downloads;
             var notifications = _notifications;
             var menus = _menus;
+            var runtimeRepository = _runtimeRepository;
+            _runtimeRepository = null;
             _host = null;
             _downloads = null;
             _notifications = null;
@@ -365,6 +371,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 finally
                 {
                     menus?.Dispose();
+                    runtimeRepository?.Dispose();
                     if (!closing && downloads != null && downloads.ActiveCount != 0)
                     {
                         var retired = new RetiredHost { Host = host, Downloads = downloads };
@@ -429,9 +436,8 @@ namespace CefFlashBrowser.Browser.UserScripts
             var count = 0;
             if (_host != null && Uri.TryCreate(address, UriKind.Absolute, out var url) && AllowsScripts(address))
             {
-                var scripts = await _service.Repository.GetSnapshotAsync(_lifetime.Token);
+                var scripts = await _runtimeRepository.GetSnapshotAsync(_lifetime.Token);
                 count = scripts.Count(script => script.IsEnabled && script.Definition.ParseResult.CanEnable
-                    && UserScriptExecutionPolicy.IsWorldAvailable(script.Definition.Metadata, GlobalData.Settings.TrustedUserScriptPageWorld)
                     && script.PreparedRevision.UrlRules.AllowsEnvironment(false, out _)
                     && script.PreparedRevision.UrlRules.IsMatch(url));
             }

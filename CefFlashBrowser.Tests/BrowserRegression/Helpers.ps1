@@ -275,6 +275,11 @@ function Open-RegressionDevTools($Context, $View) {
 }
 
 function Set-RegressionBeforeUnload($Context, $Browser) {
+    # The warm-up document can execute JavaScript before the requested page arrives.
+    Wait-Regression $Context {
+        $Browser.CanExecuteJavascriptInMainFrame -and !$Browser.IsLoading -and
+        $Browser.GetBrowser().MainFrame.Url -eq $Browser.Address
+    } 'target document is ready for beforeunload'
     $dialogHandler = New-Object RegressionJsDialogHandler
     $Browser.JsDialogHandler = $dialogHandler
     [CefFlashBrowser.Data.GlobalData]::Settings.DisableOnBeforeUnloadDialog = $false

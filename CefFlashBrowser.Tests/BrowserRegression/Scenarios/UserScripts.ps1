@@ -71,8 +71,10 @@ function Test-UserScriptDownloadsAndAudio($Context) {
         $window = New-RegressionWindow $Context
         $model = $window.ViewModel.CurrentBrowser
         $model.Address = $Context.AuxiliaryAddress
-        Wait-Regression $Context { $model.Browser.Title -eq 'Auxiliary regression' -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-ready')") -eq 'yes' } 'download source ready'
+        Wait-Regression $Context { $model.Browser.CanExecuteJavascriptInMainFrame -and
+            $model.Browser.GetBrowser().MainFrame.Url -eq $Context.AuxiliaryAddress -and
+            $model.Browser.Title -eq 'Auxiliary regression' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-download-ready')") -eq 'yes' } 'download source ready'
         $view = Find-BrowserView $window
         $session = $view.GetType().GetField('_userScriptSession', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
         $downloads = $session.GetType().GetField('_downloads', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($session)
@@ -86,24 +88,24 @@ function Test-UserScriptDownloadsAndAudio($Context) {
         Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'contract.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'CEF download commits the exact response bytes'
 
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('audioMute'))")
-        Wait-Regression $Context { $model.IsMuted -and (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-audio-set')") -eq 'yes' } 'GM mute updates tab UI'
+        Wait-Regression $Context { $model.IsMuted -and (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-audio-set')") -eq 'yes' } 'GM mute updates tab UI'
         Assert-BrowserAudioMuted $Context $model.Browser $true 'GM mute matches the native CEF state'
         $model.ToggleMute()
         Wait-Regression $Context { !$model.IsMuted } 'UI mute toggle reads back native state'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('audioRead'))")
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-audio-read')") -eq 'false' -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-audio-change')") -eq 'false' } 'GM observes UI mute changes'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-audio-read')") -eq 'false' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-audio-change')") -eq 'false' } 'GM observes UI mute changes'
         Assert-BrowserAudioMuted $Context $model.Browser $false 'UI mute readback matches native CEF'
 
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadSimple'))")
         Wait-Regression $Context { @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptPermissionDialog] }).Count -eq 1 } 'download permission prompt'
         $permission = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptPermissionDialog] })[0]
         $permission.FindName('allowRememberButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Button]::ClickEvent)))
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-state')") -eq 'completed' } 'modern download completion acknowledgement'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-download-state')") -eq 'completed' } 'modern download completion acknowledgement'
         Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'actual.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'modern GM download resolves after bytes are committed'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadSimple'))")
         Wait-Regression $Context { [IO.File]::Exists((Join-Path $directory 'actual (1).bin')) -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-state')") -eq 'completed' } 'default collision uniquifies the file'
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-download-state')") -eq 'completed' } 'default collision uniquifies the file'
         Assert-Regression ([IO.File]::Exists((Join-Path $directory 'actual.bin'))) 'uniquify preserves the existing download'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadBlob'))")
         Wait-Regression $Context {
@@ -111,10 +113,10 @@ function Test-UserScriptDownloadsAndAudio($Context) {
             if ($blobPrompt.Count -eq 1) {
                 $blobPrompt[0].FindName('allowRememberButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Button]::ClickEvent)))
             }
-            $errorText = Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-blob-error')"
+            $errorText = Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-blob-error')"
             if ($errorText) { throw $errorText }
             [IO.File]::Exists((Join-Path $directory 'blob.bin')) -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-state')") -eq 'completed'
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-download-state')") -eq 'completed'
         } 'renderer Blob download is committed'
         Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'blob.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'Blob download preserves staged bytes'
         $picker = New-Object UserScriptSaveDialogProbe($model.Browser, $Context.LanguageService.GetString('userscript_saveDownload'))
@@ -152,8 +154,10 @@ function Test-UserScriptDownloadsAndAudio($Context) {
         Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'navigation.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'navigation retains the accepted transfer and its network context'
 
         $model.Address = $Context.AuxiliaryAddress
-        Wait-Regression $Context { $model.Browser.Title -eq 'Auxiliary regression' -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-ready')") -eq 'yes' } 'download source reloads'
+        Wait-Regression $Context { $model.Browser.CanExecuteJavascriptInMainFrame -and
+            $model.Browser.GetBrowser().MainFrame.Url -eq $Context.AuxiliaryAddress -and
+            $model.Browser.Title -eq 'Auxiliary regression' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-download-ready')") -eq 'yes' } 'download source reloads'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadRetire'))")
         Wait-Regression $Context { $fixture.RequestsFor('/slow-retire') -eq 1 } 'accepted transfer before host replacement'
         $model.Address = 'view-source:' + $Context.AuxiliaryAddress
@@ -163,8 +167,10 @@ function Test-UserScriptDownloadsAndAudio($Context) {
         Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'retired.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'host replacement keeps accepted download bytes intact'
 
         $model.Address = $Context.AuxiliaryAddress
-        Wait-Regression $Context { $model.Browser.Title -eq 'Auxiliary regression' -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-download-ready')") -eq 'yes' } 'source returns after host replacement'
+        Wait-Regression $Context { $model.Browser.CanExecuteJavascriptInMainFrame -and
+            $model.Browser.GetBrowser().MainFrame.Url -eq $Context.AuxiliaryAddress -and
+            $model.Browser.Title -eq 'Auxiliary regression' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-download-ready')") -eq 'yes' } 'source returns after host replacement'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadClose'))")
         Wait-Regression $Context { $fixture.RequestsFor('/slow-close') -eq 1 } 'pending transfer before close'
         $window.ForceCloseWindow()
@@ -243,16 +249,16 @@ document.documentElement.setAttribute('data-interaction-ready', 'yes');
         $model = $window.ViewModel.CurrentBrowser
         $model.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context { $model.Browser.Title -eq 'Auxiliary regression' -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-interaction-ready')") -eq 'yes' } 'native interaction fixture ready'
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-interaction-ready')") -eq 'yes' } 'native interaction fixture ready'
         # Snapshot privately in memory; never print the user's clipboard contents.
         $clipboard = [UserScriptClipboardProbe]::Capture()
         $clipboardCaptured = $true
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptClipboardText'))")
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-clipboard')") -eq 'text' } 'text clipboard commit'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-clipboard')") -eq 'text' } 'text clipboard commit'
         $expectedText = -join ([char[]]@(0x7528,0x6237,0x811a,0x672c,0x20,0x2713))
         Assert-Regression ([System.Windows.Clipboard]::GetText() -eq $expectedText) 'GM clipboard writes real Unicode text'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptClipboardHtml'))")
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-clipboard')") -eq 'html' } 'HTML clipboard commit'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-clipboard')") -eq 'html' } 'HTML clipboard commit'
         $html = [string][System.Windows.Clipboard]::GetData([System.Windows.DataFormats]::Html)
         $bytes = [Text.Encoding]::UTF8.GetBytes($html)
         $start = [int][regex]::Match($html, 'StartFragment:(\d+)').Groups[1].Value
@@ -279,14 +285,14 @@ document.documentElement.setAttribute('data-interaction-ready', 'yes');
         Wait-Regression $Context { (Find-UserScriptNotification $Context 'Prevented notice').FindName('notificationImage').Visibility -eq [System.Windows.Visibility]::Visible } 'bounded notification image content is displayed'
 
         Invoke-UserScriptNotificationButton (Find-UserScriptNotification $Context 'Prevented notice') 'clickButton'
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-notice-done')") -eq 'yes' } 'notification click acknowledgement completes'
-        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-notice-clicked')") -eq 'yes' -and $window.ViewModel.Browsers.Count -eq 1) 'preventDefault blocks the notification URL action'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-notice-done')") -eq 'yes' } 'notification click acknowledgement completes'
+        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-notice-clicked')") -eq 'yes' -and $window.ViewModel.Browsers.Count -eq 1) 'preventDefault blocks the notification URL action'
 
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptNotifyDefault'))")
         Wait-Regression $Context { $null -ne (Find-UserScriptNotification $Context 'Default notice') } 'default-action notification is shown'
         Invoke-UserScriptNotificationButton (Find-UserScriptNotification $Context 'Default notice') 'clickButton'
         Wait-Regression $Context { $window.ViewModel.Browsers.Count -eq 2 -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-default-notice-done')") -eq 'yes' } 'notification default action opens a tab'
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-default-notice-done')") -eq 'yes' } 'notification default action opens a tab'
         $child = $window.ViewModel.CurrentBrowser
         Assert-Regression ($child -ne $model -and $child.Address -eq $fixture.BaseUrl + '/a') 'notification URL uses its real source window'
         $window.ViewModel.CloseBrowser($child)
@@ -294,12 +300,12 @@ document.documentElement.setAttribute('data-interaction-ready', 'yes');
 
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptNotifyTag'))")
         Wait-Regression $Context { $null -ne (Find-UserScriptNotification $Context 'Tag second') -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-tag-first-done')") -eq 'yes' } 'tag replacement completes the first notification'
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-tag-first-done')") -eq 'yes' } 'tag replacement completes the first notification'
         Assert-Regression ($null -eq (Find-UserScriptNotification $Context 'Tag first')) 'script-scoped tags replace the previous notification'
         Invoke-UserScriptNotificationButton (Find-UserScriptNotification $Context 'Tag second') 'closeButton'
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-tag-second-done')") -eq 'yes' } 'native close completes notification promise'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-tag-second-done')") -eq 'yes' } 'native close completes notification promise'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptNotifyTimeout'))")
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-timeout-notice-done')") -eq 'yes' } 'notification timeout completes its promise'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-timeout-notice-done')") -eq 'yes' } 'notification timeout completes its promise'
         Assert-Regression ($null -eq (Find-UserScriptNotification $Context 'Timed notice')) 'notification timeout closes native UI'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptNotifyPending'))")
         Wait-Regression $Context { $null -ne (Find-UserScriptNotification $Context 'Pending notice') } 'pending notification before close'
@@ -364,21 +370,21 @@ function Test-UserScriptTabs($Context) {
         $identity = $model.BrowserId
         $model.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context { $model.Browser.Title -eq 'Auxiliary regression' -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-tab-state-before')") -eq '0' } 'initial tab-state snapshot'
-        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-tab-state-id')") -eq $identity) 'GM tab state uses the stable host tab ID'
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-tab-state-before')") -eq '0' } 'initial tab-state snapshot'
+        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-tab-state-id')") -eq $identity) 'GM tab state uses the stable host tab ID'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptCloseSelf'))")
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-self-result')") -eq 'undefined' } 'window.close preserves its void JavaScript facade'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-self-result')") -eq 'undefined' } 'window.close preserves its void JavaScript facade'
         $view = Find-BrowserView $window
         $session = $view.GetType().GetField('_userScriptSession', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
         $tabs = $session.GetType().GetField('_tabs', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($session)
         $accepted = Complete-UserScriptTask $Context ($tabs.CloseAsync($null, [Threading.CancellationToken]::None)) 'last-tab close result'
         Assert-Regression (!$accepted -and $window.IsVisible -and $window.ViewModel.Browsers.Count -eq 1) 'script window.close preserves the last browser'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptPrivateTab'))")
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-private-denied')") -eq 'yes' } 'private request is rejected'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-private-denied')") -eq 'yes' } 'private request is rejected'
         Assert-Regression ($window.ViewModel.Browsers.Count -eq 1) 'unsupported private tabs fail before creation'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptOpenTab'))")
         Wait-Regression $Context { $window.ViewModel.Browsers.Count -eq 2 -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-child-open')") -eq 'yes' } 'GM opens a background child'
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-child-open')") -eq 'yes' } 'GM opens a background child'
         $child = $window.ViewModel.Browsers[1]
         Assert-Regression ($window.ViewModel.CurrentBrowser -eq $model -and $child.Address -eq 'about:blank' -and $model.Address -eq $Context.AuxiliaryAddress) 'GM tab options preserve source selection and ignore OriginalWindow preference'
         Wait-Regression $Context { $null -ne $child.Browser -and $child.HasDocument -and !$child.Browser.IsLoading -and $child.Browser.CanExecuteJavascriptInMainFrame } 'child document ready'
@@ -386,18 +392,18 @@ function Test-UserScriptTabs($Context) {
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptCloseTab'))")
         Wait-Regression $Context { $handler.Count -eq 1 } 'handle close requests confirmation'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptCheckTab'))")
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-child-state')") -eq 'false' } 'rejected handle close stays open'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-child-state')") -eq 'false' } 'rejected handle close stays open'
         Assert-Regression (!$child.IsClosed -and $window.ViewModel.Browsers.Count -eq 2) 'handle state reflects rejected close'
         $handler.Accept = $true
         $window.ViewModel.CloseBrowser($child)
-        Wait-Regression $Context { $child.IsClosed -and (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-child-closed')") -eq 'yes' } 'actual child close notifies its handle'
+        Wait-Regression $Context { $child.IsClosed -and (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-child-closed')") -eq 'yes' } 'actual child close notifies its handle'
         Assert-Regression ($window.ViewModel.Browsers.Count -eq 1 -and $child.Browser.IsDisposed) 'tab handle closes only after accepted native cleanup'
         [CefSharp.WebBrowserExtensions]::Reload($model.Browser, $false)
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-tab-state-before')") -eq '1' } 'tab state survives document navigation'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-tab-state-before')") -eq '1' } 'tab state survives document navigation'
         Assert-Regression ($model.BrowserId -eq $identity) 'navigation keeps the tab-state partition identity'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptOpenTab'))")
         Wait-Regression $Context { $window.ViewModel.Browsers.Count -eq 2 -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-child-open')") -eq 'yes' } 'open a child before source self-close'
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-child-open')") -eq 'yes' } 'open a child before source self-close'
         $remainingChild = $window.ViewModel.Browsers[1]
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptCloseSelf'))")
         Wait-Regression $Context { $model.IsClosed -and $window.ViewModel.Browsers.Count -eq 1 } 'source window.close does not block its own execution cleanup'
@@ -411,13 +417,13 @@ function Test-UserScriptTabs($Context) {
 
         $popup = New-AuxiliaryWindow $Context ([CefFlashBrowser.Views.PopupWebPage]) -WaitForLoad
         $popupModel = $popup.FindName('browserView').ViewModel
-        Wait-Regression $Context { (Invoke-JavaScript $Context $popupModel.Browser "document.documentElement.getAttribute('data-tab-state-before')") -eq '0' } 'popup tab fixture ready'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $popupModel.Browser "document.documentElement && document.documentElement.getAttribute('data-tab-state-before')") -eq '0' } 'popup tab fixture ready'
         [void](Invoke-JavaScript $Context $popupModel.Browser "document.dispatchEvent(new Event('userscriptOpenTab'))")
         Wait-Regression $Context { @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.BrowserWindow] }).Count -eq 1 } 'auxiliary source opens a normal browser tab'
         $childWindow = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.BrowserWindow] })[0]
         Assert-Regression ($popup.IsVisible -and $childWindow.ViewModel.CurrentBrowser.Address -eq 'about:blank') 'auxiliary source retains its page and returns a real normal tab'
         [void](Invoke-JavaScript $Context $popupModel.Browser "document.dispatchEvent(new Event('userscriptCloseTab'))")
-        Wait-Regression $Context { !$childWindow.IsVisible -and (Invoke-JavaScript $Context $popupModel.Browser "document.documentElement.getAttribute('data-child-closed')") -eq 'yes' } 'auxiliary-source handle observes actual child-window close'
+        Wait-Regression $Context { !$childWindow.IsVisible -and (Invoke-JavaScript $Context $popupModel.Browser "document.documentElement && document.documentElement.getAttribute('data-child-closed')") -eq 'yes' } 'auxiliary-source handle observes actual child-window close'
         $popup.ForceCloseWindow()
         $popup = $null
         $first = New-RegressionWindow $Context
@@ -485,7 +491,7 @@ function Test-UserScriptMenus($Context) {
         $model.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context {
             $model.UserScriptMenus.Count -eq 2 -and $model.Browser.Title -eq 'Auxiliary regression' -and
-            (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-runtime-menu-ready')") -eq 'yes'
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu-ready')") -eq 'yes'
         } 'runtime menu registration'
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
         $menu = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'build native script menu'
@@ -497,18 +503,18 @@ function Test-UserScriptMenus($Context) {
             $command = [CefSharp.CefMenuCommand]([int][CefSharp.CefMenuCommand]::UserFirst + $index)
             Assert-Regression ($ids -contains $command) "manual source $index has a native command"
             $handled = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $command)) 'invoke manual source'
-            Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-manual-$index')") -eq 'yes' } 'manual source executes'
+            Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-manual-$index')") -eq 'yes' } 'manual source executes'
             Assert-Regression ($handled -and $window.ViewModel.Browsers.Count -eq 1) "manual source $index cannot trigger an application command"
         }
         Invoke-BrowserCommand $model.UserScriptMenus[0].InvokeCommand
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-runtime-menu')") -eq '1' } 'toolbar GM command callback'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '1' } 'toolbar GM command callback'
         Invoke-BrowserCommand $model.UserScriptMenus[1].InvokeCommand
-        Assert-Regression ($null -eq (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-frame-menu')")) 'toolbar invocation cannot attest a clicked frame'
+        Assert-Regression ($null -eq (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-frame-menu')")) 'toolbar invocation cannot attest a clicked frame'
         $dynamicId = [CefSharp.CefMenuCommand]([int][CefSharp.CefMenuCommand]::UserFirst + [CefFlashBrowser.Browser.UserScripts.UserScriptContextMenuHandler]::ManualLimit)
         [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $dynamicId)) 'invoke native GM command')
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-runtime-menu')") -eq '2' } 'native GM command callback'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '2' } 'native GM command callback'
         [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, [CefSharp.CefMenuCommand]([int]$dynamicId + 1))) 'invoke frame-attested GM menu')
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-frame-menu')") -eq 'yes' } 'native frame attests the isolated menu subscriber'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-frame-menu')") -eq 'yes' } 'native frame attests the isolated menu subscriber'
 
         $overflow = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildOverflowAsync($model.Browser)) 'bounded oversized script menu'
         $overflowIds = @($overflow.Commands | Where-Object { $_ -ne [CefSharp.CefMenuCommand]::NotFound })
@@ -523,7 +529,7 @@ function Test-UserScriptMenus($Context) {
         Complete-UserScriptTask $Context ($repository.SetEnabledAsync($installed[5], $false, [Threading.CancellationToken]::None)) 'disable runtime menu script' | Out-Null
         Wait-Regression $Context { $model.UserScriptMenus.Count -eq 0 } 'disabled execution unregisters GM menus'
         Invoke-BrowserCommand $oldCommand.InvokeCommand
-        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-runtime-menu')") -eq '2') 'released menu commands cannot invoke an old execution'
+        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '2') 'released menu commands cannot invoke an old execution'
 
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
@@ -570,7 +576,7 @@ document.documentElement.setAttribute('data-close-ready', 'yes');
                 $model.Address = $Context.AuxiliaryAddress
                 Wait-Regression $Context {
                     $model.Browser.Title -eq 'Auxiliary regression' -and
-                    (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-close-ready')") -eq 'yes'
+                    (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-close-ready')") -eq 'yes'
                 } 'close-probe source ready'
                 $session = $view.GetType().GetField('_userScriptSession', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
                 $scriptHost = $session.Host
@@ -582,7 +588,7 @@ document.documentElement.setAttribute('data-close-ready', 'yes');
                 Assert-Regression ($window.IsVisible -and [object]::ReferenceEquals($session.Host, $scriptHost) -and !$model.IsClosing) "$kind keeps its host after rejected close"
                 [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptCloseProbe'))")
                 Wait-Regression $Context {
-                    (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-close-alive')") -eq '1'
+                    (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-close-alive')") -eq '1'
                 } 'bridge remains live after rejected close'
                 $value = Complete-UserScriptTask $Context ($Context.UserScriptService.ValueStore.GetAsync($installation.ScriptKey.ToString(), 'alive', [Threading.CancellationToken]::None)) 'post-rejection GM commit'
                 Assert-Regression ($value.Value.EncodedValue -eq 'n1') "$kind keeps GM storage live after rejected close"
@@ -636,8 +642,8 @@ document.documentElement.setAttribute('data-gm-before', String(previous));
     try {
         $window.Show()
         Wait-Regression $Context { $null -ne $model.Browser -and $model.Browser.Title -eq 'Auxiliary regression' } 'cold target navigation'
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-gm-before')") -eq '0' } 'first-line synchronous GM snapshot'
-        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-userscript')") -eq 'ready') 'grant-none source runs on the first target page'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-gm-before')") -eq '0' } 'first-line synchronous GM snapshot'
+        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-userscript')") -eq 'ready') 'grant-none source runs on the first target page'
         $view = Find-BrowserView $window
         $session = $view.GetType().GetField('_userScriptSession', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
         Assert-Regression (!$session.Host.IsLateAttach) 'BrowserView attaches its host before native creation'
@@ -646,7 +652,7 @@ document.documentElement.setAttribute('data-gm-before', String(previous));
         $value = Complete-UserScriptTask $Context ($Context.UserScriptService.ValueStore.GetAsync($gm.ScriptKey.ToString(), 'visits', [Threading.CancellationToken]::None)) 'GM commit'
         Assert-Regression ($value.Value.EncodedValue -eq 'n1') 'legacy GM write reaches shared SQLite storage'
         [CefSharp.WebBrowserExtensions]::Reload($model.Browser, $false)
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-gm-before')") -eq '1' } 'new-document storage bootstrap'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-gm-before')") -eq '1' } 'new-document storage bootstrap'
         Assert-Regression ($model.BrowserId -eq $identity) 'stable browser identity survives navigation'
     } finally {
         $window.ForceCloseWindow()

@@ -1,8 +1,11 @@
 function New-RegressionTab($Context, $Window, [string]$Address = 'about:blank') {
     $model = $Window.ViewModel.AddBrowser($Address, $true)
+    $documentReady = 'location.href === ' + ($Address | ConvertTo-Json -Compress) + ' && document.readyState === "complete"'
     Wait-Regression $Context {
         $null -ne $model.Browser -and $model.Browser.IsBrowserInitialized -and
-        $model.Browser.CanExecuteJavascriptInMainFrame -and $model.Browser.Address -eq $Address
+        $model.HasDocument -and $model.Browser.CanExecuteJavascriptInMainFrame -and
+        $model.Browser.GetBrowser().MainFrame.Url -eq $Address -and
+        (Invoke-JavaScript $Context $model.Browser $documentReady)
     } 'new tab initialization'
     return $model
 }
@@ -392,7 +395,10 @@ function Open-TabContextMenu($Context, $Window, $Browser) {
     $menu.PlacementTarget = $container
     $menu.IsOpen = $true
     Wait-Regression $Context {
-        $menu.Items[0].CommandParameter -eq $Browser -and $null -ne $menu.Items[1].Command
+        $expectedGesture = if ($Browser.Browser.IsLoading) { 'Esc' } else { 'Ctrl+R' }
+        $menu.Items[0].CommandParameter -eq $Browser -and
+        $menu.Items[0].Command -eq $Window.ViewModel.ToggleLoadingStateCommand -and
+        $menu.Items[0].InputGestureText -eq $expectedGesture -and $null -ne $menu.Items[1].Command
     } 'tab menu binds to its placement target'
     return $menu
 }

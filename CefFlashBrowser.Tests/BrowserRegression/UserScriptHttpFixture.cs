@@ -12,6 +12,7 @@ public sealed class UserScriptHttpFixture : IDisposable
     private readonly TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
     private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
     private readonly ConcurrentDictionary<string, int> requests = new ConcurrentDictionary<string, int>();
+    private readonly ConcurrentDictionary<string, string> cookies = new ConcurrentDictionary<string, string>();
     private readonly ConcurrentDictionary<string, TaskCompletionSource<bool>> gates = new ConcurrentDictionary<string, TaskCompletionSource<bool>>();
     private readonly ConcurrentDictionary<TcpClient, Task> clients = new ConcurrentDictionary<TcpClient, Task>();
     private readonly Task accept;
@@ -31,6 +32,12 @@ public sealed class UserScriptHttpFixture : IDisposable
     {
         int count;
         return requests.TryGetValue(path, out count) ? count : 0;
+    }
+
+    public string CookieFor(string path)
+    {
+        string value;
+        return cookies.TryGetValue(path, out value) ? value : "";
     }
 
     public void Release(string path)
@@ -70,6 +77,7 @@ public sealed class UserScriptHttpFixture : IDisposable
                 while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync().ConfigureAwait(false)))
                     if (line.StartsWith("Cookie:", StringComparison.OrdinalIgnoreCase)) cookie = line.Substring(7).Trim();
                 requests.AddOrUpdate(path, 1, (key, value) => value + 1);
+                cookies[path] = cookie;
                 var status = "200 OK";
                 var type = "text/html; charset=utf-8";
                 var extra = "";
@@ -81,7 +89,8 @@ public sealed class UserScriptHttpFixture : IDisposable
                 }
                 else if (path == "/failed") { status = "500 Internal Server Error"; body = Encoding.UTF8.GetBytes("failed"); }
                 else if (path == "/login") { extra = "Set-Cookie: session=fixture; Path=/\r\n"; body = Encoding.UTF8.GetBytes("<title>Login fixture</title>"); }
-                else if (path == "/echo") { type = "text/plain"; body = Encoding.UTF8.GetBytes(cookie); }
+                else if (path == "/echo" || path == "/anonymous") { type = "text/plain"; body = Encoding.UTF8.GetBytes(cookie); }
+                else if (path == "/blocked.js") { type = "application/javascript"; body = Encoding.UTF8.GetBytes("window.blockedResourceRan = true;"); }
                 else if (path == "/redirect") { status = "302 Found"; extra = "Location: " + (PeerUrl ?? BaseUrl) + "/echo\r\n"; body = new byte[0]; }
                 else if (path == "/dependency.js")
                 {
@@ -103,7 +112,7 @@ public sealed class UserScriptHttpFixture : IDisposable
                 else if (path == "/frames")
                     body = Encoding.UTF8.GetBytes("<title>Frame fixture</title><iframe src='/frame'></iframe><iframe src='" + (PeerUrl ?? BaseUrl) + "/frame'></iframe>");
                 else if (path == "/frame") body = Encoding.UTF8.GetBytes("<title>Child fixture</title><p>child</p>");
-                else body = Encoding.UTF8.GetBytes("<title>Userscript fixture</title><script>window.inlineRan=true;</script><img src='/blocked.png'><p>fixture</p>");
+                else body = Encoding.UTF8.GetBytes("<title>Userscript fixture</title><script>window.inlineRan=true;</script><script src='/blocked.js'></script><p>fixture</p>");
                 var header = Encoding.ASCII.GetBytes("HTTP/1.1 " + status + "\r\nContent-Type: " + type
                     + "\r\nContent-Length: " + body.Length + "\r\nConnection: close\r\nCache-Control: no-store\r\n" + extra + "\r\n");
                 await stream.WriteAsync(header, 0, header.Length).ConfigureAwait(false);
