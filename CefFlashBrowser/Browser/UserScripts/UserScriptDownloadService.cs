@@ -59,6 +59,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     throw new ObjectDisposedException(nameof(UserScriptDownloadService));
 
                 _lifetime.ThrowIfCancellationRequested();
+
                 var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, _lifetime);
 
                 try
@@ -68,6 +69,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     var inner = _pipeline.CreateAsync(request, cancellation.Token).GetAwaiter().GetResult();
                     var name = SuggestedName(request);
                     var operation = new Operation(this, inner, name, cancellation);
+
                     _operations.Add(operation.DownloadId, operation);
                     _ = operation.ObserveAsync();
                     return Task.FromResult<IDownloadOperation>(operation);
@@ -87,10 +89,12 @@ namespace CefFlashBrowser.Browser.UserScripts
         {
             token.ThrowIfCancellationRequested();
             Directory.CreateDirectory(_directory);
+
             var name = SuggestedName(request);
             var path = Path.Combine(_directory, name);
             var prompt = request.SaveAs || request.ConflictAction == "prompt"
                 || request.ConflictAction == "overwrite" && File.Exists(path);
+
             if (!prompt)
                 return new DownloadDestination(path, false);
 
@@ -99,16 +103,21 @@ namespace CefFlashBrowser.Browser.UserScripts
                 token.ThrowIfCancellationRequested();
                 return _owner() ?? throw new InvalidOperationException("The download owner is not available.");
             });
+
             var picker = Pickers.GetValue(window, key => new SemaphoreSlim(1, 1));
+
             await picker.WaitAsync(token).ConfigureAwait(false);
+
             try
             {
                 var selected = await _dispatcher.InvokeAsync(() =>
                 {
                     token.ThrowIfCancellationRequested();
+
                     var title = SimpleIoc.Global.GetInstance<LanguageService>().GetString("userscript_saveDownload");
                     return UserScriptDownloadFilePicker.Select(window, title, name, _directory, token);
                 });
+
                 return selected == null ? null : new DownloadDestination(selected, true);
             }
             finally
@@ -249,6 +258,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 finally
                 {
                     _cancellation.Dispose();
+
                     lock (_owner._lock)
                         _owner._operations.Remove(DownloadId);
 

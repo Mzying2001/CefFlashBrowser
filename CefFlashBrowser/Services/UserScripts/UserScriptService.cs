@@ -25,9 +25,13 @@ namespace CefFlashBrowser.Services.UserScripts
         private PersistentUserScriptRepository _repository;
 
         public UserScriptContentService Content { get; }
+
         public SqliteUserScriptValueStore ValueStore { get; }
+
         public SqliteUserScriptPermissionDecisionStore Decisions { get; }
+
         public InteractiveUserScriptPermissionPolicy PermissionPolicy { get; }
+
         public Exception InitializationError { get; private set; }
 
         public IUserScriptRepository Repository
@@ -64,6 +68,7 @@ namespace CefFlashBrowser.Services.UserScripts
             lock (_lock)
             {
                 ThrowIfStopping();
+
                 if (_initializeTask == null || _initializeTask.IsFaulted || _initializeTask.IsCanceled)
                     _initializeTask = Task.Run(() => InitializeCoreAsync(null, null, _lifetime.Token));
 
@@ -85,12 +90,14 @@ namespace CefFlashBrowser.Services.UserScripts
                 throw new ArgumentNullException(nameof(reviewedSource));
 
             var parsed = new UserScriptMetadataParser().Parse(reviewedSource);
+
             if (!parsed.CanEnable)
                 throw new MetadataValidationException(parsed);
 
             lock (_lock)
             {
                 ThrowIfStopping();
+
                 if (_repository != null || _initializeTask != null && !_initializeTask.IsCompleted)
                     throw new InvalidOperationException("Maintenance repair requires a failed or unpublished runtime.");
 
@@ -113,6 +120,7 @@ namespace CefFlashBrowser.Services.UserScripts
                         : (IUserScriptRepositoryPersistence)_persistence;
                     var repository = new PersistentUserScriptRepository(persistence,
                         preparer: new UserScriptPreparer(Content, Content));
+
                     await repository.InitializeAsync(linked.Token).ConfigureAwait(false);
                     linked.Token.ThrowIfCancellationRequested();
 
@@ -126,6 +134,7 @@ namespace CefFlashBrowser.Services.UserScripts
                 catch (Exception e)
                 {
                     InitializationError = e;
+
                     try
                     {
                         _report?.Invoke("Userscript initialization failed; maintenance records remain available.", e);
@@ -163,8 +172,10 @@ namespace CefFlashBrowser.Services.UserScripts
         private async Task StopCoreAsync()
         {
             _lifetime.Cancel();
+
             Func<Task>[] sessions;
             Task initialization;
+
             lock (_lock)
             {
                 sessions = _sessions.Values.ToArray();
@@ -172,6 +183,7 @@ namespace CefFlashBrowser.Services.UserScripts
             }
 
             var failures = new List<Exception>();
+
             foreach (var stop in sessions)
             {
                 try
@@ -200,6 +212,7 @@ namespace CefFlashBrowser.Services.UserScripts
             await _storage.StopAsync().ConfigureAwait(false);
             Content.Dispose();
             _lifetime.Dispose();
+
             if (failures.Count != 0)
                 throw new AggregateException("Some userscript sessions could not stop.", failures);
         }
@@ -244,6 +257,7 @@ namespace CefFlashBrowser.Services.UserScripts
             public async Task<IReadOnlyList<UserScriptPersistenceRecord>> LoadAsync(CancellationToken token)
             {
                 var records = await _inner.LoadAsync(token).ConfigureAwait(false);
+
                 if (!records.Any(record => record.ScriptKey == _key))
                     throw new KeyNotFoundException("The repair installation no longer exists.");
 

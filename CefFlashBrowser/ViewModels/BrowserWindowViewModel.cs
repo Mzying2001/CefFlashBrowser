@@ -282,6 +282,7 @@ namespace CefFlashBrowser.ViewModels
 
             var index = insertIndex.HasValue ? Math.Min(insertIndex.Value, _browsers.Count)
                 : insert && source != null ? _browsers.IndexOf(source) + 1 : _browsers.Count;
+
             return InsertBrowser(index, address, active, setParent ? source : null);
         }
 

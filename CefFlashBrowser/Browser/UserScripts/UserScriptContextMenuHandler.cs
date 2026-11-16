@@ -9,6 +9,7 @@ namespace CefFlashBrowser.Browser.UserScripts
     public sealed class UserScriptContextMenuHandler : IContextMenuHandler
     {
         public const int ManualLimit = 1024;
+
         private readonly UserScriptMenuService _menus;
         private readonly Func<int> _originalCount;
         private readonly Action _reportLimit;
@@ -28,6 +29,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         {
             _commands.Clear();
             Inner.OnBeforeContextMenu(browser, native, frame, parameters, model);
+
             if (GlobalData.Settings.DisableBrowserContextMenu)
             {
                 model.Clear();
@@ -38,19 +40,23 @@ namespace CefFlashBrowser.Browser.UserScripts
             var last = (int)CefMenuCommand.UserLast - 4;
             var limit = Math.Min(ManualLimit, Math.Max(0, last - first + 1));
             var removed = false;
+
             for (var index = model.Count - 1; index >= _originalCount(); index--)
             {
                 var id = (int)model.GetCommandIdAt(index);
+
                 if (id != (int)CefMenuCommand.NotFound && (id < first || id >= first + limit))
                 {
                     model.RemoveAt(index);
                     removed = true;
                 }
             }
+
             if (removed)
                 _reportLimit();
 
             var command = first + limit;
+
             foreach (var item in _menus.GetCommands())
             {
                 if (command > last)
@@ -60,6 +66,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 }
 
                 var id = (CefMenuCommand)command++;
+
                 _commands.Add(id, item);
                 model.AddItem(id, item.Name);
             }

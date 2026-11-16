@@ -14,9 +14,11 @@ public static class UserScriptMenuProbe
                 .GetField("_menus", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(outer);
             var handler = new UserScriptContextMenuHandler(new OverflowHandler(), menus, () => 2, () => { });
             var model = new RegressionMenuModelProxy();
+
             using (var frame = browser.GetBrowser().MainFrame)
                 handler.OnBeforeContextMenu(browser, browser.GetBrowser(), frame,
                     (IContextMenuParams)Parameters().GetTransparentProxy(), (IMenuModel)model.GetTransparentProxy());
+
             return model;
         });
     }
@@ -27,9 +29,11 @@ public static class UserScriptMenuProbe
         {
             var model = new RegressionMenuModelProxy();
             var parameters = Parameters();
+
             using (var frame = browser.GetBrowser().MainFrame)
                 browser.MenuHandler.OnBeforeContextMenu(browser, browser.GetBrowser(), frame,
                     (IContextMenuParams)parameters.GetTransparentProxy(), (IMenuModel)model.GetTransparentProxy());
+
             return model;
         });
     }
@@ -39,6 +43,7 @@ public static class UserScriptMenuProbe
         return Cef.UIThreadTaskFactory.StartNew(() =>
         {
             var parameters = Parameters();
+
             using (var frame = browser.GetBrowser().MainFrame)
                 return browser.MenuHandler.OnContextMenuCommand(browser, browser.GetBrowser(), frame,
                     (IContextMenuParams)parameters.GetTransparentProxy(), command, CefEventFlags.None);
@@ -65,11 +70,23 @@ public static class UserScriptMenuProbe
         {
             model.AddItem(CefFlashBrowser.Browser.Handlers.ContextMenuHandler.Search, "Application search");
             model.AddSeparator();
+
             for (var index = 0; index < 3000; index++)
                 model.AddItem((CefMenuCommand)((int)CefMenuCommand.UserFirst + index), "Manual source " + index);
         }
-        public bool OnContextMenuCommand(IWebBrowser browser, IBrowser native, IFrame frame, IContextMenuParams parameters, CefMenuCommand id, CefEventFlags flags) { return false; }
-        public void OnContextMenuDismissed(IWebBrowser browser, IBrowser native, IFrame frame) { }
-        public bool RunContextMenu(IWebBrowser browser, IBrowser native, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback) { return false; }
+
+        public bool OnContextMenuCommand(IWebBrowser browser, IBrowser native, IFrame frame, IContextMenuParams parameters, CefMenuCommand id, CefEventFlags flags)
+        {
+            return false;
+        }
+
+        public void OnContextMenuDismissed(IWebBrowser browser, IBrowser native, IFrame frame)
+        {
+        }
+
+        public bool RunContextMenu(IWebBrowser browser, IBrowser native, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
+        {
+            return false;
+        }
     }
 }

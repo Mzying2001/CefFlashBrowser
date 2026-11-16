@@ -34,6 +34,7 @@ namespace CefFlashBrowser.Browser.Handlers
             {
                 model.Clear();
                 LastMenuItemCount = 0;
+
                 return;
             }
 
@@ -71,6 +72,7 @@ namespace CefFlashBrowser.Browser.Handlers
             {
                 model.InsertSeparatorAt(count);
             }
+
             LastMenuItemCount = model.Count;
         }
 

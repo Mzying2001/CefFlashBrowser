@@ -19,14 +19,19 @@ namespace CefFlashBrowser.Tests
             var repository = new InMemoryUserScriptRepository();
             var raw = await repository.InstallAsync(Source, null, true, CancellationToken.None);
             var isolated = await repository.InstallAsync(Source.Replace("// @grant", "// @sandbox DOM\n// @grant"), null, true, CancellationToken.None);
+
             using (var view = new UserScriptRuntimeRepository(repository, false))
             {
                 var visible = await view.GetSnapshotAsync(CancellationToken.None);
+
                 Assert.AreEqual(1, visible.Count);
                 Assert.AreEqual(isolated.ScriptKey, visible[0].ScriptKey);
+
                 await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() => view.GetAsync(raw.ScriptKey, CancellationToken.None));
+
                 Assert.AreEqual(2, (await repository.GetSnapshotAsync(CancellationToken.None)).Count);
             }
+
             using (var trusted = new UserScriptRuntimeRepository(repository, true))
                 Assert.AreEqual(2, (await trusted.GetSnapshotAsync(CancellationToken.None)).Count);
         }
@@ -36,11 +41,14 @@ namespace CefFlashBrowser.Tests
         {
             var repository = new InMemoryUserScriptRepository();
             var installation = await repository.InstallAsync(Source.Replace("// @grant", "// @sandbox DOM\n// @grant"), null, true, CancellationToken.None);
+
             using (var view = new UserScriptRuntimeRepository(repository, false))
             {
                 UserScriptRepositoryChangedEventArgs changed = null;
+
                 view.Changed += (sender, e) => changed = e;
                 await repository.UpdateAsync(installation.ScriptKey, Source, null, CancellationToken.None);
+
                 Assert.AreEqual(RepositoryChangeKind.Removed, changed.Kind);
                 Assert.AreEqual(installation.ScriptKey, changed.Installation.ScriptKey);
                 Assert.AreEqual(0, (await view.GetSnapshotAsync(CancellationToken.None)).Count);

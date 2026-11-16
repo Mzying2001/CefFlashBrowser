@@ -147,8 +147,19 @@
         /// </summary>
         public bool DisableBrowserContextMenu { get; set; }
 
+        /// <summary>
+        /// Determines whether userscript execution is enabled
+        /// </summary>
         public bool EnableUserScripts { get; set; }
+
+        /// <summary>
+        /// Determines whether userscripts can use privileged APIs in the page execution world
+        /// </summary>
         public bool TrustedUserScriptPageWorld { get; set; }
+
+        /// <summary>
+        /// The directory for userscript downloads; defaults to the system Downloads folder when blank
+        /// </summary>
         public string UserScriptDownloadDirectory { get; set; }
 
 

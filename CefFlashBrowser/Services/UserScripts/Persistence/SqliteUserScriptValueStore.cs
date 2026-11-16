@@ -27,6 +27,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         public Task<StoredValue> GetAsync(string scriptKey, string key, CancellationToken token)
         {
             var id = ScriptKey.Parse(scriptKey).ToString();
+
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
@@ -56,6 +57,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         public Task<UserScriptValueSnapshot> GetSnapshotAsync(string scriptKey, CancellationToken token)
         {
             var id = ScriptKey.Parse(scriptKey).ToString();
+
             return _storage.RunAsync(async () =>
             {
                 var values = await _storage.Database.GetUserScriptValuesAsync(id, token).ConfigureAwait(false);
@@ -74,6 +76,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             var id = ScriptKey.Parse(scriptKey).ToString();
             var batch = UserScriptValueMutation.Validate(mutations);
+
             return _storage.RunAsync(async () =>
             {
                 var pending = await _storage.Database.ApplyUserScriptValuesAsync(id, batch, token).ConfigureAwait(false);
@@ -81,6 +84,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 // The same storage queue covers the database commit, journal and
                 // notifications, including empty/no-op acknowledgements.
                 var changes = pending.Select(item => _journal.Append(id, item.Key, item.OldValue, item.NewValue, origin)).ToList();
+
                 foreach (var change in changes)
                     Publish(change);
 
@@ -91,6 +95,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         private void Publish(UserScriptValueChangedEventArgs change)
         {
             var handlers = ValueChanged;
+
             if (handlers == null)
                 return;
 

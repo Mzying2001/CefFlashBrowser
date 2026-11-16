@@ -283,11 +283,17 @@ namespace CefFlashBrowser.Tests
 
             Record("https://example.com/a", "/new");
             Assert.AreEqual(2, notifications);
+
             long updatedAt = (long)_database.ScalarAsync("SELECT updated_at FROM website_icons").GetAwaiter().GetResult();
+
             Assert.IsTrue(updatedAt > 20);
+
             _database.ExecuteAsync("DELETE FROM website_icons").GetAwaiter().GetResult();
+
             Assert.AreEqual(0L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
+
             Record("https://example.com/a", "/new");
+
             Assert.AreEqual(2, notifications);
             Assert.AreEqual(updatedAt, _database.ScalarAsync("SELECT updated_at FROM website_icons").GetAwaiter().GetResult());
             Assert.AreEqual(1L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());

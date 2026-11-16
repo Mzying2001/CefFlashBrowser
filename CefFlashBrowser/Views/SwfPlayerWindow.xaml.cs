@@ -94,6 +94,7 @@ namespace CefFlashBrowser.Views
             else
             {
                 e.Cancel = true;
+
                 if (_windowCloseTask == null || _windowCloseTask.IsCompleted)
                     _windowCloseTask = CloseBrowserAsync(false);
             }
@@ -151,12 +152,15 @@ namespace CefFlashBrowser.Views
                 return;
 
             _forceClosePending = true;
+
             try
             {
                 var closing = CloseBrowserAsync(true);
+
                 if (!closing.IsCompleted)
                 {
                     var frame = new DispatcherFrame();
+
                     closing.GetAwaiter().OnCompleted(() => Dispatcher.InvokeAsync(() => frame.Continue = false));
                     Dispatcher.PushFrame(frame);
                 }
@@ -193,6 +197,7 @@ namespace CefFlashBrowser.Views
                 // its host, accepted work and DevTools with native context intact.
                 e.Handled = true;
                 await browserView.CompleteCloseAsync();
+
                 if (!_isClosed)
                 {
                     _doClose = true;

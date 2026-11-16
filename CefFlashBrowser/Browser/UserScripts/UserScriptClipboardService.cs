@@ -24,6 +24,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         public async Task SetTextAsync(string text, string mediaType, CancellationToken token)
         {
             var html = string.Equals(mediaType, "text/html", StringComparison.OrdinalIgnoreCase);
+
             if (!html && !string.Equals(mediaType, "text/plain", StringComparison.OrdinalIgnoreCase))
                 throw new NotSupportedException("Only text and HTML clipboard formats are supported.");
 
@@ -32,18 +33,22 @@ namespace CefFlashBrowser.Browser.UserScripts
                 for (var attempt = 0; ; attempt++)
                 {
                     linked.Token.ThrowIfCancellationRequested();
+
                     try
                     {
                         await _dispatcher.InvokeAsync(() =>
                         {
                             linked.Token.ThrowIfCancellationRequested();
+
                             var data = new DataObject();
                             data.SetText(text ?? string.Empty, TextDataFormat.UnicodeText);
+
                             if (html)
                                 data.SetData(DataFormats.Html, BuildHtml(text ?? string.Empty));
 
                             Clipboard.SetDataObject(data, true);
                         });
+
                         return;
                     }
                     catch (ExternalException) when (attempt < 4)
@@ -59,6 +64,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             const string header = "Version:1.0\r\nStartHTML:{0:D10}\r\nEndHTML:{1:D10}\r\nStartFragment:{2:D10}\r\nEndFragment:{3:D10}\r\n";
             const string prefix = "<html><body><!--StartFragment-->";
             const string suffix = "<!--EndFragment--></body></html>";
+
             var htmlStart = Encoding.UTF8.GetByteCount(string.Format(CultureInfo.InvariantCulture, header, 0, 0, 0, 0));
             var fragmentStart = htmlStart + Encoding.UTF8.GetByteCount(prefix);
             var fragmentEnd = fragmentStart + Encoding.UTF8.GetByteCount(fragment);

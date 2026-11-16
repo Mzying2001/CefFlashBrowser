@@ -405,6 +405,7 @@ namespace CefFlashBrowser.Views
                     await CompleteCloseAsync();
                 else
                     Dispose();
+
                 return;
             }
 
@@ -470,6 +471,7 @@ namespace CefFlashBrowser.Views
             if (!_closeAccepted)
             {
                 _closeAccepted = true;
+
                 if (ViewModel != null)
                     ViewModel.IsClosing = true;
 
@@ -495,6 +497,7 @@ namespace CefFlashBrowser.Views
                 Dispatcher.InvokeAsync(Dispose);
                 return;
             }
+
             Cef.UIThreadTaskFactory.StartNew(() =>
             {
                 if (!browser.IsDisposed)
@@ -553,9 +556,11 @@ namespace CefFlashBrowser.Views
             // Normal accepted closes already awaited this task. Preserve the same
             // cleanup for direct disposal, without blocking CEF's UI work.
             var scripts = _userScriptSession?.StopAsync();
+
             if (scripts != null && !scripts.IsCompleted)
             {
                 var frame = new DispatcherFrame();
+
                 scripts.GetAwaiter().OnCompleted(() => Dispatcher.InvokeAsync(() => frame.Continue = false));
                 Dispatcher.PushFrame(frame);
             }

@@ -421,8 +421,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         {
 #pragma warning disable CS0618 // type or member is obsolete
             browser = new CefSharp.WinForms.ChromiumWebBrowser();
-            if (!deferNativeCreation)
-                browser.CreateControl();
+            if (!deferNativeCreation) browser.CreateControl();
 #pragma warning restore CS0618 // type or member is obsolete
 
             Cef.AddDisposable(this);
@@ -491,6 +490,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                     return;
 
                 var preparation = BeforeDisposeAsync();
+
                 if (!preparation.IsCompleted)
                 {
                     // A CEF callback can be waiting for this Dispatcher. Return
@@ -660,9 +660,12 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
             var url = pendingAddress;
             pendingAddress = null;
+
             var version = ++navigationVersion;
+
             navigationCancellation?.Cancel();
             navigationCancellation?.Dispose();
+
             var cancellation = navigationCancellation = new CancellationTokenSource();
             var token = cancellation.Token;
 

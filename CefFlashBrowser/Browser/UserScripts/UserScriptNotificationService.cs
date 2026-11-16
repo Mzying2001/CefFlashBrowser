@@ -47,6 +47,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     throw new ObjectDisposedException(nameof(UserScriptNotificationService));
 
                 var handle = new NotificationHandle(this, request, token);
+
                 _handles.Add(handle);
                 return handle;
             }
@@ -55,6 +56,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         public Task StopAsync()
         {
             _dispatcher.VerifyAccess();
+
             lock (_lock)
             {
                 _stopping = true;
@@ -65,7 +67,9 @@ namespace CefFlashBrowser.Browser.UserScripts
         private async Task StopCoreAsync()
         {
             await Task.Yield();
+
             NotificationHandle[] handles;
+
             lock (_lock)
                 handles = _handles.ToArray();
 
@@ -78,10 +82,12 @@ namespace CefFlashBrowser.Browser.UserScripts
         private void RegisterTag(NotificationHandle handle, string tag)
         {
             _dispatcher.VerifyAccess();
+
             if (tag == null)
                 return;
 
             NotificationHandle old;
+
             lock (_lock)
             {
                 _tags.TryGetValue(tag, out old);
@@ -100,6 +106,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             }
 
             await handle.DrainAsync();
+
             lock (_lock)
                 _handles.Remove(handle);
         }
@@ -150,6 +157,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     return;
 
                 _registration = _token.Register(Dispose);
+
                 if (Volatile.Read(ref _closed) != 0)
                     _registration.Dispose();
 
@@ -173,6 +181,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                         await _owner._tabs.FocusAsync(null, _token);
 
                     _token.ThrowIfCancellationRequested();
+
                     if (string.IsNullOrEmpty(_request.Text))
                     {
                         Finish();
@@ -181,6 +190,7 @@ namespace CefFlashBrowser.Browser.UserScripts
 
                     CreateWindow();
                     _window.Show();
+
                     if (Volatile.Read(ref _closed) != 0)
                         return;
 
@@ -226,6 +236,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                         }
                     }
                 };
+
                 _window.Closed += (sender, e) => Finish();
             }
 
@@ -235,6 +246,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 {
                     Interval = TimeSpan.FromMilliseconds(_request.Timeout.Value)
                 };
+
                 _timer.Tick += Timeout;
                 _timer.Start();
             }
@@ -246,6 +258,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     var content = await _owner._content.FetchAsync(_request.ImageUrl, false, false, _token).ConfigureAwait(false);
 
                     BitmapImage bitmap;
+
                     using (var stream = new MemoryStream(content.Bytes))
                     {
                         bitmap = new BitmapImage();
@@ -282,9 +295,11 @@ namespace CefFlashBrowser.Browser.UserScripts
                     try
                     {
                         _token.ThrowIfCancellationRequested();
+
                         if (!preventDefault && _request.Url != null)
                         {
                             var tab = await _owner._tabs.OpenAsync(new OpenTabRequest(_request.Url, true, true, true), _token);
+
                             tab.Dispose();
                         }
                     }
@@ -317,6 +332,7 @@ namespace CefFlashBrowser.Browser.UserScripts
 
                 _cancellation.Cancel();
                 _registration.Dispose();
+
                 try
                 {
                     Closed?.Invoke(this, EventArgs.Empty);
@@ -355,6 +371,7 @@ namespace CefFlashBrowser.Browser.UserScripts
 
                     _cancellation.Cancel();
                     _registration.Dispose();
+
                     try
                     {
                         Closed?.Invoke(this, EventArgs.Empty);

@@ -11,6 +11,7 @@ public static class UserScriptRuntimeProbe
     {
         var service = new UserScriptService(new UserScriptStorage(database), Path.Combine(root, "MonkeySharp"),
             new UserScriptContentService(), new UserScriptPermissionPrompt());
+
         SimpleIoc.Global.Unregister<UserScriptService>(false);
         SimpleIoc.Global.Register<UserScriptService>(service);
         return service;

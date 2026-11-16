@@ -160,10 +160,12 @@ namespace CefFlashBrowser.FlashBrowser
                 try
                 {
                     var native = GetBrowser();
+
                     if (native == null || native.IsDisposed)
                         return false;
 
                     var host = native.GetHost();
+
                     if (host == null || host.IsDisposed)
                         return false;
 

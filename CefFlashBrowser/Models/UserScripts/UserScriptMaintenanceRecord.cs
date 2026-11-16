@@ -6,6 +6,7 @@ namespace CefFlashBrowser.Models.UserScripts
     public sealed class UserScriptMaintenanceRecord
     {
         public UserScriptPersistenceRecord Record { get; }
+
         public IReadOnlyList<string> Diagnostics { get; }
 
         public UserScriptMaintenanceRecord(UserScriptPersistenceRecord record, IReadOnlyList<string> diagnostics)

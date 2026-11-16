@@ -11,6 +11,7 @@ namespace CefFlashBrowser.Utils
         {
             var id = new Guid("374DE290-123F-4565-9164-39C4925E467B");
             IntPtr path = IntPtr.Zero;
+
             try
             {
                 if (SHGetKnownFolderPath(ref id, 0, IntPtr.Zero, out path) == 0 && path != IntPtr.Zero)
@@ -29,12 +30,15 @@ namespace CefFlashBrowser.Utils
         {
             var name = (suggested ?? string.Empty).Replace('\\', '/');
             name = name.Substring(name.LastIndexOf('/') + 1);
+
             var invalid = Path.GetInvalidFileNameChars();
             name = new string(name.Select(character => invalid.Contains(character) ? '_' : character).ToArray()).Trim().TrimEnd('.');
+
             if (name.Length > 150)
                 name = name.Substring(0, 150).TrimEnd('.');
 
             var stem = name.Split('.')[0].ToUpperInvariant();
+
             if (new[] { "CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$" }.Contains(stem)
                 || Enumerable.Range(1, 9).Any(index => stem == "COM" + index || stem == "LPT" + index))
                 name = "_" + name;

@@ -26,6 +26,7 @@ namespace CefFlashBrowser.Services.UserScripts
 
             _maximumBytes = maximumBytes;
             _timeout = timeout ?? TimeSpan.FromSeconds(30);
+
             if (handler == null)
             {
                 var http = new HttpClientHandler
@@ -35,12 +36,14 @@ namespace CefFlashBrowser.Services.UserScripts
                     UseDefaultCredentials = false,
                     AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
                 };
+
                 if (proxy?.EnableProxy == true)
                 {
                     if (!int.TryParse(proxy.Port, out var port) || port <= 0 || port > 65535)
                         throw new ArgumentException("Invalid installation-content proxy port.", nameof(proxy));
 
                     var address = new UriBuilder("http", proxy.IP, port).Uri;
+
                     http.Proxy = new WebProxy(address)
                     {
                         Credentials = string.IsNullOrEmpty(proxy.UserName) ? null : new NetworkCredential(proxy.UserName, proxy.PlainPassword)
@@ -66,9 +69,11 @@ namespace CefFlashBrowser.Services.UserScripts
         public async Task<ResourceContent> FetchAsync(string url, bool decodeText, bool strictUtf8, CancellationToken token)
         {
             var uri = RequireHttp(url);
+
             using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(token))
             {
                 deadline.CancelAfter(_timeout);
+
                 for (var redirects = 0; ; redirects++)
                 {
                     using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
@@ -76,6 +81,7 @@ namespace CefFlashBrowser.Services.UserScripts
                         HttpCompletionOption.ResponseHeadersRead, deadline.Token).ConfigureAwait(false))
                     {
                         var status = (int)response.StatusCode;
+
                         if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308)
                         {
                             if (redirects == 10 || response.Headers.Location == null)
@@ -86,6 +92,7 @@ namespace CefFlashBrowser.Services.UserScripts
                         }
 
                         response.EnsureSuccessStatusCode();
+
                         if (response.Content.Headers.ContentLength > _maximumBytes)
                             throw new IOException("Installation content exceeds its size limit.");
 
@@ -94,6 +101,7 @@ namespace CefFlashBrowser.Services.UserScripts
                         {
                             var buffer = new byte[65536];
                             int count;
+
                             while ((count = await input.ReadAsync(buffer, 0, buffer.Length, deadline.Token).ConfigureAwait(false)) != 0)
                             {
                                 if (output.Length + count > _maximumBytes)
@@ -105,12 +113,15 @@ namespace CefFlashBrowser.Services.UserScripts
                             var bytes = output.ToArray();
                             var charset = response.Content.Headers.ContentType?.CharSet?.Trim('"');
                             string text = null;
+
                             if (decodeText)
                             {
                                 var encoding = strictUtf8 || string.IsNullOrWhiteSpace(charset)
                                     ? new UTF8Encoding(false, true)
                                     : Encoding.GetEncoding(charset, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+
                                 text = encoding.GetString(bytes);
+
                                 if (text.StartsWith("\uFEFF", StringComparison.Ordinal))
                                     text = text.Substring(1);
                             }

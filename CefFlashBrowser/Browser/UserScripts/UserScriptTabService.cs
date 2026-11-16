@@ -49,16 +49,20 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 token.ThrowIfCancellationRequested();
                 _lifetime.ThrowIfCancellationRequested();
+
                 if (_source.IsClosed || _source.IsClosing)
                     throw new OperationCanceledException("The source tab is closing.");
 
                 var owner = _owner();
+
                 if (IsOwnerClosing(owner))
                     throw new InvalidOperationException("The source window is closing.");
 
                 var window = owner as BrowserWindow ?? Application.Current.Windows.OfType<BrowserWindow>()
                     .LastOrDefault(candidate => !candidate.ViewModel.IsClosing);
+
                 BrowserViewModel tab;
+
                 if (window == null)
                 {
                     window = WindowManager.OpenBrowser(request.Url.AbsoluteUri, request.Active);
@@ -67,6 +71,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 else
                 {
                     var opener = owner == window ? _source : null;
+
                     tab = window.ViewModel.OpenUserScriptTab(opener, request.Url.AbsoluteUri, request.Active,
                         request.Insert, request.SetParent, request.InsertIndex);
                 }
@@ -81,6 +86,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 token.ThrowIfCancellationRequested();
                 _lifetime.ThrowIfCancellationRequested();
+
                 if (_source.IsClosed)
                     return Task.FromResult(true);
 
@@ -101,7 +107,9 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 token.ThrowIfCancellationRequested();
                 _lifetime.ThrowIfCancellationRequested();
+
                 var owner = _owner();
+
                 if (_source.IsClosed || _source.IsClosing || owner == null || IsOwnerClosing(owner))
                     return false;
 
@@ -123,6 +131,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         private static bool CanCloseBrowser()
         {
             var count = 0;
+
             foreach (Window window in Application.Current.Windows)
             {
                 if (IsOwnerClosing(window))
@@ -158,6 +167,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 return Task.FromResult(false);
 
             var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
             _pendingCloses.Add(tab, completion.Task);
             _ = CompleteReservedCloseAsync(tab, close, completion);
             return completion.Task;
@@ -182,6 +192,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         private static async Task<bool> WaitForCloseAsync(Task<bool> work, CancellationToken token)
         {
             var cancellation = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
             using (token.Register(() => cancellation.TrySetCanceled()))
             {
                 await Task.WhenAny(work, cancellation.Task);
@@ -216,11 +227,13 @@ namespace CefFlashBrowser.Browser.UserScripts
                 var close = await _window.Dispatcher.InvokeAsync(() =>
                 {
                     token.ThrowIfCancellationRequested();
+
                     if (Closed)
                         return Task.FromResult(true);
 
                     return ReserveClose(_tab, () => _window.CloseScriptTabAsync(_tab));
                 });
+
                 await WaitForCloseAsync(close, token);
             }
 

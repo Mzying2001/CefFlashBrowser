@@ -37,6 +37,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     token.ThrowIfCancellationRequested();
                     return await action().ConfigureAwait(false);
                 }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+
                 _work = task;
                 return task;
             }

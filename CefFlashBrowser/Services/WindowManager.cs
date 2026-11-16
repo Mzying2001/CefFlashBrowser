@@ -189,6 +189,7 @@ namespace CefFlashBrowser.Services
                     { ShowMainWindow(); }
                 });
             });
+
             browserWindow.ShowActivated = activate;
             browserWindow.Show();
             return browserWindow;

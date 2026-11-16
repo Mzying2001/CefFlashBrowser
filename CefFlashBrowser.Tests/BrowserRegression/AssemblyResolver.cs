@@ -7,9 +7,11 @@ public static class RegressionAssemblyResolver
     public static void Install(string directory)
     {
         var root = Path.GetFullPath(directory);
+
         AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
         {
             var name = new AssemblyName(args.Name).Name;
+
             if (name != Path.GetFileName(name))
                 return null;
 
@@ -19,6 +21,7 @@ public static class RegressionAssemblyResolver
                 if (File.Exists(path))
                     return Assembly.LoadFrom(path);
             }
+
             return null;
         };
     }

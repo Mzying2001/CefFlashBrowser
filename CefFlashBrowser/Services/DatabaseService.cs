@@ -154,6 +154,7 @@ namespace CefFlashBrowser.Services
 
             var rows = await _database.QueryAsync(SelectUserScriptSql + " WHERE script_id = @id",
                 ReadUserScript, new Dictionary<string, object> { ["@id"] = key.ToString() }).ConfigureAwait(false);
+
             return rows.SingleOrDefault();
         }
 
@@ -202,7 +203,9 @@ namespace CefFlashBrowser.Services
             await _database.TransactionAsync(session =>
             {
                 token.ThrowIfCancellationRequested();
+
                 var parameters = new Dictionary<string, object> { ["@id"] = key.ToString() };
+
                 session.Execute("DELETE FROM monkeysharp_values WHERE script_id = @id", parameters);
                 session.Execute("DELETE FROM monkeysharp_permission_decisions WHERE script_id = @id", parameters);
                 session.Execute("DELETE FROM monkeysharp_tab_states WHERE script_id = @id", parameters);
@@ -221,11 +224,13 @@ namespace CefFlashBrowser.Services
             await InitializeAsync().ConfigureAwait(false);
 
             var value = StoredValue.Missing;
+
             await _database.TransactionAsync(session =>
             {
                 token.ThrowIfCancellationRequested();
                 value = ReadUserScriptValue(session, scriptId, key);
             }).ConfigureAwait(false);
+
             return value;
         }
 
@@ -235,6 +240,7 @@ namespace CefFlashBrowser.Services
             await InitializeAsync().ConfigureAwait(false);
 
             List<KeyValuePair<string, UserScriptValue>> values = null;
+
             await _database.TransactionAsync(session =>
             {
                 token.ThrowIfCancellationRequested();
@@ -244,6 +250,7 @@ namespace CefFlashBrowser.Services
                     row => new KeyValuePair<string, UserScriptValue>(row.GetString(0), UserScriptValue.FromEncoded(row.GetString(1))),
                     new Dictionary<string, object> { ["@id"] = scriptId });
             }).ConfigureAwait(false);
+
             return values;
         }
 
@@ -251,9 +258,11 @@ namespace CefFlashBrowser.Services
             string scriptId, IEnumerable<UserScriptValueMutation> mutations, CancellationToken token)
         {
             var batch = UserScriptValueMutation.Validate(mutations);
+
             await InitializeAsync().ConfigureAwait(false);
 
             var changes = new List<UserScriptValueDatabaseChange>();
+
             await _database.TransactionAsync(session =>
             {
                 token.ThrowIfCancellationRequested();
@@ -263,6 +272,7 @@ namespace CefFlashBrowser.Services
                 {
                     var old = ReadUserScriptValue(session, scriptId, mutation.Key);
                     var value = mutation.Value;
+
                     if (value == null && !old.Exists || value != null && old.Exists && old.Value.Equals(value))
                         continue;
 
@@ -273,6 +283,7 @@ namespace CefFlashBrowser.Services
                         ["@value"] = value?.EncodedValue,
                         ["@updated"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture)
                     };
+
                     if (value == null)
                     {
                         session.Execute("DELETE FROM monkeysharp_values WHERE script_id = @id AND value_key = @key", parameters);
@@ -293,6 +304,7 @@ namespace CefFlashBrowser.Services
 
                 token.ThrowIfCancellationRequested();
             }).ConfigureAwait(false);
+
             return changes.AsReadOnly();
         }
 
@@ -300,24 +312,30 @@ namespace CefFlashBrowser.Services
             UserScriptPermissionScope scope, CancellationToken token)
         {
             var parameters = UserScriptPermissionParameters(scope);
+
             await InitializeAsync().ConfigureAwait(false);
 
             PermissionDecision? result = null;
+
             await _database.TransactionAsync(session =>
             {
                 token.ThrowIfCancellationRequested();
+
                 var value = session.Scalar(
                     "SELECT decision FROM monkeysharp_permission_decisions " +
                     "WHERE script_id = @id AND kind = @kind AND target = @target", parameters);
+
                 if (value != null && value != DBNull.Value)
                 {
                     var encoded = Convert.ToInt64(value);
+
                     if (encoded != 1 && encoded != 2)
                         throw new InvalidOperationException("Invalid remembered permission decision.");
 
                     result = encoded == 1 ? PermissionDecision.Allow : PermissionDecision.Deny;
                 }
             }).ConfigureAwait(false);
+
             return result;
         }
 
@@ -328,6 +346,7 @@ namespace CefFlashBrowser.Services
                 throw new ArgumentException("Only terminal permission decisions may be stored.", nameof(decision));
 
             var parameters = UserScriptPermissionParameters(scope);
+
             parameters["@decision"] = decision == PermissionDecision.Allow ? 1 : 2;
             parameters["@updated"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture);
             await InitializeAsync().ConfigureAwait(false);
@@ -380,7 +399,9 @@ namespace CefFlashBrowser.Services
                     ["@value"] = jsonValue,
                     ["@updated"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture)
                 };
+
                 EnsureUserScriptExists(session, scriptId);
+
                 session.Execute(
                     "INSERT INTO monkeysharp_tab_states (script_id, tab_id, json_value, updated_at) " +
                     "VALUES (@id, @tab, @value, @updated) " +
@@ -396,15 +417,18 @@ namespace CefFlashBrowser.Services
             await InitializeAsync().ConfigureAwait(false);
 
             var values = new Dictionary<string, string>(StringComparer.Ordinal);
+
             await _database.TransactionAsync(session =>
             {
                 token.ThrowIfCancellationRequested();
+
                 foreach (var row in session.Query(
                     "SELECT tab_id, json_value FROM monkeysharp_tab_states WHERE script_id = @id ORDER BY tab_id",
                     item => new KeyValuePair<string, string>(item.GetString(0), item.GetString(1)),
                     new Dictionary<string, object> { ["@id"] = scriptId }))
                     values.Add(row.Key, row.Value);
             }).ConfigureAwait(false);
+
             return new ReadOnlyDictionary<string, string>(values);
         }
 
@@ -446,6 +470,7 @@ namespace CefFlashBrowser.Services
                     ["@id"] = scriptId,
                     ["@key"] = key
                 });
+
             return encoded == null || encoded == DBNull.Value ? StoredValue.Missing
                 : new StoredValue(true, UserScriptValue.FromEncoded((string)encoded));
         }

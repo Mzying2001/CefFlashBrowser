@@ -115,6 +115,7 @@ namespace CefFlashBrowser.Tests
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.GetWebsiteIconsAsync());
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.SaveWebsiteIconAsync(
                 new WebsiteIconRecord("https://example.com/a", "https://example.com/icon", 10)));
+
             Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
             Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'website_icons'"));
         }
@@ -123,13 +124,19 @@ namespace CefFlashBrowser.Tests
         public async Task LatestSchema_HasAllScriptTables_AndReinitializesWithoutChanges()
         {
             await _service.InitializeAsync();
+
             var names = await _database.QueryAsync("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name",
                 row => row.GetString(0));
+
             CollectionAssert.AreEquivalent(new[] { "website_icons", "monkeysharp_scripts", "monkeysharp_values",
                 "monkeysharp_permission_decisions", "monkeysharp_tab_states" }, names);
+
             var columns = await _database.QueryAsync("PRAGMA table_info(website_icons)", row => row.GetString(1));
+
             CollectionAssert.AreEqual(new[] { "page_url", "icon_url", "updated_at" }, columns);
+
             await new DatabaseService(_database).InitializeAsync();
+
             Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
@@ -141,11 +148,14 @@ namespace CefFlashBrowser.Tests
             await _database.ExecuteAsync("CREATE TABLE monkeysharp_values (existing TEXT)");
             await _database.ExecuteAsync("PRAGMA user_version = 1");
             await Assert.ThrowsExceptionAsync<System.Data.SQLite.SQLiteException>(() => _service.InitializeAsync());
+
             Assert.AreEqual(1L, await _database.ScalarAsync("PRAGMA user_version"));
             Assert.AreEqual("icon", await _database.ScalarAsync("SELECT icon_url FROM website_icons"));
             Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'monkeysharp_scripts'"));
+
             await _database.ExecuteAsync("DROP TABLE monkeysharp_values");
             await _service.InitializeAsync();
+
             Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
@@ -178,7 +188,9 @@ namespace CefFlashBrowser.Tests
 
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, "https://example.com/new", 30));
             Assert.AreEqual(30L, await _database.ScalarAsync("SELECT updated_at FROM website_icons"));
+
             await _database.ExecuteAsync("DELETE FROM website_icons");
+
             Assert.AreEqual(0, (await _service.GetWebsiteIconsAsync()).Count);
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, "https://example.com/new", 50));
             Assert.AreEqual(50L, await _database.ScalarAsync("SELECT updated_at FROM website_icons"));
@@ -209,6 +221,7 @@ namespace CefFlashBrowser.Tests
         public async Task UserScriptReads_InitializeWithoutStorageQueue(string operation)
         {
             var key = ScriptKey.Parse(Guid.NewGuid().ToString());
+
             switch (operation)
             {
                 case "scripts":
@@ -238,13 +251,17 @@ namespace CefFlashBrowser.Tests
             var key = ScriptKey.Parse(Guid.NewGuid().ToString());
             var now = DateTimeOffset.UtcNow;
             var record = new UserScriptDatabaseRecord(key, null, true, now, now, "source digest", "prepared payload");
+
             await Assert.ThrowsExceptionAsync<IOException>(() => _service.SaveUserScriptAsync(record,
                 () => throw new IOException("source switch failed"), CancellationToken.None));
+
             Assert.IsNull(await _service.GetUserScriptAsync(key));
             Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
 
             await _service.SaveUserScriptAsync(record, null, CancellationToken.None);
+
             var restored = await _service.GetUserScriptAsync(key);
+
             Assert.AreEqual(key, restored.ScriptKey);
             Assert.AreEqual(now, restored.InstalledAt);
             Assert.AreEqual(record.SourceSha256, restored.SourceSha256);
@@ -257,16 +274,20 @@ namespace CefFlashBrowser.Tests
             var controlled = new ControlledDatabase(_database);
             var database = new DatabaseService(controlled);
             var storage = new UserScriptStorage(database);
+
             await database.InitializeAsync();
 
             using (var entered = new ManualResetEventSlim())
             using (var release = new ManualResetEventSlim())
             {
                 var queued = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
                 controlled.TransactionQueued = () => queued.TrySetResult(true);
+
                 var blocker = _database.TransactionAsync(session =>
                 {
                     entered.Set();
+
                     if (!release.Wait(TimeSpan.FromSeconds(10)))
                         throw new TimeoutException();
                 });
@@ -274,17 +295,27 @@ namespace CefFlashBrowser.Tests
                 try
                 {
                     Assert.IsTrue(entered.Wait(TimeSpan.FromSeconds(10)));
+
                     var state = new SqliteUserScriptTabStateService(storage, "closing-tab");
                     var pending = state.SaveAsync(ScriptKey.Parse(Guid.NewGuid().ToString()), null, "{}", CancellationToken.None);
+
                     Assert.AreSame(queued.Task, await Task.WhenAny(queued.Task, Task.Delay(TimeSpan.FromSeconds(10))));
                     Assert.IsFalse(pending.IsCompleted);
 
                     var close = state.CloseAsync();
+
                     release.Set();
                     await blocker;
-                    try { await pending; Assert.Fail("A closed tab must not save queued state."); }
+
+                    try
+                    {
+                        await pending;
+                        Assert.Fail("A closed tab must not save queued state.");
+                    }
                     catch (OperationCanceledException) { }
+
                     await close;
+
                     Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_tab_states"));
                 }
                 finally
@@ -304,7 +335,9 @@ namespace CefFlashBrowser.Tests
             public bool HoldInitialization { get; set; }
             public bool FailNextInitialization { get; set; }
             public bool FailNextWrite { get; set; }
+
             public Action TransactionQueued { get; set; }
+
             public TaskCompletionSource<bool> ReleaseInitialization { get; } = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             public ControlledDatabase(IDatabase inner)
@@ -322,7 +355,9 @@ namespace CefFlashBrowser.Tests
                 }
                 if (HoldInitialization)
                     await ReleaseInitialization.Task.ConfigureAwait(false);
+
                 var transaction = _inner.TransactionAsync(action);
+
                 TransactionQueued?.Invoke();
                 await transaction.ConfigureAwait(false);
             }

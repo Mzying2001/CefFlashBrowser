@@ -15,6 +15,7 @@ public sealed class UserScriptSeamProbe
     public UserScriptSeamProbe(ChromiumFlashBrowser browser)
     {
         var repository = new InMemoryUserScriptRepository();
+
         repository.InstallAsync("// ==UserScript==\n// @name Seam probe\n// @match about:blank\n// @grant none\n// ==/UserScript==\nwindow.__seamExecuted = true;",
             null, true, CancellationToken.None).GetAwaiter().GetResult();
         Host = new CefSharpUserScriptHostBuilder(repository).Build();
@@ -32,10 +33,12 @@ public sealed class UserScriptSeamProbe
     {
         await Task.Delay(20).ConfigureAwait(false);
         ReadyAfterAwait = browser.IsBrowserInitialized;
+
         using (var audio = new CefSharpTabAudioService(() =>
             browser.IsBrowserInitialized && !browser.IsDisposed ? browser.GetBrowser().GetHost() : null))
         {
             var original = await audio.GetStateAsync(CancellationToken.None).ConfigureAwait(false);
+
             await audio.SetMuteAsync(!original.IsMuted, CancellationToken.None).ConfigureAwait(false);
             await audio.SetMuteAsync(original.IsMuted, CancellationToken.None).ConfigureAwait(false);
             await Task.Delay(250).ConfigureAwait(false);

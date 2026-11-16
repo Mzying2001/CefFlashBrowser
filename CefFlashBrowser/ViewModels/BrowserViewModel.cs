@@ -60,6 +60,7 @@ namespace CefFlashBrowser.ViewModels
             _isClosed = true;
 
             var handlers = Closed;
+
             if (handlers == null)
                 return;
 
@@ -74,6 +75,7 @@ namespace CefFlashBrowser.ViewModels
         }
 
         public bool IsClosing { get; internal set; }
+
         public bool HasDocument { get; internal set; }
 
         private IWebBrowser _browser;
@@ -204,11 +206,13 @@ namespace CefFlashBrowser.ViewModels
             {
                 var version = ++_muteRequestVersion;
                 var previous = IsMuted;
+
                 IsMuted = !previous;
 
                 try
                 {
                     var isMuted = await browser.ToggleAudioMutedAsync();
+
                     if (version == _muteRequestVersion && !IsClosing && !IsClosed)
                         IsMuted = isMuted;
                 }

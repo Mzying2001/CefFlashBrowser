@@ -247,10 +247,12 @@ namespace CefFlashBrowser
         {
             // Do not resolve an unused service during failed/forwarding startup.
             var work = _userScriptService?.StopAsync() ?? Task.CompletedTask;
+
             if (!work.IsCompleted && Application.Current?.Dispatcher is Dispatcher dispatcher
                 && dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
             {
                 var frame = new DispatcherFrame();
+
                 work.GetAwaiter().OnCompleted(() => dispatcher.InvokeAsync(() => frame.Continue = false));
                 Dispatcher.PushFrame(frame);
             }

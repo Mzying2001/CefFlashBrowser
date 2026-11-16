@@ -22,6 +22,7 @@ namespace CefFlashBrowser.Tests
         public void SuggestedNames_CannotEscapeDestinationOrUseWindowsDevices(string input, string expected)
         {
             var name = UserScriptDownloadPaths.SafeFileName(input);
+
             Assert.AreEqual(expected, name);
             Assert.AreEqual(name, Path.GetFileName(name));
         }
@@ -30,6 +31,7 @@ namespace CefFlashBrowser.Tests
         public void LongNames_RemainBoundedAndUsable()
         {
             var name = UserScriptDownloadPaths.SafeFileName(new string('a', 400) + ".bin");
+
             Assert.IsTrue(name.Length <= 150);
             Assert.IsFalse(name.EndsWith(".", StringComparison.Ordinal));
         }

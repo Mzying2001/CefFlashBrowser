@@ -35,6 +35,7 @@ namespace CefFlashBrowser.Services.UserScripts
                 return true;
 
             var report = false;
+
             lock (_lock)
             {
                 if (!_reported.TryGetValue(installation.ScriptKey, out var revision) || revision != installation.RevisionId)
@@ -65,6 +66,7 @@ namespace CefFlashBrowser.Services.UserScripts
         public async Task<UserScriptInstallation> GetAsync(ScriptKey key, CancellationToken token)
         {
             var installation = await _inner.GetAsync(key, token).ConfigureAwait(false);
+
             if (!Allows(installation))
                 throw new KeyNotFoundException("The installation's execution world is unavailable in this host.");
 
@@ -82,6 +84,7 @@ namespace CefFlashBrowser.Services.UserScripts
             var forwarded = e.Kind == RepositoryChangeKind.Removed || Allows(e.Installation) ? e
                 : new UserScriptRepositoryChangedEventArgs(RepositoryChangeKind.Removed, e.Installation);
             var handlers = Changed;
+
             if (handlers == null)
                 return;
 

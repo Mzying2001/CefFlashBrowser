@@ -26,6 +26,7 @@ namespace CefFlashBrowser.Services.UserScripts
         public Task<PermissionDecision> AuthorizeAsync(ApiAuthorizationRequest request, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
+
             if (!IsWorldAvailable(request.Installation.Definition.Metadata, _trusted())
                 || _allowedPage != null && !_allowedPage(request.Frame.Url))
                 return Task.FromResult(PermissionDecision.Deny);
@@ -38,6 +39,7 @@ namespace CefFlashBrowser.Services.UserScripts
             var world = UserScriptEngine.RequestedWorld(metadata);
             var needsBridge = metadata.GrantDeclarationState == GrantDeclarationState.ExplicitList
                 && metadata.Grants.Any(grant => grant != "none" && grant != "GM.info");
+
             return world != null && !metadata.Unwrap && !(world == "isolated" && metadata.Capabilities.Contains("unsafeWindow"))
                 && !(world == "page" && needsBridge && !trusted);
         }

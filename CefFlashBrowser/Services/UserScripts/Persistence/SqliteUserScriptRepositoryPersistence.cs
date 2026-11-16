@@ -15,6 +15,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
     public sealed class SqliteUserScriptRepositoryPersistence : IUserScriptRepositoryPersistence
     {
         public const int MaximumSourceBytes = 10 * 1024 * 1024;
+
         private static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, true);
         private readonly UserScriptStorage _storage;
         private readonly string _root;
@@ -34,6 +35,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         public async Task<IReadOnlyList<UserScriptPersistenceRecord>> LoadAsync(CancellationToken token)
         {
             var records = await ReadMaintenanceAsync(token).ConfigureAwait(false);
+
             return records.Select(item =>
             {
                 var record = item.Record;
@@ -51,18 +53,23 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             {
                 var stored = await _storage.Database.GetUserScriptsAsync().ConfigureAwait(false);
                 var result = new List<UserScriptMaintenanceRecord>();
+
                 foreach (var row in stored)
                 {
                     token.ThrowIfCancellationRequested();
+
                     var diagnostics = new List<string>();
                     string source = null;
+
                     try
                     {
                         var path = SourcePath(row.ScriptKey);
+
                         if (!Recover(path, row.SourceSha256))
                             throw new IOException("No readable source matches the committed SHA-256.");
 
                         var bytes = ReadBounded(path);
+
                         if (Hash(bytes) != row.SourceSha256)
                             throw new IOException("Source changed while reading the committed revision.");
 
@@ -108,9 +115,12 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             return _storage.RunAsync(async () =>
             {
                 EnsureRecovered();
+
                 var old = await _storage.Database.GetUserScriptAsync(record.ScriptKey).ConfigureAwait(false);
                 var path = SourcePath(record.ScriptKey);
+
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
+
                 if (old != null)
                     Recover(path, old.SourceSha256);
 
@@ -121,11 +131,13 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     throw new IOException("An unregistered source already occupies the installation directory.");
 
                 var sameContent = old != null && old.SourceSha256 == hash && old.PreparedRevisionJson == record.PreparedRevisionJson;
+
                 if (sameContent && !Matches(path, old.SourceSha256))
                     throw new IOException("The installed source changed outside the repository.");
 
                 var replaced = false;
                 var existed = File.Exists(path);
+
                 try
                 {
                     if (!sameContent)
@@ -141,6 +153,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
                     var stored = new UserScriptDatabaseRecord(record.ScriptKey, record.SourceOrigin, record.IsEnabled,
                         record.InstalledAt, record.UpdatedAt, hash, record.PreparedRevisionJson);
+
                     await _storage.Database.SaveUserScriptAsync(stored, () =>
                     {
                         if (!sameContent)
@@ -170,16 +183,21 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             return _storage.RunAsync(async () =>
             {
                 EnsureRecovered();
+
                 var old = await _storage.Database.GetUserScriptAsync(key).ConfigureAwait(false);
+
                 if (old == null)
                     return;
 
                 var path = SourcePath(key);
+
                 Recover(path, old.SourceSha256);
+
                 if (HasTransitions(path))
                     throw new IOException("Unresolved source recovery files must be repaired before removal.");
 
                 var renamed = false;
+
                 try
                 {
                     await _storage.Database.DeleteUserScriptAsync(key, () =>
@@ -207,6 +225,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             try
             {
                 _checkpoint?.Invoke("restore");
+
                 if (changed)
                 {
                     if (deleting)
@@ -231,6 +250,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             if (!Matches(path, hash))
             {
                 var candidate = new[] { path + ".backup", path + ".deleted" }.FirstOrDefault(file => Matches(file, hash));
+
                 if (candidate == null)
                     return false;
 
@@ -249,6 +269,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             try
             {
                 _checkpoint?.Invoke("cleanup");
+
                 foreach (var suffix in new[] { ".pending", ".backup", ".deleted" })
                     CleanupFile(path + suffix);
 
@@ -268,9 +289,11 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 return;
 
             CheckReparse(_root);
+
             foreach (var directory in Directory.EnumerateDirectories(_root))
             {
                 var name = Path.GetFileName(directory);
+
                 if (known.Contains(name) || !ScriptKey.TryParse(name, out var key))
                     continue;
 
@@ -295,11 +318,13 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             var id = ScriptKey.Parse(key.ToString()).ToString();
             var path = Path.GetFullPath(Path.Combine(_root, id, "userscript.js"));
+
             if (!path.StartsWith(_root.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
                 throw new IOException("Script path escaped the data directory.");
 
             CheckReparse(_root);
             CheckReparse(Path.GetDirectoryName(path));
+
             foreach (var suffix in new[] { "", ".pending", ".backup", ".deleted" })
                 CheckReparse(path + suffix);
 
@@ -319,6 +344,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             {
                 var buffer = new byte[65536];
                 int count;
+
                 while ((count = input.Read(buffer, 0, buffer.Length)) != 0)
                 {
                     if (output.Length + count > MaximumSourceBytes)

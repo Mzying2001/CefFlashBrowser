@@ -7,7 +7,9 @@ namespace CefFlashBrowser.ViewModels
     public sealed class UserScriptMenuCommand : ViewModelBase
     {
         public string Name { get; }
+
         public string Description { get; }
+
         public DelegateCommand InvokeCommand { get; }
 
         private bool _staysOpenOnClick;

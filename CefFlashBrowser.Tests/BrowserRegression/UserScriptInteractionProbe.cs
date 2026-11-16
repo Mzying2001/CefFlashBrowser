@@ -23,39 +23,58 @@ public static class UserScriptClipboardProbe
     public static IDataObject Capture()
     {
         var original = Clipboard.GetDataObject();
-        if (original == null) return null;
+
+        if (original == null)
+            return null;
+
         var copy = new DataObject();
+
         foreach (var format in original.GetFormats(false))
         {
             var value = original.GetData(format, false);
             var stream = value as Stream;
+
             if (stream != null)
             {
                 var buffer = new MemoryStream();
                 var position = stream.CanSeek ? stream.Position : 0;
-                if (stream.CanSeek) stream.Position = 0;
+
+                if (stream.CanSeek)
+                    stream.Position = 0;
+
                 stream.CopyTo(buffer);
-                if (stream.CanSeek) stream.Position = position;
+
+                if (stream.CanSeek)
+                    stream.Position = position;
+
                 buffer.Position = 0;
                 value = buffer;
             }
             else if (value is Freezable)
             {
                 var freezable = ((Freezable)value).Clone();
-                if (freezable.CanFreeze) freezable.Freeze();
+
+                if (freezable.CanFreeze)
+                    freezable.Freeze();
+
                 value = freezable;
             }
             else if (value is ICloneable)
                 value = ((ICloneable)value).Clone();
-            if (value != null) copy.SetData(format, value, false);
+
+            if (value != null)
+                copy.SetData(format, value, false);
         }
+
         return copy;
     }
 
     public static void Restore(IDataObject original)
     {
-        if (original == null) Clipboard.Clear();
-        else Clipboard.SetDataObject(original, true);
+        if (original == null)
+            Clipboard.Clear();
+        else
+            Clipboard.SetDataObject(original, true);
     }
 }
 
@@ -80,7 +99,14 @@ public sealed class UserScriptSaveDialogProbe : IDisposable
     private readonly string title;
     private readonly System.Threading.Timer timer;
     private int seen;
-    public bool Seen { get { return System.Threading.Volatile.Read(ref seen) != 0; } }
+
+    public bool Seen
+    {
+        get
+        {
+            return System.Threading.Volatile.Read(ref seen) != 0;
+        }
+    }
 
     public UserScriptSaveDialogProbe(IWebBrowser browser, string title)
     {
@@ -91,32 +117,58 @@ public sealed class UserScriptSaveDialogProbe : IDisposable
 
     private void Check(object state)
     {
-        if (Seen) return;
+        if (Seen)
+            return;
+
         EnumWindows((window, parameter) =>
         {
             uint process;
+
             GetWindowThreadProcessId(window, out process);
-            if (process != (uint)System.Diagnostics.Process.GetCurrentProcess().Id) return true;
+
+            if (process != (uint)System.Diagnostics.Process.GetCurrentProcess().Id)
+                return true;
+
             var text = new System.Text.StringBuilder(256);
             var kind = new System.Text.StringBuilder(64);
+
             GetWindowText(window, text, text.Capacity);
             GetClassName(window, kind, kind.Capacity);
-            if (kind.ToString() != "#32770" || text.ToString() != title) return true;
+
+            if (kind.ToString() != "#32770" || text.ToString() != title)
+                return true;
+
             if (System.Threading.Interlocked.Exchange(ref seen, 1) == 0)
                 Cef.UIThreadTaskFactory.StartNew(() =>
                 {
-                    if (browser.IsDisposed) return;
+                    if (browser.IsDisposed)
+                        return;
+
                     using (var frame = browser.GetBrowser().MainFrame)
-                        if (frame.IsValid) frame.ExecuteJavaScriptAsync("document.dispatchEvent(new Event('downloadCancel'));");
+                        if (frame.IsValid)
+                            frame.ExecuteJavaScriptAsync("document.dispatchEvent(new Event('downloadCancel'));");
                 });
+
             return false;
         }, IntPtr.Zero);
     }
 
-    public void Dispose() { timer.Dispose(); }
+    public void Dispose()
+    {
+        timer.Dispose();
+    }
+
     private delegate bool Callback(IntPtr window, IntPtr parameter);
-    [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool EnumWindows(Callback callback, IntPtr parameter);
-    [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
-    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)] private static extern int GetWindowText(IntPtr window, System.Text.StringBuilder text, int count);
-    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)] private static extern int GetClassName(IntPtr window, System.Text.StringBuilder text, int count);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool EnumWindows(Callback callback, IntPtr parameter);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern int GetWindowText(IntPtr window, System.Text.StringBuilder text, int count);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern int GetClassName(IntPtr window, System.Text.StringBuilder text, int count);
 }

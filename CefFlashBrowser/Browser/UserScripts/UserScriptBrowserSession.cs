@@ -95,6 +95,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 _lifetime.Token.ThrowIfCancellationRequested();
                 SetState(UserScriptState.Initializing);
+
                 if (GlobalData.Settings.EnableUserScripts)
                 {
                     await WaitAsync(_service.InitializeAsync(), _lifetime.Token);
@@ -129,6 +130,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 }
 
                 var audio = await _audio.GetStateAsync(_lifetime.Token);
+
                 if (!_lifetime.IsCancellationRequested)
                     _model.UpdateMuteState(audio.IsMuted);
             }
@@ -138,16 +140,21 @@ namespace CefFlashBrowser.Browser.UserScripts
             catch (Exception e)
             {
                 await DetachHostAsync();
+
                 if (!_lifetime.IsCancellationRequested)
                 {
                     SetState(UserScriptState.Unavailable, e.Message);
                     Log(LogLevel.Error, "Userscript initialization failed (" + e.GetType().Name + ") for tab " + _model.BrowserId);
+
                     _mount();
+
                     try
                     {
                         await WaitForNativeAsync(_lifetime.Token);
                     }
-                    catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { }
+                    catch (OperationCanceledException) when (_lifetime.IsCancellationRequested)
+                    {
+                    }
                     catch (Exception)
                     {
                         Log(LogLevel.Warning, "Native fallback initialization did not finish for tab " + _model.BrowserId);
@@ -162,11 +169,12 @@ namespace CefFlashBrowser.Browser.UserScripts
             InitializeNetworkServices();
 
             var trusted = GlobalData.Settings.TrustedUserScriptPageWorld;
+
             _runtimeRepository = new UserScriptRuntimeRepository(_service.Repository, trusted,
-                installation => Log(LogLevel.Info, "MSR215_EXECUTION_WORLD_UNAVAILABLE tab=" + _model.BrowserId
-                    + " script=" + installation.ScriptKey));
+                installation => Log(LogLevel.Info, "MSR215_EXECUTION_WORLD_UNAVAILABLE tab=" + _model.BrowserId + " script=" + installation.ScriptKey));
 
             var applicationMenu = _browser.MenuHandler as Handlers.ContextMenuHandler;
+
             _menus = new UserScriptMenuService(_model, _dispatcher, _service.Repository, () => _host,
                 () => Log(LogLevel.Warning, "Userscript menu callback failed for tab " + _model.BrowserId));
 
@@ -175,6 +183,14 @@ namespace CefFlashBrowser.Browser.UserScripts
 
             _notifications = new UserScriptNotificationService(_dispatcher, _ownerWindow, _tabs, _service.Content, _lifetime.Token,
                 () => Log(LogLevel.Warning, "Userscript notification content or interaction was unavailable for tab " + _model.BrowserId));
+
+            var options = new CefSharpHostOptions
+            {
+                TrustedPageWorld = trusted,
+                // This application only creates the normal global CEF context.
+                IsIncognito = context => false,
+                AutomaticallyUpdatesScripts = false
+            };
 
             var builder = new CefSharpUserScriptHostBuilder(_runtimeRepository)
                 .UseValueStore(_service.ValueStore)
@@ -188,15 +204,8 @@ namespace CefFlashBrowser.Browser.UserScripts
                 .UseTabService(_tabs)
                 .UseWindowService(_tabs)
                 .UseTabStateService(_tabState)
-                .UsePermissionPolicy(new UserScriptExecutionPolicy(_service.PermissionPolicy,
-                    () => trusted, url => AllowsScripts(url.AbsoluteUri)))
-                .Configure(new CefSharpHostOptions
-                {
-                    TrustedPageWorld = trusted,
-                    // This application only creates the normal global CEF context.
-                    IsIncognito = context => false,
-                    AutomaticallyUpdatesScripts = false
-                })
+                .UsePermissionPolicy(new UserScriptExecutionPolicy(_service.PermissionPolicy, () => trusted, url => AllowsScripts(url.AbsoluteUri)))
+                .Configure(options)
                 .LogTo(LogScript);
 
             _host = builder.Build();
@@ -206,21 +215,27 @@ namespace CefFlashBrowser.Browser.UserScripts
             _contextMenu = new UserScriptContextMenuHandler(_browser.MenuHandler, _menus,
                 () => applicationMenu?.LastMenuItemCount ?? 0,
                 () => Log(LogLevel.Warning, "Userscript native menu limit reached for tab " + _model.BrowserId));
+
             _browser.MenuHandler = _contextMenu;
         }
 
         private void ConfigureBrowserHandlers()
         {
             var render = _browser.RenderProcessMessageHandler;
+
             if (!(render is RenderProcessMessageHandlerMultiplexer))
+            {
                 _browser.RenderProcessMessageHandler = render == null
                     ? new RenderProcessMessageHandlerMultiplexer()
                     : new RenderProcessMessageHandlerMultiplexer(render);
+            }
 
             var request = _browser.RequestHandler;
+
             if (!(request is CefSharpWebRequestHandlerMultiplexer))
             {
                 var multiplexer = new CefSharpWebRequestHandlerMultiplexer();
+
                 if (request != null)
                     multiplexer.Add(request);
 
@@ -236,6 +251,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 _requestContext = _browser.RequestContext;
                 _ownsRequestContext = _requestContext == null;
+
                 if (_requestContext == null)
                     _requestContext = Cef.GetGlobalRequestContext();
 
@@ -265,6 +281,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 try
                 {
                     linked.Token.ThrowIfCancellationRequested();
+
                     if (!GlobalData.Settings.EnableUserScripts || !AllowsScripts(address))
                     {
                         await DetachHostAsync();
@@ -291,13 +308,18 @@ namespace CefFlashBrowser.Browser.UserScripts
 
                         var alreadyAtInitialTarget = _initialBlankTarget && address == "about:blank";
                         _initialBlankTarget = false;
+
                         if (!alreadyAtInitialTarget)
                         {
                             if (Uri.TryCreate(address, UriKind.Absolute, out var url)
                                 && (url.Scheme == "http" || url.Scheme == "https" || address == "about:blank"))
+                            {
                                 await _host.NavigateAsync(address, linked.Token);
+                            }
                             else
+                            {
                                 _browser.LoadPrepared(address);
+                            }
                         }
 
                         SetState(UserScriptState.Ready);
@@ -318,8 +340,10 @@ namespace CefFlashBrowser.Browser.UserScripts
                 catch (Exception e)
                 {
                     await DetachHostAsync();
+
                     SetState(UserScriptState.Unavailable, e.Message);
                     Log(LogLevel.Error, "Userscript preparation failed for tab " + _model.BrowserId);
+
                     if (!linked.IsCancellationRequested)
                         _browser.LoadPrepared(address);
                 }
@@ -333,14 +357,17 @@ namespace CefFlashBrowser.Browser.UserScripts
         public async Task RetryAsync()
         {
             _dispatcher.VerifyAccess();
+
             if (_stop != null)
                 return;
 
             var address = _model.Address;
             await _navigation.WaitAsync(_lifetime.Token);
+
             try
             {
                 await DetachHostAsync();
+
                 if (_repositorySubscribed)
                 {
                     _service.Repository.Changed -= RepositoryChanged;
@@ -369,8 +396,10 @@ namespace CefFlashBrowser.Browser.UserScripts
         private async Task StopCoreAsync()
         {
             await Task.Yield();
+
             SetState(UserScriptState.Stopping);
             _lifetime.Cancel();
+
             foreach (var retired in _retiredHosts.ToArray())
                 retired.Downloads.Dispose();
 
@@ -387,9 +416,11 @@ namespace CefFlashBrowser.Browser.UserScripts
             }
 
             await _navigation.WaitAsync();
+
             try
             {
                 _browser.AddressChanged -= AddressChanged;
+
                 if (_repositorySubscribed)
                     _service.Repository.Changed -= RepositoryChanged;
 
@@ -406,12 +437,14 @@ namespace CefFlashBrowser.Browser.UserScripts
                     _audio.StateChanged -= AudioStateChanged;
                     _audio.Dispose();
                     _http?.Dispose();
+
                     if (_http != null)
                         await Cef.UIThreadTaskFactory.StartNew(() => { });
                 }
                 finally
                 {
                     _webRequests?.Dispose();
+
                     if (_ownsRequestContext)
                         _requestContext?.Dispose();
 
@@ -440,20 +473,25 @@ namespace CefFlashBrowser.Browser.UserScripts
             var notifications = _notifications;
             var menus = _menus;
             var runtimeRepository = _runtimeRepository;
+
             _runtimeRepository = null;
             _host = null;
             _downloads = null;
             _notifications = null;
             _menus = null;
+
             downloads?.Retire();
+
             if (closing)
                 downloads?.Dispose();
 
             host.Diagnostic -= Diagnostic;
+
             if (_contextMenu != null && ReferenceEquals(_browser.MenuHandler, _contextMenu))
                 _browser.MenuHandler = _contextMenu.Inner;
 
             _contextMenu = null;
+
             try
             {
                 await host.DetachAsync(CancellationToken.None);
@@ -469,6 +507,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 {
                     menus?.Dispose();
                     runtimeRepository?.Dispose();
+
                     if (!closing && downloads != null && downloads.ActiveCount != 0)
                     {
                         var retired = new RetiredHost
@@ -482,6 +521,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     else
                     {
                         downloads?.Dispose();
+
                         if (downloads != null)
                             await downloads.DrainAsync();
 
@@ -533,7 +573,9 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 await UpdateMatchCountAsync(e.Address);
             }
-            catch (Exception) when (_lifetime.IsCancellationRequested) { }
+            catch (Exception) when (_lifetime.IsCancellationRequested)
+            {
+            }
             catch (Exception)
             {
                 Log(LogLevel.Warning, "Userscript match status could not update for tab " + _model.BrowserId);
@@ -552,10 +594,13 @@ namespace CefFlashBrowser.Browser.UserScripts
                 return;
 
             var count = 0;
+
             if (_host != null && Uri.TryCreate(address, UriKind.Absolute, out var url) && AllowsScripts(address))
             {
                 var scripts = await _runtimeRepository.GetSnapshotAsync(_lifetime.Token);
-                count = scripts.Count(script => script.IsEnabled && script.Definition.ParseResult.CanEnable
+
+                count = scripts.Count(script => script.IsEnabled
+                    && script.Definition.ParseResult.CanEnable
                     && script.PreparedRevision.UrlRules.AllowsEnvironment(false, out _)
                     && script.PreparedRevision.UrlRules.IsMatch(url));
             }
@@ -583,6 +628,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             _model.UserScriptState = state;
             _model.UserScriptError = error;
             _model.UserScriptsUnavailable = state == UserScriptState.Unavailable;
+
             if (state != UserScriptState.Ready)
                 _model.UserScriptMatchCount = 0;
         }
@@ -599,13 +645,16 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 var minute = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMinute;
                 _logCounts.TryGetValue(entry.ScriptKey, out var count);
+
                 var next = count != null && count.Item1 == minute ? count.Item2 + 1 : 1;
                 _logCounts[entry.ScriptKey] = Tuple.Create(minute, next);
+
                 if (next > 20)
                     return;
             }
 
             var value = entry.JsonValue ?? string.Empty;
+
             Log(LogLevel.Info, "GM.log tab=" + _model.BrowserId + " script=" + entry.ScriptKey + " "
                 + (value.Length > 4096 ? value.Substring(0, 4096) : value));
         }
@@ -624,6 +673,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(token))
             {
                 deadline.CancelAfter(TimeSpan.FromSeconds(15));
+
                 while (!_browser.IsBrowserInitialized)
                 {
                     if (_browser.IsDisposed)
@@ -637,6 +687,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         private static async Task WaitAsync(Task work, CancellationToken token)
         {
             var cancelled = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
             using (token.Register(() => cancelled.TrySetCanceled()))
             {
                 await Task.WhenAny(work, cancelled.Task);

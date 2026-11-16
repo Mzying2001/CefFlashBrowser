@@ -42,12 +42,14 @@ namespace CefFlashBrowser.Browser.UserScripts
             return await _dispatcher.InvokeAsync(() =>
             {
                 token.ThrowIfCancellationRequested();
+
                 lock (_lock)
                 {
                     if (_disposed || _model.IsClosing)
                         throw new OperationCanceledException();
 
                     var key = Tuple.Create(request.ScriptKey.ToString(), request.Name, request.Title ?? "", request.AccessKey ?? "");
+
                     if (!_groups.TryGetValue(key, out var group))
                     {
                         group = new Group
@@ -55,6 +57,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                             Command = new UserScriptMenuCommand(request.Name,
                                 installation.Definition.Metadata.Name + "\n" + request.Title, InvokeToolbar)
                         };
+
                         _groups.Add(key, group);
                         _model.UserScriptMenus.Add(group.Command);
                     }
@@ -64,6 +67,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                         Request = request,
                         Invoked = invoked
                     };
+
                     group.Subscriptions.Add(subscription);
                     Refresh(group);
 
@@ -73,6 +77,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                         {
                             group.Subscriptions.Remove(subscription);
                             Refresh(group);
+
                             if (group.Subscriptions.Count == 0)
                             {
                                 _groups.Remove(key);
@@ -104,12 +109,14 @@ namespace CefFlashBrowser.Browser.UserScripts
         public bool Invoke(UserScriptMenuCommand command, IFrame nativeFrame, CefEventFlags flags)
         {
             Subscription[] subscriptions;
+
             lock (_lock)
             {
                 if (_disposed || _model.IsClosing || _model.IsClosed)
                     return false;
 
                 var group = _groups.Values.FirstOrDefault(item => ReferenceEquals(item.Command, command));
+
                 if (group == null)
                     return false;
 
@@ -121,6 +128,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 // Resolve while still inside the native callback. Never retain the
                 // borrowed IFrame for a later WPF click or toolbar invocation.
                 var frame = nativeFrame == null ? null : _host()?.ResolveMenuFrame(nativeFrame, subscription.Request);
+
                 if (subscription.Request.ClickedFrame && frame == null)
                     continue;
 
@@ -132,6 +140,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     ShiftKey = nativeFrame != null ? flags.HasFlag(CefEventFlags.ShiftDown) : Keyboard.Modifiers.HasFlag(ModifierKeys.Shift),
                     AltKey = nativeFrame != null ? flags.HasFlag(CefEventFlags.AltDown) : Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)
                 };
+
                 try
                 {
                     subscription.Invoked(invocation);
