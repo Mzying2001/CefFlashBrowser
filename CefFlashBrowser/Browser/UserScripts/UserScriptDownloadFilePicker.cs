@@ -1,7 +1,7 @@
+using CefFlashBrowser.Utils;
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -61,45 +61,25 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         private static void Close(IntPtr owner, string title)
         {
-            EnumWindows((window, parameter) =>
+            Win32.EnumWindows((window, parameter) =>
             {
-                GetWindowThreadProcessId(window, out var process);
+                Win32.GetWindowThreadProcessId(window, out var process);
 
-                if (process != (uint)Process.GetCurrentProcess().Id || GetWindow(window, 4) != owner)
+                if (process != (uint)Process.GetCurrentProcess().Id || Win32.GetWindow(window, Win32.GW_OWNER) != owner)
                     return true;
 
                 var text = new StringBuilder(256);
                 var className = new StringBuilder(64);
 
-                GetWindowText(window, text, text.Capacity);
-                GetClassName(window, className, className.Capacity);
+                Win32.GetWindowText(window, text, text.Capacity);
+                Win32.GetClassName(window, className, className.Capacity);
 
                 if (text.ToString() != title || className.ToString() != "#32770")
                     return true;
 
-                PostMessage(window, 0x10, IntPtr.Zero, IntPtr.Zero);
+                Win32.PostMessage(window, Win32.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
                 return false;
             }, IntPtr.Zero);
         }
-
-        private delegate bool WindowCallback(IntPtr window, IntPtr parameter);
-
-        [DllImport("user32.dll")]
-        private static extern bool EnumWindows(WindowCallback callback, IntPtr parameter);
-
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindow(IntPtr window, uint command);
-
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        private static extern int GetWindowText(IntPtr window, StringBuilder text, int count);
-
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        private static extern int GetClassName(IntPtr window, StringBuilder text, int count);
-
-        [DllImport("user32.dll")]
-        private static extern bool PostMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
     }
 }

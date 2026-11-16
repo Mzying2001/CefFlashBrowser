@@ -14,7 +14,7 @@ namespace CefFlashBrowser.Utils
 
             try
             {
-                if (SHGetKnownFolderPath(ref id, 0, IntPtr.Zero, out path) == 0 && path != IntPtr.Zero)
+                if (Win32.SHGetKnownFolderPath(ref id, 0, IntPtr.Zero, out path) == 0 && path != IntPtr.Zero)
                     return Marshal.PtrToStringUni(path);
             }
             finally
@@ -48,8 +48,5 @@ namespace CefFlashBrowser.Utils
 
             return string.IsNullOrEmpty(name) ? "download.bin" : name;
         }
-
-        [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
-        private static extern int SHGetKnownFolderPath(ref Guid id, uint flags, IntPtr token, out IntPtr path);
     }
 }

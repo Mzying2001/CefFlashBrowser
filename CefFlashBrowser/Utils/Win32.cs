@@ -9,6 +9,7 @@ namespace CefFlashBrowser.Utils
         // window messages
         public const int WM_DESTROY = 0x0002;
         public const int WM_MOVE = 0x0003;
+        public const int WM_CLOSE = 0x0010;
 
         // window styles
         public const int WS_CHILD = 0x40000000;
@@ -21,6 +22,9 @@ namespace CefFlashBrowser.Utils
         public const int GWLP_HWNDPARENT = -8;
         public const int GWL_STYLE = -16;
         public const int GWL_EXSTYLE = -20;
+
+        // get window
+        public const uint GW_OWNER = 4;
 
         // set window pos
         public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
@@ -40,6 +44,9 @@ namespace CefFlashBrowser.Utils
 
         // DLL search directories
         public const uint LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
+
+        // shell links
+        internal static readonly Guid ShellLinkClassId = new Guid("00021401-0000-0000-C000-000000000046");
 
         // enum windows callback
         public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
@@ -85,6 +92,44 @@ namespace CefFlashBrowser.Utils
             public string szCSDVersion;
         }
 
+        [ComImport]
+        [Guid("000214F9-0000-0000-C000-000000000046")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        internal interface IShellLinkW
+        {
+            [PreserveSig] int GetPath(StringBuilder pszFile, int cch, IntPtr pfd, uint fFlags);
+            [PreserveSig] int GetIDList(out IntPtr ppidl);
+            [PreserveSig] int SetIDList(IntPtr pidl);
+            [PreserveSig] int GetDescription(StringBuilder pszName, int cch);
+            [PreserveSig] int SetDescription([MarshalAs(UnmanagedType.LPWStr)] string pszName);
+            [PreserveSig] int GetWorkingDirectory(StringBuilder pszDir, int cch);
+            [PreserveSig] int SetWorkingDirectory([MarshalAs(UnmanagedType.LPWStr)] string pszDir);
+            [PreserveSig] int GetArguments(StringBuilder pszArgs, int cch);
+            [PreserveSig] int SetArguments([MarshalAs(UnmanagedType.LPWStr)] string pszArgs);
+            [PreserveSig] int GetHotkey(out short pwHotkey);
+            [PreserveSig] int SetHotkey(short wHotkey);
+            [PreserveSig] int GetShowCmd(out int piShowCmd);
+            [PreserveSig] int SetShowCmd(int iShowCmd);
+            [PreserveSig] int GetIconLocation(StringBuilder pszIconPath, int cch, out int piIcon);
+            [PreserveSig] int SetIconLocation([MarshalAs(UnmanagedType.LPWStr)] string pszIconPath, int iIcon);
+            [PreserveSig] int SetRelativePath([MarshalAs(UnmanagedType.LPWStr)] string pszPathRel, uint dwReserved);
+            [PreserveSig] int Resolve(IntPtr hwnd, uint fFlags);
+            [PreserveSig] int SetPath([MarshalAs(UnmanagedType.LPWStr)] string pszFile);
+        }
+
+        [ComImport]
+        [Guid("0000010B-0000-0000-C000-000000000046")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        internal interface IPersistFile
+        {
+            [PreserveSig] int GetClassID(out Guid pClassID);
+            [PreserveSig] int IsDirty();
+            [PreserveSig] int Load([MarshalAs(UnmanagedType.LPWStr)] string pszFileName, uint dwMode);
+            [PreserveSig] int Save([MarshalAs(UnmanagedType.LPWStr)] string pszFileName, bool fRemember);
+            [PreserveSig] int SaveCompleted([MarshalAs(UnmanagedType.LPWStr)] string pszFileName);
+            [PreserveSig] int GetCurFile([MarshalAs(UnmanagedType.LPWStr)] out string ppszFileName);
+        }
+
 
         [DllImport("dwmapi.dll")]
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
@@ -108,10 +153,16 @@ namespace CefFlashBrowser.Utils
         public static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         [DllImport("user32.dll")]
-        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out IntPtr lpdwProcessId);
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         [DllImport("user32.dll")]
         public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+
+        [DllImport("user32.dll")]
+        public static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
@@ -165,6 +216,9 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("user32.dll")]
         public static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+        public static extern int SHGetKnownFolderPath(ref Guid id, uint flags, IntPtr token, out IntPtr path);
 
         [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
         public static extern int SHParseDisplayName(string pszName, IntPtr pbc, out IntPtr ppidl, uint sfgaoIn, out uint psfgaoOut);
