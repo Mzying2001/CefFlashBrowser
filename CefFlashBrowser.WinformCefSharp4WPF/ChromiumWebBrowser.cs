@@ -24,6 +24,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         /// The base browser
         /// </summary>
         private readonly CefSharp.WinForms.ChromiumWebBrowser browser;
+
         private bool isHosted;
         private string pendingAddress;
         private volatile bool isBrowserInitialized;

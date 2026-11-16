@@ -222,6 +222,7 @@ namespace CefFlashBrowser.Views
 
             browser = new ChromiumFlashBrowser(true) { ZoomLevelIncrement = 0.25 };
             RegisterName("browser", browser);
+
             browser.SetBinding(ChromiumFlashBrowser.AddressProperty,
                 new Binding(nameof(BrowserViewModel.Address)) { Mode = BindingMode.TwoWay });
             browser.SetBinding(ChromiumFlashBrowser.ZoomLevelProperty,
@@ -231,9 +232,13 @@ namespace CefFlashBrowser.Views
             browser.FullscreenModeChanged += BrowserFullscreenModeChanged;
             browser.FrameLoadStart += BrowserFrameLoadStart;
             browser.FrameLoadEnd += BrowserFrameLoadEnd;
-            browser.BeforeDisposeAsync = () => _isClosed
-                ? _userScriptSession?.StopAsync() ?? Task.CompletedTask
-                : RequestCloseAsync(true);
+
+            browser.BeforeDisposeAsync = () =>
+            {
+                return !_isClosed
+                  ? RequestCloseAsync(true)
+                  : (_userScriptSession?.StopAsync() ?? Task.CompletedTask);
+            };
 
             browser.JsDialogHandler = new Browser.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Browser.Handlers.DownloadHandler();
