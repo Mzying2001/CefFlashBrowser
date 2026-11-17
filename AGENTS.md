@@ -48,11 +48,12 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 ## Project Structure
 
 - **CefFlashBrowser/**: Main WPF application.
-  - **Browser/**: Browser-specific application behavior, including CefSharp handler implementations.
+  - **Browser/**: CefSharp handlers and per-browser userscript integration.
   - **Data/**: Shared application state, paths, configuration, and MVVM messaging data.
   - **Infrastructure/**: Reusable infrastructure helpers for collections and WPF integration.
   - **Models/**: Domain models and persisted user settings.
-  - **Services/**: Application services for language, theme, windows, database access, and favicons.
+  - **Services/**: Application services for language, theme, windows, favorites, database access, and favicons.
+    - **UserScripts/**: Userscript lifecycle, execution policy, content loading, and persistence.
   - **ViewModels/**: MVVM presentation logic for windows and dialogs.
   - **Views/**: WPF windows, dialogs, and reusable UI controls.
   - **Utils/**: Utility helpers and cross-cutting support code.
@@ -66,7 +67,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - **CefFlashBrowser.Log/**: Shared file logging library.
 - **CefFlashBrowser.CommandProxy/**: Native command proxy with Flash diagnostic filtering.
 - **CefFlashBrowser.Tests/**: MSTest project for linked application code and supporting libraries.
-  - **BrowserRegression/**: PowerShell checks for WPF/CEF behavior and packaged releases.
+  - **BrowserRegression/**: PowerShell checks for WPF/CEF behavior, userscripts, and packaged releases.
   - **CommandProxyRegression/**: Regression checks for command forwarding and diagnostic filtering.
   - **TestData/**: SOL fixtures for serialization tests.
 - **Docs/**: Reference specifications for AMF and SOL-related implementation work.
