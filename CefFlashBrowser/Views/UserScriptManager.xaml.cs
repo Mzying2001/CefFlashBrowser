@@ -1,4 +1,6 @@
-﻿using CefFlashBrowser.Services;
+﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Models;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels;
 using Microsoft.Win32;
 using SimpleMvvm.Command;
@@ -26,6 +28,7 @@ namespace CefFlashBrowser.Views
 
             InitializeComponent();
             Loaded += WindowLoaded;
+            WindowSizeInfo.Apply(GlobalData.Settings.UserScriptManagerSizeInfo, this);
         }
 
         private async void WindowLoaded(object sender, RoutedEventArgs e)
@@ -75,6 +78,16 @@ namespace CefFlashBrowser.Views
 
             sourceEditor.IsUndoEnabled = false;
             sourceEditor.IsUndoEnabled = true;
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            if (!e.Cancel)
+            {
+                GlobalData.Settings.UserScriptManagerSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+            }
         }
 
         protected override void OnClosed(EventArgs e)

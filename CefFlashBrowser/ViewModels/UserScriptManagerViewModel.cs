@@ -19,6 +19,7 @@ namespace CefFlashBrowser.ViewModels
         private readonly Func<string, string> _text;
         private readonly Action<Action> _dispatch;
         private readonly Func<string, CancellationToken, Task<string>> _fetchSource;
+
         private IUserScriptRepository _repository;
         private CancellationTokenSource _lifetime;
         private Task _pendingOperation = Task.CompletedTask;
@@ -82,8 +83,10 @@ namespace CefFlashBrowser.ViewModels
             private set => UpdateValue(ref _status, value);
         }
 
-        public UserScriptManagerViewModel(Func<Task<IUserScriptRepository>> initialize,
-            Func<string, string> text, Action<Action> dispatch,
+        public UserScriptManagerViewModel(
+            Func<Task<IUserScriptRepository>> initialize,
+            Func<string, string> text,
+            Action<Action> dispatch,
             Func<string, CancellationToken, Task<string>> fetchSource = null)
         {
             _initialize = initialize;

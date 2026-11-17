@@ -47,7 +47,7 @@ namespace CefFlashBrowser.Data
             AssetsPath = Path.Combine(AppBaseDirectory, "Assets\\");
             BinariesPath = Path.Combine(AppBaseDirectory, "Binaries\\");
             CachesPath = Path.Combine(AppBaseDirectory, "Caches\\");
-            UserScriptCachePath = Path.Combine(CachesPath, "UserScripts");
+            UserScriptCachePath = Path.Combine(CachesPath, "UserScripts\\");
             LogsPath = Path.Combine(AppBaseDirectory, "Logs\\");
             CefDllPath = Path.Combine(BinariesPath, "CefSharp\\");
             SqliteDllPath = Path.Combine(BinariesPath, "SQLite\\");
@@ -86,6 +86,7 @@ namespace CefFlashBrowser.Data
             DirectoryHelper.EnsureDirectoryExists(DataPath);
             DirectoryHelper.EnsureDirectoryExists(LogsPath);
             DirectoryHelper.EnsureDirectoryExists(CachesPath);
+            DirectoryHelper.EnsureDirectoryExists(UserScriptCachePath);
 
             InitSettings();
             return true;

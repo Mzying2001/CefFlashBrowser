@@ -63,6 +63,11 @@
         public WindowSizeInfo SolSaveManagerSizeInfo { get; set; }
 
         /// <summary>
+        /// The size and position of the userscript manager window
+        /// </summary>
+        public WindowSizeInfo UserScriptManagerSizeInfo { get; set; }
+
+        /// <summary>
         /// Proxy settings for the browser
         /// </summary>
         public ProxySettings ProxySettings { get; set; }
@@ -187,6 +192,7 @@
             BrowserWindowSizeInfo = null;
             SwfWindowSizeInfo = null;
             SolSaveManagerSizeInfo = null;
+            UserScriptManagerSizeInfo = null;
             ProxySettings = new ProxySettings();
             UserAgentSetting = new UserAgentSetting();
             FakeFlashVersionSetting = new FakeFlashVersionSetting();
@@ -204,7 +210,8 @@
             CustomEmoticon = null;
             DisableBrowserContextMenu = false;
             EnableUserScripts = true;
-            TrustedUserScriptPageWorld = false;
+            TrustedUserScriptPageWorld = true;
+            UserScriptDownloadDirectory = null;
         }
 
         /// <summary>
