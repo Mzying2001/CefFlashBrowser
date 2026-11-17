@@ -29,7 +29,8 @@ namespace CefFlashBrowser.Tests
             _database = new SqliteDatabase(Path.Combine(_root, "browser.db"));
             _storage = new UserScriptStorage(new DatabaseService(_database));
             _store = new SqliteUserScriptValueStore(_storage, 4);
-            _repository = new UserScriptRepository(new SqliteUserScriptRepositoryPersistence(_storage, Path.Combine(_root, "MonkeySharp"), Path.Combine(_root, "Cache", "UserScripts")));
+            _repository = new UserScriptRepository(new SqliteUserScriptRepositoryPersistence(
+                _storage, Path.Combine(_root, "MonkeySharp"), Path.Combine(_root, "Cache", "UserScripts")));
             await _repository.InitializeAsync(CancellationToken.None);
             _id = (await _repository.InstallAsync("// ==UserScript==\n// @name Storage\n// @match https://example.com/*\n// @grant none\n// ==/UserScript==", null, true, CancellationToken.None)).ScriptKey.ToString();
         }

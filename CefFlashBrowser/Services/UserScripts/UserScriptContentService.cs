@@ -67,6 +67,7 @@ namespace CefFlashBrowser.Services.UserScripts
         {
             var content = await FetchAsync(url, token).ConfigureAwait(false);
             var source = new UTF8Encoding(false, true).GetString(content.Bytes);
+
             return source.StartsWith("\uFEFF", StringComparison.Ordinal) ? source.Substring(1) : source;
         }
 
@@ -116,6 +117,7 @@ namespace CefFlashBrowser.Services.UserScripts
 
                             var bytes = output.ToArray();
                             var charset = response.Content.Headers.ContentType?.CharSet?.Trim('"');
+
                             return new ResourceContent(bytes, response.Content.Headers.ContentType?.MediaType, charset);
                         }
                     }

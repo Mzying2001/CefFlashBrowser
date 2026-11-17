@@ -61,6 +61,7 @@ namespace CefFlashBrowser.Services
                     "page_url TEXT PRIMARY KEY NOT NULL, " +
                     "icon_url TEXT NOT NULL, " +
                     "updated_at INTEGER NOT NULL)");
+
                 session.Execute(
                     "CREATE TABLE monkeysharp_scripts ( " +
                     "script_id TEXT PRIMARY KEY NOT NULL, " +
@@ -69,6 +70,7 @@ namespace CefFlashBrowser.Services
                     "is_enabled INTEGER NOT NULL CHECK (is_enabled IN (0, 1)), " +
                     "installed_at TEXT NOT NULL, updated_at TEXT NOT NULL, " +
                     "source_sha256 TEXT NOT NULL, commit_id TEXT NOT NULL)");
+
                 session.Execute(
                     "CREATE TABLE monkeysharp_script_assets ( " +
                     "script_id TEXT NOT NULL, kind INTEGER NOT NULL CHECK (kind IN (0, 1)), " +
@@ -78,6 +80,7 @@ namespace CefFlashBrowser.Services
                     "CHECK ((kind = 0 AND name IS NULL) OR (kind = 1 AND name IS NOT NULL AND length(name) > 0)))");
                 session.Execute("CREATE UNIQUE INDEX monkeysharp_resource_names ON monkeysharp_script_assets(script_id, name) WHERE kind = 1");
                 session.Execute("CREATE INDEX monkeysharp_asset_content ON monkeysharp_script_assets(content_sha256)");
+
                 session.Execute(
                     "CREATE TABLE monkeysharp_values ( " +
                     "script_id TEXT NOT NULL, " +
@@ -179,10 +182,12 @@ namespace CefFlashBrowser.Services
             {
                 token.ThrowIfCancellationRequested();
                 EnsureUserScriptExists(session, key.ToString());
+
                 session.Execute("UPDATE monkeysharp_scripts SET is_enabled = @enabled, updated_at = @updated WHERE script_id = @id",
                     new Dictionary<string, object>
                     {
-                        ["@id"] = key.ToString(), ["@enabled"] = enabled ? 1 : 0,
+                        ["@id"] = key.ToString(),
+                        ["@enabled"] = enabled ? 1 : 0,
                         ["@updated"] = updatedAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)
                     });
             }).ConfigureAwait(false);
@@ -224,6 +229,7 @@ namespace CefFlashBrowser.Services
                     });
 
                 var parameters = new Dictionary<string, object> { ["@id"] = record.ScriptKey.ToString() };
+
                 session.Execute("DELETE FROM monkeysharp_script_assets WHERE script_id = @id", parameters);
 
                 foreach (var asset in assets)
@@ -233,9 +239,14 @@ namespace CefFlashBrowser.Services
                         "VALUES (@id, @kind, @ordinal, @name, @url, @hash, @mime, @charset)",
                         new Dictionary<string, object>
                         {
-                            ["@id"] = asset.ScriptId, ["@kind"] = asset.Kind, ["@ordinal"] = asset.Ordinal,
-                            ["@name"] = asset.Name, ["@url"] = asset.Url, ["@hash"] = asset.ContentSha256,
-                            ["@mime"] = asset.Mime, ["@charset"] = asset.Charset
+                            ["@id"] = asset.ScriptId,
+                            ["@kind"] = asset.Kind,
+                            ["@ordinal"] = asset.Ordinal,
+                            ["@name"] = asset.Name,
+                            ["@url"] = asset.Url,
+                            ["@hash"] = asset.ContentSha256,
+                            ["@mime"] = asset.Mime,
+                            ["@charset"] = asset.Charset
                         });
 
                 token.ThrowIfCancellationRequested();
@@ -499,6 +510,7 @@ namespace CefFlashBrowser.Services
         private static UserScriptDatabaseRecord ReadUserScript(IDataRecord row)
         {
             var key = ScriptKey.Parse(row.GetString(0));
+
             if (key.ToString() != row.GetString(0))
                 throw new FormatException("The installation directory contains a noncanonical script key.");
 

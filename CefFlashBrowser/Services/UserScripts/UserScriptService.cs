@@ -206,6 +206,5 @@ namespace CefFlashBrowser.Services.UserScripts
                     _owner._sessions.Remove(_id);
             }
         }
-
     }
 }

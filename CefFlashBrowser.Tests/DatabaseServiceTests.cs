@@ -95,6 +95,7 @@ namespace CefFlashBrowser.Tests
                 session.Execute("INSERT INTO website_icons VALUES ('page', 'icon', 20)");
                 session.Execute("PRAGMA user_version = " + version);
             });
+
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.InitializeAsync());
             Assert.AreEqual((long)version, await _database.ScalarAsync("PRAGMA user_version"));
             Assert.AreEqual("icon", await _database.ScalarAsync("SELECT icon_url FROM website_icons"));

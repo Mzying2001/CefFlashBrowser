@@ -39,9 +39,11 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             {
                 var rows = await _storage.Database.GetUserScriptsAsync().ConfigureAwait(false);
                 var known = new HashSet<ScriptKey>(rows.Select(row => row.ScriptKey));
+
                 foreach (var key in _sources.RecoveryKeys())
                 {
                     token.ThrowIfCancellationRequested();
+
                     if (known.Contains(key))
                         continue;
 
@@ -50,11 +52,13 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 }
 
                 var result = new List<UserScriptLoadResult>();
+
                 foreach (var row in rows)
                 {
                     token.ThrowIfCancellationRequested();
                     result.Add(await LoadOneAsync(row).ConfigureAwait(false));
                 }
+
                 return result.AsReadOnly();
             }, token);
         }
@@ -64,12 +68,16 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             return _storage.RunAsync(async () =>
             {
                 var row = await _storage.Database.GetUserScriptAsync(key).ConfigureAwait(false);
+
                 if (row != null)
                     return await LoadOneAsync(row).ConfigureAwait(false);
 
                 try { _sources.Recover(key, null); }
                 catch (Exception e) when (UserScriptFiles.IsFileError(e))
-                { throw new UserScriptPersistenceException(key, "Orphan source recovery failed.", e); }
+                {
+                    throw new UserScriptPersistenceException(key, "Orphan source recovery failed.", e);
+                }
+
                 throw new KeyNotFoundException("Script not found: " + key);
             }, token);
         }
@@ -80,34 +88,47 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             var assets = new List<UserScriptAsset>();
             string source = null, version = null;
             var changed = false;
+
             try
             {
                 ValidateRow(row);
                 _sources.Recover(row.ScriptKey, row.CommitId);
+
                 // Database failures remain global; malformed associations belong to this installation.
                 var descriptors = await _storage.Database.GetUserScriptAssetsAsync(row.ScriptKey).ConfigureAwait(false);
+
                 foreach (var descriptor in descriptors)
                 {
                     ValidateAsset(descriptor);
+
                     ResourceContent content = null;
+
                     try { content = new ResourceContent(_cache.Read(descriptor.ContentSha256), descriptor.Mime, descriptor.Charset); }
                     catch (Exception e) when (UserScriptFiles.IsFileError(e))
-                    { diagnostics.Add(Diagnostic(row.ScriptKey, "MSR421_ASSET_UNAVAILABLE", "Asset cache unavailable: " + descriptor.Url, e)); }
+                    {
+                        diagnostics.Add(Diagnostic(row.ScriptKey, "MSR421_ASSET_UNAVAILABLE", "Asset cache unavailable: " + descriptor.Url, e));
+                    }
+
                     assets.Add(new UserScriptAsset((UserScriptAssetKind)descriptor.Kind, descriptor.Ordinal,
                         descriptor.Name, descriptor.Url, content));
                 }
 
                 new UserScriptPersistenceRecord(row.ScriptKey, null, row.SourceOrigin, row.IsEnabled,
                     row.InstalledAt, row.UpdatedAt, assets);
+
                 try
                 {
                     var bytes = _sources.Read(row.ScriptKey);
                     var hash = UserScriptFiles.Hash(bytes);
+
                     version = UserScriptSourceFiles.VersionOf(hash);
                     changed = hash != row.SourceSha256;
+
                     try { source = UserScriptFiles.Decode(bytes); }
                     catch (DecoderFallbackException e)
-                    { diagnostics.Add(Diagnostic(row.ScriptKey, "MSR420_SOURCE_UNAVAILABLE", "Source is not valid UTF-8.", e)); }
+                    {
+                        diagnostics.Add(Diagnostic(row.ScriptKey, "MSR420_SOURCE_UNAVAILABLE", "Source is not valid UTF-8.", e));
+                    }
                 }
                 catch (Exception e) when (e is FileNotFoundException || e is DirectoryNotFoundException)
                 {
@@ -115,7 +136,9 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     diagnostics.Add(Diagnostic(row.ScriptKey, "MSR420_SOURCE_UNAVAILABLE", "Source file is missing.", e));
                 }
                 catch (Exception e) when (UserScriptFiles.IsFileError(e))
-                { diagnostics.Add(Diagnostic(row.ScriptKey, "MSR420_SOURCE_UNAVAILABLE", "Source could not be read.", e)); }
+                {
+                    diagnostics.Add(Diagnostic(row.ScriptKey, "MSR420_SOURCE_UNAVAILABLE", "Source could not be read.", e));
+                }
             }
             catch (Exception e) when (UserScriptFiles.IsFileError(e) || e is ArgumentException || e is FormatException
                 || e is InvalidCastException || e is OverflowException)
@@ -129,6 +152,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
             foreach (var diagnostic in diagnostics)
                 Report("Script " + row.ScriptKey + ": " + diagnostic.Message, diagnostic.Exception);
+
             return new UserScriptLoadResult(new UserScriptPersistenceRecord(row.ScriptKey, source, row.SourceOrigin,
                 row.IsEnabled, row.InstalledAt, row.UpdatedAt, assets), version, changed, diagnostics);
         }
@@ -143,11 +167,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 var record = request.Record;
                 var previous = await _storage.Database.GetUserScriptAsync(record.ScriptKey).ConfigureAwait(false);
                 UserScriptSourceFiles.Journal journal = null;
+
                 try
                 {
                     if (previous != null)
                         ValidateRow(previous);
+
                     _sources.Recover(record.ScriptKey, previous?.CommitId);
+
                     if (previous == null)
                     {
                         if (request.ExpectedSourceVersion != null || _sources.Hash(record.ScriptKey) != null
@@ -158,12 +185,15 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     {
                         if (request.ExpectedSourceVersion == null)
                             throw new UserScriptSourceConflictException(record.ScriptKey);
+
                         _sources.CheckVersion(record.ScriptKey, request.ExpectedSourceVersion);
                     }
 
                     if (request.SourceWriteMode == SourceWriteMode.Preserve)
                         CheckPreservedSource(request);
+
                     var bytes = request.SourceWriteMode == SourceWriteMode.Replace ? UserScriptFiles.Encode(record.Source) : null;
+
                     if (bytes?.Length > MaximumSourceBytes)
                         throw new IOException("Source exceeds the 10 MiB limit.");
 
@@ -171,22 +201,29 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     {
                         var descriptor = new UserScriptAssetDatabaseRecord(record.ScriptKey.ToString(), (int)asset.Kind,
                             asset.Ordinal, asset.Name, asset.Url, _cache.Write(asset.Content.Bytes), asset.Content.MediaType, asset.Content.Charset);
+
                         ValidateAsset(descriptor);
+
                         return descriptor;
                     }).ToArray();
+
                     _checkpoint?.Invoke("objects-written");
                     token.ThrowIfCancellationRequested();
+
                     if (bytes != null)
                         journal = _sources.Stage(record.ScriptKey, previous == null ? "install" : "replace", previous?.CommitId, bytes);
 
                     _checkpoint?.Invoke("marker-written");
+
                     var hash = bytes == null ? _sources.Hash(record.ScriptKey) : UserScriptFiles.Hash(bytes);
                     var stored = new UserScriptDatabaseRecord(record.ScriptKey, record.SourceOrigin, record.IsEnabled,
                         previous?.InstalledAt ?? record.InstalledAt, record.UpdatedAt, hash, journal?.CommitId ?? Guid.NewGuid().ToString("D"));
+
                     await _storage.Database.SaveUserScriptAsync(stored, assets, () =>
                     {
                         _checkpoint?.Invoke("rows-written");
                         token.ThrowIfCancellationRequested();
+
                         if (journal == null)
                             CheckPreservedSource(request);
                         else
@@ -194,18 +231,23 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                             _sources.CheckVersion(record.ScriptKey, request.ExpectedSourceVersion ?? "missing");
                             _sources.Switch(record.ScriptKey, journal);
                         }
+
                         _checkpoint?.Invoke("source-switched");
                     }, token).ConfigureAwait(false);
+
                     // No cancellation or fallible observers may change a committed result.
                     Complete(record.ScriptKey, journal);
                     ReportCheckpoint("committed");
+
                     return UserScriptSourceFiles.VersionOf(hash);
                 }
                 catch (Exception e)
                 {
                     await RollbackAsync(record.ScriptKey, journal, e).ConfigureAwait(false);
+
                     if (UserScriptFiles.IsFileError(e) || IsConstraint(e))
                         throw new UserScriptPersistenceException(record.ScriptKey, "Installation save failed: " + e.Message, e);
+
                     throw;
                 }
             }, token);
@@ -214,6 +256,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         private void CheckPreservedSource(UserScriptSaveRequest request)
         {
             _sources.CheckVersion(request.Record.ScriptKey, request.ExpectedSourceVersion);
+
             try
             {
                 if (UserScriptFiles.Decode(_sources.Read(request.Record.ScriptKey)) != request.Record.Source)
@@ -232,11 +275,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             {
                 var previous = await _storage.Database.GetUserScriptAsync(key).ConfigureAwait(false);
                 UserScriptSourceFiles.Journal journal = null;
+
                 try
                 {
                     _sources.Recover(key, previous?.CommitId);
+
                     if (previous == null)
                         return;
+
                     journal = _sources.Stage(key, "delete", previous.CommitId, null);
                     await _storage.Database.DeleteUserScriptAsync(key, () =>
                     {
@@ -249,10 +295,13 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 catch (Exception e)
                 {
                     await RollbackAsync(key, journal, e).ConfigureAwait(false);
+
                     if (UserScriptFiles.IsFileError(e) || IsConstraint(e))
                         throw new UserScriptPersistenceException(key, "Installation removal failed: " + e.Message, e);
+
                     throw;
                 }
+
                 Complete(key, journal);
                 await CollectCoreAsync().ConfigureAwait(false);
             }, token);
@@ -262,20 +311,26 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             if (journal == null)
                 return;
+
             try
             {
                 _checkpoint?.Invoke("restore");
+
                 var row = await _storage.Database.GetUserScriptAsync(key).ConfigureAwait(false);
+
                 _sources.Recover(key, row?.CommitId);
             }
             catch (Exception e)
-            { throw new UserScriptPersistenceException(key, "Commit failed and source recovery remains unresolved.", new AggregateException(failure, e)); }
+            {
+                throw new UserScriptPersistenceException(key, "Commit failed and source recovery remains unresolved.", new AggregateException(failure, e));
+            }
         }
 
         private void Complete(ScriptKey key, UserScriptSourceFiles.Journal journal)
         {
             if (journal == null)
                 return;
+
             try
             {
                 _checkpoint?.Invoke("cleanup");
@@ -293,23 +348,31 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 var rows = await _storage.Database.GetUserScriptsAsync().ConfigureAwait(false);
                 var assets = await _storage.Database.GetUserScriptAssetsAsync().ConfigureAwait(false);
                 var known = new HashSet<string>(rows.Select(row => row.ScriptKey.ToString()), StringComparer.Ordinal);
+
                 foreach (var row in rows)
                 {
                     ValidateRow(row);
+
                     var descriptors = assets.Where(asset => asset.ScriptId == row.ScriptKey.ToString()).ToArray();
+
                     foreach (var asset in descriptors)
                         ValidateAsset(asset);
+
                     new UserScriptPersistenceRecord(row.ScriptKey, null, row.SourceOrigin, row.IsEnabled,
                         row.InstalledAt, row.UpdatedAt, descriptors.Select(asset => new UserScriptAsset(
                             (UserScriptAssetKind)asset.Kind, asset.Ordinal, asset.Name, asset.Url, null)));
                 }
+
                 if (assets.Any(asset => !known.Contains(asset.ScriptId)))
                     throw new FormatException("Orphan asset associations.");
+
                 _cache.Collect(new HashSet<string>(assets.Select(asset => asset.ContentSha256), StringComparer.Ordinal));
             }
             catch (Exception e) when (UserScriptFiles.IsFileError(e) || e is ArgumentException || e is FormatException
                 || e is InvalidCastException || e is OverflowException || e is SQLiteException)
-            { Report("Asset collection skipped or incomplete.", e); }
+            {
+                Report("Asset collection skipped or incomplete.", e);
+            }
         }
 
         private static void ValidateRow(UserScriptDatabaseRecord row)
@@ -322,11 +385,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         {
             if (!UserScriptFiles.IsHash(asset.ContentSha256))
                 throw new FormatException("Invalid asset object hash.");
+
             if (!Uri.TryCreate(asset.Url, UriKind.Absolute, out var url) || !string.IsNullOrEmpty(url.UserInfo)
                 || url.Scheme != "http" && url.Scheme != "https")
                 throw new FormatException("Asset URLs must use HTTP(S) without embedded credentials.");
+
             if (string.IsNullOrWhiteSpace(asset.Mime))
                 throw new FormatException("Asset MIME type is missing.");
+
             new ResourceContent(Array.Empty<byte>(), asset.Mime, asset.Charset);
             new UserScriptAsset((UserScriptAssetKind)asset.Kind, asset.Ordinal, asset.Name, asset.Url, null);
         }

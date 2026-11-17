@@ -107,21 +107,36 @@ namespace CefFlashBrowser.Tests
         public async Task Stop_CancelsCacheRecoveryBeforeTheCacheDirectoryIsMoved()
         {
             var first = Create(new ContentHandler { Available = true });
+
             await first.InitializeAsync();
+
             var source = Source.Replace("// @grant none", "// @grant none\n// @require https://example.com/dependency.js");
             var installed = await first.Repository.InstallAsync(source, null, true, CancellationToken.None);
+
             await first.StopAsync();
+
             var cache = Path.Combine(_root, "Cache", "UserScripts");
+
             Directory.Delete(cache, true);
+
             var blocked = new CancellationHandler();
             var restored = Create(blocked);
             var initialization = restored.InitializeAsync();
+
             await blocked.Entered.Task;
             await restored.StopAsync();
-            try { await initialization; Assert.Fail("Stopped initialization must be cancelled."); }
+
+            try
+            {
+                await initialization;
+
+                Assert.Fail("Stopped initialization must be cancelled.");
+            }
             catch (OperationCanceledException) { }
+
             Directory.CreateDirectory(cache);
             Directory.Move(cache, cache + ".cleared");
+
             Assert.IsFalse(Directory.Exists(cache));
             Assert.IsTrue(File.Exists(Path.Combine(_root, "MonkeySharp", installed.ScriptKey.ToString(), "userscript.js")));
             Assert.AreEqual(1L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_scripts"));
@@ -143,20 +158,31 @@ namespace CefFlashBrowser.Tests
         public async Task UnavailableSource_IsIsolatedAndReloadPreservesIdentityAndValues()
         {
             var first = Create();
+
             await first.InitializeAsync();
+
             var installed = await first.Repository.InstallAsync(Source, null, true, CancellationToken.None);
             var other = await first.Repository.InstallAsync(Source, null, true, CancellationToken.None);
+
             await first.ValueStore.SetAsync(installed.ScriptKey.ToString(), "saved", UserScriptValue.Undefined, CancellationToken.None);
             await first.StopAsync();
+
             var path = Path.Combine(_root, "MonkeySharp", installed.ScriptKey.ToString(), "userscript.js");
+
             File.WriteAllBytes(path, new byte[] { 255 });
+
             var restored = Create();
+
             await restored.InitializeAsync();
+
             Assert.IsNull(restored.InitializationError);
             Assert.IsFalse((await restored.Repository.GetAsync(installed.ScriptKey, CancellationToken.None)).CanExecute);
             Assert.IsTrue((await restored.Repository.GetAsync(other.ScriptKey, CancellationToken.None)).CanExecute);
+
             File.WriteAllText(path, Source + "\n// reviewed", new UTF8Encoding(false));
+
             var reloaded = await restored.Repository.ReloadAsync(installed.ScriptKey, CancellationToken.None);
+
             Assert.AreEqual(installed.InstalledAt, reloaded.InstalledAt);
             Assert.IsTrue(reloaded.CanExecute);
             Assert.IsTrue((await restored.ValueStore.GetAsync(installed.ScriptKey.ToString(), "saved", CancellationToken.None)).Exists);
@@ -166,12 +192,19 @@ namespace CefFlashBrowser.Tests
         public async Task DatabaseFailure_RemainsGlobalAndInitializationCanRetry()
         {
             await _database.ExecuteAsync("PRAGMA user_version = 4");
+
             var service = Create();
+
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => service.InitializeAsync());
             Assert.IsNotNull(service.InitializationError);
-            Assert.ThrowsException<InvalidOperationException>(() => { var ignored = service.Repository; });
+            Assert.ThrowsException<InvalidOperationException>(() =>
+            {
+                var ignored = service.Repository;
+            });
+
             await _database.ExecuteAsync("PRAGMA user_version = 0");
             await service.InitializeAsync();
+
             Assert.IsNull(service.InitializationError);
             Assert.AreEqual(0, (await service.Repository.GetSnapshotAsync(CancellationToken.None)).Count);
         }
@@ -305,7 +338,9 @@ namespace CefFlashBrowser.Tests
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
                 => Task.FromResult(new HttpResponseMessage(Available ? HttpStatusCode.OK : HttpStatusCode.NotFound)
-                { Content = new StringContent(Available ? "window.dependency = true;" : "missing") });
+                {
+                    Content = new StringContent(Available ? "window.dependency = true;" : "missing")
+                });
         }
     }
 
