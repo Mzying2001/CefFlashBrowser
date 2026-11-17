@@ -15,6 +15,52 @@ function Find-ManagerToggle($Element) {
     }
 }
 
+function Get-ManagerIconText($Icon) {
+    $content = $Icon.Template.FindName('customIcon', $Icon)
+    return @(Find-FaviconElements $content ([Windows.Controls.TextBlock]))[0]
+}
+
+function Test-BrowserIconStyleReuse($Context) {
+    $hostWindow = New-Object Windows.Window
+    $hostWindow.Left = -10000
+    $hostWindow.ShowInTaskbar = $false
+    $hostWindow.ShowActivated = $false
+    $panel = New-Object Windows.Controls.StackPanel
+    $hostWindow.Content = $panel
+    try {
+        $style = $Context.Application.FindResource([CefFlashBrowser.Views.Custom.BrowserIcon]::TextFallbackStyleKey)
+        $icons = @('A', '中') | ForEach-Object {
+            $value = New-Object CefFlashBrowser.Views.Custom.BrowserIcon
+            $value.Style = $style
+            $value.DefaultIcon = $_
+            [void]$panel.Children.Add($value)
+            $value
+        }
+        $plain = New-Object CefFlashBrowser.Views.Custom.BrowserIcon
+        [void]$panel.Children.Add($plain)
+        $custom = New-Object CefFlashBrowser.Views.Custom.BrowserIcon
+        $customText = New-Object Windows.Controls.TextBlock
+        $customText.Text = 'custom'
+        $custom.DefaultIcon = $customText
+        [void]$panel.Children.Add($custom)
+        $hostWindow.Show()
+        $hostWindow.UpdateLayout()
+        Assert-Regression ((Get-ManagerIconText $icons[0]).Text -eq 'A' -and
+            (Get-ManagerIconText $icons[1]).Text -eq '中' -and
+            ![object]::ReferenceEquals((Get-ManagerIconText $icons[0]), (Get-ManagerIconText $icons[1]))) 'shared fallback style creates independent content without a script data context'
+        Assert-Regression ((Get-ManagerIconText $icons[0]).FontSize -eq 8) 'fallback text inherits its font size from the reusable style'
+        $icons[0].DefaultIcon = 'B'
+        $hostWindow.UpdateLayout()
+        Assert-Regression ((Get-ManagerIconText $icons[0]).Text -eq 'B' -and
+            (Get-ManagerIconText $icons[1]).Text -eq '中') 'changing one fallback leaves other styled icons unchanged'
+        Assert-Regression ($null -eq $plain.DefaultIconTemplate -and
+            $plain.Template.FindName('defaultIcon', $plain).Visibility -eq [Windows.Visibility]::Visible) 'unstyled browser icons retain their default page image'
+        Assert-Regression ([object]::ReferenceEquals((Get-ManagerIconText $custom), $customText)) 'existing custom fallback elements remain supported'
+    } finally {
+        $hostWindow.Close()
+    }
+}
+
 function Save-ManagerWithConfirmation($Context, $Model, [bool]$Accept) {
     $state = @{ Count = 0; Message = '' }
     $timer = New-Object Windows.Threading.DispatcherTimer
@@ -43,6 +89,7 @@ function Test-UserScriptManager($Context) {
     $window = $null
     $browserWindow = $null
     $fixture = New-Object UserScriptHttpFixture
+    $iconFixture = New-Object FaviconHttpFixture
     $language = $Context.LanguageService.CurrentLanguage
     $theme = [CefFlashBrowser.Data.GlobalData]::Settings.Theme
     $model = $Context.Application.Resources['Locator'].UserScriptManagerViewModel
@@ -62,6 +109,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] })[0]
         Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager initialized'
+        Test-BrowserIconStyleReuse $Context
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] }).Count -eq 1) 'manager entry reuses a single window'
         Assert-Regression ($window.InputBindings.Count -eq 3) 'manager exposes new, save and close keyboard bindings'
@@ -81,11 +129,55 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Wait-Regression $Context { (Invoke-JavaScript $Context $browser "document.documentElement && document.documentElement.getAttribute('data-manager')") -eq 'saved' } 'manager-installed script executes in real CEF'
         $list = $window.FindName('scriptList')
         $list.UpdateLayout()
+        $icon = @(Find-FaviconElements ($list.ItemContainerGenerator.ContainerFromItem($item)) ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
+        Assert-Regression ($icon.Width -eq 24 -and $icon.Height -eq 24) 'script list displays a 24px icon'
+        Assert-Regression ($icon.Template.FindName('fallbackIcon', $icon).Visibility -eq [Windows.Visibility]::Visible -and
+            (Get-ManagerIconText $icon).Text -eq 'M') 'script without an icon displays its name initial'
+        foreach ($name in @('Bilibili', '哔哩哔哩')) {
+            $item.Source = $source.Replace('Manager workflow', $name)
+            Complete-UserScriptTask $Context ($model.SaveAsync()) "save fallback sample $name"
+            $list.UpdateLayout()
+            $label = Get-ManagerIconText $icon
+            Assert-Regression ($label -is [Windows.Controls.TextBlock] -and $label.Text -eq $item.IconInitial -and
+                $label.LayoutTransform.Value.IsIdentity -and $label.RenderTransform.Value.IsIdentity) "$name displays its initial as ordinary text without transforms"
+        }
+        $item.Source = $source
+        Complete-UserScriptTask $Context ($model.SaveAsync()) 'restore manager script name'
         $toggle = Find-ManagerToggle ($list.ItemContainerGenerator.ContainerFromItem($item))
         Assert-Regression ($toggle.IsChecked -and $toggle.IsEnabled) 'installed list row shows its enabled switch'
         [void][Windows.Controls.Primitives.ToggleButton].GetMethod('OnClick', [Reflection.BindingFlags]'Instance,NonPublic').Invoke($toggle, @())
         Wait-Regression $Context { !$model.IsBusy -and !$item.IsEnabled } 'list switch disables the script'
         Assert-Regression (!$toggle.IsChecked) 'switch follows committed state'
+        $iconSource = $source.Replace('// @version', ('// @icon ' + $iconFixture.BaseUrl + "/a-icon.png`n// @version"))
+        $item.Source = $iconSource
+        Assert-Regression ([string]::IsNullOrEmpty($icon.FaviconUrl)) 'unsaved edits do not refresh the list icon'
+        Complete-UserScriptTask $Context ($model.SaveAsync()) 'save script icon metadata'
+        Wait-Regression $Context {
+            $image = $icon.Template.FindName('favicon', $icon)
+            $icon.FaviconUrl -eq ($iconFixture.BaseUrl + '/a-icon.png') -and
+                $null -ne $image.Source -and !$image.Source.IsDownloading -and
+                $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq [Windows.Visibility]::Collapsed
+        } 'saved script icon loads in the list'
+        $item.Source = $iconSource.Replace('/a-icon.png', '/missing.png').Replace('Manager workflow', '脚本图标')
+        Complete-UserScriptTask $Context ($model.SaveAsync()) 'save missing script icon'
+        Wait-Regression $Context {
+            $icon.HasImageFailed -and
+                $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq [Windows.Visibility]::Visible -and
+                (Get-ManagerIconText $icon).Text -eq '脚'
+        } 'failed image displays the updated script name initial'
+        $item.Source = $iconSource.Replace('/a-icon.png', '/b-icon.png')
+        Complete-UserScriptTask $Context ($model.SaveAsync()) 'replace failed script icon'
+        Wait-Regression $Context {
+            $image = $icon.Template.FindName('favicon', $icon)
+            !$icon.HasImageFailed -and $null -ne $image.Source -and !$image.Source.IsDownloading -and
+                $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq [Windows.Visibility]::Collapsed
+        } 'valid script icon recovers after an image failure'
+        $item.Source = $source
+        Complete-UserScriptTask $Context ($model.SaveAsync()) 'remove script icon metadata'
+        Wait-Regression $Context {
+            $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq [Windows.Visibility]::Visible -and
+                (Get-ManagerIconText $icon).Text -eq 'M'
+        } 'removing the icon restores the initial fallback'
         $browserWindow.ViewModel.CurrentBrowser.Address = $Context.AuxiliarySecondAddress
         Wait-Regression $Context { $browser.Title -eq 'Second auxiliary page' } 'navigate after disabling'
         Assert-Regression ($null -eq (Invoke-JavaScript $Context $browser "document.documentElement.getAttribute('data-manager')")) 'disabled manager script does not execute in next document'
@@ -126,6 +218,15 @@ document.documentElement.setAttribute('data-manager', 'saved');
                 [Action]({ $frame.Continue = $false }.GetNewClosure()))
             [Windows.Threading.Dispatcher]::PushFrame($frame)
             $window.UpdateLayout()
+            $list = $window.FindName('scriptList')
+            $list.ScrollIntoView($item)
+            $list.UpdateLayout()
+            $icon = @(Find-FaviconElements ($list.ItemContainerGenerator.ContainerFromItem($item)) ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
+            $textBrush = $window.FindResource('PrimaryTextBrush')
+            $content = $icon.Template.FindName('customIcon', $icon)
+            $background = @(Find-FaviconElements $content ([Windows.Controls.Border]))[0]
+            Assert-Regression ((Get-ManagerIconText $icon).Foreground.Color -eq $textBrush.Color -and
+                $background.Background.Color -eq $textBrush.Color) "script fallback follows the $appearance theme"
             $bitmap = New-Object Windows.Media.Imaging.RenderTargetBitmap(1000, 650, 96, 96, [Windows.Media.PixelFormats]::Pbgra32)
             $bitmap.Render($window)
             $encoder = New-Object Windows.Media.Imaging.PngBitmapEncoder
@@ -147,6 +248,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $model.Scripts.Clear()
         $model.SelectedScript = $null
         $fixture.Dispose()
+        $iconFixture.Dispose()
         $Context.LanguageService.SetCurrentLanguage($language)
         Set-ManagerRegressionTheme $Context $theme
     }

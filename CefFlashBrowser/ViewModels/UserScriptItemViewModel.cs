@@ -1,6 +1,8 @@
 ﻿using Mzying2001.MonkeySharp.Core.Domain;
+using Mzying2001.MonkeySharp.Core.Parsing;
 using SimpleMvvm;
 using System;
+using System.Globalization;
 using System.Linq;
 
 namespace CefFlashBrowser.ViewModels
@@ -51,12 +53,24 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public string IconUrl { get; private set; }
+
+        public string IconInitial
+        {
+            get
+            {
+                var name = Name?.Trim();
+                return string.IsNullOrEmpty(name) ? "?" : StringInfo.GetNextTextElement(name);
+            }
+        }
+
         public UserScriptItemViewModel(string source, string origin, string name, bool requiresConfirmation)
         {
             _source = source;
             Origin = origin;
             DraftName = name;
             RequiresConfirmation = requiresConfirmation;
+            IconUrl = ResolveIconUrl(new UserScriptMetadataParser().Parse(source).Metadata, origin);
         }
 
         public UserScriptItemViewModel(UserScriptInstallation installation)
@@ -102,6 +116,8 @@ namespace CefFlashBrowser.ViewModels
 
         private void NotifyInstallation()
         {
+            IconUrl = ResolveIconUrl(Installation.Definition.Metadata, Installation.SourceOrigin);
+
             RaisePropertyChanged(nameof(IsInstalled));
             RaisePropertyChanged(nameof(IsEnabled));
             RaisePropertyChanged(nameof(IsReady));
@@ -110,6 +126,30 @@ namespace CefFlashBrowser.ViewModels
             RaisePropertyChanged(nameof(Problem));
             RaisePropertyChanged(nameof(IsDirty));
             RaisePropertyChanged(nameof(DirtyMark));
+            RaisePropertyChanged(nameof(IconUrl));
+            RaisePropertyChanged(nameof(IconInitial));
+        }
+
+        private static string ResolveIconUrl(UserScriptMetadata metadata, string origin)
+        {
+            var icon = string.IsNullOrWhiteSpace(metadata?.IconUrl) ? metadata?.Icon64Url : metadata.IconUrl;
+            if (string.IsNullOrWhiteSpace(icon)) return null;
+
+            icon = icon.Trim();
+            Uri uri;
+
+            if (Uri.TryCreate(icon, UriKind.Relative, out var relative))
+            {
+                if (!Uri.TryCreate(origin, UriKind.Absolute, out var source)
+                    || !Uri.TryCreate(source, relative, out uri)) return null;
+            }
+            else if (!Uri.TryCreate(icon, UriKind.Absolute, out uri))
+            {
+                return null;
+            }
+
+            return uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps || uri.IsFile
+                ? uri.AbsoluteUri : null;
         }
     }
 }
