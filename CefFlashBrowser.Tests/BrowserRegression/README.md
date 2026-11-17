@@ -179,7 +179,7 @@ and orderly CEF/storage shutdown. The existing Costura IncludeAssets warning rem
 | Release x86 | Passed | 395 passed | Recovery passed | Passed | Passed |
 
 The two version 1.1.8 archives were produced by `publish.ps1`. Each archive smoke installs assets
-from a loopback fixture, checks schema 3 and separate content-addressed files, then restores
+from a loopback fixture, checks schema 2 and separate content-addressed files, then restores
 source and assets offline through the public persistence contract. It also verifies real CEF
 injection, synchronous typed-value bootstrap, acknowledged GM writes, native SQLite deployment,
 Costura loading and orderly shutdown using only the extracted archive. The existing Costura

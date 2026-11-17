@@ -64,7 +64,7 @@ namespace CefFlashBrowser.Tests
                 await Task.WhenAll(initialization, read, write);
                 Assert.AreSame(initialization, _service.InitializeAsync());
                 Assert.AreEqual(1, controlled.InitializationCount);
-                Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
+                Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
                 Assert.AreEqual(1, (await _service.GetWebsiteIconsAsync()).Count);
             }
             finally { controlled.ReleaseInitialization.TrySetResult(true); }
@@ -86,8 +86,7 @@ namespace CefFlashBrowser.Tests
         [DataTestMethod]
         [DataRow(0)]
         [DataRow(1)]
-        [DataRow(2)]
-        public async Task ExistingOldDatabase_IsRejectedWithoutMigration(int version)
+        public async Task ExistingIconDatabase_UpgradesAndPreservesMappings(int version)
         {
             await _database.TransactionAsync(session =>
             {
@@ -96,23 +95,28 @@ namespace CefFlashBrowser.Tests
                 session.Execute("PRAGMA user_version = " + version);
             });
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.InitializeAsync());
-            Assert.AreEqual((long)version, await _database.ScalarAsync("PRAGMA user_version"));
-            Assert.AreEqual("icon", await _database.ScalarAsync("SELECT icon_url FROM website_icons"));
-            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'monkeysharp_scripts'"));
+            await _service.InitializeAsync();
+
+            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual("icon", (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
+            Assert.AreEqual(0, (await _service.GetUserScriptsAsync()).Count);
         }
 
-        [TestMethod]
-        public async Task UnsupportedVersion_RejectsReadsAndWrites_WithoutChangingDatabase()
+        [DataTestMethod]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(4)]
+        public async Task CurrentOrNewerVersion_AllowsReadsAndWrites_WithoutChangingVersion(int version)
         {
-            await _database.ExecuteAsync("PRAGMA user_version = 4");
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.InitializeAsync());
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.GetWebsiteIconsAsync());
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.SaveWebsiteIconAsync(
-                new WebsiteIconRecord("https://example.com/a", "https://example.com/icon", 10)));
+            await _service.InitializeAsync();
+            await _database.ExecuteAsync("PRAGMA user_version = " + version);
+            _service = new DatabaseService(_database);
 
-            Assert.AreEqual(4L, await _database.ScalarAsync("PRAGMA user_version"));
-            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'website_icons'"));
+            await _service.InitializeAsync();
+            await _service.SaveWebsiteIconAsync(new WebsiteIconRecord("https://example.com/a", "https://example.com/icon", 10));
+
+            Assert.AreEqual("https://example.com/icon", (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
+            Assert.AreEqual((long)version, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]
@@ -132,7 +136,7 @@ namespace CefFlashBrowser.Tests
 
             await new DatabaseService(_database).InitializeAsync();
 
-            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]
@@ -218,7 +222,7 @@ namespace CefFlashBrowser.Tests
                     break;
             }
 
-            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]
@@ -232,7 +236,7 @@ namespace CefFlashBrowser.Tests
                 () => throw new IOException("source switch failed"), CancellationToken.None));
 
             Assert.IsNull(await _service.GetUserScriptAsync(key));
-            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
 
             await _service.SaveUserScriptAsync(record, Array.Empty<UserScriptAssetDatabaseRecord>(), null, CancellationToken.None);
 

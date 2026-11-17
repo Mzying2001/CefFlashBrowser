@@ -191,18 +191,21 @@ namespace CefFlashBrowser.Tests
         [TestMethod]
         public async Task DatabaseFailure_RemainsGlobalAndInitializationCanRetry()
         {
-            await _database.ExecuteAsync("PRAGMA user_version = 4");
+            await _database.ExecuteAsync("CREATE TABLE monkeysharp_resource_names (value INTEGER)");
 
             var service = Create();
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => service.InitializeAsync());
+            await Assert.ThrowsExceptionAsync<System.Data.SQLite.SQLiteException>(() => service.InitializeAsync());
             Assert.IsNotNull(service.InitializationError);
             Assert.ThrowsException<InvalidOperationException>(() =>
             {
                 var ignored = service.Repository;
             });
 
-            await _database.ExecuteAsync("PRAGMA user_version = 0");
+            Assert.AreEqual(0L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'website_icons'"));
+
+            await _database.ExecuteAsync("DROP TABLE monkeysharp_resource_names");
             await service.InitializeAsync();
 
             Assert.IsNull(service.InitializationError);

@@ -49,65 +49,71 @@ namespace CefFlashBrowser.Services
             {
                 long version = Convert.ToInt64(session.Scalar("PRAGMA user_version"));
 
-                if (version == 3)
-                    return;
+                if (version < 1)
+                {
+                    session.Execute(
+                        "CREATE TABLE IF NOT EXISTS website_icons ( " +
+                        "page_url TEXT PRIMARY KEY NOT NULL, " +
+                        "icon_url TEXT NOT NULL, " +
+                        "updated_at INTEGER NOT NULL)");
 
-                if (version != 0 || Convert.ToInt64(session.Scalar(
-                    "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")) != 0)
-                    throw new InvalidOperationException("The browser database format is not supported. Use a new data directory.");
+                    session.Execute("PRAGMA user_version = 1");
+                }
 
-                session.Execute(
-                    "CREATE TABLE website_icons ( " +
-                    "page_url TEXT PRIMARY KEY NOT NULL, " +
-                    "icon_url TEXT NOT NULL, " +
-                    "updated_at INTEGER NOT NULL)");
+                if (version < 2)
+                {
+                    session.Execute(
+                        "CREATE TABLE IF NOT EXISTS monkeysharp_scripts ( " +
+                        "script_id TEXT PRIMARY KEY NOT NULL, " +
+                        "install_order INTEGER NOT NULL UNIQUE, " +
+                        "source_origin TEXT NULL, " +
+                        "is_enabled INTEGER NOT NULL CHECK (is_enabled IN (0, 1)), " +
+                        "installed_at TEXT NOT NULL, updated_at TEXT NOT NULL, " +
+                        "source_sha256 TEXT NOT NULL, commit_id TEXT NOT NULL)");
 
-                session.Execute(
-                    "CREATE TABLE monkeysharp_scripts ( " +
-                    "script_id TEXT PRIMARY KEY NOT NULL, " +
-                    "install_order INTEGER NOT NULL UNIQUE, " +
-                    "source_origin TEXT NULL, " +
-                    "is_enabled INTEGER NOT NULL CHECK (is_enabled IN (0, 1)), " +
-                    "installed_at TEXT NOT NULL, updated_at TEXT NOT NULL, " +
-                    "source_sha256 TEXT NOT NULL, commit_id TEXT NOT NULL)");
+                    session.Execute(
+                        "CREATE TABLE IF NOT EXISTS monkeysharp_script_assets ( " +
+                        "script_id TEXT NOT NULL, kind INTEGER NOT NULL CHECK (kind IN (0, 1)), " +
+                        "ordinal INTEGER NOT NULL CHECK (ordinal >= 0), name TEXT NULL, url TEXT NOT NULL, " +
+                        "content_sha256 TEXT NOT NULL, mime TEXT NOT NULL, charset TEXT NULL, " +
+                        "PRIMARY KEY (script_id, kind, ordinal), " +
+                        "CHECK ((kind = 0 AND name IS NULL) OR (kind = 1 AND name IS NOT NULL AND length(name) > 0)))");
 
-                session.Execute(
-                    "CREATE TABLE monkeysharp_script_assets ( " +
-                    "script_id TEXT NOT NULL, kind INTEGER NOT NULL CHECK (kind IN (0, 1)), " +
-                    "ordinal INTEGER NOT NULL CHECK (ordinal >= 0), name TEXT NULL, url TEXT NOT NULL, " +
-                    "content_sha256 TEXT NOT NULL, mime TEXT NOT NULL, charset TEXT NULL, " +
-                    "PRIMARY KEY (script_id, kind, ordinal), " +
-                    "CHECK ((kind = 0 AND name IS NULL) OR (kind = 1 AND name IS NOT NULL AND length(name) > 0)))");
-                session.Execute("CREATE UNIQUE INDEX monkeysharp_resource_names ON monkeysharp_script_assets(script_id, name) WHERE kind = 1");
-                session.Execute("CREATE INDEX monkeysharp_asset_content ON monkeysharp_script_assets(content_sha256)");
+                    session.Execute(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS monkeysharp_resource_names ON monkeysharp_script_assets(script_id, name) WHERE kind = 1");
 
-                session.Execute(
-                    "CREATE TABLE monkeysharp_values ( " +
-                    "script_id TEXT NOT NULL, " +
-                    "value_key TEXT COLLATE BINARY NOT NULL, " +
-                    "encoded_value TEXT NOT NULL, " +
-                    "value_order INTEGER NOT NULL, " +
-                    "updated_at TEXT NOT NULL, " +
-                    "PRIMARY KEY (script_id, value_key), " +
-                    "UNIQUE (script_id, value_order))");
+                    session.Execute(
+                        "CREATE INDEX IF NOT EXISTS monkeysharp_asset_content ON monkeysharp_script_assets(content_sha256)");
 
-                session.Execute(
-                    "CREATE TABLE monkeysharp_permission_decisions ( " +
-                    "script_id TEXT NOT NULL, " +
-                    "kind TEXT NOT NULL, " +
-                    "target TEXT NOT NULL, " +
-                    "decision INTEGER NOT NULL, " +
-                    "updated_at TEXT NOT NULL, " +
-                    "PRIMARY KEY (script_id, kind, target))");
+                    session.Execute(
+                        "CREATE TABLE IF NOT EXISTS monkeysharp_values ( " +
+                        "script_id TEXT NOT NULL, " +
+                        "value_key TEXT COLLATE BINARY NOT NULL, " +
+                        "encoded_value TEXT NOT NULL, " +
+                        "value_order INTEGER NOT NULL, " +
+                        "updated_at TEXT NOT NULL, " +
+                        "PRIMARY KEY (script_id, value_key), " +
+                        "UNIQUE (script_id, value_order))");
 
-                session.Execute(
-                    "CREATE TABLE monkeysharp_tab_states ( " +
-                    "script_id TEXT NOT NULL, " +
-                    "tab_id TEXT NOT NULL, " +
-                    "json_value TEXT NOT NULL, " +
-                    "updated_at TEXT NOT NULL, " +
-                    "PRIMARY KEY (script_id, tab_id))");
-                session.Execute("PRAGMA user_version = 3");
+                    session.Execute(
+                        "CREATE TABLE IF NOT EXISTS monkeysharp_permission_decisions ( " +
+                        "script_id TEXT NOT NULL, " +
+                        "kind TEXT NOT NULL, " +
+                        "target TEXT NOT NULL, " +
+                        "decision INTEGER NOT NULL, " +
+                        "updated_at TEXT NOT NULL, " +
+                        "PRIMARY KEY (script_id, kind, target))");
+
+                    session.Execute(
+                        "CREATE TABLE IF NOT EXISTS monkeysharp_tab_states ( " +
+                        "script_id TEXT NOT NULL, " +
+                        "tab_id TEXT NOT NULL, " +
+                        "json_value TEXT NOT NULL, " +
+                        "updated_at TEXT NOT NULL, " +
+                        "PRIMARY KEY (script_id, tab_id))");
+
+                    session.Execute("PRAGMA user_version = 2");
+                }
             }).ConfigureAwait(false);
         }
 

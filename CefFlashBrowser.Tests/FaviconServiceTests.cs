@@ -406,14 +406,17 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public void UnsupportedVersion_LeavesDatabaseUntouched_AndAcceptsMemoryMappings()
+        public void UnversionedDatabase_UpgradesAndPersistsMappings()
         {
-            _database.ExecuteAsync("PRAGMA user_version = 4").GetAwaiter().GetResult();
+            _database.ExecuteAsync("CREATE TABLE website_icons (page_url TEXT PRIMARY KEY, icon_url TEXT, updated_at INTEGER)").GetAwaiter().GetResult();
+            SeedMapping("https://example.com/saved", "https://example.com/saved-icon", 20);
             Initialize();
             Record("https://example.com/a", "/icon");
+
+            Assert.AreEqual("https://example.com/saved-icon", _service.GetIconUrl("https://example.com/saved"));
             Assert.AreEqual("https://example.com/icon", _service.GetIconUrl("https://example.com/a"));
-            Assert.AreEqual(4L, _database.ScalarAsync("PRAGMA user_version").GetAwaiter().GetResult());
-            Assert.AreEqual(0L, _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'website_icons'").GetAwaiter().GetResult());
+            Assert.AreEqual(2L, _database.ScalarAsync("PRAGMA user_version").GetAwaiter().GetResult());
+            Assert.AreEqual(2L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
         }
 
         [TestMethod]
