@@ -3,6 +3,7 @@ using CefFlashBrowser.ViewModels;
 using CefSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CefFlashBrowser.Browser.UserScripts
 {
@@ -40,8 +41,9 @@ namespace CefFlashBrowser.Browser.UserScripts
             var last = (int)CefMenuCommand.UserLast - 4;
             var limit = Math.Min(ManualLimit, Math.Max(0, last - first + 1));
             var removed = false;
+            var originalCount = _originalCount();
 
-            for (var index = model.Count - 1; index >= _originalCount(); index--)
+            for (var index = model.Count - 1; index >= originalCount; index--)
             {
                 var id = (int)model.GetCommandIdAt(index);
 
@@ -56,19 +58,45 @@ namespace CefFlashBrowser.Browser.UserScripts
                 _reportLimit();
 
             var command = first + limit;
+            var truncated = false;
 
-            foreach (var item in _menus.GetCommands())
+            foreach (var group in _menus.GetCommands().GroupBy(item => item.ScriptKey))
             {
-                if (command > last)
+                // Each script needs an ID for its submenu and at least one command.
+                if (command >= last)
                 {
-                    _reportLimit();
+                    truncated = true;
                     break;
                 }
 
-                var id = (CefMenuCommand)command++;
+                var submenu = model.AddSubMenu((CefMenuCommand)command++, group.First().ScriptName);
 
-                _commands.Add(id, item);
-                model.AddItem(id, item.Name);
+                foreach (var item in group)
+                {
+                    if (command > last)
+                    {
+                        truncated = true;
+                        break;
+                    }
+
+                    var id = (CefMenuCommand)command++;
+
+                    _commands.Add(id, item);
+                    submenu.AddItem(id, item.Name);
+                }
+
+                if (truncated)
+                    break;
+            }
+
+            if (truncated)
+                _reportLimit();
+
+            if (originalCount > 0 && model.Count > originalCount &&
+                model.GetCommandIdAt(originalCount - 1) != CefMenuCommand.NotFound &&
+                model.GetCommandIdAt(originalCount) != CefMenuCommand.NotFound)
+            {
+                model.InsertSeparatorAt(originalCount);
             }
         }
 

@@ -6,6 +6,10 @@ namespace CefFlashBrowser.ViewModels
 {
     public sealed class UserScriptMenuCommand : ViewModelBase
     {
+        public string ScriptKey { get; }
+
+        public string ScriptName { get; }
+
         public string Name { get; }
 
         public string Description { get; }
@@ -19,8 +23,10 @@ namespace CefFlashBrowser.ViewModels
             internal set => UpdateValue(ref _staysOpenOnClick, value);
         }
 
-        public UserScriptMenuCommand(string name, string description, Action<UserScriptMenuCommand> invoke)
+        public UserScriptMenuCommand(string scriptKey, string scriptName, string name, string description, Action<UserScriptMenuCommand> invoke)
         {
+            ScriptKey = scriptKey;
+            ScriptName = scriptName;
             Name = name;
             Description = description;
             InvokeCommand = new DelegateCommand(() => invoke(this));

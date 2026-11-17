@@ -54,7 +54,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     {
                         group = new Group
                         {
-                            Command = new UserScriptMenuCommand(request.Name,
+                            Command = new UserScriptMenuCommand(key.Item1, installation.Definition.Metadata.Name, request.Name,
                                 installation.Definition.Metadata.Name + "\n" + request.Title, InvokeToolbar)
                         };
 
@@ -91,8 +91,9 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         public UserScriptMenuCommand[] GetCommands()
         {
+            // Dictionary slots are reused after removal; the toolbar collection preserves registration order.
             lock (_lock)
-                return _groups.Values.Select(group => group.Command).ToArray();
+                return _model.UserScriptMenus.ToArray();
         }
 
         private static void Refresh(Group group)

@@ -1,18 +1,78 @@
 using CefSharp;
 using CefFlashBrowser.Browser.UserScripts;
+using Mzying2001.MonkeySharp.Core.Apis;
+using Mzying2001.MonkeySharp.Core.Domain;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 public static class UserScriptMenuProbe
 {
+    private static UserScriptMenuService Menus(IWebBrowser browser)
+    {
+        return (UserScriptMenuService)typeof(UserScriptContextMenuHandler)
+            .GetField("_menus", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(browser.MenuHandler);
+    }
+
+    public static async Task<IMenuRegistration[]> RegisterManyAsync(IWebBrowser browser, ScriptKey key, string prefix, int count)
+    {
+        var registrations = new List<IMenuRegistration>();
+        try
+        {
+            for (var index = 0; index < count; index++)
+                registrations.Add(await Menus(browser).RegisterAsync(
+                    new MenuCommandRequest(key, prefix + index, null, null, true, null, false),
+                    invocation => { }, CancellationToken.None));
+
+            return registrations.ToArray();
+        }
+        catch
+        {
+            foreach (var registration in registrations)
+                registration.Dispose();
+            throw;
+        }
+    }
+
+    public static Task<RegressionMenuModelProxy> BuildWithBaseAsync(IWebBrowser browser, bool empty, bool separator)
+    {
+        return Cef.UIThreadTaskFactory.StartNew(() =>
+        {
+            var model = new RegressionMenuModelProxy();
+            var nativeModel = (IMenuModel)model.GetTransparentProxy();
+            if (empty)
+                nativeModel.Clear();
+            if (separator)
+                nativeModel.AddSeparator();
+
+            var count = nativeModel.Count;
+            var handler = new UserScriptContextMenuHandler(new CefFlashBrowser.FlashBrowser.Handlers.ContextMenuHandler(),
+                Menus(browser), () => count, () => model.LimitReports++);
+            handler.OnBeforeContextMenu(browser, browser.GetBrowser(), null,
+                (IContextMenuParams)Parameters().GetTransparentProxy(), nativeModel);
+            return model;
+        });
+    }
+
+    public static ContextMenu Render(RegressionMenuModelProxy model)
+    {
+        var handler = typeof(CefFlashBrowser.Browser.Handlers.ContextMenuHandler);
+        var info = handler.Assembly.GetType("CefFlashBrowser.Browser.Handlers.CefMenuItemInfo")
+            .GetMethod("GetMenuItemInfoList").Invoke(null, new[] { model.GetTransparentProxy() });
+        var items = handler.GetMethod("GetMenuItems", BindingFlags.Static | BindingFlags.NonPublic)
+            .Invoke(null, new[] { info, null });
+        return new ContextMenu { ItemsSource = (IEnumerable)items };
+    }
+
     public static Task<RegressionMenuModelProxy> BuildOverflowAsync(IWebBrowser browser)
     {
         return Cef.UIThreadTaskFactory.StartNew(() =>
         {
-            var outer = (UserScriptContextMenuHandler)browser.MenuHandler;
-            var menus = (UserScriptMenuService)typeof(UserScriptContextMenuHandler)
-                .GetField("_menus", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(outer);
-            var handler = new UserScriptContextMenuHandler(new OverflowHandler(), menus, () => 2, () => { });
+            var handler = new UserScriptContextMenuHandler(new OverflowHandler(), Menus(browser), () => 2, () => { });
             var model = new RegressionMenuModelProxy();
 
             using (var frame = browser.GetBrowser().MainFrame)

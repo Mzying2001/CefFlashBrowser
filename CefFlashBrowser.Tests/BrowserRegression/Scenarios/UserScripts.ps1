@@ -495,10 +495,31 @@ function Test-UserScriptMenus($Context) {
         } 'runtime menu registration'
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
         $menu = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'build native script menu'
-        $ids = @($menu.Commands | Where-Object { $_ -ne [CefSharp.CefMenuCommand]::NotFound })
+        $ids = @($menu.AllCommands | Where-Object { $_ -ne [CefSharp.CefMenuCommand]::NotFound })
         Assert-Regression (@($ids | Sort-Object -Unique).Count -eq $ids.Count) 'manual, dynamic and application menu IDs are unique'
         Assert-Regression ($ids -contains [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::Search -and
             $ids -contains [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::OpenInNewTab) 'script menus retain application search and new-tab commands'
+        $separator = [CefSharp.CefMenuCommand]::NotFound
+        $manualIndex = $menu.Labels.IndexOf('Manual 0')
+        Assert-Regression ($manualIndex -gt 0 -and $menu.Commands[$manualIndex - 1] -eq $separator -and
+            $menu.Commands[$manualIndex - 2] -ne $separator) 'one separator precedes the entire userscript section'
+        $parentId = $menu.Commands[$menu.Labels.IndexOf('Runtime menu')]
+        $submenu = $menu.SubMenus[$parentId]
+        Assert-Regression ($menu.SubMenus.Count -eq 1 -and ($submenu.Labels -join ',') -eq 'Runtime command,Frame command' -and
+            !$menu.Labels.Contains('Runtime command')) 'a single script places its registered commands in a named submenu'
+        foreach ($trailingSeparator in @($false, $true)) {
+            $boundary = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildWithBaseAsync($model.Browser, $false, $trailingSeparator)) 'build menu boundary'
+            Assert-Regression ($boundary.Commands.Count -eq 3 -and $boundary.Commands[1] -eq $separator -and
+                $boundary.Labels[2] -eq 'Runtime menu') 'registered menus have exactly one separator after browser commands'
+        }
+        $emptyBase = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildWithBaseAsync($model.Browser, $true, $false)) 'build scripts-only menu'
+        Assert-Regression ($emptyBase.Commands.Count -eq 1 -and $emptyBase.SubMenus.Count -eq 1) 'scripts-only menu has no leading separator'
+        $rendered = [UserScriptMenuProbe]::Render($menu)
+        $parent = @($rendered.Items | Where-Object { $_ -is [System.Windows.Controls.MenuItem] -and $_.Header -eq 'Runtime menu' })[0]
+        Assert-Regression ($null -eq $parent.Command -and $parent.IsEnabled -and $parent.Items.Count -eq 2 -and
+            $null -ne $parent.Items[0].Command) 'WPF renders a non-executing script parent and executable children'
+        [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $parentId)) 'ignore script parent command')
+        Assert-Regression ($null -eq (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-runtime-menu')")) 'script parent cannot invoke a registered callback'
         for ($index = 0; $index -lt 5; $index++) {
             $command = [CefSharp.CefMenuCommand]([int][CefSharp.CefMenuCommand]::UserFirst + $index)
             Assert-Regression ($ids -contains $command) "manual source $index has a native command"
@@ -510,18 +531,111 @@ function Test-UserScriptMenus($Context) {
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '1' } 'toolbar GM command callback'
         Invoke-BrowserCommand $model.UserScriptMenus[1].InvokeCommand
         Assert-Regression ($null -eq (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-frame-menu')")) 'toolbar invocation cannot attest a clicked frame'
-        $dynamicId = [CefSharp.CefMenuCommand]([int][CefSharp.CefMenuCommand]::UserFirst + [CefFlashBrowser.Browser.UserScripts.UserScriptContextMenuHandler]::ManualLimit)
+        $dynamicId = $submenu.Commands[0]
         [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $dynamicId)) 'invoke native GM command')
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '2' } 'native GM command callback'
-        [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, [CefSharp.CefMenuCommand]([int]$dynamicId + 1))) 'invoke frame-attested GM menu')
+        [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $submenu.Commands[1])) 'invoke frame-attested GM menu')
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-frame-menu')") -eq 'yes' } 'native frame attests the isolated menu subscriber'
 
+        $orderRegistrations = @()
+        try {
+            $orderRegistrations += Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($model.Browser, $installed[5], 'Order ', 3)) 'register ordered commands'
+            $orderRegistrations[1].Dispose()
+            Wait-Regression $Context { $model.UserScriptMenus.Count -eq 4 } 'unregister middle command'
+            $orderRegistrations += Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($model.Browser, $installed[5], 'Replacement ', 1)) 'register replacement command'
+            $orderedMenu = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'build menu after unregister and register'
+            $orderedLabels = @($orderedMenu.SubMenus.Values)[0].Labels -join ','
+            Assert-Regression ($orderedLabels -eq 'Runtime command,Frame command,Order 0,Order 2,Replacement 0') "new commands append after surviving commands (actual: $orderedLabels)"
+        } finally {
+            foreach ($registration in $orderRegistrations) { $registration.Dispose() }
+        }
+        Wait-Regression $Context { $model.UserScriptMenus.Count -eq 2 } 'ordering registrations are released'
+
+        $groupRegistrations = @()
+        try {
+            $groupRegistrations += Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($model.Browser, $installed[0], 'First group ', 1)) 'register first transient script group'
+            $groupRegistrations += Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($model.Browser, $installed[1], 'Second group ', 1)) 'register second transient script group'
+            $orderedMenu = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'build ordered script groups'
+            $groupNames = @($orderedMenu.Commands | Where-Object { $orderedMenu.SubMenus.ContainsKey($_) } | ForEach-Object { $orderedMenu.Labels[$orderedMenu.Commands.IndexOf($_)] }) -join ','
+            Assert-Regression ($groupNames -eq 'Runtime menu,Manual 0,Manual 1') "new script groups follow registration order (actual: $groupNames)"
+            $groupRegistrations[0].Dispose()
+            Wait-Regression $Context { $model.UserScriptMenus.Count -eq 3 } 'unregister first transient script group'
+            $groupRegistrations += Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($model.Browser, $installed[0], 'Replacement group ', 1)) 'reregister first transient script group'
+            $orderedMenu = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'build reordered script groups'
+            $groupNames = @($orderedMenu.Commands | Where-Object { $orderedMenu.SubMenus.ContainsKey($_) } | ForEach-Object { $orderedMenu.Labels[$orderedMenu.Commands.IndexOf($_)] }) -join ','
+            Assert-Regression ($groupNames -eq 'Runtime menu,Manual 1,Manual 0') "reregistered script groups append after surviving groups (actual: $groupNames)"
+        } finally {
+            foreach ($registration in $groupRegistrations) { $registration.Dispose() }
+        }
+        Wait-Regression $Context { $model.UserScriptMenus.Count -eq 2 } 'transient script groups are released'
+
         $overflow = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildOverflowAsync($model.Browser)) 'bounded oversized script menu'
-        $overflowIds = @($overflow.Commands | Where-Object { $_ -ne [CefSharp.CefMenuCommand]::NotFound })
+        $overflowIds = @($overflow.AllCommands | Where-Object { $_ -ne [CefSharp.CefMenuCommand]::NotFound })
         Assert-Regression (@($overflowIds | Sort-Object -Unique).Count -eq $overflowIds.Count -and
             $overflowIds -contains [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::Search -and
             @($overflowIds | Where-Object { [int]$_ -ge [int][CefSharp.CefMenuCommand]::UserFirst -and [int]$_ -lt ([int][CefSharp.CefMenuCommand]::UserFirst + 1024) }).Count -eq 1024) 'oversized manual menus preserve reserved IDs and enforce their cap'
         Complete-UserScriptTask $Context ([UserScriptMenuProbe]::DismissAsync($model.Browser)) 'dismiss script menu'
+        $handled = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $dynamicId)) 'invoke dismissed script command'
+        Assert-Regression (!$handled) 'dismissal clears the submenu command mapping'
+
+        foreach ($fixture in @(
+            @{ Name = 'Other menu'; Attribute = 'other' },
+            @{ Name = 'Runtime menu'; Attribute = 'same-name' }
+        )) {
+            $source = @"
+// ==UserScript==
+// @name $($fixture.Name)
+// @namespace menu-regression-$($fixture.Attribute)
+// @match file:///*
+// @sandbox DOM
+// @grant GM.registerMenuCommand
+// ==/UserScript==
+GM.registerMenuCommand('Runtime command', function() {
+    document.documentElement.setAttribute('data-menu-$($fixture.Attribute)', 'yes');
+});
+"@
+            $item = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None)) 'install additional menu script'
+            $installed.Add($item.ScriptKey)
+        }
+        Wait-Regression $Context { $model.UserScriptMenus.Count -eq 4 } 'multiple scripts register menus'
+        $menu = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'build grouped script menus'
+        Assert-Regression ($menu.SubMenus.Count -eq 3 -and @($menu.Labels | Where-Object { $_ -eq 'Runtime menu' }).Count -eq 2) 'different installations with the same name retain independent groups'
+        $ids = @($menu.AllCommands | Where-Object { $_ -ne $separator })
+        Assert-Regression (@($ids | Sort-Object -Unique).Count -eq $ids.Count) 'all submenu parents and children have unique IDs'
+        foreach ($fixture in @(
+            @{ Name = 'Other menu'; Attribute = 'other' },
+            @{ Name = 'Runtime menu'; Attribute = 'same-name' }
+        )) {
+            $group = @($menu.SubMenus.GetEnumerator() | Where-Object {
+                $menu.Labels[$menu.Commands.IndexOf($_.Key)] -eq $fixture.Name -and $_.Value.Commands.Count -eq 1
+            })[0].Value
+            Assert-Regression ($group.Labels[0] -eq 'Runtime command') 'single-command scripts also use submenus'
+            [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $group.Commands[0])) 'invoke grouped command')
+            Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-menu-$($fixture.Attribute)')") -eq 'yes' } 'submenu invokes its owning script'
+        }
+        Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-runtime-menu')") -eq '2') 'same-name commands do not invoke another script'
+        $capacity = [int][CefSharp.CefMenuCommand]::UserLast - 4 - [int][CefSharp.CefMenuCommand]::UserFirst -
+            [CefFlashBrowser.Browser.UserScripts.UserScriptContextMenuHandler]::ManualLimit + 1
+        $registrations = @()
+        try {
+            $registrations += Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($model.Browser, $installed[5], 'Capacity ', ($capacity - 4))) 'register near-capacity commands'
+            $bounded = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildWithBaseAsync($model.Browser, $false, $false)) 'build near-capacity menus'
+            Assert-Regression ($bounded.LimitReports -eq 1 -and $bounded.SubMenus.Count -eq 1 -and
+                @($bounded.AllCommands | Where-Object { [int]$_ -ge [int][CefSharp.CefMenuCommand]::UserFirst }).Count -eq ($capacity - 1)) 'one remaining ID cannot create an empty script group'
+            $registrations += Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($model.Browser, $installed[5], 'Overflow ', 2)) 'register overflowing commands'
+            $bounded = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildWithBaseAsync($model.Browser, $false, $false)) 'build overflowing menus'
+            $boundedIds = @($bounded.AllCommands | Where-Object { [int]$_ -ge [int][CefSharp.CefMenuCommand]::UserFirst })
+            Assert-Regression ($bounded.LimitReports -eq 1 -and $bounded.SubMenus.Count -eq 1 -and
+                $boundedIds.Count -eq $capacity -and @($boundedIds | Sort-Object -Unique).Count -eq $capacity -and
+                [int]($boundedIds | Sort-Object | Select-Object -Last 1) -eq ([int][CefSharp.CefMenuCommand]::UserLast - 4)) 'overflow truncates child commands within the reserved ID range'
+        } finally {
+            foreach ($registration in $registrations) { $registration.Dispose() }
+        }
+        Wait-Regression $Context { $model.UserScriptMenus.Count -eq 4 } 'capacity registrations are released'
+        foreach ($key in @($installed[6], $installed[7])) {
+            Complete-UserScriptTask $Context ($repository.SetEnabledAsync($key, $false, [Threading.CancellationToken]::None)) 'disable additional menu script' | Out-Null
+        }
+        Wait-Regression $Context { $model.UserScriptMenus.Count -eq 2 } 'disabled groups unregister their commands'
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $true
         $disabled = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'disabled native script menu'
         Assert-Regression ($disabled.Commands.Count -eq 0) 'disabled browser context menu also removes library and GM entries'
@@ -530,6 +644,11 @@ function Test-UserScriptMenus($Context) {
         Wait-Regression $Context { $model.UserScriptMenus.Count -eq 0 } 'disabled execution unregisters GM menus'
         Invoke-BrowserCommand $oldCommand.InvokeCommand
         Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '2') 'released menu commands cannot invoke an old execution'
+        [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
+        $noCommands = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildWithBaseAsync($model.Browser, $false, $false)) 'build without registered commands'
+        Assert-Regression ($noCommands.Commands.Count -eq 1 -and $noCommands.Commands[0] -eq [CefSharp.CefMenuCommand]::Copy) 'no registered commands add no separator or empty group'
+        $empty = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildWithBaseAsync($model.Browser, $true, $false)) 'build empty menu'
+        Assert-Regression ($empty.Commands.Count -eq 0) 'an empty menu remains empty'
 
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled

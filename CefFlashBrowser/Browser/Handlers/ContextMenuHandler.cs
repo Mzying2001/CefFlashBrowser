@@ -185,19 +185,21 @@ namespace CefFlashBrowser.Browser.Handlers
                     continue;
                 }
 
+                var command = item.SubMenuItemInfos != null ? null : new DelegateCommand
+                {
+                    CanExecute = item.IsEnable,
+                    Execute = delegate { callback.Continue(item.CommandID, CefEventFlags.None); }
+                };
+
                 yield return new MenuItem
                 {
                     Header = GetHeader(item),
                     Icon = GetIcon(item.CommandID),
                     Padding = new Thickness(10, 5, 10, 5),
                     IsChecked = item.IsChecked,
-                    ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback),
-
-                    Command = new DelegateCommand
-                    {
-                        CanExecute = item.IsEnable,
-                        Execute = delegate { callback.Continue(item.CommandID, CefEventFlags.None); }
-                    }
+                    IsEnabled = item.IsEnable,
+                    Command = command,
+                    ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback)
                 };
             }
         }
