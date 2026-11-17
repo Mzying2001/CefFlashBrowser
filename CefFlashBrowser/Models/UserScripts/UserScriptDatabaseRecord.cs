@@ -6,17 +6,11 @@ namespace CefFlashBrowser.Models.UserScripts
     public sealed class UserScriptDatabaseRecord
     {
         public ScriptKey ScriptKey { get; }
-
         public string SourceOrigin { get; }
-
         public bool IsEnabled { get; }
-
         public DateTimeOffset InstalledAt { get; }
-
         public DateTimeOffset UpdatedAt { get; }
-
         public string SourceSha256 { get; }
-
         public string CommitId { get; }
 
         public UserScriptDatabaseRecord(ScriptKey scriptKey, string sourceOrigin, bool isEnabled,
