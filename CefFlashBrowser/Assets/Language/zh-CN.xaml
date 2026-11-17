@@ -240,4 +240,24 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
     <sys:String x:Key="error_notSolFile">文件“{0}”不是SOL文件。</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">未知的搜索引擎。</sys:String>
+
+    <!--Userscript manager-->
+    <sys:String x:Key="userScripts_title">用户脚本管理器</sys:String>
+    <sys:String x:Key="userScripts_new">新建脚本</sys:String>
+    <sys:String x:Key="userScripts_newScript">新脚本</sys:String>
+    <sys:String x:Key="userScripts_undo">撤销</sys:String>
+    <sys:String x:Key="userScripts_redo">重做</sys:String>
+    <sys:String x:Key="userScripts_cut">剪切</sys:String>
+    <sys:String x:Key="userScripts_copy">复制</sys:String>
+    <sys:String x:Key="userScripts_paste">粘贴</sys:String>
+    <sys:String x:Key="userScripts_selectAll">全选</sys:String>
+    <sys:String x:Key="userScripts_script">脚本</sys:String>
+    <sys:String x:Key="userScripts_reload">从磁盘重新载入</sys:String>
+    <sys:String x:Key="userScripts_delete">删除</sys:String>
+    <sys:String x:Key="userScripts_saved">已保存。刷新网页后生效。</sys:String>
+    <sys:String x:Key="userScripts_refreshPage">操作已完成。刷新网页以查看效果。</sys:String>
+    <sys:String x:Key="userScripts_deleted">已删除。</sys:String>
+    <sys:String x:Key="userScripts_working">正在处理…</sys:String>
+    <sys:String x:Key="userScripts_cancelled">操作已取消，草稿已保留。</sys:String>
+    <sys:String x:Key="userScripts_conflict">脚本或磁盘源码已变化，草稿已保留。请先重新载入，再比对草稿。</sys:String>
 </ResourceDictionary>

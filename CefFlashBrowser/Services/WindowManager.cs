@@ -1,4 +1,4 @@
-using CefFlashBrowser.Data;
+﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
@@ -212,6 +212,11 @@ namespace CefFlashBrowser.Services
         public static void ShowFavoritesManager()
         {
             ShowWindow<FavoritesManager>(singleton: true);
+        }
+
+        public static void ShowUserScriptManager()
+        {
+            ShowWindow<UserScriptManager>(singleton: true);
         }
 
         public static void ShowSettingsWindow()

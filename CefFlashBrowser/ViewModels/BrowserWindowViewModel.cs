@@ -1,4 +1,4 @@
-using CefFlashBrowser.Data;
+﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
@@ -19,6 +19,7 @@ namespace CefFlashBrowser.ViewModels
 {
     public class BrowserWindowViewModel : ViewModelBase
     {
+        public DelegateCommand OpenUserScriptManagerCommand { get; set; }
         public DelegateCommand ShowMainWindowCommand { get; set; }
         public DelegateCommand ViewSourceCommand { get; set; }
         public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
@@ -497,6 +498,7 @@ namespace CefFlashBrowser.ViewModels
             Browsers = new ReadOnlyObservableCollection<BrowserViewModel>(_browsers);
             AddBrowser(null);
 
+            OpenUserScriptManagerCommand = new DelegateCommand(WindowManager.ShowUserScriptManager);
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
             ViewSourceCommand = new DelegateCommand<BrowserViewModel>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);

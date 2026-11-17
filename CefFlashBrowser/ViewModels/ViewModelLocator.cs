@@ -29,11 +29,23 @@ namespace CefFlashBrowser.ViewModels
             SimpleIoc.Global.Register<MainWindowViewModel>();
             SimpleIoc.Global.Register<SettingsWindowViewModel>();
             SimpleIoc.Global.Register<FavoritesManagerViewModel>();
+            SimpleIoc.Global.Register(UserScriptManagerViewModelFactory);
             SimpleIoc.Global.Register<LanguageSelectorViewModel>();
 
             SimpleIoc.Global.Register(BrowserViewModelFactory, Lifetime.Transient);
             SimpleIoc.Global.Register<BrowserWindowViewModel>(Lifetime.Transient);
             SimpleIoc.Global.Register<SolSaveManagerViewModel>(Lifetime.Transient);
+        }
+
+        private static UserScriptManagerViewModel UserScriptManagerViewModelFactory(object[] parameters)
+        {
+            return new UserScriptManagerViewModel(async () =>
+            {
+                var service = SimpleIoc.Global.GetInstance<Services.UserScripts.UserScriptService>();
+                await service.InitializeAsync();
+                return service.Repository;
+            }, key => SimpleIoc.Global.GetInstance<LanguageService>().GetString(key),
+                action => System.Windows.Application.Current.Dispatcher.InvokeAsync(action));
         }
 
         private static BrowserViewModel BrowserViewModelFactory(object[] parameters)
@@ -79,6 +91,11 @@ namespace CefFlashBrowser.ViewModels
         public FavoritesManagerViewModel FavoritesManagerViewModel
         {
             get => SimpleIoc.Global.GetInstance<FavoritesManagerViewModel>();
+        }
+
+        public UserScriptManagerViewModel UserScriptManagerViewModel
+        {
+            get => SimpleIoc.Global.GetInstance<UserScriptManagerViewModel>();
         }
 
         public LanguageSelectorViewModel LanguageSelectorViewModel

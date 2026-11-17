@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
@@ -14,6 +14,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
+    <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
     <PackageReference Include="Mzying2001.MonkeySharp.Core" Version="4.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -26,6 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\CefFlashBrowser\ViewModels\UserScriptItemViewModel.cs" Link="LinkedSources\UserScripts\UserScriptItemViewModel.cs" />
+    <Compile Include="..\CefFlashBrowser\ViewModels\UserScriptManagerViewModel.cs" Link="LinkedSources\UserScripts\UserScriptManagerViewModel.cs" />
     <Compile Include="..\CefFlashBrowser\Services\UserScripts\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
     <Compile Include="..\CefFlashBrowser\Services\UserScripts\Persistence\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
     <Compile Include="..\CefFlashBrowser\Models\UserScripts\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />

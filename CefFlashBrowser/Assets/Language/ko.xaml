@@ -240,4 +240,24 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" 이름의 키/속성이 이미 있습니다.</sys:String>
     <sys:String x:Key="error_notSolFile">파일 "{0}"은(는) SOL 파일이 아닙니다.</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">알 수 없는 검색 엔진입니다.</sys:String>
+
+    <!--Userscript manager-->
+    <sys:String x:Key="userScripts_title">Userscript Manager</sys:String>
+    <sys:String x:Key="userScripts_new">New script</sys:String>
+    <sys:String x:Key="userScripts_newScript">New script</sys:String>
+    <sys:String x:Key="userScripts_undo">Undo</sys:String>
+    <sys:String x:Key="userScripts_redo">Redo</sys:String>
+    <sys:String x:Key="userScripts_cut">Cut</sys:String>
+    <sys:String x:Key="userScripts_copy">Copy</sys:String>
+    <sys:String x:Key="userScripts_paste">Paste</sys:String>
+    <sys:String x:Key="userScripts_selectAll">Select all</sys:String>
+    <sys:String x:Key="userScripts_script">Script</sys:String>
+    <sys:String x:Key="userScripts_reload">Reload from disk</sys:String>
+    <sys:String x:Key="userScripts_delete">Delete</sys:String>
+    <sys:String x:Key="userScripts_saved">Saved. Refresh the page to apply changes.</sys:String>
+    <sys:String x:Key="userScripts_refreshPage">Done. Refresh the page to see the effect.</sys:String>
+    <sys:String x:Key="userScripts_deleted">Deleted.</sys:String>
+    <sys:String x:Key="userScripts_working">Working…</sys:String>
+    <sys:String x:Key="userScripts_cancelled">Cancelled. Drafts have been kept.</sys:String>
+    <sys:String x:Key="userScripts_conflict">The script or source file changed. Your draft has been kept. Reload and compare it before saving.</sys:String>
 </ResourceDictionary>
