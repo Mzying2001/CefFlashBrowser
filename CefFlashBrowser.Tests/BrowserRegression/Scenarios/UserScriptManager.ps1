@@ -33,6 +33,16 @@ function Send-ManagerShortcut($Context, $Window, [int]$Key) {
     }
 }
 
+function Open-ManagerEditorContextMenu($Context, $Window) {
+    Set-TabWindowForeground $Context $Window
+    $editor = $Window.FindName('sourceEditor')
+    [void]$editor.Focus()
+    Wait-Regression $Context { $editor.TextArea.IsKeyboardFocusWithin } 'editor focus before opening its context menu'
+    [RegressionKeyboard]::PressKey(0x5D)
+    Wait-Regression $Context { $editor.ContextMenu.IsOpen } 'editor context menu opens through native context-menu input'
+    return $editor.ContextMenu
+}
+
 function Test-ManagerSourceEditor($Context, $Window) {
     $model = $Window.DataContext
     $editor = $Window.FindName('sourceEditor')
@@ -95,6 +105,29 @@ function Test-ManagerSourceEditor($Context, $Window) {
         Assert-Regression ($first.Source.StartsWith('const')) 'paste menu updates the bound draft'
         $editMenu.Items[6].Command.Execute($null, $editMenu.Items[6].CommandTarget)
         Assert-Regression ($editor.SelectionLength -eq $editor.Text.Length) 'select-all menu selects the full document'
+        $editor.Select(0, 5)
+        $contextMenu = Open-ManagerEditorContextMenu $Context $Window
+        $contextItems = @($contextMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] })
+        Assert-Regression ($contextItems.Count -eq 6 -and @($contextItems | Where-Object {
+            ![object]::ReferenceEquals($_.CommandTarget, $editor.TextArea)
+        }).Count -eq 0) 'editor context menu routes all six editing commands to its text area'
+        Wait-Regression $Context { $contextItems[2].IsEnabled -and $contextItems[3].IsEnabled -and $contextItems[4].IsEnabled } 'selection and clipboard enable context-menu cut, copy and paste'
+        $contextItems[3].Command.Execute($null, $contextItems[3].CommandTarget)
+        Assert-Regression ([Windows.Clipboard]::GetText() -ceq 'const' -and $editor.SelectedText -ceq 'const') 'context-menu copy preserves the selected text'
+        $contextItems[2].Command.Execute($null, $contextItems[2].CommandTarget)
+        Assert-Regression (!$first.Source.StartsWith('const')) 'context-menu cut updates the draft'
+        $contextItems[4].Command.Execute($null, $contextItems[4].CommandTarget)
+        Assert-Regression ($first.Source.StartsWith('const')) 'context-menu paste updates the draft'
+        $contextItems[0].Command.Execute($null, $contextItems[0].CommandTarget)
+        Assert-Regression (!$first.Source.StartsWith('const')) 'context-menu undo reverses the paste'
+        $contextItems[1].Command.Execute($null, $contextItems[1].CommandTarget)
+        Assert-Regression ($first.Source.StartsWith('const')) 'context-menu redo restores the paste'
+        $contextItems[5].Command.Execute($null, $contextItems[5].CommandTarget)
+        Assert-Regression ($editor.SelectionLength -eq $editor.Text.Length) 'context-menu select-all selects the full document'
+        $editor.Select(0, 0)
+        [Windows.Input.CommandManager]::InvalidateRequerySuggested()
+        Wait-Regression $Context { !$contextItems[2].IsEnabled -and !$contextItems[3].IsEnabled } 'context-menu cut and copy disable without a selection'
+        $contextMenu.IsOpen = $false
         $sameSource = $first.Source
         Send-ManagerShortcut $Context $Window 0x4E
         Wait-Regression $Context { ![object]::ReferenceEquals($first, $model.SelectedScript) } 'Ctrl+N creates a new script from editor focus'
@@ -114,6 +147,7 @@ function Test-ManagerSourceEditor($Context, $Window) {
         Wait-Regression $Context { $editor.Text -ceq $second.Source } 'identical-source selection is displayed'
         Assert-Regression (!$editor.Document.UndoStack.CanUndo -and !$editor.Document.UndoStack.CanRedo) 'identical-source script switches also clear undo and redo'
     } finally {
+        $editor.ContextMenu.IsOpen = $false
         if ($clipboardCaptured) { [UserScriptClipboardProbe]::Restore($clipboard) }
         $model.SelectedScript = $previousSelection
         if ($null -ne $first) { [void]$model.Scripts.Remove($first) }
@@ -415,6 +449,13 @@ document.documentElement.setAttribute('data-manager', 'saved');
             $Context.LanguageService.SetCurrentLanguage($locale)
             Wait-Regression $Context { $window.Title -eq $Context.LanguageService.GetString('userScriptManager_title') } "manager language ($locale)"
             Assert-Regression (![string]::IsNullOrEmpty($window.Title)) 'manager title is localized in every supported language'
+            $editorMenu = Open-ManagerEditorContextMenu $Context $window
+            $editorMenuItems = @($editorMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] })
+            $editorMenuKeys = @('undo', 'redo', 'cut', 'copy', 'paste', 'selectAll')
+            for ($index = 0; $index -lt $editorMenuKeys.Count; $index++) {
+                Assert-Regression ($editorMenuItems[$index].Header -eq $Context.LanguageService.GetString('userScriptManager_' + $editorMenuKeys[$index])) "editor context menu localizes $($editorMenuKeys[$index]) in $locale"
+            }
+            $editorMenu.IsOpen = $false
             $menu = Open-ManagerContextMenu $Context $window $previousSelection
             Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
         }
@@ -465,6 +506,10 @@ document.documentElement.setAttribute('data-manager', 'saved');
             $newEditor = New-Object CefFlashBrowser.Views.Custom.ScriptEditor
             Assert-Regression ($newEditor.Background.Color -eq $editor.Background.Color -and
                 $newEditor.SyntaxHighlighting.GetNamedColor('JavaScriptKeyWords').Foreground.GetColor($null) -eq $themeKeywords[$appearance.ToString()]) "new editors initialize with the current $appearance theme"
+            $editorMenu = Open-ManagerEditorContextMenu $Context $window
+            Assert-Regression ((Get-ManagerColorContrast $editorMenu.Items[0].Foreground.Color $editorMenu.Background.Color) -ge 4.5 -and
+                (Get-ManagerColorContrast $editorMenu.Background.Color $editor.Background.Color) -lt 2) "editor context menu follows the $appearance theme with readable text"
+            $editorMenu.IsOpen = $false
             $menu = Open-ManagerContextMenu $Context $window $item
             Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
             $list = $window.FindName('scriptList')

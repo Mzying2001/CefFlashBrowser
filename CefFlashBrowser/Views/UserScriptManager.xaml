@@ -275,6 +275,30 @@
                             </Style.Triggers>
                         </Style>
                     </c:ScriptEditor.Style>
+                    <c:ScriptEditor.ContextMenu>
+                        <ContextMenu DataContext="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="{DynamicResource userScriptManager_undo}"
+                                      Command="ApplicationCommands.Undo"
+                                      CommandTarget="{Binding}"/>
+                            <MenuItem Header="{DynamicResource userScriptManager_redo}"
+                                      Command="ApplicationCommands.Redo"
+                                      CommandTarget="{Binding}"/>
+                            <Separator/>
+                            <MenuItem Header="{DynamicResource userScriptManager_cut}"
+                                      Command="ApplicationCommands.Cut"
+                                      CommandTarget="{Binding}"/>
+                            <MenuItem Header="{DynamicResource userScriptManager_copy}"
+                                      Command="ApplicationCommands.Copy"
+                                      CommandTarget="{Binding}"/>
+                            <MenuItem Header="{DynamicResource userScriptManager_paste}"
+                                      Command="ApplicationCommands.Paste"
+                                      CommandTarget="{Binding}"/>
+                            <Separator/>
+                            <MenuItem Header="{DynamicResource userScriptManager_selectAll}"
+                                      Command="ApplicationCommands.SelectAll"
+                                      CommandTarget="{Binding}"/>
+                        </ContextMenu>
+                    </c:ScriptEditor.ContextMenu>
                 </c:ScriptEditor>
             </DockPanel>
         </Grid>
