@@ -34,8 +34,10 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             var id = ScriptKey.Parse(key.ToString()).ToString();
 
             using (var document = JsonDocument.Parse(jsonValue))
+            {
                 if (document.RootElement.ValueKind != JsonValueKind.Object)
                     throw new ArgumentException("Tab state must be a JSON object.", nameof(jsonValue));
+            }
 
             return _storage.RunAsync(() => _storage.Database.SaveUserScriptTabStateAsync(
                 id, _tabId, jsonValue, EnsureAlive, token), token);

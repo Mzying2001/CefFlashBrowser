@@ -13,8 +13,10 @@ public static class UserScriptFrameProbe
             foreach (var id in native.GetFrameIdentifiers())
             {
                 using (var frame = native.GetFrame(id))
+                {
                     if (frame != null && frame.IsValid && frame.Url == url)
                         return frame.EvaluateScriptAsync(code);
+                }
             }
 
             throw new InvalidOperationException("Fixture frame not found: " + url);

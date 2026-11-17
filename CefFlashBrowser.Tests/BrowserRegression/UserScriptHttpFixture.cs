@@ -103,8 +103,10 @@ public sealed class UserScriptHttpFixture : IDisposable
                 string line;
 
                 while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync().ConfigureAwait(false)))
+                {
                     if (line.StartsWith("Cookie:", StringComparison.OrdinalIgnoreCase))
                         cookie = line.Substring(7).Trim();
+                }
 
                 requests.AddOrUpdate(path, 1, (key, value) => value + 1);
                 cookies[path] = cookie;

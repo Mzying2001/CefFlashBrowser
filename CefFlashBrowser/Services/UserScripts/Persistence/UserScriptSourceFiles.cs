@@ -312,8 +312,10 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 var root = JObject.Parse(UserScriptFiles.Decode(UserScriptFiles.ReadBytes(Marker(path))));
 
                 foreach (var name in new[] { "operation", "commitId", "previousCommitId", "previousFileHash", "newFileHash" })
+                {
                     if (root.Property(name) == null || root[name].Type != JTokenType.String && root[name].Type != JTokenType.Null)
                         throw new FormatException("Missing or invalid transaction field: " + name);
+                }
 
                 var result = new Journal
                 {

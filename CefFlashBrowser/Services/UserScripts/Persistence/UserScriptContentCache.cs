@@ -49,7 +49,6 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 try
                 {
                     Read(hash);
-
                     return hash;
                 }
                 catch (IOException) { } // A freshly verified copy may replace a corrupt object of the same hash.
@@ -79,18 +78,26 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             UserScriptFiles.CheckPath(_objects);
 
             if (Directory.Exists(_objects))
+            {
                 foreach (var path in Directory.EnumerateFiles(_objects))
+                {
                     if (UserScriptFiles.IsHash(Path.GetFileName(path))
                         && (File.GetAttributes(path) & FileAttributes.ReparsePoint) == 0 && !referenced.Contains(Path.GetFileName(path)))
                         Cleanup(path);
+                }
+            }
 
             UserScriptFiles.CheckPath(_temporary);
 
             if (Directory.Exists(_temporary))
+            {
                 foreach (var path in Directory.EnumerateFiles(_temporary, "*.pending"))
+                {
                     if (Guid.TryParseExact(Path.GetFileNameWithoutExtension(path), "N", out _)
                         && (File.GetAttributes(path) & FileAttributes.ReparsePoint) == 0)
                         Cleanup(path);
+                }
+            }
         }
 
         private string ObjectPath(string hash)

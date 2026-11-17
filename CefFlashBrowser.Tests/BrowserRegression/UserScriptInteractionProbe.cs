@@ -145,8 +145,10 @@ public sealed class UserScriptSaveDialogProbe : IDisposable
                         return;
 
                     using (var frame = browser.GetBrowser().MainFrame)
+                    {
                         if (frame.IsValid)
                             frame.ExecuteJavaScriptAsync("document.dispatchEvent(new Event('downloadCancel'));");
+                    }
                 });
 
             return false;
