@@ -214,6 +214,43 @@
     <sys:String x:Key="userscript_downloadFailed">失败</sys:String>
     <sys:String x:Key="userscript_downloadCancel">取消</sys:String>
 
+    <!--Userscript manager-->
+    <sys:String x:Key="userScripts_title">用户脚本管理器</sys:String>
+    <sys:String x:Key="userScripts_new">新建脚本</sys:String>
+    <sys:String x:Key="userScripts_newScript">新脚本</sys:String>
+    <sys:String x:Key="userScripts_undo">撤销</sys:String>
+    <sys:String x:Key="userScripts_redo">重做</sys:String>
+    <sys:String x:Key="userScripts_cut">剪切</sys:String>
+    <sys:String x:Key="userScripts_copy">复制</sys:String>
+    <sys:String x:Key="userScripts_paste">粘贴</sys:String>
+    <sys:String x:Key="userScripts_selectAll">全选</sys:String>
+    <sys:String x:Key="userScripts_script">脚本</sys:String>
+    <sys:String x:Key="userScripts_reload">从磁盘重新载入</sys:String>
+    <sys:String x:Key="userScripts_delete">删除</sys:String>
+    <sys:String x:Key="userScripts_saved">已保存。刷新网页后生效。</sys:String>
+    <sys:String x:Key="userScripts_refreshPage">操作已完成。刷新网页以查看效果。</sys:String>
+    <sys:String x:Key="userScripts_deleted">已删除。</sys:String>
+    <sys:String x:Key="userScripts_working">正在处理…</sys:String>
+    <sys:String x:Key="userScripts_cancelled">操作已取消，草稿已保留。</sys:String>
+    <sys:String x:Key="userScripts_conflict">脚本或磁盘源码已变化，草稿已保留。请先重新载入，再比对草稿。</sys:String>
+    <sys:String x:Key="userScripts_installFile">从文件安装…</sys:String>
+    <sys:String x:Key="userScripts_installUrl">从 URL 安装…</sys:String>
+    <sys:String x:Key="userScripts_install">安装当前草稿</sys:String>
+    <sys:String x:Key="userScripts_export">导出源码…</sys:String>
+    <sys:String x:Key="userScripts_confirmInstall">是否安装以下脚本？</sys:String>
+    <sys:String x:Key="userScripts_reviewInstall">源码已载入，尚未安装。检查后选择“安装当前草稿”或保存。</sys:String>
+    <sys:String x:Key="userScripts_invalidMetadata">用户脚本元数据无效，请检查头部声明后重试。</sys:String>
+    <sys:String x:Key="userScripts_invalidUrl">请输入有效的 HTTP 或 HTTPS 地址。</sys:String>
+    <sys:String x:Key="userScripts_exported">源码已导出。</sys:String>
+    <sys:String x:Key="userScripts_match">匹配范围</sys:String>
+    <sys:String x:Key="userScripts_world">执行环境</sys:String>
+    <sys:String x:Key="userScripts_grants">声明权限</sys:String>
+    <sys:String x:Key="userScripts_cancel">取消</sys:String>
+    <sys:String x:Key="userScripts_load">载入</sys:String>
+    <sys:String x:Key="userScripts_toggle">启用或停用脚本</sys:String>
+    <sys:String x:Key="userScripts_draft">未安装草稿</sys:String>
+    <sys:String x:Key="userScripts_unavailable">不可用</sys:String>
+
     <!--提示信息-->
     <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
     <sys:String x:Key="message_deleteCache">确定要清除所有缓存吗？浏览器将会重启。</sys:String>
@@ -240,43 +277,4 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
     <sys:String x:Key="error_notSolFile">文件“{0}”不是SOL文件。</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">未知的搜索引擎。</sys:String>
-
-    <!--Userscript manager-->
-    <sys:String x:Key="userScripts_title">用户脚本管理器</sys:String>
-    <sys:String x:Key="userScripts_new">新建脚本</sys:String>
-    <sys:String x:Key="userScripts_newScript">新脚本</sys:String>
-    <sys:String x:Key="userScripts_undo">撤销</sys:String>
-    <sys:String x:Key="userScripts_redo">重做</sys:String>
-    <sys:String x:Key="userScripts_cut">剪切</sys:String>
-    <sys:String x:Key="userScripts_copy">复制</sys:String>
-    <sys:String x:Key="userScripts_paste">粘贴</sys:String>
-    <sys:String x:Key="userScripts_selectAll">全选</sys:String>
-    <sys:String x:Key="userScripts_script">脚本</sys:String>
-    <sys:String x:Key="userScripts_reload">从磁盘重新载入</sys:String>
-    <sys:String x:Key="userScripts_delete">删除</sys:String>
-    <sys:String x:Key="userScripts_saved">已保存。刷新网页后生效。</sys:String>
-    <sys:String x:Key="userScripts_refreshPage">操作已完成。刷新网页以查看效果。</sys:String>
-    <sys:String x:Key="userScripts_deleted">已删除。</sys:String>
-    <sys:String x:Key="userScripts_working">正在处理…</sys:String>
-    <sys:String x:Key="userScripts_cancelled">操作已取消，草稿已保留。</sys:String>
-    <sys:String x:Key="userScripts_conflict">脚本或磁盘源码已变化，草稿已保留。请先重新载入，再比对草稿。</sys:String>
-
-    <sys:String x:Key="userScripts_installFile">从文件安装…</sys:String>
-    <sys:String x:Key="userScripts_installUrl">从 URL 安装…</sys:String>
-    <sys:String x:Key="userScripts_install">安装当前草稿</sys:String>
-    <sys:String x:Key="userScripts_export">导出源码…</sys:String>
-    <sys:String x:Key="userScripts_confirmInstall">是否安装以下脚本？</sys:String>
-    <sys:String x:Key="userScripts_reviewInstall">源码已载入，尚未安装。检查后选择“安装当前草稿”或保存。</sys:String>
-    <sys:String x:Key="userScripts_invalidMetadata">用户脚本元数据无效，请检查头部声明后重试。</sys:String>
-    <sys:String x:Key="userScripts_invalidUrl">请输入有效的 HTTP 或 HTTPS 地址。</sys:String>
-    <sys:String x:Key="userScripts_exported">源码已导出。</sys:String>
-    <sys:String x:Key="userScripts_match">匹配范围</sys:String>
-    <sys:String x:Key="userScripts_world">执行环境</sys:String>
-    <sys:String x:Key="userScripts_grants">声明权限</sys:String>
-    <sys:String x:Key="userScripts_cancel">取消</sys:String>
-    <sys:String x:Key="userScripts_load">载入</sys:String>
-    <sys:String x:Key="userScripts_toggle">启用或停用脚本</sys:String>
-
-    <sys:String x:Key="userScripts_draft">未安装草稿</sys:String>
-    <sys:String x:Key="userScripts_unavailable">不可用</sys:String>
 </ResourceDictionary>

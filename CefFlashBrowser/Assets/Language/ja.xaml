@@ -214,6 +214,43 @@
     <sys:String x:Key="userscript_downloadFailed">失敗</sys:String>
     <sys:String x:Key="userscript_downloadCancel">キャンセル</sys:String>
 
+    <!--Userscript manager-->
+    <sys:String x:Key="userScripts_title">ユーザースクリプトマネージャー</sys:String>
+    <sys:String x:Key="userScripts_new">新規スクリプト</sys:String>
+    <sys:String x:Key="userScripts_newScript">新しいスクリプト</sys:String>
+    <sys:String x:Key="userScripts_undo">元に戻す</sys:String>
+    <sys:String x:Key="userScripts_redo">やり直し</sys:String>
+    <sys:String x:Key="userScripts_cut">切り取り</sys:String>
+    <sys:String x:Key="userScripts_copy">コピー</sys:String>
+    <sys:String x:Key="userScripts_paste">貼り付け</sys:String>
+    <sys:String x:Key="userScripts_selectAll">すべて選択</sys:String>
+    <sys:String x:Key="userScripts_script">スクリプト</sys:String>
+    <sys:String x:Key="userScripts_reload">ディスクから再読み込み</sys:String>
+    <sys:String x:Key="userScripts_delete">削除</sys:String>
+    <sys:String x:Key="userScripts_saved">保存しました。変更を適用するにはページを再読み込みしてください。</sys:String>
+    <sys:String x:Key="userScripts_refreshPage">完了しました。結果を確認するにはページを再読み込みしてください。</sys:String>
+    <sys:String x:Key="userScripts_deleted">削除しました。</sys:String>
+    <sys:String x:Key="userScripts_working">処理中…</sys:String>
+    <sys:String x:Key="userScripts_cancelled">操作をキャンセルしました。下書きは保持されています。</sys:String>
+    <sys:String x:Key="userScripts_conflict">スクリプトまたはソースファイルが変更されました。下書きは保持されています。保存する前にファイルを再読み込みし、下書きと比較してください。</sys:String>
+    <sys:String x:Key="userScripts_installFile">ファイルからインストール…</sys:String>
+    <sys:String x:Key="userScripts_installUrl">URL からインストール…</sys:String>
+    <sys:String x:Key="userScripts_install">現在の下書きをインストール</sys:String>
+    <sys:String x:Key="userScripts_export">ソースコードをエクスポート…</sys:String>
+    <sys:String x:Key="userScripts_confirmInstall">このスクリプトをインストールしますか？</sys:String>
+    <sys:String x:Key="userScripts_reviewInstall">ソースコードを読み込みました。まだインストールされていません。内容を確認してから「現在の下書きをインストール」または「保存」を選択してください。</sys:String>
+    <sys:String x:Key="userScripts_invalidMetadata">ユーザースクリプトのメタデータが無効です。メタデータヘッダーを確認して、もう一度お試しください。</sys:String>
+    <sys:String x:Key="userScripts_invalidUrl">有効な HTTP または HTTPS の URL を入力してください。</sys:String>
+    <sys:String x:Key="userScripts_exported">ソースコードをエクスポートしました。</sys:String>
+    <sys:String x:Key="userScripts_match">対象の URL</sys:String>
+    <sys:String x:Key="userScripts_world">実行環境</sys:String>
+    <sys:String x:Key="userScripts_grants">宣言された権限</sys:String>
+    <sys:String x:Key="userScripts_cancel">キャンセル</sys:String>
+    <sys:String x:Key="userScripts_load">読み込み</sys:String>
+    <sys:String x:Key="userScripts_toggle">スクリプトを有効または無効にする</sys:String>
+    <sys:String x:Key="userScripts_draft">未インストールの下書き</sys:String>
+    <sys:String x:Key="userScripts_unavailable">利用不可</sys:String>
+
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">URL を入力してください。</sys:String>
     <sys:String x:Key="message_deleteCache">すべてのキャッシュを削除しますか？ブラウザーが再起動します。</sys:String>
@@ -240,43 +277,4 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" という名前のキー/プロパティは既に存在します。</sys:String>
     <sys:String x:Key="error_notSolFile">ファイル "{0}" は SOL ファイルではありません。</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">不明な検索エンジンです。</sys:String>
-
-    <!--Userscript manager-->
-    <sys:String x:Key="userScripts_title">Userscript Manager</sys:String>
-    <sys:String x:Key="userScripts_new">New script</sys:String>
-    <sys:String x:Key="userScripts_newScript">New script</sys:String>
-    <sys:String x:Key="userScripts_undo">Undo</sys:String>
-    <sys:String x:Key="userScripts_redo">Redo</sys:String>
-    <sys:String x:Key="userScripts_cut">Cut</sys:String>
-    <sys:String x:Key="userScripts_copy">Copy</sys:String>
-    <sys:String x:Key="userScripts_paste">Paste</sys:String>
-    <sys:String x:Key="userScripts_selectAll">Select all</sys:String>
-    <sys:String x:Key="userScripts_script">Script</sys:String>
-    <sys:String x:Key="userScripts_reload">Reload from disk</sys:String>
-    <sys:String x:Key="userScripts_delete">Delete</sys:String>
-    <sys:String x:Key="userScripts_saved">Saved. Refresh the page to apply changes.</sys:String>
-    <sys:String x:Key="userScripts_refreshPage">Done. Refresh the page to see the effect.</sys:String>
-    <sys:String x:Key="userScripts_deleted">Deleted.</sys:String>
-    <sys:String x:Key="userScripts_working">Working…</sys:String>
-    <sys:String x:Key="userScripts_cancelled">Cancelled. Drafts have been kept.</sys:String>
-    <sys:String x:Key="userScripts_conflict">The script or source file changed. Your draft has been kept. Reload and compare it before saving.</sys:String>
-
-    <sys:String x:Key="userScripts_installFile">Install from file…</sys:String>
-    <sys:String x:Key="userScripts_installUrl">Install from URL…</sys:String>
-    <sys:String x:Key="userScripts_install">Install current draft</sys:String>
-    <sys:String x:Key="userScripts_export">Export source…</sys:String>
-    <sys:String x:Key="userScripts_confirmInstall">Install this script?</sys:String>
-    <sys:String x:Key="userScripts_reviewInstall">Source loaded, pending installation. Review it, then choose Install current draft or Save.</sys:String>
-    <sys:String x:Key="userScripts_invalidMetadata">Invalid userscript metadata. Check the metadata header and try again.</sys:String>
-    <sys:String x:Key="userScripts_invalidUrl">Enter a valid HTTP or HTTPS URL.</sys:String>
-    <sys:String x:Key="userScripts_exported">Source exported.</sys:String>
-    <sys:String x:Key="userScripts_match">Matches</sys:String>
-    <sys:String x:Key="userScripts_world">Execution world</sys:String>
-    <sys:String x:Key="userScripts_grants">Declared permissions</sys:String>
-    <sys:String x:Key="userScripts_cancel">Cancel</sys:String>
-    <sys:String x:Key="userScripts_load">Load</sys:String>
-    <sys:String x:Key="userScripts_toggle">Enable or disable script</sys:String>
-
-    <sys:String x:Key="userScripts_draft">Uninstalled draft</sys:String>
-    <sys:String x:Key="userScripts_unavailable">Unavailable</sys:String>
 </ResourceDictionary>

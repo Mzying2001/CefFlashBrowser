@@ -214,6 +214,43 @@
     <sys:String x:Key="userscript_downloadFailed">Non riuscito</sys:String>
     <sys:String x:Key="userscript_downloadCancel">Annulla</sys:String>
 
+    <!--Userscript manager-->
+    <sys:String x:Key="userScripts_title">Gestione script utente</sys:String>
+    <sys:String x:Key="userScripts_new">Nuovo script</sys:String>
+    <sys:String x:Key="userScripts_newScript">Nuovo script</sys:String>
+    <sys:String x:Key="userScripts_undo">Annulla</sys:String>
+    <sys:String x:Key="userScripts_redo">Rifai</sys:String>
+    <sys:String x:Key="userScripts_cut">Taglia</sys:String>
+    <sys:String x:Key="userScripts_copy">Copia</sys:String>
+    <sys:String x:Key="userScripts_paste">Incolla</sys:String>
+    <sys:String x:Key="userScripts_selectAll">Seleziona tutto</sys:String>
+    <sys:String x:Key="userScripts_script">Script</sys:String>
+    <sys:String x:Key="userScripts_reload">Ricarica dal disco</sys:String>
+    <sys:String x:Key="userScripts_delete">Elimina</sys:String>
+    <sys:String x:Key="userScripts_saved">Salvato. Ricarica la pagina per applicare le modifiche.</sys:String>
+    <sys:String x:Key="userScripts_refreshPage">Operazione completata. Ricarica la pagina per vedere il risultato.</sys:String>
+    <sys:String x:Key="userScripts_deleted">Eliminato.</sys:String>
+    <sys:String x:Key="userScripts_working">Elaborazione in corso…</sys:String>
+    <sys:String x:Key="userScripts_cancelled">Operazione annullata. Le bozze sono state conservate.</sys:String>
+    <sys:String x:Key="userScripts_conflict">Lo script o il file sorgente è stato modificato. La bozza è stata conservata. Ricarica il file e confrontalo con la bozza prima di salvare.</sys:String>
+    <sys:String x:Key="userScripts_installFile">Installa da file…</sys:String>
+    <sys:String x:Key="userScripts_installUrl">Installa da URL…</sys:String>
+    <sys:String x:Key="userScripts_install">Installa la bozza attuale</sys:String>
+    <sys:String x:Key="userScripts_export">Esporta il codice sorgente…</sys:String>
+    <sys:String x:Key="userScripts_confirmInstall">Installare questo script?</sys:String>
+    <sys:String x:Key="userScripts_reviewInstall">Codice sorgente caricato, in attesa di installazione. Controllalo, quindi scegli «Installa la bozza attuale» o «Salva».</sys:String>
+    <sys:String x:Key="userScripts_invalidMetadata">Metadati dello script utente non validi. Controlla l'intestazione dei metadati e riprova.</sys:String>
+    <sys:String x:Key="userScripts_invalidUrl">Inserisci un URL HTTP o HTTPS valido.</sys:String>
+    <sys:String x:Key="userScripts_exported">Codice sorgente esportato.</sys:String>
+    <sys:String x:Key="userScripts_match">Indirizzi corrispondenti</sys:String>
+    <sys:String x:Key="userScripts_world">Ambiente di esecuzione</sys:String>
+    <sys:String x:Key="userScripts_grants">Autorizzazioni dichiarate</sys:String>
+    <sys:String x:Key="userScripts_cancel">Annulla</sys:String>
+    <sys:String x:Key="userScripts_load">Carica</sys:String>
+    <sys:String x:Key="userScripts_toggle">Attiva o disattiva lo script</sys:String>
+    <sys:String x:Key="userScripts_draft">Bozza non installata</sys:String>
+    <sys:String x:Key="userScripts_unavailable">Non disponibile</sys:String>
+
     <!--Messaggi-->
     <sys:String x:Key="message_emptyUrl">Prego, inserisci l'url.</sys:String>
     <sys:String x:Key="message_deleteCache">Sei sicuro di voler eliminare la cache? Il browser si riavvierà.</sys:String>
@@ -240,43 +277,4 @@
     <sys:String x:Key="error_keyOrPropAreadyExists">Esiste già una chiave/proprietà con il nome "{0}".</sys:String>
     <sys:String x:Key="error_notSolFile">Il file "{0}" non è un file SOL.</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">Motore di ricerca sconosciuto.</sys:String>
-
-    <!--Userscript manager-->
-    <sys:String x:Key="userScripts_title">Userscript Manager</sys:String>
-    <sys:String x:Key="userScripts_new">New script</sys:String>
-    <sys:String x:Key="userScripts_newScript">New script</sys:String>
-    <sys:String x:Key="userScripts_undo">Undo</sys:String>
-    <sys:String x:Key="userScripts_redo">Redo</sys:String>
-    <sys:String x:Key="userScripts_cut">Cut</sys:String>
-    <sys:String x:Key="userScripts_copy">Copy</sys:String>
-    <sys:String x:Key="userScripts_paste">Paste</sys:String>
-    <sys:String x:Key="userScripts_selectAll">Select all</sys:String>
-    <sys:String x:Key="userScripts_script">Script</sys:String>
-    <sys:String x:Key="userScripts_reload">Reload from disk</sys:String>
-    <sys:String x:Key="userScripts_delete">Delete</sys:String>
-    <sys:String x:Key="userScripts_saved">Saved. Refresh the page to apply changes.</sys:String>
-    <sys:String x:Key="userScripts_refreshPage">Done. Refresh the page to see the effect.</sys:String>
-    <sys:String x:Key="userScripts_deleted">Deleted.</sys:String>
-    <sys:String x:Key="userScripts_working">Working…</sys:String>
-    <sys:String x:Key="userScripts_cancelled">Cancelled. Drafts have been kept.</sys:String>
-    <sys:String x:Key="userScripts_conflict">The script or source file changed. Your draft has been kept. Reload and compare it before saving.</sys:String>
-
-    <sys:String x:Key="userScripts_installFile">Install from file…</sys:String>
-    <sys:String x:Key="userScripts_installUrl">Install from URL…</sys:String>
-    <sys:String x:Key="userScripts_install">Install current draft</sys:String>
-    <sys:String x:Key="userScripts_export">Export source…</sys:String>
-    <sys:String x:Key="userScripts_confirmInstall">Install this script?</sys:String>
-    <sys:String x:Key="userScripts_reviewInstall">Source loaded, pending installation. Review it, then choose Install current draft or Save.</sys:String>
-    <sys:String x:Key="userScripts_invalidMetadata">Invalid userscript metadata. Check the metadata header and try again.</sys:String>
-    <sys:String x:Key="userScripts_invalidUrl">Enter a valid HTTP or HTTPS URL.</sys:String>
-    <sys:String x:Key="userScripts_exported">Source exported.</sys:String>
-    <sys:String x:Key="userScripts_match">Matches</sys:String>
-    <sys:String x:Key="userScripts_world">Execution world</sys:String>
-    <sys:String x:Key="userScripts_grants">Declared permissions</sys:String>
-    <sys:String x:Key="userScripts_cancel">Cancel</sys:String>
-    <sys:String x:Key="userScripts_load">Load</sys:String>
-    <sys:String x:Key="userScripts_toggle">Enable or disable script</sys:String>
-
-    <sys:String x:Key="userScripts_draft">Uninstalled draft</sys:String>
-    <sys:String x:Key="userScripts_unavailable">Unavailable</sys:String>
 </ResourceDictionary>
