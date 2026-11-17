@@ -52,23 +52,23 @@
             <MenuItem Header="{DynamicResource solEditor_edit}">
                 <MenuItem Header="{DynamicResource userScriptManager_undo}"
                           Command="ApplicationCommands.Undo"
-                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                          CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
                 <MenuItem Header="{DynamicResource userScriptManager_redo}"
                           Command="ApplicationCommands.Redo"
-                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                          CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource userScriptManager_cut}"
                           Command="ApplicationCommands.Cut"
-                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                          CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
                 <MenuItem Header="{DynamicResource userScriptManager_copy}"
                           Command="ApplicationCommands.Copy"
-                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                          CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
                 <MenuItem Header="{DynamicResource userScriptManager_paste}"
                           Command="ApplicationCommands.Paste"
-                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                          CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
                 <MenuItem Header="{DynamicResource userScriptManager_selectAll}"
                           Command="ApplicationCommands.SelectAll"
-                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                          CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource userScriptManager_script}">
                 <MenuItem Header="{DynamicResource userScriptManager_reload}"
@@ -256,27 +256,26 @@
                     </TextBlock.Style>
                 </TextBlock>
 
-                <TextBox x:Name="sourceEditor"
-                         Text="{Binding SelectedScript.Source, UpdateSourceTrigger=PropertyChanged}"
-                         AcceptsReturn="True"
-                         AcceptsTab="True"
-                         FontFamily="Consolas"
-                         FontSize="14"
-                         VerticalContentAlignment="Top"
-                         HorizontalScrollBarVisibility="Auto"
-                         VerticalScrollBarVisibility="Auto"
-                         TextWrapping="NoWrap"
-                         SpellCheck.IsEnabled="False">
-                    <TextBox.Style>
-                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <c:ScriptEditor x:Name="sourceEditor"
+                                SourceText="{Binding SelectedScript.Source, UpdateSourceTrigger=PropertyChanged, TargetNullValue='', FallbackValue=''}"
+                                ShowLineNumbers="True"
+                                FontFamily="Consolas"
+                                FontSize="14"
+                                Padding="4"
+                                BorderThickness="1"
+                                HorizontalScrollBarVisibility="Auto"
+                                VerticalScrollBarVisibility="Auto"
+                                WordWrap="False">
+                    <c:ScriptEditor.Style>
+                        <Style TargetType="c:ScriptEditor">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding SelectedScript}" Value="{x:Null}">
                                     <Setter Property="IsEnabled" Value="False"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </TextBox.Style>
-                </TextBox>
+                    </c:ScriptEditor.Style>
+                </c:ScriptEditor>
             </DockPanel>
         </Grid>
     </DockPanel>

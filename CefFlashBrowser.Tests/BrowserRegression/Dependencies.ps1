@@ -26,7 +26,7 @@ $app = [Reflection.Assembly]::LoadFrom((Join-Path $ApplicationPath 'CefFlashBrow
 
 $assemblies = @{}
 foreach ($name in @('Mzying2001.MonkeySharp.Core', 'Mzying2001.MonkeySharp.CefSharp',
-    'System.Text.Json', 'System.Text.Encoding.CodePages')) {
+    'System.Text.Json', 'System.Text.Encoding.CodePages', 'ICSharpCode.AvalonEdit')) {
     $path = Join-Path $ApplicationPath ($name + '.dll')
     $assembly = if (Test-Path -LiteralPath $path) {
         [Reflection.Assembly]::LoadFrom($path)
@@ -58,4 +58,12 @@ if (@($resources | Where-Object { $_ -like '*.js' }).Count -eq 0 -or
     throw 'MonkeySharp embedded bridge resources are missing.'
 }
 [void](New-Object Mzying2001.MonkeySharp.CefSharp.CefSharpHostOptions)
+$editor = New-Object CefFlashBrowser.Views.Custom.ScriptEditor
+$editor.SourceText = 'const answer = 42;'
+if ($editor.Text -ne $editor.SourceText -or $editor.SyntaxHighlighting.Name -ne 'JavaScript') {
+    throw 'AvalonEdit or its embedded JavaScript definition could not load.'
+}
+if ($Configuration -eq 'Release' -and $assemblies['ICSharpCode.AvalonEdit'].Location) {
+    throw 'Release AvalonEdit must load from Costura resources.'
+}
 Write-Host "Runtime dependency check passed ($Configuration|$Platform)."

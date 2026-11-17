@@ -20,6 +20,118 @@ function Get-ManagerIconText($Icon) {
     return @(Find-FaviconElements $content ([Windows.Controls.TextBlock]))[0]
 }
 
+function Send-ManagerShortcut($Context, $Window, [int]$Key) {
+    Set-TabWindowForeground $Context $Window
+    $editor = $Window.FindName('sourceEditor')
+    [void]$editor.Focus()
+    Wait-Regression $Context { $editor.TextArea.IsKeyboardFocusWithin } 'script editor receives keyboard input'
+    [RegressionKeyboard]::SetKey(0x11, $false)
+    try {
+        [RegressionKeyboard]::PressKey($Key)
+    } finally {
+        [RegressionKeyboard]::SetKey(0x11, $true)
+    }
+}
+
+function Test-ManagerSourceEditor($Context, $Window) {
+    $model = $Window.DataContext
+    $editor = $Window.FindName('sourceEditor')
+    $previousSelection = $model.SelectedScript
+    $first = $null
+    $second = $null
+    $clipboardCaptured = $false
+    try {
+        $model.SelectedScript = $null
+        Wait-Regression $Context { !$editor.IsEnabled -and $editor.Text -eq '' } 'empty script selection clears and disables the editor'
+        Assert-Regression ($editor -is [ICSharpCode.AvalonEdit.TextEditor] -and $editor.ShowLineNumbers -and !$editor.WordWrap) 'manager uses AvalonEdit with line numbers and unwrapped source'
+        Assert-Regression ($editor.Options.IndentationSize -eq 4 -and !$editor.Options.ConvertTabsToSpaces) 'editor preserves tabs with a four-column width'
+        $model.NewScript()
+        $first = $model.SelectedScript
+        $sample = "const answer = 42;`r`n// 中文 comment`r`nlet value = `"text`";"
+        $first.Source = $sample
+        Wait-Regression $Context { $editor.IsEnabled -and $editor.Text -ceq $sample } 'model source changes replace the displayed document without newline conversion'
+        $highlighter = New-Object ICSharpCode.AvalonEdit.Highlighting.DocumentHighlighter($editor.Document, $editor.SyntaxHighlighting)
+        try {
+            $colors = @(1..3 | ForEach-Object { $highlighter.HighlightLine($_).Sections | ForEach-Object { $_.Color.Name } })
+            foreach ($name in @('JavaScriptKeyWords', 'Digits', 'Comment', 'String')) {
+                Assert-Regression ($colors -contains $name) "JavaScript highlights $name tokens"
+            }
+        } finally {
+            $highlighter.Dispose()
+        }
+        $shared = [ICSharpCode.AvalonEdit.Highlighting.HighlightingManager]::Instance.GetDefinition('JavaScript')
+        $other = New-Object CefFlashBrowser.Views.Custom.ScriptEditor
+        Assert-Regression (![object]::ReferenceEquals($shared, $editor.SyntaxHighlighting) -and
+            ![object]::ReferenceEquals($other.SyntaxHighlighting, $editor.SyntaxHighlighting)) 'editors own independent JavaScript color definitions'
+        $editor.CaretOffset = $editor.Text.Length
+        $suffix = "`r`n// typed draft"
+        $editor.TextArea.PerformTextInput($suffix)
+        Assert-Regression ($first.Source -ceq ($sample + $suffix) -and $editor.CaretOffset -eq $editor.Text.Length -and
+            $editor.Document.UndoStack.CanUndo) 'typing updates the draft immediately without resetting caret or undo'
+        $editMenu = $Window.Content.Children[0].Items[1]
+        $wrongTargets = @($editMenu.Items | Where-Object {
+            $_ -is [Windows.Controls.MenuItem] -and ![object]::ReferenceEquals($_.CommandTarget, $editor.TextArea)
+        })
+        Assert-Regression ($wrongTargets.Count -eq 0) 'edit menu routes commands to the AvalonEdit text area'
+        $editMenu.Items[0].Command.Execute($null, $editMenu.Items[0].CommandTarget)
+        Assert-Regression ($first.Source -ceq $sample) 'edit menu undo restores the previous draft'
+        $editMenu.Items[1].Command.Execute($null, $editMenu.Items[1].CommandTarget)
+        Assert-Regression ($first.Source -ceq ($sample + $suffix)) 'edit menu redo restores the typed draft'
+        Send-ManagerShortcut $Context $Window 0x5A
+        Wait-Regression $Context { $first.Source -ceq $sample } 'Ctrl+Z reaches AvalonEdit undo'
+        Send-ManagerShortcut $Context $Window 0x59
+        Wait-Regression $Context { $first.Source -ceq ($sample + $suffix) } 'Ctrl+Y reaches AvalonEdit redo'
+        [RegressionKeyboard]::PressKey(0x09)
+        Wait-Regression $Context { $first.Source.EndsWith("`t") } 'Tab inserts a tab instead of moving keyboard focus'
+        Assert-Regression ($editor.TextArea.IsKeyboardFocusWithin) 'tab indentation retains editor focus'
+        $clipboard = [UserScriptClipboardProbe]::Capture()
+        $clipboardCaptured = $true
+        $editor.Select(0, 5)
+        $editMenu.Items[4].Command.Execute($null, $editMenu.Items[4].CommandTarget)
+        Assert-Regression ([Windows.Clipboard]::GetText() -ceq 'const') 'copy menu copies the editor selection'
+        $editMenu.Items[3].Command.Execute($null, $editMenu.Items[3].CommandTarget)
+        Assert-Regression (!$first.Source.StartsWith('const')) 'cut menu updates the bound draft'
+        $editMenu.Items[5].Command.Execute($null, $editMenu.Items[5].CommandTarget)
+        Assert-Regression ($first.Source.StartsWith('const')) 'paste menu updates the bound draft'
+        $editMenu.Items[6].Command.Execute($null, $editMenu.Items[6].CommandTarget)
+        Assert-Regression ($editor.SelectionLength -eq $editor.Text.Length) 'select-all menu selects the full document'
+        $sameSource = $first.Source
+        Send-ManagerShortcut $Context $Window 0x4E
+        Wait-Regression $Context { ![object]::ReferenceEquals($first, $model.SelectedScript) } 'Ctrl+N creates a new script from editor focus'
+        $second = $model.SelectedScript
+        $second.Source = $sameSource
+        Wait-Regression $Context { $editor.Text -ceq $sameSource } 'another script can display identical source'
+        $editor.CaretOffset = $editor.Text.Length
+        $editor.TextArea.PerformTextInput('// second script')
+        $model.SelectedScript = $first
+        Wait-Regression $Context { $editor.Text -ceq $first.Source } 'selection restores the first draft'
+        Assert-Regression (!$editor.Document.UndoStack.CanUndo -and !$editor.Document.UndoStack.CanRedo -and
+            $second.Source.EndsWith('// second script')) 'switching scripts isolates undo and preserves the other draft'
+        $editor.CaretOffset = $editor.Text.Length
+        $editor.TextArea.PerformTextInput('// same-source switch')
+        $second.Source = $first.Source
+        $model.SelectedScript = $second
+        Wait-Regression $Context { $editor.Text -ceq $second.Source } 'identical-source selection is displayed'
+        Assert-Regression (!$editor.Document.UndoStack.CanUndo -and !$editor.Document.UndoStack.CanRedo) 'identical-source script switches also clear undo and redo'
+    } finally {
+        if ($clipboardCaptured) { [UserScriptClipboardProbe]::Restore($clipboard) }
+        $model.SelectedScript = $previousSelection
+        if ($null -ne $first) { [void]$model.Scripts.Remove($first) }
+        if ($null -ne $second) { [void]$model.Scripts.Remove($second) }
+    }
+}
+
+function Get-ManagerColorContrast($First, $Second) {
+    $luminances = @($First, $Second) | ForEach-Object {
+        $channels = @($_.R, $_.G, $_.B) | ForEach-Object {
+            $value = $_ / 255.0
+            if ($value -le 0.04045) { $value / 12.92 } else { [Math]::Pow(($value + 0.055) / 1.055, 2.4) }
+        }
+        $channels[0] * 0.2126 + $channels[1] * 0.7152 + $channels[2] * 0.0722
+    }
+    return ([Math]::Max($luminances[0], $luminances[1]) + 0.05) / ([Math]::Min($luminances[0], $luminances[1]) + 0.05)
+}
+
 function Test-BrowserIconStyleReuse($Context) {
     $hostWindow = New-Object Windows.Window
     $hostWindow.Left = -10000
@@ -161,19 +273,27 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] })[0]
         Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager initialized'
         Test-BrowserIconStyleReuse $Context
+        Test-ManagerSourceEditor $Context $window
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] }).Count -eq 1) 'manager entry reuses a single window'
         Assert-Regression ($window.InputBindings.Count -eq 3) 'manager exposes new, save and close keyboard bindings'
         Invoke-BrowserCommand $model.NewCommand $null
         $item = $model.SelectedScript
         $editor = $window.FindName('sourceEditor')
-        $editor.SetCurrentValue([Windows.Controls.TextBox]::TextProperty, $source)
-        $editor.GetBindingExpression([Windows.Controls.TextBox]::TextProperty).UpdateSource()
-        Complete-UserScriptTask $Context ($model.SaveAsync()) 'save new script without confirmation'
+        $editor.SelectAll()
+        $editor.TextArea.PerformTextInput($source)
+        Send-ManagerShortcut $Context $window 0x53
+        Wait-Regression $Context { !$model.IsBusy -and $item.IsInstalled -and !$item.IsDirty } 'Ctrl+S saves the latest editor text without confirmation'
         Assert-Regression ($item.IsInstalled -and !$item.IsDirty -and $item.IsEnabled) 'new script saves and enables directly'
         $key = $item.Installation.ScriptKey
         $sourcePath = Join-Path (Join-Path $Context.TemporaryPath ('MonkeySharp\' + $key)) 'userscript.js'
         Assert-Regression ([IO.File]::ReadAllText($sourcePath) -eq $source) 'manager persists source through the shared repository'
+        $reloadedSource = $source + "`r`n// externally reloaded source"
+        [IO.File]::WriteAllText($sourcePath, $reloadedSource, (New-Object Text.UTF8Encoding($false)))
+        Complete-UserScriptTask $Context ($model.ReloadAsync()) 'reload external source into the editor'
+        Assert-Regression ($editor.Text -ceq $reloadedSource -and !$item.IsDirty -and !$editor.CanUndo) 'source reload updates the editor and resets undo without marking it dirty'
+        $item.Source = $source
+        Complete-UserScriptTask $Context ($model.SaveAsync()) 'restore the manager workflow source'
         $browserWindow = New-RegressionWindow $Context
         $browser = $browserWindow.ViewModel.CurrentBrowser.Browser
         $browserWindow.ViewModel.CurrentBrowser.Address = $Context.AuxiliaryAddress
@@ -235,11 +355,14 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $item.Source += "`n// unsaved session draft"
         $model.NewScript()
         $draft = $model.SelectedScript
-        $window.Close()
+        Send-ManagerShortcut $Context $window 0x57
+        Wait-Regression $Context { !$window.IsVisible } 'Ctrl+W closes the manager from editor focus'
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] })[0]
         Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager reopened'
+        $editor = $window.FindName('sourceEditor')
         Assert-Regression ([object]::ReferenceEquals($draft, $model.SelectedScript) -and $item.IsDirty -and $item.Source.Contains('unsaved session draft')) 'selection and unsaved drafts survive manager closure'
+        Assert-Regression ($editor.Text -ceq $draft.Source) 'reopened editor displays the selected unsaved draft'
         $path = Join-Path $Context.TemporaryPath 'manager-import.user.js'
         [IO.File]::WriteAllText($path, $source, (New-Object Text.UTF8Encoding($true)))
         Complete-UserScriptTask $Context ($model.ImportFileAsync($path)) 'load local file draft'
@@ -296,13 +419,52 @@ document.documentElement.setAttribute('data-manager', 'saved');
             Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
         }
         $Context.LanguageService.SetCurrentLanguage('zh-CN')
-        foreach ($appearance in @([CefFlashBrowser.Models.Theme]::Light, [CefFlashBrowser.Models.Theme]::Dark)) {
+        $model.SelectedScript = $item
+        $item.Source = $source + "`r`n" + ((1..60 | ForEach-Object { "const value$_ = 42; // readable code with a long comment " + ('x' * 100) }) -join "`r`n")
+        Wait-Regression $Context { $editor.Text -ceq $item.Source } 'theme fixture source is displayed'
+        $editor.CaretOffset = $editor.Text.Length
+        $editor.TextArea.PerformTextInput("`r`n// theme draft")
+        $editor.Select(10, 12)
+        $editor.ScrollToVerticalOffset(25)
+        $editor.ScrollToHorizontalOffset(16)
+        $window.UpdateLayout()
+        $scrollViewer = $editor.Template.FindName('PART_ScrollViewer', $editor)
+        Assert-Regression ($scrollViewer.ComputedVerticalScrollBarVisibility -eq [Windows.Visibility]::Visible -and
+            $scrollViewer.ComputedHorizontalScrollBarVisibility -eq [Windows.Visibility]::Visible) 'long source exposes both editor scrollbars'
+        $editorState = @{
+            Document = $editor.Document; Source = $item.Source; Dirty = $item.IsDirty
+            Caret = $editor.CaretOffset; SelectionStart = $editor.SelectionStart; SelectionLength = $editor.SelectionLength
+            VerticalOffset = $editor.VerticalOffset; HorizontalOffset = $editor.HorizontalOffset
+        }
+        $sharedHighlighting = [ICSharpCode.AvalonEdit.Highlighting.HighlightingManager]::Instance.GetDefinition('JavaScript')
+        $sharedKeyword = $sharedHighlighting.GetNamedColor('JavaScriptKeyWords').Foreground.GetColor($null)
+        $themeKeywords = @{}
+        foreach ($appearance in @([CefFlashBrowser.Models.Theme]::Light, [CefFlashBrowser.Models.Theme]::Dark, [CefFlashBrowser.Models.Theme]::Light)) {
             Set-ManagerRegressionTheme $Context $appearance
             $frame = New-Object Windows.Threading.DispatcherFrame
             [void]$Context.Application.Dispatcher.BeginInvoke([Windows.Threading.DispatcherPriority]::ApplicationIdle,
                 [Action]({ $frame.Continue = $false }.GetNewClosure()))
             [Windows.Threading.Dispatcher]::PushFrame($frame)
             $window.UpdateLayout()
+            Assert-Regression ([object]::ReferenceEquals($editorState.Document, $editor.Document) -and
+                $editorState.Source -ceq $item.Source -and $editorState.Dirty -eq $item.IsDirty -and
+                $editorState.Caret -eq $editor.CaretOffset -and $editorState.SelectionStart -eq $editor.SelectionStart -and
+                $editorState.SelectionLength -eq $editor.SelectionLength -and $editor.Document.UndoStack.CanUndo -and
+                [Math]::Abs($editorState.VerticalOffset - $editor.VerticalOffset) -lt 1 -and
+                [Math]::Abs($editorState.HorizontalOffset - $editor.HorizontalOffset) -lt 1) "editor preserves draft, caret, selection, scrolling and undo across $appearance theme changes"
+            Assert-Regression ($editor.Background.Color -eq $window.FindResource('RegionBrush').Color -and
+                $editor.Foreground.Color -eq $window.FindResource('PrimaryTextBrush').Color -and
+                $editor.BorderBrush.Color -eq $window.FindResource('BorderBrush').Color -and
+                $editor.TextArea.Caret.CaretBrush.Color -eq $editor.Foreground.Color) "editor surfaces and caret follow the $appearance theme"
+            foreach ($color in @($editor.SyntaxHighlighting.NamedHighlightingColors)) {
+                Assert-Regression ((Get-ManagerColorContrast $color.Foreground.GetColor($null) $editor.Background.Color) -ge 4.5) "$appearance syntax color $($color.Name) has readable contrast"
+            }
+            Assert-Regression ((Get-ManagerColorContrast $editor.LineNumbersForeground.Color $editor.Background.Color) -ge 4.5 -and
+                (Get-ManagerColorContrast $editor.TextArea.SelectionForeground.Color $editor.TextArea.SelectionBrush.Color) -ge 4.5) "$appearance line numbers and selected text have readable contrast"
+            $themeKeywords[$appearance.ToString()] = $editor.SyntaxHighlighting.GetNamedColor('JavaScriptKeyWords').Foreground.GetColor($null)
+            $newEditor = New-Object CefFlashBrowser.Views.Custom.ScriptEditor
+            Assert-Regression ($newEditor.Background.Color -eq $editor.Background.Color -and
+                $newEditor.SyntaxHighlighting.GetNamedColor('JavaScriptKeyWords').Foreground.GetColor($null) -eq $themeKeywords[$appearance.ToString()]) "new editors initialize with the current $appearance theme"
             $menu = Open-ManagerContextMenu $Context $window $item
             Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
             $list = $window.FindName('scriptList')
@@ -323,6 +485,12 @@ document.documentElement.setAttribute('data-manager', 'saved');
             try { $encoder.Save($stream) } finally { $stream.Dispose() }
             Assert-Regression ($null -ne $window.Background) "manager renders with $appearance theme"
         }
+        Assert-Regression ($themeKeywords.Light -ne $themeKeywords.Dark -and
+            $sharedHighlighting.GetNamedColor('JavaScriptKeyWords').Foreground.GetColor($null) -eq $sharedKeyword) 'theme changes recolor the editor without changing shared highlighting'
+        [void]$editor.Undo()
+        Assert-Regression (!$item.Source.EndsWith('// theme draft')) 'undo history still works after repeated theme changes'
+        [void]$editor.Redo()
+        Assert-Regression ($item.Source.EndsWith('// theme draft')) 'redo history still works after repeated theme changes'
     } finally {
         if ($null -ne $browserWindow) { $browserWindow.ForceCloseWindow() }
         if ($null -ne $window) { $window.Close() }

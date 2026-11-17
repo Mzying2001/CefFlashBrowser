@@ -79,6 +79,7 @@ function Expand-RegressionEmbeddedAssemblies($Context) {
 
 function Initialize-RegressionEnvironment($Context) {
     $dependencies = @(
+        'ICSharpCode.AvalonEdit.dll',
         'Mzying2001.MonkeySharp.Core.dll',
         'Mzying2001.MonkeySharp.CefSharp.dll',
         'SimpleMvvm.dll',

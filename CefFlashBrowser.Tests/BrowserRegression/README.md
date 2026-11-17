@@ -76,8 +76,9 @@ When adding checks, put the scenario in the relevant scenario file and register 
 
 ## Userscript dependency baseline
 
-Run `Dependencies.ps1` in a fresh architecture-matched Windows PowerShell process after building.
-It validates MonkeySharp 4.0.0, the CefSharp 84 reference, typed JSON and embedded bridge assets
+Run `Dependencies.ps1` in a fresh architecture-matched STA Windows PowerShell process after building.
+It validates MonkeySharp 4.0.0, the CefSharp 84 reference, typed JSON, embedded bridge assets,
+and AvalonEdit with its embedded JavaScript definition (loaded through Costura in Release)
 without starting CEF. Pass `-Platform x86` or `-Configuration Release` as appropriate;
 `-ApplicationPath` also supports an extracted release. Dependencies must resolve from that output
 or its Costura resources, never from the developer NuGet cache.

@@ -82,11 +82,11 @@ namespace CefFlashBrowser.Views
 
         private void SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // TextBox undo history belongs to the selected script, never the previous item.
-            if (sourceEditor == null) return;
+            // Undo history belongs to the selected script, even when two scripts have identical text.
+            if (sourceEditor == null)
+                return;
 
-            sourceEditor.IsUndoEnabled = false;
-            sourceEditor.IsUndoEnabled = true;
+            sourceEditor.Document.UndoStack.ClearAll();
         }
 
         protected override void OnClosing(CancelEventArgs e)
