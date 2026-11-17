@@ -132,6 +132,23 @@
                     <Style TargetType="ListBoxItem"
                            BasedOn="{StaticResource ListBoxItemBaseStyle}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#20409EFF"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#40409EFF"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="True"/>
+                                    <Condition Property="Selector.IsSelectionActive" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" Value="#40409EFF"/>
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                            </MultiTrigger>
+                        </Style.Triggers>
                     </Style>
                 </ListBox.ItemContainerStyle>
 
@@ -153,7 +170,8 @@
                                 </TextBlock>
 
                                 <TextBlock Text="{Binding Version}"
-                                           Foreground="{DynamicResource SecondaryTextBrush}">
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Opacity="0.7">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
@@ -165,7 +183,8 @@
                                     </TextBlock.Style>
                                 </TextBlock>
 
-                                <TextBlock Foreground="{DynamicResource SecondaryTextBrush}">
+                                <TextBlock Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Opacity="0.7">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Visibility" Value="Collapsed"/>
