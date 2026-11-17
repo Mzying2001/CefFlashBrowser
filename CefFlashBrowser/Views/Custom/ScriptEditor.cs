@@ -105,6 +105,7 @@ namespace CefFlashBrowser.Views.Custom
             SetHighlightingColor("JavaScriptGlobalFunctions", dark ? "#DCDCAA" : "#795E26");
             LineNumbersForeground = CreateBrush(dark ? "#9D9D9D" : "#757575");
             TextArea.SelectionBrush = CreateBrush(dark ? "#264F78" : "#ADD6FF");
+            TextArea.TextView.LinkTextForegroundBrush = CreateBrush(dark ? "#4DAAFC" : "#006AB1");
             TextArea.TextView.Redraw();
         }
 

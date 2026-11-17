@@ -125,8 +125,11 @@ function Test-ManagerSourceEditor($Context, $Window) {
         $contextItems[5].Command.Execute($null, $contextItems[5].CommandTarget)
         Assert-Regression ($editor.SelectionLength -eq $editor.Text.Length) 'context-menu select-all selects the full document'
         $editor.Select(0, 0)
+        $copyWholeLine = $editor.Options.CutCopyWholeLine
+        $editor.Options.CutCopyWholeLine = $false
         [Windows.Input.CommandManager]::InvalidateRequerySuggested()
         Wait-Regression $Context { !$contextItems[2].IsEnabled -and !$contextItems[3].IsEnabled } 'context-menu cut and copy disable without a selection'
+        $editor.Options.CutCopyWholeLine = $copyWholeLine
         $contextMenu.IsOpen = $false
         $sameSource = $first.Source
         Send-ManagerShortcut $Context $Window 0x4E
@@ -461,7 +464,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         }
         $Context.LanguageService.SetCurrentLanguage('zh-CN')
         $model.SelectedScript = $item
-        $item.Source = $source + "`r`n" + ((1..60 | ForEach-Object { "const value$_ = 42; // readable code with a long comment " + ('x' * 100) }) -join "`r`n")
+        $item.Source = $source + "`r`n// https://example.invalid/icon.png`r`n" + ((1..60 | ForEach-Object { "const value$_ = 42; // readable code with a long comment " + ('x' * 100) }) -join "`r`n")
         Wait-Regression $Context { $editor.Text -ceq $item.Source } 'theme fixture source is displayed'
         $editor.CaretOffset = $editor.Text.Length
         $editor.TextArea.PerformTextInput("`r`n// theme draft")
@@ -502,9 +505,15 @@ document.documentElement.setAttribute('data-manager', 'saved');
             }
             Assert-Regression ((Get-ManagerColorContrast $editor.LineNumbersForeground.Color $editor.Background.Color) -ge 4.5 -and
                 (Get-ManagerColorContrast $editor.TextArea.SelectionForeground.Color $editor.TextArea.SelectionBrush.Color) -ge 4.5) "$appearance line numbers and selected text have readable contrast"
+            $editor.TextArea.TextView.EnsureVisualLines()
+            $linkElements = @($editor.TextArea.TextView.VisualLines | ForEach-Object { $_.Elements } |
+                Where-Object { $_ -is [ICSharpCode.AvalonEdit.Rendering.VisualLineLinkText] })
+            Assert-Regression ($linkElements.Count -ge 1 -and $editor.Options.EnableHyperlinks) "$appearance editor recognizes web links"
+            Assert-Regression ((Get-ManagerColorContrast $editor.TextArea.TextView.LinkTextForegroundBrush.Color $editor.Background.Color) -ge 4.5) "$appearance link text has readable contrast"
             $themeKeywords[$appearance.ToString()] = $editor.SyntaxHighlighting.GetNamedColor('JavaScriptKeyWords').Foreground.GetColor($null)
             $newEditor = New-Object CefFlashBrowser.Views.Custom.ScriptEditor
             Assert-Regression ($newEditor.Background.Color -eq $editor.Background.Color -and
+                $newEditor.TextArea.TextView.LinkTextForegroundBrush.Color -eq $editor.TextArea.TextView.LinkTextForegroundBrush.Color -and
                 $newEditor.SyntaxHighlighting.GetNamedColor('JavaScriptKeyWords').Foreground.GetColor($null) -eq $themeKeywords[$appearance.ToString()]) "new editors initialize with the current $appearance theme"
             $editorMenu = Open-ManagerEditorContextMenu $Context $window
             Assert-Regression ((Get-ManagerColorContrast $editorMenu.Items[0].Foreground.Color $editorMenu.Background.Color) -ge 4.5 -and
