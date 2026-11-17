@@ -1,19 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace CefFlashBrowser.Services.UserScripts.Persistence
 {
     internal sealed class UserScriptContentCache
     {
-
         private readonly string _objects, _temporary;
 
         private readonly Action<string> _report;
 
         internal UserScriptContentCache(string root, Action<string> report)
-        { root = Path.GetFullPath(root ?? throw new ArgumentNullException(nameof(root))); _objects = Path.Combine(root, "objects"); _temporary = Path.Combine(root, "tmp"); _report = report; }
+        {
+            root = Path.GetFullPath(root ?? throw new ArgumentNullException(nameof(root)));
+            _objects = Path.Combine(root, "objects");
+            _temporary = Path.Combine(root, "tmp");
+            _report = report;
+        }
 
         internal byte[] Read(string hash)
         {

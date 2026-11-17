@@ -29,7 +29,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
             _report = report;
             _checkpoint = checkpoint;
-            _sources = new UserScriptSourceFiles(sourceRoot, message => Report(message, null));
+            _sources = new UserScriptSourceFiles(sourceRoot, message => Report(message, null), checkpoint);
             _cache = new UserScriptContentCache(cacheRoot, message => Report(message, null));
         }
 
@@ -76,8 +76,6 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
         private async Task<UserScriptLoadResult> LoadOneAsync(UserScriptDatabaseRecord row)
         {
-            // Database failures remain global; malformed associations belong to this installation.
-            var descriptors = await _storage.Database.GetUserScriptAssetsAsync(row.ScriptKey).ConfigureAwait(false);
             var diagnostics = new List<UserScriptDiagnostic>();
             var assets = new List<UserScriptAsset>();
             string source = null, version = null;
@@ -86,6 +84,8 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             {
                 ValidateRow(row);
                 _sources.Recover(row.ScriptKey, row.CommitId);
+                // Database failures remain global; malformed associations belong to this installation.
+                var descriptors = await _storage.Database.GetUserScriptAssetsAsync(row.ScriptKey).ConfigureAwait(false);
                 foreach (var descriptor in descriptors)
                 {
                     ValidateAsset(descriptor);
@@ -117,7 +117,8 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 catch (Exception e) when (UserScriptFiles.IsFileError(e))
                 { diagnostics.Add(Diagnostic(row.ScriptKey, "MSR420_SOURCE_UNAVAILABLE", "Source could not be read.", e)); }
             }
-            catch (Exception e) when (UserScriptFiles.IsFileError(e) || e is ArgumentException || e is FormatException)
+            catch (Exception e) when (UserScriptFiles.IsFileError(e) || e is ArgumentException || e is FormatException
+                || e is InvalidCastException || e is OverflowException)
             {
                 source = null;
                 version = null;
@@ -306,7 +307,8 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     throw new FormatException("Orphan asset associations.");
                 _cache.Collect(new HashSet<string>(assets.Select(asset => asset.ContentSha256), StringComparer.Ordinal));
             }
-            catch (Exception e) when (UserScriptFiles.IsFileError(e) || e is ArgumentException || e is FormatException || e is SQLiteException)
+            catch (Exception e) when (UserScriptFiles.IsFileError(e) || e is ArgumentException || e is FormatException
+                || e is InvalidCastException || e is OverflowException || e is SQLiteException)
             { Report("Asset collection skipped or incomplete.", e); }
         }
 

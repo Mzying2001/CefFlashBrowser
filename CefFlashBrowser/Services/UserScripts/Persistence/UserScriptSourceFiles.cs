@@ -29,7 +29,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
         private readonly Action<string> _report;
 
-        internal UserScriptSourceFiles(string root, Action<string> report) { _root = Path.GetFullPath(root ?? throw new ArgumentNullException(nameof(root))); _report = report; }
+        private readonly Action<string> _checkpoint;
+
+        internal UserScriptSourceFiles(string root, Action<string> report, Action<string> checkpoint = null)
+        {
+            _root = Path.GetFullPath(root ?? throw new ArgumentNullException(nameof(root)));
+            _report = report;
+            _checkpoint = checkpoint;
+        }
 
         internal string PathFor(ScriptKey key)
         {
@@ -83,21 +90,28 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 CommitId = Guid.NewGuid().ToString("D"), PreviousFileHash = Hash(key), NewFileHash = newBytes == null ? null : UserScriptFiles.Hash(newBytes) };
             if (operation == "install" && journal.PreviousFileHash != null) throw new UserScriptSourceConflictException(key);
             var markerTemporary = Marker(path) + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            var pendingWritten = false;
             try
             {
-                if (newBytes != null) UserScriptFiles.WriteNew(path + ".pending", newBytes);
+                if (newBytes != null)
+                {
+                    UserScriptFiles.WriteNew(path + ".pending", newBytes);
+                    pendingWritten = true;
+                    _checkpoint?.Invoke("pending");
+                }
                 UserScriptFiles.WriteNew(markerTemporary, Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new
                 {
                     operation = journal.Operation, commitId = journal.CommitId, previousCommitId = journal.PreviousCommitId,
                     previousFileHash = journal.PreviousFileHash, newFileHash = journal.NewFileHash
                 })));
+                _checkpoint?.Invoke("marker-staged");
                 File.Move(markerTemporary, Marker(path));
             }
             catch
             {
                 Cleanup(markerTemporary);
                 // No marker means the source has not switched. Only remove our own staged bytes.
-                if (!UserScriptFiles.Exists(Marker(path)) && newBytes != null) CleanupKnown(path + ".pending", journal.NewFileHash);
+                if (!UserScriptFiles.Exists(Marker(path)) && pendingWritten) CleanupKnown(path + ".pending", journal.NewFileHash);
                 throw;
             }
             return journal;
@@ -135,7 +149,6 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             if (UserScriptFiles.Hash(UserScriptFiles.ReadBytes(path + ".pending")) != journal.NewFileHash)
                 throw Conflict(path, "Staged source changed before switching.");
         }
-
 
         internal void Recover(ScriptKey key, string databaseCommitId)
         {
@@ -234,7 +247,8 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     throw new FormatException("Invalid transaction fields.");
                 return result;
             }
-            catch (Exception error) when (error is JsonException || error is FormatException || error is KeyNotFoundException || error is InvalidOperationException)
+            catch (Exception error) when (error is JsonException || error is FormatException || error is KeyNotFoundException
+                || error is InvalidOperationException || error is DecoderFallbackException)
             { throw Conflict(path, "Invalid transaction marker: " + error.Message); }
         }
 
@@ -276,6 +290,8 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
         private static string Marker(string sourcePath) => Path.Combine(Path.GetDirectoryName(sourcePath), "transaction.json");
 
-        private static RecoveryConflictException Conflict(string path, string message) => new RecoveryConflictException("MSR424_RECOVERY_CONFLICT: " + message + " Source: " + path + "; transaction: " + Marker(path));
+        private static RecoveryConflictException Conflict(string path, string message) => new RecoveryConflictException(
+            "MSR424_RECOVERY_CONFLICT: " + message + " Source: " + path + "; backup: " + path + ".backup; pending: " + path +
+            ".pending; deleted: " + path + ".deleted; transaction: " + Marker(path));
     }
 }

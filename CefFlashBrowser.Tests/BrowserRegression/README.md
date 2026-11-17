@@ -57,7 +57,7 @@ The runner exits with code 0 after all checks and cleanup succeed. An assertion,
 | `Scenarios/ViewSource.ps1` | Source viewing from the actions menu, Ctrl+U and page context menu for every new-page setting; native HTML and window fullscreen, tab ordering, source-address preservation, reload, duplication, history, DevTools, ordinary closing, late callbacks, and auxiliary-window routing. |
 | `Scenarios/AuxiliaryWindows.ps1` | Popup and SWF player windows: bindings, routing, DevTools, beforeunload, and cleanup; embedded SWF player reloads, local and network source assignment, and independent player windows without external HTML files. |
 | `Scenarios/UserScripts.ps1` | Persistent fixture installation, navigation and disposal, real menus and tab handles, clipboard restoration, notification interactions, committed downloads and native mute synchronization. |
-| `Scenarios/UserScriptNetwork.ps1` | Loopback network/cookie and static-rule evidence, main/same-origin/cross-port frames, cross-window storage events, offline prepared replay and explicit recovery. |
+| `Scenarios/UserScriptNetwork.ps1` | Loopback network/cookie and static-rule evidence, main/same-origin/cross-port frames, cross-window storage events, offline asset loading, external source reload, cache rebuilding and local failure isolation. |
 | `UserScriptHttpFixture.cs`, `UserScriptFrameProbe.cs`, `UserScriptRuntimeProbe.cs` | Isolated HTTP evidence and native-frame evaluation; restart the shared runtime against the same temporary database for offline/recovery checks. |
 | `PackageBrowserSmoke.ps1` | Real CEF injection and storage through assemblies resolved only from the supplied release zip. |
 | `Scenarios/Lifecycle.ps1` | Operations before CEF initialization, navigation before native hosting, closing before Show or during initialization, and the close-all message. |
@@ -75,7 +75,7 @@ When adding checks, put the scenario in the relevant scenario file and register 
 ## Userscript dependency baseline
 
 Run `Dependencies.ps1` in a fresh architecture-matched Windows PowerShell process after building.
-It validates MonkeySharp 3.0.1, the CefSharp 84 reference, typed JSON and embedded bridge assets
+It validates MonkeySharp 4.0.0, the CefSharp 84 reference, typed JSON and embedded bridge assets
 without starting CEF. Pass `-Platform x86` or `-Configuration Release` as appropriate;
 `-ApplicationPath` also supports an extracted release. Dependencies must resolve from that output
 or its Costura resources, never from the developer NuGet cache.
@@ -129,17 +129,19 @@ actual cookie jar, while installation content remains on the separate credential
 
 `-Scenario Network` checks first-request static rules, including a blocked execution world that
 must leave ordinary resources untouched. The host uses a filtered view of the shared repository,
-because denying a registered rule in MonkeySharp 3.0.1 cancels its request. Installations remain
-in the shared repository for maintenance. The fixture also verifies the actual CEF login jar,
+so unavailable installations and unsupported execution worlds register no static rules. Installations
+remain in the shared repository with their readiness and diagnostics. The fixture also verifies the actual CEF login jar,
 anonymous requests, redirect permissions, undeclared destinations, native cookie CRUD and
 rejection of unsupported partition/explicit-Cookie options before server-side effects.
 
 `-Scenario Frames` verifies first-statement bootstrap in main, same-origin and cross-port frames,
 source execution once, noframes, SPA URL notifications without reinjection, and actual local/remote
 storage events across frames, a background tab and a second window. `-Scenario Recovery` restarts
-the runtime against the same temporary database, replays prepared dependencies/resources offline,
-retains stable identity/timestamps/values, exercises unavailable-runtime fallback on corrupt
-prepared content, and repairs only the explicitly selected installation.
+the runtime against the same temporary database and separate source/cache roots. It loads assets
+offline without HTTP, adopts external source edits without reinjecting the current document,
+rebuilds missing cached dependencies, preserves identity/timestamps/GM values, and keeps a healthy
+neighbor executing when another installation is unavailable. Static rules are absent during cache
+loss and revoked after an invalid-source reload. Cache removal follows service shutdown.
 
 `-Scenario TabClosing` isolates native Ctrl+W cancellation/retry, removing an opener while its
 child awaits confirmation, and reload/close confirmation ordering. Helpers wait for the actual

@@ -190,6 +190,7 @@ function Initialize-RegressionEnvironment($Context) {
         SettingsPath = (Join-Path $Context.TemporaryPath 'settings.json')
         DatabasePath = (Join-Path $Context.TemporaryPath 'browser.db')
         MonkeySharpPath = (Join-Path $Context.TemporaryPath 'MonkeySharp')
+        UserScriptCachePath = (Join-Path $Context.TemporaryPath 'Caches\UserScripts')
     }.GetEnumerator()) {
         $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
     }
@@ -230,7 +231,7 @@ function Initialize-RegressionEnvironment($Context) {
     $scriptContent = New-Object CefFlashBrowser.Services.UserScripts.UserScriptContentService($null, $null, 10485760, $null)
     $scriptPrompt = New-Object CefFlashBrowser.Browser.UserScripts.UserScriptPermissionPrompt
     $Context.UserScriptService = New-Object CefFlashBrowser.Services.UserScripts.UserScriptService(
-        $scriptStorage, (Join-Path $Context.TemporaryPath 'MonkeySharp'), $scriptContent, $scriptPrompt, $null)
+        $scriptStorage, (Join-Path $Context.TemporaryPath 'MonkeySharp'), (Join-Path $Context.TemporaryPath 'Caches\UserScripts'), $scriptContent, $scriptPrompt, $null)
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.UserScripts.UserScriptService]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.UserScriptService.PSObject.BaseObject))
     $faviconInitialization = $Context.FaviconService.InitializeAsync()

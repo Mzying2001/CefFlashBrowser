@@ -236,6 +236,8 @@ namespace CefFlashBrowser.Tests
 
         [DataTestMethod]
         [DataRow("objects-written")]
+        [DataRow("pending")]
+        [DataRow("marker-staged")]
         [DataRow("marker-written")]
         [DataRow("rows-written")]
         [DataRow("source-switched")]
@@ -368,17 +370,52 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual("\uFEFF" + Source, (await restored.GetAsync(installed.ScriptKey, None)).Definition.Source);
         }
 
+        [TestMethod]
+        public async Task Startup_AdoptsExternalSourceWithNoWatcherOrPriorReload()
+        {
+            var installed = await InstallAsync();
+            var external = Source.Replace("@name Example", "@name External startup") + "\n// saved outside the app";
+            File.WriteAllText(PathFor(installed.ScriptKey), external, new UTF8Encoding(false));
+            var restored = await OpenAsync();
+            var snapshot = await restored.GetAsync(installed.ScriptKey, None);
+            Assert.AreEqual("External startup", snapshot.Definition.Metadata.Name);
+            Assert.IsTrue(snapshot.CanExecute);
+            Assert.AreEqual(external, File.ReadAllText(PathFor(installed.ScriptKey)));
+            Assert.IsFalse((await _persistence.LoadAsync(installed.ScriptKey, None)).SourceChangedSinceSave);
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ResourceBytesAndResponseEncoding_RoundTripWithoutTextCopies(bool binary)
+        {
+            _provider.Bytes = binary ? new byte[] { 0, 255, 254, 1 } : new byte[] { 99, 97, 102, 233 };
+            _provider.Mime = binary ? "application/octet-stream" : "text/plain";
+            _provider.Charset = binary ? "utf-8" : "windows-1252";
+            var installed = await InstallAsync(Source.Replace("// @grant none", "// @grant GM.getResourceText\n// @resource content https://example.com/resource"));
+            _provider.Offline = true;
+            var restored = await OpenAsync();
+            var content = (await restored.GetAsync(installed.ScriptKey, None)).PreparedRevision.Resources["content"];
+            CollectionAssert.AreEqual(_provider.Bytes, content.Bytes);
+            Assert.AreEqual(_provider.Mime, content.MediaType);
+            Assert.AreEqual(_provider.Charset, content.Charset);
+            if (!binary)
+                Assert.AreEqual("caf\u00e9", content.DecodeText());
+        }
+
         private sealed class ContentProvider : IUserScriptDependencyProvider, IResourceProvider
         {
             internal int Reads;
             internal bool Offline;
             internal byte[] Bytes = Encoding.UTF8.GetBytes("prepared content");
+            internal string Mime = "text/plain";
+            internal string Charset = "utf-8";
 
             private Task<ResourceContent> Read()
             {
                 Reads++;
                 if (Offline) throw new IOException("offline");
-                return Task.FromResult(new ResourceContent(Bytes, "text/plain", "utf-8"));
+                return Task.FromResult(new ResourceContent(Bytes, Mime, Charset));
             }
 
             public Task<ResourceContent> GetAsync(UserScriptInstallation installation, ResourceDeclaration resource, CancellationToken token) => Read();

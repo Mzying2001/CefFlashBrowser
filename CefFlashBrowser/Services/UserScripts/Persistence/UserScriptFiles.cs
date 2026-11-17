@@ -11,14 +11,11 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
         internal const int MaximumBytes = 10 * 1024 * 1024;
         private static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, true);
 
-
-
         internal static string Decode(byte[] bytes)
         {
             var offset = bytes.Length >= 3 && bytes[0] == 0xef && bytes[1] == 0xbb && bytes[2] == 0xbf ? 3 : 0;
             return Utf8.GetString(bytes, offset, bytes.Length - offset);
         }
-
 
         internal static byte[] Encode(string source)
         {
@@ -30,12 +27,11 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
             return output;
         }
 
-
         internal static byte[] ReadBytes(string path)
         {
             using (var input = File.OpenRead(path))
             {
-                if (input.Length > MaximumBytes) throw new IOException("Script exceeds the 10 MiB limit.");
+                if (input.Length > MaximumBytes) throw new IOException("Content exceeds the 10 MiB limit.");
                 using (var output = new MemoryStream())
                 {
                     var buffer = new byte[65536];
@@ -56,9 +52,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 return BitConverter.ToString(algorithm.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant();
         }
 
-
         internal static bool IsFileError(Exception error) => error is IOException || error is UnauthorizedAccessException;
-
 
         internal static bool IsHash(string value) => value != null && Regex.IsMatch(value, "\\A[0-9a-f]{64}\\z", RegexOptions.CultureInvariant);
 

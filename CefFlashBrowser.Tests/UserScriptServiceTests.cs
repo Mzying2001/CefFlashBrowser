@@ -46,11 +46,11 @@ namespace CefFlashBrowser.Tests
                 Directory.Delete(_root, true);
         }
 
-        private UserScriptService Create()
+        private UserScriptService Create(HttpMessageHandler handler = null)
         {
             var storage = new UserScriptStorage(new DatabaseService(_database));
             var service = new UserScriptService(storage, Path.Combine(_root, "MonkeySharp"), Path.Combine(_root, "Cache", "UserScripts"),
-                new UserScriptContentService(handler: new ContentHandler()), new RejectUserScriptPermissionPrompt());
+                new UserScriptContentService(handler: handler ?? new ContentHandler()), new RejectUserScriptPermissionPrompt());
 
             _services.Add(service);
             return service;
@@ -100,6 +100,42 @@ namespace CefFlashBrowser.Tests
 
                 release.TrySetResult(true);
                 await stop;
+            }
+        }
+
+        [TestMethod]
+        public async Task Stop_CancelsCacheRecoveryBeforeTheCacheDirectoryIsMoved()
+        {
+            var first = Create(new ContentHandler { Available = true });
+            await first.InitializeAsync();
+            var source = Source.Replace("// @grant none", "// @grant none\n// @require https://example.com/dependency.js");
+            var installed = await first.Repository.InstallAsync(source, null, true, CancellationToken.None);
+            await first.StopAsync();
+            var cache = Path.Combine(_root, "Cache", "UserScripts");
+            Directory.Delete(cache, true);
+            var blocked = new CancellationHandler();
+            var restored = Create(blocked);
+            var initialization = restored.InitializeAsync();
+            await blocked.Entered.Task;
+            await restored.StopAsync();
+            try { await initialization; Assert.Fail("Stopped initialization must be cancelled."); }
+            catch (OperationCanceledException) { }
+            Directory.CreateDirectory(cache);
+            Directory.Move(cache, cache + ".cleared");
+            Assert.IsFalse(Directory.Exists(cache));
+            Assert.IsTrue(File.Exists(Path.Combine(_root, "MonkeySharp", installed.ScriptKey.ToString(), "userscript.js")));
+            Assert.AreEqual(1L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_scripts"));
+        }
+
+        private sealed class CancellationHandler : HttpMessageHandler
+        {
+            internal readonly TaskCompletionSource<bool> Entered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
+            {
+                Entered.TrySetResult(true);
+                await Task.Delay(Timeout.Infinite, token);
+                return new HttpResponseMessage(HttpStatusCode.OK);
             }
         }
 
@@ -265,8 +301,11 @@ namespace CefFlashBrowser.Tests
 
         private sealed class ContentHandler : HttpMessageHandler
         {
+            internal bool Available;
+
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
-                => Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new StringContent("missing") });
+                => Task.FromResult(new HttpResponseMessage(Available ? HttpStatusCode.OK : HttpStatusCode.NotFound)
+                { Content = new StringContent(Available ? "window.dependency = true;" : "missing") });
         }
     }
 

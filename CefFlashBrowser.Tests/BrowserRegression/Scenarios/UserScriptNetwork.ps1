@@ -46,6 +46,8 @@ function Test-UserScriptOfflineRecovery($Context) {
 // @grant GM_getResourceText
 // @grant GM_getValue
 // @grant GM_setValue
+// @grant GM.webRequest
+// @webRequest [{"selector":"__BASE__/blocked.js","action":"cancel"}]
 // @require __BASE__/dependency.js
 // @resource fixture __BASE__/resource.txt
 // @run-at document-end
@@ -59,6 +61,8 @@ document.documentElement.setAttribute('data-offline-before', String(previous));
     $source = $source.Replace('__BASE__', $fixture.BaseUrl)
     $repository = $Context.UserScriptService.Repository
     $installation = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None)) 'install prepared fixture'
+    $healthySource = "// ==UserScript==`n// @name Healthy neighbor`n// @match http://127.0.0.1/*`n// @grant none`n// @run-at document-end`n// ==/UserScript==`ndocument.documentElement.setAttribute('data-healthy-neighbor','ready');"
+    $healthy = Complete-UserScriptTask $Context ($repository.InstallAsync($healthySource, $null, $true, [Threading.CancellationToken]::None)) 'install healthy neighbor'
     $window = $null
     try {
         $window = New-UserScriptTargetWindow $Context ($fixture.BaseUrl + '/page')
@@ -71,7 +75,7 @@ document.documentElement.setAttribute('data-offline-before', String(previous));
         $window = $null
         $fixture.Offline = $true
         Reset-UserScriptRuntime $Context
-        Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'new runtime restores persisted prepared content'
+        Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'new runtime restores source and cached assets'
         $repository = $Context.UserScriptService.Repository
         $restored = Complete-UserScriptTask $Context ($repository.GetAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'restored installation'
         Assert-Regression ($restored.ScriptKey -eq $installation.ScriptKey -and $restored.InstalledAt -eq $installation.InstalledAt) 'runtime restart preserves installation identity and precise time'
@@ -80,31 +84,67 @@ document.documentElement.setAttribute('data-offline-before', String(previous));
         Wait-Regression $Context { $null -ne $model.Browser -and $model.Browser.Title -eq 'Userscript fixture' -and
             (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-offline-before')") -eq '1' -and
             (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-offline-content')") -eq 'dependency-ready|resource-ready' } 'offline dependency and resource execution after runtime restart'
-        Assert-Regression ($fixture.RequestsFor('/dependency.js') -eq 1 -and $fixture.RequestsFor('/resource.txt') -eq 1) 'ordinary restore never refetches prepared dependencies or resources'
+        Assert-Regression ($fixture.RequestsFor('/dependency.js') -eq 1 -and $fixture.RequestsFor('/resource.txt') -eq 1) 'complete cache restores dependencies and resources without HTTP'
+        $sourcePath = Join-Path $Context.TemporaryPath ('MonkeySharp\' + $installation.ScriptKey.ToString() + '\userscript.js')
+        $external = $source + "`ndocument.documentElement.setAttribute('data-external-reload','ready');"
+        $utf8 = New-Object Text.UTF8Encoding($false)
+        [IO.File]::WriteAllText($sourcePath, $external, $utf8)
+        $reloaded = Complete-UserScriptTask $Context ($repository.ReloadAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'reload external source'
+        Assert-Regression $reloaded.CanExecute 'external source becomes ready through reload'
+        Assert-Regression ($null -eq (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-external-reload')")) 'reload does not inject an already executed document again'
         $window.ForceCloseWindow()
         $window = $null
+        $window = New-UserScriptTargetWindow $Context ($fixture.BaseUrl + '/page?external')
+        $model = $window.ViewModel.CurrentBrowser
+        Wait-Regression $Context { $null -ne $model.Browser -and $model.Browser.Title -eq 'Userscript fixture' -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-external-reload')") -eq 'ready' } 'next document uses the externally edited source'
+        $window.ForceCloseWindow()
+        $window = $null
+
+        # Stop the writer before removing its dedicated dependency cache. CEF's own cache stays live.
         Reset-UserScriptRuntime $Context
-        $parameters = New-Object 'System.Collections.Generic.Dictionary[string,object]'
-        $parameters.Add('@id', $installation.ScriptKey.ToString())
-        Complete-UserScriptTask $Context ($Context.Database.ExecuteAsync("UPDATE monkeysharp_scripts SET prepared_revision_json = '{`"format`":999}' WHERE script_id = @id", $parameters)) 'corrupt prepared fixture' | Out-Null
+        [CefFlashBrowser.Utils.DirectoryHelper]::MoveDirectoryToPendingDelete(
+            (Join-Path $Context.TemporaryPath 'Caches\UserScripts'), $true)
+        Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'missing cache remains a local failure offline'
+        $repository = $Context.UserScriptService.Repository
+        $unavailable = Complete-UserScriptTask $Context ($repository.GetAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'unavailable installation snapshot'
+        Assert-Regression ($unavailable.IsEnabled -and !$unavailable.IsReady -and $unavailable.Diagnostics.Count -gt 0) 'offline cache loss preserves enabled intent and diagnostics'
+        $requests = $fixture.RequestsFor('/blocked.js')
         $window = New-UserScriptTargetWindow $Context ($fixture.BaseUrl + '/page')
         $model = $window.ViewModel.CurrentBrowser
-        Wait-Regression $Context { $null -ne $model.Browser -and $model.Browser.Title -eq 'Userscript fixture' -and $model.UserScriptsUnavailable } 'failed script initialization preserves ordinary browsing'
-        Assert-Regression ($model.UserScriptState -eq [CefFlashBrowser.Models.UserScripts.UserScriptState]::Unavailable -and $model.UserScriptError) 'initialization failure is visibly unavailable rather than silently bypassed'
-        $maintenance = Complete-UserScriptTask $Context ($Context.UserScriptService.ReadMaintenanceAsync([Threading.CancellationToken]::None)) 'failed-runtime maintenance listing'
-        Assert-Regression (@($maintenance).Count -eq 1 -and @($maintenance)[0].Record.Source -eq $source) 'maintenance listing remains available after prepared corruption'
+        Wait-Regression $Context { $null -ne $model.Browser -and $model.Browser.Title -eq 'Userscript fixture' -and !$model.Browser.IsLoading -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-healthy-neighbor')") -eq 'ready' } 'healthy script executes beside an unavailable installation'
+        Assert-Regression (!$model.UserScriptsUnavailable -and $fixture.RequestsFor('/blocked.js') -gt $requests) 'unavailable installation registers no static rule and does not disable the page runtime'
         $window.ForceCloseWindow()
         $window = $null
         $fixture.Offline = $false
-        Complete-UserScriptTask $Context ($Context.UserScriptService.RepairAsync($installation.ScriptKey, $source, [Threading.CancellationToken]::None)) 'explicit prepared repair'
-        $repository = $Context.UserScriptService.Repository
-        $repaired = Complete-UserScriptTask $Context ($repository.GetAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'repaired stable installation'
-        Assert-Regression ($repaired.ScriptKey -eq $installation.ScriptKey -and $repaired.InstalledAt -eq $installation.InstalledAt) 'explicit repair keeps the original installation and data partition'
+        $repaired = Complete-UserScriptTask $Context ($repository.ReloadAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'reload automatically rebuilds missing assets'
+        Assert-Regression ($repaired.CanExecute -and $repaired.ScriptKey -eq $installation.ScriptKey -and $repaired.InstalledAt -eq $installation.InstalledAt) 'cache rebuild preserves identity and installation time'
+        Assert-Regression ($fixture.RequestsFor('/dependency.js') -gt 1 -and $fixture.RequestsFor('/resource.txt') -gt 1) 'missing dependencies and resources are downloaded again'
+        $requests = $fixture.RequestsFor('/blocked.js')
+        $window = New-UserScriptTargetWindow $Context ($fixture.BaseUrl + '/page?restored')
+        $model = $window.ViewModel.CurrentBrowser
+        Wait-Regression $Context { $null -ne $model.Browser -and $model.Browser.Title -eq 'Userscript fixture' -and !$model.Browser.IsLoading -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-external-reload')") -eq 'ready' } 'rebuilt assets execute with the edited source'
+        Assert-Regression ($fixture.RequestsFor('/blocked.js') -eq $requests) 'ready installation restores its static rule'
+        [IO.File]::WriteAllBytes($sourcePath, [byte[]]@(255))
+        $unavailable = Complete-UserScriptTask $Context ($repository.ReloadAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'reload invalid source'
+        Assert-Regression (!$unavailable.IsReady) 'invalid source becomes unavailable without rolling back the file'
+        $window.ForceCloseWindow()
+        $window = $null
+        $window = New-UserScriptTargetWindow $Context ($fixture.BaseUrl + '/page?invalid')
+        $model = $window.ViewModel.CurrentBrowser
+        Wait-Regression $Context { $null -ne $model.Browser -and $model.Browser.Title -eq 'Userscript fixture' -and !$model.Browser.IsLoading -and
+            (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-healthy-neighbor')") -eq 'ready' } 'invalid source leaves the healthy neighbor running'
+        Assert-Regression ($fixture.RequestsFor('/blocked.js') -gt $requests) 'failed reload revokes the previously active static rule'
+        $saved = Complete-UserScriptTask $Context ($Context.UserScriptService.ValueStore.GetAsync($installation.ScriptKey.ToString(), 'runs', [Threading.CancellationToken]::None)) 'GM data survives cache rebuild and invalid source'
+        Assert-Regression $saved.Exists 'installation data partition survives recovery'
     } finally {
         if ($null -ne $window) { $window.ForceCloseWindow() }
         try {
             $repository = $Context.UserScriptService.Repository
             Complete-UserScriptTask $Context ($repository.RemoveAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'remove prepared fixture' | Out-Null
+            Complete-UserScriptTask $Context ($repository.RemoveAsync($healthy.ScriptKey, [Threading.CancellationToken]::None)) 'remove healthy neighbor' | Out-Null
         } catch { }
         $fixture.Dispose()
     }

@@ -57,5 +57,38 @@ namespace CefFlashBrowser.Tests
                 Assert.IsNotNull(await repository.GetAsync(installation.ScriptKey, CancellationToken.None));
             }
         }
+
+        [TestMethod]
+        public async Task UnavailableReload_RevokesHostViewAndConditionalRepairRestoresIt()
+        {
+            var persistence = new InMemoryUserScriptPersistence();
+            var repository = new UserScriptRepository(persistence);
+            await repository.InitializeAsync(CancellationToken.None);
+            var installed = await repository.InstallAsync(Source.Replace("// @grant", "// @sandbox DOM\n// @grant"), null, true, CancellationToken.None);
+            using (var view = new UserScriptRuntimeRepository(repository, false))
+            {
+                UserScriptRepositoryChangedEventArgs changed = null;
+                view.Changed += (sender, e) => changed = e;
+                var loaded = await persistence.LoadAsync(installed.ScriptKey, CancellationToken.None);
+                await persistence.SaveAsync(new UserScriptSaveRequest(new UserScriptPersistenceRecord(installed.ScriptKey,
+                    "invalid metadata", null, true, installed.InstalledAt, installed.UpdatedAt, loaded.Record.Assets),
+                    loaded.SourceVersion, SourceWriteMode.Replace), CancellationToken.None);
+
+                var unavailable = await view.ReloadAsync(installed.ScriptKey, CancellationToken.None);
+                Assert.IsFalse(unavailable.CanExecute);
+                Assert.AreEqual(RepositoryChangeKind.Removed, changed.Kind);
+                Assert.AreEqual(0, (await view.GetSnapshotAsync(CancellationToken.None)).Count);
+                Assert.IsNotNull(await repository.GetAsync(installed.ScriptKey, CancellationToken.None));
+
+                var repaired = await view.UpdateIfUnchangedAsync(installed.ScriptKey, unavailable.RevisionId,
+                    installed.Definition.Source, null, CancellationToken.None);
+                Assert.IsTrue(repaired.CanExecute);
+                Assert.AreEqual(RepositoryChangeKind.Updated, changed.Kind);
+                Assert.IsTrue((await view.RefreshAssetsAsync(installed.ScriptKey, repaired.RevisionId, CancellationToken.None)).CanExecute);
+                await view.SetEnabledAsync(installed.ScriptKey, false, CancellationToken.None);
+                Assert.AreEqual(RepositoryChangeKind.Removed, changed.Kind);
+                Assert.AreEqual(0, (await view.GetSnapshotAsync(CancellationToken.None)).Count);
+            }
+        }
     }
 }

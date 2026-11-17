@@ -14,7 +14,8 @@ public sealed class UserScriptSeamProbe
 
     public UserScriptSeamProbe(ChromiumFlashBrowser browser)
     {
-        var repository = new InMemoryUserScriptRepository();
+        var repository = new UserScriptRepository(new InMemoryUserScriptPersistence());
+        repository.InitializeAsync(CancellationToken.None).GetAwaiter().GetResult();
 
         repository.InstallAsync("// ==UserScript==\n// @name Seam probe\n// @match about:blank\n// @grant none\n// ==/UserScript==\nwindow.__seamExecuted = true;",
             null, true, CancellationToken.None).GetAwaiter().GetResult();
