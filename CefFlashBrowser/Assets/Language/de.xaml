@@ -24,6 +24,7 @@
     <sys:String x:Key="mainWindow_go">Los</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Favoriten verwalten</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">SOL-Speicherstände verwalten</sys:String>
+    <sys:String x:Key="mainWindow_manageUserScripts">Benutzerskripte verwalten</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">SOL-Datei öffnen...</sys:String>
     <sys:String x:Key="mainWindow_languages">Sprache</sys:String>
     <sys:String x:Key="mainWindow_options">Optionen</sys:String>

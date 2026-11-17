@@ -144,7 +144,7 @@
                 <Separator/>
 
                 <!--UserScriptManager-->
-                <MenuItem Header="{DynamicResource userScriptManager_title}"
+                <MenuItem Header="{DynamicResource mainWindow_manageUserScripts}"
                           Command="{Binding OpenUserScriptManagerCommand}"/>
 
                 <Separator/>

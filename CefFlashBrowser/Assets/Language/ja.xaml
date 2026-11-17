@@ -24,6 +24,7 @@
     <sys:String x:Key="mainWindow_go">移動</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">お気に入りを管理</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">SOL セーブファイルを管理</sys:String>
+    <sys:String x:Key="mainWindow_manageUserScripts">ユーザースクリプトを管理</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">SOL ファイルを開く...</sys:String>
     <sys:String x:Key="mainWindow_languages">言語</sys:String>
     <sys:String x:Key="mainWindow_options">オプション</sys:String>

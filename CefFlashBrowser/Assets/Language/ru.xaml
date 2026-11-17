@@ -24,6 +24,7 @@
     <sys:String x:Key="mainWindow_go">Перейти</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Управление избранным</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">Управление сохранениями SOL</sys:String>
+    <sys:String x:Key="mainWindow_manageUserScripts">Управление пользовательскими скриптами</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">Открыть SOL-файл...</sys:String>
     <sys:String x:Key="mainWindow_languages">Язык</sys:String>
     <sys:String x:Key="mainWindow_options">Параметры</sys:String>

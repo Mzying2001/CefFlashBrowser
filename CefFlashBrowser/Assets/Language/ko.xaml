@@ -24,6 +24,7 @@
     <sys:String x:Key="mainWindow_go">이동</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">즐겨찾기 관리</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">SOL 저장 파일 관리</sys:String>
+    <sys:String x:Key="mainWindow_manageUserScripts">사용자 스크립트 관리</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">SOL 파일 열기...</sys:String>
     <sys:String x:Key="mainWindow_languages">언어</sys:String>
     <sys:String x:Key="mainWindow_options">옵션</sys:String>

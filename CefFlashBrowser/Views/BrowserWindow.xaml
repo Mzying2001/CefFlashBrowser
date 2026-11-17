@@ -211,7 +211,7 @@
 
             <Separator/>
 
-            <MenuItem Header="{DynamicResource userScriptManager_title}"
+            <MenuItem Header="{DynamicResource mainWindow_manageUserScripts}"
                       Command="{Binding OpenUserScriptManagerCommand}"/>
 
             <MenuItem Header="{DynamicResource userscript_commands}"
