@@ -168,3 +168,19 @@ resources embedded and verifies Costura resolution while running the real browse
 in Debug and Release. Both actual archives passed native deployment/command-proxy checks,
 lazy-service and SQLite persistence checks, real isolated-world injection and GM read/write,
 and orderly CEF/storage shutdown. The existing Costura IncludeAssets warning remains.
+
+## Persistence v4 acceptance (2026-11-17)
+
+| Configuration | VS MSBuild | Unit tests | Real CEF | Dependency check | Archive smoke |
+| --- | --- | --- | --- | --- | --- |
+| Debug x64 | Passed | 395 passed | Full suite and Recovery passed | Passed | Not applicable |
+| Debug x86 | Passed | 395 passed | Recovery passed | Passed | Not applicable |
+| Release x64 | Passed | 395 passed | Recovery passed | Passed | Passed |
+| Release x86 | Passed | 395 passed | Recovery passed | Passed | Passed |
+
+The two version 1.1.8 archives were produced by `publish.ps1`. Each archive smoke installs assets
+from a loopback fixture, checks schema 3 and separate content-addressed files, then restores
+source and assets offline through the public persistence contract. It also verifies real CEF
+injection, synchronous typed-value bootstrap, acknowledged GM writes, native SQLite deployment,
+Costura loading and orderly shutdown using only the extracted archive. The existing Costura
+IncludeAssets warning remains.

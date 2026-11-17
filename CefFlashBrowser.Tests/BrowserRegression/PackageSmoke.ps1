@@ -111,14 +111,43 @@ try {
         throw 'The packaged service did not persist its mapping through the shared database.'
     }
     [void]$scripts.InitializeAsync().GetAwaiter().GetResult()
-    $source = "// ==UserScript==`n// @name Packaged persistence`n// @match https://example.invalid/*`n// @grant none`n// ==/UserScript=="
-    $installation = $scripts.Repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None).GetAwaiter().GetResult()
+    Add-Type -Path (Join-Path $PSScriptRoot 'UserScriptHttpFixture.cs')
+    $fixture = New-Object UserScriptHttpFixture
+    $restoredStorage = $null
+    try {
+        $source = "// ==UserScript==`n// @name Packaged persistence`n// @match https://example.invalid/*`n// @grant none`n// @require $($fixture.BaseUrl)/dependency.js`n// @resource fixture $($fixture.BaseUrl)/resource.txt`n// ==/UserScript=="
+        $installation = $scripts.Repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None).GetAwaiter().GetResult()
+        $cachePath = Join-Path $temporaryPath 'Caches\UserScripts'
+        $objects = @(Get-ChildItem -LiteralPath (Join-Path $cachePath 'objects') -File)
+        if ($objects.Count -ne 2 -or @($objects | Where-Object Name -NotMatch '^[0-9a-f]{64}$').Count -ne 0) {
+            throw 'Packaged assets must use separate content-addressed object files.'
+        }
+        if ($database.ScalarAsync("PRAGMA user_version").GetAwaiter().GetResult() -ne 3 -or
+            $database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_script_assets").GetAwaiter().GetResult() -ne 2 -or
+            $database.ScalarAsync("SELECT COUNT(*) FROM pragma_table_info('monkeysharp_scripts') WHERE name IN ('source','prepared_revision_json','display_name')").GetAwaiter().GetResult() -ne 0) {
+            throw 'Packaged persistence must use schema 3 descriptors without source payloads.'
+        }
+        $fixture.Offline = $true
+        $restoredStorage = New-Object CefFlashBrowser.Services.UserScripts.Persistence.UserScriptStorage($databaseService)
+        $persistence = New-Object CefFlashBrowser.Services.UserScripts.Persistence.SqliteUserScriptRepositoryPersistence(
+            $restoredStorage, (Join-Path $temporaryPath 'MonkeySharp'), $cachePath, $null, $null)
+        $restoredRepository = New-Object Mzying2001.MonkeySharp.Core.Repository.UserScriptRepository($persistence, $null, $null)
+        [void]$restoredRepository.InitializeAsync([Threading.CancellationToken]::None).GetAwaiter().GetResult()
+        $restored = $restoredRepository.GetAsync($installation.ScriptKey, [Threading.CancellationToken]::None).GetAwaiter().GetResult()
+        if (!$restored.CanExecute -or $restored.PreparedRevision.Resources['fixture'].DecodeText() -ne 'resource-ready' -or
+            $fixture.RequestsFor('/dependency.js') -ne 1 -or $fixture.RequestsFor('/resource.txt') -ne 1) {
+            throw 'Packaged source and assets did not restore offline through the public persistence contract.'
+        }
+    } finally {
+        if ($null -ne $restoredStorage) { [void]$restoredStorage.StopAsync().GetAwaiter().GetResult() }
+        $fixture.Dispose()
+    }
     [void]$scripts.ValueStore.SetAsync($installation.ScriptKey.ToString(), 'packaged',
         [Mzying2001.MonkeySharp.Core.Storage.UserScriptValue]::Undefined, [Threading.CancellationToken]::None).GetAwaiter().GetResult()
     $stored = $scripts.ValueStore.GetAsync($installation.ScriptKey.ToString(), 'packaged', [Threading.CancellationToken]::None).GetAwaiter().GetResult()
     if (!$stored.Exists -or $stored.Value.EncodedValue -ne 'u' -or
         !(Test-Path -LiteralPath (Join-Path $temporaryPath ('MonkeySharp\' + $installation.ScriptKey + '\userscript.js')))) {
-        throw 'Packaged userscript services did not persist their source/prepared content and typed values.'
+        throw 'Packaged userscript services did not persist their source file and typed values.'
     }
     . (Join-Path $PSScriptRoot 'Helpers.ps1')
     . (Join-Path $PSScriptRoot 'PackageBrowserSmoke.ps1')
