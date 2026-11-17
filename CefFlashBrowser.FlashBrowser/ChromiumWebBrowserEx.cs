@@ -150,7 +150,7 @@ namespace CefFlashBrowser.FlashBrowser
             GetBrowser().CloseDevTools();
         }
 
-        public Task<bool> ToggleAudioMutedAsync()
+        public Task<bool> GetAudioMutedAsync()
         {
             return Cef.UIThreadTaskFactory.StartNew(() =>
             {
@@ -169,7 +169,6 @@ namespace CefFlashBrowser.FlashBrowser
                     if (host == null || host.IsDisposed)
                         return false;
 
-                    host.SetAudioMuted(!host.IsAudioMuted);
                     return host.IsAudioMuted;
                 }
                 catch (ObjectDisposedException)
@@ -179,23 +178,22 @@ namespace CefFlashBrowser.FlashBrowser
             });
         }
 
-        public void SetAudioMuted(bool mute)
+        public Task SetAudioMutedAsync(bool mute)
         {
-            if (IsDisposed || !IsBrowserInitialized)
-                return;
-
-            Cef.UIThreadTaskFactory.StartNew(() =>
+            return Cef.UIThreadTaskFactory.StartNew(() =>
             {
+                if (IsDisposed || !IsBrowserInitialized)
+                    return;
+
                 try
                 {
-                    if (IsDisposed)
-                        return;
-
                     var browser = GetBrowser();
+
                     if (browser == null || browser.IsDisposed)
                         return;
 
                     var host = browser.GetHost();
+
                     if (host != null && !host.IsDisposed)
                         host.SetAudioMuted(mute);
                 }

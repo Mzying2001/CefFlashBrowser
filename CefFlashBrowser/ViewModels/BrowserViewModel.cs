@@ -1,5 +1,4 @@
 ﻿using CefFlashBrowser.Data;
-using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Utils;
 using CefSharp;
@@ -7,13 +6,49 @@ using SimpleMvvm;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 namespace CefFlashBrowser.ViewModels
 {
     public class BrowserViewModel : ViewModelBase
     {
         public string BrowserId { get; } = Guid.NewGuid().ToString("D");
+
+        private IWebBrowser _browser;
+        public IWebBrowser Browser
+        {
+            get => _browser;
+            set
+            {
+                if (ReferenceEquals(_browser, value))
+                    return;
+
+                if (_browser == null)
+                {
+                    UpdateValue(ref _browser, value);
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        "Browser property can only be set once.");
+                }
+            }
+        }
+
+
+        private volatile bool _isClosed;
+        public bool IsClosed => _isClosed;
+
+
+        public event EventHandler Closed;
+
+
+        public bool IsClosing { get; internal set; }
+        public bool HasDocument { get; internal set; }
+
+
+        public ObservableCollection<UserScriptMenuCommand> UserScriptMenus { get; }
+        public ObservableCollection<UserScriptDownloadItem> UserScriptDownloads { get; }
+
 
         private UserScriptState _userScriptState;
         public UserScriptState UserScriptState
@@ -41,62 +76,6 @@ namespace CefFlashBrowser.ViewModels
         {
             get => _userScriptMatchCount;
             internal set => UpdateValue(ref _userScriptMatchCount, value);
-        }
-
-        public ObservableCollection<UserScriptDownloadItem> UserScriptDownloads { get; } = new ObservableCollection<UserScriptDownloadItem>();
-
-        public ObservableCollection<UserScriptMenuCommand> UserScriptMenus { get; } = new ObservableCollection<UserScriptMenuCommand>();
-
-        private volatile bool _isClosed;
-        public bool IsClosed => _isClosed;
-
-        public event EventHandler Closed;
-
-        internal void MarkClosed()
-        {
-            if (_isClosed)
-                return;
-
-            _isClosed = true;
-
-            var handlers = Closed;
-
-            if (handlers == null)
-                return;
-
-            foreach (EventHandler handler in handlers.GetInvocationList())
-            {
-                try
-                {
-                    handler(this, EventArgs.Empty);
-                }
-                catch { }
-            }
-        }
-
-        public bool IsClosing { get; internal set; }
-
-        public bool HasDocument { get; internal set; }
-
-        private IWebBrowser _browser;
-        public IWebBrowser Browser
-        {
-            get => _browser;
-            set
-            {
-                if (ReferenceEquals(_browser, value))
-                    return;
-
-                if (_browser == null)
-                {
-                    UpdateValue(ref _browser, value);
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        "Browser property can only be set once.");
-                }
-            }
         }
 
         private string _address;
@@ -146,6 +125,9 @@ namespace CefFlashBrowser.ViewModels
 
         public BrowserViewModel()
         {
+            UserScriptMenus = new ObservableCollection<UserScriptMenuCommand>();
+            UserScriptDownloads = new ObservableCollection<UserScriptDownloadItem>();
+
             if (GlobalData.Settings.SaveZoomLevel)
             {
                 ZoomLevel = GlobalData.Settings.BrowserZoomLevel;
@@ -153,6 +135,28 @@ namespace CefFlashBrowser.ViewModels
         }
 
 
+
+        internal void MarkClosed()
+        {
+            if (_isClosed)
+                return;
+
+            _isClosed = true;
+
+            var handlers = Closed;
+
+            if (handlers == null)
+                return;
+
+            foreach (EventHandler handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    handler(this, EventArgs.Empty);
+                }
+                catch { }
+            }
+        }
 
         public bool IsBrowserReady()
         {
@@ -202,7 +206,7 @@ namespace CefFlashBrowser.ViewModels
             if (!IsBrowserReady())
                 return;
 
-            if (Browser is ChromiumWebBrowserEx browser)
+            if (Browser is FlashBrowser.ChromiumWebBrowserEx browser)
             {
                 var version = ++_muteRequestVersion;
                 var previous = IsMuted;
@@ -211,7 +215,8 @@ namespace CefFlashBrowser.ViewModels
 
                 try
                 {
-                    var isMuted = await browser.ToggleAudioMutedAsync();
+                    await browser.SetAudioMutedAsync(!previous);
+                    var isMuted = await browser.GetAudioMutedAsync();
 
                     if (version == _muteRequestVersion && !IsClosing && !IsClosed)
                         IsMuted = isMuted;
