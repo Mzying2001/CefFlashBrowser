@@ -1,9 +1,13 @@
-﻿using Mzying2001.MonkeySharp.Core.Repository;
+﻿using CefFlashBrowser.Services.UserScripts;
+using Mzying2001.MonkeySharp.Core.Domain;
+using Mzying2001.MonkeySharp.Core.Parsing;
+using Mzying2001.MonkeySharp.Core.Repository;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +18,7 @@ namespace CefFlashBrowser.ViewModels
         private readonly Func<Task<IUserScriptRepository>> _initialize;
         private readonly Func<string, string> _text;
         private readonly Action<Action> _dispatch;
+        private readonly Func<string, CancellationToken, Task<string>> _fetchSource;
         private IUserScriptRepository _repository;
         private CancellationTokenSource _lifetime;
         private Task _pendingOperation = Task.CompletedTask;
@@ -23,9 +28,29 @@ namespace CefFlashBrowser.ViewModels
 
         public DelegateCommand NewCommand { get; }
         public DelegateCommand SaveCommand { get; }
+        public DelegateCommand InstallCommand { get; }
         public DelegateCommand ToggleCommand { get; }
         public DelegateCommand DeleteCommand { get; }
         public DelegateCommand ReloadCommand { get; }
+        public DelegateCommand LoadUrlCommand { get; }
+        public DelegateCommand ShowUrlCommand { get; }
+        public DelegateCommand HideUrlCommand { get; }
+
+        public Func<string, bool> ConfirmInstallation { private get; set; }
+
+        private string _installUrl;
+        public string InstallUrl
+        {
+            get => _installUrl;
+            set => UpdateValue(ref _installUrl, value);
+        }
+
+        private bool _showUrlInput;
+        public bool ShowUrlInput
+        {
+            get => _showUrlInput;
+            set => UpdateValue(ref _showUrlInput, value);
+        }
 
         private UserScriptItemViewModel _selectedScript;
         public UserScriptItemViewModel SelectedScript
@@ -57,13 +82,21 @@ namespace CefFlashBrowser.ViewModels
         }
 
         public UserScriptManagerViewModel(Func<Task<IUserScriptRepository>> initialize,
-            Func<string, string> text, Action<Action> dispatch)
+            Func<string, string> text, Action<Action> dispatch,
+            Func<string, CancellationToken, Task<string>> fetchSource = null)
         {
             _initialize = initialize;
             _text = text;
             _dispatch = dispatch;
+            _fetchSource = fetchSource;
 
+            LoadUrlCommand = new DelegateCommand(async () => await ImportUrlAsync(InstallUrl))
+            { CanExecuteFunc = _ => !IsBusy && _repository != null };
+            ShowUrlCommand = new DelegateCommand(() => ShowUrlInput = true) { CanExecuteFunc = _ => !IsBusy };
+            HideUrlCommand = new DelegateCommand(() => ShowUrlInput = false);
             NewCommand = new DelegateCommand(NewScript) { CanExecuteFunc = _ => !IsBusy };
+            InstallCommand = new DelegateCommand(async () => await SaveAsync())
+            { CanExecuteFunc = _ => CanEdit() && !SelectedScript.IsInstalled };
             SaveCommand = new DelegateCommand(async () => await SaveAsync()) { CanExecuteFunc = _ => CanEdit() };
             ToggleCommand = new DelegateCommand<UserScriptItemViewModel>(async item => await ToggleAsync(item))
             { CanExecuteFunc = item => !IsBusy && _repository != null && (item as UserScriptItemViewModel)?.IsInstalled == true };
@@ -129,18 +162,94 @@ namespace CefFlashBrowser.ViewModels
         public Task SaveAsync()
         {
             var item = SelectedScript;
-            if (item == null || item.RequiresConfirmation && !item.IsInstalled) return Task.CompletedTask;
+            if (item == null) return Task.CompletedTask;
 
             return RunAsync(async token =>
             {
                 var source = item.Source;
+                UserScriptSourceText.Validate(source);
+                var parsed = new UserScriptMetadataParser().Parse(source);
+                if (!parsed.CanEnable)
+                {
+                    Status = _text("userScripts_invalidMetadata");
+                    return;
+                }
+
+                if (!item.IsInstalled && item.RequiresConfirmation
+                    && ConfirmInstallation?.Invoke(ConfirmationText(parsed.Metadata, item.Origin)) != true)
+                {
+                    Status = _text("userScripts_cancelled");
+                    return;
+                }
+
+                token.ThrowIfCancellationRequested();
                 var installation = item.IsInstalled
                     ? await _repository.UpdateIfUnchangedAsync(item.Installation.ScriptKey, item.EditorRevision, source, item.Origin, token)
                     : await _repository.InstallAsync(source, item.Origin, true, token);
 
                 AcceptSave(item, installation, source);
                 Status = _text("userScripts_saved");
+                UpdateCommands();
             });
+        }
+
+        public Task ImportFileAsync(string path)
+        {
+            return RunAsync(async token =>
+            {
+                var source = await UserScriptSourceText.ReadAsync(path, token);
+                token.ThrowIfCancellationRequested();
+                AddImportDraft(source, Path.GetFullPath(path));
+            });
+        }
+
+        public Task ImportUrlAsync(string url)
+        {
+            return RunAsync(async token =>
+            {
+                if (!Uri.TryCreate(url?.Trim(), UriKind.Absolute, out var uri)
+                    || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                    throw new InvalidOperationException(_text("userScripts_invalidUrl"));
+
+                var source = await _fetchSource(uri.AbsoluteUri, token);
+                token.ThrowIfCancellationRequested();
+                UserScriptSourceText.Validate(source);
+                AddImportDraft(source, uri.AbsoluteUri);
+                ShowUrlInput = false;
+            });
+        }
+
+        private void AddImportDraft(string source, string origin)
+        {
+            var parsed = new UserScriptMetadataParser().Parse(source);
+            var item = new UserScriptItemViewModel(source, origin, parsed.Metadata?.Name ?? origin, true);
+            Scripts.Add(item);
+            SelectedScript = item;
+            Status = _text("userScripts_reviewInstall");
+        }
+
+        public Task ExportAsync(string path)
+        {
+            var source = SelectedScript?.Source;
+            if (source == null) return Task.CompletedTask;
+
+            return RunAsync(async token =>
+            {
+                await UserScriptSourceText.WriteAsync(path, source, token);
+                Status = _text("userScripts_exported");
+            });
+        }
+
+        private string ConfirmationText(UserScriptMetadata metadata, string origin)
+        {
+            return _text("userScripts_confirmInstall") + Environment.NewLine + Environment.NewLine
+                + metadata.Name + " " + metadata.Version + Environment.NewLine + origin + Environment.NewLine
+                + _text("userScripts_match") + ": " + string.Join(", ", metadata.Matches.Concat(metadata.Includes)) + Environment.NewLine
+                + _text("userScripts_world") + ": " + metadata.Sandbox + " / " + metadata.InjectInto + Environment.NewLine
+                + _text("userScripts_grants") + ": " + string.Join(", ", metadata.DeclaredGrants) + Environment.NewLine
+                + "@connect: " + string.Join(", ", metadata.Connects) + Environment.NewLine
+                + "@require: " + string.Join(", ", metadata.Requires.Select(item => item.Url)) + Environment.NewLine
+                + "@resource: " + string.Join(", ", metadata.Resources.Select(item => item.Name + " " + item.Url));
         }
 
         public Task ToggleAsync(UserScriptItemViewModel item)
@@ -187,7 +296,7 @@ namespace CefFlashBrowser.ViewModels
             });
         }
 
-        private void AcceptSave(UserScriptItemViewModel item, Mzying2001.MonkeySharp.Core.Domain.UserScriptInstallation installation, string source)
+        private void AcceptSave(UserScriptItemViewModel item, UserScriptInstallation installation, string source)
         {
             var duplicate = Scripts.FirstOrDefault(value => value != item && value.Installation?.ScriptKey == installation.ScriptKey);
             if (duplicate != null) Scripts.Remove(duplicate);
@@ -214,7 +323,7 @@ namespace CefFlashBrowser.ViewModels
             });
         }
 
-        private void Synchronize(Mzying2001.MonkeySharp.Core.Domain.UserScriptInstallation installation, bool enabledChanged)
+        private void Synchronize(UserScriptInstallation installation, bool enabledChanged)
         {
             var item = Scripts.FirstOrDefault(value => value.Installation?.ScriptKey == installation.ScriptKey);
             if (item == null) Scripts.Add(new UserScriptItemViewModel(installation));
@@ -238,7 +347,6 @@ namespace CefFlashBrowser.ViewModels
 
         private async Task RunCoreAsync(Func<CancellationToken, Task> operation)
         {
-
             var lifetime = _lifetime;
             IsBusy = true;
             Status = _text("userScripts_working");
@@ -269,9 +377,12 @@ namespace CefFlashBrowser.ViewModels
         {
             NewCommand?.RaiseCanExecuteChanged();
             SaveCommand?.RaiseCanExecuteChanged();
+            InstallCommand?.RaiseCanExecuteChanged();
             ToggleCommand?.RaiseCanExecuteChanged();
             DeleteCommand?.RaiseCanExecuteChanged();
             ReloadCommand?.RaiseCanExecuteChanged();
+            LoadUrlCommand?.RaiseCanExecuteChanged();
+            ShowUrlCommand?.RaiseCanExecuteChanged();
         }
     }
 }

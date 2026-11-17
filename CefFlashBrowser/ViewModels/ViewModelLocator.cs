@@ -45,7 +45,8 @@ namespace CefFlashBrowser.ViewModels
                 await service.InitializeAsync();
                 return service.Repository;
             }, key => SimpleIoc.Global.GetInstance<LanguageService>().GetString(key),
-                action => System.Windows.Application.Current.Dispatcher.InvokeAsync(action));
+                action => System.Windows.Application.Current.Dispatcher.InvokeAsync(action),
+                (url, token) => SimpleIoc.Global.GetInstance<Services.UserScripts.UserScriptService>().Content.FetchSourceAsync(null, url, token));
         }
 
         private static BrowserViewModel BrowserViewModelFactory(object[] parameters)

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+        x:Name="window"
         Width="1000" Height="650" MinWidth="650" MinHeight="400"
         WindowStartupLocation="CenterScreen"
         DataContext="{Binding Source={StaticResource Locator}, Path=UserScriptManagerViewModel}"
@@ -19,7 +20,12 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="{DynamicResource solEditor_file}">
                 <MenuItem Header="{DynamicResource userScripts_new}" Command="{Binding NewCommand}" InputGestureText="Ctrl+N"/>
+                <MenuItem Header="{DynamicResource userScripts_installFile}" Command="{Binding ElementName=window, Path=ImportFileCommand}"/>
+                <MenuItem Header="{DynamicResource userScripts_installUrl}" Command="{Binding ShowUrlCommand}"/>
+                <MenuItem Header="{DynamicResource userScripts_install}" Command="{Binding InstallCommand}"/>
+                <Separator/>
                 <MenuItem Header="{DynamicResource solEditor_save}" Command="{Binding SaveCommand}" InputGestureText="Ctrl+S"/>
+                <MenuItem Header="{DynamicResource userScripts_export}" Command="{Binding ElementName=window, Path=ExportCommand}"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource solEditor_close}" Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}" InputGestureText="Ctrl+W"/>
             </MenuItem>
@@ -40,13 +46,35 @@
         <Border DockPanel.Dock="Bottom" Padding="10,6">
             <TextBlock Text="{Binding Status}" TextWrapping="Wrap"/>
         </Border>
+        <Border DockPanel.Dock="Top" Padding="10,6">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ShowUrlInput}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Margin="6,0,0,0" Content="{DynamicResource userScripts_cancel}" Command="{Binding HideUrlCommand}"/>
+                <Button DockPanel.Dock="Right" Margin="6,0,0,0" Content="{DynamicResource userScripts_load}" Command="{Binding LoadUrlCommand}"/>
+                <TextBlock DockPanel.Dock="Left" Margin="0,0,6,0" VerticalAlignment="Center" Text="URL"/>
+                <TextBox Text="{Binding InstallUrl, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding LoadUrlCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+            </DockPanel>
+        </Border>
         <Grid Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="240" MinWidth="180" MaxWidth="450"/>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <ListBox x:Name="scriptList" ItemsSource="{Binding Scripts}" SelectedItem="{Binding SelectedScript}">
+            <ListBox x:Name="scriptList" ItemsSource="{Binding Scripts}" SelectedItem="{Binding SelectedScript}" SelectionChanged="SelectionChanged">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem" BasedOn="{StaticResource ListBoxItemBaseStyle}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -59,6 +87,7 @@
                                       Style="{StaticResource ToggleButtonSwitch}"
                                       IsChecked="{Binding IsEnabled, Mode=OneWay}"
                                       IsEnabled="{Binding IsInstalled}"
+                                      ToolTip="{DynamicResource userScripts_toggle}"
                                       Command="{Binding DataContext.ToggleCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                       CommandParameter="{Binding}"/>
                             <StackPanel>
