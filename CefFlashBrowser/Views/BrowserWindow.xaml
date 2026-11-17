@@ -204,15 +204,15 @@
                 </MenuItem.ItemTemplate>
             </MenuItem>
 
-            <MenuItem Header="{DynamicResource userScripts_title}"
-                      Command="{Binding OpenUserScriptManagerCommand}"/>
-
             <MenuItem Header="{DynamicResource browser_addFavorite}"
                       Command="{Binding AddFavoriteCommand}"
                       CommandParameter="{Binding CurrentBrowser}"
                       InputGestureText="Ctrl+D"/>
 
             <Separator/>
+
+            <MenuItem Header="{DynamicResource userScripts_title}"
+                      Command="{Binding OpenUserScriptManagerCommand}"/>
 
             <MenuItem Header="{DynamicResource userscript_commands}"
                       ItemsSource="{Binding CurrentBrowser.UserScriptMenus}">

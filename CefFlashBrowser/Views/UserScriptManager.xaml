@@ -3,52 +3,84 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+
         x:Name="window"
-        Width="1000" Height="650" MinWidth="650" MinHeight="400"
-        WindowStartupLocation="CenterScreen"
-        DataContext="{Binding Source={StaticResource Locator}, Path=UserScriptManagerViewModel}"
+        Width="800"
+        Height="500"
+        MinWidth="600"
+        MinHeight="400"
         Title="{DynamicResource userScripts_title}"
-        Background="{DynamicResource RegionBrush}"
-        Foreground="{DynamicResource PrimaryTextBrush}">
+        DataContext="{Binding Source={StaticResource Locator}, Path=UserScriptManagerViewModel}">
+
+    <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior x:Name="windowBehavior"/>
+    </i:Interaction.Behaviors>
+
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+N" Command="{Binding NewCommand}"/>
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}"/>
         <KeyBinding Gesture="Ctrl+W" Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
     </Window.InputBindings>
-    <i:Interaction.Behaviors>
-        <behaviors:WindowBehavior x:Name="windowBehavior"/>
-    </i:Interaction.Behaviors>
+
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="{DynamicResource solEditor_file}">
-                <MenuItem Header="{DynamicResource userScripts_new}" Command="{Binding NewCommand}" InputGestureText="Ctrl+N"/>
-                <MenuItem Header="{DynamicResource userScripts_installFile}" Command="{Binding ElementName=window, Path=ImportFileCommand}"/>
-                <MenuItem Header="{DynamicResource userScripts_installUrl}" Command="{Binding ShowUrlCommand}"/>
-                <MenuItem Header="{DynamicResource userScripts_install}" Command="{Binding InstallCommand}"/>
+                <MenuItem Header="{DynamicResource userScripts_new}"
+                          Command="{Binding NewCommand}"
+                          InputGestureText="Ctrl+N"/>
+                <MenuItem Header="{DynamicResource userScripts_installFile}"
+                          Command="{Binding ElementName=window, Path=ImportFileCommand}"/>
+                <MenuItem Header="{DynamicResource userScripts_installUrl}"
+                          Command="{Binding ShowUrlCommand}"/>
+                <MenuItem Header="{DynamicResource userScripts_install}"
+                          Command="{Binding InstallCommand}"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource solEditor_save}" Command="{Binding SaveCommand}" InputGestureText="Ctrl+S"/>
-                <MenuItem Header="{DynamicResource userScripts_export}" Command="{Binding ElementName=window, Path=ExportCommand}"/>
+                <MenuItem Header="{DynamicResource solEditor_save}"
+                          Command="{Binding SaveCommand}"
+                          InputGestureText="Ctrl+S"/>
+                <MenuItem Header="{DynamicResource userScripts_export}"
+                          Command="{Binding ElementName=window, Path=ExportCommand}"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource solEditor_close}" Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}" InputGestureText="Ctrl+W"/>
+                <MenuItem Header="{DynamicResource solEditor_close}"
+                          Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"
+                          InputGestureText="Ctrl+W"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource solEditor_edit}">
-                <MenuItem Header="{DynamicResource userScripts_undo}" Command="ApplicationCommands.Undo" CommandTarget="{Binding ElementName=sourceEditor}"/>
-                <MenuItem Header="{DynamicResource userScripts_redo}" Command="ApplicationCommands.Redo" CommandTarget="{Binding ElementName=sourceEditor}"/>
+                <MenuItem Header="{DynamicResource userScripts_undo}"
+                          Command="ApplicationCommands.Undo"
+                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                <MenuItem Header="{DynamicResource userScripts_redo}"
+                          Command="ApplicationCommands.Redo"
+                          CommandTarget="{Binding ElementName=sourceEditor}"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource userScripts_cut}" Command="ApplicationCommands.Cut" CommandTarget="{Binding ElementName=sourceEditor}"/>
-                <MenuItem Header="{DynamicResource userScripts_copy}" Command="ApplicationCommands.Copy" CommandTarget="{Binding ElementName=sourceEditor}"/>
-                <MenuItem Header="{DynamicResource userScripts_paste}" Command="ApplicationCommands.Paste" CommandTarget="{Binding ElementName=sourceEditor}"/>
-                <MenuItem Header="{DynamicResource userScripts_selectAll}" Command="ApplicationCommands.SelectAll" CommandTarget="{Binding ElementName=sourceEditor}"/>
+                <MenuItem Header="{DynamicResource userScripts_cut}"
+                          Command="ApplicationCommands.Cut"
+                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                <MenuItem Header="{DynamicResource userScripts_copy}"
+                          Command="ApplicationCommands.Copy"
+                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                <MenuItem Header="{DynamicResource userScripts_paste}"
+                          Command="ApplicationCommands.Paste"
+                          CommandTarget="{Binding ElementName=sourceEditor}"/>
+                <MenuItem Header="{DynamicResource userScripts_selectAll}"
+                          Command="ApplicationCommands.SelectAll"
+                          CommandTarget="{Binding ElementName=sourceEditor}"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource userScripts_script}">
-                <MenuItem Header="{DynamicResource userScripts_reload}" Command="{Binding ReloadCommand}"/>
-                <MenuItem Header="{DynamicResource userScripts_delete}" Command="{Binding DeleteCommand}"/>
+                <MenuItem Header="{DynamicResource userScripts_reload}"
+                          Command="{Binding ReloadCommand}"/>
+                <MenuItem Header="{DynamicResource userScripts_delete}"
+                          Command="{Binding DeleteCommand}"/>
             </MenuItem>
         </Menu>
-        <Border DockPanel.Dock="Bottom" Padding="10,6">
-            <TextBlock Text="{Binding Status}" TextWrapping="Wrap"/>
-        </Border>
-        <Border DockPanel.Dock="Top" Padding="10,6">
+
+        <StatusBar DockPanel.Dock="Bottom">
+            <TextBlock Text="{Binding Status}"
+                       Foreground="{DynamicResource PrimaryTextBrush}"/>
+        </StatusBar>
+
+        <Border DockPanel.Dock="Top"
+                Padding="10,5">
             <Border.Style>
                 <Style TargetType="Border">
                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -59,10 +91,24 @@
                     </Style.Triggers>
                 </Style>
             </Border.Style>
+
             <DockPanel>
-                <Button DockPanel.Dock="Right" Margin="6,0,0,0" Content="{DynamicResource userScripts_cancel}" Command="{Binding HideUrlCommand}"/>
-                <Button DockPanel.Dock="Right" Margin="6,0,0,0" Content="{DynamicResource userScripts_load}" Command="{Binding LoadUrlCommand}"/>
-                <TextBlock DockPanel.Dock="Left" Margin="0,0,6,0" VerticalAlignment="Center" Text="URL"/>
+                <Button
+                    DockPanel.Dock="Right"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource userScripts_cancel}"
+                    Command="{Binding HideUrlCommand}"/>
+                <Button
+                    DockPanel.Dock="Right"
+                    Margin="5,0,0,0"
+                    Content="{DynamicResource userScripts_load}"
+                    Command="{Binding LoadUrlCommand}"/>
+                <TextBlock
+                    DockPanel.Dock="Left"
+                    Margin="0,0,5,0"
+                    VerticalAlignment="Center"
+                    Text="URL"
+                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                 <TextBox Text="{Binding InstallUrl, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding LoadUrlCommand}"/>
@@ -70,22 +116,31 @@
                 </TextBox>
             </DockPanel>
         </Border>
+
         <Grid Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="240" MinWidth="180" MaxWidth="450"/>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <ListBox x:Name="scriptList" ItemsSource="{Binding Scripts}" SelectedItem="{Binding SelectedScript}" SelectionChanged="SelectionChanged">
+
+            <ListBox x:Name="scriptList"
+                     ItemsSource="{Binding Scripts}"
+                     SelectedItem="{Binding SelectedScript}"
+                     SelectionChanged="SelectionChanged">
                 <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource ListBoxItemBaseStyle}">
+                    <Style TargetType="ListBoxItem"
+                           BasedOn="{StaticResource ListBoxItemBaseStyle}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     </Style>
                 </ListBox.ItemContainerStyle>
+
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <DockPanel Margin="2,5">
-                            <CheckBox DockPanel.Dock="Right" Margin="10,0,0,0" VerticalAlignment="Center"
+                            <CheckBox DockPanel.Dock="Right"
+                                      Margin="10,0,0,0"
+                                      VerticalAlignment="Center"
                                       Style="{StaticResource ToggleButtonSwitch}"
                                       IsChecked="{Binding IsEnabled, Mode=OneWay}"
                                       IsEnabled="{Binding IsInstalled}"
@@ -96,7 +151,20 @@
                                 <TextBlock TextTrimming="CharacterEllipsis">
                                     <Run Text="{Binding Name, Mode=OneWay}"/><Run Text="{Binding DirtyMark, Mode=OneWay}"/>
                                 </TextBlock>
-                                <TextBlock Text="{Binding Version}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+
+                                <TextBlock Text="{Binding Version}"
+                                           Foreground="{DynamicResource SecondaryTextBrush}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <Trigger Property="Text" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
                                 <TextBlock Foreground="{DynamicResource SecondaryTextBrush}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
@@ -123,13 +191,39 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <GridSplitter Grid.Column="1" Width="10" Background="Transparent" HorizontalAlignment="Stretch"/>
+
+            <GridSplitter Grid.Column="1"
+                          Width="10"
+                          Background="Transparent"
+                          HorizontalAlignment="Stretch"/>
+
             <DockPanel Grid.Column="2">
-                <TextBlock DockPanel.Dock="Top" Margin="0,0,0,6" Text="{Binding SelectedScript.Problem}" TextWrapping="Wrap"/>
-                <TextBox x:Name="sourceEditor" Text="{Binding SelectedScript.Source, UpdateSourceTrigger=PropertyChanged}"
-                         AcceptsReturn="True" AcceptsTab="True" FontFamily="Consolas" FontSize="14"
-                         VerticalContentAlignment="Top" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                         TextWrapping="NoWrap" SpellCheck.IsEnabled="False">
+                <TextBlock DockPanel.Dock="Top"
+                           Margin="0,0,0,5"
+                           TextWrapping="Wrap"
+                           Text="{Binding SelectedScript.Problem}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBox x:Name="sourceEditor"
+                         Text="{Binding SelectedScript.Source, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True"
+                         AcceptsTab="True"
+                         FontFamily="Consolas"
+                         FontSize="14"
+                         VerticalContentAlignment="Top"
+                         HorizontalScrollBarVisibility="Auto"
+                         VerticalScrollBarVisibility="Auto"
+                         TextWrapping="NoWrap"
+                         SpellCheck.IsEnabled="False">
                     <TextBox.Style>
                         <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                             <Style.Triggers>

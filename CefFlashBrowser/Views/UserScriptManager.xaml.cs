@@ -14,12 +14,16 @@ namespace CefFlashBrowser.Views
         public DelegateCommand ImportFileCommand { get; }
         public DelegateCommand ExportCommand { get; }
 
-        private UserScriptManagerViewModel ViewModel => (UserScriptManagerViewModel)DataContext;
+        private UserScriptManagerViewModel ViewModel
+        {
+            get => (UserScriptManagerViewModel)DataContext;
+        }
 
         public UserScriptManager()
         {
             ImportFileCommand = new DelegateCommand(ImportFile) { CanExecuteFunc = _ => !ViewModel.IsBusy };
             ExportCommand = new DelegateCommand(Export) { CanExecuteFunc = _ => !ViewModel.IsBusy && ViewModel.SelectedScript != null };
+
             InitializeComponent();
             Loaded += WindowLoaded;
         }
@@ -47,15 +51,21 @@ namespace CefFlashBrowser.Views
         private async void ImportFile()
         {
             var dialog = new OpenFileDialog { Filter = "JavaScript (*.user.js;*.js)|*.user.js;*.js|All files (*.*)|*.*" };
+
             if (dialog.ShowDialog(this) == true)
+            {
                 await ViewModel.ImportFileAsync(dialog.FileName);
+            }
         }
 
         private async void Export()
         {
             var dialog = new SaveFileDialog { Filter = "Userscript (*.user.js)|*.user.js", DefaultExt = ".user.js", FileName = "script.user.js" };
+
             if (dialog.ShowDialog(this) == true)
+            {
                 await ViewModel.ExportAsync(dialog.FileName);
+            }
         }
 
         private void SelectionChanged(object sender, SelectionChangedEventArgs e)

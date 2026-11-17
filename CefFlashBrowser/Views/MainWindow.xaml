@@ -133,9 +133,6 @@
 
                 <Separator/>
 
-                <MenuItem Header="{DynamicResource userScripts_title}"
-                          Command="{Binding OpenUserScriptManagerCommand}"/>
-
                 <!--SolSaveManager-->
                 <MenuItem Header="{DynamicResource mainWindow_manageSolSaveFiles}"
                           Command="{Binding OpenSolSaveManagerCommand}"/>
@@ -143,6 +140,12 @@
                 <!--Open Sol File-->
                 <MenuItem Header="{DynamicResource mainWindow_openSolFile}"
                           Command="{Binding OpenSolFileCommand}"/>
+
+                <Separator/>
+
+                <!--UserScriptManager-->
+                <MenuItem Header="{DynamicResource userScripts_title}"
+                          Command="{Binding OpenUserScriptManagerCommand}"/>
 
                 <Separator/>
 
