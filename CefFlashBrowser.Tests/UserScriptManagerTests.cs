@@ -85,7 +85,7 @@ namespace CefFlashBrowser.Tests
             await manager.SaveAsync();
             Assert.IsTrue(item.Source.EndsWith("// local"));
             Assert.IsTrue(item.IsDirty);
-            Assert.AreEqual("userScripts_conflict", manager.Status);
+            Assert.AreEqual("userScriptManager_conflict", manager.Status);
             var saved = await repository.GetAsync(item.Installation.ScriptKey, CancellationToken.None);
             Assert.IsTrue(saved.Definition.Source.EndsWith("// remote"));
             manager.Close();
@@ -299,7 +299,7 @@ namespace CefFlashBrowser.Tests
             var item = model.SelectedScript;
             item.Source += "\n// keep me";
             await model.ImportUrlAsync("file:///script.user.js");
-            Assert.AreEqual("userScripts_invalidUrl", model.Status);
+            Assert.AreEqual("userScriptManager_invalidUrl", model.Status);
             await model.ImportUrlAsync("https://example.com/script.user.js");
             Assert.AreEqual("offline", model.Status);
             Assert.AreSame(item, model.SelectedScript);

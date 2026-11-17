@@ -115,7 +115,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Assert-Regression ([IO.File]::ReadAllText($export) -eq $model.SelectedScript.Source) 'export includes current unsaved source'
         foreach ($locale in @('en-US', 'zh-CN', 'zh-TW', 'de', 'fr-FR', 'it', 'ja', 'ko', 'ru')) {
             $Context.LanguageService.SetCurrentLanguage($locale)
-            Wait-Regression $Context { $window.Title -eq $Context.LanguageService.GetString('userScripts_title') } "manager language ($locale)"
+            Wait-Regression $Context { $window.Title -eq $Context.LanguageService.GetString('userScriptManager_title') } "manager language ($locale)"
             Assert-Regression (![string]::IsNullOrEmpty($window.Title)) 'manager title is localized in every supported language'
         }
         $Context.LanguageService.SetCurrentLanguage('zh-CN')

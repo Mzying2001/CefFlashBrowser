@@ -9,7 +9,7 @@
         Height="500"
         MinWidth="600"
         MinHeight="400"
-        Title="{DynamicResource userScripts_title}"
+        Title="{DynamicResource userScriptManager_title}"
         DataContext="{Binding Source={StaticResource Locator}, Path=UserScriptManagerViewModel}">
 
     <i:Interaction.Behaviors>
@@ -25,20 +25,20 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="{DynamicResource solEditor_file}">
-                <MenuItem Header="{DynamicResource userScripts_new}"
+                <MenuItem Header="{DynamicResource userScriptManager_new}"
                           Command="{Binding NewCommand}"
                           InputGestureText="Ctrl+N"/>
-                <MenuItem Header="{DynamicResource userScripts_installFile}"
+                <MenuItem Header="{DynamicResource userScriptManager_installFile}"
                           Command="{Binding ElementName=window, Path=ImportFileCommand}"/>
-                <MenuItem Header="{DynamicResource userScripts_installUrl}"
+                <MenuItem Header="{DynamicResource userScriptManager_installUrl}"
                           Command="{Binding ShowUrlCommand}"/>
-                <MenuItem Header="{DynamicResource userScripts_install}"
+                <MenuItem Header="{DynamicResource userScriptManager_install}"
                           Command="{Binding InstallCommand}"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource solEditor_save}"
                           Command="{Binding SaveCommand}"
                           InputGestureText="Ctrl+S"/>
-                <MenuItem Header="{DynamicResource userScripts_export}"
+                <MenuItem Header="{DynamicResource userScriptManager_export}"
                           Command="{Binding ElementName=window, Path=ExportCommand}"/>
                 <Separator/>
                 <MenuItem Header="{DynamicResource solEditor_close}"
@@ -46,30 +46,30 @@
                           InputGestureText="Ctrl+W"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource solEditor_edit}">
-                <MenuItem Header="{DynamicResource userScripts_undo}"
+                <MenuItem Header="{DynamicResource userScriptManager_undo}"
                           Command="ApplicationCommands.Undo"
                           CommandTarget="{Binding ElementName=sourceEditor}"/>
-                <MenuItem Header="{DynamicResource userScripts_redo}"
+                <MenuItem Header="{DynamicResource userScriptManager_redo}"
                           Command="ApplicationCommands.Redo"
                           CommandTarget="{Binding ElementName=sourceEditor}"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource userScripts_cut}"
+                <MenuItem Header="{DynamicResource userScriptManager_cut}"
                           Command="ApplicationCommands.Cut"
                           CommandTarget="{Binding ElementName=sourceEditor}"/>
-                <MenuItem Header="{DynamicResource userScripts_copy}"
+                <MenuItem Header="{DynamicResource userScriptManager_copy}"
                           Command="ApplicationCommands.Copy"
                           CommandTarget="{Binding ElementName=sourceEditor}"/>
-                <MenuItem Header="{DynamicResource userScripts_paste}"
+                <MenuItem Header="{DynamicResource userScriptManager_paste}"
                           Command="ApplicationCommands.Paste"
                           CommandTarget="{Binding ElementName=sourceEditor}"/>
-                <MenuItem Header="{DynamicResource userScripts_selectAll}"
+                <MenuItem Header="{DynamicResource userScriptManager_selectAll}"
                           Command="ApplicationCommands.SelectAll"
                           CommandTarget="{Binding ElementName=sourceEditor}"/>
             </MenuItem>
-            <MenuItem Header="{DynamicResource userScripts_script}">
-                <MenuItem Header="{DynamicResource userScripts_reload}"
+            <MenuItem Header="{DynamicResource userScriptManager_script}">
+                <MenuItem Header="{DynamicResource userScriptManager_reload}"
                           Command="{Binding ReloadCommand}"/>
-                <MenuItem Header="{DynamicResource userScripts_delete}"
+                <MenuItem Header="{DynamicResource userScriptManager_delete}"
                           Command="{Binding DeleteCommand}"/>
             </MenuItem>
         </Menu>
@@ -96,12 +96,12 @@
                 <Button
                     DockPanel.Dock="Right"
                     Margin="5,0,0,0"
-                    Content="{DynamicResource userScripts_cancel}"
+                    Content="{DynamicResource userScriptManager_cancel}"
                     Command="{Binding HideUrlCommand}"/>
                 <Button
                     DockPanel.Dock="Right"
                     Margin="5,0,0,0"
-                    Content="{DynamicResource userScripts_load}"
+                    Content="{DynamicResource userScriptManager_load}"
                     Command="{Binding LoadUrlCommand}"/>
                 <TextBlock
                     DockPanel.Dock="Left"
@@ -144,7 +144,7 @@
                                       Style="{StaticResource ToggleButtonSwitch}"
                                       IsChecked="{Binding IsEnabled, Mode=OneWay}"
                                       IsEnabled="{Binding IsInstalled}"
-                                      ToolTip="{DynamicResource userScripts_toggle}"
+                                      ToolTip="{DynamicResource userScriptManager_toggle}"
                                       Command="{Binding DataContext.ToggleCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                       CommandParameter="{Binding}"/>
                             <StackPanel>
@@ -172,7 +172,7 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsInstalled}" Value="False">
                                                     <Setter Property="Visibility" Value="Visible"/>
-                                                    <Setter Property="Text" Value="{DynamicResource userScripts_draft}"/>
+                                                    <Setter Property="Text" Value="{DynamicResource userScriptManager_draft}"/>
                                                 </DataTrigger>
                                                 <MultiDataTrigger>
                                                     <MultiDataTrigger.Conditions>
@@ -180,7 +180,7 @@
                                                         <Condition Binding="{Binding IsReady}" Value="False"/>
                                                     </MultiDataTrigger.Conditions>
                                                     <Setter Property="Visibility" Value="Visible"/>
-                                                    <Setter Property="Text" Value="{DynamicResource userScripts_unavailable}"/>
+                                                    <Setter Property="Text" Value="{DynamicResource userScriptManager_unavailable}"/>
                                                 </MultiDataTrigger>
                                             </Style.Triggers>
                                         </Style>

@@ -46,7 +46,7 @@ namespace CefFlashBrowser.Tests
             File.WriteAllText(PathFor(item.Installation.ScriptKey), external);
             item.Source += "\n// unsaved editor";
             await manager.SaveAsync();
-            Assert.AreEqual("userScripts_conflict", manager.Status);
+            Assert.AreEqual("userScriptManager_conflict", manager.Status);
             Assert.IsTrue(item.IsDirty);
             Assert.IsTrue(item.Source.EndsWith("// unsaved editor"));
             Assert.AreEqual(external, File.ReadAllText(PathFor(item.Installation.ScriptKey)));

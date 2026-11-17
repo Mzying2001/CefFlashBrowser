@@ -162,7 +162,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void NewScript()
         {
-            var name = _text("userScripts_newScript");
+            var name = _text("userScriptManager_newScript");
 
             var source =
                 "// ==UserScript==\r\n" +
@@ -203,14 +203,14 @@ namespace CefFlashBrowser.ViewModels
 
                 if (!parsed.CanEnable)
                 {
-                    Status = _text("userScripts_invalidMetadata");
+                    Status = _text("userScriptManager_invalidMetadata");
                     return;
                 }
 
                 if (!item.IsInstalled && item.RequiresConfirmation
                     && ConfirmInstallation?.Invoke(ConfirmationText(parsed.Metadata, item.Origin)) != true)
                 {
-                    Status = _text("userScripts_cancelled");
+                    Status = _text("userScriptManager_cancelled");
                     return;
                 }
 
@@ -222,7 +222,7 @@ namespace CefFlashBrowser.ViewModels
 
                 AcceptSave(item, installation, source);
 
-                Status = _text("userScripts_saved");
+                Status = _text("userScriptManager_saved");
                 UpdateCommands();
             });
         }
@@ -244,7 +244,7 @@ namespace CefFlashBrowser.ViewModels
                 if (!Uri.TryCreate(url?.Trim(), UriKind.Absolute, out var uri)
                     || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
                 {
-                    throw new InvalidOperationException(_text("userScripts_invalidUrl"));
+                    throw new InvalidOperationException(_text("userScriptManager_invalidUrl"));
                 }
 
                 var source = await _fetchSource(uri.AbsoluteUri, token);
@@ -263,7 +263,7 @@ namespace CefFlashBrowser.ViewModels
 
             Scripts.Add(item);
             SelectedScript = item;
-            Status = _text("userScripts_reviewInstall");
+            Status = _text("userScriptManager_reviewInstall");
         }
 
         public Task ExportAsync(string path)
@@ -274,17 +274,17 @@ namespace CefFlashBrowser.ViewModels
             return RunAsync(async token =>
             {
                 await UserScriptSourceText.WriteAsync(path, source, token);
-                Status = _text("userScripts_exported");
+                Status = _text("userScriptManager_exported");
             });
         }
 
         private string ConfirmationText(UserScriptMetadata metadata, string origin)
         {
-            return _text("userScripts_confirmInstall") + Environment.NewLine + Environment.NewLine
+            return _text("userScriptManager_confirmInstall") + Environment.NewLine + Environment.NewLine
                 + metadata.Name + " " + metadata.Version + Environment.NewLine + origin + Environment.NewLine
-                + _text("userScripts_match") + ": " + string.Join(", ", metadata.Matches.Concat(metadata.Includes)) + Environment.NewLine
-                + _text("userScripts_world") + ": " + metadata.Sandbox + " / " + metadata.InjectInto + Environment.NewLine
-                + _text("userScripts_grants") + ": " + string.Join(", ", metadata.DeclaredGrants) + Environment.NewLine
+                + _text("userScriptManager_match") + ": " + string.Join(", ", metadata.Matches.Concat(metadata.Includes)) + Environment.NewLine
+                + _text("userScriptManager_world") + ": " + metadata.Sandbox + " / " + metadata.InjectInto + Environment.NewLine
+                + _text("userScriptManager_grants") + ": " + string.Join(", ", metadata.DeclaredGrants) + Environment.NewLine
                 + "@connect: " + string.Join(", ", metadata.Connects) + Environment.NewLine
                 + "@require: " + string.Join(", ", metadata.Requires.Select(item => item.Url)) + Environment.NewLine
                 + "@resource: " + string.Join(", ", metadata.Resources.Select(item => item.Name + " " + item.Url));
@@ -305,7 +305,7 @@ namespace CefFlashBrowser.ViewModels
                 {
                     item.RefreshEnabled();
                 }
-                Status = _text("userScripts_refreshPage");
+                Status = _text("userScriptManager_refreshPage");
             });
         }
 
@@ -330,7 +330,7 @@ namespace CefFlashBrowser.ViewModels
                     _deletingItem = null;
                 }
 
-                Status = _text("userScripts_deleted");
+                Status = _text("userScriptManager_deleted");
             });
         }
 
@@ -353,7 +353,7 @@ namespace CefFlashBrowser.ViewModels
 
                 item.AcceptSave(installation, installation.Definition.Source);
                 item.Source = installation.Definition.Source;
-                Status = _text("userScripts_refreshPage");
+                Status = _text("userScriptManager_refreshPage");
             });
         }
 
@@ -438,21 +438,21 @@ namespace CefFlashBrowser.ViewModels
             var lifetime = _lifetime;
 
             IsBusy = true;
-            Status = _text("userScripts_working");
+            Status = _text("userScriptManager_working");
 
             try
             {
                 await operation(lifetime.Token);
-                if (Status == _text("userScripts_working")) Status = string.Empty;
+                if (Status == _text("userScriptManager_working")) Status = string.Empty;
             }
             catch (OperationCanceledException)
             {
-                Status = _text("userScripts_cancelled");
+                Status = _text("userScriptManager_cancelled");
             }
             catch (Exception e)
             {
                 Status = e is RepositoryRevisionMismatchException || e is UserScriptSourceConflictException
-                    ? _text("userScripts_conflict") : e.Message;
+                    ? _text("userScriptManager_conflict") : e.Message;
             }
             finally
             {
