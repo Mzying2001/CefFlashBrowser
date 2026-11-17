@@ -1,413 +1,349 @@
 using CefFlashBrowser.Models.UserScripts;
+using Mzying2001.MonkeySharp.Core.Apis;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Repository;
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Services.UserScripts.Persistence
 {
-    public sealed class SqliteUserScriptRepositoryPersistence : IUserScriptRepositoryPersistence
+    public sealed class SqliteUserScriptRepositoryPersistence : IUserScriptPersistence
     {
-        public const int MaximumSourceBytes = 10 * 1024 * 1024;
+        public const int MaximumSourceBytes = UserScriptFiles.MaximumBytes;
 
-        private static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, true);
         private readonly UserScriptStorage _storage;
-        private readonly string _root;
+        private readonly UserScriptSourceFiles _sources;
+        private readonly UserScriptContentCache _cache;
         private readonly Action<string, Exception> _report;
         private readonly Action<string> _checkpoint;
-        private bool _recoveryRequired;
 
-        public SqliteUserScriptRepositoryPersistence(UserScriptStorage storage, string root,
+        public SqliteUserScriptRepositoryPersistence(UserScriptStorage storage, string sourceRoot, string cacheRoot,
             Action<string, Exception> report = null, Action<string> checkpoint = null)
         {
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
-            _root = Path.GetFullPath(root ?? throw new ArgumentNullException(nameof(root)));
             _report = report;
             _checkpoint = checkpoint;
+            _sources = new UserScriptSourceFiles(sourceRoot, message => Report(message, null));
+            _cache = new UserScriptContentCache(cacheRoot, message => Report(message, null));
         }
 
-        public async Task<IReadOnlyList<UserScriptPersistenceRecord>> LoadAsync(CancellationToken token)
+        public Task<IReadOnlyList<UserScriptLoadResult>> LoadAllAsync(CancellationToken token)
         {
-            var records = await ReadMaintenanceAsync(token).ConfigureAwait(false);
-
-            return records.Select(item =>
+            return _storage.RunAsync<IReadOnlyList<UserScriptLoadResult>>(async () =>
             {
-                var record = item.Record;
-                // Never let a normal startup implicitly fetch development-record dependencies.
-                return string.IsNullOrWhiteSpace(record.PreparedRevisionJson)
-                    ? new UserScriptPersistenceRecord(record.ScriptKey, null, record.SourceOrigin,
-                        record.IsEnabled, record.InstalledAt, record.UpdatedAt)
-                    : record;
-            }).ToList().AsReadOnly();
-        }
-
-        public Task<IReadOnlyList<UserScriptMaintenanceRecord>> ReadMaintenanceAsync(CancellationToken token)
-        {
-            return _storage.RunAsync<IReadOnlyList<UserScriptMaintenanceRecord>>(async () =>
-            {
-                var stored = await _storage.Database.GetUserScriptsAsync().ConfigureAwait(false);
-                var result = new List<UserScriptMaintenanceRecord>();
-
-                foreach (var row in stored)
+                var rows = await _storage.Database.GetUserScriptsAsync().ConfigureAwait(false);
+                var known = new HashSet<ScriptKey>(rows.Select(row => row.ScriptKey));
+                foreach (var key in _sources.RecoveryKeys())
                 {
                     token.ThrowIfCancellationRequested();
+                    if (known.Contains(key))
+                        continue;
 
-                    var diagnostics = new List<string>();
-                    string source = null;
-
-                    try
-                    {
-                        var path = SourcePath(row.ScriptKey);
-
-                        if (!Recover(path, row.SourceSha256))
-                            throw new IOException("No readable source matches the committed SHA-256.");
-
-                        var bytes = ReadBounded(path);
-
-                        if (Hash(bytes) != row.SourceSha256)
-                            throw new IOException("Source changed while reading the committed revision.");
-
-                        source = Decode(bytes);
-                    }
-                    catch (Exception e) when (IsFileError(e))
-                    {
-                        diagnostics.Add(e.Message);
-                        Report("Source unavailable for " + row.ScriptKey, e);
-                    }
-
-                    if (string.IsNullOrWhiteSpace(row.PreparedRevisionJson))
-                        diagnostics.Add("Prepared revision is missing; explicit repair is required.");
-
-                    result.Add(new UserScriptMaintenanceRecord(new UserScriptPersistenceRecord(row.ScriptKey,
-                        source, row.SourceOrigin, row.IsEnabled, row.InstalledAt, row.UpdatedAt, row.PreparedRevisionJson), diagnostics.AsReadOnly()));
+                    try { _sources.Recover(key, null); }
+                    catch (Exception e) when (UserScriptFiles.IsFileError(e)) { Report("Orphan source recovery pending for " + key, e); }
                 }
 
-                CleanupOrphans(new HashSet<string>(stored.Select(row => row.ScriptKey.ToString()), StringComparer.OrdinalIgnoreCase));
-                _recoveryRequired = false;
+                var result = new List<UserScriptLoadResult>();
+                foreach (var row in rows)
+                {
+                    token.ThrowIfCancellationRequested();
+                    result.Add(await LoadOneAsync(row).ConfigureAwait(false));
+                }
                 return result.AsReadOnly();
             }, token);
         }
 
-        public Task SaveAsync(UserScriptPersistenceRecord record, CancellationToken token)
+        public Task<UserScriptLoadResult> LoadAsync(ScriptKey key, CancellationToken token)
         {
-            if (record == null)
-                throw new ArgumentNullException(nameof(record));
+            return _storage.RunAsync(async () =>
+            {
+                var row = await _storage.Database.GetUserScriptAsync(key).ConfigureAwait(false);
+                if (row != null)
+                    return await LoadOneAsync(row).ConfigureAwait(false);
 
-            if (record.Source == null || string.IsNullOrWhiteSpace(record.PreparedRevisionJson))
-                throw new ArgumentException("A saved installation needs source and a prepared revision.", nameof(record));
+                try { _sources.Recover(key, null); }
+                catch (Exception e) when (UserScriptFiles.IsFileError(e))
+                { throw new UserScriptPersistenceException(key, "Orphan source recovery failed.", e); }
+                throw new KeyNotFoundException("Script not found: " + key);
+            }, token);
+        }
 
-            var bytes = Utf8.GetBytes(record.Source);
-            // Preserve a literal leading BOM in the logical source after BOM-aware decoding.
-            if (record.Source.StartsWith("\uFEFF", StringComparison.Ordinal))
-                bytes = new byte[] { 239, 187, 191 }.Concat(bytes).ToArray();
+        private async Task<UserScriptLoadResult> LoadOneAsync(UserScriptDatabaseRecord row)
+        {
+            // Database failures remain global; malformed associations belong to this installation.
+            var descriptors = await _storage.Database.GetUserScriptAssetsAsync(row.ScriptKey).ConfigureAwait(false);
+            var diagnostics = new List<UserScriptDiagnostic>();
+            var assets = new List<UserScriptAsset>();
+            string source = null, version = null;
+            var changed = false;
+            try
+            {
+                ValidateRow(row);
+                _sources.Recover(row.ScriptKey, row.CommitId);
+                foreach (var descriptor in descriptors)
+                {
+                    ValidateAsset(descriptor);
+                    ResourceContent content = null;
+                    try { content = new ResourceContent(_cache.Read(descriptor.ContentSha256), descriptor.Mime, descriptor.Charset); }
+                    catch (Exception e) when (UserScriptFiles.IsFileError(e))
+                    { diagnostics.Add(Diagnostic(row.ScriptKey, "MSR421_ASSET_UNAVAILABLE", "Asset cache unavailable: " + descriptor.Url, e)); }
+                    assets.Add(new UserScriptAsset((UserScriptAssetKind)descriptor.Kind, descriptor.Ordinal,
+                        descriptor.Name, descriptor.Url, content));
+                }
 
-            if (bytes.Length > MaximumSourceBytes)
-                throw new IOException("Source exceeds the 10 MiB limit.");
+                new UserScriptPersistenceRecord(row.ScriptKey, null, row.SourceOrigin, row.IsEnabled,
+                    row.InstalledAt, row.UpdatedAt, assets);
+                try
+                {
+                    var bytes = _sources.Read(row.ScriptKey);
+                    var hash = UserScriptFiles.Hash(bytes);
+                    version = UserScriptSourceFiles.VersionOf(hash);
+                    changed = hash != row.SourceSha256;
+                    try { source = UserScriptFiles.Decode(bytes); }
+                    catch (DecoderFallbackException e)
+                    { diagnostics.Add(Diagnostic(row.ScriptKey, "MSR420_SOURCE_UNAVAILABLE", "Source is not valid UTF-8.", e)); }
+                }
+                catch (Exception e) when (e is FileNotFoundException || e is DirectoryNotFoundException)
+                {
+                    version = "missing";
+                    diagnostics.Add(Diagnostic(row.ScriptKey, "MSR420_SOURCE_UNAVAILABLE", "Source file is missing.", e));
+                }
+                catch (Exception e) when (UserScriptFiles.IsFileError(e))
+                { diagnostics.Add(Diagnostic(row.ScriptKey, "MSR420_SOURCE_UNAVAILABLE", "Source could not be read.", e)); }
+            }
+            catch (Exception e) when (UserScriptFiles.IsFileError(e) || e is ArgumentException || e is FormatException)
+            {
+                source = null;
+                version = null;
+                assets.Clear();
+                diagnostics.Add(Diagnostic(row.ScriptKey, e is RecoveryConflictException ? "MSR424_RECOVERY_CONFLICT"
+                    : "MSR423_PERSISTENCE_FAILED", e.Message, e));
+            }
 
-            var hash = Hash(bytes);
+            foreach (var diagnostic in diagnostics)
+                Report("Script " + row.ScriptKey + ": " + diagnostic.Message, diagnostic.Exception);
+            return new UserScriptLoadResult(new UserScriptPersistenceRecord(row.ScriptKey, source, row.SourceOrigin,
+                row.IsEnabled, row.InstalledAt, row.UpdatedAt, assets), version, changed, diagnostics);
+        }
+
+        public Task<string> SaveAsync(UserScriptSaveRequest request, CancellationToken token)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
 
             return _storage.RunAsync(async () =>
             {
-                EnsureRecovered();
-
-                var old = await _storage.Database.GetUserScriptAsync(record.ScriptKey).ConfigureAwait(false);
-                var path = SourcePath(record.ScriptKey);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-
-                if (old != null)
-                    Recover(path, old.SourceSha256);
-
-                if (HasTransitions(path))
-                    throw new IOException("Unresolved source recovery files must be repaired before saving.");
-
-                if (old == null && File.Exists(path))
-                    throw new IOException("An unregistered source already occupies the installation directory.");
-
-                var sameContent = old != null && old.SourceSha256 == hash && old.PreparedRevisionJson == record.PreparedRevisionJson;
-
-                if (sameContent && !Matches(path, old.SourceSha256))
-                    throw new IOException("The installed source changed outside the repository.");
-
-                var replaced = false;
-                var existed = File.Exists(path);
-
+                var record = request.Record;
+                var previous = await _storage.Database.GetUserScriptAsync(record.ScriptKey).ConfigureAwait(false);
+                UserScriptSourceFiles.Journal journal = null;
                 try
                 {
-                    if (!sameContent)
+                    if (previous != null)
+                        ValidateRow(previous);
+                    _sources.Recover(record.ScriptKey, previous?.CommitId);
+                    if (previous == null)
                     {
-                        using (var stream = new FileStream(path + ".pending", FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                        {
-                            stream.Write(bytes, 0, bytes.Length);
-                            stream.Flush(true);
-                        }
-
-                        _checkpoint?.Invoke("pending");
+                        if (request.ExpectedSourceVersion != null || _sources.Hash(record.ScriptKey) != null
+                            || request.SourceWriteMode != SourceWriteMode.Replace)
+                            throw new UserScriptSourceConflictException(record.ScriptKey);
+                    }
+                    else
+                    {
+                        if (request.ExpectedSourceVersion == null)
+                            throw new UserScriptSourceConflictException(record.ScriptKey);
+                        _sources.CheckVersion(record.ScriptKey, request.ExpectedSourceVersion);
                     }
 
-                    var stored = new UserScriptDatabaseRecord(record.ScriptKey, record.SourceOrigin, record.IsEnabled,
-                        record.InstalledAt, record.UpdatedAt, hash, record.PreparedRevisionJson);
+                    if (request.SourceWriteMode == SourceWriteMode.Preserve)
+                        CheckPreservedSource(request);
+                    var bytes = request.SourceWriteMode == SourceWriteMode.Replace ? UserScriptFiles.Encode(record.Source) : null;
+                    if (bytes?.Length > MaximumSourceBytes)
+                        throw new IOException("Source exceeds the 10 MiB limit.");
 
-                    await _storage.Database.SaveUserScriptAsync(stored, () =>
+                    var assets = record.Assets.Select(asset =>
                     {
-                        if (!sameContent)
-                        {
-                            if (existed)
-                                File.Replace(path + ".pending", path, path + ".backup");
-                            else
-                                File.Move(path + ".pending", path);
+                        var descriptor = new UserScriptAssetDatabaseRecord(record.ScriptKey.ToString(), (int)asset.Kind,
+                            asset.Ordinal, asset.Name, asset.Url, _cache.Write(asset.Content.Bytes), asset.Content.MediaType, asset.Content.Charset);
+                        ValidateAsset(descriptor);
+                        return descriptor;
+                    }).ToArray();
+                    _checkpoint?.Invoke("objects-written");
+                    token.ThrowIfCancellationRequested();
+                    if (bytes != null)
+                        journal = _sources.Stage(record.ScriptKey, previous == null ? "install" : "replace", previous?.CommitId, bytes);
 
-                            replaced = true;
-                            _checkpoint?.Invoke("replaced");
+                    _checkpoint?.Invoke("marker-written");
+                    var hash = bytes == null ? _sources.Hash(record.ScriptKey) : UserScriptFiles.Hash(bytes);
+                    var stored = new UserScriptDatabaseRecord(record.ScriptKey, record.SourceOrigin, record.IsEnabled,
+                        previous?.InstalledAt ?? record.InstalledAt, record.UpdatedAt, hash, journal?.CommitId ?? Guid.NewGuid().ToString("D"));
+                    await _storage.Database.SaveUserScriptAsync(stored, assets, () =>
+                    {
+                        _checkpoint?.Invoke("rows-written");
+                        token.ThrowIfCancellationRequested();
+                        if (journal == null)
+                            CheckPreservedSource(request);
+                        else
+                        {
+                            _sources.CheckVersion(record.ScriptKey, request.ExpectedSourceVersion ?? "missing");
+                            _sources.Switch(record.ScriptKey, journal);
                         }
+                        _checkpoint?.Invoke("source-switched");
                     }, token).ConfigureAwait(false);
+                    // No cancellation or fallible observers may change a committed result.
+                    Complete(record.ScriptKey, journal);
+                    ReportCheckpoint("committed");
+                    return UserScriptSourceFiles.VersionOf(hash);
                 }
-                catch (Exception failure)
+                catch (Exception e)
                 {
-                    Rollback(path, replaced, existed, false, failure);
+                    await RollbackAsync(record.ScriptKey, journal, e).ConfigureAwait(false);
+                    if (UserScriptFiles.IsFileError(e) || IsConstraint(e))
+                        throw new UserScriptPersistenceException(record.ScriptKey, "Installation save failed: " + e.Message, e);
                     throw;
                 }
-
-                CleanupCommitted(path, false);
             }, token);
         }
+
+        private void CheckPreservedSource(UserScriptSaveRequest request)
+        {
+            _sources.CheckVersion(request.Record.ScriptKey, request.ExpectedSourceVersion);
+            try
+            {
+                if (UserScriptFiles.Decode(_sources.Read(request.Record.ScriptKey)) != request.Record.Source)
+                    throw new UserScriptSourceConflictException(request.Record.ScriptKey);
+            }
+            catch (FileNotFoundException) { throw new UserScriptSourceConflictException(request.Record.ScriptKey); }
+            catch (DirectoryNotFoundException) { throw new UserScriptSourceConflictException(request.Record.ScriptKey); }
+        }
+
+        public Task SetEnabledAsync(ScriptKey key, bool enabled, DateTimeOffset updatedAt, CancellationToken token)
+            => _storage.RunAsync(() => _storage.Database.SetUserScriptEnabledAsync(key, enabled, updatedAt, token), token);
 
         public Task DeleteAsync(ScriptKey key, CancellationToken token)
         {
             return _storage.RunAsync(async () =>
             {
-                EnsureRecovered();
-
-                var old = await _storage.Database.GetUserScriptAsync(key).ConfigureAwait(false);
-
-                if (old == null)
-                    return;
-
-                var path = SourcePath(key);
-
-                Recover(path, old.SourceSha256);
-
-                if (HasTransitions(path))
-                    throw new IOException("Unresolved source recovery files must be repaired before removal.");
-
-                var renamed = false;
-
+                var previous = await _storage.Database.GetUserScriptAsync(key).ConfigureAwait(false);
+                UserScriptSourceFiles.Journal journal = null;
                 try
                 {
+                    _sources.Recover(key, previous?.CommitId);
+                    if (previous == null)
+                        return;
+                    journal = _sources.Stage(key, "delete", previous.CommitId, null);
                     await _storage.Database.DeleteUserScriptAsync(key, () =>
                     {
-                        if (File.Exists(path))
-                        {
-                            File.Move(path, path + ".deleted");
-                            renamed = true;
-                            _checkpoint?.Invoke("deleted");
-                        }
+                        _checkpoint?.Invoke("rows-written");
+                        token.ThrowIfCancellationRequested();
+                        _sources.Switch(key, journal);
+                        _checkpoint?.Invoke("source-switched");
                     }, token).ConfigureAwait(false);
                 }
-                catch (Exception failure)
+                catch (Exception e)
                 {
-                    Rollback(path, renamed, true, true, failure);
+                    await RollbackAsync(key, journal, e).ConfigureAwait(false);
+                    if (UserScriptFiles.IsFileError(e) || IsConstraint(e))
+                        throw new UserScriptPersistenceException(key, "Installation removal failed: " + e.Message, e);
                     throw;
                 }
-
-                CleanupCommitted(path, true);
+                Complete(key, journal);
+                await CollectCoreAsync().ConfigureAwait(false);
             }, token);
         }
 
-        private void Rollback(string path, bool changed, bool existed, bool deleting, Exception failure)
+        private async Task RollbackAsync(ScriptKey key, UserScriptSourceFiles.Journal journal, Exception failure)
         {
+            if (journal == null)
+                return;
             try
             {
                 _checkpoint?.Invoke("restore");
-
-                if (changed)
-                {
-                    if (deleting)
-                        File.Move(path + ".deleted", path);
-                    else if (existed)
-                        File.Replace(path + ".backup", path, null);
-                    else
-                        File.Delete(path);
-                }
-
-                CleanupFile(path + ".pending");
+                var row = await _storage.Database.GetUserScriptAsync(key).ConfigureAwait(false);
+                _sources.Recover(key, row?.CommitId);
             }
-            catch (Exception recoveryFailure)
-            {
-                _recoveryRequired = true;
-                throw new AggregateException("Installation rollback failed; recover before continuing.", failure, recoveryFailure);
-            }
+            catch (Exception e)
+            { throw new UserScriptPersistenceException(key, "Commit failed and source recovery remains unresolved.", new AggregateException(failure, e)); }
         }
 
-        private bool Recover(string path, string hash)
+        private void Complete(ScriptKey key, UserScriptSourceFiles.Journal journal)
         {
-            if (!Matches(path, hash))
-            {
-                var candidate = new[] { path + ".backup", path + ".deleted" }.FirstOrDefault(file => Matches(file, hash));
-
-                if (candidate == null)
-                    return false;
-
-                if (File.Exists(path))
-                    File.Replace(candidate, path, null);
-                else
-                    File.Move(candidate, path);
-            }
-
-            CleanupCommitted(path, false);
-            return true;
-        }
-
-        private void CleanupCommitted(string path, bool deleting)
-        {
+            if (journal == null)
+                return;
             try
             {
                 _checkpoint?.Invoke("cleanup");
-
-                foreach (var suffix in new[] { ".pending", ".backup", ".deleted" })
-                    CleanupFile(path + suffix);
-
-                if (deleting && Directory.Exists(Path.GetDirectoryName(path))
-                    && !Directory.EnumerateFileSystemEntries(Path.GetDirectoryName(path)).Any())
-                    Directory.Delete(Path.GetDirectoryName(path));
+                _sources.Complete(key, journal);
             }
-            catch (Exception e) when (IsFileError(e))
-            {
-                Report("Committed installation cleanup will retry on the next load.", e);
-            }
+            catch (Exception e) { Report("Committed source cleanup will retry on the next load.", e); }
         }
 
-        private void CleanupOrphans(HashSet<string> known)
-        {
-            if (!Directory.Exists(_root))
-                return;
+        internal Task CollectAsync(CancellationToken token) => _storage.RunAsync(CollectCoreAsync, token);
 
-            CheckReparse(_root);
-
-            foreach (var directory in Directory.EnumerateDirectories(_root))
-            {
-                var name = Path.GetFileName(directory);
-
-                if (known.Contains(name) || !ScriptKey.TryParse(name, out var key))
-                    continue;
-
-                try
-                {
-                    var path = SourcePath(key);
-                    // A deletion marker is evidence of our committed uninstall.
-                    // Unknown regular source files are never imported or removed.
-                    if (File.Exists(path + ".deleted"))
-                        CleanupCommitted(path, true);
-                    else
-                        Report("Unregistered script directory retained: " + key, null);
-                }
-                catch (Exception e) when (IsFileError(e))
-                {
-                    Report("Could not inspect an unregistered script directory.", e);
-                }
-            }
-        }
-
-        private string SourcePath(ScriptKey key)
-        {
-            var id = ScriptKey.Parse(key.ToString()).ToString();
-            var path = Path.GetFullPath(Path.Combine(_root, id, "userscript.js"));
-
-            if (!path.StartsWith(_root.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-                throw new IOException("Script path escaped the data directory.");
-
-            CheckReparse(_root);
-            CheckReparse(Path.GetDirectoryName(path));
-
-            foreach (var suffix in new[] { "", ".pending", ".backup", ".deleted" })
-                CheckReparse(path + suffix);
-
-            return path;
-        }
-
-        private static void CheckReparse(string path)
-        {
-            if ((File.Exists(path) || Directory.Exists(path)) && (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
-                throw new IOException("Reparse points are not supported in script storage.");
-        }
-
-        private static byte[] ReadBounded(string path)
-        {
-            using (var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var output = new MemoryStream())
-            {
-                var buffer = new byte[65536];
-                int count;
-
-                while ((count = input.Read(buffer, 0, buffer.Length)) != 0)
-                {
-                    if (output.Length + count > MaximumSourceBytes)
-                        throw new IOException("Source exceeds the 10 MiB limit.");
-
-                    output.Write(buffer, 0, count);
-                }
-
-                return output.ToArray();
-            }
-        }
-
-        private static string Decode(byte[] bytes)
-        {
-            var offset = bytes.Length >= 3 && bytes[0] == 239 && bytes[1] == 187 && bytes[2] == 191 ? 3 : 0;
-            return Utf8.GetString(bytes, offset, bytes.Length - offset);
-        }
-
-        private static bool Matches(string path, string hash)
+        private async Task CollectCoreAsync()
         {
             try
             {
-                return File.Exists(path) && Hash(ReadBounded(path)) == hash;
+                var rows = await _storage.Database.GetUserScriptsAsync().ConfigureAwait(false);
+                var assets = await _storage.Database.GetUserScriptAssetsAsync().ConfigureAwait(false);
+                var known = new HashSet<string>(rows.Select(row => row.ScriptKey.ToString()), StringComparer.Ordinal);
+                foreach (var row in rows)
+                {
+                    ValidateRow(row);
+                    var descriptors = assets.Where(asset => asset.ScriptId == row.ScriptKey.ToString()).ToArray();
+                    foreach (var asset in descriptors)
+                        ValidateAsset(asset);
+                    new UserScriptPersistenceRecord(row.ScriptKey, null, row.SourceOrigin, row.IsEnabled,
+                        row.InstalledAt, row.UpdatedAt, descriptors.Select(asset => new UserScriptAsset(
+                            (UserScriptAssetKind)asset.Kind, asset.Ordinal, asset.Name, asset.Url, null)));
+                }
+                if (assets.Any(asset => !known.Contains(asset.ScriptId)))
+                    throw new FormatException("Orphan asset associations.");
+                _cache.Collect(new HashSet<string>(assets.Select(asset => asset.ContentSha256), StringComparer.Ordinal));
             }
-            catch (Exception e) when (IsFileError(e))
-            {
-                return false;
-            }
+            catch (Exception e) when (UserScriptFiles.IsFileError(e) || e is ArgumentException || e is FormatException || e is SQLiteException)
+            { Report("Asset collection skipped or incomplete.", e); }
         }
 
-        private static string Hash(byte[] bytes)
+        private static void ValidateRow(UserScriptDatabaseRecord row)
         {
-            using (var algorithm = SHA256.Create())
-                return BitConverter.ToString(algorithm.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant();
+            if (!UserScriptFiles.IsHash(row.SourceSha256) || !Guid.TryParseExact(row.CommitId, "D", out var commit) || commit == Guid.Empty)
+                throw new FormatException("Invalid installation source hash or commit ID.");
         }
 
-        private static bool HasTransitions(string path)
+        private static void ValidateAsset(UserScriptAssetDatabaseRecord asset)
         {
-            return new[] { ".pending", ".backup", ".deleted" }.Any(suffix => File.Exists(path + suffix));
+            if (!UserScriptFiles.IsHash(asset.ContentSha256))
+                throw new FormatException("Invalid asset object hash.");
+            if (!Uri.TryCreate(asset.Url, UriKind.Absolute, out var url) || !string.IsNullOrEmpty(url.UserInfo)
+                || url.Scheme != "http" && url.Scheme != "https")
+                throw new FormatException("Asset URLs must use HTTP(S) without embedded credentials.");
+            if (string.IsNullOrWhiteSpace(asset.Mime))
+                throw new FormatException("Asset MIME type is missing.");
+            new ResourceContent(Array.Empty<byte>(), asset.Mime, asset.Charset);
+            new UserScriptAsset((UserScriptAssetKind)asset.Kind, asset.Ordinal, asset.Name, asset.Url, null);
         }
 
-        private static bool IsFileError(Exception e) => e is IOException || e is UnauthorizedAccessException || e is DecoderFallbackException;
+        private static bool IsConstraint(Exception error) => error is SQLiteException sql && ((int)sql.ResultCode & 255) == 19;
 
-        private static void CleanupFile(string path)
+        private static UserScriptDiagnostic Diagnostic(ScriptKey key, string code, string message, Exception error)
+            => new UserScriptDiagnostic(code, DiagnosticSeverity.Error, message, error, key);
+
+        private void ReportCheckpoint(string point)
         {
-            if (File.Exists(path))
-                File.Delete(path);
+            try { _checkpoint?.Invoke(point); }
+            catch (Exception e) { Report("Post-commit observer failed.", e); }
         }
 
-        private void Report(string message, Exception exception)
+        private void Report(string message, Exception error)
         {
-            try
-            {
-                _report?.Invoke(message, exception);
-            }
+            try { _report?.Invoke(message, error); }
             catch { }
         }
-
-        private void EnsureRecovered()
-        {
-            if (_recoveryRequired)
-                throw new IOException("Persistence requires recovery before another mutation.");
-        }
-
     }
 }

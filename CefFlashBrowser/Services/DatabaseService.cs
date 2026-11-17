@@ -20,7 +20,7 @@ namespace CefFlashBrowser.Services
     {
         private const string SelectUserScriptSql =
             "SELECT script_id, source_origin, is_enabled, installed_at, updated_at, " +
-            "source_sha256, prepared_revision_json FROM monkeysharp_scripts";
+            "source_sha256, commit_id FROM monkeysharp_scripts";
 
         private readonly IDatabase _database;
         private readonly object _lock = new object();
@@ -49,62 +49,62 @@ namespace CefFlashBrowser.Services
             {
                 long version = Convert.ToInt64(session.Scalar("PRAGMA user_version"));
 
-                if (version > 2)
-                    throw new InvalidOperationException("The browser database version is not supported.");
+                if (version == 3)
+                    return;
 
-                if (version == 0)
-                {
-                    session.Execute(
-                        "CREATE TABLE IF NOT EXISTS website_icons ( " +
-                        "page_url TEXT PRIMARY KEY NOT NULL, " +
-                        "icon_url TEXT NOT NULL, " +
-                        "updated_at INTEGER NOT NULL)");
-                    session.Execute("PRAGMA user_version = 1");
-                    version = 1;
-                }
+                if (version != 0 || Convert.ToInt64(session.Scalar(
+                    "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")) != 0)
+                    throw new InvalidOperationException("The browser database format is not supported. Use a new data directory.");
 
-                if (version == 1)
-                {
-                    session.Execute(
-                        "CREATE TABLE monkeysharp_scripts ( " +
-                        "script_id TEXT PRIMARY KEY NOT NULL, " +
-                        "install_order INTEGER NOT NULL UNIQUE, " +
-                        "source_origin TEXT NULL, " +
-                        "is_enabled INTEGER NOT NULL, " +
-                        "installed_at TEXT NOT NULL, " +
-                        "updated_at TEXT NOT NULL, " +
-                        "source_sha256 TEXT NOT NULL, " +
-                        "prepared_revision_json TEXT NOT NULL, " +
-                        "display_name TEXT NULL)");
+                session.Execute(
+                    "CREATE TABLE website_icons ( " +
+                    "page_url TEXT PRIMARY KEY NOT NULL, " +
+                    "icon_url TEXT NOT NULL, " +
+                    "updated_at INTEGER NOT NULL)");
+                session.Execute(
+                    "CREATE TABLE monkeysharp_scripts ( " +
+                    "script_id TEXT PRIMARY KEY NOT NULL, " +
+                    "install_order INTEGER NOT NULL UNIQUE, " +
+                    "source_origin TEXT NULL, " +
+                    "is_enabled INTEGER NOT NULL CHECK (is_enabled IN (0, 1)), " +
+                    "installed_at TEXT NOT NULL, updated_at TEXT NOT NULL, " +
+                    "source_sha256 TEXT NOT NULL, commit_id TEXT NOT NULL)");
+                session.Execute(
+                    "CREATE TABLE monkeysharp_script_assets ( " +
+                    "script_id TEXT NOT NULL, kind INTEGER NOT NULL CHECK (kind IN (0, 1)), " +
+                    "ordinal INTEGER NOT NULL CHECK (ordinal >= 0), name TEXT NULL, url TEXT NOT NULL, " +
+                    "content_sha256 TEXT NOT NULL, mime TEXT NOT NULL, charset TEXT NULL, " +
+                    "PRIMARY KEY (script_id, kind, ordinal), " +
+                    "CHECK ((kind = 0 AND name IS NULL) OR (kind = 1 AND name IS NOT NULL AND length(name) > 0)))");
+                session.Execute("CREATE UNIQUE INDEX monkeysharp_resource_names ON monkeysharp_script_assets(script_id, name) WHERE kind = 1");
+                session.Execute("CREATE INDEX monkeysharp_asset_content ON monkeysharp_script_assets(content_sha256)");
+                session.Execute(
+                    "CREATE TABLE monkeysharp_values ( " +
+                    "script_id TEXT NOT NULL, " +
+                    "value_key TEXT COLLATE BINARY NOT NULL, " +
+                    "encoded_value TEXT NOT NULL, " +
+                    "value_order INTEGER NOT NULL, " +
+                    "updated_at TEXT NOT NULL, " +
+                    "PRIMARY KEY (script_id, value_key), " +
+                    "UNIQUE (script_id, value_order))");
 
-                    session.Execute(
-                        "CREATE TABLE monkeysharp_values ( " +
-                        "script_id TEXT NOT NULL, " +
-                        "value_key TEXT COLLATE BINARY NOT NULL, " +
-                        "encoded_value TEXT NOT NULL, " +
-                        "value_order INTEGER NOT NULL, " +
-                        "updated_at TEXT NOT NULL, " +
-                        "PRIMARY KEY (script_id, value_key), " +
-                        "UNIQUE (script_id, value_order))");
+                session.Execute(
+                    "CREATE TABLE monkeysharp_permission_decisions ( " +
+                    "script_id TEXT NOT NULL, " +
+                    "kind TEXT NOT NULL, " +
+                    "target TEXT NOT NULL, " +
+                    "decision INTEGER NOT NULL, " +
+                    "updated_at TEXT NOT NULL, " +
+                    "PRIMARY KEY (script_id, kind, target))");
 
-                    session.Execute(
-                        "CREATE TABLE monkeysharp_permission_decisions ( " +
-                        "script_id TEXT NOT NULL, " +
-                        "kind TEXT NOT NULL, " +
-                        "target TEXT NOT NULL, " +
-                        "decision INTEGER NOT NULL, " +
-                        "updated_at TEXT NOT NULL, " +
-                        "PRIMARY KEY (script_id, kind, target))");
-
-                    session.Execute(
-                        "CREATE TABLE monkeysharp_tab_states ( " +
-                        "script_id TEXT NOT NULL, " +
-                        "tab_id TEXT NOT NULL, " +
-                        "json_value TEXT NOT NULL, " +
-                        "updated_at TEXT NOT NULL, " +
-                        "PRIMARY KEY (script_id, tab_id))");
-                    session.Execute("PRAGMA user_version = 2");
-                }
+                session.Execute(
+                    "CREATE TABLE monkeysharp_tab_states ( " +
+                    "script_id TEXT NOT NULL, " +
+                    "tab_id TEXT NOT NULL, " +
+                    "json_value TEXT NOT NULL, " +
+                    "updated_at TEXT NOT NULL, " +
+                    "PRIMARY KEY (script_id, tab_id))");
+                session.Execute("PRAGMA user_version = 3");
             }).ConfigureAwait(false);
         }
 
@@ -158,12 +158,46 @@ namespace CefFlashBrowser.Services
             return rows.SingleOrDefault();
         }
 
+        public async Task<List<UserScriptAssetDatabaseRecord>> GetUserScriptAssetsAsync(ScriptKey? key = null)
+        {
+            await InitializeAsync().ConfigureAwait(false);
+
+            return await _database.QueryAsync(
+                "SELECT script_id, kind, ordinal, name, url, content_sha256, mime, charset FROM monkeysharp_script_assets" +
+                (key.HasValue ? " WHERE script_id = @id" : "") + " ORDER BY script_id, kind, ordinal",
+                row => new UserScriptAssetDatabaseRecord(row.GetString(0), row.GetInt32(1), row.GetInt32(2),
+                    row.IsDBNull(3) ? null : row.GetString(3), row.GetString(4), row.GetString(5), row.GetString(6),
+                    row.IsDBNull(7) ? null : row.GetString(7)),
+                new Dictionary<string, object> { ["@id"] = key?.ToString() }).ConfigureAwait(false);
+        }
+
+        public async Task SetUserScriptEnabledAsync(ScriptKey key, bool enabled, DateTimeOffset updatedAt, CancellationToken token)
+        {
+            await InitializeAsync().ConfigureAwait(false);
+
+            await _database.TransactionAsync(session =>
+            {
+                token.ThrowIfCancellationRequested();
+                EnsureUserScriptExists(session, key.ToString());
+                session.Execute("UPDATE monkeysharp_scripts SET is_enabled = @enabled, updated_at = @updated WHERE script_id = @id",
+                    new Dictionary<string, object>
+                    {
+                        ["@id"] = key.ToString(), ["@enabled"] = enabled ? 1 : 0,
+                        ["@updated"] = updatedAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)
+                    });
+            }).ConfigureAwait(false);
+        }
+
         // The callback switches source files after the row update and before commit.
         // It must be synchronous and must not enter another database or storage operation.
-        public async Task SaveUserScriptAsync(UserScriptDatabaseRecord record, Action commitSource, CancellationToken token)
+        public async Task SaveUserScriptAsync(UserScriptDatabaseRecord record, IReadOnlyList<UserScriptAssetDatabaseRecord> assets,
+            Action commitSource, CancellationToken token)
         {
             if (record == null)
                 throw new ArgumentNullException(nameof(record));
+
+            if (assets == null || assets.Any(asset => asset == null || asset.ScriptId != record.ScriptKey.ToString()))
+                throw new ArgumentException("Assets must belong to the installation.", nameof(assets));
 
             await InitializeAsync().ConfigureAwait(false);
 
@@ -172,12 +206,12 @@ namespace CefFlashBrowser.Services
                 token.ThrowIfCancellationRequested();
                 session.Execute(
                     "INSERT INTO monkeysharp_scripts " +
-                    "(script_id, install_order, source_origin, is_enabled, installed_at, updated_at, source_sha256, prepared_revision_json) " +
+                    "(script_id, install_order, source_origin, is_enabled, installed_at, updated_at, source_sha256, commit_id) " +
                     "VALUES (@id, (SELECT COALESCE(MAX(install_order), -1) + 1 FROM monkeysharp_scripts), " +
-                    "@origin, @enabled, @installed, @updated, @hash, @prepared) " +
+                    "@origin, @enabled, @installed, @updated, @hash, @commit) " +
                     "ON CONFLICT(script_id) DO UPDATE SET source_origin = excluded.source_origin, " +
                     "is_enabled = excluded.is_enabled, updated_at = excluded.updated_at, " +
-                    "source_sha256 = excluded.source_sha256, prepared_revision_json = excluded.prepared_revision_json",
+                    "source_sha256 = excluded.source_sha256, commit_id = excluded.commit_id",
                     new Dictionary<string, object>
                     {
                         ["@id"] = record.ScriptKey.ToString(),
@@ -186,8 +220,23 @@ namespace CefFlashBrowser.Services
                         ["@installed"] = record.InstalledAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
                         ["@updated"] = record.UpdatedAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
                         ["@hash"] = record.SourceSha256,
-                        ["@prepared"] = record.PreparedRevisionJson
+                        ["@commit"] = record.CommitId
                     });
+
+                var parameters = new Dictionary<string, object> { ["@id"] = record.ScriptKey.ToString() };
+                session.Execute("DELETE FROM monkeysharp_script_assets WHERE script_id = @id", parameters);
+
+                foreach (var asset in assets)
+                    session.Execute(
+                        "INSERT INTO monkeysharp_script_assets " +
+                        "(script_id, kind, ordinal, name, url, content_sha256, mime, charset) " +
+                        "VALUES (@id, @kind, @ordinal, @name, @url, @hash, @mime, @charset)",
+                        new Dictionary<string, object>
+                        {
+                            ["@id"] = asset.ScriptId, ["@kind"] = asset.Kind, ["@ordinal"] = asset.Ordinal,
+                            ["@name"] = asset.Name, ["@url"] = asset.Url, ["@hash"] = asset.ContentSha256,
+                            ["@mime"] = asset.Mime, ["@charset"] = asset.Charset
+                        });
 
                 token.ThrowIfCancellationRequested();
                 commitSource?.Invoke();
@@ -206,6 +255,7 @@ namespace CefFlashBrowser.Services
 
                 var parameters = new Dictionary<string, object> { ["@id"] = key.ToString() };
 
+                session.Execute("DELETE FROM monkeysharp_script_assets WHERE script_id = @id", parameters);
                 session.Execute("DELETE FROM monkeysharp_values WHERE script_id = @id", parameters);
                 session.Execute("DELETE FROM monkeysharp_permission_decisions WHERE script_id = @id", parameters);
                 session.Execute("DELETE FROM monkeysharp_tab_states WHERE script_id = @id", parameters);
@@ -448,7 +498,11 @@ namespace CefFlashBrowser.Services
 
         private static UserScriptDatabaseRecord ReadUserScript(IDataRecord row)
         {
-            return new UserScriptDatabaseRecord(ScriptKey.Parse(row.GetString(0)),
+            var key = ScriptKey.Parse(row.GetString(0));
+            if (key.ToString() != row.GetString(0))
+                throw new FormatException("The installation directory contains a noncanonical script key.");
+
+            return new UserScriptDatabaseRecord(key,
                 row.IsDBNull(1) ? null : row.GetString(1), row.GetInt64(2) != 0,
                 DateTimeOffset.ParseExact(row.GetString(3), "O", CultureInfo.InvariantCulture),
                 DateTimeOffset.ParseExact(row.GetString(4), "O", CultureInfo.InvariantCulture),
