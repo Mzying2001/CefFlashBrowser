@@ -229,8 +229,11 @@ function Test-UserScriptNetwork($Context) {
     $peer.PeerUrl = $fixture.BaseUrl
     $repository = $Context.UserScriptService.Repository
     $installed = New-Object 'System.Collections.Generic.List[Mzying2001.MonkeySharp.Core.Domain.ScriptKey]'
+    $savedTrusted = [CefFlashBrowser.Data.GlobalData]::Settings.TrustedUserScriptPageWorld
     $window = $null
     try {
+        # Exercise untrusted page-world behavior independently of the application default.
+        [CefFlashBrowser.Data.GlobalData]::Settings.TrustedUserScriptPageWorld = $false
         # A blocked page-world script must not silently retain its static rule.
         $raw = "// ==UserScript==`n// @name Untrusted static rule`n// @match http://127.0.0.1/*`n// @grant GM.webRequest`n// @webRequest [{`"selector`":`"$($fixture.BaseUrl)/blocked.js`",`"action`":`"cancel`"}]`n// ==/UserScript==`ndocument.documentElement.setAttribute('data-untrusted','ran');"
         $blocked = Complete-UserScriptTask $Context ($repository.InstallAsync($raw, $null, $true, [Threading.CancellationToken]::None)) 'install untrusted rule fixture'
@@ -336,6 +339,7 @@ document.documentElement.setAttribute('data-network-ready', 'yes');
         Wait-UserScriptNetworkMarker $Context $model.Browser 'data-partition-clean' 'yes'
         Assert-Regression $true 'native Cookie CRUD reads back and partition refusal leaves no mutation'
     } finally {
+        [CefFlashBrowser.Data.GlobalData]::Settings.TrustedUserScriptPageWorld = $savedTrusted
         if ($null -ne $window) { $window.ForceCloseWindow() }
         foreach ($key in $installed) { Complete-UserScriptTask $Context ($repository.RemoveAsync($key, [Threading.CancellationToken]::None)) 'remove network fixture' | Out-Null }
         $fixture.Dispose()
