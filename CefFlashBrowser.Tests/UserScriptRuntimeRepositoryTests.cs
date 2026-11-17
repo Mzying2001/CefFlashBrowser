@@ -16,7 +16,8 @@ namespace CefFlashBrowser.Tests
         [TestMethod]
         public async Task HostView_ExcludesUntrustedWorlds_WithoutRemovingInstallations()
         {
-            var repository = new InMemoryUserScriptRepository();
+            var repository = new UserScriptRepository(new InMemoryUserScriptPersistence());
+            await repository.InitializeAsync(CancellationToken.None);
             var raw = await repository.InstallAsync(Source, null, true, CancellationToken.None);
             var isolated = await repository.InstallAsync(Source.Replace("// @grant", "// @sandbox DOM\n// @grant"), null, true, CancellationToken.None);
 
@@ -39,7 +40,8 @@ namespace CefFlashBrowser.Tests
         [TestMethod]
         public async Task WorldChange_PublishesRemovalToRevokePreviouslyRegisteredRules()
         {
-            var repository = new InMemoryUserScriptRepository();
+            var repository = new UserScriptRepository(new InMemoryUserScriptPersistence());
+            await repository.InitializeAsync(CancellationToken.None);
             var installation = await repository.InstallAsync(Source.Replace("// @grant", "// @sandbox DOM\n// @grant"), null, true, CancellationToken.None);
 
             using (var view = new UserScriptRuntimeRepository(repository, false))

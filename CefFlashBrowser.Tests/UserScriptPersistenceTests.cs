@@ -15,15 +15,18 @@ using System.Threading.Tasks;
 namespace CefFlashBrowser.Tests
 {
     [TestClass]
-    public class UserScriptPersistenceTests
+    public partial class UserScriptPersistenceTests
     {
         private const string Source = "// ==UserScript==\n// @name Example\n// @match https://example.com/*\n// @grant none\n// ==/UserScript==\nwindow.example = 1;";
+        private static readonly CancellationToken None = CancellationToken.None;
+        private static string AssetSource => Source.Replace("// @grant none", "// @grant GM.getResourceText\n// @require https://example.com/dependency.js\n// @resource content https://example.com/resource.txt");
 
         private string _root;
         private SqliteDatabase _database;
         private UserScriptStorage _storage;
         private SqliteUserScriptRepositoryPersistence _persistence;
-        private PersistentUserScriptRepository _repository;
+        private UserScriptRepository _repository;
+        private ContentProvider _provider;
         private Action<string> _fault;
 
         [TestInitialize]
@@ -33,8 +36,8 @@ namespace CefFlashBrowser.Tests
             _database = new SqliteDatabase(Path.Combine(_root, "browser.db"));
             _storage = new UserScriptStorage(new DatabaseService(_database));
             _persistence = CreatePersistence();
-            _repository = new PersistentUserScriptRepository(_persistence);
-            await _repository.InitializeAsync(CancellationToken.None);
+            _provider = new ContentProvider();
+            _repository = await OpenAsync();
         }
 
         [TestCleanup]
@@ -46,304 +49,340 @@ namespace CefFlashBrowser.Tests
         }
 
         private SqliteUserScriptRepositoryPersistence CreatePersistence() => new SqliteUserScriptRepositoryPersistence(
-            _storage, Path.Combine(_root, "MonkeySharp"), checkpoint: stage => _fault?.Invoke(stage));
+            _storage, Path.Combine(_root, "MonkeySharp"), Path.Combine(_root, "Cache", "UserScripts"), checkpoint: stage => _fault?.Invoke(stage));
+
+        private async Task<UserScriptRepository> OpenAsync()
+        {
+            var repository = new UserScriptRepository(_persistence, preparer: new UserScriptPreparer(_provider, _provider));
+            await repository.InitializeAsync(None);
+            return repository;
+        }
 
         private string PathFor(ScriptKey key) => Path.Combine(_root, "MonkeySharp", key.ToString(), "userscript.js");
-
-        private Task<UserScriptInstallation> InstallAsync() => _repository.InstallAsync(Source, "https://example.com/test.user.js", true, CancellationToken.None);
+        private string[] Objects => Directory.GetFiles(Path.Combine(_root, "Cache", "UserScripts", "objects"));
+        private string Marker(ScriptKey key) => Path.Combine(Path.GetDirectoryName(PathFor(key)), "transaction.json");
+        private Task<UserScriptInstallation> InstallAsync(string source = Source, bool enabled = true)
+            => _repository.InstallAsync(source, "https://example.com/test.user.js", enabled, None);
 
         [TestMethod]
-        public async Task RoundTrip_PreservesIdentityOrderTimesAndPreparedPayload()
+        public async Task RoundTrip_StoresOnlyDescriptorsAndPreservesIdentityOrderTimes()
         {
-            var first = await InstallAsync();
+            var first = await InstallAsync(AssetSource);
             var second = await InstallAsync();
-
-            Assert.AreNotEqual(first.ScriptKey, second.ScriptKey);
-
             var path = PathFor(first.ScriptKey);
-            var writeTime = DateTime.UtcNow.AddHours(-1);
-
-            File.SetLastWriteTimeUtc(path, writeTime);
-            await _repository.SetEnabledAsync(first.ScriptKey, false, CancellationToken.None);
-
-            Assert.AreEqual(writeTime, File.GetLastWriteTimeUtc(path));
-
-            var changed = await _repository.UpdateAsync(second.ScriptKey, Source.Replace("Example", "Renamed"), null, CancellationToken.None);
-
-            var restored = new PersistentUserScriptRepository(CreatePersistence());
-
-            await restored.InitializeAsync(CancellationToken.None);
-
-            var records = await restored.GetSnapshotAsync(CancellationToken.None);
+            var time = DateTime.UtcNow.AddHours(-1);
+            File.SetLastWriteTimeUtc(path, time);
+            await _repository.SetEnabledAsync(first.ScriptKey, false, None);
+            Assert.AreEqual(time, File.GetLastWriteTimeUtc(path));
+            var changed = await _repository.UpdateAsync(second.ScriptKey, Source.Replace("Example", "Renamed"), null, None);
+            var restored = await OpenAsync();
+            var records = await restored.GetSnapshotAsync(None);
 
             CollectionAssert.AreEqual(new[] { first.ScriptKey, second.ScriptKey }, records.Select(record => record.ScriptKey).ToArray());
             Assert.IsFalse(records[0].IsEnabled);
+            Assert.IsTrue(records[0].IsReady);
             Assert.AreEqual(first.InstalledAt, records[0].InstalledAt);
             Assert.AreEqual(changed.UpdatedAt, records[1].UpdatedAt);
             Assert.AreEqual("Renamed", records[1].Definition.Metadata.Name);
-            Assert.IsNotNull(records[0].PreparedRevision);
-            Assert.IsFalse(File.Exists(path + ".backup"));
+            Assert.AreEqual(1, Objects.Length);
+            CollectionAssert.AreEqual(_provider.Bytes, File.ReadAllBytes(Objects.Single()));
+            Assert.AreEqual(2L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_script_assets"));
+            foreach (var table in new[] { "monkeysharp_scripts", "monkeysharp_script_assets" })
+            {
+                var columns = await _database.QueryAsync("PRAGMA table_info(" + table + ")", row => row.GetString(1));
+                Assert.IsFalse(columns.Intersect(new[] { "source", "text", "bytes", "base64", "prepared_revision_json", "display_name" }).Any());
+            }
         }
 
-        [DataTestMethod]
-        [DataRow("pending")]
-        [DataRow("replaced")]
-        public async Task FailedSave_RollsBackFileDatabaseAndRepository(string stage)
+        [TestMethod]
+        public async Task OfflineRestartAndBodyEdit_ReuseObjectsWithoutNetworkOrRewrites()
+        {
+            var installed = await InstallAsync(AssetSource);
+            var path = Objects.Single();
+            var time = DateTime.UtcNow.AddHours(-2);
+            File.SetLastWriteTimeUtc(path, time);
+            var commit = await _database.ScalarAsync("SELECT commit_id FROM monkeysharp_scripts");
+            _provider.Offline = true;
+            var restored = await OpenAsync();
+            Assert.AreEqual(2, _provider.Reads);
+            Assert.AreEqual(commit, await _database.ScalarAsync("SELECT commit_id FROM monkeysharp_scripts"));
+            var snapshot = await restored.GetAsync(installed.ScriptKey, None);
+            Assert.AreEqual("prepared content", snapshot.PreparedRevision.Resources["content"].DecodeText());
+            await restored.UpdateAsync(installed.ScriptKey, AssetSource + "\n// body edit", null, None);
+            Assert.AreEqual(2, _provider.Reads);
+            Assert.AreEqual(time, File.GetLastWriteTimeUtc(path));
+        }
+
+        [TestMethod]
+        public async Task RenameAndDuplicateDeclarations_ReuseContentInCurrentOrder()
+        {
+            var installed = await InstallAsync(AssetSource);
+            var changed = AssetSource.Replace("@resource content", "@resource renamed")
+                .Replace("// @require https://example.com/dependency.js", "// @require https://example.com/dependency.js\n// @require https://example.com/dependency.js");
+            await _repository.UpdateAsync(installed.ScriptKey, changed, null, None);
+            var loaded = await _persistence.LoadAsync(installed.ScriptKey, None);
+            Assert.AreEqual(2, _provider.Reads);
+            Assert.AreEqual(3, loaded.Record.Assets.Count);
+            CollectionAssert.AreEqual(new[] { 0, 1 }, loaded.Record.Assets.Where(asset => asset.Kind == UserScriptAssetKind.Require).Select(asset => asset.Ordinal).ToArray());
+            Assert.AreEqual("renamed", loaded.Record.Assets.Single(asset => asset.Kind == UserScriptAssetKind.Resource).Name);
+        }
+
+        [TestMethod]
+        public async Task ExternalReloadAndRefresh_PreserveBomNewlinesBytesAndTime()
+        {
+            var installed = await InstallAsync(AssetSource);
+            var source = AssetSource.Replace("\n", "\r\n") + "\r\n// external";
+            var bytes = new UTF8Encoding(true).GetPreamble().Concat(Encoding.UTF8.GetBytes(source)).ToArray();
+            File.WriteAllBytes(PathFor(installed.ScriptKey), bytes);
+            var time = DateTime.UtcNow.AddHours(-3);
+            File.SetLastWriteTimeUtc(PathFor(installed.ScriptKey), time);
+            Assert.IsTrue((await _persistence.LoadAsync(installed.ScriptKey, None)).SourceChangedSinceSave);
+            var reloaded = await _repository.ReloadAsync(installed.ScriptKey, None);
+            Assert.AreEqual(source, reloaded.Definition.Source);
+            _provider.Bytes = Encoding.UTF8.GetBytes("new content");
+            await _repository.RefreshAssetsAsync(installed.ScriptKey, reloaded.RevisionId, None);
+            Assert.AreEqual(4, _provider.Reads);
+            CollectionAssert.AreEqual(bytes, File.ReadAllBytes(PathFor(installed.ScriptKey)));
+            Assert.AreEqual(time, File.GetLastWriteTimeUtc(PathFor(installed.ScriptKey)));
+            Assert.IsFalse((await _persistence.LoadAsync(installed.ScriptKey, None)).SourceChangedSinceSave);
+        }
+
+        [TestMethod]
+        public async Task StaleSourceAndRevision_CannotOverwriteExternalEdits()
         {
             var installed = await InstallAsync();
+            var external = Source + "\n// external";
+            File.WriteAllText(PathFor(installed.ScriptKey), external, new UTF8Encoding(false));
+            await Assert.ThrowsExceptionAsync<UserScriptSourceConflictException>(() => _repository.UpdateAsync(installed.ScriptKey, Source, null, None));
+            Assert.AreEqual(external, File.ReadAllText(PathFor(installed.ScriptKey)));
+            var reloaded = await _repository.ReloadAsync(installed.ScriptKey, None);
+            await Assert.ThrowsExceptionAsync<RepositoryRevisionMismatchException>(() => _repository.UpdateIfUnchangedAsync(installed.ScriptKey, installed.RevisionId, Source, null, None));
+            Assert.AreEqual(external, (await (await OpenAsync()).GetAsync(installed.ScriptKey, None)).Definition.Source);
+            Assert.AreNotEqual(installed.RevisionId, reloaded.RevisionId);
+        }
 
-            _fault = point =>
+        [TestMethod]
+        public async Task MissingAndInvalidSource_CanBeRepairedAfterObservingActualVersion()
+        {
+            var installed = await InstallAsync();
+            File.Delete(PathFor(installed.ScriptKey));
+            Assert.AreEqual("missing", (await _persistence.LoadAsync(installed.ScriptKey, None)).SourceVersion);
+            await Assert.ThrowsExceptionAsync<UserScriptSourceConflictException>(() => _repository.UpdateAsync(installed.ScriptKey, Source, null, None));
+            var missing = await _repository.ReloadAsync(installed.ScriptKey, None);
+            Assert.IsFalse(missing.IsReady);
+            await _repository.UpdateIfUnchangedAsync(installed.ScriptKey, missing.RevisionId, Source, null, None);
+            File.WriteAllBytes(PathFor(installed.ScriptKey), new byte[] { 255 });
+            var invalid = await _persistence.LoadAsync(installed.ScriptKey, None);
+            Assert.IsNull(invalid.Record.Source);
+            Assert.IsNotNull(invalid.SourceVersion);
+            var snapshot = await _repository.ReloadAsync(installed.ScriptKey, None);
+            Assert.IsTrue((await _repository.UpdateIfUnchangedAsync(installed.ScriptKey, snapshot.RevisionId, Source, null, None)).CanExecute);
+        }
+
+        [TestMethod]
+        public async Task LockedSource_HasNoReliableVersion_AndDoesNotAffectOtherScripts()
+        {
+            var installed = await InstallAsync();
+            var other = await InstallAsync();
+            using (File.Open(PathFor(installed.ScriptKey), FileMode.Open, FileAccess.ReadWrite, FileShare.None))
             {
-                if (point == stage)
-                    throw new IOException("simulated failure");
-            };
-
-            await Assert.ThrowsExceptionAsync<IOException>(() => _repository.UpdateAsync(installed.ScriptKey, Source + "\n// changed", null, CancellationToken.None));
-            _fault = null;
-
+                Assert.IsNull((await _persistence.LoadAsync(installed.ScriptKey, None)).SourceVersion);
+                var restored = await OpenAsync();
+                Assert.IsFalse((await restored.GetAsync(installed.ScriptKey, None)).IsReady);
+                Assert.IsTrue((await restored.GetAsync(other.ScriptKey, None)).CanExecute);
+                await Assert.ThrowsExceptionAsync<UserScriptPersistenceException>(() => restored.UpdateAsync(installed.ScriptKey, Source, null, None));
+                await restored.SetEnabledAsync(installed.ScriptKey, false, None);
+            }
             Assert.AreEqual(Source, File.ReadAllText(PathFor(installed.ScriptKey)));
-            Assert.AreEqual(installed.RevisionId, (await _repository.GetAsync(installed.ScriptKey, CancellationToken.None)).RevisionId);
-            Assert.AreEqual(Source, (await CreatePersistence().LoadAsync(CancellationToken.None)).Single().Source);
         }
 
         [TestMethod]
-        public async Task FailedRollback_BlocksMutationsUntilRecovery_AndRetainsCommittedSource()
+        public async Task LostAndCorruptCache_RedownloadsOrIsolatesOfflineFailure()
         {
-            var installed = await InstallAsync();
+            var installed = await InstallAsync(AssetSource);
+            var other = await InstallAsync();
+            File.WriteAllBytes(Objects.Single(), new byte[] { 1 });
+            var loaded = await _persistence.LoadAsync(installed.ScriptKey, None);
+            Assert.IsTrue(loaded.Record.Assets.All(asset => asset.Content == null));
+            await _repository.ReloadAsync(installed.ScriptKey, None);
+            Assert.AreEqual(4, _provider.Reads);
+            CollectionAssert.AreEqual(_provider.Bytes, File.ReadAllBytes(Objects.Single()));
+            Directory.Delete(Path.Combine(_root, "Cache"), true);
+            _provider.Offline = true;
+            var restored = await OpenAsync();
+            Assert.IsFalse((await restored.GetAsync(installed.ScriptKey, None)).IsReady);
+            Assert.IsTrue((await restored.GetAsync(other.ScriptKey, None)).CanExecute);
+            _provider.Offline = false;
+            Assert.IsTrue((await restored.ReloadAsync(installed.ScriptKey, None)).CanExecute);
+        }
 
-            _fault = stage =>
-            {
-                if (stage == "replaced" || stage == "restore")
-                    throw new IOException(stage);
-            };
-
-            await Assert.ThrowsExceptionAsync<AggregateException>(() => _repository.UpdateAsync(installed.ScriptKey, Source + "\n// uncommitted", null, CancellationToken.None));
-            _fault = null;
-            await Assert.ThrowsExceptionAsync<IOException>(() => _repository.SetEnabledAsync(installed.ScriptKey, false, CancellationToken.None));
-
-            var loaded = await _persistence.LoadAsync(CancellationToken.None);
-
-            Assert.AreEqual(Source, loaded.Single().Source);
-
-            await _repository.SetEnabledAsync(installed.ScriptKey, false, CancellationToken.None);
+        [TestMethod]
+        public async Task DisabledStartup_DoesNotFetch_AndFailedEnableRetainsIntent()
+        {
+            var installed = await InstallAsync(AssetSource, false);
+            File.Delete(Objects.Single());
+            var restored = await OpenAsync();
+            Assert.AreEqual(2, _provider.Reads);
+            var disabled = await restored.GetAsync(installed.ScriptKey, None);
+            Assert.IsFalse(disabled.IsEnabled);
+            Assert.IsFalse(disabled.IsReady);
+            _provider.Offline = true;
+            var enabled = await restored.SetEnabledAsync(installed.ScriptKey, true, None);
+            Assert.IsTrue(enabled.IsEnabled);
+            Assert.IsFalse(enabled.CanExecute);
+            Assert.IsTrue(enabled.Diagnostics.Any());
+            Assert.AreEqual(1L, await _database.ScalarAsync("SELECT is_enabled FROM monkeysharp_scripts"));
         }
 
         [DataTestMethod]
-        [DataRow(".backup")]
-        [DataRow(".deleted")]
-        public async Task Restart_RecoversOnlyCommittedDigest(string suffix)
+        [DataRow("objects-written")]
+        [DataRow("marker-written")]
+        [DataRow("rows-written")]
+        [DataRow("source-switched")]
+        public async Task FailedSave_RollsBackFileDatabaseAndSnapshot(string stage)
         {
             var installed = await InstallAsync();
-            var path = PathFor(installed.ScriptKey);
-
-            File.Move(path, path + suffix);
-
-            if (suffix == ".backup")
-                File.WriteAllText(path, "uncommitted new source");
-
-            File.WriteAllText(path + ".pending", "incomplete");
-
-            Assert.AreEqual(Source, (await CreatePersistence().LoadAsync(CancellationToken.None)).Single().Source);
-            Assert.AreEqual(Source, File.ReadAllText(path));
-            Assert.IsFalse(File.Exists(path + suffix));
-            Assert.IsFalse(File.Exists(path + ".pending"));
+            var commit = await _database.ScalarAsync("SELECT commit_id FROM monkeysharp_scripts");
+            _fault = point => { if (point == stage) throw new IOException("simulated failure"); };
+            await Assert.ThrowsExceptionAsync<UserScriptPersistenceException>(() => _repository.UpdateAsync(installed.ScriptKey, Source + "\n// changed", null, None));
+            _fault = null;
+            Assert.AreEqual(Source, File.ReadAllText(PathFor(installed.ScriptKey)));
+            Assert.AreEqual(commit, await _database.ScalarAsync("SELECT commit_id FROM monkeysharp_scripts"));
+            Assert.AreEqual(installed.RevisionId, (await _repository.GetAsync(installed.ScriptKey, None)).RevisionId);
+            Assert.AreEqual(Source, (await _persistence.LoadAsync(installed.ScriptKey, None)).Record.Source);
         }
 
         [TestMethod]
-        public async Task Commit_CancellationAndCleanupFailure_DoNotReportFailure()
+        public async Task FailedRollback_RetainsMarker_AndOtherInstallationsRemainWritable()
+        {
+            var installed = await InstallAsync();
+            var other = await InstallAsync();
+            _fault = stage => { if (stage == "source-switched" || stage == "restore") throw new IOException(stage); };
+            await Assert.ThrowsExceptionAsync<UserScriptPersistenceException>(() => _repository.UpdateAsync(installed.ScriptKey, Source + "\n// changed", null, None));
+            Assert.IsTrue(File.Exists(Marker(installed.ScriptKey)));
+            _fault = null;
+            await _repository.UpdateAsync(other.ScriptKey, Source + "\n// other", null, None);
+            Assert.AreEqual(Source, (await _persistence.LoadAsync(installed.ScriptKey, None)).Record.Source);
+            Assert.IsFalse(File.Exists(Marker(installed.ScriptKey)));
+        }
+
+        [DataTestMethod]
+        [DataRow("marker-written")]
+        [DataRow("rows-written")]
+        public async Task CancellationBeforeSwitch_DoesNotPublishInstallation(string stage)
         {
             using (var cancellation = new CancellationTokenSource())
             {
-                _fault = stage =>
-                {
-                    if (stage == "replaced")
-                        cancellation.Cancel();
-
-                    if (stage == "cleanup")
-                        throw new IOException("cleanup failed");
-                };
-
-                var installed = await _repository.InstallAsync(Source, null, true, cancellation.Token);
-
-                Assert.IsTrue(cancellation.IsCancellationRequested);
-                Assert.IsTrue((await _repository.GetAsync(installed.ScriptKey, CancellationToken.None)).IsEnabled);
-
+                _fault = point => { if (point == stage) cancellation.Cancel(); };
+                await Assert.ThrowsExceptionAsync<OperationCanceledException>(() => _repository.InstallAsync(Source, null, true, cancellation.Token));
                 _fault = null;
-
-                Assert.AreEqual(Source, (await CreatePersistence().LoadAsync(CancellationToken.None)).Single().Source);
+                Assert.AreEqual(0, (await _persistence.LoadAllAsync(None)).Count);
+                Assert.AreEqual(0, (await _repository.GetSnapshotAsync(None)).Count);
             }
         }
 
         [TestMethod]
-        public async Task MissingPrepared_IsUnavailableWithoutImplicitPreparation_ButMaintenanceKeepsSource()
+        public async Task CommittedCancellationAndCleanupFailure_StillPublishSuccessOnce()
         {
-            var installed = await InstallAsync();
-
-            await _database.ExecuteAsync("UPDATE monkeysharp_scripts SET prepared_revision_json = ''");
-
-            var records = await _persistence.LoadAsync(CancellationToken.None);
-
-            Assert.IsNull(records.Single().Source);
-
-            var maintenance = (await _persistence.ReadMaintenanceAsync(CancellationToken.None)).Single();
-
-            Assert.AreEqual(Source, maintenance.Record.Source);
-            Assert.IsTrue(maintenance.Diagnostics.Any());
-
-            var restored = new PersistentUserScriptRepository(_persistence);
-
-            await restored.InitializeAsync(CancellationToken.None);
-
-            Assert.IsFalse((await restored.GetAsync(installed.ScriptKey, CancellationToken.None)).IsEnabled);
+            using (var cancellation = new CancellationTokenSource())
+            {
+                var events = 0;
+                _repository.Changed += (sender, args) => events++;
+                _fault = stage =>
+                {
+                    if (stage == "source-switched") cancellation.Cancel();
+                    if (stage == "cleanup" || stage == "committed") throw new IOException(stage);
+                };
+                var installed = await _repository.InstallAsync(Source, null, true, cancellation.Token);
+                Assert.AreEqual(1, events);
+                Assert.IsTrue(installed.CanExecute);
+                Assert.IsTrue(File.Exists(Marker(installed.ScriptKey)));
+                _fault = null;
+                Assert.AreEqual(Source, (await _persistence.LoadAsync(installed.ScriptKey, None)).Record.Source);
+                Assert.IsFalse(File.Exists(Marker(installed.ScriptKey)));
+            }
         }
 
         [TestMethod]
-        public async Task CorruptPrepared_BlocksInitializationWithoutErasingMaintenanceData()
+        public async Task SharedObjectsAndQueuedCollection_ProtectUncommittedAndDisabledReferences()
         {
-            var installed = await InstallAsync();
-
-            await _database.ExecuteAsync("UPDATE monkeysharp_scripts SET prepared_revision_json = '{\"format\":999}'");
-
-            var restored = new PersistentUserScriptRepository(_persistence);
-
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => restored.InitializeAsync(CancellationToken.None));
-
-            Assert.AreEqual(installed.ScriptKey, (await _persistence.ReadMaintenanceAsync(CancellationToken.None)).Single().Record.ScriptKey);
-            Assert.AreEqual(Source, File.ReadAllText(PathFor(installed.ScriptKey)));
+            Task collection = null;
+            _fault = stage => { if (stage == "objects-written") collection = _persistence.CollectAsync(None); };
+            var first = await InstallAsync(AssetSource);
+            await collection;
+            _fault = null;
+            var second = await InstallAsync(AssetSource, false);
+            Assert.AreEqual(1, Objects.Length);
+            _provider.Bytes = Encoding.UTF8.GetBytes("updated content");
+            await _repository.RefreshAssetsAsync(first.ScriptKey, first.RevisionId, None);
+            Assert.AreEqual(2, Objects.Length);
+            await _repository.RemoveAsync(first.ScriptKey, None);
+            Assert.AreEqual(1, Objects.Length);
+            CollectionAssert.AreEqual(Encoding.UTF8.GetBytes("prepared content"), File.ReadAllBytes(Objects.Single()));
+            await _repository.RemoveAsync(second.ScriptKey, None);
+            Assert.AreEqual(0, Objects.Length);
         }
 
         [TestMethod]
-        public async Task UnavailableSource_IsRetained_AndUnreviewedEnableDoesNotAdoptChanges()
+        public async Task BrokenReferences_SkipCollection_AndIsolateOnlyAffectedInstallation()
         {
-            var installed = await InstallAsync();
-
-            File.WriteAllBytes(PathFor(installed.ScriptKey), new byte[] { 255, 254 });
-
-            Assert.IsNull((await _persistence.LoadAsync(CancellationToken.None)).Single().Source);
-
-            await Assert.ThrowsExceptionAsync<IOException>(() => _repository.SetEnabledAsync(installed.ScriptKey, false, CancellationToken.None));
-
-            CollectionAssert.AreEqual(new byte[] { 255, 254 }, File.ReadAllBytes(PathFor(installed.ScriptKey)));
-
-            await _repository.UpdateAsync(installed.ScriptKey, Source + "\n// reviewed", null, CancellationToken.None);
-
-            Assert.AreEqual(Source + "\n// reviewed", (await _persistence.LoadAsync(CancellationToken.None)).Single().Source);
+            var installed = await InstallAsync(AssetSource);
+            var other = await InstallAsync();
+            var orphan = Path.Combine(Path.GetDirectoryName(Objects.Single()), new string('a', 64));
+            File.WriteAllText(orphan, "unreferenced");
+            await _database.ExecuteAsync("UPDATE monkeysharp_script_assets SET content_sha256 = 'invalid'");
+            await _persistence.CollectAsync(None);
+            Assert.IsTrue(File.Exists(orphan));
+            var restored = await OpenAsync();
+            Assert.IsFalse((await restored.GetAsync(installed.ScriptKey, None)).IsReady);
+            Assert.IsTrue((await restored.GetAsync(other.ScriptKey, None)).CanExecute);
+            await restored.RemoveAsync(installed.ScriptKey, None);
         }
 
         [TestMethod]
-        public async Task Uninstall_DeletesAssociatedRows_PreservesUnknownFiles_AndCannotResurrect()
+        public async Task Uninstall_DeletesAssociatedRowsAndKeepsUnknownFiles()
         {
-            var installed = await InstallAsync();
+            var installed = await InstallAsync(AssetSource);
             var id = installed.ScriptKey.ToString();
-
             await _database.ExecuteAsync("INSERT INTO monkeysharp_values VALUES ('" + id + "', '', 'u', 0, '')");
             await _database.ExecuteAsync("INSERT INTO monkeysharp_permission_decisions VALUES ('" + id + "', 'kind', 'origin', 1, '')");
             await _database.ExecuteAsync("INSERT INTO monkeysharp_tab_states VALUES ('" + id + "', 'tab', '{}', '')");
-
             var unknown = Path.Combine(Path.GetDirectoryName(PathFor(installed.ScriptKey)), "keep.txt");
-
             File.WriteAllText(unknown, "external file");
-            _fault = stage =>
-            {
-                if (stage == "cleanup")
-                    throw new IOException("busy");
-            };
-            await _repository.RemoveAsync(installed.ScriptKey, CancellationToken.None);
+            _fault = stage => { if (stage == "source-switched") throw new IOException("delete refused"); };
+            await Assert.ThrowsExceptionAsync<UserScriptPersistenceException>(() => _repository.RemoveAsync(installed.ScriptKey, None));
+            Assert.AreEqual(2L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_script_assets"));
             _fault = null;
-
-            Assert.AreEqual(0, (await _persistence.LoadAsync(CancellationToken.None)).Count);
-
-            foreach (var table in new[] { "monkeysharp_scripts", "monkeysharp_values", "monkeysharp_permission_decisions", "monkeysharp_tab_states" })
+            await _repository.RemoveAsync(installed.ScriptKey, None);
+            foreach (var table in new[] { "monkeysharp_scripts", "monkeysharp_script_assets", "monkeysharp_values", "monkeysharp_permission_decisions", "monkeysharp_tab_states" })
                 Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM " + table));
-
             Assert.IsTrue(File.Exists(unknown));
-            Assert.IsFalse(File.Exists(PathFor(installed.ScriptKey) + ".deleted"));
+            Assert.IsFalse(File.Exists(PathFor(installed.ScriptKey)));
         }
 
         [TestMethod]
-        public async Task DeleteFailure_RestoresSourceAndInstallation()
+        public async Task LiteralBom_RoundTripsLogicalSource()
         {
-            var installed = await InstallAsync();
-
-            _fault = stage =>
-            {
-                if (stage == "deleted")
-                    throw new IOException("commit refused");
-            };
-
-            await Assert.ThrowsExceptionAsync<IOException>(() => _repository.RemoveAsync(installed.ScriptKey, CancellationToken.None));
-            _fault = null;
-
-            Assert.AreEqual(Source, (await _persistence.LoadAsync(CancellationToken.None)).Single().Source);
-        }
-
-        [TestMethod]
-        public async Task PreparedDependencies_RestoreOfflineWithoutFetchingAgain()
-        {
-            var provider = new ContentProvider();
-            var repository = new PersistentUserScriptRepository(_persistence, preparer: new UserScriptPreparer(provider, provider));
-
-            await repository.InitializeAsync(CancellationToken.None);
-
-            var source = Source.Replace("// @grant none", "// @grant GM.getResourceText\n// @require https://example.com/dependency.js\n// @resource content https://example.com/resource.txt");
-            var installed = await repository.InstallAsync(source, null, true, CancellationToken.None);
-
-            Assert.AreEqual(2, provider.Reads);
-
-            provider.Offline = true;
-
-            var restored = new PersistentUserScriptRepository(CreatePersistence(), preparer: new UserScriptPreparer(provider, provider));
-
-            await restored.InitializeAsync(CancellationToken.None);
-
-            var snapshot = await restored.GetAsync(installed.ScriptKey, CancellationToken.None);
-
-            Assert.AreEqual(2, provider.Reads);
-            Assert.AreEqual("prepared content", snapshot.PreparedRevision.Resources["content"].DecodeText());
-        }
-
-        [TestMethod]
-        public async Task LockedSource_IsUnavailableAndNotDeleted()
-        {
-            var installed = await InstallAsync();
-
-            using (File.Open(PathFor(installed.ScriptKey), FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-            {
-                Assert.IsNull((await _persistence.LoadAsync(CancellationToken.None)).Single().Source);
-            }
-
-            Assert.AreEqual(Source, (await _persistence.LoadAsync(CancellationToken.None)).Single().Source);
+            var installed = await InstallAsync("\uFEFF" + Source);
+            var restored = await OpenAsync();
+            Assert.AreEqual("\uFEFF" + Source, (await restored.GetAsync(installed.ScriptKey, None)).Definition.Source);
         }
 
         private sealed class ContentProvider : IUserScriptDependencyProvider, IResourceProvider
         {
-            public int Reads;
-            public bool Offline;
+            internal int Reads;
+            internal bool Offline;
+            internal byte[] Bytes = Encoding.UTF8.GetBytes("prepared content");
 
             private Task<ResourceContent> Read()
             {
                 Reads++;
-
-                if (Offline)
-                    throw new IOException("offline");
-
-                return Task.FromResult(new ResourceContent(Encoding.UTF8.GetBytes("prepared content"), "text/plain", "prepared content"));
+                if (Offline) throw new IOException("offline");
+                return Task.FromResult(new ResourceContent(Bytes, "text/plain", "utf-8"));
             }
 
             public Task<ResourceContent> GetAsync(UserScriptInstallation installation, ResourceDeclaration resource, CancellationToken token) => Read();
-
             public Task<ResourceContent> GetScriptAsync(UserScriptInstallation installation, UserScriptDependencyDeclaration dependency, CancellationToken token) => Read();
-        }
-
-        [TestMethod]
-        public async Task LiteralBom_RoundTripsWithoutPreparedSourceMismatch()
-        {
-            var installed = await _repository.InstallAsync("\uFEFF" + Source, null, true, CancellationToken.None);
-            var restored = new PersistentUserScriptRepository(CreatePersistence());
-
-            await restored.InitializeAsync(CancellationToken.None);
-
-            Assert.AreEqual("\uFEFF" + Source, (await restored.GetAsync(installed.ScriptKey, CancellationToken.None)).Definition.Source);
         }
     }
 }

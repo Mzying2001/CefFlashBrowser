@@ -20,7 +20,7 @@ namespace CefFlashBrowser.Tests
         private SqliteDatabase _database;
         private UserScriptStorage _storage;
         private SqliteUserScriptValueStore _store;
-        private PersistentUserScriptRepository _repository;
+        private UserScriptRepository _repository;
 
         [TestInitialize]
         public async Task Setup()
@@ -29,7 +29,7 @@ namespace CefFlashBrowser.Tests
             _database = new SqliteDatabase(Path.Combine(_root, "browser.db"));
             _storage = new UserScriptStorage(new DatabaseService(_database));
             _store = new SqliteUserScriptValueStore(_storage, 4);
-            _repository = new PersistentUserScriptRepository(new SqliteUserScriptRepositoryPersistence(_storage, Path.Combine(_root, "MonkeySharp")));
+            _repository = new UserScriptRepository(new SqliteUserScriptRepositoryPersistence(_storage, Path.Combine(_root, "MonkeySharp"), Path.Combine(_root, "Cache", "UserScripts")));
             await _repository.InitializeAsync(CancellationToken.None);
             _id = (await _repository.InstallAsync("// ==UserScript==\n// @name Storage\n// @match https://example.com/*\n// @grant none\n// ==/UserScript==", null, true, CancellationToken.None)).ScriptKey.ToString();
         }

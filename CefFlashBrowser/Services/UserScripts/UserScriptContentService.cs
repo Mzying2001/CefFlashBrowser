@@ -58,15 +58,19 @@ namespace CefFlashBrowser.Services.UserScripts
 
         public Task<ResourceContent> GetScriptAsync(UserScriptInstallation installation,
             UserScriptDependencyDeclaration dependency, CancellationToken token)
-            => FetchAsync(dependency.Url, true, false, token);
+            => FetchAsync(dependency.Url, token);
 
         public Task<ResourceContent> GetAsync(UserScriptInstallation installation, ResourceDeclaration resource, CancellationToken token)
-            => FetchAsync(resource.Url, false, false, token);
+            => FetchAsync(resource.Url, token);
 
         public async Task<string> FetchSourceAsync(UserScriptInstallation installation, string url, CancellationToken token)
-            => (await FetchAsync(url, true, true, token).ConfigureAwait(false)).Text;
+        {
+            var content = await FetchAsync(url, token).ConfigureAwait(false);
+            var source = new UTF8Encoding(false, true).GetString(content.Bytes);
+            return source.StartsWith("\uFEFF", StringComparison.Ordinal) ? source.Substring(1) : source;
+        }
 
-        public async Task<ResourceContent> FetchAsync(string url, bool decodeText, bool strictUtf8, CancellationToken token)
+        public async Task<ResourceContent> FetchAsync(string url, CancellationToken token)
         {
             var uri = RequireHttp(url);
 
@@ -112,21 +116,7 @@ namespace CefFlashBrowser.Services.UserScripts
 
                             var bytes = output.ToArray();
                             var charset = response.Content.Headers.ContentType?.CharSet?.Trim('"');
-                            string text = null;
-
-                            if (decodeText)
-                            {
-                                var encoding = strictUtf8 || string.IsNullOrWhiteSpace(charset)
-                                    ? new UTF8Encoding(false, true)
-                                    : Encoding.GetEncoding(charset, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
-
-                                text = encoding.GetString(bytes);
-
-                                if (text.StartsWith("\uFEFF", StringComparison.Ordinal))
-                                    text = text.Substring(1);
-                            }
-
-                            return new ResourceContent(bytes, response.Content.Headers.ContentType?.MediaType, text, charset);
+                            return new ResourceContent(bytes, response.Content.Headers.ContentType?.MediaType, charset);
                         }
                     }
                 }

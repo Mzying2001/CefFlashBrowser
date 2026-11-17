@@ -15,6 +15,7 @@ namespace CefFlashBrowser.Data
         public static string AssetsPath { get; }
         public static string BinariesPath { get; }
         public static string CachesPath { get; }
+        public static string UserScriptCachePath { get; }
         public static string LogsPath { get; }
         public static string CefDllPath { get; }
         public static string SqliteDllPath { get; }
@@ -46,6 +47,7 @@ namespace CefFlashBrowser.Data
             AssetsPath = Path.Combine(AppBaseDirectory, "Assets\\");
             BinariesPath = Path.Combine(AppBaseDirectory, "Binaries\\");
             CachesPath = Path.Combine(AppBaseDirectory, "Caches\\");
+            UserScriptCachePath = Path.Combine(CachesPath, "UserScripts");
             LogsPath = Path.Combine(AppBaseDirectory, "Logs\\");
             CefDllPath = Path.Combine(BinariesPath, "CefSharp\\");
             SqliteDllPath = Path.Combine(BinariesPath, "SQLite\\");

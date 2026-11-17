@@ -599,7 +599,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 var scripts = await _runtimeRepository.GetSnapshotAsync(_lifetime.Token);
 
-                count = scripts.Count(script => script.IsEnabled
+                count = scripts.Count(script => script.CanExecute
                     && script.Definition.ParseResult.CanEnable
                     && script.PreparedRevision.UrlRules.AllowsEnvironment(false, out _)
                     && script.PreparedRevision.UrlRules.IsMatch(url));

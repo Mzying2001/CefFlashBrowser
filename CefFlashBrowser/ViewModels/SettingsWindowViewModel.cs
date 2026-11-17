@@ -342,6 +342,7 @@ namespace CefFlashBrowser.ViewModels
                     {
                         Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
                         Messenger.Global.Send(MessageTokens.CLOSE_MAINWINDOW, null);
+                        Program.StopUserScriptsForExit();
                         CefSharp.Cef.Shutdown();
                         DirectoryHelper.MoveDirectoryToPendingDelete(GlobalData.CachesPath, recreateEmpty: true);
                         break;

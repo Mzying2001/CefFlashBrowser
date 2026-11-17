@@ -31,6 +31,9 @@ namespace CefFlashBrowser.Services.UserScripts
 
         private bool Allows(UserScriptInstallation installation)
         {
+            if (!installation.CanExecute || installation.Definition.Metadata == null)
+                return false;
+
             if (UserScriptExecutionPolicy.IsWorldAvailable(installation.Definition.Metadata, _trusted))
                 return true;
 
@@ -107,6 +110,12 @@ namespace CefFlashBrowser.Services.UserScripts
         public Task<UserScriptInstallation> UpdateIfUnchangedAsync(ScriptKey key, Guid revision, string source, string origin,
             CancellationToken token)
             => _inner.UpdateIfUnchangedAsync(key, revision, source, origin, token);
+
+        public Task<UserScriptInstallation> ReloadAsync(ScriptKey key, CancellationToken token)
+            => _inner.ReloadAsync(key, token);
+
+        public Task<UserScriptInstallation> RefreshAssetsAsync(ScriptKey key, Guid revision, CancellationToken token)
+            => _inner.RefreshAssetsAsync(key, revision, token);
 
         public Task<UserScriptInstallation> SetEnabledAsync(ScriptKey key, bool enabled, CancellationToken token)
             => _inner.SetEnabledAsync(key, enabled, token);

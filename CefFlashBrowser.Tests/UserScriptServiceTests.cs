@@ -49,7 +49,7 @@ namespace CefFlashBrowser.Tests
         private UserScriptService Create()
         {
             var storage = new UserScriptStorage(new DatabaseService(_database));
-            var service = new UserScriptService(storage, Path.Combine(_root, "MonkeySharp"),
+            var service = new UserScriptService(storage, Path.Combine(_root, "MonkeySharp"), Path.Combine(_root, "Cache", "UserScripts"),
                 new UserScriptContentService(handler: new ContentHandler()), new RejectUserScriptPermissionPrompt());
 
             _services.Add(service);
@@ -104,67 +104,40 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public async Task CorruptPrepared_MaintenanceRepairPreservesKeyTimeAndValues()
+        public async Task UnavailableSource_IsIsolatedAndReloadPreservesIdentityAndValues()
         {
             var first = Create();
-
             await first.InitializeAsync();
-
             var installed = await first.Repository.InstallAsync(Source, null, true, CancellationToken.None);
-
+            var other = await first.Repository.InstallAsync(Source, null, true, CancellationToken.None);
             await first.ValueStore.SetAsync(installed.ScriptKey.ToString(), "saved", UserScriptValue.Undefined, CancellationToken.None);
             await first.StopAsync();
-
-            const string corrupt = "{\"format\":999}";
-
-            await _database.ExecuteAsync("UPDATE monkeysharp_scripts SET prepared_revision_json = @payload", new Dictionary<string, object> { ["@payload"] = corrupt });
-
+            var path = Path.Combine(_root, "MonkeySharp", installed.ScriptKey.ToString(), "userscript.js");
+            File.WriteAllBytes(path, new byte[] { 255 });
             var restored = Create();
-
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => restored.InitializeAsync());
-
-            Assert.IsNotNull(restored.InitializationError);
-            Assert.ThrowsException<InvalidOperationException>(() =>
-            {
-                var ignored = restored.Repository;
-            });
-            Assert.AreEqual(Source, (await restored.ReadMaintenanceAsync(CancellationToken.None)).Single().Record.Source);
-
-            await restored.RepairAsync(installed.ScriptKey, Source + "\n// reviewed", CancellationToken.None);
-
-            var repaired = await restored.Repository.GetAsync(installed.ScriptKey, CancellationToken.None);
-
-            Assert.AreEqual(installed.InstalledAt, repaired.InstalledAt);
-            Assert.IsTrue(repaired.IsEnabled);
+            await restored.InitializeAsync();
+            Assert.IsNull(restored.InitializationError);
+            Assert.IsFalse((await restored.Repository.GetAsync(installed.ScriptKey, CancellationToken.None)).CanExecute);
+            Assert.IsTrue((await restored.Repository.GetAsync(other.ScriptKey, CancellationToken.None)).CanExecute);
+            File.WriteAllText(path, Source + "\n// reviewed", new UTF8Encoding(false));
+            var reloaded = await restored.Repository.ReloadAsync(installed.ScriptKey, CancellationToken.None);
+            Assert.AreEqual(installed.InstalledAt, reloaded.InstalledAt);
+            Assert.IsTrue(reloaded.CanExecute);
             Assert.IsTrue((await restored.ValueStore.GetAsync(installed.ScriptKey.ToString(), "saved", CancellationToken.None)).Exists);
-            Assert.AreNotEqual(corrupt, await _database.ScalarAsync("SELECT prepared_revision_json FROM monkeysharp_scripts"));
         }
 
         [TestMethod]
-        public async Task FailedRepair_DoesNotClearCorruptPayload_AndCanRetry()
+        public async Task DatabaseFailure_RemainsGlobalAndInitializationCanRetry()
         {
-            var first = Create();
-
-            await first.InitializeAsync();
-
-            var installed = await first.Repository.InstallAsync(Source, null, true, CancellationToken.None);
-
-            await first.StopAsync();
-            await _database.ExecuteAsync("UPDATE monkeysharp_scripts SET prepared_revision_json = '{\"format\":999}'");
-
-            var restored = Create();
-
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => restored.InitializeAsync());
-
-            var withDependency = Source.Replace("// @grant none", "// @grant none\n// @require https://example.com/missing.js");
-
-            await Assert.ThrowsExceptionAsync<HttpRequestException>(() => restored.RepairAsync(installed.ScriptKey, withDependency, CancellationToken.None));
-
-            Assert.AreEqual("{\"format\":999}", await _database.ScalarAsync("SELECT prepared_revision_json FROM monkeysharp_scripts"));
-
-            await restored.RepairAsync(installed.ScriptKey, Source, CancellationToken.None);
-
-            Assert.IsNotNull(restored.Repository);
+            await _database.ExecuteAsync("PRAGMA user_version = 4");
+            var service = Create();
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => service.InitializeAsync());
+            Assert.IsNotNull(service.InitializationError);
+            Assert.ThrowsException<InvalidOperationException>(() => { var ignored = service.Repository; });
+            await _database.ExecuteAsync("PRAGMA user_version = 0");
+            await service.InitializeAsync();
+            Assert.IsNull(service.InitializationError);
+            Assert.AreEqual(0, (await service.Repository.GetSnapshotAsync(CancellationToken.None)).Count);
         }
 
         [TestMethod]
@@ -334,10 +307,9 @@ namespace CefFlashBrowser.Tests
 
             using (var content = new UserScriptContentService(handler: handler))
             {
-                var result = await content.FetchAsync("https://example.com/start#sha256=abc", false, false, CancellationToken.None);
+                var result = await content.FetchAsync("https://example.com/start#sha256=abc", CancellationToken.None);
 
                 CollectionAssert.AreEqual(new byte[] { 255, 0, 1 }, result.Bytes);
-                Assert.IsNull(result.Text);
                 Assert.IsTrue(handler.Requests.All(uri => uri.Fragment == ""));
             }
         }

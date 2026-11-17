@@ -27,7 +27,7 @@ namespace CefFlashBrowser.Services.UserScripts
         {
             token.ThrowIfCancellationRequested();
 
-            if (!IsWorldAvailable(request.Installation.Definition.Metadata, _trusted())
+            if (!request.Installation.CanExecute || !IsWorldAvailable(request.Installation.Definition.Metadata, _trusted())
                 || _allowedPage != null && !_allowedPage(request.Frame.Url))
                 return Task.FromResult(PermissionDecision.Deny);
 
@@ -36,6 +36,9 @@ namespace CefFlashBrowser.Services.UserScripts
 
         public static bool IsWorldAvailable(UserScriptMetadata metadata, bool trusted)
         {
+            if (metadata == null)
+                return false;
+
             var world = UserScriptEngine.RequestedWorld(metadata);
             var needsBridge = metadata.GrantDeclarationState == GrantDeclarationState.ExplicitList
                 && metadata.Grants.Any(grant => grant != "none" && grant != "GM.info");

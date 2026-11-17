@@ -80,11 +80,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Platform)' == 'x86'">
-    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x86" Version="3.0.1" />
+    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x86" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Platform)' == 'x64'">
-    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x64" Version="3.0.1" />
+    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x64" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>

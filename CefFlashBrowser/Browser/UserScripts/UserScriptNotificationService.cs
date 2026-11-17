@@ -255,7 +255,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 try
                 {
-                    var content = await _owner._content.FetchAsync(_request.ImageUrl, false, false, _token).ConfigureAwait(false);
+                    var content = await _owner._content.FetchAsync(_request.ImageUrl, _token).ConfigureAwait(false);
 
                     BitmapImage bitmap;
 

@@ -64,7 +64,7 @@ namespace CefFlashBrowser.Tests
                 await Task.WhenAll(initialization, read, write);
                 Assert.AreSame(initialization, _service.InitializeAsync());
                 Assert.AreEqual(1, controlled.InitializationCount);
-                Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+                Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
                 Assert.AreEqual(1, (await _service.GetWebsiteIconsAsync()).Count);
             }
             finally { controlled.ReleaseInitialization.TrySetResult(true); }
@@ -86,37 +86,31 @@ namespace CefFlashBrowser.Tests
         [DataTestMethod]
         [DataRow(0)]
         [DataRow(1)]
-        public async Task ExistingDatabase_PreservesSchemaAndRecords(int version)
+        [DataRow(2)]
+        public async Task ExistingOldDatabase_IsRejectedWithoutMigration(int version)
         {
             await _database.TransactionAsync(session =>
             {
-                session.Execute(@"CREATE TABLE website_icons (
-                    page_url TEXT PRIMARY KEY NOT NULL,
-                    icon_url TEXT NOT NULL,
-                    updated_at INTEGER NOT NULL)");
-                session.Execute("INSERT INTO website_icons VALUES ('https://example.com/a', 'https://example.com/icon', 20)");
+                session.Execute("CREATE TABLE website_icons (page_url TEXT PRIMARY KEY, icon_url TEXT, updated_at INTEGER)");
+                session.Execute("INSERT INTO website_icons VALUES ('page', 'icon', 20)");
                 session.Execute("PRAGMA user_version = " + version);
             });
-            string schema = (string)await _database.ScalarAsync("SELECT sql FROM sqlite_master WHERE name = 'website_icons'");
-
-            var icon = (await _service.GetWebsiteIconsAsync()).Single();
-            Assert.AreEqual("https://example.com/a", icon.PageUrl);
-            Assert.AreEqual("https://example.com/icon", icon.IconUrl);
-            Assert.AreEqual(20L, icon.UpdatedAt);
-            Assert.AreEqual(schema, await _database.ScalarAsync("SELECT sql FROM sqlite_master WHERE name = 'website_icons'"));
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.InitializeAsync());
+            Assert.AreEqual((long)version, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual("icon", await _database.ScalarAsync("SELECT icon_url FROM website_icons"));
+            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'monkeysharp_scripts'"));
         }
 
         [TestMethod]
         public async Task UnsupportedVersion_RejectsReadsAndWrites_WithoutChangingDatabase()
         {
-            await _database.ExecuteAsync("PRAGMA user_version = 3");
+            await _database.ExecuteAsync("PRAGMA user_version = 4");
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.InitializeAsync());
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.GetWebsiteIconsAsync());
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.SaveWebsiteIconAsync(
                 new WebsiteIconRecord("https://example.com/a", "https://example.com/icon", 10)));
 
-            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(4L, await _database.ScalarAsync("PRAGMA user_version"));
             Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'website_icons'"));
         }
 
@@ -128,7 +122,7 @@ namespace CefFlashBrowser.Tests
             var names = await _database.QueryAsync("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name",
                 row => row.GetString(0));
 
-            CollectionAssert.AreEquivalent(new[] { "website_icons", "monkeysharp_scripts", "monkeysharp_values",
+            CollectionAssert.AreEquivalent(new[] { "website_icons", "monkeysharp_scripts", "monkeysharp_script_assets", "monkeysharp_values",
                 "monkeysharp_permission_decisions", "monkeysharp_tab_states" }, names);
 
             var columns = await _database.QueryAsync("PRAGMA table_info(website_icons)", row => row.GetString(1));
@@ -137,26 +131,7 @@ namespace CefFlashBrowser.Tests
 
             await new DatabaseService(_database).InitializeAsync();
 
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
-        }
-
-        [TestMethod]
-        public async Task MigrationFailure_RollsBackNewTables_AndPreservesVersionAndIcons()
-        {
-            await _database.ExecuteAsync("CREATE TABLE website_icons (page_url TEXT PRIMARY KEY, icon_url TEXT, updated_at INTEGER)");
-            await _database.ExecuteAsync("INSERT INTO website_icons VALUES ('page', 'icon', 2)");
-            await _database.ExecuteAsync("CREATE TABLE monkeysharp_values (existing TEXT)");
-            await _database.ExecuteAsync("PRAGMA user_version = 1");
-            await Assert.ThrowsExceptionAsync<System.Data.SQLite.SQLiteException>(() => _service.InitializeAsync());
-
-            Assert.AreEqual(1L, await _database.ScalarAsync("PRAGMA user_version"));
-            Assert.AreEqual("icon", await _database.ScalarAsync("SELECT icon_url FROM website_icons"));
-            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'monkeysharp_scripts'"));
-
-            await _database.ExecuteAsync("DROP TABLE monkeysharp_values");
-            await _service.InitializeAsync();
-
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]
@@ -242,7 +217,7 @@ namespace CefFlashBrowser.Tests
                     break;
             }
 
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]
@@ -250,22 +225,22 @@ namespace CefFlashBrowser.Tests
         {
             var key = ScriptKey.Parse(Guid.NewGuid().ToString());
             var now = DateTimeOffset.UtcNow;
-            var record = new UserScriptDatabaseRecord(key, null, true, now, now, "source digest", "prepared payload");
+            var record = new UserScriptDatabaseRecord(key, null, true, now, now, new string('a', 64), Guid.NewGuid().ToString("D"));
 
-            await Assert.ThrowsExceptionAsync<IOException>(() => _service.SaveUserScriptAsync(record,
+            await Assert.ThrowsExceptionAsync<IOException>(() => _service.SaveUserScriptAsync(record, Array.Empty<UserScriptAssetDatabaseRecord>(),
                 () => throw new IOException("source switch failed"), CancellationToken.None));
 
             Assert.IsNull(await _service.GetUserScriptAsync(key));
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
 
-            await _service.SaveUserScriptAsync(record, null, CancellationToken.None);
+            await _service.SaveUserScriptAsync(record, Array.Empty<UserScriptAssetDatabaseRecord>(), null, CancellationToken.None);
 
             var restored = await _service.GetUserScriptAsync(key);
 
             Assert.AreEqual(key, restored.ScriptKey);
             Assert.AreEqual(now, restored.InstalledAt);
             Assert.AreEqual(record.SourceSha256, restored.SourceSha256);
-            Assert.AreEqual(record.PreparedRevisionJson, restored.PreparedRevisionJson);
+            Assert.AreEqual(record.CommitId, restored.CommitId);
         }
 
         [TestMethod]

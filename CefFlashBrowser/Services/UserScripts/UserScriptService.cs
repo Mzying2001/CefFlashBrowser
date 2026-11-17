@@ -1,7 +1,4 @@
-using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Services.UserScripts.Persistence;
-using Mzying2001.MonkeySharp.Core.Domain;
-using Mzying2001.MonkeySharp.Core.Parsing;
 using Mzying2001.MonkeySharp.Core.Permissions;
 using Mzying2001.MonkeySharp.Core.Repository;
 using System;
@@ -22,7 +19,7 @@ namespace CefFlashBrowser.Services.UserScripts
         private readonly Action<string, Exception> _report;
         private Task _initializeTask;
         private Task _stopTask;
-        private PersistentUserScriptRepository _repository;
+        private UserScriptRepository _repository;
 
         public UserScriptContentService Content { get; }
 
@@ -43,13 +40,13 @@ namespace CefFlashBrowser.Services.UserScripts
             }
         }
 
-        public UserScriptService(UserScriptStorage storage, string root, UserScriptContentService content,
+        public UserScriptService(UserScriptStorage storage, string sourceRoot, string cacheRoot, UserScriptContentService content,
             IUserScriptPermissionPrompt prompt, Action<string, Exception> report = null)
         {
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
             Content = content ?? throw new ArgumentNullException(nameof(content));
             _report = report;
-            _persistence = new SqliteUserScriptRepositoryPersistence(storage, root, report);
+            _persistence = new SqliteUserScriptRepositoryPersistence(storage, sourceRoot, cacheRoot, report);
             ValueStore = new SqliteUserScriptValueStore(storage, report: report);
             Decisions = new SqliteUserScriptPermissionDecisionStore(storage);
             PermissionPolicy = new InteractiveUserScriptPermissionPolicy(new SensitiveUserScriptPermissionsPolicy(), Decisions, prompt);
@@ -70,42 +67,13 @@ namespace CefFlashBrowser.Services.UserScripts
                 ThrowIfStopping();
 
                 if (_initializeTask == null || _initializeTask.IsFaulted || _initializeTask.IsCanceled)
-                    _initializeTask = Task.Run(() => InitializeCoreAsync(null, null, _lifetime.Token));
+                    _initializeTask = Task.Run(() => InitializeCoreAsync(_lifetime.Token));
 
                 return _initializeTask;
             }
         }
 
-        public Task<IReadOnlyList<UserScriptMaintenanceRecord>> ReadMaintenanceAsync(CancellationToken token)
-        {
-            lock (_lock)
-                ThrowIfStopping();
-
-            return _persistence.ReadMaintenanceAsync(token);
-        }
-
-        public Task RepairAsync(ScriptKey key, string reviewedSource, CancellationToken token)
-        {
-            if (reviewedSource == null)
-                throw new ArgumentNullException(nameof(reviewedSource));
-
-            var parsed = new UserScriptMetadataParser().Parse(reviewedSource);
-
-            if (!parsed.CanEnable)
-                throw new MetadataValidationException(parsed);
-
-            lock (_lock)
-            {
-                ThrowIfStopping();
-
-                if (_repository != null || _initializeTask != null && !_initializeTask.IsCompleted)
-                    throw new InvalidOperationException("Maintenance repair requires a failed or unpublished runtime.");
-
-                return _initializeTask = Task.Run(() => InitializeCoreAsync(key, reviewedSource, token));
-            }
-        }
-
-        private async Task InitializeCoreAsync(ScriptKey? repairKey, string source, CancellationToken token)
+        private async Task InitializeCoreAsync(CancellationToken token)
         {
             // Do not execute initialization or completion callbacks under the service lock.
             using (var linked = CancellationTokenSource.CreateLinkedTokenSource(token, _lifetime.Token))
@@ -115,13 +83,11 @@ namespace CefFlashBrowser.Services.UserScripts
                     await _storage.RunAsync(() => _storage.Database.DeleteUserScriptTabStatesAsync(
                         null, linked.Token), linked.Token).ConfigureAwait(false);
 
-                    IUserScriptRepositoryPersistence persistence = repairKey.HasValue
-                        ? new RepairPersistence(_persistence, repairKey.Value, source)
-                        : (IUserScriptRepositoryPersistence)_persistence;
-                    var repository = new PersistentUserScriptRepository(persistence,
+                    var repository = new UserScriptRepository(_persistence,
                         preparer: new UserScriptPreparer(Content, Content));
 
                     await repository.InitializeAsync(linked.Token).ConfigureAwait(false);
+                    await _persistence.CollectAsync(linked.Token).ConfigureAwait(false);
                     linked.Token.ThrowIfCancellationRequested();
 
                     lock (_lock)
@@ -137,7 +103,7 @@ namespace CefFlashBrowser.Services.UserScripts
 
                     try
                     {
-                        _report?.Invoke("Userscript initialization failed; maintenance records remain available.", e);
+                        _report?.Invoke("Userscript initialization failed.", e);
                     }
                     catch { }
 
@@ -241,35 +207,5 @@ namespace CefFlashBrowser.Services.UserScripts
             }
         }
 
-        private sealed class RepairPersistence : IUserScriptRepositoryPersistence
-        {
-            private readonly SqliteUserScriptRepositoryPersistence _inner;
-            private readonly ScriptKey _key;
-            private readonly string _source;
-
-            public RepairPersistence(SqliteUserScriptRepositoryPersistence inner, ScriptKey key, string source)
-            {
-                _inner = inner;
-                _key = key;
-                _source = source;
-            }
-
-            public async Task<IReadOnlyList<UserScriptPersistenceRecord>> LoadAsync(CancellationToken token)
-            {
-                var records = await _inner.LoadAsync(token).ConfigureAwait(false);
-
-                if (!records.Any(record => record.ScriptKey == _key))
-                    throw new KeyNotFoundException("The repair installation no longer exists.");
-
-                return records
-                    .Select(record => record.ScriptKey != _key ? record : new UserScriptPersistenceRecord(
-                        record.ScriptKey, _source, record.SourceOrigin, record.IsEnabled, record.InstalledAt, DateTimeOffset.UtcNow))
-                    .ToList().AsReadOnly();
-            }
-
-            public Task SaveAsync(UserScriptPersistenceRecord record, CancellationToken token) => _inner.SaveAsync(record, token);
-
-            public Task DeleteAsync(ScriptKey key, CancellationToken token) => _inner.DeleteAsync(key, token);
-        }
     }
 }
