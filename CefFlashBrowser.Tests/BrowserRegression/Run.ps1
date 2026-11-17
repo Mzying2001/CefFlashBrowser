@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing')][string]$Scenario = 'All'
+    [ValidateSet('All', 'Manager', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -33,6 +33,7 @@ foreach ($file in @(
     'Scenarios\ViewSource.ps1',
     'Scenarios\AuxiliaryWindows.ps1',
     'Scenarios\UserScripts.ps1',
+    'Scenarios\UserScriptManager.ps1',
     'Scenarios\UserScriptNetwork.ps1',
     'Scenarios\Lifecycle.ps1'
     'Scenarios\Favicons.ps1'
@@ -99,6 +100,9 @@ try {
     } elseif ($Scenario -eq 'Loading') {
         Start-RegressionCef $context
         Test-BrowserTabLoadingMenu $context
+    } elseif ($Scenario -eq 'Manager') {
+        Start-RegressionCef $context
+        Test-UserScriptManager $context
     } elseif ($Scenario -eq 'UserScripts') {
         Start-RegressionCef $context
         Test-UserScripts $context
@@ -114,6 +118,7 @@ try {
         Test-BrowserTabControl $context
         Test-BrowserTabsBeforeShow $context
         Start-RegressionCef $context
+        Test-UserScriptManager $context
         Test-UserScriptSeams $context
         Test-UserScripts $context
         Test-UserScriptCloseCancellation $context

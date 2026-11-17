@@ -21,6 +21,8 @@ public sealed class UserScriptHttpFixture : IDisposable
 
     public string PeerUrl { get; set; }
 
+    public string ScriptSource { get; set; }
+
     public bool Offline { get; set; }
 
     public byte[] Payload
@@ -125,6 +127,11 @@ public sealed class UserScriptHttpFixture : IDisposable
                 {
                     status = "500 Internal Server Error";
                     body = Encoding.UTF8.GetBytes("failed");
+                }
+                else if (path == "/manager.user.js")
+                {
+                    type = "application/javascript";
+                    body = Encoding.UTF8.GetBytes(ScriptSource ?? string.Empty);
                 }
                 else if (path == "/login")
                 {

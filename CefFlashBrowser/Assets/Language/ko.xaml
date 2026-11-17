@@ -276,4 +276,7 @@
     <sys:String x:Key="userScripts_cancel">Cancel</sys:String>
     <sys:String x:Key="userScripts_load">Load</sys:String>
     <sys:String x:Key="userScripts_toggle">Enable or disable script</sys:String>
+
+    <sys:String x:Key="userScripts_draft">Uninstalled draft</sys:String>
+    <sys:String x:Key="userScripts_unavailable">Unavailable</sys:String>
 </ResourceDictionary>

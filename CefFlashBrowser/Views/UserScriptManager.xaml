@@ -7,7 +7,9 @@
         Width="1000" Height="650" MinWidth="650" MinHeight="400"
         WindowStartupLocation="CenterScreen"
         DataContext="{Binding Source={StaticResource Locator}, Path=UserScriptManagerViewModel}"
-        Title="{DynamicResource userScripts_title}">
+        Title="{DynamicResource userScripts_title}"
+        Background="{DynamicResource RegionBrush}"
+        Foreground="{DynamicResource PrimaryTextBrush}">
     <Window.InputBindings>
         <KeyBinding Gesture="Ctrl+N" Command="{Binding NewCommand}"/>
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}"/>
@@ -95,6 +97,27 @@
                                     <Run Text="{Binding Name, Mode=OneWay}"/><Run Text="{Binding DirtyMark, Mode=OneWay}"/>
                                 </TextBlock>
                                 <TextBlock Text="{Binding Version}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Foreground="{DynamicResource SecondaryTextBrush}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsInstalled}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Setter Property="Text" Value="{DynamicResource userScripts_draft}"/>
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsInstalled}" Value="True"/>
+                                                        <Condition Binding="{Binding IsReady}" Value="False"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Setter Property="Text" Value="{DynamicResource userScripts_unavailable}"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </StackPanel>
                         </DockPanel>
                     </DataTemplate>

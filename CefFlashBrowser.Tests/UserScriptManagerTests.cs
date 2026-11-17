@@ -1,11 +1,11 @@
-﻿using CefFlashBrowser.ViewModels;
+﻿using CefFlashBrowser.Services.UserScripts;
+using CefFlashBrowser.ViewModels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mzying2001.MonkeySharp.Core.Repository;
 using System;
 using System.IO;
-using System.Text;
-using CefFlashBrowser.Services.UserScripts;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -129,6 +129,7 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(1, manager.Scripts.Count);
             manager.Close();
         }
+
         [TestMethod]
         public async Task ExternalScriptRequiresConfirmationOnlyForFirstSave()
         {
@@ -249,9 +250,65 @@ namespace CefFlashBrowser.Tests
             Assert.ThrowsException<IOException>(() => UserScriptSourceText.Validate(new string('a', UserScriptSourceText.MaximumBytes + 1)));
         }
 
+        [TestMethod]
+        public async Task ExternalRemovalWhileClosedKeepsUnsavedText()
+        {
+            var repository = await RepositoryAsync();
+            var model = Manager(repository);
+            await model.OpenAsync();
+            model.NewScript();
+            await model.SaveAsync();
+            var item = model.SelectedScript;
+            item.Source += "\n// retained after removal";
+            model.Close();
+            await repository.RemoveAsync(item.Installation.ScriptKey, CancellationToken.None);
+            await model.OpenAsync();
+            Assert.AreEqual(1, model.Scripts.Count);
+            Assert.IsFalse(model.SelectedScript.IsInstalled);
+            Assert.IsTrue(model.SelectedScript.Source.EndsWith("// retained after removal"));
+            model.Close();
+        }
+
+        [TestMethod]
+        public async Task CloseDuringInitializationCanReopenWithoutLosingDrafts()
+        {
+            var repository = await RepositoryAsync();
+            var gate = new TaskCompletionSource<IUserScriptRepository>();
+            var model = new UserScriptManagerViewModel(() => gate.Task, key => key, action => action());
+            var opening = model.OpenAsync();
+            model.Close();
+            var reopening = model.OpenAsync();
+            gate.SetResult(repository);
+            await opening;
+            await reopening;
+            model.NewScript();
+            await model.SaveAsync();
+            Assert.IsTrue(model.SelectedScript.IsInstalled);
+            Assert.IsFalse(model.IsBusy);
+            model.Close();
+        }
+
+        [TestMethod]
+        public async Task InvalidUrlAndDownloadFailureKeepExistingDraft()
+        {
+            var repository = await RepositoryAsync();
+            var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository), key => key,
+                action => action(), (url, token) => { throw new IOException("offline"); });
+            await model.OpenAsync();
+            model.NewScript();
+            var item = model.SelectedScript;
+            item.Source += "\n// keep me";
+            await model.ImportUrlAsync("file:///script.user.js");
+            Assert.AreEqual("userScripts_invalidUrl", model.Status);
+            await model.ImportUrlAsync("https://example.com/script.user.js");
+            Assert.AreEqual("offline", model.Status);
+            Assert.AreSame(item, model.SelectedScript);
+            Assert.IsTrue(item.Source.EndsWith("// keep me"));
+            Assert.AreEqual(1, model.Scripts.Count);
+            model.Close();
+        }
+
         private static string Template()
             => "// ==UserScript==\n// @name test\n// @match https://example.com/*\n// @grant none\n// ==/UserScript==\n";
-
-
     }
 }

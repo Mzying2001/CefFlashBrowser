@@ -276,4 +276,7 @@
     <sys:String x:Key="userScripts_cancel">取消</sys:String>
     <sys:String x:Key="userScripts_load">载入</sys:String>
     <sys:String x:Key="userScripts_toggle">启用或停用脚本</sys:String>
+
+    <sys:String x:Key="userScripts_draft">未安装草稿</sys:String>
+    <sys:String x:Key="userScripts_unavailable">不可用</sys:String>
 </ResourceDictionary>

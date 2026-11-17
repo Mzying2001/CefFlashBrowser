@@ -6,8 +6,8 @@ using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +23,7 @@ namespace CefFlashBrowser.ViewModels
         private CancellationTokenSource _lifetime;
         private Task _pendingOperation = Task.CompletedTask;
         private int _openGeneration;
+        private UserScriptItemViewModel _deletingItem;
 
         public ObservableCollection<UserScriptItemViewModel> Scripts { get; } = new ObservableCollection<UserScriptItemViewModel>();
 
@@ -124,7 +125,10 @@ namespace CefFlashBrowser.ViewModels
                 var snapshot = await _repository.GetSnapshotAsync(token);
                 foreach (var removed in Scripts.Where(item => item.IsInstalled
                     && !snapshot.Any(value => value.ScriptKey == item.Installation.ScriptKey)).ToArray())
+                {
+                    if (removed.IsDirty) KeepDraft(removed);
                     RemoveItem(removed);
+                }
 
                 foreach (var installation in snapshot)
                     Synchronize(installation, false);
@@ -167,6 +171,9 @@ namespace CefFlashBrowser.ViewModels
             return RunAsync(async token =>
             {
                 var source = item.Source;
+                var previous = item.Installation;
+                var revision = item.EditorRevision;
+                var origin = item.Origin;
                 UserScriptSourceText.Validate(source);
                 var parsed = new UserScriptMetadataParser().Parse(source);
                 if (!parsed.CanEnable)
@@ -183,9 +190,9 @@ namespace CefFlashBrowser.ViewModels
                 }
 
                 token.ThrowIfCancellationRequested();
-                var installation = item.IsInstalled
-                    ? await _repository.UpdateIfUnchangedAsync(item.Installation.ScriptKey, item.EditorRevision, source, item.Origin, token)
-                    : await _repository.InstallAsync(source, item.Origin, true, token);
+                var installation = previous != null
+                    ? await _repository.UpdateIfUnchangedAsync(previous.ScriptKey, revision, source, origin, token)
+                    : await _repository.InstallAsync(source, origin, true, token);
 
                 AcceptSave(item, installation, source);
                 Status = _text("userScripts_saved");
@@ -258,8 +265,15 @@ namespace CefFlashBrowser.ViewModels
 
             return RunAsync(async token =>
             {
-                var installation = await _repository.SetEnabledAsync(item.Installation.ScriptKey, !item.IsEnabled, token);
-                item.Synchronize(installation, true);
+                try
+                {
+                    var installation = await _repository.SetEnabledAsync(item.Installation.ScriptKey, !item.IsEnabled, token);
+                    item.Synchronize(installation, true);
+                }
+                finally
+                {
+                    item.RefreshEnabled();
+                }
                 Status = _text("userScripts_refreshPage");
             });
         }
@@ -271,10 +285,18 @@ namespace CefFlashBrowser.ViewModels
 
             return RunAsync(async token =>
             {
-                if (item.IsInstalled)
-                    await _repository.RemoveAsync(item.Installation.ScriptKey, token);
+                _deletingItem = item;
+                try
+                {
+                    if (item.IsInstalled)
+                        await _repository.RemoveAsync(item.Installation.ScriptKey, token);
 
-                RemoveItem(item);
+                    RemoveItem(item);
+                }
+                finally
+                {
+                    _deletingItem = null;
+                }
                 Status = _text("userScripts_deleted");
             });
         }
@@ -286,10 +308,13 @@ namespace CefFlashBrowser.ViewModels
 
             return RunAsync(async token =>
             {
+                var source = item.Source;
                 if (item.IsDirty)
-                    Scripts.Add(new UserScriptItemViewModel(item.Source, item.Origin, item.Name, false));
+                    KeepDraft(item);
 
                 var installation = await _repository.ReloadAsync(item.Installation.ScriptKey, token);
+                if (item.Source != source && item.IsDirty)
+                    KeepDraft(item);
                 item.AcceptSave(installation, installation.Definition.Source);
                 item.Source = installation.Definition.Source;
                 Status = _text("userScripts_refreshPage");
@@ -314,7 +339,11 @@ namespace CefFlashBrowser.ViewModels
                 if (e.Kind == RepositoryChangeKind.Removed)
                 {
                     var item = Scripts.FirstOrDefault(value => value.Installation?.ScriptKey == e.Installation.ScriptKey);
-                    if (item != null) RemoveItem(item);
+                    if (item != null)
+                    {
+                        if (item.IsDirty && item != _deletingItem) KeepDraft(item);
+                        RemoveItem(item);
+                    }
                 }
                 else
                 {
@@ -328,6 +357,11 @@ namespace CefFlashBrowser.ViewModels
             var item = Scripts.FirstOrDefault(value => value.Installation?.ScriptKey == installation.ScriptKey);
             if (item == null) Scripts.Add(new UserScriptItemViewModel(installation));
             else item.Synchronize(installation, enabledChanged);
+        }
+
+        private void KeepDraft(UserScriptItemViewModel item)
+        {
+            Scripts.Add(new UserScriptItemViewModel(item.Source, item.Origin, item.Name, false));
         }
 
         private void RemoveItem(UserScriptItemViewModel item)

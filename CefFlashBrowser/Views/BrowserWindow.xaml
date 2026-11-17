@@ -33,9 +33,6 @@
                       Command="{Binding ShowMainWindowCommand}"
                       InputGestureText="Alt+Home"/>
 
-            <MenuItem Header="{DynamicResource userScripts_title}"
-                      Command="{Binding OpenUserScriptManagerCommand}"/>
-
             <MenuItem Header="{DynamicResource browser_newTab}"
                       Command="{Binding AddBrowserCommand}"
                       InputGestureText="Ctrl+T">
@@ -206,6 +203,9 @@
                     </DataTemplate>
                 </MenuItem.ItemTemplate>
             </MenuItem>
+
+            <MenuItem Header="{DynamicResource userScripts_title}"
+                      Command="{Binding OpenUserScriptManagerCommand}"/>
 
             <MenuItem Header="{DynamicResource browser_addFavorite}"
                       Command="{Binding AddFavoriteCommand}"

@@ -26,12 +26,13 @@ namespace CefFlashBrowser.ViewModels
 
         public bool IsReady => Installation?.IsReady == true;
 
-        public string Name => Installation?.Definition.Metadata?.Name ?? DraftName;
+        public string Name => string.IsNullOrWhiteSpace(Installation?.Definition.Metadata?.Name)
+            ? DraftName : Installation.Definition.Metadata.Name;
 
         public string Version => Installation?.Definition.Metadata?.Version;
 
         public string Problem => Installation == null || Installation.IsReady ? null
-            : string.Join(Environment.NewLine, Installation.Diagnostics.Select(item => item.Message));
+            : Installation.Diagnostics.FirstOrDefault()?.Message;
 
         public bool IsDirty => !IsInstalled || Source != _savedSource;
 
@@ -92,6 +93,11 @@ namespace CefFlashBrowser.ViewModels
             Origin = installation.SourceOrigin;
             _savedSource = submittedSource;
             NotifyInstallation();
+        }
+
+        public void RefreshEnabled()
+        {
+            RaisePropertyChanged(nameof(IsEnabled));
         }
 
         private void NotifyInstallation()
