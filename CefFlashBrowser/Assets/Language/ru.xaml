@@ -228,6 +228,7 @@
     <sys:String x:Key="userScriptManager_script">Скрипт</sys:String>
     <sys:String x:Key="userScriptManager_reload">Перезагрузить с диска</sys:String>
     <sys:String x:Key="userScriptManager_delete">Удалить</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">Удалить скрипт «{0}»?</sys:String>
     <sys:String x:Key="userScriptManager_saved">Сохранено. Перезагрузите страницу, чтобы применить изменения.</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">Готово. Перезагрузите страницу, чтобы увидеть результат.</sys:String>
     <sys:String x:Key="userScriptManager_deleted">Удалено.</sys:String>

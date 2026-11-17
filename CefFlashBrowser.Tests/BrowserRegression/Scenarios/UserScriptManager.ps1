@@ -85,6 +85,57 @@ function Save-ManagerWithConfirmation($Context, $Model, [bool]$Accept) {
     }
 }
 
+function Open-ManagerContextMenu($Context, $Window, $Script) {
+    $list = $Window.FindName('scriptList')
+    $list.ScrollIntoView($Script)
+    $list.UpdateLayout()
+    $container = $list.ItemContainerGenerator.ContainerFromItem($Script)
+    $right = New-Object Windows.Input.MouseButtonEventArgs([Windows.Input.Mouse]::PrimaryDevice, 0, [Windows.Input.MouseButton]::Right)
+    $right.RoutedEvent = [Windows.UIElement]::PreviewMouseRightButtonDownEvent
+    $container.RaiseEvent($right)
+    Assert-Regression ([object]::ReferenceEquals($Window.DataContext.SelectedScript, $Script)) 'right click selects the target script'
+    $menu = $container.ContextMenu
+    $menu.PlacementTarget = $container
+    $menu.IsOpen = $true
+    Wait-Regression $Context {
+        $menu.Items[0].Command -eq $Window.DataContext.DeleteCommand -and
+            $menu.Items[0].Header -eq $Context.LanguageService.GetString('userScriptManager_delete')
+    } 'script context menu binds to the manager and current language'
+    return $menu
+}
+
+function Invoke-ManagerDeleteWithConfirmation($Context, $Window, $MenuItem, [Nullable[bool]]$Accept) {
+    $model = $Window.DataContext
+    $expected = [string]::Format($Context.LanguageService.GetString('userScriptManager_confirmDelete'), $model.SelectedScript.Name)
+    $state = @{ Count = 0; Message = ''; Busy = $false }
+    $timer = New-Object Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(50)
+    $handler = [EventHandler]({
+        $dialog = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.JsConfirmDialog] }) | Select-Object -First 1
+        if ($null -ne $dialog) {
+            $state.Count++
+            $state.Message = $dialog.Message
+            $canDelete = [Windows.Input.ICommand].GetMethod('CanExecute').Invoke($model.DeleteCommand, [object[]]@($null))
+            $state.Busy = $model.IsBusy -and !$canDelete
+            if ($null -eq $Accept) { $dialog.Close() }
+            else { [CefFlashBrowser.Utils.DialogHelper]::SetDialogResult($dialog, $Accept) }
+        }
+    }.GetNewClosure())
+    $timer.add_Tick($handler)
+    $timer.Start()
+    try {
+        $owner = [Windows.Controls.ItemsControl]::ItemsControlFromItemContainer($MenuItem)
+        if ($owner -is [Windows.Controls.ContextMenu]) { $owner.IsOpen = $false }
+        Invoke-BrowserCommand $MenuItem.Command $MenuItem.CommandParameter
+        Wait-Regression $Context { !$model.IsBusy } 'reviewed script deletion'
+        Assert-Regression ($state.Count -eq 1 -and $state.Message -eq $expected) 'deletion opens exactly one localized confirmation naming the target'
+        Assert-Regression ($state.Busy) 'deletion stays disabled while confirmation is open'
+    } finally {
+        $timer.Stop()
+        $timer.remove_Tick($handler)
+    }
+}
+
 function Test-UserScriptManager($Context) {
     $window = $null
     $browserWindow = $null
@@ -205,10 +256,44 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $export = Join-Path $Context.TemporaryPath 'manager-export.user.js'
         Complete-UserScriptTask $Context ($model.ExportAsync($export)) 'export current draft'
         Assert-Regression ([IO.File]::ReadAllText($export) -eq $model.SelectedScript.Source) 'export includes current unsaved source'
+        $previousSelection = $model.SelectedScript
+        $countBeforeDelete = $model.Scripts.Count
+        $model.NewScript()
+        $deleteTarget = $model.SelectedScript
+        $deleteTarget.Source = $source.Replace('Manager workflow', 'Delete target')
+        Complete-UserScriptTask $Context ($model.SaveAsync()) 'install deletion fixture'
+        $deletePath = Join-Path (Join-Path $Context.TemporaryPath ('MonkeySharp\' + $deleteTarget.Installation.ScriptKey)) 'userscript.js'
+        $deleteTarget.Source += "`n// keep until approved"
+        $model.NewScript()
+        $deleteDraft = $model.SelectedScript
+        $draftSource = $deleteDraft.Source
+        $model.SelectedScript = $previousSelection
+        $menu = Open-ManagerContextMenu $Context $window $deleteTarget
+        Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
+        Assert-Regression ($model.Scripts.Contains($deleteTarget) -and $deleteTarget.Source.EndsWith('keep until approved') -and
+            [IO.File]::Exists($deletePath)) 'declined context deletion preserves installed source and unsaved edits'
+        $topDelete = @($window.Content.Children[0].Items | ForEach-Object { $_.Items } |
+            Where-Object { $_ -is [Windows.Controls.MenuItem] -and $_.Command -eq $model.DeleteCommand })[0]
+        Invoke-ManagerDeleteWithConfirmation $Context $window $topDelete $null
+        Assert-Regression ($model.Scripts.Contains($deleteTarget) -and [IO.File]::Exists($deletePath)) 'closing the top-menu confirmation cancels deletion'
+        $menu = Open-ManagerContextMenu $Context $window $deleteTarget
+        Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $true
+        Assert-Regression (!$model.Scripts.Contains($deleteTarget) -and ![IO.File]::Exists($deletePath) -and
+            $model.Scripts.Contains($previousSelection) -and $model.Scripts.Count -eq $countBeforeDelete + 1) 'approved context deletion removes only the right-clicked script without retaining its dirty draft'
+        $model.SelectedScript = $previousSelection
+        $menu = Open-ManagerContextMenu $Context $window $deleteDraft
+        Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
+        Assert-Regression ($model.Scripts.Contains($deleteDraft) -and $deleteDraft.Source -eq $draftSource) 'declined draft deletion preserves its source'
+        Invoke-ManagerDeleteWithConfirmation $Context $window $topDelete $true
+        Assert-Regression (!$model.Scripts.Contains($deleteDraft) -and $model.Scripts.Count -eq $countBeforeDelete) 'approved top-menu deletion removes the draft'
+        Assert-Regression ($null -eq $window.FindName('scriptList').ContextMenu) 'blank script-list space has no deletion menu'
+        $model.SelectedScript = $previousSelection
         foreach ($locale in @('en-US', 'zh-CN', 'zh-TW', 'de', 'fr-FR', 'it', 'ja', 'ko', 'ru')) {
             $Context.LanguageService.SetCurrentLanguage($locale)
             Wait-Regression $Context { $window.Title -eq $Context.LanguageService.GetString('userScriptManager_title') } "manager language ($locale)"
             Assert-Regression (![string]::IsNullOrEmpty($window.Title)) 'manager title is localized in every supported language'
+            $menu = Open-ManagerContextMenu $Context $window $previousSelection
+            Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
         }
         $Context.LanguageService.SetCurrentLanguage('zh-CN')
         foreach ($appearance in @([CefFlashBrowser.Models.Theme]::Light, [CefFlashBrowser.Models.Theme]::Dark)) {
@@ -218,6 +303,8 @@ document.documentElement.setAttribute('data-manager', 'saved');
                 [Action]({ $frame.Continue = $false }.GetNewClosure()))
             [Windows.Threading.Dispatcher]::PushFrame($frame)
             $window.UpdateLayout()
+            $menu = Open-ManagerContextMenu $Context $window $item
+            Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
             $list = $window.FindName('scriptList')
             $list.ScrollIntoView($item)
             $list.UpdateLayout()

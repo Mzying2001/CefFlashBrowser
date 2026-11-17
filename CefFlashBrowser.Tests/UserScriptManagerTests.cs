@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Tests
 {
@@ -22,7 +23,8 @@ namespace CefFlashBrowser.Tests
         }
 
         private static UserScriptManagerViewModel Manager(IUserScriptRepository repository)
-            => new UserScriptManagerViewModel(() => Task.FromResult(repository), key => key, action => action());
+            => new UserScriptManagerViewModel(() => Task.FromResult(repository),
+                key => key == "userScriptManager_confirmDelete" ? "Delete \"{0}\"?" : key, action => action());
 
         [TestMethod]
         public async Task NewSaveToggleAndEditKeepInstallationIdentity()
@@ -124,10 +126,111 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(original, item.Source);
             Assert.IsFalse(item.IsDirty);
             Assert.IsTrue(manager.Scripts.Single(value => !value.IsInstalled).Source.EndsWith("// draft"));
+            manager.ConfirmDeletion = _ => true;
             await manager.DeleteAsync();
             Assert.AreEqual(0, (await repository.GetSnapshotAsync(CancellationToken.None)).Count);
             Assert.AreEqual(1, manager.Scripts.Count);
             manager.Close();
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task DeleteRequiresExplicitConfirmationAndPreservesUnsavedSource(bool installed)
+        {
+            var repository = await RepositoryAsync();
+            var manager = Manager(repository);
+            await manager.OpenAsync();
+
+            try
+            {
+                manager.NewScript();
+                if (installed) await manager.SaveAsync();
+                var item = manager.SelectedScript;
+                var savedSource = item.Source;
+                item.Source += "\n// unsaved";
+                var source = item.Source;
+
+                await manager.DeleteAsync();
+                Assert.AreSame(item, manager.SelectedScript);
+                Assert.AreEqual(1, manager.Scripts.Count);
+                Assert.AreEqual(source, item.Source);
+                Assert.AreEqual(installed ? 1 : 0, (await repository.GetSnapshotAsync(CancellationToken.None)).Count);
+
+                var confirmations = 0;
+                manager.ConfirmDeletion = message =>
+                {
+                    confirmations++;
+                    Assert.AreEqual("Delete \"" + item.Name + "\"?", message);
+                    Assert.IsTrue(manager.IsBusy);
+                    Assert.IsFalse(((ICommand)manager.DeleteCommand).CanExecute(null));
+                    Assert.IsTrue(manager.DeleteAsync().IsCompleted);
+                    return false;
+                };
+
+                await manager.DeleteAsync();
+                Assert.AreEqual(1, confirmations);
+                Assert.AreSame(item, manager.SelectedScript);
+                Assert.AreEqual(1, manager.Scripts.Count);
+                Assert.AreEqual(source, item.Source);
+                Assert.IsTrue(item.IsDirty);
+                Assert.IsFalse(manager.IsBusy);
+                Assert.AreEqual("userScriptManager_cancelled", manager.Status);
+                Assert.AreEqual(installed ? 1 : 0, (await repository.GetSnapshotAsync(CancellationToken.None)).Count);
+                if (installed)
+                    Assert.AreEqual(savedSource, (await repository.GetAsync(item.Installation.ScriptKey, CancellationToken.None)).Definition.Source);
+            }
+            finally
+            {
+                manager.Close();
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ConfirmedDeleteRemovesOnlyReviewedScript(bool installed)
+        {
+            var repository = await RepositoryAsync();
+            var manager = Manager(repository);
+            await manager.OpenAsync();
+
+            try
+            {
+                manager.NewScript();
+                if (installed) await manager.SaveAsync();
+                var item = manager.SelectedScript;
+                item.Source += "\n// discard after confirmation";
+                manager.NewScript();
+                var other = manager.SelectedScript;
+                manager.SelectedScript = item;
+
+                var confirmations = 0;
+                manager.ConfirmDeletion = message =>
+                {
+                    confirmations++;
+                    Assert.AreEqual("Delete \"" + item.Name + "\"?", message);
+                    manager.SelectedScript = other;
+                    return true;
+                };
+
+                await manager.DeleteAsync();
+                Assert.AreEqual(1, confirmations);
+                Assert.AreSame(other, manager.Scripts.Single());
+                Assert.AreSame(other, manager.SelectedScript);
+                Assert.AreEqual(0, (await repository.GetSnapshotAsync(CancellationToken.None)).Count);
+                Assert.AreEqual("userScriptManager_deleted", manager.Status);
+
+                manager.ConfirmDeletion = _ => true;
+                await manager.DeleteAsync();
+                Assert.AreEqual(0, manager.Scripts.Count);
+                Assert.IsNull(manager.SelectedScript);
+                Assert.IsFalse(((ICommand)manager.DeleteCommand).CanExecute(null));
+            }
+            finally
+            {
+                manager.Close();
+            }
         }
 
         [TestMethod]

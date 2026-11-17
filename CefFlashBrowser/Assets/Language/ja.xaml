@@ -228,6 +228,7 @@
     <sys:String x:Key="userScriptManager_script">スクリプト</sys:String>
     <sys:String x:Key="userScriptManager_reload">ディスクから再読み込み</sys:String>
     <sys:String x:Key="userScriptManager_delete">削除</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">スクリプト「{0}」を削除しますか？</sys:String>
     <sys:String x:Key="userScriptManager_saved">保存しました。変更を適用するにはページを再読み込みしてください。</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">完了しました。結果を確認するにはページを再読み込みしてください。</sys:String>
     <sys:String x:Key="userScriptManager_deleted">削除しました。</sys:String>

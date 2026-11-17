@@ -228,6 +228,7 @@
     <sys:String x:Key="userScriptManager_script">Skript</sys:String>
     <sys:String x:Key="userScriptManager_reload">Von Datenträger neu laden</sys:String>
     <sys:String x:Key="userScriptManager_delete">Löschen</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">Möchten Sie das Skript „{0}“ löschen?</sys:String>
     <sys:String x:Key="userScriptManager_saved">Gespeichert. Laden Sie die Seite neu, um die Änderungen anzuwenden.</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">Fertig. Laden Sie die Seite neu, um das Ergebnis zu sehen.</sys:String>
     <sys:String x:Key="userScriptManager_deleted">Gelöscht.</sys:String>

@@ -228,6 +228,7 @@
     <sys:String x:Key="userScriptManager_script">Script</sys:String>
     <sys:String x:Key="userScriptManager_reload">Recharger depuis le disque</sys:String>
     <sys:String x:Key="userScriptManager_delete">Supprimer</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">Voulez-vous supprimer le script « {0} » ?</sys:String>
     <sys:String x:Key="userScriptManager_saved">Enregistré. Rechargez la page pour appliquer les modifications.</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">Terminé. Rechargez la page pour voir le résultat.</sys:String>
     <sys:String x:Key="userScriptManager_deleted">Supprimé.</sys:String>

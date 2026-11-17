@@ -42,6 +42,9 @@
                 <MenuItem Header="{DynamicResource userScriptManager_export}"
                           Command="{Binding ElementName=window, Path=ExportCommand}"/>
                 <Separator/>
+                <MenuItem Header="{DynamicResource userScriptManager_delete}"
+                          Command="{Binding DeleteCommand}"/>
+                <Separator/>
                 <MenuItem Header="{DynamicResource solEditor_close}"
                           Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"
                           InputGestureText="Ctrl+W"/>
@@ -70,8 +73,6 @@
             <MenuItem Header="{DynamicResource userScriptManager_script}">
                 <MenuItem Header="{DynamicResource userScriptManager_reload}"
                           Command="{Binding ReloadCommand}"/>
-                <MenuItem Header="{DynamicResource userScriptManager_delete}"
-                          Command="{Binding DeleteCommand}"/>
             </MenuItem>
         </Menu>
 
@@ -133,6 +134,18 @@
                     <Style TargetType="ListBoxItem"
                            BasedOn="{StaticResource ListBoxItemBaseStyle}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Tag"
+                                Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                    <MenuItem Header="{DynamicResource userScriptManager_delete}"
+                                              Command="{Binding DeleteCommand}"/>
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
+                        <EventSetter Event="PreviewMouseRightButtonDown"
+                                     Handler="ScriptPreviewMouseRightButtonDown"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#20409EFF"/>

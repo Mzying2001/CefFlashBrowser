@@ -39,6 +39,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand HideUrlCommand { get; }
 
         public Func<string, bool> ConfirmInstallation { private get; set; }
+        public Func<string, bool> ConfirmDeletion { private get; set; }
 
         private string _installUrl;
         public string InstallUrl
@@ -316,6 +317,15 @@ namespace CefFlashBrowser.ViewModels
 
             return RunAsync(async token =>
             {
+                if (ConfirmDeletion?.Invoke(string.Format(_text("userScriptManager_confirmDelete"), item.Name)) != true)
+                {
+                    Status = _text("userScriptManager_cancelled");
+                    return;
+                }
+
+                token.ThrowIfCancellationRequested();
+                if (!Scripts.Contains(item)) return;
+
                 _deletingItem = item;
 
                 try

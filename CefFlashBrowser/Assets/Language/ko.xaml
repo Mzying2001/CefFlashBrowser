@@ -228,6 +228,7 @@
     <sys:String x:Key="userScriptManager_script">스크립트</sys:String>
     <sys:String x:Key="userScriptManager_reload">디스크에서 다시 불러오기</sys:String>
     <sys:String x:Key="userScriptManager_delete">삭제</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">스크립트 "{0}"을(를) 삭제하시겠습니까?</sys:String>
     <sys:String x:Key="userScriptManager_saved">저장되었습니다. 변경 사항을 적용하려면 페이지를 새로 고침하세요.</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">완료되었습니다. 결과를 확인하려면 페이지를 새로 고침하세요.</sys:String>
     <sys:String x:Key="userScriptManager_deleted">삭제되었습니다.</sys:String>

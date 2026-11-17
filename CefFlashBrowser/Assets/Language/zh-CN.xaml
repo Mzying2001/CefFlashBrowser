@@ -228,6 +228,7 @@
     <sys:String x:Key="userScriptManager_script">脚本</sys:String>
     <sys:String x:Key="userScriptManager_reload">从磁盘重新载入</sys:String>
     <sys:String x:Key="userScriptManager_delete">删除</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">是否删除脚本“{0}”？</sys:String>
     <sys:String x:Key="userScriptManager_saved">已保存。刷新网页后生效。</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">操作已完成。刷新网页以查看效果。</sys:String>
     <sys:String x:Key="userScriptManager_deleted">已删除。</sys:String>

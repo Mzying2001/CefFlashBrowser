@@ -228,6 +228,7 @@
     <sys:String x:Key="userScriptManager_script">Script</sys:String>
     <sys:String x:Key="userScriptManager_reload">Reload from disk</sys:String>
     <sys:String x:Key="userScriptManager_delete">Delete</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">Delete the script "{0}"?</sys:String>
     <sys:String x:Key="userScriptManager_saved">Saved. Refresh the page to apply changes.</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">Done. Refresh the page to see the effect.</sys:String>
     <sys:String x:Key="userScriptManager_deleted">Deleted.</sys:String>

@@ -8,6 +8,7 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CefFlashBrowser.Views
 {
@@ -33,7 +34,8 @@ namespace CefFlashBrowser.Views
 
         private async void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            ViewModel.ConfirmInstallation = ConfirmInstallation;
+            ViewModel.ConfirmInstallation = ConfirmOperation;
+            ViewModel.ConfirmDeletion = ConfirmOperation;
             ViewModel.PropertyChanged += ViewModelPropertyChanged;
             await ViewModel.OpenAsync();
         }
@@ -44,7 +46,7 @@ namespace CefFlashBrowser.Views
             ExportCommand.RaiseCanExecuteChanged();
         }
 
-        private bool ConfirmInstallation(string message)
+        private bool ConfirmOperation(string message)
         {
             bool accepted = false;
             WindowManager.Confirm(message, Title, result => accepted = result == true);
@@ -71,6 +73,13 @@ namespace CefFlashBrowser.Views
             }
         }
 
+        private void ScriptPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var item = (ListBoxItem)sender;
+            item.IsSelected = true;
+            item.Focus();
+        }
+
         private void SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // TextBox undo history belongs to the selected script, never the previous item.
@@ -94,6 +103,7 @@ namespace CefFlashBrowser.Views
         {
             ViewModel.PropertyChanged -= ViewModelPropertyChanged;
             ViewModel.ConfirmInstallation = null;
+            ViewModel.ConfirmDeletion = null;
             ViewModel.Close();
             base.OnClosed(e);
         }
