@@ -76,8 +76,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - Builds target both x86 and x64; output paths differ: `bin\Release\` (x86) vs `bin\x64\Release\` (x64)
 - Entry point is `Program.cs` (not the default `App.xaml.cs`)
 - CefSharp version 84.4.10 is pinned for Flash compatibility
-- Follow the project's existing code style when modifying or adding code
-- Keep text and source files using CRLF line endings to match the repository's Windows/WPF conventions
+- Follow the repository's `.editorconfig` when modifying or adding files
 
 ## Git Commit Conventions
 
