@@ -80,7 +80,7 @@
         </StatusBar>
 
         <Border DockPanel.Dock="Top"
-                Padding="10,5">
+                Margin="10,10,10,0">
             <Border.Style>
                 <Style TargetType="Border">
                     <Setter Property="Visibility" Value="Collapsed"/>
