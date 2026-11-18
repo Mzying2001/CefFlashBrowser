@@ -177,7 +177,7 @@ namespace CefFlashBrowser.ViewModels
                 "// ==/UserScript==\r\n" +
                 "\r\n" +
                 "(function() {\r\n" +
-                "    'use strict';\r\n" +
+                "  'use strict';\r\n" +
                 "\r\n" +
                 "})();\r\n";
 

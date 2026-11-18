@@ -54,12 +54,13 @@ function Test-ManagerSourceEditor($Context, $Window) {
         $model.SelectedScript = $null
         Wait-Regression $Context { !$editor.IsEnabled -and $editor.Text -eq '' } 'empty script selection clears and disables the editor'
         Assert-Regression ($editor -is [ICSharpCode.AvalonEdit.TextEditor] -and $editor.ShowLineNumbers -and !$editor.WordWrap) 'manager uses AvalonEdit with line numbers and unwrapped source'
-        Assert-Regression ($editor.Options.IndentationSize -eq 4 -and !$editor.Options.ConvertTabsToSpaces) 'editor preserves tabs with a four-column width'
+        Assert-Regression ($editor.Options.IndentationSize -eq 2 -and $editor.Options.ConvertTabsToSpaces) 'editor defaults to two-space indentation'
         $model.NewScript()
         $first = $model.SelectedScript
-        $sample = "const answer = 42;`r`n// 中文 comment`r`nlet value = `"text`";"
+        Assert-Regression ($first.Source.Contains("`r`n  'use strict';`r`n")) 'new script template uses two-space indentation'
+        $sample = "const answer = 42;`r`n// 中文 comment`r`n`tlet value = `"text`";"
         $first.Source = $sample
-        Wait-Regression $Context { $editor.IsEnabled -and $editor.Text -ceq $sample } 'model source changes replace the displayed document without newline conversion'
+        Wait-Regression $Context { $editor.IsEnabled -and $editor.Text -ceq $sample } 'editor displays the source with its original tabs and newlines'
         $highlighter = New-Object ICSharpCode.AvalonEdit.Highlighting.DocumentHighlighter($editor.Document, $editor.SyntaxHighlighting)
         try {
             $colors = @(1..3 | ForEach-Object { $highlighter.HighlightLine($_).Sections | ForEach-Object { $_.Color.Name } })
@@ -91,8 +92,10 @@ function Test-ManagerSourceEditor($Context, $Window) {
         Wait-Regression $Context { $first.Source -ceq $sample } 'Ctrl+Z reaches AvalonEdit undo'
         Send-ManagerShortcut $Context $Window 0x59
         Wait-Regression $Context { $first.Source -ceq ($sample + $suffix) } 'Ctrl+Y reaches AvalonEdit redo'
+        $indentOffset = $editor.Document.GetLineByNumber(4).Offset
+        $editor.CaretOffset = $indentOffset
         [RegressionKeyboard]::PressKey(0x09)
-        Wait-Regression $Context { $first.Source.EndsWith("`t") } 'Tab inserts a tab instead of moving keyboard focus'
+        Wait-Regression $Context { $first.Source -ceq ($sample + $suffix).Insert($indentOffset, '  ') } 'Tab inserts two spaces at the start of the line'
         Assert-Regression ($editor.TextArea.IsKeyboardFocusWithin) 'tab indentation retains editor focus'
         $clipboard = [UserScriptClipboardProbe]::Capture()
         $clipboardCaptured = $true

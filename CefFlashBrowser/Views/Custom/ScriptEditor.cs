@@ -36,8 +36,8 @@ namespace CefFlashBrowser.Views.Custom
             }
 
             SyntaxHighlighting = _javascript;
-            Options.IndentationSize = 4;
-            Options.ConvertTabsToSpaces = false;
+            Options.IndentationSize = 2;
+            Options.ConvertTabsToSpaces = true;
             SetResourceReference(BackgroundProperty, "RegionBrush");
             SetResourceReference(ForegroundProperty, "PrimaryTextBrush");
             SetResourceReference(BorderBrushProperty, "BorderBrush");
