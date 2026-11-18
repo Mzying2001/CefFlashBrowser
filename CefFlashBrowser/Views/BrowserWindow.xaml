@@ -552,6 +552,29 @@
                                   UriSource="{StaticResource NewTabIconUri}"/>
                 </Button>
 
+                <!--script commands button-->
+                <Button x:Name="toolbarScriptCommandsButton"
+                        Margin="0,0,10,0"
+                        AutomationProperties.Name="{DynamicResource userscript_commands}"
+                        ToolTip="{DynamicResource userscript_commands}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource scriptCommandsMenu}"/>
+                    </i:Interaction.Behaviors>
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentBrowser.UserScriptMenus.Count, FallbackValue=0}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <svgc:SvgIcon Width="13"
+                                  Height="13"
+                                  UriSource="{StaticResource PluginIconUri}"/>
+                </Button>
+
                 <!--blocked swfs button-->
                 <Button Margin="0,0,10,0"
                         ToolTip="{DynamicResource browser_toolTipBlockedSwfs}">
@@ -594,29 +617,6 @@
                                   Height="13"
                                   UriSource="{StaticResource SearchIconUri}"/>
                 </ToggleButton>
-
-                <!--script commands button-->
-                <Button x:Name="toolbarScriptCommandsButton"
-                        Margin="0,0,10,0"
-                        AutomationProperties.Name="{DynamicResource userscript_commands}"
-                        ToolTip="{DynamicResource userscript_commands}">
-                    <i:Interaction.Behaviors>
-                        <behaviors:ContextMenuBehavior Menu="{DynamicResource scriptCommandsMenu}"/>
-                    </i:Interaction.Behaviors>
-                    <Button.Style>
-                        <Style TargetType="Button"
-                               BasedOn="{StaticResource {x:Type Button}}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentBrowser.UserScriptMenus.Count, FallbackValue=0}" Value="0">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                    <svgc:SvgIcon Width="13"
-                                  Height="13"
-                                  UriSource="{StaticResource PluginIconUri}"/>
-                </Button>
 
                 <!--menu button-->
                 <Button x:Name="toolbarActionsButton"
