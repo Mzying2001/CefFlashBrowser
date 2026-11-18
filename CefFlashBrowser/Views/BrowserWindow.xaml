@@ -872,9 +872,9 @@
                                BasedOn="{StaticResource {x:Static c:BrowserTab.ItemContainerStyleKey}}">
                             <Setter Property="ToolTip">
                                 <Setter.Value>
-                                    <StackPanel>
+                                    <StackPanel MaxWidth="500">
                                         <TextBlock Text="{Binding Title}"
-                                                   TextTrimming="CharacterEllipsis"/>
+                                                   TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Address}"
                                                    TextTrimming="CharacterEllipsis"
                                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
