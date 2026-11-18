@@ -8,16 +8,18 @@ namespace CefFlashBrowser.Views.Dialogs
     {
         public UserScriptPermissionChoice Choice { get; private set; } = new UserScriptPermissionChoice(PermissionDecision.Deny);
 
-        public UserScriptPermissionDialog(string description)
+        public UserScriptPermissionDialog()
         {
             InitializeComponent();
-            message.Text = description;
+
             PreviewKeyDown += (sender, e) =>
             {
                 if (e.Key == Key.Escape)
                     Close();
             };
         }
+
+        internal void SetDescription(string description) => message.Text = description;
 
         private void DenyClick(object sender, RoutedEventArgs e) => Complete(PermissionDecision.Deny, true);
 

@@ -39,7 +39,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     var message = language.GetFormattedString("userscript_permissionMessage",
                         request.Installation.Definition.Metadata.Name, scope.Kind, scope.Target);
 
-                    window = new UserScriptPermissionDialog(message);
+                    window = WindowManager.CreateUserScriptPermissionDialog(message);
                     // An owner can disappear while another tab still waits on the
                     // same shared permission batch. The batch token owns this UI.
                     window.Closed += (sender, e) => completion.TrySetResult(window.Choice);

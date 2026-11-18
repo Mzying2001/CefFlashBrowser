@@ -217,9 +217,7 @@ namespace CefFlashBrowser.Browser.UserScripts
 
             private void CreateWindow()
             {
-                _window = WindowManager.CreateWindow<UserScriptNotificationWindow>();
-                _window.SetMessage(_request.Title, _request.Text);
-                _window.Owner = _owner._owner();
+                _window = WindowManager.CreateUserScriptNotificationWindow(_request.Title, _request.Text, _owner._owner());
 
                 _window.Clicked += (sender, e) =>
                 {

@@ -2,7 +2,6 @@ using CefFlashBrowser.Data;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.Utils;
-using CefFlashBrowser.Views.Dialogs;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Parsing;
 using Mzying2001.MonkeySharp.Core.Repository;
@@ -103,8 +102,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 if (owner == null || !GlobalData.Settings.EnableUserScripts)
                     return;
 
-                var dialog = UserScriptInstallDialog.Create(parsed.Metadata, origin, update: previous != null);
-                if (ShowDialog(dialog, owner, token) != true)
+                if (!WindowManager.ConfirmUserScriptInstallation(parsed.Metadata, origin, owner, update: previous != null, token: token))
                     return;
 
                 token.ThrowIfCancellationRequested();
@@ -156,23 +154,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 return;
 
             var language = SimpleIoc.Global.GetInstance<LanguageService>();
-            var dialog = WindowManager.CreateWindow<JsAlertDialog>();
-            dialog.Title = language.GetString("userScriptManager_title");
-            dialog.Message = language.GetString(messageKey);
-            ShowDialog(dialog, owner, token);
-        }
-
-        private static bool? ShowDialog(Window dialog, Window owner, CancellationToken token)
-        {
-            using (token.Register(() => dialog.Dispatcher.InvokeAsync(() =>
-            {
-                if (dialog.IsVisible)
-                    dialog.Close();
-            })))
-            {
-                token.ThrowIfCancellationRequested();
-                return DialogHelper.ShowModal(dialog, owner);
-            }
+            WindowManager.ShowAlertDialog(language.GetString(messageKey), language.GetString("userScriptManager_title"), owner, token);
         }
     }
 }

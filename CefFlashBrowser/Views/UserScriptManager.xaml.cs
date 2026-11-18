@@ -1,9 +1,7 @@
 ﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
-using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
-using CefFlashBrowser.Views.Dialogs;
 using Microsoft.Win32;
 using Mzying2001.MonkeySharp.Core.Domain;
 using SimpleMvvm.Command;
@@ -56,7 +54,7 @@ namespace CefFlashBrowser.Views
 
         private bool ConfirmInstallation(UserScriptMetadata metadata, string origin)
         {
-            return DialogHelper.ShowModal(UserScriptInstallDialog.Create(metadata, origin), this) == true;
+            return WindowManager.ConfirmUserScriptInstallation(metadata, origin, this);
         }
 
         private bool ConfirmOperation(string message)

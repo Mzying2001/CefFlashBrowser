@@ -5,11 +5,13 @@ using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
+using Mzying2001.MonkeySharp.Core.Domain;
 using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -219,6 +221,29 @@ namespace CefFlashBrowser.Services
             ShowWindow<UserScriptManager>(singleton: true);
         }
 
+        internal static bool ConfirmUserScriptInstallation(UserScriptMetadata metadata, string origin,
+            Window owner, bool update = false, CancellationToken token = default)
+        {
+            var dialog = CreateWindow<UserScriptInstallDialog>();
+            dialog.SetScript(metadata, origin, update);
+            return ShowModal(dialog, owner, token);
+        }
+
+        internal static UserScriptPermissionDialog CreateUserScriptPermissionDialog(string description)
+        {
+            var dialog = CreateWindow<UserScriptPermissionDialog>();
+            dialog.SetDescription(description);
+            return dialog;
+        }
+
+        internal static UserScriptNotificationWindow CreateUserScriptNotificationWindow(string title, string text, Window owner)
+        {
+            var window = CreateWindow<UserScriptNotificationWindow>();
+            window.SetMessage(title, text);
+            window.Owner = owner;
+            return window;
+        }
+
         public static void ShowSettingsWindow()
         {
             ShowWindow<SettingsWindow>(singleton: true);
@@ -238,22 +263,48 @@ namespace CefFlashBrowser.Services
 
         public static void Alert(string message = "", string title = "", Action<bool> callback = null)
         {
-            var dialog = ShowWindow<JsAlertDialog>(modal: true, initializer: window =>
+            bool accepted = ShowAlertDialog(message, title);
+            callback?.Invoke(accepted);
+        }
+
+        internal static bool ShowAlertDialog(string message, string title, Window owner = null, CancellationToken token = default)
+        {
+            var dialog = CreateWindow<JsAlertDialog>(initializer: window =>
             {
                 window.Title = title;
                 window.Message = message;
             });
-            callback?.Invoke(DialogHelper.GetDialogResult(dialog) == true);
+            return ShowModal(dialog, owner, token);
+        }
+
+        private static bool ShowModal(Window dialog, Window owner, CancellationToken token)
+        {
+            using (token.Register(() => dialog.Dispatcher.InvokeAsync(() =>
+            {
+                if (dialog.IsVisible)
+                    dialog.Close();
+            })))
+            {
+                token.ThrowIfCancellationRequested();
+                return DialogHelper.ShowModal(dialog, owner) == true;
+            }
         }
 
         public static void Confirm(string message = "", string title = "", Action<bool?> callback = null)
         {
-            var dialog = ShowWindow<JsConfirmDialog>(modal: true, initializer: window =>
+            var dialog = ShowConfirmDialog(message, title);
+            callback?.Invoke(DialogHelper.GetDialogResult(dialog));
+        }
+
+        internal static JsConfirmDialog ShowConfirmDialog(string message, string title,
+            Action<JsConfirmDialog> onSourceInitialized = null)
+        {
+            return ShowWindow<JsConfirmDialog>(modal: true, initializer: window =>
             {
                 window.Title = title;
                 window.Message = message;
+                onSourceInitialized?.Invoke(window);
             });
-            callback?.Invoke(DialogHelper.GetDialogResult(dialog));
         }
 
         public static void Prompt(string message = "", string title = "", string defaultInputText = "", Action<bool?, string> callback = null)

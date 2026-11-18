@@ -1,4 +1,3 @@
-using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels;
 using Mzying2001.MonkeySharp.Core.Domain;
 using System;
@@ -14,20 +13,6 @@ namespace CefFlashBrowser.Views.Dialogs
         public UserScriptInstallDialog()
         {
             InitializeComponent();
-        }
-
-        internal static UserScriptInstallDialog Create(UserScriptMetadata metadata, string origin, bool update = false)
-        {
-            var dialog = WindowManager.CreateWindow<UserScriptInstallDialog>();
-            dialog.SetScript(metadata, origin);
-
-            if (update)
-            {
-                dialog.SetResourceReference(TitleProperty, "userScriptInstall_confirmUpdate");
-                dialog.installButton.SetResourceReference(ContentControl.ContentProperty, "userScriptInstall_update");
-            }
-
-            return dialog;
         }
 
         private static void SetOptionalText(TextBlock element, string value, TextBlock label = null)
@@ -46,7 +31,7 @@ namespace CefFlashBrowser.Views.Dialogs
             return string.Join(Environment.NewLine, entries.Where(entry => !string.IsNullOrWhiteSpace(entry)));
         }
 
-        private void SetScript(UserScriptMetadata metadata, string origin)
+        internal void SetScript(UserScriptMetadata metadata, string origin, bool update)
         {
             scriptIcon.FaviconUrl = UserScriptItemViewModel.ResolveIconUrl(metadata, origin);
             scriptIcon.DefaultIcon = UserScriptItemViewModel.GetIconInitial(metadata.Name);
@@ -63,6 +48,12 @@ namespace CefFlashBrowser.Views.Dialogs
             SetOptionalText(scriptConnects, JoinLines(metadata.Connects), connectsLabel);
             SetOptionalText(scriptRequires, JoinLines(metadata.Requires.Select(item => item.Url)), requiresLabel);
             SetOptionalText(scriptResources, JoinLines(metadata.Resources.Select(item => item.Name + " " + item.Url)), resourcesLabel);
+
+            if (update)
+            {
+                SetResourceReference(TitleProperty, "userScriptInstall_confirmUpdate");
+                installButton.SetResourceReference(ContentControl.ContentProperty, "userScriptInstall_update");
+            }
         }
     }
 }
