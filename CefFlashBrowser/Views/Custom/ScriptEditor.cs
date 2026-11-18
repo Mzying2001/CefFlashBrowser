@@ -1,4 +1,5 @@
 ﻿using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using System;
@@ -10,19 +11,26 @@ namespace CefFlashBrowser.Views.Custom
 {
     public class ScriptEditor : TextEditor
     {
-        public static readonly DependencyProperty SourceTextProperty = DependencyProperty.Register(
-            nameof(SourceText), typeof(string), typeof(ScriptEditor),
-            new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                (d, e) => ((ScriptEditor)d).UpdateText((string)e.NewValue)));
-
         private readonly IHighlightingDefinition _javascript;
         private bool _updatingText;
+
+
+        public static readonly DependencyProperty SourceTextProperty = DependencyProperty.Register(
+            nameof(SourceText), typeof(string), typeof(ScriptEditor),
+            new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSourceTextChanged));
+
+        private static void OnSourceTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var editor = (ScriptEditor)d;
+            editor.UpdateText((string)e.NewValue);
+        }
 
         public string SourceText
         {
             get => (string)GetValue(SourceTextProperty);
             set => SetValue(SourceTextProperty, value);
         }
+
 
         public ScriptEditor()
         {
@@ -41,7 +49,7 @@ namespace CefFlashBrowser.Views.Custom
             SetResourceReference(BackgroundProperty, "RegionBrush");
             SetResourceReference(ForegroundProperty, "PrimaryTextBrush");
             SetResourceReference(BorderBrushProperty, "BorderBrush");
-            TextArea.SetResourceReference(ICSharpCode.AvalonEdit.Editing.TextArea.SelectionForegroundProperty, "PrimaryTextBrush");
+            TextArea.SetResourceReference(TextArea.SelectionForegroundProperty, "PrimaryTextBrush");
             TextArea.SelectionBorder = null;
             UpdatePalette();
         }
@@ -63,6 +71,7 @@ namespace CefFlashBrowser.Views.Custom
             if (Text == text) return;
 
             _updatingText = true;
+
             try
             {
                 Text = text;

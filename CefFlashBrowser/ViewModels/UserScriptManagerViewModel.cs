@@ -178,7 +178,7 @@ namespace CefFlashBrowser.ViewModels
                 "\r\n" +
                 "(function() {\r\n" +
                 "  'use strict';\r\n" +
-                "\r\n" +
+                "  \r\n" +
                 "})();\r\n";
 
             var item = new UserScriptItemViewModel(source, null, name, false);
