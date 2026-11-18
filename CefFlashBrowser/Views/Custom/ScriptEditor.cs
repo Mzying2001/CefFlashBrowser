@@ -4,6 +4,8 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using System;
 using System.Windows;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml;
 
@@ -55,6 +57,27 @@ namespace CefFlashBrowser.Views.Custom
             TextArea.SetResourceReference(TextArea.SelectionForegroundProperty, "PrimaryTextBrush");
             TextArea.SelectionBorder = null;
             UpdatePalette();
+        }
+
+        protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnPreviewMouseWheel(e);
+
+            if (e.Handled || Keyboard.Modifiers != ModifierKeys.Shift || e.Delta == 0)
+                return;
+
+            e.Handled = true;
+
+            var textView = TextArea.TextView;
+            IScrollInfo scrollInfo = textView;
+
+            int lines = SystemParameters.WheelScrollLines;
+            double step = lines < 0 ? scrollInfo.ViewportWidth : lines * textView.WideSpaceWidth;
+            double offset = scrollInfo.HorizontalOffset - step * e.Delta / Mouse.MouseWheelDeltaForOneLine;
+            double maxOffset = Math.Max(0, scrollInfo.ExtentWidth - scrollInfo.ViewportWidth);
+
+            scrollInfo.SetHorizontalOffset(Math.Max(0, Math.Min(offset, maxOffset)));
+            scrollInfo.ScrollOwner?.InvalidateScrollInfo();
         }
 
         protected override void OnTextChanged(EventArgs e)

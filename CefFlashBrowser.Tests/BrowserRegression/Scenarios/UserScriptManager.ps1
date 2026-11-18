@@ -172,6 +172,43 @@ function Get-ManagerColorContrast($First, $Second) {
     return ([Math]::Max($luminances[0], $luminances[1]) + 0.05) / ([Math]::Min($luminances[0], $luminances[1]) + 0.05)
 }
 
+function Invoke-ManagerEditorWheel($TextView, [int]$Delta) {
+    $wheel = [Windows.Input.MouseWheelEventArgs]::new([Windows.Input.Mouse]::PrimaryDevice, 0, $Delta)
+    $wheel.RoutedEvent = [Windows.Input.Mouse]::PreviewMouseWheelEvent
+    $TextView.RaiseEvent($wheel)
+    if (!$wheel.Handled) {
+        $wheel.RoutedEvent = [Windows.Input.Mouse]::MouseWheelEvent
+        $TextView.RaiseEvent($wheel)
+    }
+}
+
+function Test-ManagerEditorWheel($Context, $Window, $Editor) {
+    Set-TabWindowForeground $Context $Window
+    $view = $Editor.TextArea.TextView
+    $delta = [Windows.Input.Mouse]::MouseWheelDeltaForOneLine
+    $Editor.ScrollToHorizontalOffset(0)
+    $Editor.ScrollToVerticalOffset(0)
+    $Window.UpdateLayout()
+
+    [RegressionKeyboard]::SetKey(0x10, $false)
+    try {
+        Wait-Regression $Context { [Windows.Input.Keyboard]::Modifiers -eq [Windows.Input.ModifierKeys]::Shift } 'Shift is held for horizontal scrolling'
+        Invoke-ManagerEditorWheel $view (-$delta)
+        $Window.UpdateLayout()
+        Assert-Regression ($Editor.HorizontalOffset -gt 0 -and $Editor.VerticalOffset -eq 0) 'Shift+wheel down scrolls the editor right without moving vertically'
+        Invoke-ManagerEditorWheel $view (2 * $delta)
+        $Window.UpdateLayout()
+        Assert-Regression ($Editor.HorizontalOffset -eq 0 -and $Editor.VerticalOffset -eq 0) 'Shift+wheel up scrolls the editor left and stops at the start of the line'
+    } finally {
+        [RegressionKeyboard]::SetKey(0x10, $true)
+    }
+
+    Wait-Regression $Context { [Windows.Input.Keyboard]::Modifiers -eq [Windows.Input.ModifierKeys]::None } 'Shift is released for vertical scrolling'
+    Invoke-ManagerEditorWheel $view (-$delta)
+    $Window.UpdateLayout()
+    Assert-Regression ($Editor.HorizontalOffset -eq 0 -and $Editor.VerticalOffset -gt 0) 'unmodified wheel scrolls the editor vertically'
+}
+
 function Test-ManagerFindReplace($Context, $Window) {
     $model = $Window.DataContext
     $previousSelection = $model.SelectedScript
@@ -715,6 +752,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $item.Source = $source + "`r`n// https://example.invalid/icon.png`r`n" + ((1..60 | ForEach-Object { "const value$_ = 42; // readable code with a long comment " + ('x' * 100) }) -join "`r`n")
         Wait-Regression $Context { $editor.Text -ceq $item.Source } 'theme fixture source is displayed'
         Test-ManagerSearchAppearance $Context $window
+        Test-ManagerEditorWheel $Context $window $editor
         $editor.CaretOffset = $editor.Text.Length
         $editor.TextArea.PerformTextInput("`r`n// theme draft")
         $editor.Select(10, 12)
