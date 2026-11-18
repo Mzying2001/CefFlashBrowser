@@ -824,19 +824,32 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 || (NavigationHandler != null && e.Address == "about:blank" && Address != "about:blank"))
                 return;
 
+            SetDocumentAddress(e.Address);
+            AddressChanged?.Invoke(this, e);
+        }
+
+        public void RestoreAddressAfterCanceledNavigation(string address)
+        {
+            Dispatcher.VerifyAccess();
+
+            if (isHosted && !browser.IsDisposed && pendingAddress == null)
+                SetDocumentAddress(string.IsNullOrEmpty(address) ? "about:blank" : address);
+        }
+
+        private void SetDocumentAddress(string address)
+        {
             lock (onNotifyAddressChangedLock)
             {
                 onNotifyAddressChanged = true;
                 try
                 {
-                    SetCurrentValue(AddressProperty, e.Address);
+                    SetCurrentValue(AddressProperty, address);
                 }
                 finally
                 {
                     onNotifyAddressChanged = false;
                 }
             }
-            AddressChanged?.Invoke(this, e);
         }
 
         private void OnTitleChanged(object sender, TitleChangedEventArgs e)

@@ -249,6 +249,11 @@
     <sys:String x:Key="userScriptManager_export">Esporta il codice sorgente…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Installare questo script?</sys:String>
     <sys:String x:Key="userScriptInstall_install">Installa</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">Aggiornare questo script utente?</sys:String>
+    <sys:String x:Key="userScriptInstall_update">Aggiorna</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">Impossibile scaricare lo script utente.</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">Impossibile salvare lo script utente.</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">Questa origine corrisponde a più installazioni oppure lo script esistente è cambiato. Controlla lo script nel gestore degli script utente e riprova.</sys:String>
     <sys:String x:Key="userScriptInstall_author">Autore</sys:String>
     <sys:String x:Key="userScriptInstall_source">Origine</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">Codice sorgente caricato, in attesa di installazione. Controllalo, quindi scegli «Installa la bozza attuale» o «Salva».</sys:String>

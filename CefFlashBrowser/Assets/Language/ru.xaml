@@ -249,6 +249,11 @@
     <sys:String x:Key="userScriptManager_export">Экспортировать исходный код…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Установить этот скрипт?</sys:String>
     <sys:String x:Key="userScriptInstall_install">Установить</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">Обновить этот пользовательский скрипт?</sys:String>
+    <sys:String x:Key="userScriptInstall_update">Обновить</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">Не удалось загрузить пользовательский скрипт.</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">Не удалось сохранить пользовательский скрипт.</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">Этому источнику соответствует несколько установок или существующий скрипт изменился. Проверьте скрипт в диспетчере пользовательских скриптов и повторите попытку.</sys:String>
     <sys:String x:Key="userScriptInstall_author">Автор</sys:String>
     <sys:String x:Key="userScriptInstall_source">Источник</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">Исходный код загружен и ожидает установки. Проверьте его, затем выберите «Установить текущий черновик» или «Сохранить».</sys:String>

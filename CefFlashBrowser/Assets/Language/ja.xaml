@@ -249,6 +249,11 @@
     <sys:String x:Key="userScriptManager_export">ソースコードをエクスポート…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">このスクリプトをインストールしますか？</sys:String>
     <sys:String x:Key="userScriptInstall_install">インストール</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">このユーザースクリプトを更新しますか？</sys:String>
+    <sys:String x:Key="userScriptInstall_update">更新</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">ユーザースクリプトをダウンロードできませんでした。</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">ユーザースクリプトを保存できませんでした。</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">この入手元に複数のインストールがあるか、既存のスクリプトが変更されました。ユーザースクリプトマネージャーで確認してから、もう一度お試しください。</sys:String>
     <sys:String x:Key="userScriptInstall_author">作者</sys:String>
     <sys:String x:Key="userScriptInstall_source">インストール元</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">ソースコードを読み込みました。まだインストールされていません。内容を確認してから「現在の下書きをインストール」または「保存」を選択してください。</sys:String>

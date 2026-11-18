@@ -27,6 +27,33 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserView : UserControl, IDisposable
     {
+        private sealed class BrowserRequestHandler : CefSharp.Handler.RequestHandler
+        {
+            private readonly BrowserView _view;
+
+            public BrowserRequestHandler(BrowserView view)
+            {
+                _view = view;
+            }
+
+            protected override bool OnBeforeBrowse(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame,
+                IRequest request, bool userGesture, bool isRedirect)
+            {
+                return !isRedirect && frame.IsMain && request.Method == "GET"
+                    && _view.TryQueueUserScriptInstall(request.Url, frame.Url ?? "about:blank");
+            }
+
+            protected override bool OnOpenUrlFromTab(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame,
+                string targetUrl, WindowOpenDisposition targetDisposition, bool userGesture)
+            {
+                return userGesture
+                    && (targetDisposition == WindowOpenDisposition.NewBackgroundTab
+                        || targetDisposition == WindowOpenDisposition.NewForegroundTab
+                        || targetDisposition == WindowOpenDisposition.NewWindow)
+                    && _view.TryQueueUserScriptInstall(targetUrl);
+            }
+        }
+
         private class BrowserLifeSpanHandler : LifeSpanHandler
         {
             private readonly BrowserView view;
@@ -242,6 +269,7 @@ namespace CefFlashBrowser.Views
 
             browser.JsDialogHandler = new Browser.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Browser.Handlers.DownloadHandler();
+            browser.RequestHandler = new BrowserRequestHandler(this);
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
             browser.FaviconDiscovered += BrowserFaviconDiscovered;
@@ -292,6 +320,37 @@ namespace CefFlashBrowser.Views
             {
                 // Release CEF callbacks waiting for a window that has already closed.
             }
+        }
+
+        private bool TryQueueUserScriptInstall(string address, string documentAddress = null)
+        {
+            if (_isClosed || !GlobalData.Settings.EnableUserScripts
+                || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished
+                || !UserScriptWebInstaller.TryGetOrigin(address, out var origin))
+                return false;
+
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (GetInstallOwner() == null)
+                    return;
+
+                if (documentAddress != null && UserScriptWebInstaller.TryGetOrigin(browser.Address, out var pendingOrigin)
+                    && pendingOrigin == origin)
+                {
+                    browser.RestoreAddressAfterCanceledNavigation(documentAddress);
+                }
+
+                _ = UserScriptWebInstaller.InstallAsync(origin, GetInstallOwner, _closeToken);
+            }, DispatcherPriority.Normal, _closeToken);
+            return true;
+        }
+
+        private Window GetInstallOwner()
+        {
+            if (_isClosed || ViewModel?.IsClosing == true || browser.IsDisposed)
+                return null;
+
+            return _ownerWindow ?? Window.GetWindow(this);
         }
 
         private void BrowserDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -803,6 +862,9 @@ namespace CefFlashBrowser.Views
         {
             if (_isClosed
                 || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                return;
+
+            if (TryQueueUserScriptInstall(targetUrl))
                 return;
 
             var isPopup = targetDisposition == WindowOpenDisposition.NewPopup;

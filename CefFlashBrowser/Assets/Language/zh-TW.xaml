@@ -249,6 +249,11 @@
     <sys:String x:Key="userScriptManager_export">匯出原始碼…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">是否安裝以下腳本？</sys:String>
     <sys:String x:Key="userScriptInstall_install">安裝</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">是否更新以下腳本？</sys:String>
+    <sys:String x:Key="userScriptInstall_update">更新</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">無法下載使用者腳本。</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">無法儲存使用者腳本。</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">此來源對應多筆安裝記錄，或已安裝的腳本發生了變更。請在使用者腳本管理員中檢查後再試。</sys:String>
     <sys:String x:Key="userScriptInstall_author">作者</sys:String>
     <sys:String x:Key="userScriptInstall_source">來源</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">原始碼已載入，尚未安裝。檢查後選擇「安裝目前草稿」或儲存。</sys:String>

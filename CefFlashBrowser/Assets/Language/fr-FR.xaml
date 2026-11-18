@@ -249,6 +249,11 @@
     <sys:String x:Key="userScriptManager_export">Exporter le code source…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Installer ce script ?</sys:String>
     <sys:String x:Key="userScriptInstall_install">Installer</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">Mettre à jour ce script utilisateur ?</sys:String>
+    <sys:String x:Key="userScriptInstall_update">Mettre à jour</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">Impossible de télécharger le script utilisateur.</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">Impossible d’enregistrer le script utilisateur.</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">Cette source correspond à plusieurs installations ou le script existant a changé. Vérifiez le script dans le gestionnaire de scripts utilisateur et réessayez.</sys:String>
     <sys:String x:Key="userScriptInstall_author">Auteur</sys:String>
     <sys:String x:Key="userScriptInstall_source">Source</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">Code source chargé, en attente d'installation. Vérifiez-le, puis choisissez « Installer le brouillon actuel » ou « Enregistrer ».</sys:String>

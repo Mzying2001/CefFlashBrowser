@@ -249,6 +249,11 @@
     <sys:String x:Key="userScriptManager_export">导出源码…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">是否安装以下脚本？</sys:String>
     <sys:String x:Key="userScriptInstall_install">安装</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">是否更新以下用户脚本？</sys:String>
+    <sys:String x:Key="userScriptInstall_update">更新</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">无法下载用户脚本。</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">无法保存用户脚本。</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">此来源对应多个安装记录，或已安装的脚本发生了变化。请在用户脚本管理器中检查后重试。</sys:String>
     <sys:String x:Key="userScriptInstall_author">作者</sys:String>
     <sys:String x:Key="userScriptInstall_source">来源</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">源码已载入，尚未安装。检查后选择“安装当前草稿”或保存。</sys:String>

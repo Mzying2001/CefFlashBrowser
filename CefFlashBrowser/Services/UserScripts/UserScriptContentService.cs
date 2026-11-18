@@ -101,26 +101,42 @@ namespace CefFlashBrowser.Services.UserScripts
                         if (response.Content.Headers.ContentLength > _maximumBytes)
                             throw new IOException("Installation content exceeds its size limit.");
 
-                        using (var input = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
-                        using (var output = new MemoryStream())
-                        {
-                            var buffer = new byte[65536];
-                            int count;
-
-                            while ((count = await input.ReadAsync(buffer, 0, buffer.Length, deadline.Token).ConfigureAwait(false)) != 0)
-                            {
-                                if (output.Length + count > _maximumBytes)
-                                    throw new IOException("Installation content exceeds its size limit.");
-
-                                output.Write(buffer, 0, count);
-                            }
-
-                            var bytes = output.ToArray();
-                            var charset = response.Content.Headers.ContentType?.CharSet?.Trim('"');
-
-                            return new ResourceContent(bytes, response.Content.Headers.ContentType?.MediaType, charset);
-                        }
+                        return await ReadContentAsync(response.Content, deadline.Token).ConfigureAwait(false);
                     }
+                }
+            }
+        }
+
+        private async Task<ResourceContent> ReadContentAsync(HttpContent content, CancellationToken token)
+        {
+            // On .NET Framework a response stream can ignore cancellation during a pending read.
+            using (token.Register(content.Dispose))
+            {
+                try
+                {
+                    using (var input = await content.ReadAsStreamAsync().ConfigureAwait(false))
+                    using (var output = new MemoryStream())
+                    {
+                        var buffer = new byte[65536];
+                        int count;
+
+                        while ((count = await input.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false)) != 0)
+                        {
+                            if (output.Length + count > _maximumBytes)
+                                throw new IOException("Installation content exceeds its size limit.");
+
+                            output.Write(buffer, 0, count);
+                        }
+
+                        token.ThrowIfCancellationRequested();
+                        var charset = content.Headers.ContentType?.CharSet?.Trim('"');
+                        return new ResourceContent(output.ToArray(), content.Headers.ContentType?.MediaType, charset);
+                    }
+                }
+                catch (Exception e) when (token.IsCancellationRequested
+                    && (e is IOException || e is HttpRequestException || e is ObjectDisposedException))
+                {
+                    throw new OperationCanceledException("Installation content read was cancelled.", e, token);
                 }
             }
         }

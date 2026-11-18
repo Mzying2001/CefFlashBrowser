@@ -56,9 +56,7 @@ namespace CefFlashBrowser.Views
 
         private bool ConfirmInstallation(UserScriptMetadata metadata, string origin)
         {
-            var dialog = WindowManager.CreateWindow<UserScriptInstallDialog>();
-            dialog.SetScript(metadata, origin);
-            return DialogHelper.ShowModal(dialog, this) == true;
+            return DialogHelper.ShowModal(UserScriptInstallDialog.Create(metadata, origin), this) == true;
         }
 
         private bool ConfirmOperation(string message)

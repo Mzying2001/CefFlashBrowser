@@ -617,6 +617,181 @@ function Invoke-ManagerDeleteWithConfirmation($Context, $Window, $MenuItem, [Nul
     }
 }
 
+function Invoke-WebScriptNavigation($Context, $Window, [scriptblock]$Navigate, [string]$ExpectedOrigin,
+    [string]$Action, [string]$ResultKey, [switch]$Update) {
+    $state = @{ Reviews = 0; Results = 0; Failure = $null }
+    $timer = New-Object Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(25)
+    $handler = [EventHandler]({
+        $dialog = $Context.Application.Windows | Where-Object {
+            $_.IsVisible -and ($_ -is [CefFlashBrowser.Views.Dialogs.UserScriptInstallDialog] -or
+                $_ -is [CefFlashBrowser.Views.Dialogs.JsAlertDialog])
+        } | Select-Object -First 1
+        if ($null -eq $dialog) { return }
+
+        try {
+            Assert-Regression ([object]::ReferenceEquals($dialog.Owner, $Window)) 'web installation dialog belongs to the originating browser window'
+            if ($dialog -is [CefFlashBrowser.Views.Dialogs.UserScriptInstallDialog]) {
+                $state.Reviews++
+                Assert-Regression ($Action -and $state.Reviews -eq 1) 'web navigation presents exactly one confirmation'
+                $titleKey = if ($Update) { 'userScriptInstall_confirmUpdate' } else { 'userScriptManager_confirmInstall' }
+                $buttonKey = if ($Update) { 'userScriptInstall_update' } else { 'userScriptInstall_install' }
+                $install = $dialog.FindName('installButton')
+                Assert-Regression ($dialog.Title -ceq $Context.LanguageService.GetString($titleKey) -and
+                    $install.Content -ceq $Context.LanguageService.GetString($buttonKey) -and
+                    $dialog.FindName('scriptName').Text -ceq 'Web installation fixture' -and
+                    $dialog.FindName('scriptOrigin').Text -ceq $ExpectedOrigin) 'browser confirmation shows the reviewed source and the localized action'
+                $button = if ($Action -eq 'Confirm') { $install } else { $dialog.FindName('cancelButton') }
+                Invoke-BrowserCommand $button.Command $button.CommandParameter
+            } else {
+                $state.Results++
+                Assert-Regression ($ResultKey -and $state.Results -eq 1 -and
+                    $dialog.Message -ceq $Context.LanguageService.GetString($ResultKey)) "web navigation shows the expected result $ResultKey"
+                $dialog.Close()
+            }
+        } catch {
+            $state.Failure = $_
+            if ($dialog.IsVisible) { $dialog.Close() }
+        }
+    }.GetNewClosure())
+    $timer.add_Tick($handler)
+    $timer.Start()
+    try {
+        & $Navigate
+        Wait-Regression $Context {
+            $null -ne $state.Failure -or (($state.Reviews -eq [int][bool]$Action) -and ($state.Results -eq [int][bool]$ResultKey))
+        } 'web script navigation completes'
+        if ($null -ne $state.Failure) { throw $state.Failure }
+    } finally {
+        $timer.Stop()
+        $timer.remove_Tick($handler)
+    }
+}
+
+function Test-WebUserScriptInstallation($Context, $Window, $Manager, $Fixture) {
+    $model = $Window.ViewModel.CurrentBrowser
+    $browser = $model.Browser
+    $service = $Context.UserScriptService
+    $repository = $service.Repository
+    $token = [Threading.CancellationToken]::None
+    $settings = [CefFlashBrowser.Data.GlobalData]::Settings
+    $page = $Fixture.BaseUrl + '/web-install'
+    $origin = $Fixture.BaseUrl + '/redirect-install.USER.JS?channel=stable'
+    $source = @"
+// ==UserScript==
+// @name Web installation fixture
+// @version 1.0.0
+// @match $page
+// @sandbox DOM
+// @grant none
+// @run-at document-end
+// ==/UserScript==
+document.documentElement.setAttribute('data-web-install', 'ready');
+"@
+    $Fixture.ScriptSource = $source
+    $model.Address = $page
+    Wait-Regression $Context { $browser.Title -eq 'Web install fixture' -and !$browser.IsLoading } 'web install fixture is ready'
+    $history = Invoke-JavaScript $Context $browser 'history.length'
+    $tabCount = $Window.ViewModel.Browsers.Count
+    $priorFetches = $Fixture.RequestsFor('/manager.user.js')
+
+    Invoke-WebScriptNavigation $Context $Window {
+        [void](Invoke-JavaScript $Context $browser "document.getElementById('install').click()")
+    } -ExpectedOrigin $origin -Action Cancel
+    Assert-Regression (@($Manager.Scripts | Where-Object { $_.IsInstalled -and $_.Origin -ceq $origin }).Count -eq 0 -and
+        $browser.Address -ceq $page -and $Fixture.RequestsFor('/manager.user.js') -eq ($priorFetches + 1)) 'cancelling a same-page link preserves the original page and repository'
+
+    Invoke-WebScriptNavigation $Context $Window {
+        [void](Invoke-JavaScript $Context $browser "document.getElementById('new-tab-install').click()")
+    } -ExpectedOrigin $origin -Action Confirm -ResultKey userScriptManager_refreshPage
+    Wait-Regression $Context {
+        @($Manager.Scripts | Where-Object { $_.IsInstalled -and $_.Origin -ceq $origin }).Count -eq 1
+    } 'open script manager observes the web installation'
+    $item = $Manager.Scripts | Where-Object { $_.IsInstalled -and $_.Origin -ceq $origin }
+    $key = $item.Installation.ScriptKey
+    Assert-Regression ($item.IsEnabled -and $item.Installation.Definition.Source -ceq $source -and
+        $Window.ViewModel.Browsers.Count -eq $tabCount -and (Invoke-JavaScript $Context $browser 'history.length') -eq $history -and
+        $browser.Address -ceq $page -and $Fixture.RequestsFor('/manager.user.js') -eq ($priorFetches + 2)) 'new-tab install commits the fetched source once and creates no tab or navigation entry'
+    Invoke-BrowserCommand $browser.ReloadCommand
+    Wait-Regression $Context {
+        (Invoke-JavaScript $Context $browser "document.documentElement.getAttribute('data-web-install')") -eq 'ready'
+    } 'browser-installed script executes on page refresh'
+
+    Complete-UserScriptTask $Context ($repository.SetEnabledAsync($key, $false, $token)) 'disable the web script before update' | Out-Null
+    $value = [Mzying2001.MonkeySharp.Core.Storage.UserScriptValue]::FromJson('42')
+    Complete-UserScriptTask $Context ($service.ValueStore.SetAsync($key.ToString(), 'web-install', $value, $token)) 'save userscript data before update' | Out-Null
+    $updated = $source.Replace('1.0.0', '2.0.0')
+    $Fixture.ScriptSource = $updated
+    Invoke-WebScriptNavigation $Context $Window {
+        Invoke-BrowserCommand $browser.LoadUrlCommand ($origin + '#address-bar')
+    } -ExpectedOrigin $origin -Action Confirm -ResultKey userScriptManager_refreshPage -Update
+    Wait-Regression $Context { $item.Installation.Definition.Source -ceq $updated } 'open script manager observes the web update'
+    $saved = Complete-UserScriptTask $Context ($service.ValueStore.GetAsync($key.ToString(), 'web-install', $token)) 'read preserved userscript data'
+    Assert-Regression (@($Manager.Scripts | Where-Object { $_.IsInstalled -and $_.Origin -ceq $origin }).Count -eq 1 -and
+        $item.Installation.ScriptKey.Equals($key) -and !$item.IsEnabled -and $saved.Value.EncodedValue -ceq $value.EncodedValue -and
+        $model.Address -ceq $page -and $Window.FindName('addressTextBox').Text -ceq $page -and
+        $Fixture.RequestsFor('/manager.user.js') -eq ($priorFetches + 3)) 'address-bar update preserves the script key, enabled state, data, and current page address'
+
+    $duplicate = Complete-UserScriptTask $Context ($repository.InstallAsync($source, ($origin + '#old-import'), $true, $token)) 'create a historical duplicate'
+    Invoke-WebScriptNavigation $Context $Window {
+        Invoke-BrowserCommand $browser.LoadUrlCommand $origin
+    } -ResultKey userScriptInstall_conflict
+    $unmodified = Complete-UserScriptTask $Context ($repository.GetAsync($duplicate.ScriptKey, $token)) 'read untouched historical duplicate'
+    Assert-Regression ($unmodified.Definition.Source -ceq $source -and $item.Installation.Definition.Source -ceq $updated) 'conflicting historical installs remain unchanged'
+    Complete-UserScriptTask $Context ($repository.RemoveAsync($duplicate.ScriptKey, $token)) 'remove the historical duplicate' | Out-Null
+
+    Invoke-WebScriptNavigation $Context $Window {
+        Invoke-BrowserCommand $browser.LoadUrlCommand ($Fixture.BaseUrl + '/invalid-install.user.js')
+    } -ResultKey userScriptManager_invalidMetadata
+    Invoke-WebScriptNavigation $Context $Window {
+        Invoke-BrowserCommand $browser.LoadUrlCommand ($Fixture.BaseUrl + '/missing-install.user.js')
+    } -ResultKey userScriptInstall_downloadFailed
+    Assert-Regression ($model.Address -ceq $page -and $item.Installation.Definition.Source -ceq $updated) 'invalid source and HTTP failures leave the document and script unchanged'
+
+    $background = $Fixture.BaseUrl + '/web-install-background'
+    $model.Address = $background
+    Wait-Regression $Context {
+        $browser.Title -eq 'Background script fixture' -and !$browser.IsLoading -and
+        $Fixture.RequestsFor('/child-install.user.js') -eq 1 -and
+        (Invoke-JavaScript $Context $browser 'window.ordinaryResourceRan') -eq $true
+    } 'subframes and script resources with the suffix load normally'
+    $normal = $Fixture.BaseUrl + '/normal.js'
+    Invoke-BrowserCommand $browser.LoadUrlCommand $normal
+    Wait-Regression $Context {
+        $browser.Address -ceq $normal -and !$browser.IsLoading -and $Fixture.RequestsFor('/normal.js') -eq 1
+    } 'ordinary JavaScript URL loads without installation'
+
+    $enabled = $settings.EnableUserScripts
+    try {
+        $settings.EnableUserScripts = $false
+        Invoke-BrowserCommand $browser.LoadUrlCommand ($Fixture.BaseUrl + '/invalid-install.user.js')
+        Wait-Regression $Context { $browser.Title -eq 'Plain web page' } 'script links navigate normally when userscripts are off'
+    } finally {
+        $settings.EnableUserScripts = $enabled
+    }
+
+    $closing = New-RegressionWindow $Context
+    $closingBrowser = $closing.ViewModel.CurrentBrowser.Browser
+    $slow = $Fixture.BaseUrl + '/slow-install.user.js'
+    $beforeDuplicate = $browser.Address
+    try {
+        Invoke-BrowserCommand $closingBrowser.LoadUrlCommand $slow
+        Wait-Regression $Context { $Fixture.RequestsFor('/slow-install.user.js') -eq 1 } 'start a pending installation download'
+        Invoke-BrowserCommand $browser.LoadUrlCommand ($slow + '#repeat')
+        Wait-Regression $Context { $browser.Address -ceq $beforeDuplicate -and !$browser.IsLoading } 'intercept a simultaneous request for the same script'
+        $closing.ForceCloseWindow()
+        Wait-Regression $Context { $closingBrowser.IsDisposed } 'close the originating browser during download'
+        Invoke-WebScriptNavigation $Context $Window {
+            Invoke-BrowserCommand $browser.LoadUrlCommand ($Fixture.BaseUrl + '/invalid-install.user.js?after=close')
+        } -ResultKey userScriptManager_invalidMetadata
+        Assert-Regression ($Fixture.RequestsFor('/slow-install.user.js') -eq 1 -and
+            @($Manager.Scripts | Where-Object { $_.Origin -ceq $slow }).Count -eq 0) 'duplicate clicks share one request and closing the source releases the next install'
+    } finally {
+        $closing.ForceCloseWindow()
+        $Fixture.Release('/slow-install.user.js')
+    }
+}
+
 function Test-UserScriptManager($Context) {
     $window = $null
     $browserWindow = $null
@@ -964,6 +1139,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Assert-Regression (!$item.Source.EndsWith('// theme draft')) 'undo history still works after repeated theme changes'
         [void]$editor.Redo()
         Assert-Regression ($item.Source.EndsWith('// theme draft')) 'redo history still works after repeated theme changes'
+        Test-WebUserScriptInstallation $Context $browserWindow $model $fixture
     } finally {
         if ($null -ne $browserWindow) { $browserWindow.ForceCloseWindow() }
         if ($null -ne $window) { $window.Close() }

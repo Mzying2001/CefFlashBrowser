@@ -249,6 +249,11 @@
     <sys:String x:Key="userScriptManager_export">소스 코드 내보내기…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">이 스크립트를 설치하시겠습니까?</sys:String>
     <sys:String x:Key="userScriptInstall_install">설치</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">이 사용자 스크립트를 업데이트하시겠습니까?</sys:String>
+    <sys:String x:Key="userScriptInstall_update">업데이트</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">사용자 스크립트를 다운로드하지 못했습니다.</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">사용자 스크립트를 저장하지 못했습니다.</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">이 출처에 해당하는 설치 항목이 여러 개이거나 기존 스크립트가 변경되었습니다. 사용자 스크립트 관리자에서 확인한 후 다시 시도하세요.</sys:String>
     <sys:String x:Key="userScriptInstall_author">작성자</sys:String>
     <sys:String x:Key="userScriptInstall_source">출처</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">소스 코드를 불러왔으며 아직 설치되지 않았습니다. 내용을 검토한 후 '현재 초안 설치' 또는 '저장'을 선택하세요.</sys:String>

@@ -1,3 +1,4 @@
+using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels;
 using Mzying2001.MonkeySharp.Core.Domain;
 using System;
@@ -13,6 +14,20 @@ namespace CefFlashBrowser.Views.Dialogs
         public UserScriptInstallDialog()
         {
             InitializeComponent();
+        }
+
+        internal static UserScriptInstallDialog Create(UserScriptMetadata metadata, string origin, bool update = false)
+        {
+            var dialog = WindowManager.CreateWindow<UserScriptInstallDialog>();
+            dialog.SetScript(metadata, origin);
+
+            if (update)
+            {
+                dialog.SetResourceReference(TitleProperty, "userScriptInstall_confirmUpdate");
+                dialog.installButton.SetResourceReference(ContentControl.ContentProperty, "userScriptInstall_update");
+            }
+
+            return dialog;
         }
 
         private static void SetOptionalText(TextBlock element, string value, TextBlock label = null)
@@ -31,7 +46,7 @@ namespace CefFlashBrowser.Views.Dialogs
             return string.Join(Environment.NewLine, entries.Where(entry => !string.IsNullOrWhiteSpace(entry)));
         }
 
-        internal void SetScript(UserScriptMetadata metadata, string origin)
+        private void SetScript(UserScriptMetadata metadata, string origin)
         {
             scriptIcon.FaviconUrl = UserScriptItemViewModel.ResolveIconUrl(metadata, origin);
             scriptIcon.DefaultIcon = UserScriptItemViewModel.GetIconInitial(metadata.Name);

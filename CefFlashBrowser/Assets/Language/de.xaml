@@ -249,6 +249,11 @@
     <sys:String x:Key="userScriptManager_export">Quelltext exportieren…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Dieses Skript installieren?</sys:String>
     <sys:String x:Key="userScriptInstall_install">Installieren</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">Dieses Benutzerskript aktualisieren?</sys:String>
+    <sys:String x:Key="userScriptInstall_update">Aktualisieren</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">Das Benutzerskript konnte nicht heruntergeladen werden.</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">Das Benutzerskript konnte nicht gespeichert werden.</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">Diese Quelle gehört zu mehreren Installationen oder das vorhandene Skript wurde geändert. Prüfen Sie das Skript in der Benutzerskriptverwaltung und versuchen Sie es erneut.</sys:String>
     <sys:String x:Key="userScriptInstall_author">Autor</sys:String>
     <sys:String x:Key="userScriptInstall_source">Quelle</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">Quelltext geladen, noch nicht installiert. Prüfen Sie ihn und wählen Sie dann „Aktuellen Entwurf installieren“ oder „Speichern“.</sys:String>

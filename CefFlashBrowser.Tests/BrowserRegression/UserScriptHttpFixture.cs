@@ -118,7 +118,12 @@ public sealed class UserScriptHttpFixture : IDisposable
                 var extra = "";
                 byte[] body;
 
-                if (path == "/download" || path.StartsWith("/slow-", StringComparison.Ordinal))
+                if (path == "/manager.user.js" || path == "/slow-install.user.js")
+                {
+                    type = "application/javascript";
+                    body = Encoding.UTF8.GetBytes(ScriptSource ?? string.Empty);
+                }
+                else if (path == "/download" || path.StartsWith("/slow-", StringComparison.Ordinal))
                 {
                     body = Payload;
                     type = "application/octet-stream";
@@ -128,10 +133,36 @@ public sealed class UserScriptHttpFixture : IDisposable
                     status = "500 Internal Server Error";
                     body = Encoding.UTF8.GetBytes("failed");
                 }
-                else if (path == "/manager.user.js")
+                else if (path == "/web-install")
+                {
+                    body = Encoding.UTF8.GetBytes("<title>Web install fixture</title>"
+                        + "<a id='install' href='/redirect-install.USER.JS?channel=stable#link'>Install</a>"
+                        + "<a id='new-tab-install' target='_blank' href='/redirect-install.USER.JS?channel=stable#new-tab'>Install in new tab</a>");
+                }
+                else if (path == "/web-install-background")
+                {
+                    body = Encoding.UTF8.GetBytes("<title>Background script fixture</title>"
+                        + "<iframe src='/child-install.user.js'></iframe><script src='/resource-install.user.js'></script>");
+                }
+                else if (path == "/child-install.user.js" || path == "/invalid-install.user.js")
+                {
+                    body = Encoding.UTF8.GetBytes("<title>Plain web page</title>");
+                }
+                else if (path == "/resource-install.user.js" || path == "/normal.js")
                 {
                     type = "application/javascript";
-                    body = Encoding.UTF8.GetBytes(ScriptSource ?? string.Empty);
+                    body = Encoding.UTF8.GetBytes("window.ordinaryResourceRan = true;");
+                }
+                else if (path == "/redirect-install.USER.JS")
+                {
+                    status = "302 Found";
+                    extra = "Location: /manager.user.js\r\n";
+                    body = new byte[0];
+                }
+                else if (path == "/missing-install.user.js")
+                {
+                    status = "404 Not Found";
+                    body = new byte[0];
                 }
                 else if (path == "/login")
                 {
