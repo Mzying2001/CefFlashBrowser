@@ -642,6 +642,15 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Assert-Regression (!$model.Scripts.Contains($deleteDraft) -and $model.Scripts.Count -eq $countBeforeDelete) 'approved top-menu deletion removes the draft'
         Assert-Regression ($null -eq $window.FindName('scriptList').ContextMenu) 'blank script-list space has no deletion menu'
         $model.SelectedScript = $previousSelection
+        $searchAutomationNames = @{
+            closeSearchButton = 'Close'
+            searchText = 'Find'
+            findPrevious = 'PreviousMatch'
+            findNext = 'NextMatch'
+            matchCase = 'MatchCase'
+            replacementText = 'Replace'
+            replaceCurrent = 'ReplaceCurrent'
+        }
         foreach ($locale in @('en-US', 'zh-CN', 'zh-TW', 'de', 'fr-FR', 'it', 'ja', 'ko', 'ru')) {
             $Context.LanguageService.SetCurrentLanguage($locale)
             Wait-Regression $Context { $window.Title -eq $Context.LanguageService.GetString('userScriptManager_title') } "manager language ($locale)"
@@ -650,11 +659,15 @@ document.documentElement.setAttribute('data-manager', 'saved');
             $replaceMenu.Command.Execute($null, $replaceMenu.CommandTarget)
             $searchInput = $window.FindName('searchText')
             $replaceAllLabel = $window.FindName('replaceAll').Content
-            Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($searchInput) -ceq $Context.LanguageService.GetString('browser_find') -and
+            Assert-Regression ([HandyControl.Controls.InfoElement]::GetPlaceholder($searchInput) -ceq $Context.LanguageService.GetString('browser_find') -and
                 $replaceMenu.Header -ceq $Context.LanguageService.GetString('userScriptManager_replace') -and
-                $window.FindName('matchCase').ToolTip -ceq $Context.LanguageService.GetString('userScriptManager_matchCase') -and
+                $window.FindName('matchCase').Content -ceq $Context.LanguageService.GetString('userScriptManager_matchCase') -and
                 $window.FindName('replaceCurrent').ToolTip -ceq $Context.LanguageService.GetString('userScriptManager_replaceCurrent') -and
                 $replaceAllLabel -ceq $Context.LanguageService.GetString('userScriptManager_replaceAll')) "search toolbar and menu localize in $locale"
+            foreach ($controlName in $searchAutomationNames.Keys) {
+                $control = $window.FindName($controlName)
+                Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($control) -ceq $searchAutomationNames[$controlName]) "automation name for $controlName stays fixed in $locale"
+            }
             $editorMenu = Open-ManagerEditorContextMenu $Context $window
             $editorMenuItems = @($editorMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] })
             $editorMenuKeys = @('undo', 'redo', 'cut', 'copy', 'paste', 'selectAll')

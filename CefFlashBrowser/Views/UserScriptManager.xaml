@@ -283,7 +283,7 @@
                         <DockPanel>
                             <Button
                                 x:Name="closeSearchButton" DockPanel.Dock="Right" Margin="5,0,0,0"
-                                AutomationProperties.Name="{DynamicResource solEditor_close}"
+                                AutomationProperties.Name="Close"
                                 Width="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Height}"
                                 ToolTip="{DynamicResource solEditor_close}" Click="CloseSearchClicked">
                                 <svgc:SvgIcon Width="10" Height="10"
@@ -291,13 +291,13 @@
                             </Button>
                             <hc:TextBox
                                 x:Name="searchText" TextChanged="SearchTextChanged"
-                                hc:InfoElement.Placeholder="{DynamicResource browser_find}"
-                                AutomationProperties.Name="{DynamicResource browser_find}"/>
+                                AutomationProperties.Name="Find"
+                                hc:InfoElement.Placeholder="{DynamicResource browser_find}"/>
                         </DockPanel>
                         <WrapPanel>
                             <Button
                                 x:Name="findPrevious" Margin="0,5,5,0"
-                                AutomationProperties.Name="{DynamicResource userScriptManager_findPrevious}"
+                                AutomationProperties.Name="PreviousMatch"
                                 Width="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Height}"
                                 ToolTip="{DynamicResource userScriptManager_findPrevious}" Click="FindMatchClicked">
                                 <svgc:SvgIcon Width="12" Height="12"
@@ -305,7 +305,7 @@
                             </Button>
                             <Button
                                 x:Name="findNext" Margin="0,5,10,0"
-                                AutomationProperties.Name="{DynamicResource userScriptManager_findNext}"
+                                AutomationProperties.Name="NextMatch"
                                 Width="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Height}"
                                 ToolTip="{DynamicResource userScriptManager_findNext}" Click="FindMatchClicked">
                                 <svgc:SvgIcon Width="12" Height="12"
@@ -314,9 +314,8 @@
                             <CheckBox
                                 x:Name="matchCase" Margin="0,5,0,0" VerticalAlignment="Center"
                                 Content="{DynamicResource userScriptManager_matchCase}"
-                                ToolTip="{DynamicResource userScriptManager_matchCase}"
                                 Checked="MatchCaseChanged" Unchecked="MatchCaseChanged"
-                                AutomationProperties.Name="{DynamicResource userScriptManager_matchCase}"/>
+                                AutomationProperties.Name="MatchCase"/>
                         </WrapPanel>
                         <TextBlock x:Name="matchCount" Margin="0,5,0,0" TextWrapping="Wrap"
                                    Foreground="{DynamicResource SecondaryTextBrush}">
@@ -330,13 +329,13 @@
                                     Visibility="Collapsed">
                             <hc:TextBox
                                 x:Name="replacementText"
-                                hc:InfoElement.Placeholder="{DynamicResource userScriptManager_replace}"
-                                AutomationProperties.Name="{DynamicResource userScriptManager_replace}"/>
+                                AutomationProperties.Name="Replace"
+                                hc:InfoElement.Placeholder="{DynamicResource userScriptManager_replace}"/>
                             <WrapPanel>
                                 <Button
                                     x:Name="replaceCurrent" Margin="0,5,5,0" Padding="10,0"
                                     Content="{DynamicResource userScriptManager_replace}"
-                                    AutomationProperties.Name="{DynamicResource userScriptManager_replaceCurrent}"
+                                    AutomationProperties.Name="ReplaceCurrent"
                                     ToolTip="{DynamicResource userScriptManager_replaceCurrent}"
                                     Click="ReplaceCurrentClicked"/>
                                 <Button
