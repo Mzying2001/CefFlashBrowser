@@ -39,7 +39,7 @@
         <CommandBinding Command="ApplicationCommands.Replace" CanExecute="CanFindOrReplace" Executed="OpenFindOrReplace"/>
     </Window.CommandBindings>
 
-    <DockPanel>
+    <DockPanel SizeChanged="ContentSizeChanged">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="{DynamicResource solEditor_file}">
                 <MenuItem Header="{DynamicResource userScriptManager_new}"
@@ -142,11 +142,11 @@
             </DockPanel>
         </Border>
 
-        <Grid Margin="10">
+        <Grid x:Name="scriptLayout" Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="180" MaxWidth="450"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="2*" MinWidth="240"/>
+                <ColumnDefinition x:Name="scriptListColumn" Width="240" MinWidth="180"/>
+                <ColumnDefinition x:Name="scriptSplitterColumn" Width="10"/>
+                <ColumnDefinition x:Name="scriptEditorColumn" Width="*" MinWidth="240"/>
             </Grid.ColumnDefinitions>
 
             <ListBox x:Name="scriptList"

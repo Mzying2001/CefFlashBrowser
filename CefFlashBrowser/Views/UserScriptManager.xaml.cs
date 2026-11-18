@@ -14,6 +14,8 @@ namespace CefFlashBrowser.Views
 {
     public partial class UserScriptManager : Window
     {
+        private const double MaxScriptListWidth = 450;
+
         public DelegateCommand ImportFileCommand { get; }
         public DelegateCommand ExportCommand { get; }
 
@@ -91,6 +93,16 @@ namespace CefFlashBrowser.Views
 
             sourceEditor.Document.UndoStack.ClearAll();
             OnSearchScriptChanged();
+        }
+
+        private void ContentSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (!e.WidthChanged)
+                return;
+
+            double availableWidth = e.NewSize.Width - scriptLayout.Margin.Left - scriptLayout.Margin.Right
+                - scriptSplitterColumn.Width.Value - scriptEditorColumn.MinWidth;
+            scriptListColumn.MaxWidth = Math.Max(scriptListColumn.MinWidth, Math.Min(MaxScriptListWidth, availableWidth));
         }
 
         protected override void OnClosing(CancelEventArgs e)

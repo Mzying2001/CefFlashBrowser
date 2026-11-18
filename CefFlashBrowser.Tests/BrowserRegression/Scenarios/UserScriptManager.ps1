@@ -298,12 +298,22 @@ function Test-ManagerSearchAppearance($Context, $Window) {
     $theme = [CefFlashBrowser.Data.GlobalData]::Settings.Theme
     $language = $Context.LanguageService.CurrentLanguage
     $width = $Window.Width
-    $scriptColumn = $bar.Parent.Parent.ColumnDefinitions[0]
+    $scriptColumn = $Window.FindName('scriptListColumn')
     $columnWidth = $scriptColumn.Width
     try {
-        $Window.Width = $Window.MinWidth
-        $scriptColumn.Width = New-Object Windows.GridLength(100, [Windows.GridUnitType]::Star)
+        $Window.Width = 800
         $Window.UpdateLayout()
+        Assert-Regression ($columnWidth.IsAbsolute -and [Math]::Abs($scriptColumn.ActualWidth - 240) -lt 1) 'script list starts at a fixed width'
+        $Window.Width = $Window.MinWidth
+        $Window.UpdateLayout()
+        Assert-Regression ([Math]::Abs($scriptColumn.ActualWidth - 240) -lt 1) 'resizing the window keeps the default script list width'
+        $Window.Width = 800
+        $Window.UpdateLayout()
+        $scriptColumn.Width = New-Object Windows.GridLength($scriptColumn.MaxWidth)
+        $Window.UpdateLayout()
+        $Window.Width = $Window.MinWidth
+        $Window.UpdateLayout()
+        Assert-Regression ($scriptColumn.ActualWidth -lt $scriptColumn.Width.Value) 'shrinking the window limits a widened script list'
         $menu.Command.Execute($null, $menu.CommandTarget)
         $editor.CaretOffset = 0
         $editor.TextArea.ClearSelection()
