@@ -79,7 +79,7 @@ namespace CefFlashBrowser.Tests
             var time = DateTime.UtcNow.AddHours(-1);
 
             File.SetLastWriteTimeUtc(path, time);
-            await _repository.SetEnabledAsync(first.ScriptKey, false, None);
+            var disabled = await _repository.SetEnabledAsync(first.ScriptKey, false, None);
 
             Assert.AreEqual(time, File.GetLastWriteTimeUtc(path));
 
@@ -90,8 +90,10 @@ namespace CefFlashBrowser.Tests
             CollectionAssert.AreEqual(new[] { first.ScriptKey, second.ScriptKey }, records.Select(record => record.ScriptKey).ToArray());
             Assert.IsFalse(records[0].IsEnabled);
             Assert.IsTrue(records[0].IsReady);
-            Assert.AreEqual(first.InstalledAt, records[0].InstalledAt);
-            Assert.AreEqual(changed.UpdatedAt, records[1].UpdatedAt);
+            Assert.AreEqual(first.InstalledAt.ToUnixTimeMilliseconds(), records[0].InstalledAt.ToUnixTimeMilliseconds());
+            Assert.AreEqual(disabled.UpdatedAt.ToUnixTimeMilliseconds(), records[0].UpdatedAt.ToUnixTimeMilliseconds());
+            Assert.AreEqual(second.InstalledAt.ToUnixTimeMilliseconds(), records[1].InstalledAt.ToUnixTimeMilliseconds());
+            Assert.AreEqual(changed.UpdatedAt.ToUnixTimeMilliseconds(), records[1].UpdatedAt.ToUnixTimeMilliseconds());
             Assert.AreEqual("Renamed", records[1].Definition.Metadata.Name);
             Assert.AreEqual(1, Objects.Length);
             CollectionAssert.AreEqual(_provider.Bytes, File.ReadAllBytes(Objects.Single()));

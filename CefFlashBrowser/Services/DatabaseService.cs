@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,14 +67,21 @@ namespace CefFlashBrowser.Services
                         "install_order INTEGER NOT NULL UNIQUE, " +
                         "source_origin TEXT NULL, " +
                         "is_enabled INTEGER NOT NULL CHECK (is_enabled IN (0, 1)), " +
-                        "installed_at TEXT NOT NULL, updated_at TEXT NOT NULL, " +
-                        "source_sha256 TEXT NOT NULL, commit_id TEXT NOT NULL)");
+                        "installed_at INTEGER NOT NULL, " +
+                        "updated_at INTEGER NOT NULL, " +
+                        "source_sha256 TEXT NOT NULL, " +
+                        "commit_id TEXT NOT NULL)");
 
                     session.Execute(
                         "CREATE TABLE IF NOT EXISTS monkeysharp_script_assets ( " +
-                        "script_id TEXT NOT NULL, kind INTEGER NOT NULL CHECK (kind IN (0, 1)), " +
-                        "ordinal INTEGER NOT NULL CHECK (ordinal >= 0), name TEXT NULL, url TEXT NOT NULL, " +
-                        "content_sha256 TEXT NOT NULL, mime TEXT NOT NULL, charset TEXT NULL, " +
+                        "script_id TEXT NOT NULL, " +
+                        "kind INTEGER NOT NULL CHECK (kind IN (0, 1)), " +
+                        "ordinal INTEGER NOT NULL CHECK (ordinal >= 0), " +
+                        "name TEXT NULL, " +
+                        "url TEXT NOT NULL, " +
+                        "content_sha256 TEXT NOT NULL, " +
+                        "mime TEXT NOT NULL, " +
+                        "charset TEXT NULL, " +
                         "PRIMARY KEY (script_id, kind, ordinal), " +
                         "CHECK ((kind = 0 AND name IS NULL) OR (kind = 1 AND name IS NOT NULL AND length(name) > 0)))");
 
@@ -91,7 +97,7 @@ namespace CefFlashBrowser.Services
                         "value_key TEXT COLLATE BINARY NOT NULL, " +
                         "encoded_value TEXT NOT NULL, " +
                         "value_order INTEGER NOT NULL, " +
-                        "updated_at TEXT NOT NULL, " +
+                        "updated_at INTEGER NOT NULL, " +
                         "PRIMARY KEY (script_id, value_key), " +
                         "UNIQUE (script_id, value_order))");
 
@@ -101,7 +107,7 @@ namespace CefFlashBrowser.Services
                         "kind TEXT NOT NULL, " +
                         "target TEXT NOT NULL, " +
                         "decision INTEGER NOT NULL, " +
-                        "updated_at TEXT NOT NULL, " +
+                        "updated_at INTEGER NOT NULL, " +
                         "PRIMARY KEY (script_id, kind, target))");
 
                     session.Execute(
@@ -109,7 +115,7 @@ namespace CefFlashBrowser.Services
                         "script_id TEXT NOT NULL, " +
                         "tab_id TEXT NOT NULL, " +
                         "json_value TEXT NOT NULL, " +
-                        "updated_at TEXT NOT NULL, " +
+                        "updated_at INTEGER NOT NULL, " +
                         "PRIMARY KEY (script_id, tab_id))");
 
                     session.Execute("PRAGMA user_version = 2");
@@ -194,7 +200,7 @@ namespace CefFlashBrowser.Services
                     {
                         ["@id"] = key.ToString(),
                         ["@enabled"] = enabled ? 1 : 0,
-                        ["@updated"] = updatedAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)
+                        ["@updated"] = updatedAt.ToUnixTimeMilliseconds()
                     });
             }).ConfigureAwait(false);
         }
@@ -228,8 +234,8 @@ namespace CefFlashBrowser.Services
                         ["@id"] = record.ScriptKey.ToString(),
                         ["@origin"] = record.SourceOrigin,
                         ["@enabled"] = record.IsEnabled ? 1 : 0,
-                        ["@installed"] = record.InstalledAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
-                        ["@updated"] = record.UpdatedAt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
+                        ["@installed"] = record.InstalledAt.ToUnixTimeMilliseconds(),
+                        ["@updated"] = record.UpdatedAt.ToUnixTimeMilliseconds(),
                         ["@hash"] = record.SourceSha256,
                         ["@commit"] = record.CommitId
                     });
@@ -348,7 +354,7 @@ namespace CefFlashBrowser.Services
                         ["@id"] = scriptId,
                         ["@key"] = mutation.Key,
                         ["@value"] = value?.EncodedValue,
-                        ["@updated"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture)
+                        ["@updated"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                     };
 
                     if (value == null)
@@ -415,7 +421,7 @@ namespace CefFlashBrowser.Services
             var parameters = UserScriptPermissionParameters(scope);
 
             parameters["@decision"] = decision == PermissionDecision.Allow ? 1 : 2;
-            parameters["@updated"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture);
+            parameters["@updated"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             await InitializeAsync().ConfigureAwait(false);
 
             await _database.TransactionAsync(session =>
@@ -464,7 +470,7 @@ namespace CefFlashBrowser.Services
                     ["@id"] = scriptId,
                     ["@tab"] = tabId,
                     ["@value"] = jsonValue,
-                    ["@updated"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture)
+                    ["@updated"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                 };
 
                 EnsureUserScriptExists(session, scriptId);
@@ -522,8 +528,8 @@ namespace CefFlashBrowser.Services
 
             return new UserScriptDatabaseRecord(key,
                 row.IsDBNull(1) ? null : row.GetString(1), row.GetInt64(2) != 0,
-                DateTimeOffset.ParseExact(row.GetString(3), "O", CultureInfo.InvariantCulture),
-                DateTimeOffset.ParseExact(row.GetString(4), "O", CultureInfo.InvariantCulture),
+                DateTimeOffset.FromUnixTimeMilliseconds(row.GetInt64(3)),
+                DateTimeOffset.FromUnixTimeMilliseconds(row.GetInt64(4)),
                 row.GetString(5), row.IsDBNull(6) ? null : row.GetString(6));
         }
 

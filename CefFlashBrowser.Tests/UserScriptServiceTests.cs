@@ -183,7 +183,7 @@ namespace CefFlashBrowser.Tests
 
             var reloaded = await restored.Repository.ReloadAsync(installed.ScriptKey, CancellationToken.None);
 
-            Assert.AreEqual(installed.InstalledAt, reloaded.InstalledAt);
+            Assert.AreEqual(installed.InstalledAt.ToUnixTimeMilliseconds(), reloaded.InstalledAt.ToUnixTimeMilliseconds());
             Assert.IsTrue(reloaded.CanExecute);
             Assert.IsTrue((await restored.ValueStore.GetAsync(installed.ScriptKey.ToString(), "saved", CancellationToken.None)).Exists);
         }
@@ -224,6 +224,7 @@ namespace CefFlashBrowser.Tests
 
             await service.Decisions.SetAsync(scope, PermissionDecision.Allow, CancellationToken.None);
 
+            Assert.AreEqual("integer", await _database.ScalarAsync("SELECT typeof(updated_at) FROM monkeysharp_permission_decisions"));
             Assert.AreEqual(PermissionDecision.Allow, await service.Decisions.GetAsync(scope, CancellationToken.None));
             Assert.IsNull(await service.Decisions.GetAsync(new UserScriptPermissionScope(scope.ScriptKey, "GM.xmlHttpRequest", scope.Target), CancellationToken.None));
             Assert.IsNull(await service.Decisions.GetAsync(new UserScriptPermissionScope(scope.ScriptKey, scope.Kind, "https://other.example.com"), CancellationToken.None));

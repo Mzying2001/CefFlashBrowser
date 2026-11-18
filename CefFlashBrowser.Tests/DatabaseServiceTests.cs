@@ -134,6 +134,16 @@ namespace CefFlashBrowser.Tests
 
             CollectionAssert.AreEqual(new[] { "page_url", "icon_url", "updated_at" }, columns);
 
+            foreach (var table in new[] { "monkeysharp_scripts", "monkeysharp_values", "monkeysharp_permission_decisions", "monkeysharp_tab_states" })
+            {
+                var timestampColumns = await _database.QueryAsync(
+                    "SELECT name FROM pragma_table_info('" + table + "') " +
+                    "WHERE name IN ('installed_at', 'updated_at') AND type = 'INTEGER' AND [notnull] = 1",
+                    row => row.GetString(0));
+                var expected = table == "monkeysharp_scripts" ? new[] { "installed_at", "updated_at" } : new[] { "updated_at" };
+                CollectionAssert.AreEquivalent(expected, timestampColumns, table);
+            }
+
             await new DatabaseService(_database).InitializeAsync();
 
             Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
@@ -229,8 +239,11 @@ namespace CefFlashBrowser.Tests
         public async Task UserScriptSave_InitializesAndRollsBackWhenSourceCommitFails()
         {
             var key = ScriptKey.Parse(Guid.NewGuid().ToString());
-            var now = DateTimeOffset.UtcNow;
-            var record = new UserScriptDatabaseRecord(key, null, true, now, now, new string('a', 64), Guid.NewGuid().ToString("D"));
+            const long installedAtMilliseconds = 1700000000123L;
+            var installedAt = DateTimeOffset.FromUnixTimeMilliseconds(installedAtMilliseconds);
+            var updatedAt = installedAt.AddMilliseconds(1);
+            var record = new UserScriptDatabaseRecord(key, null, true, installedAt.ToOffset(TimeSpan.FromHours(8)).AddTicks(1234),
+                updatedAt, new string('a', 64), Guid.NewGuid().ToString("D"));
 
             await Assert.ThrowsExceptionAsync<IOException>(() => _service.SaveUserScriptAsync(record, Array.Empty<UserScriptAssetDatabaseRecord>(),
                 () => throw new IOException("source switch failed"), CancellationToken.None));
@@ -243,7 +256,10 @@ namespace CefFlashBrowser.Tests
             var restored = await _service.GetUserScriptAsync(key);
 
             Assert.AreEqual(key, restored.ScriptKey);
-            Assert.AreEqual(now, restored.InstalledAt);
+            Assert.AreEqual(installedAt, restored.InstalledAt);
+            Assert.AreEqual(updatedAt, restored.UpdatedAt);
+            Assert.AreEqual(installedAtMilliseconds, await _database.ScalarAsync("SELECT installed_at FROM monkeysharp_scripts"));
+            Assert.AreEqual(installedAtMilliseconds + 1, await _database.ScalarAsync("SELECT updated_at FROM monkeysharp_scripts"));
             Assert.AreEqual(record.SourceSha256, restored.SourceSha256);
             Assert.AreEqual(record.CommitId, restored.CommitId);
         }

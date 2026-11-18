@@ -65,6 +65,7 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(value.EncodedValue, stored.Value.EncodedValue);
             Assert.IsFalse((await restored.GetAsync(_id, "missing", CancellationToken.None)).Exists);
             Assert.AreEqual(value.EncodedValue, await _database.ScalarAsync("SELECT encoded_value FROM monkeysharp_values"));
+            Assert.AreEqual("integer", await _database.ScalarAsync("SELECT typeof(updated_at) FROM monkeysharp_values"));
         }
 
         [TestMethod]
@@ -246,6 +247,7 @@ namespace CefFlashBrowser.Tests
             var second = new SqliteUserScriptTabStateService(_storage, "second-tab");
 
             await first.SaveAsync(key, null, "{\"count\":1}", CancellationToken.None);
+            Assert.AreEqual("integer", await _database.ScalarAsync("SELECT typeof(updated_at) FROM monkeysharp_tab_states"));
             await second.SaveAsync(key, null, "{\"count\":2}", CancellationToken.None);
 
             Assert.AreEqual("{\"count\":1}", await first.GetAsync(key, null, CancellationToken.None));
