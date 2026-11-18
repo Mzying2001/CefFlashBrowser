@@ -477,7 +477,7 @@ function Test-UserScriptMenus($Context) {
     var count = 0;
     await GM.registerMenuCommand('Runtime command', function() {
         document.documentElement.setAttribute('data-runtime-menu', String(++count));
-    });
+    }, {autoClose:false});
     await GM.registerMenuCommand('Frame command', function() {
         document.documentElement.setAttribute('data-frame-menu', 'yes');
     }, {clickedFrame:true});
@@ -488,6 +488,8 @@ function Test-UserScriptMenus($Context) {
         $installed.Add($item.ScriptKey)
         $window = New-RegressionWindow $Context
         $model = $window.ViewModel.CurrentBrowser
+        $scriptButton = $window.FindName('toolbarScriptCommandsButton')
+        Assert-Regression ($null -ne $scriptButton -and $scriptButton.Visibility -eq 'Collapsed') 'toolbar script button is hidden before commands register'
         $model.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context {
             $model.UserScriptMenus.Count -eq 2 -and $model.Browser.Title -eq 'Auxiliary regression' -and
@@ -527,15 +529,50 @@ function Test-UserScriptMenus($Context) {
             Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-manual-$index')") -eq 'yes' } 'manual source executes'
             Assert-Regression ($handled -and $window.ViewModel.Browsers.Count -eq 1) "manual source $index cannot trigger an application command"
         }
-        Invoke-BrowserCommand $model.UserScriptMenus[0].InvokeCommand
-        Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '1' } 'toolbar GM command callback'
-        Invoke-BrowserCommand $model.UserScriptMenus[1].InvokeCommand
-        Assert-Regression ($null -eq (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-frame-menu')")) 'toolbar invocation cannot attest a clicked frame'
+        $actionsButton = $window.FindName('toolbarActionsButton')
+        $window.UpdateLayout()
+        $buttonOffset = $actionsButton.TranslatePoint([Windows.Point]::new(0, 0), $scriptButton)
+        Assert-Regression ($scriptButton.IsVisible -and $scriptButton.ActualWidth -eq $actionsButton.ActualWidth -and
+            $buttonOffset.X -eq ($scriptButton.ActualWidth + $scriptButton.Margin.Right) -and $buttonOffset.Y -eq 0) 'script button sits immediately left of the actions button'
+        $scriptMenu = $window.Resources['scriptCommandsMenu']
+        $scriptButton.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Primitives.ButtonBase]::ClickEvent))
+        try {
+            Wait-Regression $Context {
+                $scriptMenu.IsOpen -and $scriptMenu.ItemContainerGenerator.ContainerFromIndex(1)
+            } 'toolbar script button opens its menu'
+            $runtimeItem = $scriptMenu.ItemContainerGenerator.ContainerFromIndex(0)
+            $frameItem = $scriptMenu.ItemContainerGenerator.ContainerFromIndex(1)
+            Assert-Regression ($scriptMenu.PlacementTarget -eq $scriptButton -and $scriptMenu.Items.Count -eq 2 -and
+                $runtimeItem.Header -eq 'Runtime command' -and $runtimeItem.ToolTip -like 'Runtime menu*' -and
+                $runtimeItem.IsEnabled -and $runtimeItem.StaysOpenOnClick -and
+                $frameItem.Header -eq 'Frame command' -and !$frameItem.IsEnabled) 'toolbar menu renders the current tab commands and their options'
+            Invoke-BrowserCommand $runtimeItem.Command
+            Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '1' } 'toolbar GM command callback'
+            Invoke-BrowserCommand $frameItem.Command
+            Assert-Regression ($null -eq (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-frame-menu')")) 'toolbar invocation cannot attest a clicked frame'
+        } finally {
+            $scriptMenu.IsOpen = $false
+        }
         $dynamicId = $submenu.Commands[0]
         [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $dynamicId)) 'invoke native GM command')
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '2' } 'native GM command callback'
         [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $submenu.Commands[1])) 'invoke frame-attested GM menu')
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-frame-menu')") -eq 'yes' } 'native frame attests the isolated menu subscriber'
+
+        $actionsMenu = Open-BrowserActionsMenu $Context $window
+        try {
+            $headers = @($actionsMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] } | ForEach-Object { $_.Header })
+            Assert-Regression ($headers -notcontains $window.FindResource('userscript_commands') -and
+                $headers -contains $window.FindResource('mainWindow_manageUserScripts') -and
+                $headers -contains $window.FindResource('userscript_downloads')) 'actions retain script management and downloads after moving script commands'
+        } finally {
+            $actionsMenu.IsOpen = $false
+        }
+
+        $window.ViewModel.AddBrowser('about:blank', $true) | Out-Null
+        Wait-Regression $Context { $scriptButton.Visibility -eq 'Collapsed' -and $scriptMenu.Items.Count -eq 0 } 'toolbar script menu follows a tab without commands'
+        $window.ViewModel.CurrentBrowser = $model
+        Wait-Regression $Context { $scriptButton.IsVisible -and $scriptMenu.Items.Count -eq 2 } 'returning to the script tab restores its toolbar commands'
 
         $orderRegistrations = @()
         try {
@@ -642,6 +679,7 @@ GM.registerMenuCommand('Runtime command', function() {
         $oldCommand = $model.UserScriptMenus[0]
         Complete-UserScriptTask $Context ($repository.SetEnabledAsync($installed[5], $false, [Threading.CancellationToken]::None)) 'disable runtime menu script' | Out-Null
         Wait-Regression $Context { $model.UserScriptMenus.Count -eq 0 } 'disabled execution unregisters GM menus'
+        Wait-Regression $Context { $scriptButton.Visibility -eq 'Collapsed' -and $scriptMenu.Items.Count -eq 0 } 'last command removal hides the toolbar script button'
         Invoke-BrowserCommand $oldCommand.InvokeCommand
         Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '2') 'released menu commands cannot invoke an old execution'
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false

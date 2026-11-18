@@ -214,30 +214,6 @@
             <MenuItem Header="{DynamicResource mainWindow_manageUserScripts}"
                       Command="{Binding OpenUserScriptManagerCommand}"/>
 
-            <MenuItem Header="{DynamicResource userscript_commands}"
-                      ItemsSource="{Binding CurrentBrowser.UserScriptMenus}">
-                <MenuItem.Style>
-                    <Style TargetType="MenuItem"
-                           BasedOn="{StaticResource {x:Type MenuItem}}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding CurrentBrowser.UserScriptMenus.Count}" Value="0">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </MenuItem.Style>
-
-                <MenuItem.ItemContainerStyle>
-                    <Style TargetType="MenuItem"
-                           BasedOn="{StaticResource {x:Type MenuItem}}">
-                        <Setter Property="Header" Value="{Binding Name}"/>
-                        <Setter Property="ToolTip" Value="{Binding Description}"/>
-                        <Setter Property="Command" Value="{Binding InvokeCommand}"/>
-                        <Setter Property="StaysOpenOnClick" Value="{Binding StaysOpenOnClick}"/>
-                    </Style>
-                </MenuItem.ItemContainerStyle>
-            </MenuItem>
-
             <MenuItem Header="{DynamicResource userscript_downloads}"
                       ItemsSource="{Binding CurrentBrowser.UserScriptDownloads}">
                 <MenuItem.Style>
@@ -337,6 +313,23 @@
                       Command="{Binding ViewSourceCommand}"
                       CommandParameter="{Binding CurrentBrowser}"
                       InputGestureText="Ctrl+U"/>
+        </ContextMenu>
+
+        <!--Script commands menu-->
+        <ContextMenu x:Key="scriptCommandsMenu"
+                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                     ItemsSource="{Binding CurrentBrowser.UserScriptMenus}"
+                     VerticalOffset="-8"
+                     HorizontalOffset="8">
+            <ContextMenu.ItemContainerStyle>
+                <Style TargetType="MenuItem"
+                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Setter Property="Header" Value="{Binding Name}"/>
+                    <Setter Property="ToolTip" Value="{Binding Description}"/>
+                    <Setter Property="Command" Value="{Binding InvokeCommand}"/>
+                    <Setter Property="StaysOpenOnClick" Value="{Binding StaysOpenOnClick}"/>
+                </Style>
+            </ContextMenu.ItemContainerStyle>
         </ContextMenu>
 
         <!--Blocked SWFs menu-->
@@ -569,10 +562,8 @@
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.BlockedSwfs.Count}"
-                                             Value="0">
-                                    <Setter Property="Visibility"
-                                            Value="Collapsed"/>
+                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.BlockedSwfs.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -593,10 +584,8 @@
                         <Style TargetType="ToggleButton"
                                BasedOn="{StaticResource {x:Type ToggleButton}}">
                             <Style.Triggers>
-                                <Trigger Property="IsChecked"
-                                         Value="False">
-                                    <Setter Property="Visibility"
-                                            Value="Collapsed"/>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -606,8 +595,32 @@
                                   UriSource="{StaticResource SearchIconUri}"/>
                 </ToggleButton>
 
+                <!--script commands button-->
+                <Button x:Name="toolbarScriptCommandsButton"
+                        Margin="0,0,10,0"
+                        AutomationProperties.Name="{DynamicResource userscript_commands}"
+                        ToolTip="{DynamicResource userscript_commands}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource scriptCommandsMenu}"/>
+                    </i:Interaction.Behaviors>
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentBrowser.UserScriptMenus.Count, FallbackValue=0}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <svgc:SvgIcon Width="13"
+                                  Height="13"
+                                  UriSource="{StaticResource PluginIconUri}"/>
+                </Button>
+
                 <!--menu button-->
-                <Button ToolTip="{DynamicResource browser_toolTipMore}">
+                <Button x:Name="toolbarActionsButton"
+                        ToolTip="{DynamicResource browser_toolTipMore}">
                     <i:Interaction.Behaviors>
                         <behaviors:ContextMenuBehavior Menu="{DynamicResource browserActionsMenu}"/>
                     </i:Interaction.Behaviors>
