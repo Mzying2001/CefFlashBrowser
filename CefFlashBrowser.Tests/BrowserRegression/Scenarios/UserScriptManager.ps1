@@ -772,15 +772,35 @@ document.documentElement.setAttribute('data-manager', 'saved');
 
         $url = $fixture.BaseUrl + '/manager.user.js'
         $dependency = $fixture.BaseUrl + '/dependency.js'
+        $secondDependency = $fixture.BaseUrl + '/blocked.js'
         $resource = $fixture.BaseUrl + '/resource.txt'
-        $fixture.ScriptSource = $source.Replace('// @grant none',
-            "// @grant none`n// @icon64 /blocked.png`n// @connect 127.0.0.1`n// @require $dependency`n// @resource fixture $resource")
+        $secondResource = $fixture.BaseUrl + '/blocked.png'
+        $metadata = @"
+// @grant GM_getValue
+// @grant GM_setValue
+// @include https://fixture.invalid/*
+// @inject-into content
+// @icon64 /blocked.png
+// @connect 127.0.0.1
+// @connect localhost
+// @require $dependency
+// @require $secondDependency
+// @resource fixture $resource
+// @resource second $secondResource
+"@
+        $fixture.ScriptSource = $source.Replace('// @grant none', $metadata)
         Complete-UserScriptTask $Context ($model.ImportUrlAsync($url)) 'download URL draft'
         Assert-Regression (!$model.SelectedScript.IsInstalled -and $fixture.RequestsFor('/manager.user.js') -eq 1) 'URL download produces a pending draft'
         $expected = @{
             Text = @{
-                scriptName = 'Manager workflow'; scriptOrigin = $url; scriptConnects = '127.0.0.1'
-                scriptRequires = $dependency; scriptResources = "fixture $resource"
+                scriptName = 'Manager workflow'
+                scriptOrigin = $url
+                scriptMatches = "file:///*`r`nhttps://fixture.invalid/*"
+                scriptWorld = "DOM`r`ncontent"
+                scriptGrants = "GM_getValue`r`nGM_setValue"
+                scriptConnects = "127.0.0.1`r`nlocalhost"
+                scriptRequires = "$dependency`r`n$secondDependency"
+                scriptResources = "fixture $resource`r`nsecond $secondResource"
             }
             IconUrl = $fixture.BaseUrl + '/blocked.png'; IconReady = $true
         }
