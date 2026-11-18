@@ -696,6 +696,8 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 browser.Load(url);
         }
 
+        // On CEF 84, loading about:blank starts the renderer so MonkeySharp can
+        // prepare its isolated userscript runtime before the first target navigation.
         public void LoadInitialBlank()
         {
             if (!isHosted || browser.IsDisposed)
@@ -777,6 +779,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnLoadError(object sender, LoadErrorEventArgs e)
         {
+            // A committed error page can also be the first target in history.
             if (hasInitialBlank && !browser.IsDisposed && !e.Browser.IsDisposed
                 && e.Frame.IsMain && e.ErrorCode != CefErrorCode.Aborted && e.FailedUrl != "about:blank"
                 && TryRemoveInitialBlank(e.Browser.GetHost(), e.FailedUrl))
@@ -845,6 +848,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
             InvokeOnUIThread(delegate
             {
+                // Keep the requested address visible while the renderer warms up.
                 if (!isInitialBlank || Address == "about:blank")
                     OnAddressChanged(e);
             });
@@ -855,8 +859,9 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             if (host == null)
                 return false;
 
-            // CEF visits the entries synchronously on its UI thread. Reset only
-            // while the warm-up document and its replacement are the entire history.
+            // CEF adds the warm-up to history. The reset keeps only the current entry.
+            // Verify synchronously on the CEF UI thread that the warm-up and the first
+            // target are the entire history.
             var history = new InitialBlankHistoryVisitor(address);
             host.GetNavigationEntries(history, false);
 
