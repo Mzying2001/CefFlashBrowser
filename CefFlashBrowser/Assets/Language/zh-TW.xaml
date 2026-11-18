@@ -225,6 +225,14 @@
     <sys:String x:Key="userScriptManager_copy">複製</sys:String>
     <sys:String x:Key="userScriptManager_paste">貼上</sys:String>
     <sys:String x:Key="userScriptManager_selectAll">全選</sys:String>
+    <sys:String x:Key="userScriptManager_replace">取代</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">上一個相符項目</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">下一個相符項目</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">區分大小寫</sys:String>
+    <sys:String x:Key="userScriptManager_matches">相符項目</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">沒有相符項目</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">取代目前項目</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">全部取代</sys:String>
     <sys:String x:Key="userScriptManager_script">腳本</sys:String>
     <sys:String x:Key="userScriptManager_reload">從磁碟重新載入</sys:String>
     <sys:String x:Key="userScriptManager_delete">刪除</sys:String>

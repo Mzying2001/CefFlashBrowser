@@ -29,6 +29,9 @@ namespace CefFlashBrowser.Views
 
             InitializeComponent();
             Loaded += WindowLoaded;
+            sourceEditor.TextChanged += (_, __) => UpdateSearchControls();
+            sourceEditor.TextArea.SelectionChanged += (_, __) => UpdateSearchControls();
+
             WindowSizeInfo.Apply(GlobalData.Settings.UserScriptManagerSizeInfo, this);
         }
 
@@ -87,6 +90,7 @@ namespace CefFlashBrowser.Views
                 return;
 
             sourceEditor.Document.UndoStack.ClearAll();
+            OnSearchScriptChanged();
         }
 
         protected override void OnClosing(CancelEventArgs e)

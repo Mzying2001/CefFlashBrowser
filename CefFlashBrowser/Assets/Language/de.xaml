@@ -225,6 +225,14 @@
     <sys:String x:Key="userScriptManager_copy">Kopieren</sys:String>
     <sys:String x:Key="userScriptManager_paste">Einfügen</sys:String>
     <sys:String x:Key="userScriptManager_selectAll">Alles auswählen</sys:String>
+    <sys:String x:Key="userScriptManager_replace">Ersetzen</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">Vorheriger Treffer</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">Nächster Treffer</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">Groß-/Kleinschreibung beachten</sys:String>
+    <sys:String x:Key="userScriptManager_matches">Treffer</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">Keine Treffer</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">Treffer ersetzen</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">Alle ersetzen</sys:String>
     <sys:String x:Key="userScriptManager_script">Skript</sys:String>
     <sys:String x:Key="userScriptManager_reload">Von Datenträger neu laden</sys:String>
     <sys:String x:Key="userScriptManager_delete">Löschen</sys:String>

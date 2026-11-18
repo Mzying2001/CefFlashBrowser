@@ -14,6 +14,8 @@ namespace CefFlashBrowser.Views.Custom
         private readonly IHighlightingDefinition _javascript;
         private bool _updatingText;
 
+        internal ScriptEditorSearch Search { get; }
+
 
         public static readonly DependencyProperty SourceTextProperty = DependencyProperty.Register(
             nameof(SourceText), typeof(string), typeof(ScriptEditor),
@@ -43,6 +45,7 @@ namespace CefFlashBrowser.Views.Custom
                 _javascript = HighlightingLoader.Load(reader, HighlightingManager.Instance);
             }
 
+            Search = new ScriptEditorSearch(this);
             SyntaxHighlighting = _javascript;
             Options.IndentationSize = 2;
             Options.ConvertTabsToSpaces = true;
@@ -114,6 +117,7 @@ namespace CefFlashBrowser.Views.Custom
             SetHighlightingColor("JavaScriptGlobalFunctions", dark ? "#DCDCAA" : "#795E26");
             LineNumbersForeground = CreateBrush(dark ? "#9D9D9D" : "#757575");
             TextArea.SelectionBrush = CreateBrush(dark ? "#264F78" : "#ADD6FF");
+            Search.MarkerBrush = CreateBrush(dark ? "#453919" : "#FFF0AE");
             TextArea.TextView.LinkTextForegroundBrush = CreateBrush(dark ? "#4DAAFC" : "#006AB1");
             TextArea.TextView.Redraw();
         }

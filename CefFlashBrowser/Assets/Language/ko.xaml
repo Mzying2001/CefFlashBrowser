@@ -225,6 +225,14 @@
     <sys:String x:Key="userScriptManager_copy">복사</sys:String>
     <sys:String x:Key="userScriptManager_paste">붙여넣기</sys:String>
     <sys:String x:Key="userScriptManager_selectAll">모두 선택</sys:String>
+    <sys:String x:Key="userScriptManager_replace">바꾸기</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">이전 일치 항목</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">다음 일치 항목</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">대소문자 구분</sys:String>
+    <sys:String x:Key="userScriptManager_matches">일치 항목</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">일치 항목 없음</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">선택 항목 바꾸기</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">모두 바꾸기</sys:String>
     <sys:String x:Key="userScriptManager_script">스크립트</sys:String>
     <sys:String x:Key="userScriptManager_reload">디스크에서 다시 불러오기</sys:String>
     <sys:String x:Key="userScriptManager_delete">삭제</sys:String>

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
 
         x:Name="window"
@@ -18,10 +19,24 @@
     </i:Interaction.Behaviors>
 
     <Window.InputBindings>
-        <KeyBinding Gesture="Ctrl+N" Command="{Binding NewCommand}"/>
-        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}"/>
-        <KeyBinding Gesture="Ctrl+W" Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+        <KeyBinding Gesture="Ctrl+N"
+                    Command="{Binding NewCommand}"/>
+        <KeyBinding Gesture="Ctrl+S"
+                    Command="{Binding SaveCommand}"/>
+        <KeyBinding Gesture="Ctrl+W"
+                    Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
+        <KeyBinding Gesture="Ctrl+F"
+                    Command="ApplicationCommands.Find"
+                    CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
+        <KeyBinding Gesture="Ctrl+H"
+                    Command="ApplicationCommands.Replace"
+                    CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
     </Window.InputBindings>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Find" CanExecute="CanFindOrReplace" Executed="OpenFindOrReplace"/>
+        <CommandBinding Command="ApplicationCommands.Replace" CanExecute="CanFindOrReplace" Executed="OpenFindOrReplace"/>
+    </Window.CommandBindings>
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -68,6 +83,13 @@
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
                 <MenuItem Header="{DynamicResource userScriptManager_selectAll}"
                           Command="ApplicationCommands.SelectAll"
+                          CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
+                <Separator/>
+                <MenuItem x:Name="findMenuItem" Header="{DynamicResource browser_find}"
+                          InputGestureText="Ctrl+F" Command="ApplicationCommands.Find"
+                          CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
+                <MenuItem x:Name="replaceMenuItem" Header="{DynamicResource userScriptManager_replace}"
+                          InputGestureText="Ctrl+H" Command="ApplicationCommands.Replace"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource userScriptManager_script}">
@@ -240,7 +262,8 @@
                           Background="Transparent"
                           HorizontalAlignment="Stretch"/>
 
-            <DockPanel Grid.Column="2">
+            <DockPanel Grid.Column="2"
+                       PreviewKeyDown="SearchPreviewKeyDown">
                 <TextBlock DockPanel.Dock="Top"
                            Margin="0,0,0,5"
                            TextWrapping="Wrap"
@@ -255,6 +278,70 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
+
+                <Border x:Name="searchBar"
+                        DockPanel.Dock="Top"
+                        Padding="10"
+                        BorderThickness="1,1,1,0"
+                        Visibility="Collapsed"
+                        Background="{DynamicResource RegionBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}">
+                    <StackPanel>
+                        <DockPanel>
+                            <Button
+                                x:Name="closeSearchButton" DockPanel.Dock="Right" Margin="5,0,0,0" Padding="5,0" Content="×"
+                                AutomationProperties.Name="{DynamicResource solEditor_close}"
+                                ToolTip="{DynamicResource solEditor_close}" Click="CloseSearchClicked"/>
+                            <hc:TextBox
+                                x:Name="searchText" TextChanged="SearchTextChanged"
+                                hc:InfoElement.Placeholder="{DynamicResource browser_find}"
+                                AutomationProperties.Name="{DynamicResource browser_find}"/>
+                        </DockPanel>
+                        <WrapPanel Margin="0,5,0,0">
+                            <Button
+                                x:Name="findPrevious" Margin="0,5,5,0" Padding="5,0" Content="↑"
+                                AutomationProperties.Name="{DynamicResource userScriptManager_findPrevious}"
+                                ToolTip="{DynamicResource userScriptManager_findPrevious}" Click="FindMatchClicked"/>
+                            <Button
+                                x:Name="findNext" Margin="0,5,10,0" Padding="5,0" Content="↓"
+                                AutomationProperties.Name="{DynamicResource userScriptManager_findNext}"
+                                ToolTip="{DynamicResource userScriptManager_findNext}" Click="FindMatchClicked"/>
+                            <CheckBox
+                                x:Name="matchCase" Margin="0,5,0,0" VerticalAlignment="Center"
+                                Content="{DynamicResource userScriptManager_matchCase}"
+                                ToolTip="{DynamicResource userScriptManager_matchCase}"
+                                Checked="MatchCaseChanged" Unchecked="MatchCaseChanged"
+                                AutomationProperties.Name="{DynamicResource userScriptManager_matchCase}"/>
+                        </WrapPanel>
+                        <TextBlock x:Name="matchCount" Margin="0,5,0,0" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource SecondaryTextBrush}">
+                            <Run Text="{DynamicResource userScriptManager_matches}"/><Run Text=" "/><Run x:Name="matchCountValue"/>
+                        </TextBlock>
+                        <TextBlock x:Name="noMatches" Margin="0,5,0,0" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                   Text="{DynamicResource userScriptManager_noMatches}"/>
+                        <StackPanel x:Name="replaceRow"
+                                    Margin="0,5,0,0"
+                                    Visibility="Collapsed">
+                            <hc:TextBox
+                                x:Name="replacementText"
+                                hc:InfoElement.Placeholder="{DynamicResource userScriptManager_replace}"
+                                AutomationProperties.Name="{DynamicResource userScriptManager_replace}"/>
+                            <WrapPanel>
+                                <Button
+                                    x:Name="replaceCurrent" Margin="0,5,5,0" Padding="5"
+                                    Content="{DynamicResource userScriptManager_replace}"
+                                    AutomationProperties.Name="{DynamicResource userScriptManager_replaceCurrent}"
+                                    ToolTip="{DynamicResource userScriptManager_replaceCurrent}"
+                                    Click="ReplaceCurrentClicked"/>
+                                <Button
+                                    x:Name="replaceAll" Margin="0,5,0,0" Padding="5"
+                                    Content="{DynamicResource userScriptManager_replaceAll}"
+                                    Click="ReplaceAllClicked"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
 
                 <c:ScriptEditor x:Name="sourceEditor"
                                 SourceText="{Binding SelectedScript.Source, UpdateSourceTrigger=PropertyChanged, TargetNullValue='', FallbackValue=''}"

@@ -225,6 +225,14 @@
     <sys:String x:Key="userScriptManager_copy">Copy</sys:String>
     <sys:String x:Key="userScriptManager_paste">Paste</sys:String>
     <sys:String x:Key="userScriptManager_selectAll">Select all</sys:String>
+    <sys:String x:Key="userScriptManager_replace">Replace</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">Previous match</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">Next match</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">Match case</sys:String>
+    <sys:String x:Key="userScriptManager_matches">Matches</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">No matches</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">Replace current</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">Replace all</sys:String>
     <sys:String x:Key="userScriptManager_script">Script</sys:String>
     <sys:String x:Key="userScriptManager_reload">Reload from disk</sys:String>
     <sys:String x:Key="userScriptManager_delete">Delete</sys:String>

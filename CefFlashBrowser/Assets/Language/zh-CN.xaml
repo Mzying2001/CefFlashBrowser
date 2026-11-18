@@ -225,6 +225,14 @@
     <sys:String x:Key="userScriptManager_copy">复制</sys:String>
     <sys:String x:Key="userScriptManager_paste">粘贴</sys:String>
     <sys:String x:Key="userScriptManager_selectAll">全选</sys:String>
+    <sys:String x:Key="userScriptManager_replace">替换</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">上一个匹配项</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">下一个匹配项</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">区分大小写</sys:String>
+    <sys:String x:Key="userScriptManager_matches">匹配项</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">无匹配项</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">替换当前</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">全部替换</sys:String>
     <sys:String x:Key="userScriptManager_script">脚本</sys:String>
     <sys:String x:Key="userScriptManager_reload">从磁盘重新载入</sys:String>
     <sys:String x:Key="userScriptManager_delete">删除</sys:String>

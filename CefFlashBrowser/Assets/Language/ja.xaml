@@ -225,6 +225,14 @@
     <sys:String x:Key="userScriptManager_copy">コピー</sys:String>
     <sys:String x:Key="userScriptManager_paste">貼り付け</sys:String>
     <sys:String x:Key="userScriptManager_selectAll">すべて選択</sys:String>
+    <sys:String x:Key="userScriptManager_replace">置換</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">前の一致</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">次の一致</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">大文字と小文字を区別</sys:String>
+    <sys:String x:Key="userScriptManager_matches">一致件数</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">一致なし</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">選択中を置換</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">すべて置換</sys:String>
     <sys:String x:Key="userScriptManager_script">スクリプト</sys:String>
     <sys:String x:Key="userScriptManager_reload">ディスクから再読み込み</sys:String>
     <sys:String x:Key="userScriptManager_delete">削除</sys:String>

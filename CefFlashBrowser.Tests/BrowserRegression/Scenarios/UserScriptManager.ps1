@@ -172,6 +172,195 @@ function Get-ManagerColorContrast($First, $Second) {
     return ([Math]::Max($luminances[0], $luminances[1]) + 0.05) / ([Math]::Min($luminances[0], $luminances[1]) + 0.05)
 }
 
+function Test-ManagerFindReplace($Context, $Window) {
+    $model = $Window.DataContext
+    $previousSelection = $model.SelectedScript
+    $first = $null
+    $second = $null
+    $editor = $Window.FindName('sourceEditor')
+    $bar = $Window.FindName('searchBar')
+    $query = $Window.FindName('searchText')
+    $replacement = $Window.FindName('replacementText')
+    $replaceRow = $Window.FindName('replaceRow')
+    $matchCase = $Window.FindName('matchCase')
+    $count = $Window.FindName('matchCountValue')
+    $noMatches = $Window.FindName('noMatches')
+    $findMenu = $Window.FindName('findMenuItem')
+    $replaceMenu = $Window.FindName('replaceMenuItem')
+    $next = $Window.FindName('findNext')
+    $replaceCurrent = $Window.FindName('replaceCurrent')
+    $replaceAll = $Window.FindName('replaceAll')
+    try {
+        $model.NewScript()
+        $first = $model.SelectedScript
+        $model.NewScript()
+        $second = $model.SelectedScript
+        $sample = 'token TOKEN token'
+        $first.Source = $sample
+        $second.Source = $sample
+        $model.SelectedScript = $first
+        Wait-Regression $Context { $editor.Text -ceq $sample } 'find fixture is displayed'
+
+        $editor.Select(0, 5)
+        Send-ManagerShortcut $Context $Window 0x46
+        Wait-Regression $Context { $bar.IsVisible -and $query.IsKeyboardFocused } 'Ctrl+F opens the inline search and focuses its input'
+        Assert-Regression ($query.Text -ceq 'token' -and $query.SelectionLength -eq 5 -and !$replaceRow.IsVisible -and
+            $count.Text -eq '3') 'find seeds selected text and counts matches regardless of case'
+        [RegressionKeyboard]::PressKey(0x0D)
+        Wait-Regression $Context { $editor.SelectionStart -eq 6 } 'Enter selects the next match'
+        [RegressionKeyboard]::PressKey(0x72)
+        Wait-Regression $Context { $editor.SelectionStart -eq 12 } 'F3 advances to the last match'
+        [RegressionKeyboard]::PressKey(0x72)
+        Wait-Regression $Context { $editor.SelectionStart -eq 0 } 'F3 wraps to the first match'
+        [RegressionKeyboard]::SetKey(0x10, $false)
+        try { [RegressionKeyboard]::PressKey(0x0D) } finally { [RegressionKeyboard]::SetKey(0x10, $true) }
+        Wait-Regression $Context { $editor.SelectionStart -eq 12 } 'Shift+Enter wraps to the last match'
+        [RegressionKeyboard]::SetKey(0x10, $false)
+        try { [RegressionKeyboard]::PressKey(0x72) } finally { [RegressionKeyboard]::SetKey(0x10, $true) }
+        Wait-Regression $Context { $editor.SelectionStart -eq 6 } 'Shift+F3 selects the previous match'
+
+        [RegressionKeyboard]::PressKey(0x1B)
+        Wait-Regression $Context { !$bar.IsVisible -and $editor.TextArea.IsKeyboardFocusWithin } 'Escape closes search and returns focus to the editor'
+        $findMenu.Command.Execute($null, $findMenu.CommandTarget)
+        Assert-Regression ($bar.IsVisible -and !$replaceRow.IsVisible) 'Edit menu opens find'
+        [RegressionKeyboard]::SetKey(0x11, $false)
+        try { [RegressionKeyboard]::PressKey(0x48) } finally { [RegressionKeyboard]::SetKey(0x11, $true) }
+        Wait-Regression $Context { $replaceRow.IsVisible -and $query.IsKeyboardFocused } 'Ctrl+H opens replace from the search box'
+        [RegressionKeyboard]::PressKey(0x1B)
+        Wait-Regression $Context { !$bar.IsVisible } 'Escape also closes replace mode'
+        $replaceMenu.Command.Execute($null, $replaceMenu.CommandTarget)
+        Assert-Regression ($replaceRow.IsVisible -and $query.IsKeyboardFocused) 'Edit menu opens replace'
+
+        $query.Text = 'token'
+        $matchCase.IsChecked = $true
+        Assert-Regression ($count.Text -eq '2' -and $editor.SelectedText -ceq 'token') 'matching case refreshes matches and skips other casing'
+        $query.Text = 'missing'
+        Assert-Regression ($noMatches.IsVisible -and !$next.IsEnabled -and !$replaceCurrent.IsEnabled -and !$replaceAll.IsEnabled) 'no matches disables navigation and replacement'
+        $query.Clear()
+        Assert-Regression (!$noMatches.IsVisible -and !$next.IsEnabled -and !$replaceAll.IsEnabled) 'empty query clears the result state'
+
+        $matchCase.IsChecked = $false
+        $editor.CaretOffset = 0
+        $editor.TextArea.ClearSelection()
+        $query.Text = 'token'
+        $replacement.Text = 'token$1'
+        $replaceCurrent.RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Primitives.ButtonBase]::ClickEvent)))
+        Assert-Regression ($first.Source -ceq 'token$1 TOKEN token' -and $editor.SelectionStart -eq 8 -and
+            $editor.SelectedText -ceq 'TOKEN') 'replace current inserts literal text and advances beyond it'
+        $replacement.Clear()
+        $replaceCurrent.RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Primitives.ButtonBase]::ClickEvent)))
+        Assert-Regression ($first.Source -ceq 'token$1  token' -and $second.Source -ceq $sample) 'empty replacement deletes only the selected match in the current draft'
+
+        $sourceBefore = "[a]`r`n[A]`t[a]"
+        $sourceAfter = "[a]`$1`r`n[a]`$1`t[a]`$1"
+        $first.Source = $sourceBefore
+        $query.Text = '[a]'
+        $replacement.Text = '[a]$1'
+        $replaceAll.RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Primitives.ButtonBase]::ClickEvent)))
+        Assert-Regression ($first.Source -ceq $sourceAfter -and $second.Source -ceq $sample) 'replace all edits each original literal match once and preserves other text and drafts'
+        [void]$editor.Undo()
+        Assert-Regression ($first.Source -ceq $sourceBefore -and !$editor.CanUndo) 'one undo restores the whole replace-all operation'
+        [void]$editor.Redo()
+        Assert-Regression ($first.Source -ceq $sourceAfter) 'one redo reapplies the whole replace-all operation'
+
+        $matchCase.IsChecked = $true
+        $editor.Select(0, 3)
+        Assert-Regression ($replaceCurrent.IsEnabled) 'a matching editor selection enables replacement'
+        $second.Source = $first.Source
+        $model.SelectedScript = $second
+        Assert-Regression ($replaceRow.IsVisible -and $query.Text -ceq '[a]' -and $replacement.Text -ceq '[a]$1' -and
+            $matchCase.IsChecked -and $count.Text -eq '3' -and !$replaceCurrent.IsEnabled -and !$editor.CanUndo) 'identical-source script switch keeps the search inputs and clears the prior selection and undo'
+        $second.Source = '[A]'
+        Assert-Regression ($replaceRow.IsVisible -and $noMatches.IsVisible -and !$replaceAll.IsEnabled) 'source changes refresh the match list without closing the toolbar'
+        $model.SelectedScript = $first
+        Assert-Regression ($replaceRow.IsVisible -and $count.Text -eq '3') 'switching to different source refreshes matches for the newly selected script'
+        $model.SelectedScript = $null
+        Wait-Regression $Context { !$bar.IsVisible -and !$editor.IsEnabled } 'no selected script closes the toolbar'
+        Assert-Regression (!$findMenu.Command.CanExecute($null, $findMenu.CommandTarget) -and
+            !$replaceMenu.Command.CanExecute($null, $replaceMenu.CommandTarget)) 'no selected script disables find and replace commands'
+    } finally {
+        $model.SelectedScript = $null
+        $query.Clear()
+        $replacement.Clear()
+        $matchCase.IsChecked = $false
+        $model.SelectedScript = $previousSelection
+        if ($null -ne $first) { [void]$model.Scripts.Remove($first) }
+        if ($null -ne $second) { [void]$model.Scripts.Remove($second) }
+    }
+}
+
+function Test-ManagerSearchAppearance($Context, $Window) {
+    $editor = $Window.FindName('sourceEditor')
+    $bar = $Window.FindName('searchBar')
+    $query = $Window.FindName('searchText')
+    $menu = $Window.FindName('replaceMenuItem')
+    $renderer = $editor.TextArea.TextView.BackgroundRenderers | Where-Object { $_.GetType().Name -eq 'ScriptEditorSearch' }
+    $theme = [CefFlashBrowser.Data.GlobalData]::Settings.Theme
+    $language = $Context.LanguageService.CurrentLanguage
+    $width = $Window.Width
+    $scriptColumn = $bar.Parent.Parent.ColumnDefinitions[0]
+    $columnWidth = $scriptColumn.Width
+    try {
+        $Window.Width = $Window.MinWidth
+        $scriptColumn.Width = New-Object Windows.GridLength($scriptColumn.MaxWidth)
+        $Window.UpdateLayout()
+        $menu.Command.Execute($null, $menu.CommandTarget)
+        $editor.CaretOffset = 0
+        $editor.TextArea.ClearSelection()
+        $query.Text = 'const'
+        $matchLine = $editor.Document.GetLineByOffset($editor.SelectionStart).LineNumber
+        $view = $editor.TextArea.TextView
+        Wait-Regression $Context {
+            $view.VisualLinesValid -and $view.VisualLines.Count -gt 0 -and
+                $view.VisualLines[0].FirstDocumentLine.LineNumber -le $matchLine -and
+                $view.VisualLines[$view.VisualLines.Count - 1].LastDocumentLine.LineNumber -ge $matchLine
+        } 'search scrolls a matching line into view with the search box focused'
+        Assert-Regression ($editor.SelectedText -ceq 'const' -and $query.IsKeyboardFocused) 'search selects a match and keeps input focus'
+        $editor.TextArea.ClearSelection()
+        Assert-Regression ($renderer.Count -gt 0) 'theme fixture contains search matches'
+        $palette = @{}
+        foreach ($appearance in @([CefFlashBrowser.Models.Theme]::Light, [CefFlashBrowser.Models.Theme]::Dark)) {
+            Set-ManagerRegressionTheme $Context $appearance
+            $editor.ScrollToHorizontalOffset(0)
+            $Window.UpdateLayout()
+            $matchColor = $renderer.MarkerBrush.Color
+            $palette[$appearance.ToString()] = $matchColor
+            $bitmap = New-Object Windows.Media.Imaging.RenderTargetBitmap([int]$Window.ActualWidth, [int]$Window.ActualHeight, 96, 96, [Windows.Media.PixelFormats]::Pbgra32)
+            $bitmap.Render($Window)
+            $stride = $bitmap.PixelWidth * 4
+            $pixels = New-Object byte[] ($stride * $bitmap.PixelHeight)
+            $bitmap.CopyPixels($pixels, $stride, 0)
+            $found = $false
+            for ($offset = 0; $offset -lt $pixels.Length; $offset += 4) {
+                if ($pixels[$offset] -eq $matchColor.B -and $pixels[$offset + 1] -eq $matchColor.G -and
+                    $pixels[$offset + 2] -eq $matchColor.R -and $pixels[$offset + 3] -eq 255) {
+                    $found = $true
+                    break
+                }
+            }
+            Assert-Regression ($found) "editor renders match highlights in the $appearance theme"
+            Assert-Regression ($bar.Background.Color -eq $editor.Background.Color) "search toolbar follows the $appearance theme"
+        }
+        foreach ($locale in $Context.LanguageService.GetSupportedLanguage()) {
+            $Context.LanguageService.SetCurrentLanguage($locale)
+            $Window.UpdateLayout()
+            foreach ($name in @('matchCase', 'matchCount', 'replaceCurrent', 'replaceAll')) {
+                $control = $Window.FindName($name)
+                $bounds = $control.TransformToAncestor($bar).TransformBounds((New-Object Windows.Rect($control.RenderSize)))
+                Assert-Regression ($bounds.Right -le $bar.ActualWidth) "search control $name fits at minimum editor width in $locale"
+            }
+            Assert-Regression ($editor.ActualHeight -gt 0) "editor remains visible below the search toolbar in $locale"
+        }
+        Assert-Regression ($palette.Light -ne $palette.Dark) 'search highlight colors change with the editor theme'
+    } finally {
+        $Window.Width = $width
+        $scriptColumn.Width = $columnWidth
+        $Window.FindName('closeSearchButton').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Primitives.ButtonBase]::ClickEvent)))
+        $Context.LanguageService.SetCurrentLanguage($language)
+        Set-ManagerRegressionTheme $Context $theme
+    }
+}
+
 function Test-BrowserIconStyleReuse($Context) {
     $hostWindow = New-Object Windows.Window
     $hostWindow.Left = -10000
@@ -314,9 +503,11 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager initialized'
         Test-BrowserIconStyleReuse $Context
         Test-ManagerSourceEditor $Context $window
+        Test-ManagerFindReplace $Context $window
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] }).Count -eq 1) 'manager entry reuses a single window'
-        Assert-Regression ($window.InputBindings.Count -eq 3) 'manager exposes new, save and close keyboard bindings'
+        $gestures = @($window.InputBindings | ForEach-Object { $_.Gesture.GetDisplayStringForCulture([Globalization.CultureInfo]::InvariantCulture) })
+        Assert-Regression (($gestures -join ',') -eq 'Ctrl+N,Ctrl+S,Ctrl+W,Ctrl+F,Ctrl+H') 'manager exposes new, save, close, find and replace keyboard bindings'
         Invoke-BrowserCommand $model.NewCommand $null
         $item = $model.SelectedScript
         $editor = $window.FindName('sourceEditor')
@@ -455,6 +646,15 @@ document.documentElement.setAttribute('data-manager', 'saved');
             $Context.LanguageService.SetCurrentLanguage($locale)
             Wait-Regression $Context { $window.Title -eq $Context.LanguageService.GetString('userScriptManager_title') } "manager language ($locale)"
             Assert-Regression (![string]::IsNullOrEmpty($window.Title)) 'manager title is localized in every supported language'
+            $replaceMenu = $window.FindName('replaceMenuItem')
+            $replaceMenu.Command.Execute($null, $replaceMenu.CommandTarget)
+            $searchInput = $window.FindName('searchText')
+            $replaceAllLabel = $window.FindName('replaceAll').Content
+            Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($searchInput) -ceq $Context.LanguageService.GetString('browser_find') -and
+                $replaceMenu.Header -ceq $Context.LanguageService.GetString('userScriptManager_replace') -and
+                $window.FindName('matchCase').ToolTip -ceq $Context.LanguageService.GetString('userScriptManager_matchCase') -and
+                $window.FindName('replaceCurrent').ToolTip -ceq $Context.LanguageService.GetString('userScriptManager_replaceCurrent') -and
+                $replaceAllLabel -ceq $Context.LanguageService.GetString('userScriptManager_replaceAll')) "search toolbar and menu localize in $locale"
             $editorMenu = Open-ManagerEditorContextMenu $Context $window
             $editorMenuItems = @($editorMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] })
             $editorMenuKeys = @('undo', 'redo', 'cut', 'copy', 'paste', 'selectAll')
@@ -469,6 +669,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $model.SelectedScript = $item
         $item.Source = $source + "`r`n// https://example.invalid/icon.png`r`n" + ((1..60 | ForEach-Object { "const value$_ = 42; // readable code with a long comment " + ('x' * 100) }) -join "`r`n")
         Wait-Regression $Context { $editor.Text -ceq $item.Source } 'theme fixture source is displayed'
+        Test-ManagerSearchAppearance $Context $window
         $editor.CaretOffset = $editor.Text.Length
         $editor.TextArea.PerformTextInput("`r`n// theme draft")
         $editor.Select(10, 12)
