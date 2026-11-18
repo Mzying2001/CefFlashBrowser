@@ -322,25 +322,40 @@
                      HorizontalOffset="8"
                      DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
             <ContextMenu.Resources>
-                <sys:Double x:Key="scriptCommandRowMinHeight">32</sys:Double>
                 <CollectionViewSource x:Key="scriptCommandGroups" Source="{Binding CurrentBrowser.UserScriptMenus}">
                     <CollectionViewSource.GroupDescriptions>
                         <PropertyGroupDescription PropertyName="ScriptKey"/>
                     </CollectionViewSource.GroupDescriptions>
                 </CollectionViewSource>
+                <sys:Double x:Key="scriptCommandRowMinHeight">32</sys:Double>
             </ContextMenu.Resources>
             <ContextMenu.ItemsSource>
                 <Binding Source="{StaticResource scriptCommandGroups}"/>
             </ContextMenu.ItemsSource>
             <ContextMenu.GroupStyle>
                 <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="GroupItem"
+                               BasedOn="{StaticResource {x:Type GroupItem}}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="GroupItem">
+                                        <StackPanel>
+                                            <ContentPresenter x:Name="PART_Header"/>
+                                            <ItemsPresenter/>
+                                        </StackPanel>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
                     <GroupStyle.HeaderTemplate>
                         <DataTemplate>
                             <Grid Margin="0,0,12,0"
                                   MinHeight="{StaticResource scriptCommandRowMinHeight}">
                                 <Grid.ColumnDefinitions>
                                     <!-- Match the text inset in the HandyControl command row. -->
-                                    <ColumnDefinition Width="41"/>
+                                    <ColumnDefinition Width="36"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <c:BrowserIcon

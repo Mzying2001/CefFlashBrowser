@@ -54,11 +54,13 @@ namespace CefFlashBrowser.Browser.UserScripts
                     {
                         var metadata = installation.Definition.Metadata;
                         var iconUrl = UserScriptItemViewModel.ResolveIconUrl(metadata, installation.SourceOrigin);
+                        var title = request.Title?.TrimEnd();
+                        var description = string.IsNullOrEmpty(title) ? metadata.Name : metadata.Name + "\n" + title;
 
                         group = new Group
                         {
-                            Command = new UserScriptMenuCommand(key.Item1, metadata.Name, request.Name,
-                                metadata.Name + "\n" + request.Title, InvokeToolbar, iconUrl)
+                            Command = new UserScriptMenuCommand(
+                                key.Item1, metadata.Name, request.Name, description, InvokeToolbar, iconUrl)
                         };
 
                         _groups.Add(key, group);

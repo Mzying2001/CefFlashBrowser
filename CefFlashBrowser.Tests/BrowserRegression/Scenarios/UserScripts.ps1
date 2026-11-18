@@ -467,7 +467,8 @@ function Test-UserScriptMenus($Context) {
             $item = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None)) 'install manual menu fixture'
             $installed.Add($item.ScriptKey)
         }
-        $source = @'
+        $frameCommandName = 'Frame command with a long label that exceeds the popup width'
+        $source = @"
 // ==UserScript==
 // @name Runtime menu
 // @icon a-icon.png
@@ -480,12 +481,12 @@ function Test-UserScriptMenus($Context) {
     await GM.registerMenuCommand('Runtime command', function() {
         document.documentElement.setAttribute('data-runtime-menu', String(++count));
     }, {autoClose:false});
-    await GM.registerMenuCommand('Frame command', function() {
+    await GM.registerMenuCommand('$frameCommandName', function() {
         document.documentElement.setAttribute('data-frame-menu', 'yes');
-    }, {clickedFrame:true});
+    }, {clickedFrame:true, title:'Frame only\n\nSecond line\n\n'});
     document.documentElement.setAttribute('data-runtime-menu-ready', 'yes');
 })();
-'@
+"@
         $origin = $iconFixture.BaseUrl + '/menu.user.js'
         $item = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $origin, $true, [Threading.CancellationToken]::None)) 'install runtime menu fixture'
         $installed.Add($item.ScriptKey)
@@ -510,7 +511,7 @@ function Test-UserScriptMenus($Context) {
             $menu.Commands[$manualIndex - 2] -ne $separator) 'one separator precedes the entire userscript section'
         $parentId = $menu.Commands[$menu.Labels.IndexOf('Runtime menu')]
         $submenu = $menu.SubMenus[$parentId]
-        Assert-Regression ($menu.SubMenus.Count -eq 1 -and ($submenu.Labels -join ',') -eq 'Runtime command,Frame command' -and
+        Assert-Regression ($menu.SubMenus.Count -eq 1 -and ($submenu.Labels -join ',') -eq "Runtime command,$frameCommandName" -and
             !$menu.Labels.Contains('Runtime command')) 'a single script places its registered commands in a named submenu'
         foreach ($trailingSeparator in @($false, $true)) {
             $boundary = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildWithBaseAsync($model.Browser, $false, $trailingSeparator)) 'build menu boundary'
@@ -550,8 +551,15 @@ function Test-UserScriptMenus($Context) {
                 !$runtimeItem.HasItems -and !$frameItem.HasItems -and
                 $runtimeItem.Header -eq 'Runtime command' -and $runtimeItem.ToolTip -like 'Runtime menu*' -and
                 $runtimeItem.IsEnabled -and $runtimeItem.StaysOpenOnClick -and
-                $frameItem.Header -eq 'Frame command' -and !$frameItem.IsEnabled) 'toolbar menu renders the current tab commands and their options'
+                $frameItem.Header -eq $frameCommandName -and !$frameItem.IsEnabled) 'toolbar menu renders the current tab commands and their options'
             $scriptMenu.UpdateLayout()
+            $menuBorder = @(Find-FaviconElements $scriptMenu ([Windows.Controls.Border]))[0]
+            $highlight = $runtimeItem.Template.FindName('Bd', $runtimeItem)
+            $leftInset = $highlight.TranslatePoint([Windows.Point]::new(0, 0), $menuBorder).X
+            $rightInset = $menuBorder.ActualWidth - ($leftInset + $highlight.ActualWidth)
+            Assert-Regression ($leftInset -gt 0 -and [Math]::Abs($leftInset - $rightInset) -lt 0.5) "toolbar command highlight has equal side insets (left $leftInset, right $rightInset)"
+            Assert-Regression ($runtimeItem.ToolTip -ceq 'Runtime menu' -and
+                $frameItem.ToolTip -ceq "Runtime menu`nFrame only`n`nSecond line") 'toolbar tooltips preserve descriptions without trailing blank lines'
             $groupIcon = @(Find-FaviconElements $scriptMenu ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
             $groupTitle = @(Find-FaviconElements $scriptMenu ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -eq 'Runtime menu' })[0]
             $commandTitle = @(Find-FaviconElements $runtimeItem ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -eq $runtimeItem.Header })[0]
@@ -585,6 +593,14 @@ function Test-UserScriptMenus($Context) {
 
         $actionsMenu = Open-BrowserActionsMenu $Context $window
         try {
+            $actionsMenu.UpdateLayout()
+            $actionsBorder = @(Find-FaviconElements $actionsMenu ([Windows.Controls.Border]))[0]
+            $actionItem = $actionsMenu.Items[0]
+            $actionHighlight = $actionItem.Template.FindName('Bd', $actionItem)
+            $actionsLeftInset = $actionHighlight.TranslatePoint([Windows.Point]::new(0, 0), $actionsBorder).X
+            $actionsRightInset = $actionsBorder.ActualWidth - ($actionsLeftInset + $actionHighlight.ActualWidth)
+            Assert-Regression ([Math]::Abs($leftInset - $actionsLeftInset) -lt 0.5 -and
+                [Math]::Abs($rightInset - $actionsRightInset) -lt 0.5) "script menu side insets ($leftInset, $rightInset) match the actions menu ($actionsLeftInset, $actionsRightInset)"
             $headers = @($actionsMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] } | ForEach-Object { $_.Header })
             Assert-Regression ($headers -notcontains $window.FindResource('userscript_commands') -and
                 $headers -contains $window.FindResource('mainWindow_manageUserScripts') -and
@@ -606,7 +622,7 @@ function Test-UserScriptMenus($Context) {
             $orderRegistrations += Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($model.Browser, $installed[5], 'Replacement ', 1)) 'register replacement command'
             $orderedMenu = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'build menu after unregister and register'
             $orderedLabels = @($orderedMenu.SubMenus.Values)[0].Labels -join ','
-            Assert-Regression ($orderedLabels -eq 'Runtime command,Frame command,Order 0,Order 2,Replacement 0') "new commands append after surviving commands (actual: $orderedLabels)"
+            Assert-Regression ($orderedLabels -eq "Runtime command,$frameCommandName,Order 0,Order 2,Replacement 0") "new commands append after surviving commands (actual: $orderedLabels)"
         } finally {
             foreach ($registration in $orderRegistrations) { $registration.Dispose() }
         }
