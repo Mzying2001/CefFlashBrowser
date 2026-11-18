@@ -543,6 +543,8 @@ function Test-UserScriptMenus($Context) {
             $runtimeItem = $scriptMenu.ItemContainerGenerator.ContainerFromIndex(0)
             $frameItem = $scriptMenu.ItemContainerGenerator.ContainerFromIndex(1)
             Assert-Regression ($scriptMenu.PlacementTarget -eq $scriptButton -and $scriptMenu.Items.Count -eq 2 -and
+                $scriptMenu.Items.Groups.Count -eq 1 -and $scriptMenu.Items.Groups[0].Name -eq $installed[5].ToString() -and
+                !$runtimeItem.HasItems -and !$frameItem.HasItems -and
                 $runtimeItem.Header -eq 'Runtime command' -and $runtimeItem.ToolTip -like 'Runtime menu*' -and
                 $runtimeItem.IsEnabled -and $runtimeItem.StaysOpenOnClick -and
                 $frameItem.Header -eq 'Frame command' -and !$frameItem.IsEnabled) 'toolbar menu renders the current tab commands and their options'
@@ -570,9 +572,9 @@ function Test-UserScriptMenus($Context) {
         }
 
         $window.ViewModel.AddBrowser('about:blank', $true) | Out-Null
-        Wait-Regression $Context { $scriptButton.Visibility -eq 'Collapsed' -and $scriptMenu.Items.Count -eq 0 } 'toolbar script menu follows a tab without commands'
+        Wait-Regression $Context { $scriptButton.Visibility -eq 'Collapsed' -and $scriptMenu.Items.Count -eq 0 -and $scriptMenu.Items.Groups.Count -eq 0 } 'toolbar script menu follows a tab without commands'
         $window.ViewModel.CurrentBrowser = $model
-        Wait-Regression $Context { $scriptButton.IsVisible -and $scriptMenu.Items.Count -eq 2 } 'returning to the script tab restores its toolbar commands'
+        Wait-Regression $Context { $scriptButton.IsVisible -and $scriptMenu.Items.Count -eq 2 -and $scriptMenu.Items.Groups.Count -eq 1 } 'returning to the script tab restores its toolbar commands'
 
         $orderRegistrations = @()
         try {
@@ -615,10 +617,11 @@ function Test-UserScriptMenus($Context) {
         $handled = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $dynamicId)) 'invoke dismissed script command'
         Assert-Regression (!$handled) 'dismissal clears the submenu command mapping'
 
-        foreach ($fixture in @(
+        $menuFixtures = @(
             @{ Name = 'Other menu'; Attribute = 'other' },
             @{ Name = 'Runtime menu'; Attribute = 'same-name' }
-        )) {
+        )
+        foreach ($fixture in $menuFixtures) {
             $source = @"
 // ==UserScript==
 // @name $($fixture.Name)
@@ -628,27 +631,54 @@ function Test-UserScriptMenus($Context) {
 // @grant GM.registerMenuCommand
 // ==/UserScript==
 GM.registerMenuCommand('Runtime command', function() {
-    document.documentElement.setAttribute('data-menu-$($fixture.Attribute)', 'yes');
+    var root = document.documentElement;
+    var attribute = 'data-menu-$($fixture.Attribute)';
+    root.setAttribute(attribute, String(Number(root.getAttribute(attribute)) + 1));
 });
 "@
             $item = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None)) 'install additional menu script'
             $installed.Add($item.ScriptKey)
+            $fixture.Key = $item.ScriptKey.ToString()
         }
         Wait-Regression $Context { $model.UserScriptMenus.Count -eq 4 } 'multiple scripts register menus'
+        $toolbarGroups = @($scriptMenu.Items.Groups)
+        Assert-Regression ($toolbarGroups.Count -eq 3 -and
+            @($toolbarGroups | Where-Object { $_.Items[0].ScriptName -eq 'Runtime menu' }).Count -eq 2) 'toolbar groups distinguish scripts with the same name'
         $menu = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'build grouped script menus'
         Assert-Regression ($menu.SubMenus.Count -eq 3 -and @($menu.Labels | Where-Object { $_ -eq 'Runtime menu' }).Count -eq 2) 'different installations with the same name retain independent groups'
         $ids = @($menu.AllCommands | Where-Object { $_ -ne $separator })
         Assert-Regression (@($ids | Sort-Object -Unique).Count -eq $ids.Count) 'all submenu parents and children have unique IDs'
-        foreach ($fixture in @(
-            @{ Name = 'Other menu'; Attribute = 'other' },
-            @{ Name = 'Runtime menu'; Attribute = 'same-name' }
-        )) {
+        foreach ($fixture in $menuFixtures) {
             $group = @($menu.SubMenus.GetEnumerator() | Where-Object {
                 $menu.Labels[$menu.Commands.IndexOf($_.Key)] -eq $fixture.Name -and $_.Value.Commands.Count -eq 1
             })[0].Value
             Assert-Regression ($group.Labels[0] -eq 'Runtime command') 'single-command scripts also use submenus'
             [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $group.Commands[0])) 'invoke grouped command')
-            Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-menu-$($fixture.Attribute)')") -eq 'yes' } 'submenu invokes its owning script'
+            Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-menu-$($fixture.Attribute)')") -eq '1' } 'submenu invokes its owning script'
+        }
+
+        Set-TabWindowForeground $Context $window
+        foreach ($commandIndex in @(2, 3)) {
+            $scriptButton.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Primitives.ButtonBase]::ClickEvent))
+            try {
+                Wait-Regression $Context { $scriptMenu.IsOpen -and $scriptMenu.ItemContainerGenerator.ContainerFromIndex(3) } 'grouped toolbar menu opens'
+                $firstItem = $scriptMenu.ItemContainerGenerator.ContainerFromIndex(0)
+                $item = $scriptMenu.ItemContainerGenerator.ContainerFromIndex($commandIndex)
+                $fixture = $menuFixtures | Where-Object { $_.Key -eq $item.DataContext.ScriptKey }
+                Assert-Regression ($null -ne $fixture -and !$item.HasItems -and $item.IsEnabled) 'grouped toolbar command is directly actionable'
+                Assert-Regression ($firstItem.Focus()) 'first toolbar command receives focus'
+                for ($index = 2; $index -le $commandIndex; $index++) {
+                    $nextItem = $scriptMenu.ItemContainerGenerator.ContainerFromIndex($index)
+                    [RegressionKeyboard]::PressKey(0x28)
+                    Wait-Regression $Context { $nextItem.IsKeyboardFocused } 'Down moves to the next enabled command across groups'
+                }
+                [RegressionKeyboard]::PressKey(0x0D)
+                Wait-Regression $Context {
+                    !$scriptMenu.IsOpen -and (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-menu-$($fixture.Attribute)')") -eq '2'
+                } 'Enter invokes the owning script and closes the toolbar menu'
+            } finally {
+                $scriptMenu.IsOpen = $false
+            }
         }
         Assert-Regression ((Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-runtime-menu')") -eq '2') 'same-name commands do not invoke another script'
         $capacity = [int][CefSharp.CefMenuCommand]::UserLast - 4 - [int][CefSharp.CefMenuCommand]::UserFirst -
@@ -673,6 +703,7 @@ GM.registerMenuCommand('Runtime command', function() {
             Complete-UserScriptTask $Context ($repository.SetEnabledAsync($key, $false, [Threading.CancellationToken]::None)) 'disable additional menu script' | Out-Null
         }
         Wait-Regression $Context { $model.UserScriptMenus.Count -eq 2 } 'disabled groups unregister their commands'
+        Assert-Regression ($scriptMenu.Items.Groups.Count -eq 1) 'toolbar removes groups when their last command unregisters'
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $true
         $disabled = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($model.Browser)) 'disabled native script menu'
         Assert-Regression ($disabled.Commands.Count -eq 0) 'disabled browser context menu also removes library and GM entries'

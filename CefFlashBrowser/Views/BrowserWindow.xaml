@@ -318,9 +318,36 @@
         <!--Script commands menu-->
         <ContextMenu x:Key="scriptCommandsMenu"
                      DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                     ItemsSource="{Binding CurrentBrowser.UserScriptMenus}"
                      VerticalOffset="-8"
                      HorizontalOffset="8">
+            <ContextMenu.Resources>
+                <CollectionViewSource x:Key="scriptCommandGroups" Source="{Binding CurrentBrowser.UserScriptMenus}">
+                    <CollectionViewSource.GroupDescriptions>
+                        <PropertyGroupDescription PropertyName="ScriptKey"/>
+                    </CollectionViewSource.GroupDescriptions>
+                </CollectionViewSource>
+            </ContextMenu.Resources>
+            <ContextMenu.ItemsSource>
+                <Binding Source="{StaticResource scriptCommandGroups}"/>
+            </ContextMenu.ItemsSource>
+            <ContextMenu.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                Margin="12,8,12,3"
+                                MaxWidth="320"
+                                HorizontalAlignment="Left"
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                TextTrimming="CharacterEllipsis"
+                                Foreground="{DynamicResource PrimaryTextBrush}"
+                                Text="{Binding Items[0].ScriptName}"
+                                ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </ContextMenu.GroupStyle>
             <ContextMenu.ItemContainerStyle>
                 <Style TargetType="MenuItem"
                        BasedOn="{StaticResource {x:Type MenuItem}}">
