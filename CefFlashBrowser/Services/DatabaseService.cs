@@ -399,28 +399,41 @@ namespace CefFlashBrowser.Services
                     "WHERE script_id = @id AND kind = @kind AND target = @target", parameters);
 
                 if (value != null && value != DBNull.Value)
-                {
-                    var encoded = Convert.ToInt64(value);
-
-                    if (encoded != 1 && encoded != 2)
-                        throw new InvalidOperationException("Invalid remembered permission decision.");
-
-                    result = encoded == 1 ? PermissionDecision.Allow : PermissionDecision.Deny;
-                }
+                    result = DecodePermissionDecision(Convert.ToInt64(value));
             }).ConfigureAwait(false);
 
             return result;
         }
 
+        public async Task<IReadOnlyList<UserScriptPermissionRecord>> GetUserScriptPermissionsAsync(
+            IReadOnlyCollection<ScriptKey> scriptKeys, CancellationToken token)
+        {
+            await InitializeAsync().ConfigureAwait(false);
+
+            var records = new List<UserScriptPermissionRecord>();
+            await _database.TransactionAsync(session =>
+            {
+                foreach (var scriptKey in scriptKeys)
+                {
+                    token.ThrowIfCancellationRequested();
+                    var id = scriptKey.ToString();
+                    records.AddRange(session.Query(
+                        "SELECT kind, target, decision, updated_at FROM monkeysharp_permission_decisions WHERE script_id = @id",
+                        row => new UserScriptPermissionRecord(new UserScriptPermissionScope(id, row.GetString(0), row.GetString(1)),
+                            DecodePermissionDecision(row.GetInt64(2)), row.GetInt64(3)),
+                        new Dictionary<string, object> { ["@id"] = id }));
+                }
+            }).ConfigureAwait(false);
+
+            return records.AsReadOnly();
+        }
+
         public async Task SaveUserScriptPermissionDecisionAsync(
             UserScriptPermissionScope scope, PermissionDecision decision, CancellationToken token)
         {
-            if (decision != PermissionDecision.Allow && decision != PermissionDecision.Deny)
-                throw new ArgumentException("Only terminal permission decisions may be stored.", nameof(decision));
-
             var parameters = UserScriptPermissionParameters(scope);
 
-            parameters["@decision"] = decision == PermissionDecision.Allow ? 1 : 2;
+            parameters["@decision"] = EncodePermissionDecision(decision);
             parameters["@updated"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             await InitializeAsync().ConfigureAwait(false);
 
@@ -435,6 +448,36 @@ namespace CefFlashBrowser.Services
                     "decision = excluded.decision, updated_at = excluded.updated_at", parameters);
                 token.ThrowIfCancellationRequested();
             }).ConfigureAwait(false);
+        }
+
+        public async Task<bool> ChangeUserScriptPermissionAsync(
+            UserScriptPermissionRecord expected, PermissionDecision? decision, CancellationToken token)
+        {
+            var parameters = UserScriptPermissionParameters(expected.Scope);
+            parameters["@previousDecision"] = EncodePermissionDecision(expected.Decision);
+            parameters["@previousUpdate"] = expected.UpdatedAt;
+
+            var sql = "DELETE FROM monkeysharp_permission_decisions";
+            if (decision.HasValue)
+            {
+                parameters["@decision"] = EncodePermissionDecision(decision.Value);
+                parameters["@updated"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                // Keep fast edits distinct even when they share a clock tick.
+                sql = "UPDATE monkeysharp_permission_decisions SET decision = @decision, updated_at = MAX(@updated, updated_at + 1)";
+            }
+
+            await InitializeAsync().ConfigureAwait(false);
+
+            var changed = false;
+            await _database.TransactionAsync(session =>
+            {
+                token.ThrowIfCancellationRequested();
+                changed = session.Execute(sql + " WHERE script_id = @id AND kind = @kind AND target = @target " +
+                    "AND decision = @previousDecision AND updated_at = @previousUpdate", parameters) == 1;
+                token.ThrowIfCancellationRequested();
+            }).ConfigureAwait(false);
+
+            return changed;
         }
 
         public async Task RevokeUserScriptPermissionsAsync(string scriptId, CancellationToken token)
@@ -551,6 +594,22 @@ namespace CefFlashBrowser.Services
 
             return encoded == null || encoded == DBNull.Value ? StoredValue.Missing
                 : new StoredValue(true, UserScriptValue.FromEncoded((string)encoded));
+        }
+
+        private static int EncodePermissionDecision(PermissionDecision decision)
+        {
+            if (decision != PermissionDecision.Allow && decision != PermissionDecision.Deny)
+                throw new ArgumentException("Only terminal permission decisions may be stored.", nameof(decision));
+
+            return decision == PermissionDecision.Allow ? 1 : 2;
+        }
+
+        private static PermissionDecision DecodePermissionDecision(long encoded)
+        {
+            if (encoded != 1 && encoded != 2)
+                throw new InvalidOperationException("Invalid remembered permission decision.");
+
+            return encoded == 1 ? PermissionDecision.Allow : PermissionDecision.Deny;
         }
 
         private static Dictionary<string, object> UserScriptPermissionParameters(UserScriptPermissionScope scope)

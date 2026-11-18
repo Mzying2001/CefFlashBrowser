@@ -47,6 +47,23 @@ namespace CefFlashBrowser.Views
             set => DataContext = value;
         }
 
+        private void OpenUserScriptPermissions(object sender, RoutedEventArgs e)
+        {
+            var browser = ViewModel?.CurrentBrowser?.Browser;
+            string address = null;
+
+            if (browser != null && !browser.IsDisposed && browser.IsBrowserInitialized)
+            {
+                using (var frame = browser.GetBrowser()?.MainFrame)
+                {
+                    if (frame?.IsValid == true)
+                        address = frame.Url;
+                }
+            }
+
+            WindowManager.ShowUserScriptPermissions(this, address);
+        }
+
 
 
         public BrowserWindow()

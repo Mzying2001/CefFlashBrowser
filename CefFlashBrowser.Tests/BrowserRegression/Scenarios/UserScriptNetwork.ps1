@@ -24,6 +24,99 @@ function Wait-UserScriptNetworkMarker($Context, $Browser, [string]$Name, [string
     } $Name
 }
 
+function Open-UserScriptPermissions($Context, $Window, [string]$Address) {
+    $menu = Open-BrowserActionsMenu $Context $Window
+    $downloadLabel = $Window.FindResource('userscript_downloads')
+    $downloads = $menu.Items | Where-Object { $_.Header -eq $downloadLabel } | Select-Object -First 1
+    Assert-Regression ($null -ne $downloads) 'actions contain script downloads'
+    $item = $menu.Items[$menu.Items.IndexOf($downloads) + 1]
+    Assert-Regression ($item.Header -eq $Window.FindResource('userscript_managePermissions')) 'script permissions appear directly after script downloads'
+    $menu.IsOpen = $false
+    $item.RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.MenuItem]::ClickEvent)))
+
+    $findWindow = {
+        $Context.Application.Windows | Where-Object {
+            $_ -is [CefFlashBrowser.Views.UserScriptPermissionsWindow] -and $_.Owner -eq $Window -and
+            $_.FindName('pageAddress').Text -eq $Address -and $_.FindName('refreshButton').IsEnabled
+        } | Select-Object -First 1
+    }
+    Wait-Regression $Context { $null -ne (& $findWindow) } 'permissions window loads for the selected main document'
+    return (& $findWindow)
+}
+
+function Test-UserScriptPermissions($Context, $Window, $Model, $Fixture, $Peer) {
+    $currentPage = $Fixture.BaseUrl + '/page'
+    $otherPage = $Fixture.BaseUrl + '/login'
+    $source = "// ==UserScript==`n// @name Login permissions`n// @match http://127.0.0.1/login*`n// @grant GM.xmlHttpRequest`n// @connect 127.0.0.1`n// ==/UserScript=="
+    $token = [Threading.CancellationToken]::None
+    $buttonClick = [System.Windows.Controls.Button]::ClickEvent
+    $service = $Context.UserScriptService
+    $otherScript = Complete-UserScriptTask $Context ($service.Repository.InstallAsync($source, $null, $false, $token)) 'install second tab permissions fixture'
+    $primary = $null
+    $secondary = $null
+    try {
+        $scope = New-Object Mzying2001.MonkeySharp.Core.Permissions.UserScriptPermissionScope($otherScript.ScriptKey.ToString(), 'GM.xmlHttpRequest', $Fixture.BaseUrl)
+        Complete-UserScriptTask $Context ($service.Decisions.SetAsync($scope, 'Deny', $token)) 'save second tab permission' | Out-Null
+        $primary = Open-UserScriptPermissions $Context $Window $currentPage
+        $primaryList = $primary.FindName('permissionList')
+        Assert-Regression ($primaryList.Items.Count -eq 3 -and @($primaryList.Items | Where-Object { $_.Record.Scope.Target -eq $Peer.BaseUrl }).Count -eq 1) 'page shows matching script decisions including cross-origin targets'
+        Assert-Regression ($primaryList.View.Columns[2].Header -eq $Window.FindResource('userscript_permissionTarget')) 'permission columns use localized labels'
+
+        [void](New-RegressionTab $Context $Window $otherPage)
+        $secondary = Open-UserScriptPermissions $Context $Window $otherPage
+        $secondaryList = $secondary.FindName('permissionList')
+        Assert-Regression ($secondaryList.Items.Count -eq 1 -and $secondaryList.Items[0].ScriptName -eq 'Login permissions' -and
+            $secondaryList.Items[0].IsScriptDisabled -and $secondaryList.Items[0].Record.Decision -eq 'Deny') 'second tab shows only its matching disabled script and saved denial'
+        Assert-Regression ($primary.FindName('pageAddress').Text -eq $currentPage) 'open permission windows keep their original page'
+        $secondaryList.SelectedIndex = 0
+        Complete-UserScriptTask $Context ($service.Decisions.SetAsync($scope, 'Allow', $token)) 'change permission outside the open window' | Out-Null
+        $secondary.FindName('clearButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+        Wait-Regression $Context {
+            $secondary.FindName('refreshButton').IsEnabled -and $secondaryList.Items.Count -eq 1 -and
+            $secondaryList.Items[0].Record.Decision -eq 'Allow' -and
+            $secondary.FindName('statusText').Text -eq $secondary.FindResource('userscript_permissionChanged')
+        } 'stale edits refresh the list and report the conflict'
+        $secondary.Close()
+        $secondary = $null
+        $Window.ViewModel.CurrentBrowser = $Model
+
+        $primaryList.SelectedItem = $primaryList.Items | Where-Object {
+            $_.Record.Scope.Kind -eq 'GM.xmlHttpRequest' -and $_.Record.Scope.Target -eq $Fixture.BaseUrl
+        } | Select-Object -First 1
+        $refresh = $primary.FindName('refreshButton')
+        $dispatch = "document.documentElement.removeAttribute('data-managed-permission'); document.dispatchEvent(new Event('xhrManagedPermission'));"
+        $requestCount = $Fixture.RequestsFor('/echo')
+        $primary.FindName('denyButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+        Wait-Regression $Context { $refresh.IsEnabled -and $primaryList.SelectedItem.Record.Decision -eq 'Deny' } 'denied decision saved'
+        [void](Invoke-JavaScript $Context $Model.Browser $dispatch)
+        Wait-UserScriptNetworkMarker $Context $Model.Browser 'data-managed-permission' 'MSP005_PERMISSION_DENIED'
+        Assert-Regression ($Fixture.RequestsFor('/echo') -eq $requestCount) 'changed denial applies to the next invocation'
+
+        $primary.FindName('allowButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+        Wait-Regression $Context { $refresh.IsEnabled -and $primaryList.SelectedItem.Record.Decision -eq 'Allow' } 'allowed decision saved'
+        [void](Invoke-JavaScript $Context $Model.Browser $dispatch)
+        Wait-UserScriptNetworkMarker $Context $Model.Browser 'data-managed-permission' 'allowed'
+        Assert-Regression ($Fixture.RequestsFor('/echo') -eq ($requestCount + 1)) 'changed allowance applies to the next invocation'
+
+        $primary.FindName('clearButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+        Wait-Regression $Context { $refresh.IsEnabled -and $primaryList.Items.Count -eq 2 -and $primaryList.SelectedIndex -eq -1 } 'clear removes only the selected record'
+        [void](Invoke-JavaScript $Context $Model.Browser $dispatch)
+        $findPrompt = {
+            $Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptPermissionDialog] } | Select-Object -First 1
+        }
+        Wait-Regression $Context { $null -ne (& $findPrompt) } 'cleared permission prompts on the next invocation'
+        Assert-Regression ($Fixture.RequestsFor('/echo') -eq ($requestCount + 1)) 'the repeated prompt waits before sending the request'
+        (& $findPrompt).FindName('allowOnceButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+        Wait-UserScriptNetworkMarker $Context $Model.Browser 'data-managed-permission' 'allowed'
+        $refresh.RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+        Wait-Regression $Context { $refresh.IsEnabled -and $primaryList.Items.Count -eq 2 } 'allow once does not create a managed record'
+    } finally {
+        if ($null -ne $secondary) { $secondary.Close() }
+        if ($null -ne $primary) { $primary.Close() }
+        Complete-UserScriptTask $Context ($service.Repository.RemoveAsync($otherScript.ScriptKey, $token)) 'remove second tab permissions fixture' | Out-Null
+    }
+}
+
 function Invoke-UserScriptFrame($Context, $Browser, [string]$Url, [string]$Code) {
     $response = Complete-UserScriptTask $Context ([UserScriptFrameProbe]::EvaluateAsync($Browser, $Url, $Code)) 'fixture frame JavaScript'
     if (!$response.Success) { throw $response.Message }
@@ -267,6 +360,7 @@ function Test-UserScriptNetwork($Context) {
 // ==UserScript==
 // @name CEF network probe
 // @match http://127.0.0.1/*
+// @exclude-match http://127.0.0.1/login*
 // @sandbox DOM
 // @grant GM.xmlHttpRequest
 // @grant GM.cookie
@@ -280,6 +374,14 @@ function run(name, work) {
 run('xhrAuthenticated', async function() {
     var response = await GM.xmlHttpRequest({url:'__BASE__/echo'});
     document.documentElement.setAttribute('data-authenticated', response.responseText.indexOf('session=fixture') >= 0 ? 'yes':'no');
+});
+run('xhrManagedPermission', async function() {
+    try {
+        await GM.xmlHttpRequest({url:'__BASE__/echo'});
+        document.documentElement.setAttribute('data-managed-permission', 'allowed');
+    } catch (error) {
+        document.documentElement.setAttribute('data-managed-permission', String(error.code));
+    }
 });
 run('xhrAnonymous', async function() {
     var response = await GM.xmlHttpRequest({url:'__BASE__/anonymous', anonymous:true});
@@ -338,6 +440,7 @@ document.documentElement.setAttribute('data-network-ready', 'yes');
         Wait-UserScriptNetworkMarker $Context $model.Browser 'data-partition' 'MSP006_NOT_SUPPORTED'
         Wait-UserScriptNetworkMarker $Context $model.Browser 'data-partition-clean' 'yes'
         Assert-Regression $true 'native Cookie CRUD reads back and partition refusal leaves no mutation'
+        Test-UserScriptPermissions $Context $window $model $fixture $peer
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.TrustedUserScriptPageWorld = $savedTrusted
         if ($null -ne $window) { $window.ForceCloseWindow() }

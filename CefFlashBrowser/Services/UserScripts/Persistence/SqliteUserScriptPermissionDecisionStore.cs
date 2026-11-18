@@ -1,6 +1,8 @@
+using CefFlashBrowser.Models.UserScripts;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Permissions;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,6 +30,20 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
             ValidateScope(scope);
             return _storage.RunAsync(() => _storage.Database.SaveUserScriptPermissionDecisionAsync(scope, decision, token), token);
+        }
+
+        internal Task<IReadOnlyList<UserScriptPermissionRecord>> GetForScriptsAsync(
+            IReadOnlyCollection<ScriptKey> scriptKeys, CancellationToken token)
+        {
+            return _storage.RunAsync(() => _storage.Database.GetUserScriptPermissionsAsync(scriptKeys, token), token);
+        }
+
+        public Task<bool> ChangeAsync(UserScriptPermissionRecord expected, PermissionDecision? decision, CancellationToken token)
+        {
+            if (expected == null)
+                throw new ArgumentNullException(nameof(expected));
+
+            return _storage.RunAsync(() => _storage.Database.ChangeUserScriptPermissionAsync(expected, decision, token), token);
         }
 
         public Task RevokeAsync(string scriptKey, CancellationToken token)

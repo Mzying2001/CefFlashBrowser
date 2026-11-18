@@ -1,5 +1,6 @@
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
@@ -219,6 +220,14 @@ namespace CefFlashBrowser.Services
         public static void ShowUserScriptManager()
         {
             ShowWindow<UserScriptManager>(singleton: true);
+        }
+
+        internal static void ShowUserScriptPermissions(BrowserWindow owner, string address)
+        {
+            var window = CreateWindow<UserScriptPermissionsWindow>();
+            window.Owner = owner;
+            window.SetPage(SimpleIoc.Global.GetInstance<UserScriptService>(), address);
+            window.Show();
         }
 
         internal static bool ConfirmUserScriptInstallation(UserScriptMetadata metadata, string origin,

@@ -238,6 +238,79 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
+        public async Task PagePermissions_MatchScriptsAndIncludeAllTheirTargets()
+        {
+            var service = Create();
+            var token = CancellationToken.None;
+            await service.InitializeAsync();
+
+            var source = Source.Replace("// @grant none", "// @grant GM.xmlHttpRequest\n// @connect *")
+                .Replace("https://example.com/*", "https://example.com/play/*");
+            var current = await service.Repository.InstallAsync(source, null, true, token);
+            var disabled = await service.Repository.InstallAsync(source.Replace("@name Service", "@name Disabled")
+                .Replace("// @grant", "// @exclude-match https://example.com/play/private/*\n// @grant"), null, false, token);
+            var manual = await service.Repository.InstallAsync(source.Replace("@name Service", "@name Manual")
+                .Replace("// @match https://example.com/play/*", "// @run-at context-menu\n// @exclude-match https://example.com/play/private/*"),
+                null, true, token);
+            var other = await service.Repository.InstallAsync(source.Replace("@name Service", "@name Other")
+                .Replace("https://example.com/play/*", "https://example.com/other/*"), null, true, token);
+
+            foreach (var script in new[] { current, disabled, manual, other })
+            {
+                await service.Decisions.SetAsync(new UserScriptPermissionScope(script.ScriptKey.ToString(),
+                    "GM.xmlHttpRequest", "https://cdn.example.net:8443"), PermissionDecision.Allow, token);
+            }
+
+            await service.Decisions.SetAsync(new UserScriptPermissionScope(current.ScriptKey.ToString(),
+                "GM.xmlHttpRequest", "https://example.com"), PermissionDecision.Deny, token);
+
+            var rows = await service.GetPagePermissionsAsync(new Uri("https://example.com/play/index.html"), token);
+            CollectionAssert.AreEqual(new[] { "Disabled", "Manual", "Service", "Service" }, rows.Select(row => row.ScriptName).ToArray());
+            Assert.IsTrue(rows[0].IsScriptDisabled);
+            Assert.AreEqual("https://cdn.example.net:8443", rows[0].Record.Scope.Target);
+            Assert.AreEqual(PermissionDecision.Deny, rows[3].Record.Decision);
+
+            var excluded = await service.GetPagePermissionsAsync(new Uri("https://example.com/play/private/index.html"), token);
+            Assert.AreEqual(2, excluded.Count);
+            Assert.IsTrue(excluded.All(row => row.ScriptName == "Service"));
+            Assert.AreEqual(0, (await service.GetPagePermissionsAsync(null, token)).Count);
+        }
+
+        [TestMethod]
+        public async Task PagePermissions_ChangeOnlyTheSelectedRecordAndRejectStaleEdits()
+        {
+            var service = Create();
+            var token = CancellationToken.None;
+            var page = new Uri("https://example.com/");
+            await service.InitializeAsync();
+
+            var installed = await service.Repository.InstallAsync(Source, null, true, token);
+            var scope = new UserScriptPermissionScope(installed.ScriptKey.ToString(), "GM.cookie", "https://example.com");
+            var otherTarget = new UserScriptPermissionScope(scope.ScriptKey, scope.Kind, "https://other.example.com");
+            var otherApi = new UserScriptPermissionScope(scope.ScriptKey, "GM.download", scope.Target);
+            foreach (var item in new[] { scope, otherTarget, otherApi })
+                await service.Decisions.SetAsync(item, PermissionDecision.Allow, token);
+
+            var original = (await service.GetPagePermissionsAsync(page, token))
+                .Single(row => row.Record.Scope.Kind == scope.Kind && row.Record.Scope.Target == scope.Target).Record;
+            Assert.IsTrue(await service.Decisions.ChangeAsync(original, PermissionDecision.Deny, token));
+            Assert.AreEqual(PermissionDecision.Deny, await service.Decisions.GetAsync(scope, token));
+            Assert.IsFalse(await service.Decisions.ChangeAsync(original, null, token));
+
+            var denied = (await service.GetPagePermissionsAsync(page, token)).Single(row => row.Record.Decision == PermissionDecision.Deny).Record;
+            Assert.IsTrue(await service.Decisions.ChangeAsync(denied, PermissionDecision.Allow, token));
+            Assert.IsFalse(await service.Decisions.ChangeAsync(original, null, token));
+
+            var allowed = (await service.GetPagePermissionsAsync(page, token))
+                .Single(row => row.Record.Scope.Kind == scope.Kind && row.Record.Scope.Target == scope.Target).Record;
+            Assert.IsTrue(await service.Decisions.ChangeAsync(allowed, null, token));
+            Assert.IsNull(await service.Decisions.GetAsync(scope, token));
+            Assert.IsFalse(await service.Decisions.ChangeAsync(allowed, PermissionDecision.Deny, token));
+            Assert.AreEqual(PermissionDecision.Allow, await service.Decisions.GetAsync(otherTarget, token));
+            Assert.AreEqual(PermissionDecision.Allow, await service.Decisions.GetAsync(otherApi, token));
+        }
+
+        [TestMethod]
         public async Task StaticRequests_RespectPageWorldTrustAndInternalPagePolicy()
         {
             var service = Create();

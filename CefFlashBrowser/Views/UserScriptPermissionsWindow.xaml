@@ -1,0 +1,122 @@
+<Window x:Class="CefFlashBrowser.Views.UserScriptPermissionsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+        xmlns:permissions="clr-namespace:Mzying2001.MonkeySharp.Core.Permissions;assembly=Mzying2001.MonkeySharp.Core"
+
+        Title="{DynamicResource userscript_managePermissions}"
+        Width="760"
+        Height="460"
+        MinWidth="560"
+        MinHeight="340"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        Loaded="WindowLoaded">
+
+    <i:Interaction.Behaviors>
+        <behaviors:WindowBehavior/>
+    </i:Interaction.Behaviors>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBox x:Name="pageAddress"
+                 AutomationProperties.Name="{DynamicResource userscript_permissionPage}"
+                 IsReadOnly="True"
+                 ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+        <TextBlock Grid.Row="1"
+                   Margin="0,10,0,12"
+                   Foreground="{DynamicResource SecondaryTextBrush}"
+                   Text="{DynamicResource userscript_permissionScope}"
+                   TextWrapping="Wrap"/>
+
+        <ListView x:Name="permissionList"
+                  Grid.Row="2"
+                  AutomationProperties.Name="{DynamicResource userscript_managePermissions}"
+                  SelectionMode="Single"
+                  SelectionChanged="PermissionSelectionChanged">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="185" Header="{DynamicResource userscript_permissionScript}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding ScriptName}" TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding ScriptName}"/>
+                                    <TextBlock Text="{DynamicResource userscript_permissionDisabled}"
+                                               Foreground="{DynamicResource SecondaryTextBrush}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsScriptDisabled}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="145" Header="API" DisplayMemberBinding="{Binding Record.Scope.Kind}"/>
+                    <GridViewColumn Width="250" Header="{DynamicResource userscript_permissionTarget}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Record.Scope.Target}" TextTrimming="CharacterEllipsis"
+                                           ToolTip="{Binding Record.Scope.Target}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="105" Header="{DynamicResource userscript_permissionDecision}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{DynamicResource userscript_permissionDeny}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Record.Decision}" Value="{x:Static permissions:PermissionDecision.Allow}">
+                                                    <Setter Property="Text" Value="{DynamicResource userscript_permissionAllow}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <TextBlock x:Name="statusText"
+                   Grid.Row="3"
+                   Margin="0,8,0,0"
+                   TextWrapping="Wrap"
+                   Visibility="Collapsed"/>
+
+        <DockPanel Grid.Row="4" Margin="0,14,0,0">
+            <Button x:Name="refreshButton" DockPanel.Dock="Left" MinWidth="80"
+                    Content="{DynamicResource browser_reload}" Click="RefreshClicked"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="allowButton" MinWidth="80" Margin="0,0,8,0"
+                        Content="{DynamicResource userscript_permissionAllow}" Click="AllowClicked" IsEnabled="False"/>
+                <Button x:Name="denyButton" MinWidth="80" Margin="0,0,8,0"
+                        Content="{DynamicResource userscript_permissionDeny}" Click="DenyClicked" IsEnabled="False"/>
+                <Button x:Name="clearButton" MinWidth="90" Margin="0,0,8,0"
+                        Content="{DynamicResource userscript_permissionClear}" Click="ClearClicked" IsEnabled="False"/>
+                <Button MinWidth="80"
+                        Content="{DynamicResource userscript_notificationClose}" Click="CloseClicked"/>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>

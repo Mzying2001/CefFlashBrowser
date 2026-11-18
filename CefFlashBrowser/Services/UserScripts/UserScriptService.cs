@@ -1,9 +1,13 @@
+using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Services.UserScripts.Persistence;
+using Mzying2001.MonkeySharp.Core.Domain;
+using Mzying2001.MonkeySharp.Core.Matching;
 using Mzying2001.MonkeySharp.Core.Permissions;
 using Mzying2001.MonkeySharp.Core.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -58,6 +62,54 @@ namespace CefFlashBrowser.Services.UserScripts
                 ThrowIfStopping();
 
             return new SqliteUserScriptTabStateService(_storage, browserId);
+        }
+
+        public async Task<IReadOnlyList<UserScriptPagePermission>> GetPagePermissionsAsync(Uri page, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (page == null || !page.IsAbsoluteUri)
+                return Array.Empty<UserScriptPagePermission>();
+
+            await InitializeAsync().ConfigureAwait(false);
+
+            var scripts = await Repository.GetSnapshotAsync(token).ConfigureAwait(false);
+            var matchingScripts = scripts.Where(script => MatchesPermissionPage(script.Definition.Metadata, page))
+                .ToDictionary(script => script.ScriptKey);
+
+            if (matchingScripts.Count == 0)
+                return Array.Empty<UserScriptPagePermission>();
+
+            var records = await Decisions.GetForScriptsAsync(matchingScripts.Keys, token).ConfigureAwait(false);
+
+            UserScriptPagePermission selector(UserScriptPermissionRecord record)
+            {
+                var script = matchingScripts[ScriptKey.Parse(record.Scope.ScriptKey)];
+                return new UserScriptPagePermission(script.Definition.Metadata.Name, !script.IsEnabled, record);
+            }
+
+            return records
+                .Select(selector)
+                .OrderBy(item => item.ScriptName, StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(item => item.Record.Scope.ScriptKey, StringComparer.Ordinal)
+                .ThenBy(item => item.Record.Scope.Kind, StringComparer.Ordinal)
+                .ThenBy(item => item.Record.Scope.Target, StringComparer.Ordinal)
+                .ToList().AsReadOnly();
+        }
+
+        private static bool MatchesPermissionPage(UserScriptMetadata metadata, Uri page)
+        {
+            if (metadata == null)
+                return false;
+
+            try
+            {
+                return UserScriptUrlRules.Compile(metadata).IsMatch(page, metadata.RunAt == UserScriptRunAt.ContextMenu);
+            }
+            catch (Exception error) when (error is FormatException || error is ArgumentException || error is RegexMatchTimeoutException)
+            {
+                return false;
+            }
         }
 
         public Task InitializeAsync()

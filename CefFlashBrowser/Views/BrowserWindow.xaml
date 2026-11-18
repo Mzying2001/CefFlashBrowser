@@ -211,9 +211,6 @@
 
             <Separator/>
 
-            <MenuItem Header="{DynamicResource mainWindow_manageUserScripts}"
-                      Command="{Binding OpenUserScriptManagerCommand}"/>
-
             <MenuItem Header="{DynamicResource userscript_downloads}"
                       ItemsSource="{Binding CurrentBrowser.UserScriptDownloads}">
                 <MenuItem.Style>
@@ -289,6 +286,12 @@
                     </DataTemplate>
                 </MenuItem.ItemTemplate>
             </MenuItem>
+
+            <MenuItem Header="{DynamicResource userscript_managePermissions}"
+                      Click="OpenUserScriptPermissions"/>
+
+            <MenuItem Header="{DynamicResource mainWindow_manageUserScripts}"
+                      Command="{Binding OpenUserScriptManagerCommand}"/>
 
             <Separator/>
 
