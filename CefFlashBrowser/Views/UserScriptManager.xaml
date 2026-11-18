@@ -121,20 +121,25 @@
                 <Button
                     DockPanel.Dock="Right"
                     Margin="5,0,0,0"
+                    Padding="10,0"
                     Content="{DynamicResource userScriptManager_cancel}"
                     Command="{Binding HideUrlCommand}"/>
                 <Button
                     DockPanel.Dock="Right"
                     Margin="5,0,0,0"
+                    Padding="10,0"
                     Content="{DynamicResource userScriptManager_load}"
                     Command="{Binding LoadUrlCommand}"/>
                 <TextBlock
                     DockPanel.Dock="Left"
                     Margin="0,0,5,0"
                     VerticalAlignment="Center"
-                    Text="URL"
+                    Text="URL:"
                     Foreground="{DynamicResource PrimaryTextBrush}"/>
                 <TextBox Text="{Binding InstallUrl, UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:TextBoxSelectAllOnFocus/>
+                    </i:Interaction.Behaviors>
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding LoadUrlCommand}"/>
                     </TextBox.InputBindings>
