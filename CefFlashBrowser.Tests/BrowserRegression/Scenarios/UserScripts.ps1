@@ -460,6 +460,7 @@ function Test-UserScriptMenus($Context) {
     $installed = New-Object 'System.Collections.Generic.List[Mzying2001.MonkeySharp.Core.Domain.ScriptKey]'
     $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
     $window = $null
+    $iconFixture = New-Object FaviconHttpFixture
     try {
         for ($index = 0; $index -lt 5; $index++) {
             $source = "// ==UserScript==`n// @name Manual $index`n// @match file:///*`n// @run-at context-menu`n// @grant none`n// ==/UserScript==`ndocument.documentElement.setAttribute('data-manual-$index','yes');"
@@ -469,6 +470,7 @@ function Test-UserScriptMenus($Context) {
         $source = @'
 // ==UserScript==
 // @name Runtime menu
+// @icon a-icon.png
 // @match file:///*
 // @sandbox DOM
 // @grant GM.registerMenuCommand
@@ -484,7 +486,8 @@ function Test-UserScriptMenus($Context) {
     document.documentElement.setAttribute('data-runtime-menu-ready', 'yes');
 })();
 '@
-        $item = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None)) 'install runtime menu fixture'
+        $origin = $iconFixture.BaseUrl + '/menu.user.js'
+        $item = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $origin, $true, [Threading.CancellationToken]::None)) 'install runtime menu fixture'
         $installed.Add($item.ScriptKey)
         $window = New-RegressionWindow $Context
         $model = $window.ViewModel.CurrentBrowser
@@ -548,6 +551,25 @@ function Test-UserScriptMenus($Context) {
                 $runtimeItem.Header -eq 'Runtime command' -and $runtimeItem.ToolTip -like 'Runtime menu*' -and
                 $runtimeItem.IsEnabled -and $runtimeItem.StaysOpenOnClick -and
                 $frameItem.Header -eq 'Frame command' -and !$frameItem.IsEnabled) 'toolbar menu renders the current tab commands and their options'
+            $scriptMenu.UpdateLayout()
+            $groupIcon = @(Find-FaviconElements $scriptMenu ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
+            $groupTitle = @(Find-FaviconElements $scriptMenu ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -eq 'Runtime menu' })[0]
+            $commandTitle = @(Find-FaviconElements $runtimeItem ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -eq $runtimeItem.Header })[0]
+            $groupX = $groupTitle.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).X
+            $commandX = $commandTitle.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).X
+            Assert-Regression ([Math]::Abs($groupX - $commandX) -lt 0.5) "toolbar group title aligns with command text (title $groupX, command $commandX)"
+            $group = @(Find-FaviconElements $scriptMenu ([Windows.Controls.GroupItem]))[0]
+            $groupY = $group.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).Y
+            $commandY = $runtimeItem.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).Y
+            $titleHeight = $commandY - $groupY
+            Assert-Regression ([Math]::Abs($titleHeight - $runtimeItem.ActualHeight) -lt 0.5) "toolbar group title matches the command row height (title ${titleHeight}, command $($runtimeItem.ActualHeight))"
+            Assert-Regression ($groupIcon.ActualWidth -eq 16 -and $groupIcon.ActualHeight -eq 16 -and
+                $groupIcon.FaviconUrl -eq ($iconFixture.BaseUrl + '/a-icon.png') -and
+                $groupIcon.TranslatePoint([Windows.Point]::new(16, 0), $scriptMenu).X -lt $groupX) 'toolbar group shows its resolved 16x16 icon left of the title'
+            $iconImage = $groupIcon.Template.FindName('favicon', $groupIcon)
+            Wait-Regression $Context {
+                $null -ne $iconImage.Source -and !$iconImage.Source.IsDownloading -and !$groupIcon.HasImageFailed
+            } 'toolbar script icon loads successfully'
             Invoke-BrowserCommand $runtimeItem.Command
             Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-runtime-menu')") -eq '1' } 'toolbar GM command callback'
             Invoke-BrowserCommand $frameItem.Command
@@ -666,6 +688,10 @@ GM.registerMenuCommand('Runtime command', function() {
                 $item = $scriptMenu.ItemContainerGenerator.ContainerFromIndex($commandIndex)
                 $fixture = $menuFixtures | Where-Object { $_.Key -eq $item.DataContext.ScriptKey }
                 Assert-Regression ($null -ne $fixture -and !$item.HasItems -and $item.IsEnabled) 'grouped toolbar command is directly actionable'
+                $fallbackIcon = @(Find-FaviconElements $scriptMenu ([CefFlashBrowser.Views.Custom.BrowserIcon]) |
+                    Where-Object { $_.DataContext.Name -eq $fixture.Key })[0]
+                Assert-Regression ($fallbackIcon.DefaultIcon -eq $fixture.Name[0].ToString() -and
+                    $fallbackIcon.Template.FindName('fallbackIcon', $fallbackIcon).IsVisible) 'toolbar group without an icon shows its script initial'
                 Assert-Regression ($firstItem.Focus()) 'first toolbar command receives focus'
                 for ($index = 2; $index -le $commandIndex; $index++) {
                     $nextItem = $scriptMenu.ItemContainerGenerator.ContainerFromIndex($index)
@@ -722,6 +748,7 @@ GM.registerMenuCommand('Runtime command', function() {
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
         if ($null -ne $window) { $window.ForceCloseWindow() }
+        $iconFixture.Dispose()
         foreach ($key in $installed) {
             Complete-UserScriptTask $Context ($repository.RemoveAsync($key, [Threading.CancellationToken]::None)) 'remove menu fixture' | Out-Null
         }

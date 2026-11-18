@@ -14,6 +14,10 @@ namespace CefFlashBrowser.ViewModels
 
         public string Description { get; }
 
+        public string ScriptIconUrl { get; }
+
+        public string ScriptIconInitial => UserScriptItemViewModel.GetIconInitial(ScriptName);
+
         public DelegateCommand InvokeCommand { get; }
 
         private bool _staysOpenOnClick;
@@ -23,12 +27,14 @@ namespace CefFlashBrowser.ViewModels
             internal set => UpdateValue(ref _staysOpenOnClick, value);
         }
 
-        public UserScriptMenuCommand(string scriptKey, string scriptName, string name, string description, Action<UserScriptMenuCommand> invoke)
+        public UserScriptMenuCommand(string scriptKey, string scriptName, string name, string description,
+            Action<UserScriptMenuCommand> invoke, string scriptIconUrl = null)
         {
             ScriptKey = scriptKey;
             ScriptName = scriptName;
             Name = name;
             Description = description;
+            ScriptIconUrl = scriptIconUrl;
             InvokeCommand = new DelegateCommand(() => invoke(this));
         }
     }
