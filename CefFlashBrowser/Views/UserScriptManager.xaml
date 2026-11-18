@@ -264,21 +264,6 @@
 
             <DockPanel Grid.Column="2"
                        PreviewKeyDown="SearchPreviewKeyDown">
-                <TextBlock DockPanel.Dock="Top"
-                           Margin="0,0,0,5"
-                           TextWrapping="Wrap"
-                           Text="{Binding SelectedScript.Problem}">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Style.Triggers>
-                                <Trigger Property="Text" Value="">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
                 <Border x:Name="searchBar"
                         DockPanel.Dock="Top"
                         Padding="10"
@@ -341,6 +326,28 @@
                             </WrapPanel>
                         </StackPanel>
                     </StackPanel>
+                </Border>
+
+                <Border DockPanel.Dock="Bottom"
+                        Padding="10,5"
+                        BorderThickness="1,0,1,1"
+                        Background="{DynamicResource RegionBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedScript.Problem}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding SelectedScript.Problem}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock Text="{Binding SelectedScript.Problem}"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource PrimaryTextBrush}"/>
                 </Border>
 
                 <c:ScriptEditor x:Name="sourceEditor"
