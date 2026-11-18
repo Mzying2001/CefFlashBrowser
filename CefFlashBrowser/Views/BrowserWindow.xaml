@@ -317,9 +317,10 @@
 
         <!--Script commands menu-->
         <ContextMenu x:Key="scriptCommandsMenu"
-                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                     MaxWidth="300"
                      VerticalOffset="-8"
-                     HorizontalOffset="8">
+                     HorizontalOffset="8"
+                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
             <ContextMenu.Resources>
                 <sys:Double x:Key="scriptCommandRowMinHeight">32</sys:Double>
                 <CollectionViewSource x:Key="scriptCommandGroups" Source="{Binding CurrentBrowser.UserScriptMenus}">
@@ -352,7 +353,6 @@
                                     Style="{StaticResource {x:Static c:BrowserIcon.TextFallbackStyleKey}}"/>
                                 <TextBlock
                                     Grid.Column="1"
-                                    MaxWidth="320"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     FontSize="12"
