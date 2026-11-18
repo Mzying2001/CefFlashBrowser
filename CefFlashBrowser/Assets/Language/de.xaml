@@ -37,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">Sonstiges</sys:String>
     <sys:String x:Key="settings_headerBrowser">Browser</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Website-Verhalten</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">Benutzerskripte</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">Benutzerskripte aktivieren</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">Privilegierte APIs für Benutzerskripte im Seitenkontext zulassen</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">Änderungen gelten für neu geöffnete Tabs.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">Standardverhalten für Berechtigungen</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">Gilt, wenn keine Entscheidung zur Berechtigung gespeichert ist.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Erweitert</sys:String>
     <sys:String x:Key="settings_headerAboutCef">Über CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">Suchmaschinen in der Adressleiste verwenden</sys:String>
@@ -79,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">Ursprüngliches Fenster</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Neues Fenster</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">Neuer Tab</sys:String>
+
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">Nachfragen</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">Automatisch erlauben</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">Automatisch verweigern</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>

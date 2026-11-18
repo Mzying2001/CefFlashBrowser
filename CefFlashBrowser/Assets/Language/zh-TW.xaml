@@ -37,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">其他</sys:String>
     <sys:String x:Key="settings_headerBrowser">瀏覽器</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">網站行為</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">使用者指令碼</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">啟用使用者指令碼</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">允許使用者指令碼在網頁環境中使用特權 API</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">變更會在新開啟的分頁中生效。</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">預設權限行為</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">僅在沒有已儲存的權限決定時使用。</sys:String>
     <sys:String x:Key="settings_headerAdvanced">進階</sys:String>
     <sys:String x:Key="settings_headerAboutCef">關於 CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">在網址列使用搜尋引擎</sys:String>
@@ -79,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">原視窗</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新視窗</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">新分頁</sys:String>
+
+    <!--使用者指令碼預設權限行為-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">顯示提示視窗</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">直接允許</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">直接拒絕</sys:String>
 
     <!--搜尋引擎-->
     <sys:String x:Key="searchEngine_baidu">百度</sys:String>

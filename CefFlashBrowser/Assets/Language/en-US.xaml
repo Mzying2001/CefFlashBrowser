@@ -37,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">Other</sys:String>
     <sys:String x:Key="settings_headerBrowser">Browser</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Website Behavior</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">Userscripts</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">Enable userscripts</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">Allow privileged userscript APIs in the page context</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">Changes take effect in newly opened tabs.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">Default permission behavior</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">Applies when there is no saved permission decision.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Advanced</sys:String>
     <sys:String x:Key="settings_headerAboutCef">About CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">Use search engines in the address bar</sys:String>
@@ -79,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">Original window</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">New window</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">New tab</sys:String>
+
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">Show a prompt</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">Allow automatically</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">Deny automatically</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>

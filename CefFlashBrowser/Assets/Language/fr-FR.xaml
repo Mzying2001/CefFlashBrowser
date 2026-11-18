@@ -37,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">Autre</sys:String>
     <sys:String x:Key="settings_headerBrowser">Navigateur</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Comportement des site Web</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">Scripts utilisateur</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">Activer les scripts utilisateur</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">Autoriser les API privilégiées des scripts utilisateur dans le contexte de la page</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">Les modifications s’appliquent aux nouveaux onglets.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">Comportement par défaut des autorisations</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">S’applique lorsqu’aucune décision d’autorisation n’est enregistrée.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Avancé</sys:String>
     <sys:String x:Key="settings_headerAboutCef">À propos de CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">Utilisez le moteur de recherche dans la barre d'adresse</sys:String>
@@ -79,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">Fenêtre d'origine</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Nouvelle fenêtre</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">Nouvel onglet</sys:String>
+
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">Afficher une invite</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">Autoriser automatiquement</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">Refuser automatiquement</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>

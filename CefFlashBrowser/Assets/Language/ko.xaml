@@ -37,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">기타</sys:String>
     <sys:String x:Key="settings_headerBrowser">브라우저</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">웹사이트 동작</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">사용자 스크립트</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">사용자 스크립트 사용</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">페이지 컨텍스트에서 권한이 필요한 사용자 스크립트 API 허용</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">변경 사항은 새로 연 탭에 적용됩니다.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">기본 권한 동작</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">저장된 권한 결정이 없을 때 적용됩니다.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">고급</sys:String>
     <sys:String x:Key="settings_headerAboutCef">CEF 정보</sys:String>
     <sys:String x:Key="settings_useSearchEngine">주소 표시줄에서 검색 엔진 사용</sys:String>
@@ -79,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">원래 창</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">새 창</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">새 탭</sys:String>
+
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">팝업으로 묻기</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">자동으로 허용</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">자동으로 거부</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>

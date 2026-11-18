@@ -37,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">Altro</sys:String>
     <sys:String x:Key="settings_headerBrowser">Browser</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Funzionamento siti web</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">Script utente</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">Abilita gli script utente</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">Consenti le API con privilegi degli script utente nel contesto della pagina</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">Le modifiche si applicano alle nuove schede.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">Comportamento predefinito delle autorizzazioni</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">Si applica quando non è stata salvata alcuna decisione sull’autorizzazione.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Avanzate</sys:String>
     <sys:String x:Key="settings_headerAboutCef">Circa CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">Usa i motori di ricerca nella barra degli indirizzi</sys:String>
@@ -79,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">Finestra originale</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Nuova Finestra</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">Nuova scheda</sys:String>
+
+    <!--Comportamenti predefiniti delle autorizzazioni degli script utente-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">Mostra una richiesta</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">Consenti automaticamente</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">Nega automaticamente</sys:String>
 
     <!--Motore di ricerca-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>

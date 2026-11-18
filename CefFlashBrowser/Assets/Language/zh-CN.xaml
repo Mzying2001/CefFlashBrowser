@@ -37,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">其他</sys:String>
     <sys:String x:Key="settings_headerBrowser">浏览器</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">网站行为</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">用户脚本</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">启用用户脚本</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">允许用户脚本在页面环境中使用特权 API</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">更改会在新打开的标签页中生效。</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">默认权限行为</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">仅在没有已保存的权限决定时使用。</sys:String>
     <sys:String x:Key="settings_headerAdvanced">高级</sys:String>
     <sys:String x:Key="settings_headerAboutCef">关于 CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">在地址栏中使用搜索引擎</sys:String>
@@ -79,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">原窗口</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新窗口</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">新标签页</sys:String>
+
+    <!--用户脚本默认权限行为-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">弹窗提示</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">直接允许</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">直接拒绝</sys:String>
 
     <!--搜索引擎-->
     <sys:String x:Key="searchEngine_baidu">百度</sys:String>

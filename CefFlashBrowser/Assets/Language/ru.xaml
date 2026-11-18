@@ -37,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">Другое</sys:String>
     <sys:String x:Key="settings_headerBrowser">Браузер</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Поведение сайтов</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">Пользовательские скрипты</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">Включить пользовательские скрипты</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">Разрешить привилегированные API пользовательских скриптов в контексте страницы</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">Изменения вступают в силу в новых вкладках.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">Поведение разрешений по умолчанию</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">Применяется, если решение о разрешении не сохранено.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Дополнительно</sys:String>
     <sys:String x:Key="settings_headerAboutCef">О CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">Использовать поисковые системы в адресной строке</sys:String>
@@ -79,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">Исходное окно</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Новое окно</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">Новая вкладка</sys:String>
+
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">Показывать запрос</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">Разрешать автоматически</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">Запрещать автоматически</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
