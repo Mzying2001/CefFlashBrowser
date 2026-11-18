@@ -328,6 +328,7 @@
                     </CollectionViewSource.GroupDescriptions>
                 </CollectionViewSource>
                 <sys:Double x:Key="scriptCommandRowMinHeight">32</sys:Double>
+                <Thickness x:Key="scriptCommandTextMargin">36,3,10,3</Thickness>
             </ContextMenu.Resources>
             <ContextMenu.ItemsSource>
                 <Binding Source="{StaticResource scriptCommandGroups}"/>
@@ -351,23 +352,18 @@
                     </GroupStyle.ContainerStyle>
                     <GroupStyle.HeaderTemplate>
                         <DataTemplate>
-                            <Grid Margin="0,0,12,0"
-                                  MinHeight="{StaticResource scriptCommandRowMinHeight}">
-                                <Grid.ColumnDefinitions>
-                                    <!-- Match the text inset in the HandyControl command row. -->
-                                    <ColumnDefinition Width="36"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <Grid MinHeight="{StaticResource scriptCommandRowMinHeight}">
                                 <c:BrowserIcon
                                     Width="16"
                                     Height="16"
-                                    HorizontalAlignment="Center"
+                                    Margin="10,0,0,0"
+                                    HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     FaviconUrl="{Binding Items[0].ScriptIconUrl}"
                                     DefaultIcon="{Binding Items[0].ScriptIconInitial}"
                                     Style="{StaticResource {x:Static c:BrowserIcon.TextFallbackStyleKey}}"/>
                                 <TextBlock
-                                    Grid.Column="1"
+                                    Margin="{StaticResource scriptCommandTextMargin}"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     FontSize="12"
@@ -389,6 +385,22 @@
                     <Setter Property="ToolTip" Value="{Binding Description}"/>
                     <Setter Property="Command" Value="{Binding InvokeCommand}"/>
                     <Setter Property="StaysOpenOnClick" Value="{Binding StaysOpenOnClick}"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="MenuItem">
+                                <Border x:Name="Bd"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="{TemplateBinding hc:BorderElement.CornerRadius}">
+                                    <TextBlock Margin="{StaticResource scriptCommandTextMargin}"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </ContextMenu.ItemContainerStyle>
         </ContextMenu>

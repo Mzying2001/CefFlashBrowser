@@ -566,6 +566,17 @@ function Test-UserScriptMenus($Context) {
             $groupX = $groupTitle.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).X
             $commandX = $commandTitle.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).X
             Assert-Regression ([Math]::Abs($groupX - $commandX) -lt 0.5) "toolbar group title aligns with command text (title $groupX, command $commandX)"
+            $longCommandTitle = @(Find-FaviconElements $frameItem ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -eq $frameCommandName })[0]
+            $textRight = $longCommandTitle.TranslatePoint([Windows.Point]::new($longCommandTitle.ActualWidth, 0), $frameItem).X
+            $textRightInset = $frameItem.ActualWidth - $textRight
+            Assert-Regression ([Math]::Abs($textRightInset - 10) -lt 0.5) "toolbar command text has only the standard right padding (actual $textRightInset)"
+            $typeface = [Windows.Media.Typeface]::new($longCommandTitle.FontFamily, $longCommandTitle.FontStyle,
+                $longCommandTitle.FontWeight, $longCommandTitle.FontStretch)
+            $formattedTitle = [Windows.Media.FormattedText]::new($frameCommandName, [Globalization.CultureInfo]::CurrentUICulture,
+                $longCommandTitle.FlowDirection, $typeface, $longCommandTitle.FontSize, $longCommandTitle.Foreground,
+                [Windows.Media.VisualTreeHelper]::GetDpi($longCommandTitle).PixelsPerDip)
+            Assert-Regression ($longCommandTitle.TextTrimming -eq 'CharacterEllipsis' -and
+                $formattedTitle.Width -gt $longCommandTitle.ActualWidth) 'an overflowing toolbar command label uses an ellipsis'
             $group = @(Find-FaviconElements $scriptMenu ([Windows.Controls.GroupItem]))[0]
             $groupY = $group.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).Y
             $commandY = $runtimeItem.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).Y
@@ -709,6 +720,9 @@ GM.registerMenuCommand('Runtime command', function() {
                 Assert-Regression ($fallbackIcon.DefaultIcon -eq $fixture.Name[0].ToString() -and
                     $fallbackIcon.Template.FindName('fallbackIcon', $fallbackIcon).IsVisible) 'toolbar group without an icon shows its script initial'
                 Assert-Regression ($firstItem.Focus()) 'first toolbar command receives focus'
+                $focusedBorder = $firstItem.Template.FindName('Bd', $firstItem)
+                Assert-Regression ($firstItem.IsHighlighted -and
+                    $focusedBorder.Background.Color -eq $window.FindResource('SecondaryRegionBrush').Color) 'toolbar command keeps the themed keyboard highlight'
                 for ($index = 2; $index -le $commandIndex; $index++) {
                     $nextItem = $scriptMenu.ItemContainerGenerator.ContainerFromIndex($index)
                     [RegressionKeyboard]::PressKey(0x28)
