@@ -302,7 +302,7 @@ function Test-ManagerSearchAppearance($Context, $Window) {
     $columnWidth = $scriptColumn.Width
     try {
         $Window.Width = $Window.MinWidth
-        $scriptColumn.Width = New-Object Windows.GridLength($scriptColumn.MaxWidth)
+        $scriptColumn.Width = New-Object Windows.GridLength(100, [Windows.GridUnitType]::Star)
         $Window.UpdateLayout()
         $menu.Command.Execute($null, $menu.CommandTarget)
         $editor.CaretOffset = 0
@@ -341,10 +341,31 @@ function Test-ManagerSearchAppearance($Context, $Window) {
             Assert-Regression ($found) "editor renders match highlights in the $appearance theme"
             Assert-Regression ($bar.Background.Color -eq $editor.Background.Color) "search toolbar follows the $appearance theme"
         }
+        $previous = $Window.FindName('findPrevious')
+        $next = $Window.FindName('findNext')
+        $matchCase = $Window.FindName('matchCase')
         foreach ($locale in $Context.LanguageService.GetSupportedLanguage()) {
             $Context.LanguageService.SetCurrentLanguage($locale)
-            $Window.UpdateLayout()
-            foreach ($name in @('matchCase', 'matchCount', 'replaceCurrent', 'replaceAll')) {
+            foreach ($name in @('matchCount', 'noMatches')) {
+                $query.Text = if ($name -eq 'matchCount') { 'const' } else { 'missing search result' }
+                $Window.UpdateLayout()
+                $status = $Window.FindName($name)
+                $statusBounds = $status.TransformToAncestor($bar).TransformBounds((New-Object Windows.Rect($status.RenderSize)))
+                $nextBounds = $next.TransformToAncestor($bar).TransformBounds((New-Object Windows.Rect($next.RenderSize)))
+                $caseBounds = $matchCase.TransformToAncestor($bar).TransformBounds((New-Object Windows.Rect($matchCase.RenderSize)))
+                $center = $nextBounds.Top + $nextBounds.Height / 2
+                $previousCenter = $previous.TranslatePoint((New-Object Windows.Point(0, ($previous.ActualHeight / 2))), $bar).Y
+                $rightEdge = $bar.ActualWidth - $bar.Padding.Right - $bar.BorderThickness.Right
+                Assert-Regression ($status.IsVisible -and $status.ActualWidth -gt 0 -and $matchCase.ActualWidth -gt 0 -and
+                    $status.TextAlignment -eq [Windows.TextAlignment]::Right -and [Math]::Abs($statusBounds.Right - $rightEdge) -lt 1 -and
+                    $status.Parent.Margin.Left -eq 10 -and $statusBounds.Left -ge $caseBounds.Right + 9 -and
+                    [Math]::Abs($statusBounds.Top + $statusBounds.Height / 2 - $center) -lt 1 -and
+                    [Math]::Abs($caseBounds.Top + $caseBounds.Height / 2 - $center) -lt 1 -and
+                    [Math]::Abs($previousCenter - $center) -lt 1) "search status $name aligns with navigation and match case in $locale"
+            }
+            $barBounds = $bar.TransformToAncestor($Window).TransformBounds((New-Object Windows.Rect($bar.RenderSize)))
+            Assert-Regression ($barBounds.Right -le $Window.ActualWidth) "search toolbar stays inside the window in $locale"
+            foreach ($name in @('replaceCurrent', 'replaceAll')) {
                 $control = $Window.FindName($name)
                 $bounds = $control.TransformToAncestor($bar).TransformBounds((New-Object Windows.Rect($control.RenderSize)))
                 Assert-Regression ($bounds.Right -le $bar.ActualWidth) "search control $name fits at minimum editor width in $locale"
@@ -356,6 +377,7 @@ function Test-ManagerSearchAppearance($Context, $Window) {
         $Window.Width = $width
         $scriptColumn.Width = $columnWidth
         $Window.FindName('closeSearchButton').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Primitives.ButtonBase]::ClickEvent)))
+        $editor.TextArea.ClearSelection()
         $Context.LanguageService.SetCurrentLanguage($language)
         Set-ManagerRegressionTheme $Context $theme
     }

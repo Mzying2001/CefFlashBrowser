@@ -144,9 +144,9 @@
 
         <Grid Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240" MinWidth="180" MaxWidth="450"/>
+                <ColumnDefinition Width="*" MinWidth="180" MaxWidth="450"/>
                 <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*" MinWidth="240"/>
             </Grid.ColumnDefinitions>
 
             <ListBox x:Name="scriptList"
@@ -279,6 +279,7 @@
                             <Setter Property="Padding" Value="0"/>
                         </Style>
                     </Border.Resources>
+
                     <StackPanel>
                         <DockPanel>
                             <Button
@@ -294,9 +295,15 @@
                                 AutomationProperties.Name="Find"
                                 hc:InfoElement.Placeholder="{DynamicResource browser_find}"/>
                         </DockPanel>
-                        <WrapPanel>
+                        <Grid Margin="0,5,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
                             <Button
-                                x:Name="findPrevious" Margin="0,5,5,0"
+                                x:Name="findPrevious" Margin="0,0,5,0" VerticalAlignment="Center"
                                 AutomationProperties.Name="PreviousMatch"
                                 Width="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Height}"
                                 ToolTip="{DynamicResource userScriptManager_findPrevious}" Click="FindMatchClicked">
@@ -304,26 +311,35 @@
                                               UriSource="{StaticResource UpIconUri}"/>
                             </Button>
                             <Button
-                                x:Name="findNext" Margin="0,5,10,0"
+                                x:Name="findNext" Grid.Column="1" VerticalAlignment="Center"
                                 AutomationProperties.Name="NextMatch"
                                 Width="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Height}"
                                 ToolTip="{DynamicResource userScriptManager_findNext}" Click="FindMatchClicked">
                                 <svgc:SvgIcon Width="12" Height="12"
                                               UriSource="{StaticResource DownIconUri}"/>
                             </Button>
-                            <CheckBox
-                                x:Name="matchCase" Margin="0,5,0,0" VerticalAlignment="Center"
-                                Content="{DynamicResource userScriptManager_matchCase}"
-                                Checked="MatchCaseChanged" Unchecked="MatchCaseChanged"
-                                AutomationProperties.Name="MatchCase"/>
-                        </WrapPanel>
-                        <TextBlock x:Name="matchCount" Margin="0,5,0,0" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource SecondaryTextBrush}">
-                            <Run Text="{DynamicResource userScriptManager_matches}"/><Run Text=" "/><Run x:Name="matchCountValue"/>
-                        </TextBlock>
-                        <TextBlock x:Name="noMatches" Margin="0,5,0,0" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource SecondaryTextBrush}"
-                                   Text="{DynamicResource userScriptManager_noMatches}"/>
+                            <CheckBox x:Name="matchCase" Grid.Column="2" Margin="10,0,0,0"
+                                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                                      Content="{DynamicResource userScriptManager_matchCase}"
+                                      Checked="MatchCaseChanged" Unchecked="MatchCaseChanged"
+                                      AutomationProperties.Name="MatchCase">
+                                <CheckBox.ContentTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                                    </DataTemplate>
+                                </CheckBox.ContentTemplate>
+                            </CheckBox>
+                            <Grid Grid.Column="3" Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock x:Name="matchCount" TextWrapping="Wrap" TextAlignment="Right"
+                                           Foreground="{DynamicResource SecondaryTextBrush}">
+                                    <Run Text="{DynamicResource userScriptManager_matches}"/><Run Text=" "/><Run x:Name="matchCountValue"/>
+                                </TextBlock>
+                                <TextBlock x:Name="noMatches" TextWrapping="Wrap" TextAlignment="Right"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                           Text="{DynamicResource userScriptManager_noMatches}">
+                                </TextBlock>
+                            </Grid>
+                        </Grid>
                         <StackPanel x:Name="replaceRow"
                                     Margin="0,5,0,0"
                                     Visibility="Collapsed">
