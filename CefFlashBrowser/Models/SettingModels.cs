@@ -49,6 +49,16 @@ namespace CefFlashBrowser.Models
     }
 
     /// <summary>
+    /// Specifies how to handle userscript permission requests without a remembered decision.
+    /// </summary>
+    public enum UserScriptPermissionBehavior
+    {
+        Prompt,
+        Allow,
+        Deny,
+    }
+
+    /// <summary>
     /// Stores settings for overriding the reported Flash Player version.
     /// </summary>
     public class FakeFlashVersionSetting

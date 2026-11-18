@@ -117,6 +117,43 @@ function Test-UserScriptPermissions($Context, $Window, $Model, $Fixture, $Peer) 
     }
 }
 
+function Test-UserScriptPermissionDefaults($Context, $Browser, $Fixture, $ScriptKey) {
+    $settings = [CefFlashBrowser.Data.GlobalData]::Settings
+    $original = $settings.DefaultUserScriptPermissionBehavior
+    $decisions = $Context.UserScriptService.Decisions
+    $token = [Threading.CancellationToken]::None
+    $scope = New-Object Mzying2001.MonkeySharp.Core.Permissions.UserScriptPermissionScope($ScriptKey.ToString(), 'GM.xmlHttpRequest', $Fixture.BaseUrl)
+    $cases = @(
+        @{ Default = 'Allow'; Saved = $null; Expected = 'allowed'; Requests = 1 },
+        @{ Default = 'Deny'; Saved = $null; Expected = 'MSP005_PERMISSION_DENIED'; Requests = 0 },
+        @{ Default = 'Deny'; Saved = 'Allow'; Expected = 'allowed'; Requests = 1 },
+        @{ Default = 'Allow'; Saved = 'Deny'; Expected = 'MSP005_PERMISSION_DENIED'; Requests = 0 }
+    )
+
+    try {
+        foreach ($case in $cases) {
+            $settings.DefaultUserScriptPermissionBehavior = $case.Default
+            if ($null -ne $case.Saved) {
+                Complete-UserScriptTask $Context ($decisions.SetAsync($scope, $case.Saved, $token)) 'save explicit permission' | Out-Null
+            }
+
+            $requests = $Fixture.RequestsFor('/echo')
+            [void](Invoke-JavaScript $Context $Browser "document.documentElement.removeAttribute('data-managed-permission'); document.dispatchEvent(new Event('xhrManagedPermission'));")
+            Wait-UserScriptNetworkMarker $Context $Browser 'data-managed-permission' $case.Expected
+
+            $saved = Complete-UserScriptTask $Context ($decisions.GetAsync($scope, $token)) 'read saved permission'
+            $prompts = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptPermissionDialog] })
+            Assert-Regression ($prompts.Count -eq 0 -and $saved -eq $case.Saved -and
+                $Fixture.RequestsFor('/echo') -eq ($requests + $case.Requests)) "default $($case.Default) with saved decision '$($case.Saved)' resolves without prompting or changing saved decisions"
+        }
+
+        [void](Invoke-JavaScript $Context $Browser "document.documentElement.removeAttribute('data-undeclared'); document.dispatchEvent(new Event('xhrUndeclared'));")
+        Wait-UserScriptNetworkMarker $Context $Browser 'data-undeclared' 'MSP005_PERMISSION_DENIED'
+    } finally {
+        $settings.DefaultUserScriptPermissionBehavior = $original
+    }
+}
+
 function Invoke-UserScriptFrame($Context, $Browser, [string]$Url, [string]$Code) {
     $response = Complete-UserScriptTask $Context ([UserScriptFrameProbe]::EvaluateAsync($Browser, $Url, $Code)) 'fixture frame JavaScript'
     if (!$response.Success) { throw $response.Message }
@@ -441,6 +478,7 @@ document.documentElement.setAttribute('data-network-ready', 'yes');
         Wait-UserScriptNetworkMarker $Context $model.Browser 'data-partition-clean' 'yes'
         Assert-Regression $true 'native Cookie CRUD reads back and partition refusal leaves no mutation'
         Test-UserScriptPermissions $Context $window $model $fixture $peer
+        Test-UserScriptPermissionDefaults $Context $model.Browser $fixture $script.ScriptKey
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.TrustedUserScriptPageWorld = $savedTrusted
         if ($null -ne $window) { $window.ForceCloseWindow() }

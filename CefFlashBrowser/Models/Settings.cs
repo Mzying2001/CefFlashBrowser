@@ -163,6 +163,11 @@
         public bool TrustedUserScriptPageWorld { get; set; }
 
         /// <summary>
+        /// The default behavior for userscript permissions without a remembered decision.
+        /// </summary>
+        public UserScriptPermissionBehavior DefaultUserScriptPermissionBehavior { get; set; }
+
+        /// <summary>
         /// The directory for userscript downloads; defaults to the system Downloads folder when blank
         /// </summary>
         public string UserScriptDownloadDirectory { get; set; }
@@ -211,6 +216,7 @@
             DisableBrowserContextMenu = false;
             EnableUserScripts = true;
             TrustedUserScriptPageWorld = true;
+            DefaultUserScriptPermissionBehavior = UserScriptPermissionBehavior.Prompt;
             UserScriptDownloadDirectory = null;
         }
 

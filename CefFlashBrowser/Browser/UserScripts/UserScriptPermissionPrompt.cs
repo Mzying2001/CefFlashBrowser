@@ -1,3 +1,5 @@
+using CefFlashBrowser.Data;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Views.Dialogs;
 using Mzying2001.MonkeySharp.Core.Permissions;
@@ -14,6 +16,18 @@ namespace CefFlashBrowser.Browser.UserScripts
         public async Task<UserScriptPermissionChoice> PromptAsync(ApiAuthorizationRequest request,
             UserScriptPermissionScope scope, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
+            // The interactive policy checks remembered decisions before requesting a choice.
+            switch (GlobalData.Settings?.DefaultUserScriptPermissionBehavior)
+            {
+                case UserScriptPermissionBehavior.Allow:
+                    return new UserScriptPermissionChoice(PermissionDecision.Allow);
+
+                case UserScriptPermissionBehavior.Deny:
+                    return new UserScriptPermissionChoice(PermissionDecision.Deny);
+            }
+
             var dispatcher = Application.Current?.Dispatcher;
 
             if (dispatcher == null || dispatcher.HasShutdownStarted)
