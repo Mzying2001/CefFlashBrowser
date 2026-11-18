@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'Manager', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing')][string]$Scenario = 'All'
+    [ValidateSet('All', 'Manager', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -97,6 +97,9 @@ try {
     } elseif ($Scenario -eq 'TabRouting') {
         Start-RegressionCef $context
         Test-BrowserTabNewPageRouting $context
+    } elseif ($Scenario -eq 'TabHistory') {
+        Start-RegressionCef $context
+        Test-BrowserTabHistory $context
     } elseif ($Scenario -eq 'Loading') {
         Start-RegressionCef $context
         Test-BrowserTabLoadingMenu $context
@@ -130,6 +133,7 @@ try {
         Test-UserScriptFrames $context
         Test-UserScriptOfflineRecovery $context
         Test-NavigationBeforeHosting $context
+        Test-BrowserTabHistory $context
         Test-AuxiliaryBeforeShow $context
         Test-BrowserWindow $context
         Test-Favicons $context

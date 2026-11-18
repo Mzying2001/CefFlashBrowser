@@ -10,6 +10,77 @@ function New-RegressionTab($Context, $Window, [string]$Address = 'about:blank') 
     return $model
 }
 
+function Test-BrowserTabHistory($Context) {
+    $fixture = New-Object UserScriptHttpFixture
+    $window = $null
+    try {
+        $window = New-RegressionWindow $Context
+        $tab = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+        $browser = $tab.Browser
+        Wait-Regression $Context { !$browser.IsLoading } 'first page finishes loading'
+        Assert-FirstHistoryEntry $Context $browser $Context.AuxiliaryAddress
+
+        $tab = New-RegressionTab $Context $window
+        $browser = $tab.Browser
+        $firstAddress = $fixture.BaseUrl + '/echo'
+        $tab.Address = $fixture.BaseUrl + '/redirect'
+        Wait-Regression $Context {
+            $tab.Address -eq $firstAddress -and $tab.HasDocument -and !$browser.IsLoading
+        } 'first navigation from a blank tab finishes after a redirect'
+        Assert-FirstHistoryEntry $Context $browser $firstAddress
+
+        $secondAddress = $fixture.BaseUrl + '/page'
+        $tab.Address = $secondAddress
+        Wait-Regression $Context { $browser.Title -eq 'Userscript fixture' -and !$browser.IsLoading } 'second page finishes loading'
+        Assert-Regression ($browser.CanGoBack -and $browser.BackCommand.CanExecute) 'second page enables Back'
+        Invoke-BrowserCommand $browser.BackCommand
+        Wait-Regression $Context {
+            $tab.Address -eq $firstAddress -and $browser.CanGoForward -and !$browser.IsLoading
+        } 'Back returns to the first page'
+        Assert-Regression (!$browser.CanGoBack -and !$browser.BackCommand.CanExecute) 'Back stops at the first page'
+        Invoke-BrowserCommand $browser.ForwardCommand
+        Wait-Regression $Context { $tab.Address -eq $secondAddress -and !$browser.IsLoading } 'Forward returns to the second page'
+
+        $browser.LoadPrepared('about:blank')
+        Wait-Regression $Context { $tab.Address -eq 'about:blank' -and !$browser.IsLoading } 'a later blank navigation updates the address'
+        Invoke-BrowserCommand $browser.BackCommand
+        Wait-Regression $Context { $tab.Address -eq $secondAddress -and !$browser.IsLoading } 'Back returns from a later blank page'
+        Invoke-BrowserCommand $browser.ForwardCommand
+        Wait-Regression $Context { $tab.Address -eq 'about:blank' -and !$browser.IsLoading } 'Forward revisits a later blank page'
+
+        $tab = New-RegressionTab $Context $window
+        $browser = $tab.Browser
+        $errorState = @{ Code = $null }
+        $onLoadError = [EventHandler[CefSharp.LoadErrorEventArgs]]({
+            param($sender, $eventArgs)
+            if ($eventArgs.Frame.IsMain) { $errorState.Code = $eventArgs.ErrorCode }
+        }.GetNewClosure())
+        $browser.add_LoadError($onLoadError)
+        try {
+            $missingAddress = ([Uri](Join-Path $Context.TemporaryPath 'missing.html')).AbsoluteUri
+            $tab.Address = $missingAddress
+            Wait-Regression $Context {
+                $errorState.Code -eq [CefSharp.CefErrorCode]::FileNotFound -and !$browser.IsLoading
+            } 'failed first navigation reports its load error'
+            Assert-FirstHistoryEntry $Context $browser $missingAddress
+        } finally {
+            $browser.remove_LoadError($onLoadError)
+        }
+    } finally {
+        if ($null -ne $window) { $window.ForceCloseWindow() }
+        $fixture.Dispose()
+    }
+}
+
+function Assert-FirstHistoryEntry($Context, $Browser, [string]$Address) {
+    $read = [CefSharp.AsyncExtensions]::GetNavigationEntriesAsync($Browser.GetBrowser().GetHost(), $false)
+    Wait-Regression $Context { $read.IsCompleted } 'read native navigation history'
+    $history = $read.GetAwaiter().GetResult()
+    Assert-Regression (!$Browser.GetBrowser().CanGoBack -and !$Browser.CanGoBack -and !$Browser.BackCommand.CanExecute -and
+        $history.Count -eq 1 -and $history[0].Url -eq $Address) `
+        "first page is the only history entry (entries: $($history.Url -join ', '))"
+}
+
 function Test-BrowserTabsBeforeShow($Context) {
     $window = New-Object CefFlashBrowser.Views.BrowserWindow
     $model = $window.ViewModel

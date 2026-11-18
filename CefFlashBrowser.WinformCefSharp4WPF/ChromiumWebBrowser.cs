@@ -30,6 +30,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         private volatile bool isBrowserInitialized;
         private CancellationTokenSource navigationCancellation;
         private long navigationVersion;
+        private volatile bool hasInitialBlank;
         private Task disposalTask;
         private bool disposalPrepared;
 
@@ -695,6 +696,15 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 browser.Load(url);
         }
 
+        public void LoadInitialBlank()
+        {
+            if (!isHosted || browser.IsDisposed)
+                return;
+
+            hasInitialBlank = true;
+            browser.Load("about:blank");
+        }
+
         private void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
         {
             InvokeOnUIThread(delegate { OnJavascriptMessageReceived(e); });
@@ -767,6 +777,13 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnLoadError(object sender, LoadErrorEventArgs e)
         {
+            if (hasInitialBlank && !browser.IsDisposed && !e.Browser.IsDisposed
+                && e.Frame.IsMain && e.ErrorCode != CefErrorCode.Aborted && e.FailedUrl != "about:blank"
+                && TryRemoveInitialBlank(e.Browser.GetHost(), e.FailedUrl))
+            {
+                hasInitialBlank = false;
+            }
+
             InvokeOnUIThread(delegate { OnLoadError(e); }, invokeAsync: false);
         }
 
@@ -794,12 +811,24 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnAddressChanged(object sender, AddressChangedEventArgs e)
         {
+            bool isInitialBlank;
+
             try
             {
                 if (browser.IsDisposed || e.Browser.IsDisposed)
                     return;
 
-                var entry = e.Browser.GetHost()?.GetVisibleNavigationEntry();
+                var host = e.Browser.GetHost();
+                var hadInitialBlank = hasInitialBlank;
+                isInitialBlank = hadInitialBlank && e.Address == "about:blank";
+
+                if (hadInitialBlank && !isInitialBlank)
+                {
+                    hasInitialBlank = false;
+                    TryRemoveInitialBlank(host, e.Address);
+                }
+
+                var entry = host?.GetVisibleNavigationEntry();
 
                 // CEF reports the underlying URL for source pages. Read the visible
                 // entry on the CEF UI thread before dispatching to WPF.
@@ -814,14 +843,53 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 return;
             }
 
-            InvokeOnUIThread(delegate { OnAddressChanged(e); });
+            InvokeOnUIThread(delegate
+            {
+                if (!isInitialBlank || Address == "about:blank")
+                    OnAddressChanged(e);
+            });
+        }
+
+        private static bool TryRemoveInitialBlank(IBrowserHost host, string address)
+        {
+            if (host == null)
+                return false;
+
+            // CEF visits the entries synchronously on its UI thread. Reset only
+            // while the warm-up document and its replacement are the entire history.
+            var history = new InitialBlankHistoryVisitor(address);
+            host.GetNavigationEntries(history, false);
+
+            return history.CanRemoveInitialBlank && host.ExecuteDevToolsMethod(0, "Page.resetNavigationHistory", "{}") > 0;
+        }
+
+        private sealed class InitialBlankHistoryVisitor : INavigationEntryVisitor
+        {
+            private readonly string _address;
+
+            public InitialBlankHistoryVisitor(string address) => _address = address;
+
+            public bool CanRemoveInitialBlank { get; private set; }
+
+            public bool Visit(NavigationEntry entry, bool current, int index, int total)
+            {
+                if (total != 2 || !entry.IsValid)
+                    return false;
+
+                if (index == 0)
+                    return !current && entry.Url == "about:blank";
+
+                CanRemoveInitialBlank = current && entry.Url == _address;
+                return false;
+            }
+
+            public void Dispose() { }
         }
 
         protected virtual void OnAddressChanged(AddressChangedEventArgs e)
         {
             // Initial CEF notifications must not replace an unhosted navigation request.
-            if (!isHosted || browser.IsDisposed || pendingAddress != null
-                || (NavigationHandler != null && e.Address == "about:blank" && Address != "about:blank"))
+            if (!isHosted || browser.IsDisposed || pendingAddress != null)
                 return;
 
             SetDocumentAddress(e.Address);

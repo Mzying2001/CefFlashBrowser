@@ -117,7 +117,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     if (needsBlankDocument)
                     {
                         _initialBlankTarget = _model.Address == "about:blank";
-                        _browser.LoadPrepared("about:blank");
+                        _browser.LoadInitialBlank();
                     }
 
                     await _host.PrepareAsync(_lifetime.Token);
