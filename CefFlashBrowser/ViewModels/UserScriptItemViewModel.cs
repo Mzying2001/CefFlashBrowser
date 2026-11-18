@@ -55,14 +55,7 @@ namespace CefFlashBrowser.ViewModels
 
         public string IconUrl { get; private set; }
 
-        public string IconInitial
-        {
-            get
-            {
-                var name = Name?.Trim();
-                return string.IsNullOrEmpty(name) ? "?" : StringInfo.GetNextTextElement(name);
-            }
-        }
+        public string IconInitial => GetIconInitial(Name);
 
         public UserScriptItemViewModel(string source, string origin, string name, bool requiresConfirmation)
         {
@@ -130,7 +123,13 @@ namespace CefFlashBrowser.ViewModels
             RaisePropertyChanged(nameof(IconInitial));
         }
 
-        private static string ResolveIconUrl(UserScriptMetadata metadata, string origin)
+        internal static string GetIconInitial(string name)
+        {
+            name = name?.Trim();
+            return string.IsNullOrEmpty(name) ? "?" : StringInfo.GetNextTextElement(name);
+        }
+
+        internal static string ResolveIconUrl(UserScriptMetadata metadata, string origin)
         {
             var icon = string.IsNullOrWhiteSpace(metadata?.IconUrl) ? metadata?.Icon64Url : metadata.IconUrl;
             if (string.IsNullOrWhiteSpace(icon)) return null;

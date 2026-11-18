@@ -1,8 +1,11 @@
 ﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
+using CefFlashBrowser.Views.Dialogs;
 using Microsoft.Win32;
+using Mzying2001.MonkeySharp.Core.Domain;
 using SimpleMvvm.Command;
 using System;
 using System.ComponentModel;
@@ -39,7 +42,7 @@ namespace CefFlashBrowser.Views
 
         private async void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            ViewModel.ConfirmInstallation = ConfirmOperation;
+            ViewModel.ConfirmInstallation = ConfirmInstallation;
             ViewModel.ConfirmDeletion = ConfirmOperation;
             ViewModel.PropertyChanged += ViewModelPropertyChanged;
             await ViewModel.OpenAsync();
@@ -49,6 +52,13 @@ namespace CefFlashBrowser.Views
         {
             ImportFileCommand.RaiseCanExecuteChanged();
             ExportCommand.RaiseCanExecuteChanged();
+        }
+
+        private bool ConfirmInstallation(UserScriptMetadata metadata, string origin)
+        {
+            var dialog = WindowManager.CreateWindow<UserScriptInstallDialog>();
+            dialog.SetScript(metadata, origin);
+            return DialogHelper.ShowModal(dialog, this) == true;
         }
 
         private bool ConfirmOperation(string message)

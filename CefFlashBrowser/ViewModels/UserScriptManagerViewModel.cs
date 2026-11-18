@@ -38,7 +38,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ShowUrlCommand { get; }
         public DelegateCommand HideUrlCommand { get; }
 
-        public Func<string, bool> ConfirmInstallation { private get; set; }
+        public Func<UserScriptMetadata, string, bool> ConfirmInstallation { private get; set; }
         public Func<string, bool> ConfirmDeletion { private get; set; }
 
         private string _installUrl;
@@ -208,8 +208,8 @@ namespace CefFlashBrowser.ViewModels
                     return;
                 }
 
-                if (!item.IsInstalled && item.RequiresConfirmation
-                    && ConfirmInstallation?.Invoke(ConfirmationText(parsed.Metadata, item.Origin)) != true)
+                if (previous == null && item.RequiresConfirmation
+                    && ConfirmInstallation?.Invoke(parsed.Metadata, origin) != true)
                 {
                     Status = _text("userScriptManager_cancelled");
                     return;
@@ -277,18 +277,6 @@ namespace CefFlashBrowser.ViewModels
                 await UserScriptSourceText.WriteAsync(path, source, token);
                 Status = _text("userScriptManager_exported");
             });
-        }
-
-        private string ConfirmationText(UserScriptMetadata metadata, string origin)
-        {
-            return _text("userScriptManager_confirmInstall") + Environment.NewLine + Environment.NewLine
-                + metadata.Name + " " + metadata.Version + Environment.NewLine + origin + Environment.NewLine
-                + _text("userScriptManager_match") + ": " + string.Join(", ", metadata.Matches.Concat(metadata.Includes)) + Environment.NewLine
-                + _text("userScriptManager_world") + ": " + metadata.Sandbox + " / " + metadata.InjectInto + Environment.NewLine
-                + _text("userScriptManager_grants") + ": " + string.Join(", ", metadata.DeclaredGrants) + Environment.NewLine
-                + "@connect: " + string.Join(", ", metadata.Connects) + Environment.NewLine
-                + "@require: " + string.Join(", ", metadata.Requires.Select(item => item.Url)) + Environment.NewLine
-                + "@resource: " + string.Join(", ", metadata.Resources.Select(item => item.Name + " " + item.Url));
         }
 
         public Task ToggleAsync(UserScriptItemViewModel item)

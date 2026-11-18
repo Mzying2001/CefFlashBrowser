@@ -248,6 +248,9 @@
     <sys:String x:Key="userScriptManager_install">現在の下書きをインストール</sys:String>
     <sys:String x:Key="userScriptManager_export">ソースコードをエクスポート…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">このスクリプトをインストールしますか？</sys:String>
+    <sys:String x:Key="userScriptInstall_install">インストール</sys:String>
+    <sys:String x:Key="userScriptInstall_author">作者</sys:String>
+    <sys:String x:Key="userScriptInstall_source">インストール元</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">ソースコードを読み込みました。まだインストールされていません。内容を確認してから「現在の下書きをインストール」または「保存」を選択してください。</sys:String>
     <sys:String x:Key="userScriptManager_invalidMetadata">ユーザースクリプトのメタデータが無効です。メタデータヘッダーを確認して、もう一度お試しください。</sys:String>
     <sys:String x:Key="userScriptManager_invalidUrl">有効な HTTP または HTTPS の URL を入力してください。</sys:String>

@@ -248,6 +248,9 @@
     <sys:String x:Key="userScriptManager_install">安装当前草稿</sys:String>
     <sys:String x:Key="userScriptManager_export">导出源码…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">是否安装以下脚本？</sys:String>
+    <sys:String x:Key="userScriptInstall_install">安装</sys:String>
+    <sys:String x:Key="userScriptInstall_author">作者</sys:String>
+    <sys:String x:Key="userScriptInstall_source">来源</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">源码已载入，尚未安装。检查后选择“安装当前草稿”或保存。</sys:String>
     <sys:String x:Key="userScriptManager_invalidMetadata">用户脚本元数据无效，请检查头部声明后重试。</sys:String>
     <sys:String x:Key="userScriptManager_invalidUrl">请输入有效的 HTTP 或 HTTPS 地址。</sys:String>

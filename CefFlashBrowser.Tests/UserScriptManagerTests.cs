@@ -1,6 +1,7 @@
 ﻿using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.ViewModels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Repository;
 using System;
 using System.IO;
@@ -238,19 +239,38 @@ namespace CefFlashBrowser.Tests
         {
             var repository = await RepositoryAsync();
             var source = Template();
+            const string origin = "https://example.com/game.user.js";
             var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository), key => key,
                 action => action(), (url, token) => Task.FromResult(source));
             await model.OpenAsync();
-            await model.ImportUrlAsync("https://example.com/game.user.js");
+            await model.ImportUrlAsync(origin);
             Assert.AreEqual(0, (await repository.GetSnapshotAsync(CancellationToken.None)).Count);
+            var reviewedSource = source.Replace("@name test", "@name reviewed\n// @icon icons/edited.png");
+            model.SelectedScript.Source = reviewedSource;
+
             var confirmations = 0;
-            model.ConfirmInstallation = message => { confirmations++; return false; };
+            UserScriptMetadata reviewedMetadata = null;
+            string reviewedOrigin = null;
+            model.ConfirmInstallation = (metadata, sourceOrigin) =>
+            {
+                confirmations++;
+                reviewedMetadata = metadata;
+                reviewedOrigin = sourceOrigin;
+                return confirmations == 2;
+            };
+
             await model.SaveAsync();
             Assert.AreEqual(1, confirmations);
+            Assert.AreEqual("reviewed", reviewedMetadata?.Name);
+            Assert.AreEqual("icons/edited.png", reviewedMetadata?.IconUrl);
+            Assert.AreEqual(origin, reviewedOrigin);
             Assert.IsTrue(model.SelectedScript.IsDirty);
             Assert.IsFalse(model.SelectedScript.IsInstalled);
-            model.ConfirmInstallation = message => { confirmations++; return true; };
+            Assert.AreEqual(reviewedSource, model.SelectedScript.Source);
+            Assert.AreEqual(0, (await repository.GetSnapshotAsync(CancellationToken.None)).Count);
+
             await model.SaveAsync();
+            Assert.AreEqual(reviewedSource, model.SelectedScript.Installation?.Definition.Source);
             model.SelectedScript.Source += "\n// edit";
             await model.SaveAsync();
             await model.ToggleAsync(model.SelectedScript);
@@ -336,7 +356,7 @@ namespace CefFlashBrowser.Tests
             var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository), key => key,
                 action => action(), (url, token) => Task.FromResult(Template()));
             await model.OpenAsync();
-            model.ConfirmInstallation = _ => true;
+            model.ConfirmInstallation = (_, __) => true;
             for (var index = 0; index < 2; index++)
             {
                 await model.ImportUrlAsync("https://example.com/same.user.js");

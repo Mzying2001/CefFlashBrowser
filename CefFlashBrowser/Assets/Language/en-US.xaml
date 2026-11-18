@@ -248,6 +248,9 @@
     <sys:String x:Key="userScriptManager_install">Install current draft</sys:String>
     <sys:String x:Key="userScriptManager_export">Export source…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Install this script?</sys:String>
+    <sys:String x:Key="userScriptInstall_install">Install</sys:String>
+    <sys:String x:Key="userScriptInstall_author">Author</sys:String>
+    <sys:String x:Key="userScriptInstall_source">Source</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">Source loaded, pending installation. Review it, then choose Install current draft or Save.</sys:String>
     <sys:String x:Key="userScriptManager_invalidMetadata">Invalid userscript metadata. Check the metadata header and try again.</sys:String>
     <sys:String x:Key="userScriptManager_invalidUrl">Enter a valid HTTP or HTTPS URL.</sys:String>

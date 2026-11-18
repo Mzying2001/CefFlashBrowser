@@ -248,6 +248,9 @@
     <sys:String x:Key="userScriptManager_install">Установить текущий черновик</sys:String>
     <sys:String x:Key="userScriptManager_export">Экспортировать исходный код…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Установить этот скрипт?</sys:String>
+    <sys:String x:Key="userScriptInstall_install">Установить</sys:String>
+    <sys:String x:Key="userScriptInstall_author">Автор</sys:String>
+    <sys:String x:Key="userScriptInstall_source">Источник</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">Исходный код загружен и ожидает установки. Проверьте его, затем выберите «Установить текущий черновик» или «Сохранить».</sys:String>
     <sys:String x:Key="userScriptManager_invalidMetadata">Недопустимые метаданные пользовательского скрипта. Проверьте заголовок метаданных и повторите попытку.</sys:String>
     <sys:String x:Key="userScriptManager_invalidUrl">Введите допустимый URL с протоколом HTTP или HTTPS.</sys:String>

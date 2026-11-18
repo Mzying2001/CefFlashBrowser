@@ -248,6 +248,9 @@
     <sys:String x:Key="userScriptManager_install">Installa la bozza attuale</sys:String>
     <sys:String x:Key="userScriptManager_export">Esporta il codice sorgente…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Installare questo script?</sys:String>
+    <sys:String x:Key="userScriptInstall_install">Installa</sys:String>
+    <sys:String x:Key="userScriptInstall_author">Autore</sys:String>
+    <sys:String x:Key="userScriptInstall_source">Origine</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">Codice sorgente caricato, in attesa di installazione. Controllalo, quindi scegli «Installa la bozza attuale» o «Salva».</sys:String>
     <sys:String x:Key="userScriptManager_invalidMetadata">Metadati dello script utente non validi. Controlla l'intestazione dei metadati e riprova.</sys:String>
     <sys:String x:Key="userScriptManager_invalidUrl">Inserisci un URL HTTP o HTTPS valido.</sys:String>

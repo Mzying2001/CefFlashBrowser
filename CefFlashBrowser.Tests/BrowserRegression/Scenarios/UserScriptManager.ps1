@@ -471,24 +471,95 @@ function Test-BrowserIconStyleReuse($Context) {
     }
 }
 
-function Save-ManagerWithConfirmation($Context, $Model, [bool]$Accept) {
-    $state = @{ Count = 0; Message = '' }
+function Save-ManagerWithConfirmation($Context, $Window, [string]$Action, [hashtable]$Expected) {
+    $model = $Window.DataContext
+    $state = @{ Count = 0; Failure = $null }
     $timer = New-Object Windows.Threading.DispatcherTimer
     $timer.Interval = [TimeSpan]::FromMilliseconds(50)
     $handler = [EventHandler]({
-        $dialog = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.JsConfirmDialog] }) | Select-Object -First 1
-        if ($null -ne $dialog) {
-            $state.Count++
-            $state.Message = $dialog.Message
-            $timer.Stop()
-            [CefFlashBrowser.Utils.DialogHelper]::SetDialogResult($dialog, $Accept)
+        $dialog = @($Context.Application.Windows | Where-Object {
+            $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptInstallDialog] -or $_ -is [CefFlashBrowser.Views.Dialogs.JsConfirmDialog]
+        }) | Select-Object -First 1
+        if ($null -eq $dialog) { return }
+
+        $state.Count++
+        $timer.Stop()
+        try {
+            Assert-Regression ($dialog -is [CefFlashBrowser.Views.Dialogs.UserScriptInstallDialog] -and
+                [object]::ReferenceEquals($dialog.Owner, $Window) -and $model.IsBusy) 'external installation opens a dedicated modal owned by the manager'
+            foreach ($name in $Expected.Text.Keys) {
+                $control = $dialog.FindName($name)
+                $text = $Expected.Text[$name]
+                Assert-Regression ($control.Text -ceq $text -and ($control.IsVisible -eq ![string]::IsNullOrWhiteSpace($text))) "installation dialog presents $name from the reviewed script"
+                if ($control -is [Windows.Controls.TextBlock] -and $control.Parent -is [Windows.Controls.Grid]) {
+                    $grid = $control.Parent
+                    $row = [Windows.Controls.Grid]::GetRow($control)
+                    $label = $grid.Children | Where-Object {
+                        [Windows.Controls.Grid]::GetRow($_) -eq $row -and [Windows.Controls.Grid]::GetColumn($_) -eq 0
+                    }
+                    Assert-Regression ($label.Visibility -eq $control.Visibility -and
+                        ($control.IsVisible -or $grid.RowDefinitions[$row].ActualHeight -eq 0)) "installation dialog hides the entire $name row when absent"
+                }
+            }
+
+            $icon = $dialog.FindName('scriptIcon')
+            $fallback = $icon.Template.FindName('fallbackIcon', $icon)
+            Assert-Regression ($icon.FaviconUrl -eq $Expected.IconUrl) 'installation dialog resolves the reviewed icon URL'
+            if ($Expected.IconReady) {
+                Wait-Regression $Context {
+                    $image = $icon.Template.FindName('favicon', $icon)
+                    $null -ne $image.Source -and !$image.Source.IsDownloading -and !$fallback.IsVisible
+                } 'declared icon loads in the installation dialog'
+            } else {
+                if ($Expected.IconUrl) {
+                    Wait-Regression $Context { $icon.HasImageFailed } 'failed installation icon finishes loading'
+                }
+                Assert-Regression ($fallback.IsVisible -and (Get-ManagerIconText $icon).Text -eq $Expected.Initial) 'installation dialog shows the script name initial as the icon fallback'
+            }
+
+            $install = $dialog.FindName('installButton')
+            $cancel = $dialog.FindName('cancelButton')
+            Assert-Regression ($dialog.Title -ceq $Context.LanguageService.GetString('userScriptManager_confirmInstall') -and
+                $install.Content -ceq $Context.LanguageService.GetString('userScriptInstall_install') -and
+                $cancel.Content -ceq $Context.LanguageService.GetString('dialog_cancel')) 'installation dialog localizes the title and actions'
+            if ($Expected.Scrolls) {
+                $details = $dialog.FindName('scriptDetails')
+                Assert-Regression ($details.ComputedVerticalScrollBarVisibility -eq [Windows.Visibility]::Visible -and
+                    $details.ExtentWidth -le $details.ViewportWidth -and $install.IsVisible -and $cancel.IsVisible) 'long script details wrap and scroll above the action buttons'
+                Assert-Regression ($dialog.Background.Color -eq $dialog.FindResource('RegionBrush').Color -and
+                    $dialog.FindName('scriptDescription').Foreground.Color -eq $dialog.FindResource('PrimaryTextBrush').Color) 'installation dialog uses the active theme colors'
+            }
+
+            switch ($Action) {
+                'Close' { $dialog.Close() }
+                'Escape' {
+                    Set-TabWindowForeground $Context $dialog
+                    [RegressionKeyboard]::PressKey(0x1B)
+                }
+                'Enter' {
+                    Set-TabWindowForeground $Context $dialog
+                    Assert-Regression ($install.IsKeyboardFocused) 'installation action has initial keyboard focus'
+                    [RegressionKeyboard]::PressKey(0x0D)
+                }
+                default {
+                    $button = if ($Action -eq 'Install') { $install } else { $cancel }
+                    $peer = New-Object Windows.Automation.Peers.ButtonAutomationPeer($button)
+                    $peer.GetPattern([Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+                }
+            }
+            Wait-Regression $Context { !$dialog.IsVisible } "$Action dismisses the installation dialog"
+        } catch {
+            $state.Failure = $_
+        } finally {
+            if ($dialog.IsVisible) { $dialog.Close() }
         }
     }.GetNewClosure())
     $timer.add_Tick($handler)
     $timer.Start()
     try {
         Complete-UserScriptTask $Context ($Model.SaveAsync()) 'reviewed script installation'
-        Assert-Regression ($state.Count -eq 1 -and $state.Message.Contains('@require')) 'external installation opens exactly one confirmation with permissions and dependencies'
+        if ($null -ne $state.Failure) { throw $state.Failure }
+        Assert-Regression ($state.Count -eq 1) 'external installation opens exactly one confirmation'
     } finally {
         $timer.Stop()
         $timer.remove_Tick($handler)
@@ -664,17 +735,58 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Assert-Regression ([object]::ReferenceEquals($draft, $model.SelectedScript) -and $item.IsDirty -and $item.Source.Contains('unsaved session draft')) 'selection and unsaved drafts survive manager closure'
         Assert-Regression ($editor.Text -ceq $draft.Source) 'reopened editor displays the selected unsaved draft'
         $path = Join-Path $Context.TemporaryPath 'manager-import.user.js'
-        [IO.File]::WriteAllText($path, $source, (New-Object Text.UTF8Encoding($true)))
+        $minimalSource = $source -replace '(?m)^// @(match|sandbox|grant).*\r?\n', ''
+        [IO.File]::WriteAllText($path, $minimalSource, (New-Object Text.UTF8Encoding($true)))
         Complete-UserScriptTask $Context ($model.ImportFileAsync($path)) 'load local file draft'
-        Save-ManagerWithConfirmation $Context $model $false
-        Assert-Regression (!$model.SelectedScript.IsInstalled) 'declined installation leaves an editable draft'
-        Save-ManagerWithConfirmation $Context $model $true
-        Assert-Regression ($model.SelectedScript.IsInstalled) 'accepted local script installs'
-        $fixture.ScriptSource = $source
-        Complete-UserScriptTask $Context ($model.ImportUrlAsync($fixture.BaseUrl + '/manager.user.js')) 'download URL draft'
+        $expected = @{
+            Text = @{
+                scriptName = 'Manager workflow'; scriptVersion = '1.0.0'; scriptDescription = ''; scriptAuthor = ''; scriptOrigin = $path
+                scriptMatches = ''; scriptWorld = ''; scriptGrants = ''; scriptConnects = ''; scriptRequires = ''; scriptResources = ''
+            }
+            Initial = 'M'
+        }
+        Save-ManagerWithConfirmation $Context $window 'Close' $expected
+        Assert-Regression (!$model.SelectedScript.IsInstalled -and $model.SelectedScript.Source -ceq $minimalSource) 'closing installation preserves the local draft'
+        $description = ('A long description for the script installation review. ' * 90).TrimEnd()
+        $missingIcon = $iconFixture.BaseUrl + '/missing.png'
+        $reviewedSource = $source.Replace('Manager workflow', '脚本安装确认').Replace('// @version 1.0.0',
+            "// @version 2.0.0`n// @author Local author`n// @description $description`n// @icon $missingIcon")
+        $model.SelectedScript.Source = $reviewedSource
+        $expected = @{
+            Text = @{
+                scriptName = '脚本安装确认'; scriptVersion = '2.0.0'; scriptDescription = $description
+                scriptAuthor = 'Local author'; scriptOrigin = $path; scriptMatches = 'file:///*'
+                scriptWorld = 'DOM'; scriptGrants = 'none'
+            }
+            IconUrl = $missingIcon; Initial = '脚'; Scrolls = $true
+        }
+        Set-ManagerRegressionTheme $Context ([CefFlashBrowser.Models.Theme]::Light)
+        Save-ManagerWithConfirmation $Context $window 'Cancel' $expected
+        Assert-Regression (!$model.SelectedScript.IsInstalled -and $model.SelectedScript.Source -ceq $reviewedSource) 'cancel button preserves edited script without installing'
+        Set-ManagerRegressionTheme $Context ([CefFlashBrowser.Models.Theme]::Dark)
+        Save-ManagerWithConfirmation $Context $window 'Escape' $expected
+        Assert-Regression (!$model.SelectedScript.IsInstalled -and $model.SelectedScript.Source -ceq $reviewedSource) 'Escape preserves edited script without installing'
+        Save-ManagerWithConfirmation $Context $window 'Install' $expected
+        Assert-Regression ($model.SelectedScript.IsInstalled -and $model.SelectedScript.Installation.Definition.Source -ceq $reviewedSource) 'install button commits the reviewed local source'
+        Set-ManagerRegressionTheme $Context $theme
+
+        $url = $fixture.BaseUrl + '/manager.user.js'
+        $dependency = $fixture.BaseUrl + '/dependency.js'
+        $resource = $fixture.BaseUrl + '/resource.txt'
+        $fixture.ScriptSource = $source.Replace('// @grant none',
+            "// @grant none`n// @icon64 /blocked.png`n// @connect 127.0.0.1`n// @require $dependency`n// @resource fixture $resource")
+        Complete-UserScriptTask $Context ($model.ImportUrlAsync($url)) 'download URL draft'
         Assert-Regression (!$model.SelectedScript.IsInstalled -and $fixture.RequestsFor('/manager.user.js') -eq 1) 'URL download produces a pending draft'
-        Save-ManagerWithConfirmation $Context $model $true
-        Assert-Regression ($fixture.RequestsFor('/manager.user.js') -eq 1) 'confirmed installation uses reviewed bytes without another source request'
+        $expected = @{
+            Text = @{
+                scriptName = 'Manager workflow'; scriptOrigin = $url; scriptConnects = '127.0.0.1'
+                scriptRequires = $dependency; scriptResources = "fixture $resource"
+            }
+            IconUrl = $fixture.BaseUrl + '/blocked.png'; IconReady = $true
+        }
+        Save-ManagerWithConfirmation $Context $window 'Enter' $expected
+        Assert-Regression ($model.SelectedScript.IsInstalled -and $model.SelectedScript.Installation.Definition.Source -ceq $fixture.ScriptSource -and
+            $fixture.RequestsFor('/manager.user.js') -eq 1) 'Enter installs the reviewed URL source without another source request'
         $model.SelectedScript.Source += "`n// exported draft"
         $export = Join-Path $Context.TemporaryPath 'manager-export.user.js'
         Complete-UserScriptTask $Context ($model.ExportAsync($export)) 'export current draft'

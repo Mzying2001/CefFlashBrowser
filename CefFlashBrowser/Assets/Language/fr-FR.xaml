@@ -248,6 +248,9 @@
     <sys:String x:Key="userScriptManager_install">Installer le brouillon actuel</sys:String>
     <sys:String x:Key="userScriptManager_export">Exporter le code source…</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Installer ce script ?</sys:String>
+    <sys:String x:Key="userScriptInstall_install">Installer</sys:String>
+    <sys:String x:Key="userScriptInstall_author">Auteur</sys:String>
+    <sys:String x:Key="userScriptInstall_source">Source</sys:String>
     <sys:String x:Key="userScriptManager_reviewInstall">Code source chargé, en attente d'installation. Vérifiez-le, puis choisissez « Installer le brouillon actuel » ou « Enregistrer ».</sys:String>
     <sys:String x:Key="userScriptManager_invalidMetadata">Métadonnées du script utilisateur invalides. Vérifiez l'en-tête des métadonnées et réessayez.</sys:String>
     <sys:String x:Key="userScriptManager_invalidUrl">Saisissez une URL HTTP ou HTTPS valide.</sys:String>
