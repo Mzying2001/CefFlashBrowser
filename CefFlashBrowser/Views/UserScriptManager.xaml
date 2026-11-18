@@ -5,6 +5,7 @@
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
 
         x:Name="window"
         Width="800"
@@ -271,26 +272,45 @@
                         Visibility="Collapsed"
                         Background="{DynamicResource RegionBrush}"
                         BorderBrush="{DynamicResource BorderBrush}">
+                    <Border.Resources>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Height" Value="30"/>
+                            <Setter Property="Padding" Value="0"/>
+                        </Style>
+                    </Border.Resources>
                     <StackPanel>
                         <DockPanel>
                             <Button
-                                x:Name="closeSearchButton" DockPanel.Dock="Right" Margin="5,0,0,0" Padding="5,0" Content="×"
+                                x:Name="closeSearchButton" DockPanel.Dock="Right" Margin="5,0,0,0"
                                 AutomationProperties.Name="{DynamicResource solEditor_close}"
-                                ToolTip="{DynamicResource solEditor_close}" Click="CloseSearchClicked"/>
+                                Width="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Height}"
+                                ToolTip="{DynamicResource solEditor_close}" Click="CloseSearchClicked">
+                                <svgc:SvgIcon Width="10" Height="10"
+                                              UriSource="{StaticResource CloseIconUri}"/>
+                            </Button>
                             <hc:TextBox
                                 x:Name="searchText" TextChanged="SearchTextChanged"
                                 hc:InfoElement.Placeholder="{DynamicResource browser_find}"
                                 AutomationProperties.Name="{DynamicResource browser_find}"/>
                         </DockPanel>
-                        <WrapPanel Margin="0,5,0,0">
+                        <WrapPanel>
                             <Button
-                                x:Name="findPrevious" Margin="0,5,5,0" Padding="5,0" Content="↑"
+                                x:Name="findPrevious" Margin="0,5,5,0"
                                 AutomationProperties.Name="{DynamicResource userScriptManager_findPrevious}"
-                                ToolTip="{DynamicResource userScriptManager_findPrevious}" Click="FindMatchClicked"/>
+                                Width="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Height}"
+                                ToolTip="{DynamicResource userScriptManager_findPrevious}" Click="FindMatchClicked">
+                                <svgc:SvgIcon Width="12" Height="12"
+                                              UriSource="{StaticResource UpIconUri}"/>
+                            </Button>
                             <Button
-                                x:Name="findNext" Margin="0,5,10,0" Padding="5,0" Content="↓"
+                                x:Name="findNext" Margin="0,5,10,0"
                                 AutomationProperties.Name="{DynamicResource userScriptManager_findNext}"
-                                ToolTip="{DynamicResource userScriptManager_findNext}" Click="FindMatchClicked"/>
+                                Width="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Height}"
+                                ToolTip="{DynamicResource userScriptManager_findNext}" Click="FindMatchClicked">
+                                <svgc:SvgIcon Width="12" Height="12"
+                                              UriSource="{StaticResource DownIconUri}"/>
+                            </Button>
                             <CheckBox
                                 x:Name="matchCase" Margin="0,5,0,0" VerticalAlignment="Center"
                                 Content="{DynamicResource userScriptManager_matchCase}"
@@ -314,13 +334,13 @@
                                 AutomationProperties.Name="{DynamicResource userScriptManager_replace}"/>
                             <WrapPanel>
                                 <Button
-                                    x:Name="replaceCurrent" Margin="0,5,5,0" Padding="5"
+                                    x:Name="replaceCurrent" Margin="0,5,5,0" Padding="10,0"
                                     Content="{DynamicResource userScriptManager_replace}"
                                     AutomationProperties.Name="{DynamicResource userScriptManager_replaceCurrent}"
                                     ToolTip="{DynamicResource userScriptManager_replaceCurrent}"
                                     Click="ReplaceCurrentClicked"/>
                                 <Button
-                                    x:Name="replaceAll" Margin="0,5,0,0" Padding="5"
+                                    x:Name="replaceAll" Margin="0,5,0,0" Padding="10,0"
                                     Content="{DynamicResource userScriptManager_replaceAll}"
                                     Click="ReplaceAllClicked"/>
                             </WrapPanel>
