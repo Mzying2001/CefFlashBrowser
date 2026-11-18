@@ -471,7 +471,8 @@ function Test-BrowserIconStyleReuse($Context) {
     }
 }
 
-function Save-ManagerWithConfirmation($Context, $Window, [string]$Action, [hashtable]$Expected, [switch]$Update) {
+function Invoke-ManagerWithConfirmation($Context, $Window, [string]$Action, [hashtable]$Expected,
+    [switch]$Update, [scriptblock]$Start = { $Model.SaveAsync() }) {
     $model = $Window.DataContext
     $state = @{ Count = 0; Failure = $null }
     $timer = New-Object Windows.Threading.DispatcherTimer
@@ -559,7 +560,7 @@ function Save-ManagerWithConfirmation($Context, $Window, [string]$Action, [hasht
     $timer.add_Tick($handler)
     $timer.Start()
     try {
-        Complete-UserScriptTask $Context ($Model.SaveAsync()) 'reviewed script installation'
+        Complete-UserScriptTask $Context (& $Start) 'manager installation confirmation completes'
         if ($null -ne $state.Failure) { throw $state.Failure }
         Assert-Regression ($state.Count -eq 1) 'external installation opens exactly one confirmation'
     } finally {
@@ -795,22 +796,20 @@ document.documentElement.setAttribute('data-web-install', 'ready');
     }
 
     $Fixture.ScriptSource = $updated.Replace('2.0.0', '3.0.0')
-    Complete-UserScriptTask $Context ($Manager.ImportUrlAsync($origin)) 'load a manager update for the web installation'
-    $draft = $Manager.SelectedScript
-    Assert-Regression (!$draft.IsInstalled -and $draft.Source -ceq $Fixture.ScriptSource -and
-        $item.Installation.Definition.Source -ceq $updated) 'loading a matching URL leaves a reviewable draft before updating'
-    $reviewed = $draft.Source.Replace('3.0.0', '3.1.0')
-    $draft.Source = $reviewed
+    $item.Source += "`n// unsaved edit before update"
+    $scriptCount = $Manager.Scripts.Count
     $expected = @{
-        Text = @{ scriptName = 'Web installation fixture'; scriptVersion = '3.1.0'; scriptOrigin = $origin }
+        Text = @{ scriptName = 'Web installation fixture'; scriptVersion = '3.0.0'; scriptOrigin = $origin }
         Initial = 'W'
     }
-    Save-ManagerWithConfirmation $Context $ManagerWindow 'Install' $expected -Update
-    $item = $Manager.SelectedScript
+    Invoke-ManagerWithConfirmation $Context $ManagerWindow 'Install' $expected -Update -Start { $Manager.ImportUrlAsync($origin) }
+    $editor = $ManagerWindow.FindName('sourceEditor')
+    Assert-Regression ($Manager.Scripts.Count -eq $scriptCount -and [object]::ReferenceEquals($item, $Manager.SelectedScript) -and
+        !$item.IsDirty -and $editor.Text -ceq $Fixture.ScriptSource) 'loading a matching URL confirms immediately and displays the updated source'
     $saved = Complete-UserScriptTask $Context ($service.ValueStore.GetAsync($key.ToString(), 'web-install', $token)) 'read data preserved by the manager update'
     Assert-Regression (@($Manager.Scripts | Where-Object { $_.IsInstalled -and $_.Origin -ceq $origin }).Count -eq 1 -and
         $item.IsInstalled -and $item.Installation.ScriptKey.Equals($key) -and !$item.IsEnabled -and
-        $item.Installation.Definition.Source -ceq $reviewed -and $saved.Value.EncodedValue -ceq $value.EncodedValue) 'manager updates the web installation in place and preserves enabled state and data'
+        $item.Installation.Definition.Source -ceq $Fixture.ScriptSource -and $saved.Value.EncodedValue -ceq $value.EncodedValue) 'manager updates the web installation in place and preserves enabled state and data'
 }
 
 function Test-UserScriptManager($Context) {
@@ -941,7 +940,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
             }
             Initial = 'M'
         }
-        Save-ManagerWithConfirmation $Context $window 'Close' $expected
+        Invoke-ManagerWithConfirmation $Context $window 'Close' $expected
         Assert-Regression (!$model.SelectedScript.IsInstalled -and $model.SelectedScript.Source -ceq $minimalSource) 'closing installation preserves the local draft'
         $description = ('A long description for the script installation review. ' * 90).TrimEnd()
         $missingIcon = $iconFixture.BaseUrl + '/missing.png'
@@ -957,12 +956,12 @@ document.documentElement.setAttribute('data-manager', 'saved');
             IconUrl = $missingIcon; Initial = '脚'; Scrolls = $true
         }
         Set-ManagerRegressionTheme $Context ([CefFlashBrowser.Models.Theme]::Light)
-        Save-ManagerWithConfirmation $Context $window 'Cancel' $expected
+        Invoke-ManagerWithConfirmation $Context $window 'Cancel' $expected
         Assert-Regression (!$model.SelectedScript.IsInstalled -and $model.SelectedScript.Source -ceq $reviewedSource) 'cancel button preserves edited script without installing'
         Set-ManagerRegressionTheme $Context ([CefFlashBrowser.Models.Theme]::Dark)
-        Save-ManagerWithConfirmation $Context $window 'Escape' $expected
+        Invoke-ManagerWithConfirmation $Context $window 'Escape' $expected
         Assert-Regression (!$model.SelectedScript.IsInstalled -and $model.SelectedScript.Source -ceq $reviewedSource) 'Escape preserves edited script without installing'
-        Save-ManagerWithConfirmation $Context $window 'Install' $expected
+        Invoke-ManagerWithConfirmation $Context $window 'Install' $expected
         Assert-Regression ($model.SelectedScript.IsInstalled -and $model.SelectedScript.Installation.Definition.Source -ceq $reviewedSource) 'install button commits the reviewed local source'
         Set-ManagerRegressionTheme $Context $theme
 
@@ -1000,7 +999,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
             }
             IconUrl = $fixture.BaseUrl + '/blocked.png'; IconReady = $true
         }
-        Save-ManagerWithConfirmation $Context $window 'Enter' $expected
+        Invoke-ManagerWithConfirmation $Context $window 'Enter' $expected
         Assert-Regression ($model.SelectedScript.IsInstalled -and $model.SelectedScript.Installation.Definition.Source -ceq $fixture.ScriptSource -and
             $fixture.RequestsFor('/manager.user.js') -eq 1) 'Enter installs the reviewed URL source without another source request'
         $model.SelectedScript.Source += "`n// exported draft"

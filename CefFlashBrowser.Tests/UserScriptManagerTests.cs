@@ -394,6 +394,7 @@ namespace CefFlashBrowser.Tests
                 };
 
                 await ImportAsync(false);
+                CollectionAssert.AreEqual(Array.Empty<bool>(), confirmations);
                 await model.SaveAsync();
                 var original = model.SelectedScript;
                 Assert.IsTrue(original.IsInstalled, model.Status);
@@ -403,34 +404,38 @@ namespace CefFlashBrowser.Tests
                 var unsaved = original.Source + "\n// local edits";
                 original.Source = unsaved;
                 var originalSource = source;
+                model.NewScript();
+                var other = model.SelectedScript;
+                var otherSource = other.Source;
 
-                source += "\n// new version";
-                await ImportAsync(true);
-                var draft = model.SelectedScript;
-                var reviewed = source.Replace("@name test", "@name reviewed");
-                draft.Source = reviewed;
-                CollectionAssert.AreEqual(new[] { false }, confirmations);
-
+                source = source.Replace("@name test", "@name updated") + "\n// new version";
                 confirm = false;
-                await model.SaveAsync();
+                await ImportAsync(true);
+                CollectionAssert.AreEqual(new[] { false, true }, confirmations);
                 Assert.AreEqual("userScriptManager_cancelled", model.Status);
-                Assert.AreSame(draft, model.SelectedScript);
-                Assert.IsFalse(draft.IsInstalled);
-                Assert.AreEqual(reviewed, draft.Source);
+                Assert.AreSame(other, model.SelectedScript);
+                Assert.AreSame(other, model.Scripts.Single(item => !item.IsInstalled));
+                Assert.AreEqual(otherSource, other.Source);
+                Assert.AreEqual(unsaved, original.Source);
                 Assert.AreEqual(originalSource, (await repository.GetAsync(key, CancellationToken.None)).Definition.Source);
 
                 confirm = true;
-                await model.SaveAsync();
+                await ImportAsync(true);
                 CollectionAssert.AreEqual(new[] { false, true, true }, confirmations);
-                Assert.AreEqual("reviewed", reviewedName);
+                Assert.AreEqual("updated", reviewedName);
+                Assert.AreEqual("userScriptManager_saved", model.Status);
                 var installed = (await repository.GetSnapshotAsync(CancellationToken.None)).Single();
                 Assert.AreEqual(key, installed.ScriptKey);
                 Assert.AreEqual(installedAt, installed.InstalledAt);
-                Assert.AreEqual(reviewed, installed.Definition.Source);
+                Assert.AreEqual(source, installed.Definition.Source);
                 Assert.IsFalse(installed.IsEnabled);
-                Assert.AreSame(model.SelectedScript, model.Scripts.Single(item => item.IsInstalled));
-                Assert.IsFalse(model.SelectedScript.IsDirty);
-                Assert.AreEqual(unsaved, model.Scripts.Single(item => !item.IsInstalled).Source);
+                Assert.AreSame(original, model.Scripts.Single(item => item.IsInstalled));
+                Assert.AreSame(original, model.SelectedScript);
+                Assert.AreEqual(source, original.Source);
+                Assert.AreEqual(installed.RevisionId, original.EditorRevision);
+                Assert.IsFalse(original.IsDirty);
+                Assert.AreSame(other, model.Scripts.Single(item => !item.IsInstalled));
+                Assert.AreEqual(otherSource, other.Source);
             }
             finally
             {
@@ -458,7 +463,7 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public async Task ImportWithHistoricalDuplicatesRetainsDraftWithoutConfirming()
+        public async Task ImportWithHistoricalDuplicatesReportsConflictWithoutAddingDraft()
         {
             var repository = await RepositoryAsync();
             var token = CancellationToken.None;
@@ -478,12 +483,11 @@ namespace CefFlashBrowser.Tests
             };
 
             await model.ImportUrlAsync(url);
-            await model.SaveAsync();
 
             Assert.AreEqual(0, confirmations);
             Assert.AreEqual("userScriptInstall_conflict", model.Status);
-            Assert.IsFalse(model.SelectedScript.IsInstalled);
-            Assert.AreEqual(updated, model.SelectedScript.Source);
+            Assert.AreEqual(2, model.Scripts.Count);
+            Assert.IsTrue(model.Scripts.All(item => item.IsInstalled));
             var snapshot = await repository.GetSnapshotAsync(token);
             Assert.AreEqual(2, snapshot.Count);
             Assert.IsTrue(snapshot.All(item => item.Definition.Source == original));
@@ -501,10 +505,10 @@ namespace CefFlashBrowser.Tests
             const string url = "https://example.com/concurrent.user.js";
             var source = Template();
             var concurrentSource = source + "\n// concurrent change";
-            var draftSource = source + "\n// imported update";
+            var importedSource = source + "\n// imported update";
             var original = change == "installed" ? null : await repository.InstallAsync(source, url, true, token);
             var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository), key => key,
-                action => action(), (_, __) => Task.FromResult(draftSource));
+                action => action(), (_, __) => Task.FromResult(importedSource));
             await model.OpenAsync();
             bool? updateRequested = null;
             model.ConfirmInstallation = (_, __, update) =>
@@ -526,17 +530,56 @@ namespace CefFlashBrowser.Tests
             };
 
             await model.ImportUrlAsync(url);
-            await model.SaveAsync();
+            if (original == null)
+                await model.SaveAsync();
 
             Assert.AreEqual(original != null, updateRequested);
             Assert.AreEqual("userScriptInstall_conflict", model.Status);
-            Assert.IsFalse(model.SelectedScript.IsInstalled);
-            Assert.AreEqual(draftSource, model.SelectedScript.Source);
+            if (original == null)
+            {
+                Assert.AreSame(model.SelectedScript, model.Scripts.Single(item => !item.IsInstalled));
+                Assert.AreEqual(importedSource, model.SelectedScript.Source);
+            }
+            else
+            {
+                Assert.IsTrue(model.Scripts.All(item => item.IsInstalled));
+            }
             var saved = await repository.GetSnapshotAsync(token);
             if (change == "removed")
                 Assert.AreEqual(0, saved.Count);
             else
                 Assert.AreEqual(concurrentSource, saved.Single().Definition.Source);
+            model.Close();
+        }
+
+        [TestMethod]
+        public async Task ImportWithInvalidMetadataDoesNotConfirmOrChangeExistingInstallation()
+        {
+            var repository = await RepositoryAsync();
+            var token = CancellationToken.None;
+            const string url = "https://example.com/invalid-update.user.js";
+            var original = await repository.InstallAsync(Template(), url, true, token);
+            var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository), key => key,
+                action => action(), (_, __) => Task.FromResult("console.log('missing metadata');"));
+            await model.OpenAsync();
+            var item = model.SelectedScript;
+            var unsaved = item.Source + "\n// unsaved edit";
+            item.Source = unsaved;
+            var confirmations = 0;
+            model.ConfirmInstallation = (_, __, ___) =>
+            {
+                confirmations++;
+                return true;
+            };
+
+            await model.ImportUrlAsync(url);
+
+            Assert.AreEqual(0, confirmations);
+            Assert.AreEqual("userScriptManager_invalidMetadata", model.Status);
+            Assert.AreSame(item, model.Scripts.Single());
+            Assert.AreSame(item, model.SelectedScript);
+            Assert.AreEqual(unsaved, item.Source);
+            Assert.AreEqual(original.RevisionId, (await repository.GetAsync(original.ScriptKey, token)).RevisionId);
             model.Close();
         }
 

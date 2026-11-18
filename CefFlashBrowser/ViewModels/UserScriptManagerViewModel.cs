@@ -243,14 +243,19 @@ namespace CefFlashBrowser.ViewModels
                 return null;
             }
 
-            var previous = matches.SingleOrDefault();
+            return await ConfirmAndCommitImportAsync(metadata, matches.SingleOrDefault(), source, origin, token);
+        }
 
+        private async Task<UserScriptInstallation> ConfirmAndCommitImportAsync(UserScriptMetadata metadata,
+            UserScriptInstallation previous, string source, string origin, CancellationToken token)
+        {
             if (ConfirmInstallation?.Invoke(metadata, origin, previous != null) != true)
             {
                 Status = _text("userScriptManager_cancelled");
                 return null;
             }
 
+            token.ThrowIfCancellationRequested();
             var installation = await UserScriptSourceInstaller.TryCommitAsync(_repository, previous, source, origin, token);
 
             if (installation == null)
@@ -263,9 +268,9 @@ namespace CefFlashBrowser.ViewModels
         {
             return RunAsync(async token =>
             {
-                var source = await UserScriptSourceText.ReadAsync(path, token);
-                token.ThrowIfCancellationRequested();
-                AddImportDraft(source, Path.GetFullPath(path));
+                var origin = Path.GetFullPath(path);
+                var source = await UserScriptSourceText.ReadAsync(origin, token);
+                await ImportSourceAsync(source, origin, token);
             });
         }
 
@@ -283,19 +288,56 @@ namespace CefFlashBrowser.ViewModels
                 token.ThrowIfCancellationRequested();
 
                 UserScriptSourceText.Validate(source);
-                AddImportDraft(source, uri.AbsoluteUri);
+                await ImportSourceAsync(source, uri.AbsoluteUri, token);
                 ShowUrlInput = false;
             });
         }
 
-        private void AddImportDraft(string source, string origin)
+        private async Task ImportSourceAsync(string source, string origin, CancellationToken token)
         {
-            var parsed = new UserScriptMetadataParser().Parse(source);
-            var item = new UserScriptItemViewModel(source, origin, parsed.Metadata?.Name ?? origin, true);
+            var matches = await UserScriptSourceInstaller.FindMatchesAsync(_repository, origin, token);
+            token.ThrowIfCancellationRequested();
 
-            Scripts.Add(item);
+            if (matches.Length > 1)
+            {
+                Status = _text("userScriptInstall_conflict");
+                return;
+            }
+
+            var parsed = new UserScriptMetadataParser().Parse(source);
+            var previous = matches.SingleOrDefault();
+            if (previous == null)
+            {
+                var draft = new UserScriptItemViewModel(source, origin, parsed.Metadata?.Name ?? origin, true);
+                Scripts.Add(draft);
+                SelectedScript = draft;
+                Status = _text("userScriptManager_reviewInstall");
+                return;
+            }
+
+            if (!parsed.CanEnable)
+            {
+                Status = _text("userScriptManager_invalidMetadata");
+                return;
+            }
+
+            var installation = await ConfirmAndCommitImportAsync(parsed.Metadata, previous, source, origin, token);
+            if (installation == null) return;
+
+            var item = Scripts.FirstOrDefault(value => value.Installation?.ScriptKey == installation.ScriptKey);
+            if (item == null)
+            {
+                item = new UserScriptItemViewModel(installation);
+                Scripts.Add(item);
+            }
+            else
+            {
+                item.AcceptSave(installation, installation.Definition.Source);
+                item.Source = installation.Definition.Source;
+            }
+
             SelectedScript = item;
-            Status = _text("userScriptManager_reviewInstall");
+            Status = _text("userScriptManager_saved");
         }
 
         public Task ExportAsync(string path)
