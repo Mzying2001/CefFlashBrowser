@@ -52,9 +52,9 @@ namespace CefFlashBrowser.Views
             ExportCommand.RaiseCanExecuteChanged();
         }
 
-        private bool ConfirmInstallation(UserScriptMetadata metadata, string origin)
+        private bool ConfirmInstallation(UserScriptMetadata metadata, string origin, bool update)
         {
-            return WindowManager.ConfirmUserScriptInstallation(metadata, origin, this);
+            return WindowManager.ConfirmUserScriptInstallation(metadata, origin, this, update: update);
         }
 
         private bool ConfirmOperation(string message)

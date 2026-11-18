@@ -2,9 +2,7 @@ using CefFlashBrowser.Data;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.Utils;
-using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Parsing;
-using Mzying2001.MonkeySharp.Core.Repository;
 using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;
@@ -32,7 +30,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 || !uri.AbsolutePath.EndsWith(".user.js", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            origin = new UriBuilder(uri) { Fragment = string.Empty }.Uri.AbsoluteUri;
+            origin = UserScriptSourceInstaller.NormalizeHttpOrigin(uri);
             return true;
         }
 
@@ -69,16 +67,17 @@ namespace CefFlashBrowser.Browser.UserScripts
                 return;
 
             var errorKey = "userScriptInstall_downloadFailed";
-            UserScriptInstallation previous = null;
 
             try
             {
                 var service = SimpleIoc.Global.GetInstance<UserScriptService>();
                 var source = await service.Content.FetchSourceAsync(null, origin, token);
+
                 UserScriptSourceText.Validate(source);
                 token.ThrowIfCancellationRequested();
 
                 var parsed = new UserScriptMetadataParser().Parse(source);
+
                 if (!parsed.CanEnable)
                 {
                     ShowResult(getOwner, "userScriptManager_invalidMetadata", token);
@@ -86,10 +85,12 @@ namespace CefFlashBrowser.Browser.UserScripts
                 }
 
                 errorKey = "userScriptInstall_saveFailed";
+
                 await service.InitializeAsync();
                 token.ThrowIfCancellationRequested();
+
                 var repository = service.Repository;
-                var matches = await FindByOriginAsync(repository, origin, token);
+                var matches = await UserScriptSourceInstaller.FindMatchesAsync(repository, origin, token);
 
                 if (matches.Length > 1)
                 {
@@ -97,8 +98,9 @@ namespace CefFlashBrowser.Browser.UserScripts
                     return;
                 }
 
-                previous = matches.SingleOrDefault();
+                var previous = matches.SingleOrDefault();
                 var owner = getOwner();
+
                 if (owner == null || !GlobalData.Settings.EnableUserScripts)
                     return;
 
@@ -106,45 +108,21 @@ namespace CefFlashBrowser.Browser.UserScripts
                     return;
 
                 token.ThrowIfCancellationRequested();
+
                 if (getOwner() == null || !GlobalData.Settings.EnableUserScripts)
                     return;
 
-                var current = await FindByOriginAsync(repository, origin, token);
-                if (current.Length != matches.Length || (previous != null
-                    && (!current[0].ScriptKey.Equals(previous.ScriptKey) || current[0].RevisionId != previous.RevisionId)))
-                {
-                    ShowResult(getOwner, "userScriptInstall_conflict", token);
-                    return;
-                }
-
-                if (previous == null)
-                    await repository.InstallAsync(source, origin, true, token);
-                else
-                    await repository.UpdateIfUnchangedAsync(previous.ScriptKey, previous.RevisionId, source, origin, token);
-
-                ShowResult(getOwner, "userScriptManager_refreshPage", token);
+                var installation = await UserScriptSourceInstaller.TryCommitAsync(repository, previous, source, origin, token);
+                ShowResult(getOwner, installation == null ? "userScriptInstall_conflict" : "userScriptManager_refreshPage", token);
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
-            }
-            catch (Exception e) when (e is RepositoryRevisionMismatchException || e is UserScriptSourceConflictException
-                || (previous != null && e is KeyNotFoundException))
-            {
-                ShowResult(getOwner, "userScriptInstall_conflict", token);
             }
             catch (Exception e)
             {
                 LogHelper.LogError("Web userscript installation failed (" + e.GetType().Name + ").");
                 ShowResult(getOwner, errorKey, token);
             }
-        }
-
-        private static async Task<UserScriptInstallation[]> FindByOriginAsync(IUserScriptRepository repository,
-            string origin, CancellationToken token)
-        {
-            var snapshot = await repository.GetSnapshotAsync(token);
-            return snapshot.Where(installation => TryGetOrigin(installation.SourceOrigin, out var installedOrigin)
-                && installedOrigin == origin).Take(2).ToArray();
         }
 
         private static void ShowResult(Func<Window> getOwner, string messageKey, CancellationToken token)

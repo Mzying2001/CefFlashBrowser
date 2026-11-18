@@ -38,7 +38,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ShowUrlCommand { get; }
         public DelegateCommand HideUrlCommand { get; }
 
-        public Func<UserScriptMetadata, string, bool> ConfirmInstallation { private get; set; }
+        public Func<UserScriptMetadata, string, bool, bool> ConfirmInstallation { private get; set; }
         public Func<string, bool> ConfirmDeletion { private get; set; }
 
         private string _installUrl;
@@ -208,24 +208,55 @@ namespace CefFlashBrowser.ViewModels
                     return;
                 }
 
-                if (previous == null && item.RequiresConfirmation
-                    && ConfirmInstallation?.Invoke(parsed.Metadata, origin) != true)
-                {
-                    Status = _text("userScriptManager_cancelled");
-                    return;
-                }
-
                 token.ThrowIfCancellationRequested();
 
-                var installation = previous == null
-                    ? await _repository.InstallAsync(source, origin, true, token)
-                    : await _repository.UpdateIfUnchangedAsync(previous.ScriptKey, revision, source, origin, token);
+                UserScriptInstallation installation;
+
+                if (previous == null && item.RequiresConfirmation)
+                {
+                    installation = await SaveImportAsync(parsed.Metadata, source, origin, token);
+                    if (installation == null) return;
+                }
+                else
+                {
+                    installation = previous == null
+                        ? await _repository.InstallAsync(source, origin, true, token)
+                        : await _repository.UpdateIfUnchangedAsync(previous.ScriptKey, revision, source, origin, token);
+                }
 
                 AcceptSave(item, installation, source);
 
                 Status = _text("userScriptManager_saved");
                 UpdateCommands();
             });
+        }
+
+        private async Task<UserScriptInstallation> SaveImportAsync(UserScriptMetadata metadata, string source, string origin,
+            CancellationToken token)
+        {
+            var matches = await UserScriptSourceInstaller.FindMatchesAsync(_repository, origin, token);
+            token.ThrowIfCancellationRequested();
+
+            if (matches.Length > 1)
+            {
+                Status = _text("userScriptInstall_conflict");
+                return null;
+            }
+
+            var previous = matches.SingleOrDefault();
+
+            if (ConfirmInstallation?.Invoke(metadata, origin, previous != null) != true)
+            {
+                Status = _text("userScriptManager_cancelled");
+                return null;
+            }
+
+            var installation = await UserScriptSourceInstaller.TryCommitAsync(_repository, previous, source, origin, token);
+
+            if (installation == null)
+                Status = _text("userScriptInstall_conflict");
+
+            return installation;
         }
 
         public Task ImportFileAsync(string path)
@@ -360,7 +391,10 @@ namespace CefFlashBrowser.ViewModels
             var duplicate = Scripts.FirstOrDefault(value => value != item && value.Installation?.ScriptKey == installation.ScriptKey);
 
             if (duplicate != null)
+            {
+                if (duplicate.IsDirty) KeepDraft(duplicate, item.RequiresConfirmation);
                 Scripts.Remove(duplicate);
+            }
 
             item.AcceptSave(installation, source);
         }
@@ -403,9 +437,9 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void KeepDraft(UserScriptItemViewModel item)
+        private void KeepDraft(UserScriptItemViewModel item, bool requiresConfirmation = false)
         {
-            Scripts.Add(new UserScriptItemViewModel(item.Source, item.Origin, item.Name, false));
+            Scripts.Add(new UserScriptItemViewModel(item.Source, item.Origin, item.Name, requiresConfirmation));
         }
 
         private void RemoveItem(UserScriptItemViewModel item)

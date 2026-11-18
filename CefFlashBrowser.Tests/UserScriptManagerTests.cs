@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Repository;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -251,11 +252,14 @@ namespace CefFlashBrowser.Tests
             var confirmations = 0;
             UserScriptMetadata reviewedMetadata = null;
             string reviewedOrigin = null;
-            model.ConfirmInstallation = (metadata, sourceOrigin) =>
+            bool? updateRequested = null;
+
+            model.ConfirmInstallation = (metadata, sourceOrigin, update) =>
             {
                 confirmations++;
                 reviewedMetadata = metadata;
                 reviewedOrigin = sourceOrigin;
+                updateRequested = update;
                 return confirmations == 2;
             };
 
@@ -264,6 +268,7 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual("reviewed", reviewedMetadata?.Name);
             Assert.AreEqual("icons/edited.png", reviewedMetadata?.IconUrl);
             Assert.AreEqual(origin, reviewedOrigin);
+            Assert.AreEqual(false, updateRequested);
             Assert.IsTrue(model.SelectedScript.IsDirty);
             Assert.IsFalse(model.SelectedScript.IsInstalled);
             Assert.AreEqual(reviewedSource, model.SelectedScript.Source);
@@ -349,21 +354,189 @@ namespace CefFlashBrowser.Tests
             }
         }
 
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public async Task ImportFromSameSourceUpdatesExistingInstallation(bool localFile)
+        {
+            var repository = await RepositoryAsync();
+            var source = Template();
+            var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository), key => key,
+                action => action(), (_, __) => Task.FromResult(source));
+            var path = localFile ? Path.GetTempFileName() : null;
+            const string url = "https://example.com/scripts/game?channel=stable";
+
+            async Task ImportAsync(bool secondImport)
+            {
+                if (localFile)
+                {
+                    File.WriteAllText(path, source);
+                    var importPath = secondImport ? Path.Combine(Path.GetDirectoryName(path), ".", Path.GetFileName(path)) : path;
+                    await model.ImportFileAsync(importPath);
+                }
+                else
+                {
+                    await model.ImportUrlAsync(url + (secondImport ? "#second" : "#first"));
+                }
+            }
+
+            try
+            {
+                await model.OpenAsync();
+                var confirmations = new List<bool>();
+                var confirm = true;
+                string reviewedName = null;
+                model.ConfirmInstallation = (metadata, _, update) =>
+                {
+                    confirmations.Add(update);
+                    reviewedName = metadata.Name;
+                    return confirm;
+                };
+
+                await ImportAsync(false);
+                await model.SaveAsync();
+                var original = model.SelectedScript;
+                Assert.IsTrue(original.IsInstalled, model.Status);
+                var key = original.Installation.ScriptKey;
+                var installedAt = original.Installation.InstalledAt;
+                await model.ToggleAsync(original);
+                var unsaved = original.Source + "\n// local edits";
+                original.Source = unsaved;
+                var originalSource = source;
+
+                source += "\n// new version";
+                await ImportAsync(true);
+                var draft = model.SelectedScript;
+                var reviewed = source.Replace("@name test", "@name reviewed");
+                draft.Source = reviewed;
+                CollectionAssert.AreEqual(new[] { false }, confirmations);
+
+                confirm = false;
+                await model.SaveAsync();
+                Assert.AreEqual("userScriptManager_cancelled", model.Status);
+                Assert.AreSame(draft, model.SelectedScript);
+                Assert.IsFalse(draft.IsInstalled);
+                Assert.AreEqual(reviewed, draft.Source);
+                Assert.AreEqual(originalSource, (await repository.GetAsync(key, CancellationToken.None)).Definition.Source);
+
+                confirm = true;
+                await model.SaveAsync();
+                CollectionAssert.AreEqual(new[] { false, true, true }, confirmations);
+                Assert.AreEqual("reviewed", reviewedName);
+                var installed = (await repository.GetSnapshotAsync(CancellationToken.None)).Single();
+                Assert.AreEqual(key, installed.ScriptKey);
+                Assert.AreEqual(installedAt, installed.InstalledAt);
+                Assert.AreEqual(reviewed, installed.Definition.Source);
+                Assert.IsFalse(installed.IsEnabled);
+                Assert.AreSame(model.SelectedScript, model.Scripts.Single(item => item.IsInstalled));
+                Assert.IsFalse(model.SelectedScript.IsDirty);
+                Assert.AreEqual(unsaved, model.Scripts.Single(item => !item.IsInstalled).Source);
+            }
+            finally
+            {
+                model.Close();
+                if (path != null) File.Delete(path);
+            }
+        }
+
         [TestMethod]
-        public async Task SameNameImportsCreateDistinctInstallations()
+        public async Task SameNameFromDifferentUrlsCreatesSeparateInstallations()
         {
             var repository = await RepositoryAsync();
             var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository), key => key,
                 action => action(), (url, token) => Task.FromResult(Template()));
             await model.OpenAsync();
-            model.ConfirmInstallation = (_, __) => true;
-            for (var index = 0; index < 2; index++)
+            model.ConfirmInstallation = (_, __, update) => !update;
+
+            await model.ImportUrlAsync("https://example.com/same.user.js?channel=stable");
+            await model.SaveAsync();
+            await model.ImportUrlAsync("https://example.com/same.user.js?channel=beta");
+            await model.SaveAsync();
+
+            Assert.AreEqual(2, (await repository.GetSnapshotAsync(CancellationToken.None)).Count);
+            model.Close();
+        }
+
+        [TestMethod]
+        public async Task ImportWithHistoricalDuplicatesRetainsDraftWithoutConfirming()
+        {
+            var repository = await RepositoryAsync();
+            var token = CancellationToken.None;
+            const string url = "https://example.com/duplicate.user.js";
+            var original = Template();
+            var updated = original + "\n// update";
+            await repository.InstallAsync(original, url, true, token);
+            await repository.InstallAsync(original, url + "#old-import", true, token);
+            var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository), key => key,
+                action => action(), (_, __) => Task.FromResult(updated));
+            await model.OpenAsync();
+            var confirmations = 0;
+            model.ConfirmInstallation = (_, __, ___) =>
             {
-                await model.ImportUrlAsync("https://example.com/same.user.js");
-                await model.SaveAsync();
-            }
-            Assert.AreEqual(2, model.Scripts.Count);
-            Assert.AreEqual(2, model.Scripts.Select(item => item.Installation.ScriptKey).Distinct().Count());
+                confirmations++;
+                return true;
+            };
+
+            await model.ImportUrlAsync(url);
+            await model.SaveAsync();
+
+            Assert.AreEqual(0, confirmations);
+            Assert.AreEqual("userScriptInstall_conflict", model.Status);
+            Assert.IsFalse(model.SelectedScript.IsInstalled);
+            Assert.AreEqual(updated, model.SelectedScript.Source);
+            var snapshot = await repository.GetSnapshotAsync(token);
+            Assert.AreEqual(2, snapshot.Count);
+            Assert.IsTrue(snapshot.All(item => item.Definition.Source == original));
+            model.Close();
+        }
+
+        [DataTestMethod]
+        [DataRow("installed")]
+        [DataRow("updated")]
+        [DataRow("removed")]
+        public async Task ImportRejectsStaleConfirmation(string change)
+        {
+            var repository = await RepositoryAsync();
+            var token = CancellationToken.None;
+            const string url = "https://example.com/concurrent.user.js";
+            var source = Template();
+            var concurrentSource = source + "\n// concurrent change";
+            var draftSource = source + "\n// imported update";
+            var original = change == "installed" ? null : await repository.InstallAsync(source, url, true, token);
+            var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository), key => key,
+                action => action(), (_, __) => Task.FromResult(draftSource));
+            await model.OpenAsync();
+            bool? updateRequested = null;
+            model.ConfirmInstallation = (_, __, update) =>
+            {
+                updateRequested = update;
+                switch (change)
+                {
+                    case "installed":
+                        repository.InstallAsync(concurrentSource, url, true, token).GetAwaiter().GetResult();
+                        break;
+                    case "updated":
+                        repository.UpdateAsync(original.ScriptKey, concurrentSource, url, token).GetAwaiter().GetResult();
+                        break;
+                    case "removed":
+                        repository.RemoveAsync(original.ScriptKey, token).GetAwaiter().GetResult();
+                        break;
+                }
+                return true;
+            };
+
+            await model.ImportUrlAsync(url);
+            await model.SaveAsync();
+
+            Assert.AreEqual(original != null, updateRequested);
+            Assert.AreEqual("userScriptInstall_conflict", model.Status);
+            Assert.IsFalse(model.SelectedScript.IsInstalled);
+            Assert.AreEqual(draftSource, model.SelectedScript.Source);
+            var saved = await repository.GetSnapshotAsync(token);
+            if (change == "removed")
+                Assert.AreEqual(0, saved.Count);
+            else
+                Assert.AreEqual(concurrentSource, saved.Single().Definition.Source);
             model.Close();
         }
 

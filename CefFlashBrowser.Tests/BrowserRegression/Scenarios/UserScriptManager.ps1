@@ -471,7 +471,7 @@ function Test-BrowserIconStyleReuse($Context) {
     }
 }
 
-function Save-ManagerWithConfirmation($Context, $Window, [string]$Action, [hashtable]$Expected) {
+function Save-ManagerWithConfirmation($Context, $Window, [string]$Action, [hashtable]$Expected, [switch]$Update) {
     $model = $Window.DataContext
     $state = @{ Count = 0; Failure = $null }
     $timer = New-Object Windows.Threading.DispatcherTimer
@@ -519,8 +519,10 @@ function Save-ManagerWithConfirmation($Context, $Window, [string]$Action, [hasht
 
             $install = $dialog.FindName('installButton')
             $cancel = $dialog.FindName('cancelButton')
-            Assert-Regression ($dialog.Title -ceq $Context.LanguageService.GetString('userScriptManager_confirmInstall') -and
-                $install.Content -ceq $Context.LanguageService.GetString('userScriptInstall_install') -and
+            $titleKey = if ($Update) { 'userScriptInstall_confirmUpdate' } else { 'userScriptManager_confirmInstall' }
+            $buttonKey = if ($Update) { 'userScriptInstall_update' } else { 'userScriptInstall_install' }
+            Assert-Regression ($dialog.Title -ceq $Context.LanguageService.GetString($titleKey) -and
+                $install.Content -ceq $Context.LanguageService.GetString($buttonKey) -and
                 $cancel.Content -ceq $Context.LanguageService.GetString('dialog_cancel')) 'installation dialog localizes the title and actions'
             if ($Expected.Scrolls) {
                 $details = $dialog.FindName('scriptDetails')
@@ -668,7 +670,8 @@ function Invoke-WebScriptNavigation($Context, $Window, [scriptblock]$Navigate, [
     }
 }
 
-function Test-WebUserScriptInstallation($Context, $Window, $Manager, $Fixture) {
+function Test-WebUserScriptInstallation($Context, $Window, $ManagerWindow, $Fixture) {
+    $Manager = $ManagerWindow.DataContext
     $model = $Window.ViewModel.CurrentBrowser
     $browser = $model.Browser
     $service = $Context.UserScriptService
@@ -790,6 +793,24 @@ document.documentElement.setAttribute('data-web-install', 'ready');
         $closing.ForceCloseWindow()
         $Fixture.Release('/slow-install.user.js')
     }
+
+    $Fixture.ScriptSource = $updated.Replace('2.0.0', '3.0.0')
+    Complete-UserScriptTask $Context ($Manager.ImportUrlAsync($origin)) 'load a manager update for the web installation'
+    $draft = $Manager.SelectedScript
+    Assert-Regression (!$draft.IsInstalled -and $draft.Source -ceq $Fixture.ScriptSource -and
+        $item.Installation.Definition.Source -ceq $updated) 'loading a matching URL leaves a reviewable draft before updating'
+    $reviewed = $draft.Source.Replace('3.0.0', '3.1.0')
+    $draft.Source = $reviewed
+    $expected = @{
+        Text = @{ scriptName = 'Web installation fixture'; scriptVersion = '3.1.0'; scriptOrigin = $origin }
+        Initial = 'W'
+    }
+    Save-ManagerWithConfirmation $Context $ManagerWindow 'Install' $expected -Update
+    $item = $Manager.SelectedScript
+    $saved = Complete-UserScriptTask $Context ($service.ValueStore.GetAsync($key.ToString(), 'web-install', $token)) 'read data preserved by the manager update'
+    Assert-Regression (@($Manager.Scripts | Where-Object { $_.IsInstalled -and $_.Origin -ceq $origin }).Count -eq 1 -and
+        $item.IsInstalled -and $item.Installation.ScriptKey.Equals($key) -and !$item.IsEnabled -and
+        $item.Installation.Definition.Source -ceq $reviewed -and $saved.Value.EncodedValue -ceq $value.EncodedValue) 'manager updates the web installation in place and preserves enabled state and data'
 }
 
 function Test-UserScriptManager($Context) {
@@ -1139,7 +1160,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Assert-Regression (!$item.Source.EndsWith('// theme draft')) 'undo history still works after repeated theme changes'
         [void]$editor.Redo()
         Assert-Regression ($item.Source.EndsWith('// theme draft')) 'redo history still works after repeated theme changes'
-        Test-WebUserScriptInstallation $Context $browserWindow $model $fixture
+        Test-WebUserScriptInstallation $Context $browserWindow $window $fixture
     } finally {
         if ($null -ne $browserWindow) { $browserWindow.ForceCloseWindow() }
         if ($null -ne $window) { $window.Close() }
