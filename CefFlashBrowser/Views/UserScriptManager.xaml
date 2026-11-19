@@ -345,7 +345,11 @@
                             <hc:TextBox
                                 x:Name="searchText" TextChanged="SearchTextChanged"
                                 AutomationProperties.Name="Find"
-                                hc:InfoElement.Placeholder="{DynamicResource browser_find}"/>
+                                hc:InfoElement.Placeholder="{DynamicResource browser_find}">
+                                <i:Interaction.Behaviors>
+                                    <behaviors:TextBoxSelectAllOnFocus/>
+                                </i:Interaction.Behaviors>
+                            </hc:TextBox>
                         </DockPanel>
                         <Grid Margin="0,5,0,0">
                             <Grid.ColumnDefinitions>
@@ -398,7 +402,11 @@
                             <hc:TextBox
                                 x:Name="replacementText"
                                 AutomationProperties.Name="Replace"
-                                hc:InfoElement.Placeholder="{DynamicResource userScriptManager_replace}"/>
+                                hc:InfoElement.Placeholder="{DynamicResource userScriptManager_replace}">
+                                <i:Interaction.Behaviors>
+                                    <behaviors:TextBoxSelectAllOnFocus/>
+                                </i:Interaction.Behaviors>
+                            </hc:TextBox>
                             <WrapPanel>
                                 <Button
                                     x:Name="replaceCurrent" Margin="0,5,5,0" Padding="10,0"
