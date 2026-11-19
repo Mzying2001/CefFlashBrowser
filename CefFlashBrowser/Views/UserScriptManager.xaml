@@ -262,9 +262,14 @@
                                            Style="{StaticResource {x:Static c:BrowserIcon.TextFallbackStyleKey}}"/>
 
                             <StackPanel>
-                                <TextBlock TextTrimming="CharacterEllipsis">
-                                    <Run Text="{Binding Name, Mode=OneWay}"/><Run Text="{Binding DirtyMark, Mode=OneWay}"/>
-                                </TextBlock>
+                                <DockPanel HorizontalAlignment="Left">
+                                    <TextBlock DockPanel.Dock="Right"
+                                               Margin="2,0,0,0"
+                                               Text="{Binding DirtyMark, Mode=OneWay}"
+                                               Foreground="{DynamicResource DangerBrush}"/>
+                                    <TextBlock TextTrimming="CharacterEllipsis"
+                                               Text="{Binding Name, Mode=OneWay}"/>
+                                </DockPanel>
 
                                 <TextBlock Text="{Binding Version}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
