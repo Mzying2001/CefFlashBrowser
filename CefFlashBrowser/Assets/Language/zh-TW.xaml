@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">取代目前項目</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">全部取代</sys:String>
     <sys:String x:Key="userScriptManager_script">腳本</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">檢視詳細資料</sys:String>
+    <sys:String x:Key="userScriptDetails_title">腳本詳細資料</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">未知中繼資料</sys:String>
     <sys:String x:Key="userScriptManager_reload">從磁碟重新載入</sys:String>
     <sys:String x:Key="userScriptManager_delete">刪除</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">是否刪除腳本「{0}」？</sys:String>

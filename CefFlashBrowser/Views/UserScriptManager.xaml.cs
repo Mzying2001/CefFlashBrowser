@@ -56,6 +56,7 @@ namespace CefFlashBrowser.Views
         {
             ViewModel.ConfirmInstallation = ConfirmInstallation;
             ViewModel.ConfirmDeletion = ConfirmOperation;
+            ViewModel.ShowDetails = script => WindowManager.ShowUserScriptDetails(script, this);
             ViewModel.PropertyChanged += ViewModelPropertyChanged;
             await ViewModel.OpenAsync();
         }
@@ -203,6 +204,7 @@ namespace CefFlashBrowser.Views
             ViewModel.PropertyChanged -= ViewModelPropertyChanged;
             ViewModel.ConfirmInstallation = null;
             ViewModel.ConfirmDeletion = null;
+            ViewModel.ShowDetails = null;
             ViewModel.Close();
             base.OnClosed(e);
         }

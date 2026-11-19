@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">선택 항목 바꾸기</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">모두 바꾸기</sys:String>
     <sys:String x:Key="userScriptManager_script">스크립트</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">세부 정보 보기</sys:String>
+    <sys:String x:Key="userScriptDetails_title">스크립트 세부 정보</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">알 수 없는 메타데이터</sys:String>
     <sys:String x:Key="userScriptManager_reload">디스크에서 다시 불러오기</sys:String>
     <sys:String x:Key="userScriptManager_delete">삭제</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">스크립트 "{0}"을(를) 삭제하시겠습니까?</sys:String>

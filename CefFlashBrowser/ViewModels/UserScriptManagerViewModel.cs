@@ -59,6 +59,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ReorderCommand { get; }
         public Predicate<object> CanReorderItem { get; }
         public DelegateCommand DeleteCommand { get; }
+        public DelegateCommand<UserScriptItemViewModel> ShowDetailsCommand { get; }
         public DelegateCommand ReloadCommand { get; }
         public DelegateCommand LoadUrlCommand { get; }
         public DelegateCommand ShowUrlCommand { get; }
@@ -66,6 +67,7 @@ namespace CefFlashBrowser.ViewModels
 
         public Func<UserScriptMetadata, string, bool, bool> ConfirmInstallation { private get; set; }
         public Func<string, bool> ConfirmDeletion { private get; set; }
+        public Action<UserScriptItemViewModel> ShowDetails { private get; set; }
 
         private string _filterText = string.Empty;
         private string _filterTerm = string.Empty;
@@ -164,6 +166,10 @@ namespace CefFlashBrowser.ViewModels
             SaveCommand = new DelegateCommand(async () => await SaveAsync()) { CanExecuteFunc = _ => CanEdit() };
             ToggleCommand = new DelegateCommand<UserScriptItemViewModel>(async item => await ToggleAsync(item)) { CanExecuteFunc = item => !IsBusy && _repository != null && (item as UserScriptItemViewModel)?.IsInstalled == true };
             DeleteCommand = new DelegateCommand(async () => await DeleteAsync()) { CanExecuteFunc = _ => CanEdit() };
+            ShowDetailsCommand = new DelegateCommand<UserScriptItemViewModel>(item => ShowDetails?.Invoke(item))
+            {
+                CanExecuteFunc = item => !IsBusy && item is UserScriptItemViewModel
+            };
             MoveUpCommand = CreateMoveCommand(UserScriptMove.Up);
             MoveDownCommand = CreateMoveCommand(UserScriptMove.Down);
             MoveToFirstCommand = CreateMoveCommand(UserScriptMove.First);
@@ -772,6 +778,7 @@ namespace CefFlashBrowser.ViewModels
             ToggleCommand?.RaiseCanExecuteChanged();
             UpdateMoveCommands();
             DeleteCommand?.RaiseCanExecuteChanged();
+            ShowDetailsCommand?.RaiseCanExecuteChanged();
             ReloadCommand?.RaiseCanExecuteChanged();
             LoadUrlCommand?.RaiseCanExecuteChanged();
             ShowUrlCommand?.RaiseCanExecuteChanged();

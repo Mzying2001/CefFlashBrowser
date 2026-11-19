@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">Treffer ersetzen</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">Alle ersetzen</sys:String>
     <sys:String x:Key="userScriptManager_script">Skript</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">Details anzeigen</sys:String>
+    <sys:String x:Key="userScriptDetails_title">Skriptdetails</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">Unbekannte Metadaten</sys:String>
     <sys:String x:Key="userScriptManager_reload">Von Datenträger neu laden</sys:String>
     <sys:String x:Key="userScriptManager_delete">Löschen</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">Möchten Sie das Skript „{0}“ löschen?</sys:String>

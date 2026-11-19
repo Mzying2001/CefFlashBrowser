@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">選択中を置換</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">すべて置換</sys:String>
     <sys:String x:Key="userScriptManager_script">スクリプト</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">詳細を表示</sys:String>
+    <sys:String x:Key="userScriptDetails_title">スクリプトの詳細</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">不明なメタデータ</sys:String>
     <sys:String x:Key="userScriptManager_reload">ディスクから再読み込み</sys:String>
     <sys:String x:Key="userScriptManager_delete">削除</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">スクリプト「{0}」を削除しますか？</sys:String>

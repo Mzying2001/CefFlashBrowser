@@ -94,6 +94,10 @@
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource userScriptManager_script}">
+                <MenuItem x:Name="showDetailsMenuItem"
+                          Header="{DynamicResource userScriptManager_showDetails}"
+                          Command="{Binding ShowDetailsCommand}"
+                          CommandParameter="{Binding SelectedScript}"/>
                 <MenuItem Header="{DynamicResource userScriptManager_reload}"
                           Command="{Binding ReloadCommand}"/>
             </MenuItem>
@@ -219,6 +223,10 @@
                                     <Separator Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     <MenuItem Header="{DynamicResource userScriptManager_delete}"
                                               Command="{Binding DeleteCommand}"/>
+                                    <Separator/>
+                                    <MenuItem Header="{DynamicResource userScriptManager_showDetails}"
+                                              Command="{Binding ShowDetailsCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                 </ContextMenu>
                             </Setter.Value>
                         </Setter>

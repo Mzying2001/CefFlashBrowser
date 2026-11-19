@@ -666,11 +666,170 @@ function Open-ManagerContextMenu($Context, $Window, $Script) {
     $menu.PlacementTarget = $container
     $menu.IsOpen = $true
     Wait-Regression $Context {
-        $menu.Items.Count -eq 6 -and $menu.Items[4] -is [Windows.Controls.Separator] -and
+        $menu.Items.Count -eq 8 -and $menu.Items[4] -is [Windows.Controls.Separator] -and
             $menu.Items[5].Command -eq $Window.DataContext.DeleteCommand -and
-            $menu.Items[5].Header -eq $Context.LanguageService.GetString('userScriptManager_delete')
-    } 'script context menu binds to the manager and current language'
+            $menu.Items[5].Header -eq $Context.LanguageService.GetString('userScriptManager_delete') -and
+            $menu.Items[6] -is [Windows.Controls.Separator] -and
+            $menu.Items[7].Command -eq $Window.DataContext.ShowDetailsCommand -and
+            [object]::ReferenceEquals($menu.Items[7].CommandParameter, $Script) -and
+            $menu.Items[7].Header -eq $Context.LanguageService.GetString('userScriptManager_showDetails')
+    } 'script context menu places localized view details after delete and a separator'
     return $menu
+}
+
+function Invoke-ManagerDetailsDialog($Context, $Window, $MenuItem, [scriptblock]$Check, [string]$Dismiss) {
+    Assert-Regression ($MenuItem.IsEnabled) 'view details is enabled for a script'
+    $state = @{ Count = 0; Failure = $null }
+    $timer = New-Object Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(50)
+    $handler = [EventHandler]({
+        $dialog = $Context.Application.Windows | Where-Object {
+            $_.IsVisible -and $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptDetailsDialog]
+        } | Select-Object -First 1
+        if ($null -eq $dialog) { return }
+
+        $timer.Stop()
+        $state.Count++
+        try {
+            $button = $dialog.FindName('closeButton')
+            Assert-Regression ([object]::ReferenceEquals($dialog.Owner, $Window) -and
+                $dialog.Title -ceq $Context.LanguageService.GetString('userScriptDetails_title') -and
+                $button.Content -ceq $Context.LanguageService.GetString('solEditor_close')) 'details dialog is owned by the manager and localized'
+            & $Check $dialog
+            if ($Dismiss -eq 'Button') {
+                $peer = New-Object Windows.Automation.Peers.ButtonAutomationPeer($button)
+                $peer.GetPattern([Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+            } else {
+                Set-TabWindowForeground $Context $dialog
+                if ($Dismiss -eq 'Escape') {
+                    [RegressionKeyboard]::PressKey(0x1B)
+                } else {
+                    [RegressionKeyboard]::SetKey(0x11, $false)
+                    try { [RegressionKeyboard]::PressKey(0x57) }
+                    finally { [RegressionKeyboard]::SetKey(0x11, $true) }
+                }
+            }
+            Wait-Regression $Context { !$dialog.IsVisible } "$Dismiss closes the details dialog"
+        } catch {
+            $state.Failure = $_
+        } finally {
+            if ($dialog.IsVisible) { $dialog.Close() }
+        }
+    }.GetNewClosure())
+    $timer.add_Tick($handler)
+    $timer.Start()
+    try {
+        [void][Windows.Controls.MenuItem].GetMethod('OnClick', [Reflection.BindingFlags]'Instance,NonPublic').Invoke($MenuItem, @())
+        Wait-Regression $Context { $state.Count -gt 0 } 'view details displays its dialog'
+        if ($null -ne $state.Failure) { throw $state.Failure }
+        Assert-Regression ($state.Count -eq 1) 'menu item opens one details dialog'
+    } finally {
+        $timer.Stop()
+        $timer.remove_Tick($handler)
+    }
+}
+
+function Test-ManagerDetails($Context, $Window, $Item) {
+    $model = $Window.DataContext
+    $detailsItem = $Window.FindName('showDetailsMenuItem')
+    $scriptMenu = [Windows.Controls.ItemsControl]::ItemsControlFromItemContainer($detailsItem)
+    $installedSource = $Item.Source
+    $draft = $null
+    $menu = $null
+    try {
+        $model.SelectedScript = $null
+        $scriptMenu.IsSubmenuOpen = $true
+        Wait-Regression $Context { !$detailsItem.IsEnabled } 'view details is disabled without a selection'
+        Assert-Regression ($detailsItem.Header -ceq $Context.LanguageService.GetString('userScriptManager_showDetails')) 'script menu localizes view details'
+        $model.SelectedScript = $Item
+        $previewSource = @'
+// ==UserScript==
+// @name Details preview
+// @name:zh-CN Localized name
+// @namespace CefFlashBrowser.Regression
+// @version 2.0
+// @description A script with long metadata
+// @description:zh-CN Localized description
+// @exclude-match https://example.com/private/*
+// @match https://example.com/*
+// @noframes
+// @grant none
+// @require https://example.com/library.js#md5=d41d8cd98f00b204e9800998ecf8427e
+// @resource logo https://example.com/logo.png
+// @antifeature:en-US ads Displays ads
+// @webRequest {"selector":"https://example.com/ads/*","action":"cancel"}
+// @custom first
+// @custom second
+// @custom-flag
+// @custom-long LENGTH
+// ==/UserScript==
+'@
+        $previewSource = $previewSource.Replace('LENGTH', ('x' * 900))
+        $editor = $Window.FindName('sourceEditor')
+        $editor.SelectAll()
+        $editor.TextArea.PerformTextInput($previewSource)
+        Invoke-ManagerDetailsDialog $Context $Window $detailsItem {
+            param($dialog)
+            Assert-Regression ($dialog.FindName('scriptName').Text -ceq 'Details preview' -and
+                $dialog.FindName('scriptVersion').Text -ceq '2.0' -and
+                $dialog.FindName('scriptDescription').Text -ceq 'A script with long metadata' -and
+                (Get-ManagerIconText ($dialog.FindName('scriptIcon'))).Text -ceq 'D') 'details header shows the current editor text and icon fallback'
+            $known = $dialog.FindName('metadataRows')
+            $unknown = $dialog.FindName('unknownMetadataRows')
+            $rows = @{}
+            foreach ($row in $known.Items) { $rows[$row.Key] = $row.Value }
+            Assert-Regression ($rows['@name:zh-CN'] -ceq 'Localized name' -and $rows['@description:zh-CN'] -ceq 'Localized description' -and
+                $rows['@exclude-match'] -ceq 'https://example.com/private/*' -and $rows['@run-at'] -ceq 'document-idle' -and
+                $rows.ContainsKey('@noframes') -and $rows['@grant'] -ceq 'none' -and
+                $rows['@require'] -ceq 'https://example.com/library.js#md5=d41d8cd98f00b204e9800998ecf8427e' -and
+                $rows['@resource'] -ceq 'logo https://example.com/logo.png' -and
+                $rows['@antifeature:en-US'] -ceq 'ads Displays ads' -and
+                $rows['@webRequest'] -ceq '{"selector":"https://example.com/ads/*","action":"cancel"}') 'details show normalized scalar, flag, localized and structured metadata'
+            $unknownSection = $dialog.FindName('unknownMetadataSection')
+            $knownSection = $dialog.FindName('metadataSection')
+            $position = $unknownSection.TranslatePoint([Windows.Point]::new(0, 0), $knownSection)
+            Assert-Regression ($unknownSection.IsVisible -and $position.Y -ge $knownSection.ActualHeight -and
+                ($unknown.Items.Key -join ',') -ceq '@custom,@custom-flag,@custom-long' -and
+                $unknown.Items[0].Value -ceq ('first' + [Environment]::NewLine + 'second') -and
+                $unknown.Items[1].Value -ceq '') 'unknown fields appear last with repeated and empty values preserved'
+            $values = @(Find-FaviconElements $known ([Windows.Controls.TextBox]))
+            $scroll = $dialog.FindName('scriptDetails')
+            Assert-Regression ($values.Count -eq $known.Items.Count -and $values[0].Text -ceq 'Details preview' -and
+                @($values | Where-Object { !$_.IsReadOnly }).Count -eq 0 -and $scroll.ScrollableHeight -gt 0 -and
+                $scroll.ExtentWidth -le $scroll.ViewportWidth -and $dialog.FindName('closeButton').IsVisible) 'rendered metadata is read-only and wraps in a scrolling area above Close'
+        } 'Button'
+        Assert-Regression ($Item.IsDirty -and $Item.Source -ceq $previewSource -and
+            $editor.Text -ceq $previewSource -and $Item.Installation.Definition.Source -ceq $installedSource) 'preview leaves the editor and installed source intact'
+
+        $model.NewScript()
+        $draft = $model.SelectedScript
+        $draft.Source = $draft.Source -replace '(?m)^// @name[^\r\n]*', '// @name Draft preview'
+        $menu = Open-ManagerContextMenu $Context $Window $draft
+        $model.SelectedScript = $Item
+        Invoke-ManagerDetailsDialog $Context $Window $menu.Items[7] {
+            param($dialog)
+            Assert-Regression ($dialog.FindName('scriptName').Text -ceq 'Draft preview' -and
+                !$dialog.FindName('unknownMetadataSection').IsVisible) 'context details use the row draft with an empty unknown section hidden'
+        } 'Escape'
+
+        $model.SelectedScript = $draft
+        $draft.Source = '// ==UserScript=='
+        $draftName = $draft.Name
+        $draftCheck = {
+            param($dialog)
+            Assert-Regression ($dialog.FindName('scriptName').Text -ceq $draftName -and
+                $dialog.FindName('invalidMetadata').IsVisible -and
+                !$dialog.FindName('metadataSection').IsVisible) 'an incomplete metadata block shows a draft name and a message'
+        }.GetNewClosure()
+        $scriptMenu.IsSubmenuOpen = $true
+        Invoke-ManagerDetailsDialog $Context $Window $detailsItem $draftCheck 'Ctrl+W'
+    } finally {
+        $scriptMenu.IsSubmenuOpen = $false
+        if ($null -ne $menu) { $menu.IsOpen = $false }
+        if ($null -ne $draft) { [void]$model.Scripts.Remove($draft) }
+        $Item.Source = $installedSource
+        $model.SelectedScript = $Item
+    }
 }
 
 function Invoke-ManagerDeleteWithConfirmation($Context, $Window, $MenuItem, [Nullable[bool]]$Accept) {
@@ -1017,13 +1176,14 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
         $filter.Text = 'Manager order'
         $menu = Open-ManagerContextMenu $Context $Window $item
         Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Collapsed }).Count -eq 5 -and
-            $menu.Items[5].Visibility -eq [Windows.Visibility]::Visible -and $menu.Items[5].IsEnabled) 'filtering hides the four move items and their separator while leaving delete available'
+            $menu.Items[5].IsEnabled -and $menu.Items[6].Visibility -eq [Windows.Visibility]::Visible -and
+            $menu.Items[7].IsEnabled) 'filtering leaves delete and details available with their separator'
         $menu.IsOpen = $false
         Assert-Regression ($list.Items.Count -eq 2 -and [object]::ReferenceEquals($list.Items[0], $first) -and
             [object]::ReferenceEquals($list.Items[1], $item) -and $editor.Text -ceq $editedSource -and $editor.CanUndo) 'filtered rows retain their order, selection and source edits'
         $filter.Text = ''
         $menu = Open-ManagerContextMenu $Context $Window $item
-        Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Visible }).Count -eq 6 -and
+        Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Visible }).Count -eq 8 -and
             $menu.Items[0].IsEnabled -and $behavior.IsDragEnabled) 'clearing the filter restores the move items, their separator and drag reordering'
         $menu.IsOpen = $false
         Invoke-BrowserCommand $menu.Items[0].Command
@@ -1183,6 +1343,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $key = $item.Installation.ScriptKey
         $sourcePath = Join-Path (Join-Path $Context.TemporaryPath ('MonkeySharp\' + $key)) 'userscript.js'
         Assert-Regression ([IO.File]::ReadAllText($sourcePath) -eq $source) 'manager persists source through the shared repository'
+        Test-ManagerDetails $Context $window $item
         $reloadedSource = $source + "`r`n// externally reloaded source"
         [IO.File]::WriteAllText($sourcePath, $reloadedSource, (New-Object Text.UTF8Encoding($false)))
         Complete-UserScriptTask $Context ($model.ReloadAsync()) 'reload external source into the editor'

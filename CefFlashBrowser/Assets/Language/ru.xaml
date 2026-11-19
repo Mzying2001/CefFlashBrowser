@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">Заменить выделенное</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">Заменить всё</sys:String>
     <sys:String x:Key="userScriptManager_script">Скрипт</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">Показать сведения</sys:String>
+    <sys:String x:Key="userScriptDetails_title">Сведения о скрипте</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">Неизвестные метаданные</sys:String>
     <sys:String x:Key="userScriptManager_reload">Перезагрузить с диска</sys:String>
     <sys:String x:Key="userScriptManager_delete">Удалить</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">Удалить скрипт «{0}»?</sys:String>

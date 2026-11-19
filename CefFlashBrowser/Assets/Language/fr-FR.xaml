@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">Remplacer la sélection</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">Tout remplacer</sys:String>
     <sys:String x:Key="userScriptManager_script">Script</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">Afficher les détails</sys:String>
+    <sys:String x:Key="userScriptDetails_title">Détails du script</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">Métadonnées inconnues</sys:String>
     <sys:String x:Key="userScriptManager_reload">Recharger depuis le disque</sys:String>
     <sys:String x:Key="userScriptManager_delete">Supprimer</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">Voulez-vous supprimer le script « {0} » ?</sys:String>

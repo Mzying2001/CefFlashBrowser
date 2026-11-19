@@ -222,6 +222,13 @@ namespace CefFlashBrowser.Services
             ShowWindow<UserScriptManager>(singleton: true);
         }
 
+        internal static void ShowUserScriptDetails(UserScriptItemViewModel script, UserScriptManager owner)
+        {
+            var dialog = CreateWindow<UserScriptDetailsDialog>();
+            dialog.SetScript(script);
+            DialogHelper.ShowModal(dialog, owner);
+        }
+
         internal static void ShowUserScriptPermissions(BrowserWindow owner, string address)
         {
             var window = CreateWindow<UserScriptPermissionsWindow>();
