@@ -127,6 +127,14 @@
                 <MenuItem Header="{DynamicResource userScriptManager_reload}"
                           Command="{Binding ReloadCommand}"/>
             </MenuItem>
+            <MenuItem Header="{DynamicResource userScriptManager_help}">
+                <MenuItem Header="{DynamicResource userScriptManager_aboutMonkeySharp}"
+                          Command="{Binding ElementName=window, Path=OpenInDefaultBrowserCommand}"
+                          CommandParameter="https://github.com/Mzying2001/MonkeySharp/blob/main/README.md"/>
+                <MenuItem Header="{DynamicResource userScriptManager_usageGuide}"
+                          Command="{Binding ElementName=window, Path=OpenInDefaultBrowserCommand}"
+                          CommandParameter="https://github.com/Mzying2001/MonkeySharp/blob/main/docs/usage-guide.md"/>
+            </MenuItem>
         </Menu>
 
         <StatusBar DockPanel.Dock="Bottom">

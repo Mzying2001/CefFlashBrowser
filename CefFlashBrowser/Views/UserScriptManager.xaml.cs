@@ -28,6 +28,7 @@ namespace CefFlashBrowser.Views
 
         public DelegateCommand ImportFileCommand { get; }
         public DelegateCommand ExportCommand { get; }
+        public DelegateCommand OpenInDefaultBrowserCommand { get; }
 
         private UserScriptManagerViewModel ViewModel
         {
@@ -40,6 +41,7 @@ namespace CefFlashBrowser.Views
 
             ImportFileCommand = new DelegateCommand(ImportFile) { CanExecuteFunc = _ => !ViewModel.IsBusy };
             ExportCommand = new DelegateCommand(Export) { CanExecuteFunc = _ => !ViewModel.IsBusy && ViewModel.SelectedScript != null };
+            OpenInDefaultBrowserCommand = new DelegateCommand<string>(WindowManager.OpenInDefaultBrowser);
 
             InitializeComponent();
 

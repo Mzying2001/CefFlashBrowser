@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">Replace current</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">Replace all</sys:String>
     <sys:String x:Key="userScriptManager_script">Script</sys:String>
+    <sys:String x:Key="userScriptManager_help">Help</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">About MonkeySharp</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">Userscript Guide</sys:String>
     <sys:String x:Key="userScriptManager_showDetails">View details</sys:String>
     <sys:String x:Key="userScriptDetails_title">Script details</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">Unknown metadata</sys:String>

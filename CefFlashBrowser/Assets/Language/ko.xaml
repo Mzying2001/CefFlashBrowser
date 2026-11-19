@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">선택 항목 바꾸기</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">모두 바꾸기</sys:String>
     <sys:String x:Key="userScriptManager_script">스크립트</sys:String>
+    <sys:String x:Key="userScriptManager_help">도움말</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">MonkeySharp 정보</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">사용자 스크립트 사용 안내</sys:String>
     <sys:String x:Key="userScriptManager_showDetails">세부 정보 보기</sys:String>
     <sys:String x:Key="userScriptDetails_title">스크립트 세부 정보</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">알 수 없는 메타데이터</sys:String>

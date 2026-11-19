@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">Заменить выделенное</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">Заменить всё</sys:String>
     <sys:String x:Key="userScriptManager_script">Скрипт</sys:String>
+    <sys:String x:Key="userScriptManager_help">Справка</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">О MonkeySharp</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">Руководство по пользовательским скриптам</sys:String>
     <sys:String x:Key="userScriptManager_showDetails">Показать сведения</sys:String>
     <sys:String x:Key="userScriptDetails_title">Сведения о скрипте</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">Неизвестные метаданные</sys:String>

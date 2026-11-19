@@ -259,6 +259,9 @@
     <sys:String x:Key="userScriptManager_replaceCurrent">取代目前項目</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">全部取代</sys:String>
     <sys:String x:Key="userScriptManager_script">腳本</sys:String>
+    <sys:String x:Key="userScriptManager_help">說明</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">關於 MonkeySharp</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">使用者腳本使用指南</sys:String>
     <sys:String x:Key="userScriptManager_showDetails">檢視詳細資料</sys:String>
     <sys:String x:Key="userScriptDetails_title">腳本詳細資料</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">未知中繼資料</sys:String>

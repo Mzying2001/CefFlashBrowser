@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -133,15 +132,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void OpenInDefaultBrowser(string url)
         {
-            try
-            {
-                Process.Start(url);
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError($"Failed to open URL in default browser: {url}", e);
-                WindowManager.ShowError(e.Message);
-            }
+            WindowManager.OpenInDefaultBrowser(url);
         }
 
         private static bool IsBrowserReady(BrowserViewModel browser)

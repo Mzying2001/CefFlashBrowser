@@ -11,6 +11,7 @@ using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -343,6 +344,19 @@ namespace CefFlashBrowser.Services
             }
             catch { }
             MessageBox.Show(errMsg, title, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        internal static void OpenInDefaultBrowser(string url)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose();
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError($"Failed to open URL in default browser: {url}", e);
+                ShowError(e.Message);
+            }
         }
 
         public static void ShowSolSaveManager()
