@@ -176,8 +176,7 @@ namespace CefFlashBrowser.Views.Behaviors
             _dragCandidate = null;
 
             var data = BeginDrag(item);
-            if (data == null)
-                return;
+            if (data == null) return;
 
             e.Handled = true;
 
@@ -232,11 +231,11 @@ namespace CefFlashBrowser.Views.Behaviors
 
             var preview = new Border
             {
+                Opacity = 0.9,
                 BorderThickness = new Thickness(PreviewBorderThickness),
                 BorderBrush = list.TryFindResource("BorderBrush") as Brush ?? SystemColors.ActiveBorderBrush,
                 Background = list.TryFindResource("RegionBrush") as Brush ?? SystemColors.WindowBrush,
-                CornerRadius = new CornerRadius(4),
-                Opacity = 0.9,
+                CornerRadius = new CornerRadius(6),
                 Child = new Image { Source = snapshot, Width = size.Width, Height = size.Height, Stretch = Stretch.Fill }
             };
 
