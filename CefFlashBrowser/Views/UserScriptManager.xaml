@@ -148,20 +148,48 @@
         </Border>
 
         <Grid x:Name="scriptLayout" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="scriptListColumn" Width="240" MinWidth="180"/>
                 <ColumnDefinition x:Name="scriptSplitterColumn" Width="10"/>
                 <ColumnDefinition x:Name="scriptEditorColumn" Width="*" MinWidth="240"/>
             </Grid.ColumnDefinitions>
 
+            <Grid Margin="0,0,0,6">
+                <hc:TextBox x:Name="scriptFilter"
+                            Padding="28,0,8,0"
+                            MaxLength="100"
+                            Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                            AutomationProperties.Name="{DynamicResource solSaveManager_filterPlaceholder}"
+                            hc:InfoElement.Placeholder="{DynamicResource solSaveManager_filterPlaceholder}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:TextBoxSelectAllOnFocus/>
+                    </i:Interaction.Behaviors>
+                </hc:TextBox>
+
+                <Grid Margin="8,0,0,0"
+                      Width="13"
+                      Height="13"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Left"
+                      IsHitTestVisible="False">
+                    <svgc:SvgIcon UriSource="{StaticResource SearchIconUri}"/>
+                </Grid>
+            </Grid>
+
             <ListBox x:Name="scriptList"
-                     ItemsSource="{Binding Scripts}"
+                     Grid.Row="1"
+                     ItemsSource="{Binding ScriptsView}"
                      SelectedItem="{Binding SelectedScript}"
+                     IsSynchronizedWithCurrentItem="False"
                      AllowDrop="True"
                      SelectionChanged="SelectionChanged">
                 <i:Interaction.Behaviors>
                     <behaviors:ListReorderBehavior
-                        IsDragEnabled="True"
+                        IsDragEnabled="{Binding IsReorderingEnabled}"
                         ReorderCommand="{Binding ReorderCommand}"
                         CanReorderItem="{Binding CanReorderItem}"/>
                 </i:Interaction.Behaviors>
@@ -281,11 +309,13 @@
             </ListBox>
 
             <GridSplitter Grid.Column="1"
+                          Grid.RowSpan="2"
                           Width="10"
                           Background="Transparent"
                           HorizontalAlignment="Stretch"/>
 
             <DockPanel Grid.Column="2"
+                       Grid.RowSpan="2"
                        PreviewKeyDown="SearchPreviewKeyDown">
                 <Border x:Name="searchBar"
                         DockPanel.Dock="Top"

@@ -337,6 +337,8 @@ function Test-ManagerSearchAppearance($Context, $Window) {
     $width = $Window.Width
     $scriptColumn = $Window.FindName('scriptListColumn')
     $columnWidth = $scriptColumn.Width
+    $filter = $Window.FindName('scriptFilter')
+    $list = $Window.FindName('scriptList')
     try {
         $Window.Width = 800
         $Window.UpdateLayout()
@@ -344,6 +346,9 @@ function Test-ManagerSearchAppearance($Context, $Window) {
         $Window.Width = $Window.MinWidth
         $Window.UpdateLayout()
         Assert-Regression ([Math]::Abs($scriptColumn.ActualWidth - 240) -lt 1) 'resizing the window keeps the default script list width'
+        $filterOrigin = $filter.TranslatePoint([Windows.Point]::new(0, 0), $list)
+        Assert-Regression ([Math]::Abs($filter.ActualWidth - $list.ActualWidth) -lt 1 -and
+            $filterOrigin.Y + $filter.ActualHeight -le 0) 'the filter spans the script column above the list at minimum window width'
         $Window.Width = 800
         $Window.UpdateLayout()
         $scriptColumn.Width = New-Object Windows.GridLength($scriptColumn.MaxWidth)
@@ -393,6 +398,8 @@ function Test-ManagerSearchAppearance($Context, $Window) {
         $matchCase = $Window.FindName('matchCase')
         foreach ($locale in $Context.LanguageService.GetSupportedLanguage()) {
             $Context.LanguageService.SetCurrentLanguage($locale)
+            Assert-Regression ([HandyControl.Controls.InfoElement]::GetPlaceholder($filter) -ceq
+                $Context.LanguageService.GetString('solSaveManager_filterPlaceholder')) "list filter placeholder follows the language in $locale"
             foreach ($name in @('matchCount', 'noMatches')) {
                 $query.Text = if ($name -eq 'matchCount') { 'const' } else { 'missing search result' }
                 $Window.UpdateLayout()
@@ -813,6 +820,68 @@ document.documentElement.setAttribute('data-web-install', 'ready');
         $item.Installation.Definition.Source -ceq $Fixture.ScriptSource -and $saved.Value.EncodedValue -ceq $value.EncodedValue) 'manager updates the web installation in place and preserves enabled state and data'
 }
 
+function Test-ManagerListFilter($Context, $Window, $Item) {
+    $model = $Window.DataContext
+    $list = $Window.FindName('scriptList')
+    $filter = $Window.FindName('scriptFilter')
+    $source = $Item.Source
+    $drafts = @()
+    try {
+        $model.SelectedScript = $Item
+        $filter.Text = '  wORKFLOW  '
+        Assert-Regression ($list.Items.Count -eq 1 -and [object]::ReferenceEquals($list.SelectedItem, $Item)) 'filter trims its input, matches names without case sensitivity and preserves selection'
+        $Item.Source += "`n// unsaved filter fixture"
+        $editedSource = $Item.Source
+        $filter.Text = '1.0.0'
+        Assert-Regression ($list.Items.Count -eq 0 -and $null -eq $model.SelectedScript -and
+            $Item.Source -ceq $editedSource) 'a version-only query hides the script and preserves its unsaved source'
+        $filter.Text = '   '
+        Assert-Regression ($list.Items.Count -eq $model.Scripts.Count -and $model.IsReorderingEnabled) 'whitespace shows the complete list and permits reordering'
+        $filter.Text = 'workflow'
+        $model.SelectedScript = $Item
+        $Item.Source = $source.Replace('Manager workflow', 'Renamed filter fixture')
+        Assert-Regression ($list.Items.Contains($Item)) 'unsaved name changes follow the displayed name'
+        Complete-UserScriptTask $Context ($model.SaveAsync()) 'save renamed filter fixture'
+        Wait-Regression $Context { !$list.Items.Contains($Item) -and $null -eq $model.SelectedScript } 'saving a non-matching name hides and deselects that script'
+        $filter.Text = 'rENAMED'
+        Assert-Regression ($list.Items.Contains($Item)) 'the new name is searchable'
+        $filter.Text = 'workflow'
+        $repository = $Context.UserScriptService.Repository
+        Complete-UserScriptTask $Context ($repository.UpdateAsync($Item.Installation.ScriptKey, $source, $null,
+            [Threading.CancellationToken]::None)) 'restore the workflow script name through the repository' | Out-Null
+        Wait-Regression $Context { $list.Items.Contains($Item) -and $Item.Source -ceq $source } 'an external name change reveals a newly matching script'
+
+        $draftName = $Context.LanguageService.GetString('userScriptManager_newScript')
+        $filter.Text = $draftName
+        Invoke-BrowserCommand $model.NewCommand
+        $drafts += $model.SelectedScript
+        Assert-Regression ($filter.Text -ceq $draftName -and !$model.SelectedScript.IsInstalled -and
+            $list.Items.Contains($model.SelectedScript)) 'a matching new draft is selected without clearing the filter'
+        $filter.Text = 'workflow'
+        Invoke-BrowserCommand $model.NewCommand
+        $drafts += $model.SelectedScript
+        Assert-Regression ($filter.Text.Length -eq 0 -and $list.Items.Contains($model.SelectedScript) -and
+            $model.SelectedScript.Name -ceq $draftName) 'a non-matching new draft is selected in the restored list'
+
+        $path = Join-Path $Context.TemporaryPath 'manager-filter.user.js'
+        [IO.File]::WriteAllText($path, $source.Replace('Manager workflow', 'Imported filter fixture'))
+        foreach ($query in @('filter fixture', 'workflow')) {
+            $filter.Text = $query
+            Complete-UserScriptTask $Context ($model.ImportFileAsync($path)) "import draft while filtering by $query"
+            $drafts += $model.SelectedScript
+            $expected = if ($query -eq 'workflow') { '' } else { $query }
+            Assert-Regression ($filter.Text -ceq $expected -and $model.SelectedScript.Origin -ceq $path -and
+                $list.Items.Contains($model.SelectedScript)) 'import selects its draft and clears the filter only when needed'
+        }
+    } finally {
+        $filter.Text = ''
+        foreach ($draft in $drafts) {
+            [void]$model.Scripts.Remove($draft)
+        }
+        $model.SelectedScript = $Item
+    }
+}
+
 function Test-ManagerExecutionOrder($Context, $Window, $BrowserModel) {
     $repository = $Context.UserScriptService.Repository
     $model = $Window.DataContext
@@ -830,6 +899,7 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
 '@
     $installed = @()
     $behavior = $null
+    $filter = $Window.FindName('scriptFilter')
     try {
         foreach ($mark in @('A', 'B')) {
             $installed += Complete-UserScriptTask $Context ($repository.InstallAsync($scriptSource.Replace('__MARK__', $mark), $null, $true, $token)) "install order fixture $mark"
@@ -864,6 +934,28 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
         $editor = $Window.FindName('sourceEditor')
         $editor.TextArea.PerformTextInput('// unsaved drag edit')
         $editedSource = $item.Source
+        $filter.Text = 'Manager'
+        Assert-Regression ($list.Items.Count -eq $model.Scripts.Count -and !$behavior.IsDragEnabled -and
+            $null -eq (Start-ListReorderDrag $behavior $item)) 'a filter matching every script also prevents starting a drag'
+        $filter.Text = 'Manager order'
+        $menu = Open-ManagerContextMenu $Context $Window $item
+        Assert-Regression (@($menu.Items | Select-Object -First 4 | Where-Object { $_.IsEnabled }).Count -eq 0 -and
+            $menu.Items[5].IsEnabled) 'filtering disables all four sorting commands while leaving delete available'
+        $menu.IsOpen = $false
+        Assert-Regression ($list.Items.Count -eq 2 -and [object]::ReferenceEquals($list.Items[0], $first) -and
+            [object]::ReferenceEquals($list.Items[1], $item) -and $editor.Text -ceq $editedSource -and $editor.CanUndo) 'filtered rows retain their order, selection and source edits'
+        $filter.Text = ''
+        $menu = Open-ManagerContextMenu $Context $Window $item
+        Assert-Regression ($menu.Items[0].IsEnabled -and $behavior.IsDragEnabled) 'clearing the filter restores menu and drag reordering'
+        $menu.IsOpen = $false
+        Invoke-BrowserCommand $menu.Items[0].Command
+        Wait-Regression $Context { !$model.IsBusy -and $model.Scripts.IndexOf($item) -lt $model.Scripts.IndexOf($first) } 'the menu moves the script after clearing the filter'
+        $snapshot = Complete-UserScriptTask $Context ($repository.GetSnapshotAsync($token)) 'read the saved menu order'
+        Assert-Regression ($snapshot[$model.Scripts.IndexOf($item)].ScriptKey.Equals($item.Installation.ScriptKey) -and
+            $snapshot[$model.Scripts.IndexOf($first)].ScriptKey.Equals($first.Installation.ScriptKey)) 'the menu persists the restored ordering operation'
+        Invoke-BrowserCommand $model.MoveDownCommand
+        Wait-Regression $Context { !$model.IsBusy -and $model.Scripts.IndexOf($item) -gt $model.Scripts.IndexOf($first) } 'restore the pre-drag order'
+
         $flags = [Reflection.BindingFlags]'Instance,NonPublic'
         $Window.UpdateLayout()
         $sourceRow = $list.ItemContainerGenerator.ContainerFromItem($item)
@@ -949,17 +1041,20 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
         $data = Start-ListReorderDrag $behavior $item
         [void](Invoke-ListReorderDragEvent $list $data $edge $over)
         Wait-Regression $Context { $scroll.VerticalOffset -gt $offset } 'dragging near the bottom edge scrolls the list'
-        $behavior.IsDragEnabled = $false
+        $filter.Text = 'Manager order'
         try {
+            $Window.UpdateLayout()
             $stoppedOffset = $scroll.VerticalOffset
             $elapsed = [Diagnostics.Stopwatch]::StartNew()
             Wait-Regression $Context { $elapsed.ElapsedMilliseconds -ge 350 } 'two drag-scroll intervals elapse'
-            Assert-Regression ($scroll.VerticalOffset -eq $stoppedOffset -and
-                $model.Scripts.IndexOf($item) -eq ($model.Scripts.IndexOf($first) + 1)) 'disabling an edge drag stops scrolling and preserves script order'
+            Assert-Regression (!$behavior.IsDragEnabled -and $scroll.VerticalOffset -eq $stoppedOffset -and
+                @(Get-ListReorderAdorners $list).Count -eq 0 -and
+                $model.Scripts.IndexOf($item) -eq ($model.Scripts.IndexOf($first) + 1)) 'starting a filter cancels the drag, stops scrolling and preserves script order'
         } finally {
-            $behavior.IsDragEnabled = $true
+            $filter.Text = ''
         }
     } finally {
+        $filter.Text = ''
         if ($null -ne $behavior) { Invoke-ViewCallback $behavior 'EndDrag' @() }
         foreach ($installation in $installed) {
             Complete-UserScriptTask $Context ($repository.RemoveAsync($installation.ScriptKey, $token)) 'remove order fixture' | Out-Null
@@ -1020,6 +1115,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $browserWindow.ViewModel.CurrentBrowser.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context { (Invoke-JavaScript $Context $browser "document.documentElement && document.documentElement.getAttribute('data-manager')") -eq 'saved' } 'manager-installed script executes in real CEF'
         Test-ManagerExecutionOrder $Context $window $browserWindow.ViewModel.CurrentBrowser
+        Test-ManagerListFilter $Context $window $item
         $model.SelectedScript = $item
         $list = $window.FindName('scriptList')
         $list.ScrollIntoView($item)
@@ -1079,12 +1175,14 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $item.Source += "`n// unsaved session draft"
         $model.NewScript()
         $draft = $model.SelectedScript
+        $window.FindName('scriptFilter').Text = $draft.Name
         Send-ManagerShortcut $Context $window 0x57
         Wait-Regression $Context { !$window.IsVisible } 'Ctrl+W closes the manager from editor focus'
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] })[0]
         Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager reopened'
         $editor = $window.FindName('sourceEditor')
+        Assert-Regression ($window.FindName('scriptFilter').Text.Length -eq 0) 'reopening the manager clears the list filter'
         Assert-Regression ([object]::ReferenceEquals($draft, $model.SelectedScript) -and $item.IsDirty -and $item.Source.Contains('unsaved session draft')) 'selection and unsaved drafts survive manager closure'
         Assert-Regression ($editor.Text -ceq $draft.Source) 'reopened editor displays the selected unsaved draft'
         $path = Join-Path $Context.TemporaryPath 'manager-import.user.js'

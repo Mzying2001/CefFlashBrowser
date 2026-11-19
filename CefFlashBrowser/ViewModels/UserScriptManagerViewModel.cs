@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -29,6 +30,22 @@ namespace CefFlashBrowser.ViewModels
         private UserScriptItemViewModel _deletingItem;
 
         public ObservableCollection<UserScriptItemViewModel> Scripts { get; } = new ObservableCollection<UserScriptItemViewModel>();
+
+        private ListCollectionView _scriptsView;
+        public ListCollectionView ScriptsView
+        {
+            get
+            {
+                if (_scriptsView == null)
+                {
+                    _scriptsView = new ListCollectionView(Scripts);
+                    _scriptsView.LiveFilteringProperties.Add(nameof(UserScriptItemViewModel.Name));
+                    RefreshScriptsView();
+                }
+
+                return _scriptsView;
+            }
+        }
 
         public DelegateCommand NewCommand { get; }
         public DelegateCommand SaveCommand { get; }
@@ -48,6 +65,40 @@ namespace CefFlashBrowser.ViewModels
 
         public Func<UserScriptMetadata, string, bool, bool> ConfirmInstallation { private get; set; }
         public Func<string, bool> ConfirmDeletion { private get; set; }
+
+        private string _filterText = string.Empty;
+        private string _filterTerm = string.Empty;
+        public string FilterText
+        {
+            get => _filterText;
+            set
+            {
+                if (!UpdateValue(ref _filterText, value ?? string.Empty))
+                    return;
+
+                var term = _filterText.Trim();
+
+                if (string.Equals(_filterTerm, term, StringComparison.OrdinalIgnoreCase))
+                    return;
+
+                var wasFiltering = IsFiltering;
+                _filterTerm = term;
+
+                if (wasFiltering != IsFiltering)
+                {
+                    RaisePropertyChanged(nameof(IsReorderingEnabled));
+                    UpdateMoveCommands();
+                }
+
+                if (SelectedScript != null && !MatchesFilter(SelectedScript))
+                    SelectedScript = null;
+
+                RefreshScriptsView();
+            }
+        }
+
+        private bool IsFiltering => _filterTerm.Length > 0;
+        public bool IsReorderingEnabled => !IsFiltering;
 
         private string _installUrl;
         public string InstallUrl
@@ -156,7 +207,7 @@ namespace CefFlashBrowser.ViewModels
                 }
 
                 ApplyInstalledOrder(snapshot);
-                SelectedScript = SelectedScript ?? Scripts.FirstOrDefault();
+                SelectedScript = SelectedScript ?? Scripts.FirstOrDefault(MatchesFilter);
             });
         }
 
@@ -170,6 +221,8 @@ namespace CefFlashBrowser.ViewModels
             var lifetime = _lifetime;
             _lifetime = null;
             lifetime?.Cancel();
+
+            FilterText = string.Empty;
 
             if (lifetime != null)
             {
@@ -199,6 +252,38 @@ namespace CefFlashBrowser.ViewModels
 
             var item = new UserScriptItemViewModel(source, null, name, false);
             Scripts.Add(item);
+            SelectScriptForEditing(item);
+        }
+
+        private bool MatchesFilter(UserScriptItemViewModel item)
+            => !IsFiltering || item.Name?.IndexOf(_filterTerm, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        private void RefreshScriptsView()
+        {
+            if (_scriptsView == null)
+                return;
+
+            using (_scriptsView.DeferRefresh())
+            {
+                _scriptsView.Filter = IsFiltering
+                    ? new Predicate<object>(item => MatchesFilter((UserScriptItemViewModel)item))
+                    : null;
+                _scriptsView.IsLiveFiltering = IsFiltering;
+            }
+        }
+
+        private void SelectScriptForEditing(UserScriptItemViewModel item)
+        {
+            if (!MatchesFilter(item))
+            {
+                FilterText = string.Empty;
+            }
+            else if (_scriptsView != null && !_scriptsView.Contains(item))
+            {
+                // An import can rename a hidden script before live filtering runs.
+                _scriptsView.Refresh();
+            }
+
             SelectedScript = item;
         }
 
@@ -329,7 +414,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 var draft = new UserScriptItemViewModel(source, origin, parsed.Metadata?.Name ?? origin, true);
                 Scripts.Add(draft);
-                SelectedScript = draft;
+                SelectScriptForEditing(draft);
                 Status = _text("userScriptManager_reviewInstall");
                 return;
             }
@@ -356,7 +441,7 @@ namespace CefFlashBrowser.ViewModels
                 item.Source = installation.Definition.Source;
             }
 
-            SelectedScript = item;
+            SelectScriptForEditing(item);
             Status = _text("userScriptManager_saved");
         }
 
@@ -445,7 +530,7 @@ namespace CefFlashBrowser.ViewModels
         }
 
         private int GetReorderableIndex(UserScriptItemViewModel item)
-            => !IsBusy && _lifetime != null && _repository is OrderedUserScriptRepository && item?.IsInstalled == true
+            => IsReorderingEnabled && !IsBusy && _lifetime != null && _repository is OrderedUserScriptRepository && item?.IsInstalled == true
                 ? Scripts.IndexOf(item) : -1;
 
         internal bool CanDragScript(UserScriptItemViewModel item)
@@ -617,7 +702,8 @@ namespace CefFlashBrowser.ViewModels
 
             if (SelectedScript == item)
             {
-                SelectedScript = Scripts.Count == 0 ? null : Scripts[Math.Max(0, Math.Min(index, Scripts.Count - 1))];
+                SelectedScript = IsFiltering || Scripts.Count == 0
+                    ? null : Scripts[Math.Max(0, Math.Min(index, Scripts.Count - 1))];
             }
         }
 
