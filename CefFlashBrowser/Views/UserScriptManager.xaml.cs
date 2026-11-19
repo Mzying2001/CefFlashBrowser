@@ -106,6 +106,12 @@ namespace CefFlashBrowser.Views
             item.Focus();
         }
 
+        private void ScriptContextMenuOpened(object sender, RoutedEventArgs e)
+        {
+            // MenuItem keeps its last CanExecute result when the popup binds the row's CommandParameter.
+            ViewModel.ShowDetailsCommand.RaiseCanExecuteChanged();
+        }
+
         private void ShowSelectedScript()
         {
             var script = (UserScriptItemViewModel)scriptList.SelectedItem;

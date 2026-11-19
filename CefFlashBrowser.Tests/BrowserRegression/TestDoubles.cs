@@ -48,6 +48,9 @@ public static class RegressionKeyboard
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint count, Input[] inputs, int size);
 
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetCursorPos(int x, int y);
+
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
@@ -120,6 +123,19 @@ public static class RegressionKeyboard
         {
             SetKey(virtualKey, true);
         }
+    }
+
+    public static void ClickMouse(int x, int y, bool right)
+    {
+        if (!SetCursorPos(x, y))
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+
+        var down = new Input();
+        down.Data.Mouse.Flags = right ? 0x0008u : 0x0002u;
+        var up = new Input();
+        up.Data.Mouse.Flags = right ? 0x0010u : 0x0004u;
+        if (SendInput(2, new[] { down, up }, Marshal.SizeOf(typeof(Input))) != 2)
+            throw new Win32Exception(Marshal.GetLastWin32Error());
     }
 }
 

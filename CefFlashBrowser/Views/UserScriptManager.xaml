@@ -15,6 +15,32 @@
         Title="{DynamicResource userScriptManager_title}"
         DataContext="{Binding Source={StaticResource Locator}, Path=UserScriptManagerViewModel}">
 
+    <Window.Resources>
+        <ContextMenu x:Key="ScriptContextMenu"
+                     Opened="ScriptContextMenuOpened"
+                     DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+            <MenuItem Header="{DynamicResource common_moveUp}"
+                      Command="{Binding MoveUpCommand}"
+                      Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <MenuItem Header="{DynamicResource common_moveDown}"
+                      Command="{Binding MoveDownCommand}"
+                      Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <MenuItem Header="{DynamicResource common_moveToTop}"
+                      Command="{Binding MoveToFirstCommand}"
+                      Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <MenuItem Header="{DynamicResource common_moveToBottom}"
+                      Command="{Binding MoveToLastCommand}"
+                      Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Separator Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <MenuItem Header="{DynamicResource userScriptManager_delete}"
+                      Command="{Binding DeleteCommand}"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource userScriptManager_showDetails}"
+                      Command="{Binding ShowDetailsCommand}"
+                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+        </ContextMenu>
+    </Window.Resources>
+
     <i:Interaction.Behaviors>
         <behaviors:WindowBehavior x:Name="windowBehavior"/>
     </i:Interaction.Behaviors>
@@ -205,31 +231,8 @@
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="Tag"
                                 Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
-                        <Setter Property="ContextMenu">
-                            <Setter.Value>
-                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                    <MenuItem Header="{DynamicResource common_moveUp}"
-                                              Command="{Binding MoveUpCommand}"
-                                              Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                    <MenuItem Header="{DynamicResource common_moveDown}"
-                                              Command="{Binding MoveDownCommand}"
-                                              Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                    <MenuItem Header="{DynamicResource common_moveToTop}"
-                                              Command="{Binding MoveToFirstCommand}"
-                                              Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                    <MenuItem Header="{DynamicResource common_moveToBottom}"
-                                              Command="{Binding MoveToLastCommand}"
-                                              Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                    <Separator Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                    <MenuItem Header="{DynamicResource userScriptManager_delete}"
-                                              Command="{Binding DeleteCommand}"/>
-                                    <Separator/>
-                                    <MenuItem Header="{DynamicResource userScriptManager_showDetails}"
-                                              Command="{Binding ShowDetailsCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                </ContextMenu>
-                            </Setter.Value>
-                        </Setter>
+                        <Setter Property="ContextMenu"
+                                Value="{StaticResource ScriptContextMenu}"/>
                         <EventSetter Event="PreviewMouseRightButtonDown"
                                      Handler="ScriptPreviewMouseRightButtonDown"/>
                         <Style.Triggers>

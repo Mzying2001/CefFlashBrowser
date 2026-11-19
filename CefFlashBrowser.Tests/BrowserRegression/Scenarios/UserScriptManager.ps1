@@ -677,6 +677,15 @@ function Open-ManagerContextMenu($Context, $Window, $Script) {
     return $menu
 }
 
+function Send-ManagerScriptClick($List, $Script, [switch]$Right) {
+    $List.ScrollIntoView($Script)
+    $List.UpdateLayout()
+    $row = $List.ItemContainerGenerator.ContainerFromItem($Script)
+    $point = $row.PointToScreen([Windows.Point]::new($row.ActualWidth / 4, $row.ActualHeight / 2))
+    [RegressionKeyboard]::ClickMouse([int]$point.X, [int]$point.Y, $Right.IsPresent)
+    return $row
+}
+
 function Invoke-ManagerDetailsDialog($Context, $Window, $MenuItem, [scriptblock]$Check, [string]$Dismiss) {
     Assert-Regression ($MenuItem.IsEnabled) 'view details is enabled for a script'
     $state = @{ Count = 0; Failure = $null }
@@ -804,6 +813,22 @@ function Test-ManagerDetails($Context, $Window, $Item) {
         $model.NewScript()
         $draft = $model.SelectedScript
         $draft.Source = $draft.Source -replace '(?m)^// @name[^\r\n]*', '// @name Draft preview'
+        $Item.Source = $installedSource
+        $model.SelectedScript = $Item
+        Set-TabWindowForeground $Context $Window
+        $list = $Window.FindName('scriptList')
+        [void](Send-ManagerScriptClick $list $draft)
+        Wait-Regression $Context { [object]::ReferenceEquals($model.SelectedScript, $draft) } 'left click selects the draft'
+        $row = Send-ManagerScriptClick $list $Item -Right
+        $menu = $row.ContextMenu
+        Wait-Regression $Context { $menu.IsOpen -and $menu.IsVisible } 'right click opens the installed script menu for the first time'
+        Assert-Regression ($Item.IsInstalled -and !$Item.IsDirty -and
+            [object]::ReferenceEquals($model.SelectedScript, $Item) -and
+            [object]::ReferenceEquals($menu.Items[7].CommandParameter, $Item) -and
+            $menu.Items[7].IsEnabled) 'details is enabled on first open after right-clicking a different installed script'
+        $menu.IsOpen = $false
+        Wait-Regression $Context { !$menu.IsVisible } 'installed script menu closes'
+
         $menu = Open-ManagerContextMenu $Context $Window $draft
         $model.SelectedScript = $Item
         Invoke-ManagerDetailsDialog $Context $Window $menu.Items[7] {
