@@ -939,14 +939,15 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
             $null -eq (Start-ListReorderDrag $behavior $item)) 'a filter matching every script also prevents starting a drag'
         $filter.Text = 'Manager order'
         $menu = Open-ManagerContextMenu $Context $Window $item
-        Assert-Regression (@($menu.Items | Select-Object -First 4 | Where-Object { $_.IsEnabled }).Count -eq 0 -and
-            $menu.Items[5].IsEnabled) 'filtering disables all four sorting commands while leaving delete available'
+        Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Collapsed }).Count -eq 5 -and
+            $menu.Items[5].Visibility -eq [Windows.Visibility]::Visible -and $menu.Items[5].IsEnabled) 'filtering hides the four move items and their separator while leaving delete available'
         $menu.IsOpen = $false
         Assert-Regression ($list.Items.Count -eq 2 -and [object]::ReferenceEquals($list.Items[0], $first) -and
             [object]::ReferenceEquals($list.Items[1], $item) -and $editor.Text -ceq $editedSource -and $editor.CanUndo) 'filtered rows retain their order, selection and source edits'
         $filter.Text = ''
         $menu = Open-ManagerContextMenu $Context $Window $item
-        Assert-Regression ($menu.Items[0].IsEnabled -and $behavior.IsDragEnabled) 'clearing the filter restores menu and drag reordering'
+        Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Visible }).Count -eq 6 -and
+            $menu.Items[0].IsEnabled -and $behavior.IsDragEnabled) 'clearing the filter restores the move items, their separator and drag reordering'
         $menu.IsOpen = $false
         Invoke-BrowserCommand $menu.Items[0].Command
         Wait-Regression $Context { !$model.IsBusy -and $model.Scripts.IndexOf($item) -lt $model.Scripts.IndexOf($first) } 'the menu moves the script after clearing the filter'

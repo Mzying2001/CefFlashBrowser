@@ -204,14 +204,18 @@
                             <Setter.Value>
                                 <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                                     <MenuItem Header="{DynamicResource common_moveUp}"
-                                              Command="{Binding MoveUpCommand}"/>
+                                              Command="{Binding MoveUpCommand}"
+                                              Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     <MenuItem Header="{DynamicResource common_moveDown}"
-                                              Command="{Binding MoveDownCommand}"/>
+                                              Command="{Binding MoveDownCommand}"
+                                              Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     <MenuItem Header="{DynamicResource common_moveToTop}"
-                                              Command="{Binding MoveToFirstCommand}"/>
+                                              Command="{Binding MoveToFirstCommand}"
+                                              Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     <MenuItem Header="{DynamicResource common_moveToBottom}"
-                                              Command="{Binding MoveToLastCommand}"/>
-                                    <Separator/>
+                                              Command="{Binding MoveToLastCommand}"
+                                              Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    <Separator Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     <MenuItem Header="{DynamicResource userScriptManager_delete}"
                                               Command="{Binding DeleteCommand}"/>
                                 </ContextMenu>
