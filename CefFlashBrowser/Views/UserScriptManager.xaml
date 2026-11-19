@@ -343,7 +343,7 @@
                         Padding="10"
                         BorderThickness="1,1,1,0"
                         Visibility="Collapsed"
-                        Background="{DynamicResource RegionBrush}"
+                        Background="{DynamicResource SecondaryRegionBrush}"
                         BorderBrush="{DynamicResource BorderBrush}">
                     <Border.Resources>
                         <Style TargetType="Button"
@@ -447,7 +447,7 @@
                 <Border DockPanel.Dock="Bottom"
                         Padding="10,5"
                         BorderThickness="1,0,1,1"
-                        Background="{DynamicResource RegionBrush}"
+                        Background="{DynamicResource SecondaryRegionBrush}"
                         BorderBrush="{DynamicResource BorderBrush}">
                     <Border.Style>
                         <Style TargetType="Border">
