@@ -1,13 +1,17 @@
+using CefFlashBrowser.Browser.UserScripts;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Database;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Services.UserScripts;
+using CefFlashBrowser.Services.UserScripts.Persistence;
 using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using Newtonsoft.Json;
 using SimpleMvvm.Ioc;
+using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -31,6 +35,7 @@ namespace CefFlashBrowser
         private static FileLogger _logger;
         private static FavoritesService _favoritesService;
         private static FaviconService _faviconService;
+        private static UserScriptService _userScriptService;
 
         private const string InsufficientDirectoryPermissionsMessage =
             "CefFlashBrowser 需要对程序运行目录拥有读取、写入和删除文件的权限，无法继续运行。\r\n\r\n" +
@@ -155,6 +160,8 @@ namespace CefFlashBrowser
 
         private static void InitCefFlash()
         {
+            CefSharpSettings.ConcurrentTaskExecution = true;
+            CefSharpSettings.WcfEnabled = false;
             Environment.SetEnvironmentVariable("ComSpec", GlobalData.CommandProxyPath); // Filter the Flash diagnostic; forward other commands to cmd.
 
             var settings = new CefFlashSettings()
@@ -219,6 +226,8 @@ namespace CefFlashBrowser
                 GlobalData.SaveData();
             }
 
+            StopUserScriptsForExit();
+
             if (Cef.IsInitialized)
             {
                 Cef.Shutdown();
@@ -234,9 +243,28 @@ namespace CefFlashBrowser
             }
         }
 
+        internal static void StopUserScriptsForExit()
+        {
+            // Do not resolve an unused service during failed/forwarding startup.
+            var work = _userScriptService?.StopAsync() ?? Task.CompletedTask;
+
+            if (!work.IsCompleted && Application.Current?.Dispatcher is Dispatcher dispatcher
+                && dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
+            {
+                var frame = new DispatcherFrame();
+
+                work.GetAwaiter().OnCompleted(() => dispatcher.InvokeAsync(() => frame.Continue = false));
+                Dispatcher.PushFrame(frame);
+            }
+
+            work.GetAwaiter().GetResult();
+        }
+
         public static void Restart()
         {
             _restart = true;
+            Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
+            StopUserScriptsForExit();
             Application.Current.Shutdown();
         }
 
@@ -258,6 +286,13 @@ namespace CefFlashBrowser
                 () => _favoritesService = new FavoritesService(
                     GlobalData.FavoritesPath, SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
 
+            SimpleIoc.Global.Register<UserScriptService>(
+                () => _userScriptService = new UserScriptService(
+                    new UserScriptStorage(SimpleIoc.Global.GetInstance<DatabaseService>()),
+                    GlobalData.MonkeySharpPath, GlobalData.UserScriptCachePath,
+                    new UserScriptContentService(GlobalData.Settings.ProxySettings),
+                    new UserScriptPermissionPrompt(), LogShutdownError), Lifetime.Singleton);
+
             SimpleIoc.Global.Register<FaviconService>(
                 () => _faviconService = new FaviconService(
                     SimpleIoc.Global.GetInstance<DatabaseService>(), SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
@@ -271,8 +306,14 @@ namespace CefFlashBrowser
 
         private static async Task StopDatabaseAsync(Task faviconWork)
         {
-            try { await faviconWork.ConfigureAwait(false); }
-            catch (Exception e) { LogShutdownError("Failed to stop the favicon service", e); }
+            try
+            {
+                await faviconWork.ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LogShutdownError("Failed to stop application storage consumers", e);
+            }
 
             try
             {
@@ -285,7 +326,10 @@ namespace CefFlashBrowser
             }
             finally
             {
-                try { _logger?.Dispose(); }
+                try
+                {
+                    _logger?.Dispose();
+                }
                 catch { }
             }
         }
@@ -299,11 +343,13 @@ namespace CefFlashBrowser
         private static void UnregisterServices()
         {
             var faviconWork = _faviconService?.StopAsync() ?? Task.CompletedTask;
-            var stopTask = StopDatabaseAsync(faviconWork);
+            var scriptWork = _userScriptService?.StopAsync() ?? Task.CompletedTask;
+            var stopTask = StopDatabaseAsync(Task.WhenAll(faviconWork, scriptWork));
 
             if (!stopTask.Wait(TimeSpan.FromSeconds(5)))
                 LogHelper.LogWtf("Timed out waiting for favicon writes; the database will close after queued operations finish.");
 
+            SimpleIoc.Global.Unregister<UserScriptService>(false);
             SimpleIoc.Global.Unregister<FaviconService>(false);
             SimpleIoc.Global.Unregister<FavoritesService>(false);
             SimpleIoc.Global.Unregister<DatabaseService>(false);

@@ -1,10 +1,84 @@
 function New-RegressionTab($Context, $Window, [string]$Address = 'about:blank') {
     $model = $Window.ViewModel.AddBrowser($Address, $true)
+    $documentReady = 'location.href === ' + ($Address | ConvertTo-Json -Compress) + ' && document.readyState === "complete"'
     Wait-Regression $Context {
         $null -ne $model.Browser -and $model.Browser.IsBrowserInitialized -and
-        $model.Browser.CanExecuteJavascriptInMainFrame -and $model.Browser.Address -eq $Address
+        $model.HasDocument -and $model.Browser.CanExecuteJavascriptInMainFrame -and
+        $model.Browser.GetBrowser().MainFrame.Url -eq $Address -and
+        (Invoke-JavaScript $Context $model.Browser $documentReady)
     } 'new tab initialization'
     return $model
+}
+
+function Test-BrowserTabHistory($Context) {
+    $fixture = New-Object UserScriptHttpFixture
+    $window = $null
+    try {
+        $window = New-RegressionWindow $Context
+        $tab = New-RegressionTab $Context $window $Context.AuxiliaryAddress
+        $browser = $tab.Browser
+        Wait-Regression $Context { !$browser.IsLoading } 'first page finishes loading'
+        Assert-FirstHistoryEntry $Context $browser $Context.AuxiliaryAddress
+
+        $tab = New-RegressionTab $Context $window
+        $browser = $tab.Browser
+        $firstAddress = $fixture.BaseUrl + '/echo'
+        $tab.Address = $fixture.BaseUrl + '/redirect'
+        Wait-Regression $Context {
+            $tab.Address -eq $firstAddress -and $tab.HasDocument -and !$browser.IsLoading
+        } 'first navigation from a blank tab finishes after a redirect'
+        Assert-FirstHistoryEntry $Context $browser $firstAddress
+
+        $secondAddress = $fixture.BaseUrl + '/page'
+        $tab.Address = $secondAddress
+        Wait-Regression $Context { $browser.Title -eq 'Userscript fixture' -and !$browser.IsLoading } 'second page finishes loading'
+        Assert-Regression ($browser.CanGoBack -and $browser.BackCommand.CanExecute) 'second page enables Back'
+        Invoke-BrowserCommand $browser.BackCommand
+        Wait-Regression $Context {
+            $tab.Address -eq $firstAddress -and $browser.CanGoForward -and !$browser.IsLoading
+        } 'Back returns to the first page'
+        Assert-Regression (!$browser.CanGoBack -and !$browser.BackCommand.CanExecute) 'Back stops at the first page'
+        Invoke-BrowserCommand $browser.ForwardCommand
+        Wait-Regression $Context { $tab.Address -eq $secondAddress -and !$browser.IsLoading } 'Forward returns to the second page'
+
+        $browser.LoadPrepared('about:blank')
+        Wait-Regression $Context { $tab.Address -eq 'about:blank' -and !$browser.IsLoading } 'a later blank navigation updates the address'
+        Invoke-BrowserCommand $browser.BackCommand
+        Wait-Regression $Context { $tab.Address -eq $secondAddress -and !$browser.IsLoading } 'Back returns from a later blank page'
+        Invoke-BrowserCommand $browser.ForwardCommand
+        Wait-Regression $Context { $tab.Address -eq 'about:blank' -and !$browser.IsLoading } 'Forward revisits a later blank page'
+
+        $tab = New-RegressionTab $Context $window
+        $browser = $tab.Browser
+        $errorState = @{ Code = $null }
+        $onLoadError = [EventHandler[CefSharp.LoadErrorEventArgs]]({
+            param($sender, $eventArgs)
+            if ($eventArgs.Frame.IsMain) { $errorState.Code = $eventArgs.ErrorCode }
+        }.GetNewClosure())
+        $browser.add_LoadError($onLoadError)
+        try {
+            $missingAddress = ([Uri](Join-Path $Context.TemporaryPath 'missing.html')).AbsoluteUri
+            $tab.Address = $missingAddress
+            Wait-Regression $Context {
+                $errorState.Code -eq [CefSharp.CefErrorCode]::FileNotFound -and !$browser.IsLoading
+            } 'failed first navigation reports its load error'
+            Assert-FirstHistoryEntry $Context $browser $missingAddress
+        } finally {
+            $browser.remove_LoadError($onLoadError)
+        }
+    } finally {
+        if ($null -ne $window) { $window.ForceCloseWindow() }
+        $fixture.Dispose()
+    }
+}
+
+function Assert-FirstHistoryEntry($Context, $Browser, [string]$Address) {
+    $read = [CefSharp.AsyncExtensions]::GetNavigationEntriesAsync($Browser.GetBrowser().GetHost(), $false)
+    Wait-Regression $Context { $read.IsCompleted } 'read native navigation history'
+    $history = $read.GetAwaiter().GetResult()
+    Assert-Regression (!$Browser.GetBrowser().CanGoBack -and !$Browser.CanGoBack -and !$Browser.BackCommand.CanExecute -and
+        $history.Count -eq 1 -and $history[0].Url -eq $Address) `
+        "first page is the only history entry (entries: $($history.Url -join ', '))"
 }
 
 function Test-BrowserTabsBeforeShow($Context) {
@@ -392,7 +466,10 @@ function Open-TabContextMenu($Context, $Window, $Browser) {
     $menu.PlacementTarget = $container
     $menu.IsOpen = $true
     Wait-Regression $Context {
-        $menu.Items[0].CommandParameter -eq $Browser -and $null -ne $menu.Items[1].Command
+        $expectedGesture = if ($Browser.Browser.IsLoading) { 'Esc' } else { 'Ctrl+R' }
+        $menu.Items[0].CommandParameter -eq $Browser -and
+        $menu.Items[0].Command -eq $Window.ViewModel.ToggleLoadingStateCommand -and
+        $menu.Items[0].InputGestureText -eq $expectedGesture -and $null -ne $menu.Items[1].Command
     } 'tab menu binds to its placement target'
     return $menu
 }
@@ -600,6 +677,7 @@ function Test-BrowserTabLoadingMenu($Context) {
             }
             Invoke-TabMenuItem $menu 0
             Wait-Regression $Context { !$target.Browser.IsLoading } 'tab menu stops the pending request'
+            Assert-Regression ($fixture.SlowRequests -eq $requests + 1) 'stopping a CDP navigation does not retry the request'
             $menu = Open-TabContextMenu $Context $window $target
             Assert-Regression ($menu.Items[0].Header -eq $Context.LanguageService.GetString('browser_reload') -and
                 $menu.Items[0].Icon -eq $reloadIcon -and $menu.Items[0].InputGestureText -eq 'Ctrl+R' -and

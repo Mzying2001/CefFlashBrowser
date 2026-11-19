@@ -1,15 +1,19 @@
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.Views;
 using CefFlashBrowser.Views.Dialogs;
+using Mzying2001.MonkeySharp.Core.Domain;
 using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -169,7 +173,12 @@ namespace CefFlashBrowser.Services
 
         public static void ShowBrowser(string address)
         {
-            ShowWindow<BrowserWindow>(initializer: window =>
+            OpenBrowser(address);
+        }
+
+        internal static BrowserWindow OpenBrowser(string address, bool activate = true)
+        {
+            var browserWindow = CreateWindow<BrowserWindow>(initializer: window =>
             {
                 _browserWindows.Add(window);
                 ((BrowserWindowViewModel)window.DataContext).CurrentBrowser.Address = address;
@@ -184,6 +193,10 @@ namespace CefFlashBrowser.Services
                     { ShowMainWindow(); }
                 });
             });
+
+            browserWindow.ShowActivated = activate;
+            browserWindow.Show();
+            return browserWindow;
         }
 
         public static void ShowSwfPlayer(string fileName)
@@ -205,6 +218,49 @@ namespace CefFlashBrowser.Services
             ShowWindow<FavoritesManager>(singleton: true);
         }
 
+        public static void ShowUserScriptManager()
+        {
+            ShowWindow<UserScriptManager>(singleton: true);
+        }
+
+        internal static void ShowUserScriptDetails(UserScriptItemViewModel script, UserScriptManager owner)
+        {
+            var dialog = CreateWindow<UserScriptDetailsDialog>();
+            dialog.SetScript(script);
+            DialogHelper.ShowModal(dialog, owner);
+        }
+
+        internal static void ShowUserScriptPermissions(BrowserWindow owner, string address)
+        {
+            var window = CreateWindow<UserScriptPermissionsWindow>();
+            window.Owner = owner;
+            window.SetPage(SimpleIoc.Global.GetInstance<UserScriptService>(), address);
+            window.Show();
+        }
+
+        internal static bool ConfirmUserScriptInstallation(UserScriptMetadata metadata, string origin,
+            Window owner, bool update = false, CancellationToken token = default)
+        {
+            var dialog = CreateWindow<UserScriptInstallDialog>();
+            dialog.SetScript(metadata, origin, update);
+            return ShowModal(dialog, owner, token);
+        }
+
+        internal static UserScriptPermissionDialog CreateUserScriptPermissionDialog(string description)
+        {
+            var dialog = CreateWindow<UserScriptPermissionDialog>();
+            dialog.SetDescription(description);
+            return dialog;
+        }
+
+        internal static UserScriptNotificationWindow CreateUserScriptNotificationWindow(string title, string text, Window owner)
+        {
+            var window = CreateWindow<UserScriptNotificationWindow>();
+            window.SetMessage(title, text);
+            window.Owner = owner;
+            return window;
+        }
+
         public static void ShowSettingsWindow()
         {
             ShowWindow<SettingsWindow>(singleton: true);
@@ -224,22 +280,48 @@ namespace CefFlashBrowser.Services
 
         public static void Alert(string message = "", string title = "", Action<bool> callback = null)
         {
-            var dialog = ShowWindow<JsAlertDialog>(modal: true, initializer: window =>
+            bool accepted = ShowAlertDialog(message, title);
+            callback?.Invoke(accepted);
+        }
+
+        internal static bool ShowAlertDialog(string message, string title, Window owner = null, CancellationToken token = default)
+        {
+            var dialog = CreateWindow<JsAlertDialog>(initializer: window =>
             {
                 window.Title = title;
                 window.Message = message;
             });
-            callback?.Invoke(DialogHelper.GetDialogResult(dialog) == true);
+            return ShowModal(dialog, owner, token);
+        }
+
+        private static bool ShowModal(Window dialog, Window owner, CancellationToken token)
+        {
+            using (token.Register(() => dialog.Dispatcher.InvokeAsync(() =>
+            {
+                if (dialog.IsVisible)
+                    dialog.Close();
+            })))
+            {
+                token.ThrowIfCancellationRequested();
+                return DialogHelper.ShowModal(dialog, owner) == true;
+            }
         }
 
         public static void Confirm(string message = "", string title = "", Action<bool?> callback = null)
         {
-            var dialog = ShowWindow<JsConfirmDialog>(modal: true, initializer: window =>
+            var dialog = ShowConfirmDialog(message, title);
+            callback?.Invoke(DialogHelper.GetDialogResult(dialog));
+        }
+
+        internal static JsConfirmDialog ShowConfirmDialog(string message, string title,
+            Action<JsConfirmDialog> onSourceInitialized = null)
+        {
+            return ShowWindow<JsConfirmDialog>(modal: true, initializer: window =>
             {
                 window.Title = title;
                 window.Message = message;
+                onSourceInitialized?.Invoke(window);
             });
-            callback?.Invoke(DialogHelper.GetDialogResult(dialog));
         }
 
         public static void Prompt(string message = "", string title = "", string defaultInputText = "", Action<bool?, string> callback = null)
@@ -262,6 +344,19 @@ namespace CefFlashBrowser.Services
             }
             catch { }
             MessageBox.Show(errMsg, title, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        internal static void OpenInDefaultBrowser(string url)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose();
+            }
+            catch (Exception e)
+            {
+                LogHelper.LogError($"Failed to open URL in default browser: {url}", e);
+                ShowError(e.Message);
+            }
         }
 
         public static void ShowSolSaveManager()

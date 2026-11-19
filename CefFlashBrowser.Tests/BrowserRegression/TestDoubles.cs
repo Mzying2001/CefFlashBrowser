@@ -48,6 +48,9 @@ public static class RegressionKeyboard
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint count, Input[] inputs, int size);
 
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetCursorPos(int x, int y);
+
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
@@ -121,6 +124,19 @@ public static class RegressionKeyboard
             SetKey(virtualKey, true);
         }
     }
+
+    public static void ClickMouse(int x, int y, bool right)
+    {
+        if (!SetCursorPos(x, y))
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+
+        var down = new Input();
+        down.Data.Mouse.Flags = right ? 0x0008u : 0x0002u;
+        var up = new Input();
+        up.Data.Mouse.Flags = right ? 0x0010u : 0x0004u;
+        if (SendInput(2, new[] { down, up }, Marshal.SizeOf(typeof(Input))) != 2)
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+    }
 }
 
 public sealed class RegressionContextMenuParamsProxy : RealProxy
@@ -154,8 +170,26 @@ public sealed class RegressionMenuModelProxy : RealProxy
     public readonly List<CefMenuCommand> Commands = new List<CefMenuCommand> { CefMenuCommand.Copy };
     public readonly List<string> Labels = new List<string> { "Copy" };
     public readonly HashSet<CefMenuCommand> Checked = new HashSet<CefMenuCommand>();
+    public readonly Dictionary<CefMenuCommand, RegressionMenuModelProxy> SubMenus = new Dictionary<CefMenuCommand, RegressionMenuModelProxy>();
+    public int LimitReports;
 
     public RegressionMenuModelProxy() : base(typeof(IMenuModel)) { }
+
+    public IEnumerable<CefMenuCommand> AllCommands
+    {
+        get
+        {
+            foreach (var command in Commands)
+            {
+                yield return command;
+
+                RegressionMenuModelProxy submenu;
+                if (SubMenus.TryGetValue(command, out submenu))
+                    foreach (var child in submenu.AllCommands)
+                        yield return child;
+            }
+        }
+    }
 
     public override IMessage Invoke(IMessage message)
     {
@@ -163,6 +197,37 @@ public sealed class RegressionMenuModelProxy : RealProxy
         object result = true;
         switch (call.MethodName)
         {
+            case "get_Count": result = Commands.Count; break;
+            case "GetCommandIdAt": result = Commands[(int)call.Args[0]]; break;
+            case "GetLabelAt": result = Labels[(int)call.Args[0]]; break;
+            case "IsEnabledAt": result = true; break;
+            case "IsCheckedAt": result = Checked.Contains(Commands[(int)call.Args[0]]); break;
+            case "GetSubMenuAt":
+                RegressionMenuModelProxy child;
+                result = SubMenus.TryGetValue(Commands[(int)call.Args[0]], out child) ? child.GetTransparentProxy() : null;
+                break;
+            case "AddSubMenu":
+                var submenu = new RegressionMenuModelProxy();
+                submenu.Commands.Clear();
+                submenu.Labels.Clear();
+                Commands.Add((CefMenuCommand)call.Args[0]);
+                Labels.Add((string)call.Args[1]);
+                SubMenus.Add((CefMenuCommand)call.Args[0], submenu);
+                result = submenu.GetTransparentProxy();
+                break;
+            case "AddItem":
+                Commands.Add((CefMenuCommand)call.Args[0]);
+                Labels.Add((string)call.Args[1]);
+                break;
+            case "AddSeparator":
+                Commands.Add(CefMenuCommand.NotFound);
+                Labels.Add(null);
+                break;
+            case "RemoveAt":
+                SubMenus.Remove(Commands[(int)call.Args[0]]);
+                Commands.RemoveAt((int)call.Args[0]);
+                Labels.RemoveAt((int)call.Args[0]);
+                break;
             case "InsertItemAt":
             case "InsertCheckItemAt":
                 Commands.Insert((int)call.Args[0], (CefMenuCommand)call.Args[1]);
@@ -185,6 +250,8 @@ public sealed class RegressionMenuModelProxy : RealProxy
             case "Clear":
                 Commands.Clear();
                 Labels.Clear();
+                SubMenus.Clear();
+                Checked.Clear();
                 break;
             case "GetType": result = typeof(IMenuModel); break;
             case "ToString": result = "Regression menu model"; break;

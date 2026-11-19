@@ -10,7 +10,11 @@ namespace CefFlashBrowser.FlashBrowser
     {
         public ICollection<string> BlockedSwfs { get; }
 
-        public ChromiumFlashBrowser()
+        public ChromiumFlashBrowser() : this(false)
+        {
+        }
+
+        public ChromiumFlashBrowser(bool deferNativeCreation) : base(deferNativeCreation)
         {
             BlockedSwfs = new ObservableCollection<string>();
         }

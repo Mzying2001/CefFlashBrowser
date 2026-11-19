@@ -4,6 +4,7 @@ using CefSharp;
 using SimpleMvvm.Command;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -62,7 +63,11 @@ namespace CefFlashBrowser.FlashBrowser
         }
 
 
-        public ChromiumWebBrowserEx()
+        public ChromiumWebBrowserEx() : this(false)
+        {
+        }
+
+        public ChromiumWebBrowserEx(bool deferNativeCreation) : base(deferNativeCreation)
         {
             // Apply decorator handlers
             FocusHandler = null;
@@ -145,23 +150,50 @@ namespace CefFlashBrowser.FlashBrowser
             GetBrowser().CloseDevTools();
         }
 
-        public void SetAudioMuted(bool mute)
+        public Task<bool> GetAudioMutedAsync()
         {
-            if (IsDisposed || !IsBrowserInitialized)
-                return;
-
-            Cef.UIThreadTaskFactory.StartNew(() =>
+            return Cef.UIThreadTaskFactory.StartNew(() =>
             {
+                if (IsDisposed || !IsBrowserInitialized)
+                    return false;
+
                 try
                 {
-                    if (IsDisposed)
-                        return;
+                    var native = GetBrowser();
 
+                    if (native == null || native.IsDisposed)
+                        return false;
+
+                    var host = native.GetHost();
+
+                    if (host == null || host.IsDisposed)
+                        return false;
+
+                    return host.IsAudioMuted;
+                }
+                catch (ObjectDisposedException)
+                {
+                    return false;
+                }
+            });
+        }
+
+        public Task SetAudioMutedAsync(bool mute)
+        {
+            return Cef.UIThreadTaskFactory.StartNew(() =>
+            {
+                if (IsDisposed || !IsBrowserInitialized)
+                    return;
+
+                try
+                {
                     var browser = GetBrowser();
+
                     if (browser == null || browser.IsDisposed)
                         return;
 
                     var host = browser.GetHost();
+
                     if (host != null && !host.IsDisposed)
                         host.SetAudioMuted(mute);
                 }

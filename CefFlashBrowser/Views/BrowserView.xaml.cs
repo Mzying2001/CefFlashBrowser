@@ -1,8 +1,11 @@
-﻿using CefFlashBrowser.Data;
+﻿using CefFlashBrowser.Browser.UserScripts;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.FlashBrowser.Handlers;
+using CefFlashBrowser.Log;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefSharp;
@@ -13,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -23,6 +27,33 @@ namespace CefFlashBrowser.Views
     /// </summary>
     public partial class BrowserView : UserControl, IDisposable
     {
+        private sealed class BrowserRequestHandler : CefSharp.Handler.RequestHandler
+        {
+            private readonly BrowserView _view;
+
+            public BrowserRequestHandler(BrowserView view)
+            {
+                _view = view;
+            }
+
+            protected override bool OnBeforeBrowse(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame,
+                IRequest request, bool userGesture, bool isRedirect)
+            {
+                return !isRedirect && frame.IsMain && request.Method == "GET"
+                    && _view.TryQueueUserScriptInstall(request.Url, frame.Url ?? "about:blank");
+            }
+
+            protected override bool OnOpenUrlFromTab(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame,
+                string targetUrl, WindowOpenDisposition targetDisposition, bool userGesture)
+            {
+                return userGesture
+                    && (targetDisposition == WindowOpenDisposition.NewBackgroundTab
+                        || targetDisposition == WindowOpenDisposition.NewForegroundTab
+                        || targetDisposition == WindowOpenDisposition.NewWindow)
+                    && _view.TryQueueUserScriptInstall(targetUrl);
+            }
+        }
+
         private class BrowserLifeSpanHandler : LifeSpanHandler
         {
             private readonly BrowserView view;
@@ -123,6 +154,8 @@ namespace CefFlashBrowser.Views
 
 
 
+        private readonly ChromiumFlashBrowser browser;
+        private UserScriptBrowserSession _userScriptSession;
         private volatile bool _isClosed;
         private Window _ownerWindow;
         private readonly CancellationTokenSource _closeCancellation = new CancellationTokenSource();
@@ -214,8 +247,29 @@ namespace CefFlashBrowser.Views
             _closeToken = _closeCancellation.Token;
             InitializeComponent();
 
+            browser = new ChromiumFlashBrowser(true) { ZoomLevelIncrement = 0.25 };
+            RegisterName("browser", browser);
+
+            browser.SetBinding(ChromiumFlashBrowser.AddressProperty,
+                new Binding(nameof(BrowserViewModel.Address)) { Mode = BindingMode.TwoWay });
+            browser.SetBinding(ChromiumFlashBrowser.ZoomLevelProperty,
+                new Binding(nameof(BrowserViewModel.ZoomLevel)) { Mode = BindingMode.TwoWay });
+
+            browser.TitleChanged += BrowserTitleChanged;
+            browser.FullscreenModeChanged += BrowserFullscreenModeChanged;
+            browser.FrameLoadStart += BrowserFrameLoadStart;
+            browser.FrameLoadEnd += BrowserFrameLoadEnd;
+
+            browser.BeforeDisposeAsync = () =>
+            {
+                return !_isClosed
+                  ? RequestCloseAsync(true)
+                  : (_userScriptSession?.StopAsync() ?? Task.CompletedTask);
+            };
+
             browser.JsDialogHandler = new Browser.Handlers.JsDialogHandler();
             browser.DownloadHandler = new Browser.Handlers.DownloadHandler();
+            browser.RequestHandler = new BrowserRequestHandler(this);
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
             browser.FaviconDiscovered += BrowserFaviconDiscovered;
@@ -223,6 +277,8 @@ namespace CefFlashBrowser.Views
             Messenger.Global.Register(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Register(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
             Messenger.Global.Register(MessageTokens.BROWSER_CLOSE_CANCELED, BrowserCloseCanceledHandler);
+
+            AttachBrowser();
         }
 
         private void UnregisterMessageHandlers()
@@ -230,6 +286,18 @@ namespace CefFlashBrowser.Views
             Messenger.Global.Unregister(MessageTokens.DEVTOOLS_OPENED, DevToolsOpenedHandler);
             Messenger.Global.Unregister(MessageTokens.DEVTOOLS_CLOSED, DevToolsClosedHandler);
             Messenger.Global.Unregister(MessageTokens.BROWSER_CLOSE_CANCELED, BrowserCloseCanceledHandler);
+        }
+
+        private void BrowserFrameLoadStart(object sender, FrameLoadStartEventArgs e)
+        {
+            if (!_isClosed && e.Frame.IsMain && ViewModel != null)
+                ViewModel.HasDocument = false;
+        }
+
+        private void BrowserFrameLoadEnd(object sender, FrameLoadEndEventArgs e)
+        {
+            if (!_isClosed && e.Frame.IsMain && ViewModel != null)
+                ViewModel.HasDocument = true;
         }
 
         private void BrowserFaviconDiscovered(object sender, FaviconDiscoveredEventArgs e)
@@ -254,25 +322,79 @@ namespace CefFlashBrowser.Views
             }
         }
 
+        private bool TryQueueUserScriptInstall(string address, string documentAddress = null)
+        {
+            if (_isClosed || !GlobalData.Settings.EnableUserScripts
+                || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished
+                || !UserScriptWebInstaller.TryGetOrigin(address, out var origin))
+                return false;
+
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (GetInstallOwner() == null)
+                    return;
+
+                if (documentAddress != null && UserScriptWebInstaller.TryGetOrigin(browser.Address, out var pendingOrigin)
+                    && pendingOrigin == origin)
+                {
+                    browser.RestoreAddressAfterCanceledNavigation(documentAddress);
+                }
+
+                _ = UserScriptWebInstaller.InstallAsync(origin, GetInstallOwner, _closeToken);
+            }, DispatcherPriority.Normal, _closeToken);
+            return true;
+        }
+
+        private Window GetInstallOwner()
+        {
+            if (_isClosed || ViewModel?.IsClosing == true || browser.IsDisposed)
+                return null;
+
+            return _ownerWindow ?? Window.GetWindow(this);
+        }
+
         private void BrowserDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             AttachBrowser();
         }
 
-        private void BrowserViewLoaded(object sender, RoutedEventArgs e)
+        private async void BrowserViewLoaded(object sender, RoutedEventArgs e)
         {
             AttachBrowser();
+
+            if (_userScriptSession != null)
+                await _userScriptSession.StartAsync();
+        }
+
+        private async void RetryUserScripts(object sender, RoutedEventArgs e)
+        {
+            if (!_isClosed && _userScriptSession != null)
+            {
+                try
+                {
+                    await _userScriptSession.RetryAsync();
+                }
+                catch (OperationCanceledException) { }
+            }
         }
 
         private void AttachBrowser()
         {
-            if (_isClosed)
+            if (_isClosed || browser == null)
                 return;
 
             if (ViewModel != null)
             {
                 ViewModel.Browser = browser;
                 ViewModel.Title = browser.Title;
+                browser.DataContext = ViewModel;
+
+                if (_userScriptSession == null)
+                {
+                    _userScriptSession = new UserScriptBrowserSession(browser, ViewModel,
+                        SimpleIoc.Global.GetInstance<UserScriptService>(), SimpleIoc.Global.GetInstance<ILogger>(),
+                        MountBrowser, () => _ownerWindow ?? Window.GetWindow(this), () => RequestCloseAsync(false));
+                }
             }
 
             var ownerWindow = Window.GetWindow(this);
@@ -286,6 +408,12 @@ namespace CefFlashBrowser.Views
                 if (_ownerWindow != null)
                     _ownerWindow.Closed += OwnerWindowClosed;
             }
+        }
+
+        private void MountBrowser()
+        {
+            if (!_isClosed && !browser.IsDisposed && browserContainer.Content != browser)
+                browserContainer.Content = browser;
         }
 
         private void SaveDevToolsWidth()
@@ -332,6 +460,16 @@ namespace CefFlashBrowser.Views
             if (browser.IsDisposed)
             {
                 Dispose();
+                return;
+            }
+
+            if (!browser.IsNativeControlCreated)
+            {
+                if (Cef.IsInitialized)
+                    await CompleteCloseAsync();
+                else
+                    Dispose();
+
                 return;
             }
 
@@ -397,8 +535,15 @@ namespace CefFlashBrowser.Views
             if (!_closeAccepted)
             {
                 _closeAccepted = true;
-                InvokeAfterCefCallback(() =>
+
+                if (ViewModel != null)
+                    ViewModel.IsClosing = true;
+
+                InvokeAfterCefCallback(async () =>
                 {
+                    if (_userScriptSession != null)
+                        await _userScriptSession.StopAsync();
+
                     if (_devToolsOpen && !browser.IsDisposed)
                         browser.CloseDevTools();
                     else
@@ -411,6 +556,12 @@ namespace CefFlashBrowser.Views
 
         private void DestroyClosedBrowser()
         {
+            if (!browser.IsNativeControlCreated)
+            {
+                Dispatcher.InvokeAsync(Dispose);
+                return;
+            }
+
             Cef.UIThreadTaskFactory.StartNew(() =>
             {
                 if (!browser.IsDisposed)
@@ -466,6 +617,20 @@ namespace CefFlashBrowser.Views
 
             _isClosed = true;
 
+            // Normal accepted closes already awaited this task. Preserve the same
+            // cleanup for direct disposal, without blocking CEF's UI work.
+            var scripts = _userScriptSession?.StopAsync();
+
+            if (scripts != null && !scripts.IsCompleted)
+            {
+                var frame = new DispatcherFrame();
+
+                scripts.GetAwaiter().OnCompleted(() => Dispatcher.InvokeAsync(() => frame.Continue = false));
+                Dispatcher.PushFrame(frame);
+            }
+
+            scripts?.GetAwaiter().GetResult();
+
             _closeCancellation.Cancel();
             _closeCancellation.Dispose();
 
@@ -475,6 +640,10 @@ namespace CefFlashBrowser.Views
 
             DataContextChanged -= BrowserDataContextChanged;
             browser.FaviconDiscovered -= BrowserFaviconDiscovered;
+            browser.TitleChanged -= BrowserTitleChanged;
+            browser.FullscreenModeChanged -= BrowserFullscreenModeChanged;
+            browser.FrameLoadStart -= BrowserFrameLoadStart;
+            browser.FrameLoadEnd -= BrowserFrameLoadEnd;
             Loaded -= BrowserViewLoaded;
 
             if (_ownerWindow != null)
@@ -693,6 +862,9 @@ namespace CefFlashBrowser.Views
         {
             if (_isClosed
                 || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                return;
+
+            if (TryQueueUserScriptInstall(targetUrl))
                 return;
 
             var isPopup = targetDisposition == WindowOpenDisposition.NewPopup;

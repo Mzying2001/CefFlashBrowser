@@ -24,6 +24,7 @@
     <sys:String x:Key="mainWindow_go">跳转</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理收藏夹</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存档</sys:String>
+    <sys:String x:Key="mainWindow_manageUserScripts">管理用户脚本</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">打开SOL文件...</sys:String>
     <sys:String x:Key="mainWindow_languages">语言</sys:String>
     <sys:String x:Key="mainWindow_options">选项</sys:String>
@@ -36,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">其他</sys:String>
     <sys:String x:Key="settings_headerBrowser">浏览器</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">网站行为</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">用户脚本</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">启用用户脚本</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">允许用户脚本在页面环境中使用特权 API</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">更改会在新打开的标签页中生效。</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">默认权限行为</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">仅在没有已保存的权限决定时使用。</sys:String>
     <sys:String x:Key="settings_headerAdvanced">高级</sys:String>
     <sys:String x:Key="settings_headerAboutCef">关于 CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">在地址栏中使用搜索引擎</sys:String>
@@ -78,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">原窗口</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新窗口</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">新标签页</sys:String>
+
+    <!--用户脚本默认权限行为-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">弹窗提示</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">直接允许</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">直接拒绝</sys:String>
 
     <!--搜索引擎-->
     <sys:String x:Key="searchEngine_baidu">百度</sys:String>
@@ -191,6 +203,102 @@
     <sys:String x:Key="dialog_addItem">添加项</sys:String>
     <sys:String x:Key="dialog_itemName">名称</sys:String>
     <sys:String x:Key="dialog_assocArray">关联数组</sys:String>
+
+    <!--用户脚本-->
+    <sys:String x:Key="userscript_permissionTitle">用户脚本权限</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">脚本：{0}&#xA;能力：{1}&#xA;目标：{2}&#xA;&#xA;是否允许此脚本使用该能力？</sys:String>
+    <sys:String x:Key="userscript_denyRemember">拒绝并记住</sys:String>
+    <sys:String x:Key="userscript_allowOnce">允许一次</sys:String>
+    <sys:String x:Key="userscript_allowRemember">允许并记住</sys:String>
+    <sys:String x:Key="userscript_managePermissions">管理脚本权限</sys:String>
+    <sys:String x:Key="userscript_permissionPage">页面地址</sys:String>
+    <sys:String x:Key="userscript_permissionScope">这里显示与此页面匹配的脚本已保存的决定。修改也会影响这些脚本在其他页面上对同一 API 和目标的后续调用。</sys:String>
+    <sys:String x:Key="userscript_permissionScript">脚本</sys:String>
+    <sys:String x:Key="userscript_permissionDisabled">已停用</sys:String>
+    <sys:String x:Key="userscript_permissionTarget">目标</sys:String>
+    <sys:String x:Key="userscript_permissionDecision">决定</sys:String>
+    <sys:String x:Key="userscript_permissionAllow">允许</sys:String>
+    <sys:String x:Key="userscript_permissionDeny">拒绝</sys:String>
+    <sys:String x:Key="userscript_permissionClear">清除决定</sys:String>
+    <sys:String x:Key="userscript_permissionLoading">正在加载脚本权限…</sys:String>
+    <sys:String x:Key="userscript_permissionEmpty">此页面匹配的脚本没有已保存的权限决定。</sys:String>
+    <sys:String x:Key="userscript_permissionChanged">这条决定已在别处更改或清除。列表已刷新。</sys:String>
+    <sys:String x:Key="userscript_permissionError">无法读取或更新脚本权限。请刷新后重试。</sys:String>
+    <sys:String x:Key="userscript_unavailable">本次页面未启用用户脚本</sys:String>
+    <sys:String x:Key="userscript_retry">重试并重新导航</sys:String>
+    <sys:String x:Key="userscript_commands">脚本命令</sys:String>
+    <sys:String x:Key="userscript_notification">用户脚本通知</sys:String>
+    <sys:String x:Key="userscript_notificationClose">关闭</sys:String>
+    <sys:String x:Key="userscript_notificationClick">点击通知</sys:String>
+    <sys:String x:Key="userscript_downloads">脚本下载</sys:String>
+    <sys:String x:Key="userscript_saveDownload">保存脚本下载</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">等待中</sys:String>
+    <sys:String x:Key="userscript_downloading">下载中</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">已完成</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">已取消</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">已超时</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">失败</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">取消</sys:String>
+
+    <!--Userscript Manager-->
+    <sys:String x:Key="userScriptManager_title">用户脚本管理器</sys:String>
+    <sys:String x:Key="userScriptManager_new">新建脚本</sys:String>
+    <sys:String x:Key="userScriptManager_newScript">新脚本</sys:String>
+    <sys:String x:Key="userScriptManager_undo">撤销</sys:String>
+    <sys:String x:Key="userScriptManager_redo">重做</sys:String>
+    <sys:String x:Key="userScriptManager_cut">剪切</sys:String>
+    <sys:String x:Key="userScriptManager_copy">复制</sys:String>
+    <sys:String x:Key="userScriptManager_paste">粘贴</sys:String>
+    <sys:String x:Key="userScriptManager_selectAll">全选</sys:String>
+    <sys:String x:Key="userScriptManager_replace">替换</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">上一个匹配项</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">下一个匹配项</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">区分大小写</sys:String>
+    <sys:String x:Key="userScriptManager_matches">匹配项</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">无匹配项</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">替换当前</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">全部替换</sys:String>
+    <sys:String x:Key="userScriptManager_script">脚本</sys:String>
+    <sys:String x:Key="userScriptManager_help">帮助</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">关于 MonkeySharp</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">用户脚本使用指南</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">查看详情</sys:String>
+    <sys:String x:Key="userScriptDetails_title">脚本详情</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">未知元数据</sys:String>
+    <sys:String x:Key="userScriptManager_reload">从磁盘重新载入</sys:String>
+    <sys:String x:Key="userScriptManager_delete">删除</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">是否删除脚本“{0}”？</sys:String>
+    <sys:String x:Key="userScriptManager_saved">已保存。刷新网页后生效。</sys:String>
+    <sys:String x:Key="userScriptManager_refreshPage">操作已完成。刷新网页以查看效果。</sys:String>
+    <sys:String x:Key="userScriptManager_deleted">已删除。</sys:String>
+    <sys:String x:Key="userScriptManager_working">正在处理…</sys:String>
+    <sys:String x:Key="userScriptManager_cancelled">操作已取消，草稿已保留。</sys:String>
+    <sys:String x:Key="userScriptManager_conflict">脚本或磁盘源码已变化，草稿已保留。请先重新载入，再比对草稿。</sys:String>
+    <sys:String x:Key="userScriptManager_installFile">从文件安装…</sys:String>
+    <sys:String x:Key="userScriptManager_installUrl">从 URL 安装…</sys:String>
+    <sys:String x:Key="userScriptManager_install">安装当前草稿</sys:String>
+    <sys:String x:Key="userScriptManager_export">导出源码…</sys:String>
+    <sys:String x:Key="userScriptManager_confirmInstall">是否安装以下脚本？</sys:String>
+    <sys:String x:Key="userScriptInstall_install">安装</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">是否更新以下用户脚本？</sys:String>
+    <sys:String x:Key="userScriptInstall_update">更新</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">无法下载用户脚本。</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">无法保存用户脚本。</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">此来源对应多个安装记录，或已安装的脚本发生了变化。请在用户脚本管理器中检查后重试。</sys:String>
+    <sys:String x:Key="userScriptInstall_author">作者</sys:String>
+    <sys:String x:Key="userScriptInstall_source">来源</sys:String>
+    <sys:String x:Key="userScriptManager_reviewInstall">源码已载入，尚未安装。检查后选择“安装当前草稿”或保存。</sys:String>
+    <sys:String x:Key="userScriptManager_invalidMetadata">用户脚本元数据无效，请检查头部声明后重试。</sys:String>
+    <sys:String x:Key="userScriptManager_invalidUrl">请输入有效的 HTTP 或 HTTPS 地址。</sys:String>
+    <sys:String x:Key="userScriptManager_exported">源码已导出。</sys:String>
+    <sys:String x:Key="userScriptManager_match">匹配范围</sys:String>
+    <sys:String x:Key="userScriptManager_world">执行环境</sys:String>
+    <sys:String x:Key="userScriptManager_grants">声明权限</sys:String>
+    <sys:String x:Key="userScriptManager_cancel">取消</sys:String>
+    <sys:String x:Key="userScriptManager_load">载入</sys:String>
+    <sys:String x:Key="userScriptManager_toggle">启用或停用脚本</sys:String>
+    <sys:String x:Key="userScriptManager_draft">未安装草稿</sys:String>
+    <sys:String x:Key="userScriptManager_unavailable">不可用</sys:String>
 
     <!--提示信息-->
     <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>

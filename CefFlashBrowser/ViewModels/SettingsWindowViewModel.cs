@@ -329,6 +329,52 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool EnableUserScripts
+        {
+            get => GlobalData.Settings.EnableUserScripts;
+            set
+            {
+                if (GlobalData.Settings.EnableUserScripts != value)
+                {
+                    GlobalData.Settings.EnableUserScripts = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public bool TrustedUserScriptPageWorld
+        {
+            get => GlobalData.Settings.TrustedUserScriptPageWorld;
+            set
+            {
+                if (GlobalData.Settings.TrustedUserScriptPageWorld != value)
+                {
+                    GlobalData.Settings.TrustedUserScriptPageWorld = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public List<ItemViewModel<UserScriptPermissionBehavior>> UserScriptPermissionBehaviors { get; } = new List<ItemViewModel<UserScriptPermissionBehavior>>
+        {
+            new ItemViewModel<UserScriptPermissionBehavior>(UserScriptPermissionBehavior.Prompt, "userScriptPermissionBehavior_prompt"),
+            new ItemViewModel<UserScriptPermissionBehavior>(UserScriptPermissionBehavior.Allow, "userScriptPermissionBehavior_allow"),
+            new ItemViewModel<UserScriptPermissionBehavior>(UserScriptPermissionBehavior.Deny, "userScriptPermissionBehavior_deny")
+        };
+
+        public UserScriptPermissionBehavior DefaultUserScriptPermissionBehavior
+        {
+            get => GlobalData.Settings.DefaultUserScriptPermissionBehavior;
+            set
+            {
+                if (GlobalData.Settings.DefaultUserScriptPermissionBehavior != value)
+                {
+                    GlobalData.Settings.DefaultUserScriptPermissionBehavior = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         private void DeleteCache()
         {
             WindowManager.Confirm(LanguageService.GetString("message_deleteCache"), callback: result =>
@@ -342,6 +388,7 @@ namespace CefFlashBrowser.ViewModels
                     {
                         Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
                         Messenger.Global.Send(MessageTokens.CLOSE_MAINWINDOW, null);
+                        Program.StopUserScriptsForExit();
                         CefSharp.Cef.Shutdown();
                         DirectoryHelper.MoveDirectoryToPendingDelete(GlobalData.CachesPath, recreateEmpty: true);
                         break;

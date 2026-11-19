@@ -24,6 +24,7 @@
     <sys:String x:Key="mainWindow_go">移動</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">お気に入りを管理</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">SOL セーブファイルを管理</sys:String>
+    <sys:String x:Key="mainWindow_manageUserScripts">ユーザースクリプトを管理</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">SOL ファイルを開く...</sys:String>
     <sys:String x:Key="mainWindow_languages">言語</sys:String>
     <sys:String x:Key="mainWindow_options">オプション</sys:String>
@@ -36,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">その他</sys:String>
     <sys:String x:Key="settings_headerBrowser">ブラウザー</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Web サイトの動作</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">ユーザースクリプト</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">ユーザースクリプトを有効にする</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">ページのコンテキストで特権付きユーザースクリプト API を許可する</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">変更は新しく開いたタブに適用されます。</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">権限の既定の動作</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">保存済みの権限設定がない場合に適用されます。</sys:String>
     <sys:String x:Key="settings_headerAdvanced">詳細設定</sys:String>
     <sys:String x:Key="settings_headerAboutCef">CEF について</sys:String>
     <sys:String x:Key="settings_useSearchEngine">アドレスバーで検索エンジンを使用する</sys:String>
@@ -78,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">元のウィンドウ</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新しいウィンドウ</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">新しいタブ</sys:String>
+
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">ダイアログで確認</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">自動で許可</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">自動で拒否</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -191,6 +203,102 @@
     <sys:String x:Key="dialog_addItem">項目を追加</sys:String>
     <sys:String x:Key="dialog_itemName">名前</sys:String>
     <sys:String x:Key="dialog_assocArray">連想配列</sys:String>
+
+    <!--Userscripts-->
+    <sys:String x:Key="userscript_permissionTitle">ユーザースクリプトの権限</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">スクリプト：{0}&#xA;機能：{1}&#xA;対象：{2}&#xA;&#xA;このスクリプトにこの機能の使用を許可しますか？</sys:String>
+    <sys:String x:Key="userscript_denyRemember">拒否して記憶</sys:String>
+    <sys:String x:Key="userscript_allowOnce">今回のみ許可</sys:String>
+    <sys:String x:Key="userscript_allowRemember">許可して記憶</sys:String>
+    <sys:String x:Key="userscript_managePermissions">スクリプトの権限を管理</sys:String>
+    <sys:String x:Key="userscript_permissionPage">ページのアドレス</sys:String>
+    <sys:String x:Key="userscript_permissionScope">このページに一致するスクリプトの保存済みの権限を表示します。変更は、別のページから同じ API と対象に対して行われる後続の呼び出しにも適用されます。</sys:String>
+    <sys:String x:Key="userscript_permissionScript">スクリプト</sys:String>
+    <sys:String x:Key="userscript_permissionDisabled">無効</sys:String>
+    <sys:String x:Key="userscript_permissionTarget">対象</sys:String>
+    <sys:String x:Key="userscript_permissionDecision">設定</sys:String>
+    <sys:String x:Key="userscript_permissionAllow">許可</sys:String>
+    <sys:String x:Key="userscript_permissionDeny">拒否</sys:String>
+    <sys:String x:Key="userscript_permissionClear">設定をクリア</sys:String>
+    <sys:String x:Key="userscript_permissionLoading">スクリプトの権限を読み込み中…</sys:String>
+    <sys:String x:Key="userscript_permissionEmpty">このページに一致するスクリプトに保存済みの権限設定はありません。</sys:String>
+    <sys:String x:Key="userscript_permissionChanged">この設定は別の場所で変更またはクリアされました。一覧を更新しました。</sys:String>
+    <sys:String x:Key="userscript_permissionError">スクリプトの権限を読み込みまたは更新できませんでした。一覧を更新してから再試行してください。</sys:String>
+    <sys:String x:Key="userscript_unavailable">このページではユーザースクリプトを利用できません</sys:String>
+    <sys:String x:Key="userscript_retry">再試行してページを再読み込み</sys:String>
+    <sys:String x:Key="userscript_commands">スクリプトコマンド</sys:String>
+    <sys:String x:Key="userscript_notification">ユーザースクリプトの通知</sys:String>
+    <sys:String x:Key="userscript_notificationClose">閉じる</sys:String>
+    <sys:String x:Key="userscript_notificationClick">通知をクリック</sys:String>
+    <sys:String x:Key="userscript_downloads">スクリプトのダウンロード</sys:String>
+    <sys:String x:Key="userscript_saveDownload">スクリプトのダウンロードを保存</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">待機中</sys:String>
+    <sys:String x:Key="userscript_downloading">ダウンロード中</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">完了</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">キャンセル済み</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">タイムアウト</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">失敗</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">キャンセル</sys:String>
+
+    <!--Userscript Manager-->
+    <sys:String x:Key="userScriptManager_title">ユーザースクリプトマネージャー</sys:String>
+    <sys:String x:Key="userScriptManager_new">新規スクリプト</sys:String>
+    <sys:String x:Key="userScriptManager_newScript">新しいスクリプト</sys:String>
+    <sys:String x:Key="userScriptManager_undo">元に戻す</sys:String>
+    <sys:String x:Key="userScriptManager_redo">やり直し</sys:String>
+    <sys:String x:Key="userScriptManager_cut">切り取り</sys:String>
+    <sys:String x:Key="userScriptManager_copy">コピー</sys:String>
+    <sys:String x:Key="userScriptManager_paste">貼り付け</sys:String>
+    <sys:String x:Key="userScriptManager_selectAll">すべて選択</sys:String>
+    <sys:String x:Key="userScriptManager_replace">置換</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">前の一致</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">次の一致</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">大文字と小文字を区別</sys:String>
+    <sys:String x:Key="userScriptManager_matches">一致件数</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">一致なし</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">選択中を置換</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">すべて置換</sys:String>
+    <sys:String x:Key="userScriptManager_script">スクリプト</sys:String>
+    <sys:String x:Key="userScriptManager_help">ヘルプ</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">MonkeySharp について</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">ユーザースクリプトガイド</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">詳細を表示</sys:String>
+    <sys:String x:Key="userScriptDetails_title">スクリプトの詳細</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">不明なメタデータ</sys:String>
+    <sys:String x:Key="userScriptManager_reload">ディスクから再読み込み</sys:String>
+    <sys:String x:Key="userScriptManager_delete">削除</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">スクリプト「{0}」を削除しますか？</sys:String>
+    <sys:String x:Key="userScriptManager_saved">保存しました。変更を適用するにはページを再読み込みしてください。</sys:String>
+    <sys:String x:Key="userScriptManager_refreshPage">完了しました。結果を確認するにはページを再読み込みしてください。</sys:String>
+    <sys:String x:Key="userScriptManager_deleted">削除しました。</sys:String>
+    <sys:String x:Key="userScriptManager_working">処理中…</sys:String>
+    <sys:String x:Key="userScriptManager_cancelled">操作をキャンセルしました。下書きは保持されています。</sys:String>
+    <sys:String x:Key="userScriptManager_conflict">スクリプトまたはソースファイルが変更されました。下書きは保持されています。保存する前にファイルを再読み込みし、下書きと比較してください。</sys:String>
+    <sys:String x:Key="userScriptManager_installFile">ファイルからインストール…</sys:String>
+    <sys:String x:Key="userScriptManager_installUrl">URL からインストール…</sys:String>
+    <sys:String x:Key="userScriptManager_install">現在の下書きをインストール</sys:String>
+    <sys:String x:Key="userScriptManager_export">ソースコードをエクスポート…</sys:String>
+    <sys:String x:Key="userScriptManager_confirmInstall">このスクリプトをインストールしますか？</sys:String>
+    <sys:String x:Key="userScriptInstall_install">インストール</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">このユーザースクリプトを更新しますか？</sys:String>
+    <sys:String x:Key="userScriptInstall_update">更新</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">ユーザースクリプトをダウンロードできませんでした。</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">ユーザースクリプトを保存できませんでした。</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">この入手元に複数のインストールがあるか、既存のスクリプトが変更されました。ユーザースクリプトマネージャーで確認してから、もう一度お試しください。</sys:String>
+    <sys:String x:Key="userScriptInstall_author">作者</sys:String>
+    <sys:String x:Key="userScriptInstall_source">インストール元</sys:String>
+    <sys:String x:Key="userScriptManager_reviewInstall">ソースコードを読み込みました。まだインストールされていません。内容を確認してから「現在の下書きをインストール」または「保存」を選択してください。</sys:String>
+    <sys:String x:Key="userScriptManager_invalidMetadata">ユーザースクリプトのメタデータが無効です。メタデータヘッダーを確認して、もう一度お試しください。</sys:String>
+    <sys:String x:Key="userScriptManager_invalidUrl">有効な HTTP または HTTPS の URL を入力してください。</sys:String>
+    <sys:String x:Key="userScriptManager_exported">ソースコードをエクスポートしました。</sys:String>
+    <sys:String x:Key="userScriptManager_match">対象の URL</sys:String>
+    <sys:String x:Key="userScriptManager_world">実行環境</sys:String>
+    <sys:String x:Key="userScriptManager_grants">宣言された権限</sys:String>
+    <sys:String x:Key="userScriptManager_cancel">キャンセル</sys:String>
+    <sys:String x:Key="userScriptManager_load">読み込み</sys:String>
+    <sys:String x:Key="userScriptManager_toggle">スクリプトを有効または無効にする</sys:String>
+    <sys:String x:Key="userScriptManager_draft">未インストールの下書き</sys:String>
+    <sys:String x:Key="userScriptManager_unavailable">利用不可</sys:String>
 
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">URL を入力してください。</sys:String>

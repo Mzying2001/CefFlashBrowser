@@ -63,6 +63,11 @@
         public WindowSizeInfo SolSaveManagerSizeInfo { get; set; }
 
         /// <summary>
+        /// The size and position of the userscript manager window
+        /// </summary>
+        public WindowSizeInfo UserScriptManagerSizeInfo { get; set; }
+
+        /// <summary>
         /// Proxy settings for the browser
         /// </summary>
         public ProxySettings ProxySettings { get; set; }
@@ -147,6 +152,26 @@
         /// </summary>
         public bool DisableBrowserContextMenu { get; set; }
 
+        /// <summary>
+        /// Determines whether userscript execution is enabled
+        /// </summary>
+        public bool EnableUserScripts { get; set; }
+
+        /// <summary>
+        /// Determines whether userscripts can use privileged APIs in the page execution world
+        /// </summary>
+        public bool TrustedUserScriptPageWorld { get; set; }
+
+        /// <summary>
+        /// The default behavior for userscript permissions without a remembered decision.
+        /// </summary>
+        public UserScriptPermissionBehavior DefaultUserScriptPermissionBehavior { get; set; }
+
+        /// <summary>
+        /// The directory for userscript downloads; defaults to the system Downloads folder when blank
+        /// </summary>
+        public string UserScriptDownloadDirectory { get; set; }
+
 
         /// <summary>
         /// Default settings
@@ -172,6 +197,7 @@
             BrowserWindowSizeInfo = null;
             SwfWindowSizeInfo = null;
             SolSaveManagerSizeInfo = null;
+            UserScriptManagerSizeInfo = null;
             ProxySettings = new ProxySettings();
             UserAgentSetting = new UserAgentSetting();
             FakeFlashVersionSetting = new FakeFlashVersionSetting();
@@ -188,6 +214,10 @@
             DisableGpuAcceleration = false;
             CustomEmoticon = null;
             DisableBrowserContextMenu = false;
+            EnableUserScripts = true;
+            TrustedUserScriptPageWorld = true;
+            DefaultUserScriptPermissionBehavior = UserScriptPermissionBehavior.Prompt;
+            UserScriptDownloadDirectory = null;
         }
 
         /// <summary>

@@ -41,9 +41,35 @@
         <Menu>
             <!--Favorites Menu-->
             <MenuItem Header="{DynamicResource common_favorites}">
+                <MenuItem.Resources>
+                    <ControlTemplate x:Key="favoriteMenuItemTemplate" TargetType="MenuItem">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding hc:BorderElement.CornerRadius}">
+                            <Grid Margin="{TemplateBinding Padding}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="26"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Content="{TemplateBinding Icon}"/>
+                                <ContentPresenter
+                                    Grid.Column="1"
+                                    Margin="0,3,0,3"
+                                    VerticalAlignment="Center"
+                                    ContentSource="Header"
+                                    RecognizesAccessKey="True"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </MenuItem.Resources>
+
                 <MenuItem.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
-                        <StackPanel MaxWidth="225">
+                        <StackPanel MaxWidth="250">
                             <TextBlock Text="{Binding Name}"
                                        TextTrimming="CharacterEllipsis"/>
                             <TextBlock FontSize="10"
@@ -71,6 +97,7 @@
                                 </c:BrowserIcon>
                             </DataTemplate>
                         </Style.Resources>
+                        <Setter Property="Template" Value="{StaticResource favoriteMenuItemTemplate}"/>
                         <Setter Property="Tag"
                                 Value="{Binding RelativeSource={RelativeSource AncestorType=Menu}, Path=DataContext}"/>
                         <Style.Triggers>
@@ -100,6 +127,7 @@
                     <CompositeCollection>
                         <!--Favorites Manager-->
                         <MenuItem Padding="10,7"
+                                  Template="{StaticResource favoriteMenuItemTemplate}"
                                   Header="{DynamicResource mainWindow_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
 
@@ -140,6 +168,12 @@
                 <!--Open Sol File-->
                 <MenuItem Header="{DynamicResource mainWindow_openSolFile}"
                           Command="{Binding OpenSolFileCommand}"/>
+
+                <Separator/>
+
+                <!--UserScriptManager-->
+                <MenuItem Header="{DynamicResource mainWindow_manageUserScripts}"
+                          Command="{Binding OpenUserScriptManagerCommand}"/>
 
                 <Separator/>
 

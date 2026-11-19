@@ -88,6 +88,13 @@ function Test-Favicons($Context) {
         $mainItem = $mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorite)
         $browserItem = $browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorite)
         Assert-FaviconMenuIcon $mainItem $favorite $iconA 'home favorite'
+        foreach ($item in @($mainItem, $mainFavoritesMenu.Items[0])) {
+            $header = @(Find-FaviconElements $item ([System.Windows.Controls.ContentPresenter]) |
+                Where-Object { $_.ContentSource -eq 'Header' })[0]
+            $headerRight = $header.TranslatePoint([Windows.Point]::new($header.ActualWidth, 0), $item).X
+            $rightInset = $item.ActualWidth - $headerRight
+            Assert-Regression ([Math]::Abs($rightInset - $item.Padding.Right) -lt 0.5) "home favorites menu item uses only standard right padding (actual $rightInset)"
+        }
         Assert-FaviconMenuIcon $browserItem $favorite $iconA 'browser favorite while another page is active'
         Assert-FaviconMenuIcon ($mainFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[1])) $favorites[1] $null 'unvisited home favorite'
         Assert-FaviconMenuIcon ($browserFavoritesMenu.ItemContainerGenerator.ContainerFromItem($favorites[1])) $favorites[1] $null 'unvisited browser favorite'

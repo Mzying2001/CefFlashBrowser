@@ -1,0 +1,155 @@
+using CefFlashBrowser.Models;
+using Mzying2001.MonkeySharp.Core.Apis;
+using Mzying2001.MonkeySharp.Core.Domain;
+using Mzying2001.MonkeySharp.Core.Updates;
+using System;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace CefFlashBrowser.Services.UserScripts
+{
+    public sealed class UserScriptContentService : IUserScriptDependencyProvider, IResourceProvider, IUserScriptUpdateFetcher, IDisposable
+    {
+        private readonly HttpClient _client;
+        private readonly int _maximumBytes;
+        private readonly TimeSpan _timeout;
+
+        public UserScriptContentService(ProxySettings proxy = null, HttpMessageHandler handler = null,
+            int maximumBytes = 10 * 1024 * 1024, TimeSpan? timeout = null)
+        {
+            if (maximumBytes <= 0)
+                throw new ArgumentOutOfRangeException(nameof(maximumBytes));
+
+            _maximumBytes = maximumBytes;
+            _timeout = timeout ?? TimeSpan.FromSeconds(30);
+
+            if (handler == null)
+            {
+                var http = new HttpClientHandler
+                {
+                    AllowAutoRedirect = false,
+                    UseCookies = false,
+                    UseDefaultCredentials = false,
+                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                };
+
+                if (proxy?.EnableProxy == true)
+                {
+                    if (!int.TryParse(proxy.Port, out var port) || port <= 0 || port > 65535)
+                        throw new ArgumentException("Invalid installation-content proxy port.", nameof(proxy));
+
+                    var address = new UriBuilder("http", proxy.IP, port).Uri;
+
+                    http.Proxy = new WebProxy(address)
+                    {
+                        Credentials = string.IsNullOrEmpty(proxy.UserName) ? null : new NetworkCredential(proxy.UserName, proxy.PlainPassword)
+                    };
+                }
+
+                handler = http;
+            }
+
+            _client = new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan };
+        }
+
+        public Task<ResourceContent> GetScriptAsync(UserScriptInstallation installation,
+            UserScriptDependencyDeclaration dependency, CancellationToken token)
+            => FetchAsync(dependency.Url, token);
+
+        public Task<ResourceContent> GetAsync(UserScriptInstallation installation, ResourceDeclaration resource, CancellationToken token)
+            => FetchAsync(resource.Url, token);
+
+        public async Task<string> FetchSourceAsync(UserScriptInstallation installation, string url, CancellationToken token)
+        {
+            var content = await FetchAsync(url, token).ConfigureAwait(false);
+            var source = new UTF8Encoding(false, true).GetString(content.Bytes);
+
+            return source.StartsWith("\uFEFF", StringComparison.Ordinal) ? source.Substring(1) : source;
+        }
+
+        public async Task<ResourceContent> FetchAsync(string url, CancellationToken token)
+        {
+            var uri = RequireHttp(url);
+
+            using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(token))
+            {
+                deadline.CancelAfter(_timeout);
+
+                for (var redirects = 0; ; redirects++)
+                {
+                    using (var request = new HttpRequestMessage(HttpMethod.Get, uri))
+                    using (var response = await _client.SendAsync(request,
+                        HttpCompletionOption.ResponseHeadersRead, deadline.Token).ConfigureAwait(false))
+                    {
+                        var status = (int)response.StatusCode;
+
+                        if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308)
+                        {
+                            if (redirects == 10 || response.Headers.Location == null)
+                                throw new HttpRequestException("Invalid or excessive installation-content redirects.");
+
+                            uri = RequireHttp(new Uri(uri, response.Headers.Location).AbsoluteUri);
+                            continue;
+                        }
+
+                        response.EnsureSuccessStatusCode();
+
+                        if (response.Content.Headers.ContentLength > _maximumBytes)
+                            throw new IOException("Installation content exceeds its size limit.");
+
+                        return await ReadContentAsync(response.Content, deadline.Token).ConfigureAwait(false);
+                    }
+                }
+            }
+        }
+
+        private async Task<ResourceContent> ReadContentAsync(HttpContent content, CancellationToken token)
+        {
+            // On .NET Framework a response stream can ignore cancellation during a pending read.
+            using (token.Register(content.Dispose))
+            {
+                try
+                {
+                    using (var input = await content.ReadAsStreamAsync().ConfigureAwait(false))
+                    using (var output = new MemoryStream())
+                    {
+                        var buffer = new byte[65536];
+                        int count;
+
+                        while ((count = await input.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false)) != 0)
+                        {
+                            if (output.Length + count > _maximumBytes)
+                                throw new IOException("Installation content exceeds its size limit.");
+
+                            output.Write(buffer, 0, count);
+                        }
+
+                        token.ThrowIfCancellationRequested();
+                        var charset = content.Headers.ContentType?.CharSet?.Trim('"');
+                        return new ResourceContent(output.ToArray(), content.Headers.ContentType?.MediaType, charset);
+                    }
+                }
+                catch (Exception e) when (token.IsCancellationRequested
+                    && (e is IOException || e is HttpRequestException || e is ObjectDisposedException))
+                {
+                    throw new OperationCanceledException("Installation content read was cancelled.", e, token);
+                }
+            }
+        }
+
+        private static Uri RequireHttp(string url)
+        {
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+                (uri.Scheme != "http" && uri.Scheme != "https") || !string.IsNullOrEmpty(uri.UserInfo))
+                throw new ArgumentException("Installation content requires an HTTP(S) URL without embedded credentials.", nameof(url));
+
+            return new UriBuilder(uri) { Fragment = string.Empty }.Uri;
+        }
+
+        public void Dispose() => _client.Dispose();
+    }
+}

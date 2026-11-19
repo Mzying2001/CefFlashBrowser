@@ -22,6 +22,7 @@ namespace CefFlashBrowser.Browser.Handlers
         public override bool OnBeforeUnloadDialog(IWebBrowser chromiumWebBrowser, IBrowser browser, string messageText, bool isReload, IJsDialogCallback callback)
         {
             RegisterBeforeUnloadDialog(chromiumWebBrowser, callback, isReload);
+
             if (GlobalData.Settings.DisableOnBeforeUnloadDialog)
             {
                 CompleteBeforeUnloadDialog(chromiumWebBrowser, callback, isReload, true);
@@ -38,14 +39,11 @@ namespace CefFlashBrowser.Browser.Handlers
                 }
 
                 var msg = SimpleIoc.Global.GetInstance<LanguageService>().GetString(isReload ? "message_askWhetherToReload" : "message_askWhetherToLeave");
-                var dialog = WindowManager.ShowWindow<JsConfirmDialog>(modal: true, initializer: window =>
-                {
-                    window.Title = wpfWebBrowser.Title;
-                    window.Message = msg;
-                    _beforeUnloadDialog = window;
-                });
+                var dialog = WindowManager.ShowConfirmDialog(msg, wpfWebBrowser.Title, window => _beforeUnloadDialog = window);
+
                 if (ReferenceEquals(_beforeUnloadDialog, dialog))
                     _beforeUnloadDialog = null;
+
                 CompleteBeforeUnloadDialog(chromiumWebBrowser, callback, isReload, DialogHelper.GetDialogResult(dialog) == true);
             });
             return true;

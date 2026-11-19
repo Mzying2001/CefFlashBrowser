@@ -15,6 +15,7 @@ namespace CefFlashBrowser.Data
         public static string AssetsPath { get; }
         public static string BinariesPath { get; }
         public static string CachesPath { get; }
+        public static string UserScriptCachePath { get; }
         public static string LogsPath { get; }
         public static string CefDllPath { get; }
         public static string SqliteDllPath { get; }
@@ -33,6 +34,7 @@ namespace CefFlashBrowser.Data
         public static string FavoritesPath { get; }
         public static string SettingsPath { get; }
         public static string DatabasePath { get; }
+        public static string MonkeySharpPath { get; }
 
         /// <summary>
         /// true if the program is started with parameters
@@ -45,6 +47,7 @@ namespace CefFlashBrowser.Data
             AssetsPath = Path.Combine(AppBaseDirectory, "Assets\\");
             BinariesPath = Path.Combine(AppBaseDirectory, "Binaries\\");
             CachesPath = Path.Combine(AppBaseDirectory, "Caches\\");
+            UserScriptCachePath = Path.Combine(CachesPath, "UserScripts\\");
             LogsPath = Path.Combine(AppBaseDirectory, "Logs\\");
             CefDllPath = Path.Combine(BinariesPath, "CefSharp\\");
             SqliteDllPath = Path.Combine(BinariesPath, "SQLite\\");
@@ -68,6 +71,7 @@ namespace CefFlashBrowser.Data
             FavoritesPath = Path.Combine(DataPath, "favorites.json");
             SettingsPath = Path.Combine(DataPath, "settings.json");
             DatabasePath = Path.Combine(DataPath, "browser.db");
+            MonkeySharpPath = Path.Combine(DataPath, "MonkeySharp");
 
             Messenger.Global.Register(MessageTokens.SAVE_SETTINGS, _ => SaveSettings());
         }
@@ -82,6 +86,7 @@ namespace CefFlashBrowser.Data
             DirectoryHelper.EnsureDirectoryExists(DataPath);
             DirectoryHelper.EnsureDirectoryExists(LogsPath);
             DirectoryHelper.EnsureDirectoryExists(CachesPath);
+            DirectoryHelper.EnsureDirectoryExists(UserScriptCachePath);
 
             InitSettings();
             return true;

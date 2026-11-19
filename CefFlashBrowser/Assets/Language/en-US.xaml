@@ -24,6 +24,7 @@
     <sys:String x:Key="mainWindow_go">Go</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Manage Favorites</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">Manage SOL Save Files</sys:String>
+    <sys:String x:Key="mainWindow_manageUserScripts">Manage Userscripts</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">Open SOL file...</sys:String>
     <sys:String x:Key="mainWindow_languages">Language</sys:String>
     <sys:String x:Key="mainWindow_options">Options</sys:String>
@@ -36,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">Other</sys:String>
     <sys:String x:Key="settings_headerBrowser">Browser</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Website Behavior</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">Userscripts</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">Enable userscripts</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">Allow privileged userscript APIs in the page context</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">Changes take effect in newly opened tabs.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">Default permission behavior</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">Applies when there is no saved permission decision.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Advanced</sys:String>
     <sys:String x:Key="settings_headerAboutCef">About CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">Use search engines in the address bar</sys:String>
@@ -78,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">Original window</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">New window</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">New tab</sys:String>
+
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">Show a prompt</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">Allow automatically</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">Deny automatically</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -191,6 +203,102 @@
     <sys:String x:Key="dialog_addItem">Add Item</sys:String>
     <sys:String x:Key="dialog_itemName">Name</sys:String>
     <sys:String x:Key="dialog_assocArray">Associative Array</sys:String>
+
+    <!--Userscripts-->
+    <sys:String x:Key="userscript_permissionTitle">Userscript permission</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script: {0}&#xA;Capability: {1}&#xA;Target: {2}&#xA;&#xA;Allow this script to use this capability?</sys:String>
+    <sys:String x:Key="userscript_denyRemember">Deny and remember</sys:String>
+    <sys:String x:Key="userscript_allowOnce">Allow once</sys:String>
+    <sys:String x:Key="userscript_allowRemember">Allow and remember</sys:String>
+    <sys:String x:Key="userscript_managePermissions">Manage script permissions</sys:String>
+    <sys:String x:Key="userscript_permissionPage">Page address</sys:String>
+    <sys:String x:Key="userscript_permissionScope">Decisions shown here are saved for scripts that match this page. Changes also apply to later calls by those scripts on other pages for the same API and target.</sys:String>
+    <sys:String x:Key="userscript_permissionScript">Script</sys:String>
+    <sys:String x:Key="userscript_permissionDisabled">Disabled</sys:String>
+    <sys:String x:Key="userscript_permissionTarget">Target</sys:String>
+    <sys:String x:Key="userscript_permissionDecision">Decision</sys:String>
+    <sys:String x:Key="userscript_permissionAllow">Allow</sys:String>
+    <sys:String x:Key="userscript_permissionDeny">Deny</sys:String>
+    <sys:String x:Key="userscript_permissionClear">Clear decision</sys:String>
+    <sys:String x:Key="userscript_permissionLoading">Loading script permissions…</sys:String>
+    <sys:String x:Key="userscript_permissionEmpty">No saved permission decisions for scripts that match this page.</sys:String>
+    <sys:String x:Key="userscript_permissionChanged">This decision was changed or cleared elsewhere. The list has been refreshed.</sys:String>
+    <sys:String x:Key="userscript_permissionError">Could not read or update script permissions. Refresh and try again.</sys:String>
+    <sys:String x:Key="userscript_unavailable">Userscripts are unavailable for this page</sys:String>
+    <sys:String x:Key="userscript_retry">Retry and navigate again</sys:String>
+    <sys:String x:Key="userscript_commands">Script commands</sys:String>
+    <sys:String x:Key="userscript_notification">Userscript notification</sys:String>
+    <sys:String x:Key="userscript_notificationClose">Close</sys:String>
+    <sys:String x:Key="userscript_notificationClick">Click notification</sys:String>
+    <sys:String x:Key="userscript_downloads">Script downloads</sys:String>
+    <sys:String x:Key="userscript_saveDownload">Save script download</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">Waiting</sys:String>
+    <sys:String x:Key="userscript_downloading">Downloading</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">Completed</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">Cancelled</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">Timed out</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">Failed</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">Cancel</sys:String>
+
+    <!--Userscript Manager-->
+    <sys:String x:Key="userScriptManager_title">Userscript Manager</sys:String>
+    <sys:String x:Key="userScriptManager_new">New script</sys:String>
+    <sys:String x:Key="userScriptManager_newScript">New script</sys:String>
+    <sys:String x:Key="userScriptManager_undo">Undo</sys:String>
+    <sys:String x:Key="userScriptManager_redo">Redo</sys:String>
+    <sys:String x:Key="userScriptManager_cut">Cut</sys:String>
+    <sys:String x:Key="userScriptManager_copy">Copy</sys:String>
+    <sys:String x:Key="userScriptManager_paste">Paste</sys:String>
+    <sys:String x:Key="userScriptManager_selectAll">Select all</sys:String>
+    <sys:String x:Key="userScriptManager_replace">Replace</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">Previous match</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">Next match</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">Match case</sys:String>
+    <sys:String x:Key="userScriptManager_matches">Matches</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">No matches</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">Replace current</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">Replace all</sys:String>
+    <sys:String x:Key="userScriptManager_script">Script</sys:String>
+    <sys:String x:Key="userScriptManager_help">Help</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">About MonkeySharp</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">Userscript Guide</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">View details</sys:String>
+    <sys:String x:Key="userScriptDetails_title">Script details</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">Unknown metadata</sys:String>
+    <sys:String x:Key="userScriptManager_reload">Reload from disk</sys:String>
+    <sys:String x:Key="userScriptManager_delete">Delete</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">Delete the script "{0}"?</sys:String>
+    <sys:String x:Key="userScriptManager_saved">Saved. Refresh the page to apply changes.</sys:String>
+    <sys:String x:Key="userScriptManager_refreshPage">Done. Refresh the page to see the effect.</sys:String>
+    <sys:String x:Key="userScriptManager_deleted">Deleted.</sys:String>
+    <sys:String x:Key="userScriptManager_working">Working…</sys:String>
+    <sys:String x:Key="userScriptManager_cancelled">Cancelled. Drafts have been kept.</sys:String>
+    <sys:String x:Key="userScriptManager_conflict">The script or source file changed. Your draft has been kept. Reload and compare it before saving.</sys:String>
+    <sys:String x:Key="userScriptManager_installFile">Install from file…</sys:String>
+    <sys:String x:Key="userScriptManager_installUrl">Install from URL…</sys:String>
+    <sys:String x:Key="userScriptManager_install">Install current draft</sys:String>
+    <sys:String x:Key="userScriptManager_export">Export source…</sys:String>
+    <sys:String x:Key="userScriptManager_confirmInstall">Install this script?</sys:String>
+    <sys:String x:Key="userScriptInstall_install">Install</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">Update this userscript?</sys:String>
+    <sys:String x:Key="userScriptInstall_update">Update</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">Could not download the userscript.</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">Could not save the userscript.</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">This source matches multiple installations or the existing script changed. Review the script in the Userscript Manager and try again.</sys:String>
+    <sys:String x:Key="userScriptInstall_author">Author</sys:String>
+    <sys:String x:Key="userScriptInstall_source">Source</sys:String>
+    <sys:String x:Key="userScriptManager_reviewInstall">Source loaded, pending installation. Review it, then choose Install current draft or Save.</sys:String>
+    <sys:String x:Key="userScriptManager_invalidMetadata">Invalid userscript metadata. Check the metadata header and try again.</sys:String>
+    <sys:String x:Key="userScriptManager_invalidUrl">Enter a valid HTTP or HTTPS URL.</sys:String>
+    <sys:String x:Key="userScriptManager_exported">Source exported.</sys:String>
+    <sys:String x:Key="userScriptManager_match">Matches</sys:String>
+    <sys:String x:Key="userScriptManager_world">Execution world</sys:String>
+    <sys:String x:Key="userScriptManager_grants">Declared permissions</sys:String>
+    <sys:String x:Key="userScriptManager_cancel">Cancel</sys:String>
+    <sys:String x:Key="userScriptManager_load">Load</sys:String>
+    <sys:String x:Key="userScriptManager_toggle">Enable or disable script</sys:String>
+    <sys:String x:Key="userScriptManager_draft">Uninstalled draft</sys:String>
+    <sys:String x:Key="userScriptManager_unavailable">Unavailable</sys:String>
 
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>

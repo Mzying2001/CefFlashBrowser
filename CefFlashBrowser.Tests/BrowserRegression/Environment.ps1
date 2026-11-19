@@ -11,6 +11,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         ApplicationPath = $applicationPath
         CefPath = Join-Path $applicationPath 'Binaries\CefSharp'
         TemporaryPath = Join-Path ([IO.Path]::GetTempPath()) ('CefFlashBrowser-regression-' + [Guid]::NewGuid())
+        EmbeddedAssemblyPath = $null
         Application = $null
         Logger = $null
         LanguageService = $null
@@ -18,6 +19,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         Database = $null
         DatabaseService = $null
         FaviconService = $null
+        UserScriptService = $null
         CefStarted = $false
         OriginalComSpec = [Environment]::GetEnvironmentVariable('ComSpec')
         AuxiliaryTypes = @()
@@ -33,6 +35,13 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
 
 function Get-RegressionDependencyPath($Context, [string]$Dependency) {
     $applicationPath = Join-Path $Context.ApplicationPath $Dependency
+    if ($Context.Configuration -eq 'Release') {
+        if ($null -ne $Context.EmbeddedAssemblyPath) {
+            $embeddedPath = Join-Path $Context.EmbeddedAssemblyPath $Dependency
+            if (Test-Path -LiteralPath $embeddedPath -PathType Leaf) { return $embeddedPath }
+        }
+        return $applicationPath
+    }
     $projectOutputPath = Join-Path $Context.RepositoryPath (
         "$([IO.Path]::GetFileNameWithoutExtension($Dependency))\bin\$($Context.Platform)\$($Context.Configuration)\net462\$Dependency")
 
@@ -46,8 +55,33 @@ function Get-RegressionDependencyPath($Context, [string]$Dependency) {
     return $applicationPath
 }
 
+function Expand-RegressionEmbeddedAssemblies($Context) {
+    if ($Context.Configuration -ne 'Release') { return }
+    # Add-Type needs physical compiler references. Use the built executable's bytes,
+    # never another project's output or the developer's package cache for Release.
+    $assembly = [Reflection.Assembly]::ReflectionOnlyLoadFrom((Join-Path $Context.ApplicationPath 'CefFlashBrowser.exe'))
+    $Context.EmbeddedAssemblyPath = Join-Path $Context.TemporaryPath 'Assemblies'
+    [void][IO.Directory]::CreateDirectory($Context.EmbeddedAssemblyPath)
+    foreach ($name in $assembly.GetManifestResourceNames()) {
+        if (!$name.StartsWith('costura.') -or !$name.EndsWith('.dll.compressed')) { continue }
+        $fileName = $name.Substring(8, $name.Length - 8 - '.compressed'.Length)
+        if ([IO.Path]::GetFileName($fileName) -ne $fileName) { throw 'Invalid embedded dependency name.' }
+        $resource = $assembly.GetManifestResourceStream($name)
+        try {
+            $decoded = New-Object IO.Compression.DeflateStream($resource, [IO.Compression.CompressionMode]::Decompress)
+            try {
+                $file = [IO.File]::Create((Join-Path $Context.EmbeddedAssemblyPath $fileName))
+                try { $decoded.CopyTo($file) } finally { $file.Dispose() }
+            } finally { $decoded.Dispose() }
+        } finally { $resource.Dispose() }
+    }
+}
+
 function Initialize-RegressionEnvironment($Context) {
     $dependencies = @(
+        'ICSharpCode.AvalonEdit.dll',
+        'Mzying2001.MonkeySharp.Core.dll',
+        'Mzying2001.MonkeySharp.CefSharp.dll',
         'SimpleMvvm.dll',
         'Microsoft.Xaml.Behaviors.dll',
         'HandyControl.dll',
@@ -73,6 +107,7 @@ function Initialize-RegressionEnvironment($Context) {
             throw "Build output not found: $path. Build the solution with VS MSBuild for $($Context.Configuration)|$($Context.Platform) first."
         }
     }
+    Expand-RegressionEmbeddedAssemblies $Context
     foreach ($dependency in $dependencies) {
         $path = Get-RegressionDependencyPath $Context $dependency
         if (!(Test-Path -LiteralPath $path -PathType Leaf)) {
@@ -89,10 +124,17 @@ function Initialize-RegressionEnvironment($Context) {
     if ($null -ne [System.Windows.Application]::Current) {
         throw 'Run the regression in a fresh Windows PowerShell process.'
     }
+    Add-Type -Path (Join-Path $Context.ScriptPath 'AssemblyResolver.cs')
+    [RegressionAssemblyResolver]::Install($Context.ApplicationPath)
+    if ($null -ne $Context.EmbeddedAssemblyPath) {
+        [RegressionAssemblyResolver]::Install($Context.EmbeddedAssemblyPath)
+    }
     foreach ($dependency in $dependencies) {
         [void][Reflection.Assembly]::LoadFrom((Get-RegressionDependencyPath $Context $dependency))
     }
     [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.CefPath 'CefSharp.dll'))
+    [CefSharp.CefSharpSettings]::ConcurrentTaskExecution = $true
+    [CefSharp.CefSharpSettings]::WcfEnabled = $false
     $applicationAssembly = [Reflection.Assembly]::LoadFrom((Join-Path $Context.ApplicationPath 'CefFlashBrowser.exe'))
     Assert-Regression ($applicationAssembly.GetManifestResourceNames() -contains 'CefFlashBrowser.Assets.SwfPlayer.swfplayer.html') 'SWF player page is embedded in the application'
     $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
@@ -109,13 +151,30 @@ function Initialize-RegressionEnvironment($Context) {
     }
 
     $references = @(
+        'System.Net.Http',
+        (Get-RegressionDependencyPath $Context 'CefFlashBrowser.Database.dll'),
+        [System.Xaml.XamlReader].Assembly.Location,
+        [System.Windows.Interop.HwndHost].Assembly.Location,
+        [System.Windows.DependencyObject].Assembly.Location,
+        [System.Windows.Media.Visual].Assembly.Location,
         (Join-Path $Context.CefPath 'CefSharp.dll'),
+        (Join-Path $Context.CefPath 'CefSharp.Core.dll'),
         $applicationAssembly.FullName,
-        (Get-RegressionDependencyPath $Context 'CefFlashBrowser.FlashBrowser.dll')
+        (Get-RegressionDependencyPath $Context 'CefFlashBrowser.FlashBrowser.dll'),
+        (Get-RegressionDependencyPath $Context 'SimpleMvvm.dll'),
+        (Get-RegressionDependencyPath $Context 'CefFlashBrowser.WinformCefSharp4WPF.dll'),
+        (Get-RegressionDependencyPath $Context 'Mzying2001.MonkeySharp.Core.dll'),
+        (Get-RegressionDependencyPath $Context 'Mzying2001.MonkeySharp.CefSharp.dll')
     )
     Add-Type -ReferencedAssemblies $references -Path @(
         (Join-Path $Context.ScriptPath 'TestDoubles.cs'),
-        (Join-Path $Context.ScriptPath 'FaviconHttpFixture.cs')
+        (Join-Path $Context.ScriptPath 'FaviconHttpFixture.cs'),
+        (Join-Path $Context.ScriptPath 'UserScriptSeamProbe.cs'),
+        (Join-Path $Context.ScriptPath 'UserScriptMenuProbe.cs'),
+        (Join-Path $Context.ScriptPath 'UserScriptInteractionProbe.cs'),
+        (Join-Path $Context.ScriptPath 'UserScriptHttpFixture.cs'),
+        (Join-Path $Context.ScriptPath 'UserScriptFrameProbe.cs'),
+        (Join-Path $Context.ScriptPath 'UserScriptRuntimeProbe.cs')
     )
     $Context.DisposedBrowser = (New-Object DisposedBrowserProxy([CefSharp.IBrowser])).GetTransparentProxy()
     $Context.AuxiliaryTypes = @(
@@ -131,6 +190,8 @@ function Initialize-RegressionEnvironment($Context) {
         FavoritesPath = (Join-Path $Context.TemporaryPath 'favorites.json')
         SettingsPath = (Join-Path $Context.TemporaryPath 'settings.json')
         DatabasePath = (Join-Path $Context.TemporaryPath 'browser.db')
+        MonkeySharpPath = (Join-Path $Context.TemporaryPath 'MonkeySharp')
+        UserScriptCachePath = (Join-Path $Context.TemporaryPath 'Caches\UserScripts')
     }.GetEnumerator()) {
         $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
     }
@@ -138,6 +199,7 @@ function Initialize-RegressionEnvironment($Context) {
     # Keep the embedded page's virtual file address consistent with the deployed executable.
     $globalDataType.GetField('<SwfPlayerPath>k__BackingField', $privateStatic).SetValue(
         $null, (Join-Path $Context.ApplicationPath 'Assets\SwfPlayer\swfplayer.html'))
+    [CefFlashBrowser.Data.GlobalData]::Settings.UserScriptDownloadDirectory = Join-Path $Context.TemporaryPath 'Downloads'
     [CefFlashBrowser.Data.GlobalData]::IsStartWithoutMainWindow = $true
     $locator = New-Object CefFlashBrowser.ViewModels.ViewModelLocator
     $Context.Application.Resources.Add('Locator', $locator.PSObject.BaseObject)
@@ -166,6 +228,13 @@ function Initialize-RegressionEnvironment($Context) {
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.DatabaseService.PSObject.BaseObject))
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.FaviconService]).Invoke(
         [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.FaviconService.PSObject.BaseObject))
+    $scriptStorage = New-Object CefFlashBrowser.Services.UserScripts.Persistence.UserScriptStorage($Context.DatabaseService)
+    $scriptContent = New-Object CefFlashBrowser.Services.UserScripts.UserScriptContentService($null, $null, 10485760, $null)
+    $scriptPrompt = New-Object CefFlashBrowser.Browser.UserScripts.UserScriptPermissionPrompt
+    $Context.UserScriptService = New-Object CefFlashBrowser.Services.UserScripts.UserScriptService(
+        $scriptStorage, (Join-Path $Context.TemporaryPath 'MonkeySharp'), (Join-Path $Context.TemporaryPath 'Caches\UserScripts'), $scriptContent, $scriptPrompt, $null)
+    [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Services.UserScripts.UserScriptService]).Invoke(
+        [SimpleMvvm.Ioc.SimpleIoc]::Global, @($Context.UserScriptService.PSObject.BaseObject))
     $faviconInitialization = $Context.FaviconService.InitializeAsync()
     Wait-Regression $Context { $faviconInitialization.IsCompleted } 'isolated favicon database initialization'
     [void]$faviconInitialization.GetAwaiter().GetResult()
@@ -224,7 +293,7 @@ function Initialize-RegressionEnvironment($Context) {
 
     # Keep this list in sync with the <sys:Uri> icon resources declared in App.xaml;
     # a missing icon here crashes template instantiation with XamlParseException.
-    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Warning', 'Search', 'More', 'Mute', 'Volume', 'Up', 'Down', 'Page', 'Close', 'Language', 'Settings', 'Star')) {
+    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Warning', 'Search', 'More', 'Mute', 'Volume', 'Up', 'Down', 'Page', 'Close', 'Language', 'Settings', 'Star', 'Plugin')) {
         $Context.Application.Resources.Add($icon + 'IconUri', [Uri]::new(('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg'), [UriKind]::Relative))
     }
     $Context.Application.Resources.Add('NewTabIconUri', [Uri]::new('/Assets/Svgs/new-tab.svg', [UriKind]::Relative))
@@ -272,6 +341,15 @@ function Stop-RegressionEnvironment($Context) {
                     $cleanupErrors.Add($_)
                 }
             }
+        } catch {
+            $cleanupErrors.Add($_)
+        }
+    }
+    if ($null -ne $Context.UserScriptService) {
+        try {
+            $scripts = $Context.UserScriptService.StopAsync()
+            Wait-Regression $Context { $scripts.IsCompleted } 'userscript runtime shutdown'
+            [void]$scripts.GetAwaiter().GetResult()
         } catch {
             $cleanupErrors.Add($_)
         }

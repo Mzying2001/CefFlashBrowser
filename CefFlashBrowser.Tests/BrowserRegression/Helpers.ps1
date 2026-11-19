@@ -23,7 +23,25 @@ function Wait-Regression($Context, [scriptblock]$Condition, [string]$Message, [i
 }
 
 function Invoke-JavaScript($Context, $Browser, [string]$Code) {
-    $evaluation = [CefSharp.WebBrowserExtensions]::EvaluateScriptAsync($Browser, $Code, [TimeSpan]::FromSeconds(5))
+    $deadline = [Diagnostics.Stopwatch]::StartNew()
+    while ($true) {
+        Wait-Regression $Context { $Browser.CanExecuteJavascriptInMainFrame } 'JavaScript context availability' 5
+        try {
+            $evaluation = [CefSharp.WebBrowserExtensions]::EvaluateScriptAsync($Browser, $Code, [TimeSpan]::FromSeconds(5))
+            break
+        } catch {
+            if ($deadline.Elapsed.TotalSeconds -ge 5 -or
+                !$_.Exception.GetBaseException().Message.StartsWith('Unable to execute javascript at this time', [StringComparison]::Ordinal)) {
+                throw
+            }
+            # Navigation can release the context between the readiness check and
+            # the extension's own check. Pump callbacks before a bounded retry.
+            $frame = New-Object System.Windows.Threading.DispatcherFrame
+            $stopFrame = [Action]({ $frame.Continue = $false }.GetNewClosure())
+            [void]$Context.Application.Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Background, $stopFrame)
+            [System.Windows.Threading.Dispatcher]::PushFrame($frame)
+        }
+    }
     Wait-Regression $Context { $evaluation.IsCompleted } 'JavaScript result'
     $response = $evaluation.GetAwaiter().GetResult()
 
@@ -187,12 +205,15 @@ function New-AuxiliaryWindow($Context, [Type]$WindowType, [switch]$WaitForLoad) 
     }
 
     $auxView = $auxWindow.FindName('browserView')
+    $expectedPage = if ($auxWindow -is [CefFlashBrowser.Views.SwfPlayerWindow]) {
+        ([Uri][CefFlashBrowser.Data.GlobalData]::SwfPlayerPath).AbsoluteUri
+    } else { $Context.AuxiliaryAddress }
     $loadState = @{ MainFrameLoaded = $false }
     $loaded = [EventHandler[CefSharp.FrameLoadEndEventArgs]]({
         param($sender, $eventArgs)
         try {
             if ($sender.IsDisposed) { return }
-            if ($eventArgs.Frame.IsMain) { $loadState.MainFrameLoaded = $true }
+            if ($eventArgs.Frame.IsMain -and $eventArgs.Frame.Url -eq $expectedPage) { $loadState.MainFrameLoaded = $true }
         } catch {
             # CEF can deliver a late FrameLoadEnd callback after the window starts closing.
         }
@@ -254,6 +275,11 @@ function Open-RegressionDevTools($Context, $View) {
 }
 
 function Set-RegressionBeforeUnload($Context, $Browser) {
+    # The warm-up document can execute JavaScript before the requested page arrives.
+    Wait-Regression $Context {
+        $Browser.CanExecuteJavascriptInMainFrame -and !$Browser.IsLoading -and
+        $Browser.GetBrowser().MainFrame.Url -eq $Browser.Address
+    } 'target document is ready for beforeunload'
     $dialogHandler = New-Object RegressionJsDialogHandler
     $Browser.JsDialogHandler = $dialogHandler
     [CefFlashBrowser.Data.GlobalData]::Settings.DisableOnBeforeUnloadDialog = $false

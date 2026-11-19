@@ -24,6 +24,7 @@
     <sys:String x:Key="mainWindow_go">Go</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Gérer les favoris</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">Gérer les fichiers de sauvegarde SOL</sys:String>
+    <sys:String x:Key="mainWindow_manageUserScripts">Gérer les scripts utilisateur</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">Ouvrir un fichier SOL....</sys:String>
     <sys:String x:Key="mainWindow_languages">Langue</sys:String>
     <sys:String x:Key="mainWindow_options">Options</sys:String>
@@ -36,6 +37,12 @@
     <sys:String x:Key="settings_headerOther">Autre</sys:String>
     <sys:String x:Key="settings_headerBrowser">Navigateur</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Comportement des site Web</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">Scripts utilisateur</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">Activer les scripts utilisateur</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">Autoriser les API privilégiées des scripts utilisateur dans le contexte de la page</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">Les modifications s’appliquent aux nouveaux onglets.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">Comportement par défaut des autorisations</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">S’applique lorsqu’aucune décision d’autorisation n’est enregistrée.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Avancé</sys:String>
     <sys:String x:Key="settings_headerAboutCef">À propos de CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">Utilisez le moteur de recherche dans la barre d'adresse</sys:String>
@@ -78,6 +85,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">Fenêtre d'origine</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">Nouvelle fenêtre</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">Nouvel onglet</sys:String>
+
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">Afficher une invite</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">Autoriser automatiquement</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">Refuser automatiquement</sys:String>
 
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
@@ -191,6 +203,102 @@
     <sys:String x:Key="dialog_addItem">Ajouter un élément</sys:String>
     <sys:String x:Key="dialog_itemName">Nom</sys:String>
     <sys:String x:Key="dialog_assocArray">Tableau associatif</sys:String>
+
+    <!--Userscripts-->
+    <sys:String x:Key="userscript_permissionTitle">Autorisation de script utilisateur</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Script : {0}&#xA;Fonctionnalité : {1}&#xA;Cible : {2}&#xA;&#xA;Autoriser ce script à utiliser cette fonctionnalité ?</sys:String>
+    <sys:String x:Key="userscript_denyRemember">Refuser et mémoriser</sys:String>
+    <sys:String x:Key="userscript_allowOnce">Autoriser une fois</sys:String>
+    <sys:String x:Key="userscript_allowRemember">Autoriser et mémoriser</sys:String>
+    <sys:String x:Key="userscript_managePermissions">Gérer les autorisations des scripts</sys:String>
+    <sys:String x:Key="userscript_permissionPage">Adresse de la page</sys:String>
+    <sys:String x:Key="userscript_permissionScope">Cette liste affiche les décisions enregistrées pour les scripts qui correspondent à cette page. Les modifications s’appliquent aussi à leurs futurs appels à la même API et à la même cible sur d’autres pages.</sys:String>
+    <sys:String x:Key="userscript_permissionScript">Script</sys:String>
+    <sys:String x:Key="userscript_permissionDisabled">Désactivé</sys:String>
+    <sys:String x:Key="userscript_permissionTarget">Cible</sys:String>
+    <sys:String x:Key="userscript_permissionDecision">Décision</sys:String>
+    <sys:String x:Key="userscript_permissionAllow">Autoriser</sys:String>
+    <sys:String x:Key="userscript_permissionDeny">Refuser</sys:String>
+    <sys:String x:Key="userscript_permissionClear">Effacer la décision</sys:String>
+    <sys:String x:Key="userscript_permissionLoading">Chargement des autorisations des scripts…</sys:String>
+    <sys:String x:Key="userscript_permissionEmpty">Aucune décision enregistrée pour les scripts qui correspondent à cette page.</sys:String>
+    <sys:String x:Key="userscript_permissionChanged">Cette décision a été modifiée ou effacée ailleurs. La liste a été actualisée.</sys:String>
+    <sys:String x:Key="userscript_permissionError">Impossible de lire ou de modifier les autorisations des scripts. Actualisez la liste et réessayez.</sys:String>
+    <sys:String x:Key="userscript_unavailable">Les scripts utilisateur ne sont pas disponibles sur cette page</sys:String>
+    <sys:String x:Key="userscript_retry">Réessayer et recharger la page</sys:String>
+    <sys:String x:Key="userscript_commands">Commandes de script</sys:String>
+    <sys:String x:Key="userscript_notification">Notification de script utilisateur</sys:String>
+    <sys:String x:Key="userscript_notificationClose">Fermer</sys:String>
+    <sys:String x:Key="userscript_notificationClick">Cliquer sur la notification</sys:String>
+    <sys:String x:Key="userscript_downloads">Téléchargements de scripts</sys:String>
+    <sys:String x:Key="userscript_saveDownload">Enregistrer le téléchargement du script</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">En attente</sys:String>
+    <sys:String x:Key="userscript_downloading">Téléchargement en cours</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">Terminé</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">Annulé</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">Délai dépassé</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">Échec</sys:String>
+    <sys:String x:Key="userscript_downloadCancel">Annuler</sys:String>
+
+    <!--Userscript Manager-->
+    <sys:String x:Key="userScriptManager_title">Gestionnaire de scripts utilisateur</sys:String>
+    <sys:String x:Key="userScriptManager_new">Nouveau script</sys:String>
+    <sys:String x:Key="userScriptManager_newScript">Nouveau script</sys:String>
+    <sys:String x:Key="userScriptManager_undo">Annuler</sys:String>
+    <sys:String x:Key="userScriptManager_redo">Refaire</sys:String>
+    <sys:String x:Key="userScriptManager_cut">Couper</sys:String>
+    <sys:String x:Key="userScriptManager_copy">Copier</sys:String>
+    <sys:String x:Key="userScriptManager_paste">Coller</sys:String>
+    <sys:String x:Key="userScriptManager_selectAll">Tout sélectionner</sys:String>
+    <sys:String x:Key="userScriptManager_replace">Remplacer</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">Résultat précédent</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">Résultat suivant</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">Respecter la casse</sys:String>
+    <sys:String x:Key="userScriptManager_matches">Résultats</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">Aucun résultat</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">Remplacer la sélection</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">Tout remplacer</sys:String>
+    <sys:String x:Key="userScriptManager_script">Script</sys:String>
+    <sys:String x:Key="userScriptManager_help">Aide</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">À propos de MonkeySharp</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">Guide des scripts utilisateur</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">Afficher les détails</sys:String>
+    <sys:String x:Key="userScriptDetails_title">Détails du script</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">Métadonnées inconnues</sys:String>
+    <sys:String x:Key="userScriptManager_reload">Recharger depuis le disque</sys:String>
+    <sys:String x:Key="userScriptManager_delete">Supprimer</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">Voulez-vous supprimer le script « {0} » ?</sys:String>
+    <sys:String x:Key="userScriptManager_saved">Enregistré. Rechargez la page pour appliquer les modifications.</sys:String>
+    <sys:String x:Key="userScriptManager_refreshPage">Terminé. Rechargez la page pour voir le résultat.</sys:String>
+    <sys:String x:Key="userScriptManager_deleted">Supprimé.</sys:String>
+    <sys:String x:Key="userScriptManager_working">Traitement en cours…</sys:String>
+    <sys:String x:Key="userScriptManager_cancelled">Opération annulée. Les brouillons ont été conservés.</sys:String>
+    <sys:String x:Key="userScriptManager_conflict">Le script ou le fichier source a été modifié. Votre brouillon a été conservé. Rechargez le fichier et comparez-le au brouillon avant d'enregistrer.</sys:String>
+    <sys:String x:Key="userScriptManager_installFile">Installer depuis un fichier…</sys:String>
+    <sys:String x:Key="userScriptManager_installUrl">Installer depuis une URL…</sys:String>
+    <sys:String x:Key="userScriptManager_install">Installer le brouillon actuel</sys:String>
+    <sys:String x:Key="userScriptManager_export">Exporter le code source…</sys:String>
+    <sys:String x:Key="userScriptManager_confirmInstall">Installer ce script ?</sys:String>
+    <sys:String x:Key="userScriptInstall_install">Installer</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">Mettre à jour ce script utilisateur ?</sys:String>
+    <sys:String x:Key="userScriptInstall_update">Mettre à jour</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">Impossible de télécharger le script utilisateur.</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">Impossible d’enregistrer le script utilisateur.</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">Cette source correspond à plusieurs installations ou le script existant a changé. Vérifiez le script dans le gestionnaire de scripts utilisateur et réessayez.</sys:String>
+    <sys:String x:Key="userScriptInstall_author">Auteur</sys:String>
+    <sys:String x:Key="userScriptInstall_source">Source</sys:String>
+    <sys:String x:Key="userScriptManager_reviewInstall">Code source chargé, en attente d'installation. Vérifiez-le, puis choisissez « Installer le brouillon actuel » ou « Enregistrer ».</sys:String>
+    <sys:String x:Key="userScriptManager_invalidMetadata">Métadonnées du script utilisateur invalides. Vérifiez l'en-tête des métadonnées et réessayez.</sys:String>
+    <sys:String x:Key="userScriptManager_invalidUrl">Saisissez une URL HTTP ou HTTPS valide.</sys:String>
+    <sys:String x:Key="userScriptManager_exported">Code source exporté.</sys:String>
+    <sys:String x:Key="userScriptManager_match">Adresses correspondantes</sys:String>
+    <sys:String x:Key="userScriptManager_world">Environnement d'exécution</sys:String>
+    <sys:String x:Key="userScriptManager_grants">Autorisations déclarées</sys:String>
+    <sys:String x:Key="userScriptManager_cancel">Annuler</sys:String>
+    <sys:String x:Key="userScriptManager_load">Charger</sys:String>
+    <sys:String x:Key="userScriptManager_toggle">Activer ou désactiver le script</sys:String>
+    <sys:String x:Key="userScriptManager_draft">Brouillon non installé</sys:String>
+    <sys:String x:Key="userScriptManager_unavailable">Indisponible</sys:String>
 
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">Veuillez saisir l'url.</sys:String>

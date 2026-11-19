@@ -48,11 +48,12 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 ## Project Structure
 
 - **CefFlashBrowser/**: Main WPF application.
-  - **Browser/**: Browser-specific application behavior, including CefSharp handler implementations.
+  - **Browser/**: CefSharp handlers and per-browser userscript integration.
   - **Data/**: Shared application state, paths, configuration, and MVVM messaging data.
   - **Infrastructure/**: Reusable infrastructure helpers for collections and WPF integration.
   - **Models/**: Domain models and persisted user settings.
-  - **Services/**: Application services for language, theme, windows, database access, and favicons.
+  - **Services/**: Application services for language, theme, windows, favorites, database access, and favicons.
+    - **UserScripts/**: Userscript lifecycle, execution policy, content loading, and persistence.
   - **ViewModels/**: MVVM presentation logic for windows and dialogs.
   - **Views/**: WPF windows, dialogs, and reusable UI controls.
   - **Utils/**: Utility helpers and cross-cutting support code.
@@ -66,7 +67,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - **CefFlashBrowser.Log/**: Shared file logging library.
 - **CefFlashBrowser.CommandProxy/**: Native command proxy with Flash diagnostic filtering.
 - **CefFlashBrowser.Tests/**: MSTest project for linked application code and supporting libraries.
-  - **BrowserRegression/**: PowerShell checks for WPF/CEF behavior and packaged releases.
+  - **BrowserRegression/**: PowerShell checks for WPF/CEF behavior, userscripts, and packaged releases.
   - **CommandProxyRegression/**: Regression checks for command forwarding and diagnostic filtering.
   - **TestData/**: SOL fixtures for serialization tests.
 - **Docs/**: Reference specifications for AMF and SOL-related implementation work.
@@ -76,8 +77,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - Builds target both x86 and x64; output paths differ: `bin\Release\` (x86) vs `bin\x64\Release\` (x64)
 - Entry point is `Program.cs` (not the default `App.xaml.cs`)
 - CefSharp version 84.4.10 is pinned for Flash compatibility
-- Follow the project's existing code style when modifying or adding code
-- Keep text and source files using CRLF line endings to match the repository's Windows/WPF conventions
+- Follow the repository's `.editorconfig` when modifying or adding files
 
 ## Git Commit Conventions
 

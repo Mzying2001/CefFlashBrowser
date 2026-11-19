@@ -5,6 +5,9 @@ namespace CefFlashBrowser.Views.Custom
 {
     public class BrowserIcon : Control
     {
+        public static readonly ComponentResourceKey TextFallbackStyleKey =
+            new ComponentResourceKey(typeof(BrowserIcon), "TextFallbackStyle");
+
         private Image _image;
 
         private static readonly DependencyPropertyKey HasImageFailedPropertyKey =
@@ -36,6 +39,15 @@ namespace CefFlashBrowser.Views.Custom
             set { SetValue(DefaultIconProperty, value); }
         }
 
+        public static readonly DependencyProperty DefaultIconTemplateProperty =
+            DependencyProperty.Register(nameof(DefaultIconTemplate), typeof(DataTemplate), typeof(BrowserIcon), new PropertyMetadata(null));
+
+        public DataTemplate DefaultIconTemplate
+        {
+            get { return (DataTemplate)GetValue(DefaultIconTemplateProperty); }
+            set { SetValue(DefaultIconTemplateProperty, value); }
+        }
+
         static BrowserIcon()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(BrowserIcon), new FrameworkPropertyMetadata(typeof(BrowserIcon)));
@@ -48,7 +60,9 @@ namespace CefFlashBrowser.Views.Custom
 
             SetValue(HasImageFailedPropertyKey, false);
             base.OnApplyTemplate();
+
             _image = GetTemplateChild("favicon") as Image;
+
             if (_image != null)
                 _image.ImageFailed += ImageFailed;
         }

@@ -5,6 +5,8 @@
     <Platforms>x86;x64</Platforms>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <UseWPF>true</UseWPF>
     <DefineConstants>$(DefineConstants);CEFFLASHBROWSER_TESTS</DefineConstants>
   </PropertyGroup>
@@ -12,7 +14,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
+    <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
+    <PackageReference Include="Mzying2001.MonkeySharp.Core" Version="4.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
@@ -22,6 +26,15 @@
     <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\CefFlashBrowser\ViewModels\UserScriptItemViewModel.cs" Link="LinkedSources\UserScripts\UserScriptItemViewModel.cs" />
+    <Compile Include="..\CefFlashBrowser\ViewModels\UserScriptManagerViewModel.cs" Link="LinkedSources\UserScripts\UserScriptManagerViewModel.cs" />
+    <Compile Include="..\CefFlashBrowser\Infrastructure\Collections\ListReorderRequest.cs" Link="LinkedSources\ListReorderRequest.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\UserScripts\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
+    <Compile Include="..\CefFlashBrowser\Services\UserScripts\Persistence\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
+    <Compile Include="..\CefFlashBrowser\Models\UserScripts\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
+  </ItemGroup>
+
   <!-- Link source files from the main app -->
   <ItemGroup>
     <Compile Include="..\CefFlashBrowser\Utils\PasswordProtector.cs" Link="LinkedSources\PasswordProtector.cs" />
@@ -29,6 +42,8 @@
     <Compile Include="..\CefFlashBrowser\Models\WebsiteIconRecord.cs" Link="LinkedSources\WebsiteIconRecord.cs" />
     <Compile Include="..\CefFlashBrowser\Services\FaviconService.cs" Link="LinkedSources\FaviconService.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\WebsiteIconUrlConverter.cs" Link="LinkedSources\WebsiteIconUrlConverter.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\UserScriptDownloadPaths.cs" Link="LinkedSources\UserScriptDownloadPaths.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\Win32.cs" Link="LinkedSources\Win32.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\UrlHelper.cs" Link="LinkedSources\UrlHelper.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\DirectoryHelper.cs" Link="LinkedSources\DirectoryHelper.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\ValueConverterBase.cs" Link="LinkedSources\ValueConverterBase.cs" />
@@ -46,6 +61,7 @@
 
   <ItemGroup>
     <Reference Include="System.Security" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <!-- Compiled at runtime by the standalone regression runners. -->

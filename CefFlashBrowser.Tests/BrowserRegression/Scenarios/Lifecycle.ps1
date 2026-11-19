@@ -121,3 +121,38 @@ function Test-CloseAllBrowsers($Context) {
         Assert-AuxiliaryClosed $Context $auxWindow ($auxWindow.FindName('browserView'))
     }
 }
+
+function Test-UserScriptSeams($Context) {
+    $browser = New-Object CefFlashBrowser.FlashBrowser.ChromiumFlashBrowser($true)
+    $window = New-Object System.Windows.Window
+    $window.Width = 800
+    $window.Height = 600
+    $window.ShowActivated = $false
+    $window.ShowInTaskbar = $false
+    $window.Content = $browser
+    $probe = New-Object UserScriptSeamProbe($browser)
+    try {
+        Assert-Regression (!$browser.IsNativeControlCreated -and !$browser.IsBrowserInitialized) 'deferred browser attaches before native creation'
+        Assert-Regression (!$probe.Host.IsLateAttach) 'userscript host is attached on time'
+        $browser.Address = 'https://example.invalid/superseded'
+        $browser.Load('about:blank')
+        $preparation = $probe.Host.PrepareAsync([Threading.CancellationToken]::None)
+        Assert-Regression (!$preparation.IsCompleted) 'preparation waits asynchronously for native creation'
+        $window.Show()
+        Wait-Regression $Context { $preparation.IsCompleted -and $probe.Navigations -eq 1 } 'userscript preparation before first navigation'
+        [void]$preparation.GetAwaiter().GetResult()
+        Assert-Regression (!$probe.Host.IsLatePreparation) 'userscript host prepares before business navigation'
+        $read = $probe.ReadAsync($browser)
+        Wait-Regression $Context { $read.IsCompleted } 'worker readiness and native audio polling'
+        [void]$read.GetAwaiter().GetResult()
+        Assert-Regression $probe.ReadyAfterAwait 'readiness is safe after a worker await'
+        Wait-Regression $Context { (Invoke-JavaScript $Context $browser 'window.__seamExecuted === true') } 'async bridge lifecycle reaches user source'
+    } finally {
+        $detach = $probe.Host.DetachAsync([Threading.CancellationToken]::None)
+        Wait-Regression $Context { $detach.IsCompleted } 'seam host detach'
+        [void]$detach.GetAwaiter().GetResult()
+        $probe.Host.Dispose()
+        $window.Close()
+        $browser.Dispose()
+    }
+}

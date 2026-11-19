@@ -147,7 +147,8 @@
                                     x:Name="customIcon"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
-                                    Content="{TemplateBinding DefaultIcon}"/>
+                                    Content="{TemplateBinding DefaultIcon}"
+                                    ContentTemplate="{TemplateBinding DefaultIconTemplate}"/>
                                 <svgc:SvgIcon
                                     x:Name="defaultIcon"
                                     Width="15"
@@ -174,6 +175,37 @@
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+
+
+
+    <!--BrowserIcon TextFallback-->
+    <Style x:Key="{x:Static local:BrowserIcon.TextFallbackStyleKey}"
+           TargetType="{x:Type local:BrowserIcon}"
+           BasedOn="{StaticResource {x:Type local:BrowserIcon}}">
+        <Setter Property="Background" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        <Setter Property="FontSize" Value="8"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="DefaultIconTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Grid Width="16" Height="16">
+                        <Border
+                            CornerRadius="3"
+                            Opacity="0.07"
+                            Background="{Binding Background, RelativeSource={RelativeSource AncestorType=local:BrowserIcon}}"/>
+                        <TextBlock
+                            Text="{Binding}"
+                            Opacity="0.8"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+                    </Grid>
+                </DataTemplate>
             </Setter.Value>
         </Setter>
     </Style>
