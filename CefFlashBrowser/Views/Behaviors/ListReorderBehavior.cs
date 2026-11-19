@@ -1,4 +1,5 @@
 using CefFlashBrowser.Infrastructure.Collections;
+using CefFlashBrowser.Utils;
 using Microsoft.Xaml.Behaviors;
 using System;
 using System.Windows;
@@ -6,7 +7,9 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace CefFlashBrowser.Views.Behaviors
@@ -24,13 +27,17 @@ namespace CefFlashBrowser.Views.Behaviors
             nameof(CanReorderItem), typeof(Predicate<object>), typeof(ListReorderBehavior));
 
         private const double ScrollEdge = 24;
+        private const double PreviewBorderThickness = 1;
         private object _dragCandidate;
         private Point _dragStart;
+        private Vector _previewOffset;
         private DragSession _drag;
         private Point _dragPosition;
         private DispatcherTimer _scrollTimer;
         private AdornerLayer _insertLayer;
         private InsertAdorner _insertLine;
+        private Popup _dragPreview;
+        private bool _usedPreviewCursor;
 
         public bool IsDragEnabled
         {
@@ -135,6 +142,7 @@ namespace CefFlashBrowser.Views.Behaviors
 
             _dragCandidate = list.Items[index];
             _dragStart = e.GetPosition(list);
+            _previewOffset = (Vector)e.GetPosition(row) + new Vector(PreviewBorderThickness, PreviewBorderThickness);
         }
 
         private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
@@ -158,7 +166,8 @@ namespace CefFlashBrowser.Views.Behaviors
                 return;
             }
 
-            var distance = e.GetPosition(list) - _dragStart;
+            var position = e.GetPosition(list);
+            var distance = position - _dragStart;
 
             if (Math.Abs(distance.X) < SystemParameters.MinimumHorizontalDragDistance
                 && Math.Abs(distance.Y) < SystemParameters.MinimumVerticalDragDistance)
@@ -174,6 +183,7 @@ namespace CefFlashBrowser.Views.Behaviors
 
             try
             {
+                ShowDragPreview(position);
                 DragDrop.DoDragDrop(list, data, DragDropEffects.Move);
             }
             finally
@@ -195,9 +205,112 @@ namespace CefFlashBrowser.Views.Behaviors
                 return null;
 
             _drag = new DragSession(list, viewport, item);
-            // Keep this handler on the source until OLE exits, even if the behavior is detached.
+            // Keep the source handlers until OLE exits, even if the behavior is detached.
             list.PreviewQueryContinueDrag += OnQueryContinueDrag;
+            list.PreviewGiveFeedback += OnGiveFeedback;
             return new DataObject(typeof(DragToken), _drag.Token);
+        }
+
+        private void ShowDragPreview(Point position)
+        {
+            var list = _drag.List;
+
+            if (!(list.ItemContainerGenerator.ContainerFromItem(_drag.Item) is ListBoxItem row)
+                || row.ActualWidth <= 0 || row.ActualHeight <= 0 || VisualTreeHelper.GetChildrenCount(row) == 0)
+                return;
+
+            var size = row.RenderSize;
+            var dpi = VisualTreeHelper.GetDpi(row);
+
+            var snapshot = new RenderTargetBitmap(
+                (int)Math.Ceiling(size.Width * dpi.DpiScaleX), (int)Math.Ceiling(size.Height * dpi.DpiScaleY),
+                dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+
+            // Render the template root to exclude the container's offset within the list.
+            snapshot.Render((Visual)VisualTreeHelper.GetChild(row, 0));
+            snapshot.Freeze();
+
+            var preview = new Border
+            {
+                BorderThickness = new Thickness(PreviewBorderThickness),
+                BorderBrush = list.TryFindResource("BorderBrush") as Brush ?? SystemColors.ActiveBorderBrush,
+                Background = list.TryFindResource("RegionBrush") as Brush ?? SystemColors.WindowBrush,
+                CornerRadius = new CornerRadius(4),
+                Opacity = 0.9,
+                Child = new Image { Source = snapshot, Width = size.Width, Height = size.Height, Stretch = Stretch.Fill }
+            };
+
+            _dragPreview = new Popup
+            {
+                Placement = PlacementMode.RelativePoint,
+                PlacementTarget = list,
+                HorizontalOffset = position.X - _previewOffset.X,
+                VerticalOffset = position.Y - _previewOffset.Y,
+                AllowsTransparency = true,
+                StaysOpen = true,
+                Focusable = false,
+                IsHitTestVisible = false,
+                Child = preview
+            };
+            _dragPreview.Opened += OnDragPreviewOpened;
+            _dragPreview.IsOpen = true;
+        }
+
+        private void OnDragPreviewOpened(object sender, EventArgs e)
+        {
+            if (PresentationSource.FromVisual(_dragPreview.Child) is HwndSource source)
+            {
+                // Let OLE hit-test the list beneath the native popup.
+                HwndHelper.SetWindowExStyle(source.Handle, HwndHelper.GetWindowExStyle(source.Handle)
+                    | Win32.WS_EX_TRANSPARENT | Win32.WS_EX_NOACTIVATE);
+                PositionDragPreview(source);
+            }
+        }
+
+        private void PositionDragPreview(HwndSource source)
+        {
+            if (!Win32.GetCursorPos(out var cursor))
+                return;
+
+            var offset = source.CompositionTarget.TransformToDevice.Transform(_previewOffset);
+
+            Win32.SetWindowPos(source.Handle, IntPtr.Zero, cursor.x - (int)Math.Round(offset.X),
+                cursor.y - (int)Math.Round(offset.Y), 0, 0,
+                Win32.SWP_NOSIZE | Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE);
+        }
+
+        private void OnGiveFeedback(object sender, GiveFeedbackEventArgs e)
+        {
+            if (_dragPreview?.IsOpen != true || !(PresentationSource.FromVisual(_dragPreview.Child) is HwndSource source))
+                return;
+
+            PositionDragPreview(source);
+
+            if (e.Effects == DragDropEffects.Move)
+            {
+                Mouse.SetCursor(Cursors.Arrow);
+                _usedPreviewCursor = true;
+                e.UseDefaultCursors = false;
+                e.Handled = true;
+            }
+        }
+
+        private void HideDragPreview()
+        {
+            if (_dragPreview != null)
+            {
+                _dragPreview.Opened -= OnDragPreviewOpened;
+                _dragPreview.IsOpen = false;
+                _dragPreview.Child = null;
+                _dragPreview.PlacementTarget = null;
+                _dragPreview = null;
+            }
+
+            if (_usedPreviewCursor)
+            {
+                Mouse.SetCursor(null);
+                _usedPreviewCursor = false;
+            }
         }
 
         private bool CanStartDrag(ListBox list, object item)
@@ -466,6 +579,7 @@ namespace CefFlashBrowser.Views.Behaviors
                 _drag.Cancelled = true;
 
             ClearFeedback();
+            HideDragPreview();
         }
 
         private void EndDrag()
@@ -475,6 +589,7 @@ namespace CefFlashBrowser.Views.Behaviors
             if (_drag != null)
             {
                 _drag.List.PreviewQueryContinueDrag -= OnQueryContinueDrag;
+                _drag.List.PreviewGiveFeedback -= OnGiveFeedback;
                 _drag = null;
             }
         }
