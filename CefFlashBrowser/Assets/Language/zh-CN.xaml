@@ -5,8 +5,8 @@
     <sys:String x:Key="language_name">中文</sys:String>
 
     <!--共用字段-->
-    <sys:String x:Key="common_swfFile">SWF文件</sys:String>
-    <sys:String x:Key="common_solFile">SOL文件</sys:String>
+    <sys:String x:Key="common_swfFile">SWF 文件</sys:String>
+    <sys:String x:Key="common_solFile">SOL 文件</sys:String>
     <sys:String x:Key="common_allFiles">所有文件</sys:String>
     <sys:String x:Key="common_shortcut">快捷方式</sys:String>
     <sys:String x:Key="common_favorites">收藏夹</sys:String>
@@ -23,13 +23,13 @@
     <sys:String x:Key="mainWindow_title">欢迎</sys:String>
     <sys:String x:Key="mainWindow_go">跳转</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理收藏夹</sys:String>
-    <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存档</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">管理 SOL 存档</sys:String>
     <sys:String x:Key="mainWindow_manageUserScripts">管理用户脚本</sys:String>
-    <sys:String x:Key="mainWindow_openSolFile">打开SOL文件...</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">打开 SOL 文件...</sys:String>
     <sys:String x:Key="mainWindow_languages">语言</sys:String>
     <sys:String x:Key="mainWindow_options">选项</sys:String>
-    <sys:String x:Key="mainWindow_loadSwf">加载本地SWF文件...</sys:String>
-    <sys:String x:Key="mainWindow_viewGithub">在GitHub中查看</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">加载本地 SWF 文件...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">在 GitHub 中查看</sys:String>
 
     <!--设置窗口-->
     <sys:String x:Key="settings_headerMainWindow">主窗口</sys:String>
@@ -55,13 +55,13 @@
     <sys:String x:Key="settings_disableOnBeforeUnloadDialog">阻止网页刷新/关闭时的弹窗</sys:String>
     <sys:String x:Key="settings_enableProxy">使用代理</sys:String>
     <sys:String x:Key="settings_enableCustomUserAgent">自定义用户代理（UA）</sys:String>
-    <sys:String x:Key="settings_enableFakeFlashVersion">伪造Flash版本</sys:String>
-    <sys:String x:Key="settings_cefVersion">CefSharp版本</sys:String>
+    <sys:String x:Key="settings_enableFakeFlashVersion">伪造 Flash 版本</sys:String>
+    <sys:String x:Key="settings_cefVersion">CefSharp 版本</sys:String>
     <sys:String x:Key="settings_server">服务器</sys:String>
     <sys:String x:Key="settings_username">用户名</sys:String>
     <sys:String x:Key="settings_password">密码</sys:String>
     <sys:String x:Key="settings_userAgent">用户代理</sys:String>
-    <sys:String x:Key="settings_flashVersion">Flash版本</sys:String>
+    <sys:String x:Key="settings_flashVersion">Flash 版本</sys:String>
     <sys:String x:Key="settings_buttonDeleteCache">清除</sys:String>
     <sys:String x:Key="settings_buttonViewDetails">详情</sys:String>
     <sys:String x:Key="settings_buttonRestart">重启</sys:String>
@@ -73,7 +73,7 @@
     <sys:String x:Key="settings_alwaysShowTabStrip">始终显示标签页栏</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">嵌入开发工具到浏览器窗口</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止网页进入全屏模式</sys:String>
-    <sys:String x:Key="settings_disableGpuAcceleration">禁用GPU加速</sys:String>
+    <sys:String x:Key="settings_disableGpuAcceleration">禁用 GPU 加速</sys:String>
     <sys:String x:Key="settings_disableBrowserContextMenu">禁用右键菜单</sys:String>
 
     <!--主窗口地址栏-->
@@ -142,7 +142,7 @@
     <sys:String x:Key="browser_openInDefaultBrowser">在默认浏览器中打开</sys:String>
     <sys:String x:Key="browser_createShortcut">创建网页快捷方式</sys:String>
     <sys:String x:Key="browser_addFavorite">添加此网站到收藏夹</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">一些Flash内容似乎被Chromium内核屏蔽，你可以在SWF播放器中播放它：</sys:String>
+    <sys:String x:Key="browser_tipsBlockedSwfs">一些 Flash 内容似乎被 Chromium 内核屏蔽，你可以在 SWF 播放器中播放它：</sys:String>
     <sys:String x:Key="browser_toolTipBack">返回（Alt+向左键）</sys:String>
     <sys:String x:Key="browser_toolTipForward">前进（Alt+向右键）</sys:String>
     <sys:String x:Key="browser_toolTipReload">刷新（Ctrl+R）</sys:String>
@@ -150,7 +150,7 @@
     <sys:String x:Key="browser_toolTipNewTab">新标签页（Ctrl+T）</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">关闭标签页（Ctrl+W）</sys:String>
     <sys:String x:Key="browser_toolTipMore">更多</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">被屏蔽的Flash内容</sys:String>
+    <sys:String x:Key="browser_toolTipBlockedSwfs">被屏蔽的 Flash 内容</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加号键）</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">缩小（Ctrl+减号键）</sys:String>
     <sys:String x:Key="browser_loading">加载中...</sys:String>
@@ -165,7 +165,7 @@
     <sys:String x:Key="browser_openTabInNewWindow">在新窗口中打开标签页</sys:String>
 
     <!--存档管理器-->
-    <sys:String x:Key="solSaveManager_title">SOL存档管理器</sys:String>
+    <sys:String x:Key="solSaveManager_title">SOL 存档管理器</sys:String>
     <sys:String x:Key="solSaveManager_headerFileName">文件名</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">文件路径</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">操作</sys:String>
@@ -175,7 +175,7 @@
     <sys:String x:Key="solSaveManager_filterPlaceholder">筛选...</sys:String>
 
     <!--存档编辑器-->
-    <sys:String x:Key="solEditor_title">SOL编辑器</sys:String>
+    <sys:String x:Key="solEditor_title">SOL 编辑器</sys:String>
     <sys:String x:Key="solEditor_file">文件</sys:String>
     <sys:String x:Key="solEditor_save">保存</sys:String>
     <sys:String x:Key="solEditor_saveAs">另存为...</sys:String>
@@ -189,8 +189,8 @@
     <sys:String x:Key="solEditor_statusSaved">已保存</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">未知状态</sys:String>
     <sys:String x:Key="solEditor_emptyString">（空）</sys:String>
-    <sys:String x:Key="solEditor_amf0SolFile">AMF0编码的SOL文件</sys:String>
-    <sys:String x:Key="solEditor_amf3SolFile">AMF3编码的SOL文件</sys:String>
+    <sys:String x:Key="solEditor_amf0SolFile">AMF0 编码的 SOL 文件</sys:String>
+    <sys:String x:Key="solEditor_amf3SolFile">AMF3 编码的 SOL 文件</sys:String>
 
     <!--对话框-->
     <sys:String x:Key="dialog_ok">确定</sys:String>
@@ -324,6 +324,6 @@
     <sys:String x:Key="error_objPropAreadyExists">对象已经存在名称为“{0}”的属性。</sys:String>
     <sys:String x:Key="error_keyOrPropEmpty">键值/属性名不能为空。</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
-    <sys:String x:Key="error_notSolFile">文件“{0}”不是SOL文件。</sys:String>
+    <sys:String x:Key="error_notSolFile">文件“{0}”不是 SOL 文件。</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">未知的搜索引擎。</sys:String>
 </ResourceDictionary>

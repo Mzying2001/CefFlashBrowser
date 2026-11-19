@@ -5,8 +5,8 @@
     <sys:String x:Key="language_name">中文（繁體）</sys:String>
 
     <!-- 共用欄位 -->
-    <sys:String x:Key="common_swfFile">SWF檔案</sys:String>
-    <sys:String x:Key="common_solFile">SOL檔案</sys:String>
+    <sys:String x:Key="common_swfFile">SWF 檔案</sys:String>
+    <sys:String x:Key="common_solFile">SOL 檔案</sys:String>
     <sys:String x:Key="common_shortcut">捷徑</sys:String>
     <sys:String x:Key="common_allFiles">所有檔案</sys:String>
     <sys:String x:Key="common_favorites">我的最愛</sys:String>
@@ -23,13 +23,13 @@
     <sys:String x:Key="mainWindow_title">歡迎</sys:String>
     <sys:String x:Key="mainWindow_go">前往</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理我的最愛</sys:String>
-    <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存檔</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">管理 SOL 存檔</sys:String>
     <sys:String x:Key="mainWindow_manageUserScripts">管理使用者腳本</sys:String>
-    <sys:String x:Key="mainWindow_openSolFile">開啟SOL檔案...</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">開啟 SOL 檔案...</sys:String>
     <sys:String x:Key="mainWindow_languages">語言</sys:String>
     <sys:String x:Key="mainWindow_options">選項</sys:String>
-    <sys:String x:Key="mainWindow_loadSwf">載入本機SWF檔案...</sys:String>
-    <sys:String x:Key="mainWindow_viewGithub">在GitHub檢視</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">載入本機 SWF 檔案...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">在 GitHub 檢視</sys:String>
 
     <!--設定視窗-->
     <sys:String x:Key="settings_headerMainWindow">主視窗</sys:String>
@@ -55,25 +55,25 @@
     <sys:String x:Key="settings_disableOnBeforeUnloadDialog">阻止網頁重新整理/關閉時的確認對話框</sys:String>
     <sys:String x:Key="settings_enableProxy">使用代理伺服器</sys:String>
     <sys:String x:Key="settings_enableCustomUserAgent">自訂使用者代理（UA）</sys:String>
-    <sys:String x:Key="settings_enableFakeFlashVersion">偽造Flash版本</sys:String>
-    <sys:String x:Key="settings_cefVersion">CefSharp版本</sys:String>
+    <sys:String x:Key="settings_enableFakeFlashVersion">偽造 Flash 版本</sys:String>
+    <sys:String x:Key="settings_cefVersion">CefSharp 版本</sys:String>
     <sys:String x:Key="settings_server">伺服器</sys:String>
     <sys:String x:Key="settings_username">使用者名稱</sys:String>
     <sys:String x:Key="settings_password">密碼</sys:String>
     <sys:String x:Key="settings_userAgent">使用者代理</sys:String>
-    <sys:String x:Key="settings_flashVersion">Flash版本</sys:String>
+    <sys:String x:Key="settings_flashVersion">Flash 版本</sys:String>
     <sys:String x:Key="settings_buttonDeleteCache">清除</sys:String>
     <sys:String x:Key="settings_buttonViewDetails">詳細資料</sys:String>
     <sys:String x:Key="settings_buttonRestart">重新啟動</sys:String>
     <sys:String x:Key="settings_needRestart">此部分設定需重新啟動程式後生效。</sys:String>
-    <sys:String x:Key="settings_ip">IP位址</sys:String>
+    <sys:String x:Key="settings_ip">IP 位址</sys:String>
     <sys:String x:Key="settings_port">通訊埠</sys:String>
     <sys:String x:Key="settings_optional">（選填）</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">儲存網頁縮放比例</sys:String>
     <sys:String x:Key="settings_alwaysShowTabStrip">一律顯示分頁列</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">將開發者工具嵌入至瀏覽器視窗</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止網頁進入全螢幕模式</sys:String>
-    <sys:String x:Key="settings_disableGpuAcceleration">停用GPU加速</sys:String>
+    <sys:String x:Key="settings_disableGpuAcceleration">停用 GPU 加速</sys:String>
     <sys:String x:Key="settings_disableBrowserContextMenu">停用右鍵選單</sys:String>
 
     <!--主視窗網址列-->
@@ -142,7 +142,7 @@
     <sys:String x:Key="browser_openInDefaultBrowser">在預設瀏覽器開啟</sys:String>
     <sys:String x:Key="browser_createShortcut">建立網頁捷徑</sys:String>
     <sys:String x:Key="browser_addFavorite">將此網站加入我的最愛</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">部分Flash內容可能被Chromium核心封鎖，您可以在SWF播放器中播放：</sys:String>
+    <sys:String x:Key="browser_tipsBlockedSwfs">部分 Flash 內容可能被 Chromium 核心封鎖，您可以在 SWF 播放器中播放：</sys:String>
     <sys:String x:Key="browser_toolTipBack">上一頁（Alt+向左鍵）</sys:String>
     <sys:String x:Key="browser_toolTipForward">下一頁（Alt+向右鍵）</sys:String>
     <sys:String x:Key="browser_toolTipReload">重新整理（Ctrl+R）</sys:String>
@@ -150,7 +150,7 @@
     <sys:String x:Key="browser_toolTipNewTab">新分頁（Ctrl+T）</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">關閉分頁（Ctrl+W）</sys:String>
     <sys:String x:Key="browser_toolTipMore">更多功能</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">被封鎖的Flash內容</sys:String>
+    <sys:String x:Key="browser_toolTipBlockedSwfs">被封鎖的 Flash 內容</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加號鍵）</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">縮小（Ctrl+減號鍵）</sys:String>
     <sys:String x:Key="browser_loading">載入中...</sys:String>
@@ -165,7 +165,7 @@
     <sys:String x:Key="browser_openTabInNewWindow">在新視窗中開啟分頁</sys:String>
 
     <!--存檔管理員-->
-    <sys:String x:Key="solSaveManager_title">SOL存檔管理員</sys:String>
+    <sys:String x:Key="solSaveManager_title">SOL 存檔管理員</sys:String>
     <sys:String x:Key="solSaveManager_headerFileName">檔案名稱</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">檔案路徑</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">操作</sys:String>
@@ -175,7 +175,7 @@
     <sys:String x:Key="solSaveManager_filterPlaceholder">篩選...</sys:String>
 
     <!--存檔編輯器-->
-    <sys:String x:Key="solEditor_title">SOL編輯器</sys:String>
+    <sys:String x:Key="solEditor_title">SOL 編輯器</sys:String>
     <sys:String x:Key="solEditor_file">檔案</sys:String>
     <sys:String x:Key="solEditor_save">儲存</sys:String>
     <sys:String x:Key="solEditor_saveAs">另存新檔...</sys:String>
@@ -189,8 +189,8 @@
     <sys:String x:Key="solEditor_statusSaved">已儲存</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">未知狀態</sys:String>
     <sys:String x:Key="solEditor_emptyString">（空）</sys:String>
-    <sys:String x:Key="solEditor_amf0SolFile">AMF0編碼的SOL檔案</sys:String>
-    <sys:String x:Key="solEditor_amf3SolFile">AMF3編碼的SOL檔案</sys:String>
+    <sys:String x:Key="solEditor_amf0SolFile">AMF0 編碼的 SOL 檔案</sys:String>
+    <sys:String x:Key="solEditor_amf3SolFile">AMF3 編碼的 SOL 檔案</sys:String>
 
     <!--對話框-->
     <sys:String x:Key="dialog_ok">確定</sys:String>
@@ -324,6 +324,6 @@
     <sys:String x:Key="error_objPropAreadyExists">物件中已經存在名稱為「{0}」的屬性。</sys:String>
     <sys:String x:Key="error_keyOrPropEmpty">鍵值/屬性名稱不能為空。</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">已經存在名稱為「{0}」的鍵值/屬性。</sys:String>
-    <sys:String x:Key="error_notSolFile">檔案「{0}」不是SOL檔案。</sys:String>
+    <sys:String x:Key="error_notSolFile">檔案「{0}」不是 SOL 檔案。</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">未知的搜尋引擎。</sys:String>
 </ResourceDictionary>
