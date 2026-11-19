@@ -78,7 +78,10 @@
                                 </MultiBinding>
                             </c:BrowserIcon.FaviconUrl>
                         </c:BrowserIcon>
-                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Name}"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
                     </DockPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
