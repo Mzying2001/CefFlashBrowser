@@ -813,6 +813,24 @@ document.documentElement.setAttribute('data-web-install', 'ready');
         $item.Installation.Definition.Source -ceq $Fixture.ScriptSource -and $saved.Value.EncodedValue -ceq $value.EncodedValue) 'manager updates the web installation in place and preserves enabled state and data'
 }
 
+function Invoke-ManagerDragEvent($List, $Item, [Windows.Point]$Point, [Windows.RoutedEvent]$Event) {
+    $data = [Windows.DataObject]::new($Item.GetType(), $Item.PSObject.BaseObject)
+    $constructor = [Windows.DragEventArgs].GetConstructors([Reflection.BindingFlags]'Instance,NonPublic')[0]
+    $eventArgs = $constructor.Invoke([object[]]@($data, [Windows.DragDropKeyStates]::LeftMouseButton,
+        [Windows.DragDropEffects]::Move, $List.PSObject.BaseObject, $Point))
+    $eventArgs.RoutedEvent = $Event
+    $List.RaiseEvent($eventArgs)
+    return $eventArgs.Effects
+}
+
+function Invoke-ManagerDragEscape($List) {
+    $constructor = [Windows.QueryContinueDragEventArgs].GetConstructors([Reflection.BindingFlags]'Instance,NonPublic')[0]
+    $query = $constructor.Invoke([object[]]@($true, [Windows.DragDropKeyStates]::LeftMouseButton))
+    $query.RoutedEvent = [Windows.DragDrop]::PreviewQueryContinueDragEvent
+    $List.RaiseEvent($query)
+    return $query.Action
+}
+
 function Test-ManagerExecutionOrder($Context, $Window, $BrowserModel) {
     $repository = $Context.UserScriptService.Repository
     $model = $Window.DataContext
@@ -853,17 +871,86 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
             $menu.Items[0].IsEnabled -and !$menu.Items[1].IsEnabled -and
                 $menu.Items[2].IsEnabled -and !$menu.Items[3].IsEnabled
         } 'last installed script only offers moves toward the beginning'
-        $move = $menu.Items[2]
         $menu.IsOpen = $false
-        Invoke-BrowserCommand $move.Command
-        Wait-Regression $Context { !$model.IsBusy -and [object]::ReferenceEquals($model.Scripts[0], $item) } 'move to first commits and updates the list'
-        Assert-Regression ([object]::ReferenceEquals($model.SelectedScript, $item)) 'moving a script preserves selection'
+        $list = $Window.FindName('scriptList')
+        $first = @($model.Scripts | Where-Object { $_.IsInstalled -and $_.Installation.ScriptKey.Equals($installed[0].ScriptKey) })[0]
+        $editor = $Window.FindName('sourceEditor')
+        $editor.TextArea.PerformTextInput('// unsaved drag edit')
+        $editedSource = $item.Source
+        $flags = [Reflection.BindingFlags]'Instance,NonPublic'
+        $insertLine = $Window.GetType().GetField('_scriptInsertLine', $flags)
+        $Window.UpdateLayout()
+        $sourceRow = $list.ItemContainerGenerator.ContainerFromItem($item)
+        $targetRow = $list.ItemContainerGenerator.ContainerFromItem($first)
+        $toggle = Find-ManagerToggle $sourceRow
+        $down = [Windows.Input.MouseButtonEventArgs]::new([Windows.Input.Mouse]::PrimaryDevice, 0, [Windows.Input.MouseButton]::Left)
+        $down.RoutedEvent = [Windows.Input.Mouse]::PreviewMouseDownEvent
+        $toggle.RaiseEvent($down)
+        $candidate = $Window.GetType().GetField('_scriptDragCandidate', $flags)
+        Assert-Regression ($null -eq $candidate.GetValue($Window)) 'pressing the enable switch does not start a drag'
+
+        $before = $targetRow.TranslatePoint([Windows.Point]::new(65, $targetRow.ActualHeight / 4), $list)
+        $over = [Windows.DragDrop]::PreviewDragOverEvent
+        $drop = [Windows.DragDrop]::PreviewDropEvent
+        Invoke-ViewCallback $Window 'BeginScriptDrag' @($item)
+        $effect = Invoke-ManagerDragEvent $list $item $before $over
+        Assert-Regression ($effect -eq [Windows.DragDropEffects]::Move -and $null -ne $insertLine.GetValue($Window) -and
+            $model.Scripts.IndexOf($first) -lt $model.Scripts.IndexOf($item)) 'the upper half shows an insertion line without changing script order'
+        [void](Invoke-ManagerDragEvent $list $item $before ([Windows.DragDrop]::PreviewDragLeaveEvent))
+        Assert-Regression ($null -eq $insertLine.GetValue($Window)) 'leaving the list clears the insertion line'
+        [void](Invoke-ManagerDragEvent $list $item $before $over)
+        Assert-Regression ((Invoke-ManagerDragEscape $list) -eq [Windows.DragAction]::Cancel -and
+            $null -eq $insertLine.GetValue($Window) -and $model.Scripts.IndexOf($first) -lt $model.Scripts.IndexOf($item)) 'Esc clears the drop preview and preserves script order'
+        Invoke-ViewCallback $Window 'EndScriptDrag' @()
+
+        Invoke-ViewCallback $Window 'BeginScriptDrag' @($item)
+        $effect = Invoke-ManagerDragEvent $list $item $before $drop
+        Invoke-ViewCallback $Window 'EndScriptDrag' @()
+        Assert-Regression ($effect -eq [Windows.DragDropEffects]::Move) 'the list accepts a drop from its own drag'
+        Wait-Regression $Context { !$model.IsBusy -and $model.Scripts.IndexOf($item) -eq ($model.Scripts.IndexOf($first) - 1) } 'dropping in the upper half inserts before the target'
+        Assert-Regression ([object]::ReferenceEquals($model.SelectedScript, $item) -and
+            $item.IsDirty -and $editor.Text -ceq $editedSource -and $null -eq $insertLine.GetValue($Window)) 'dragging preserves selection and unsaved source and clears the insertion line'
         Assert-Regression ((Invoke-JavaScript $Context $BrowserModel.Browser $readOrder) -ceq 'AB') 'reordering does not rerun scripts in the existing document'
         Invoke-BrowserCommand $BrowserModel.Browser.ReloadCommand
         Wait-Regression $Context {
             (Invoke-JavaScript $Context $BrowserModel.Browser $readOrder) -ceq 'BA'
         } 'same-stage scripts follow the custom order after refresh'
+
+        $Window.UpdateLayout()
+        $targetRow = $list.ItemContainerGenerator.ContainerFromItem($first)
+        $after = $targetRow.TranslatePoint([Windows.Point]::new(65, $targetRow.ActualHeight * 3 / 4), $list)
+        Invoke-ViewCallback $Window 'BeginScriptDrag' @($item)
+        [void](Invoke-ManagerDragEvent $list $item $after $drop)
+        Invoke-ViewCallback $Window 'EndScriptDrag' @()
+        Wait-Regression $Context { !$model.IsBusy -and $model.Scripts.IndexOf($item) -eq ($model.Scripts.IndexOf($first) + 1) } 'dropping in the lower half inserts after the target'
+
+        $Window.UpdateLayout()
+        $topItem = $model.Scripts[0]
+        $lastRow = $list.ItemContainerGenerator.ContainerFromItem($item)
+        $blank = $lastRow.TranslatePoint([Windows.Point]::new(65, $lastRow.ActualHeight + 5), $list)
+        Invoke-ViewCallback $Window 'BeginScriptDrag' @($topItem)
+        $effect = Invoke-ManagerDragEvent $list $topItem $blank $drop
+        Invoke-ViewCallback $Window 'EndScriptDrag' @()
+        Assert-Regression ($effect -eq [Windows.DragDropEffects]::Move) 'the blank space after the last installed row accepts a drop'
+        Wait-Regression $Context { !$model.IsBusy -and [object]::ReferenceEquals($list.Items[$list.Items.Count - 1], $topItem) } 'dropping in the trailing space moves the script to the end'
+
+        foreach ($index in 1..15) {
+            $installed += Complete-UserScriptTask $Context ($repository.InstallAsync($scriptSource.Replace('__MARK__', "Scroll $index"), $null, $false, $token)) "install drag overflow fixture $index"
+        }
+        $list.ScrollIntoView($item)
+        $Window.UpdateLayout()
+        $viewport = @(Find-FaviconElements $list ([Windows.Controls.ScrollContentPresenter]))[0]
+        $scroll = $viewport.TemplatedParent
+        $offset = $scroll.VerticalOffset
+        $edge = $viewport.TranslatePoint([Windows.Point]::new(65, $viewport.ActualHeight - 5), $list)
+        Invoke-ViewCallback $Window 'BeginScriptDrag' @($item)
+        [void](Invoke-ManagerDragEvent $list $item $edge $over)
+        Wait-Regression $Context { $scroll.VerticalOffset -gt $offset } 'dragging near the bottom edge scrolls the list'
+        [void](Invoke-ManagerDragEscape $list)
+        $timer = $Window.GetType().GetField('_scriptDragTimer', $flags).GetValue($Window)
+        Assert-Regression (!$timer.IsEnabled -and $model.Scripts.IndexOf($item) -eq ($model.Scripts.IndexOf($first) + 1)) 'canceling an edge drag stops scrolling and preserves script order'
     } finally {
+        Invoke-ViewCallback $Window 'EndScriptDrag' @()
         foreach ($installation in $installed) {
             Complete-UserScriptTask $Context ($repository.RemoveAsync($installation.ScriptKey, $token)) 'remove order fixture' | Out-Null
         }
@@ -925,6 +1012,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Test-ManagerExecutionOrder $Context $window $browserWindow.ViewModel.CurrentBrowser
         $model.SelectedScript = $item
         $list = $window.FindName('scriptList')
+        $list.ScrollIntoView($item)
         $list.UpdateLayout()
         $icon = @(Find-FaviconElements ($list.ItemContainerGenerator.ContainerFromItem($item)) ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
         Assert-Regression ($icon.Width -eq 24 -and $icon.Height -eq 24) 'script list displays a 24px icon'

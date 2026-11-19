@@ -53,7 +53,32 @@ namespace CefFlashBrowser.Services.UserScripts
             }
         }
 
-        internal async Task<bool> MoveAsync(ScriptKey key, UserScriptMove move, CancellationToken token)
+        internal Task<bool> MoveAsync(ScriptKey key, UserScriptMove move, CancellationToken token)
+            => MoveCoreAsync(key, (keys, index) =>
+            {
+                switch (move)
+                {
+                    case UserScriptMove.Up: return index - 1;
+                    case UserScriptMove.Down: return index + 1;
+                    case UserScriptMove.First: return 0;
+                    case UserScriptMove.Last: return keys.Count - 1;
+                    default: throw new ArgumentOutOfRangeException(nameof(move));
+                }
+            }, token);
+
+        internal Task<bool> MoveRelativeAsync(ScriptKey key, ScriptKey target, bool after, CancellationToken token)
+            => MoveCoreAsync(key, (keys, index) => GetRelativeDestination(index, keys.IndexOf(target), after), token);
+
+        internal static int GetRelativeDestination(int sourceIndex, int targetIndex, bool after)
+        {
+            if (sourceIndex < 0 || targetIndex < 0)
+                return -1;
+
+            var insertionIndex = targetIndex + (after ? 1 : 0);
+            return sourceIndex < insertionIndex ? insertionIndex - 1 : insertionIndex;
+        }
+
+        private async Task<bool> MoveCoreAsync(ScriptKey key, Func<List<ScriptKey>, int, int> getDestination, CancellationToken token)
         {
             await _membershipAndOrder.WaitAsync(token).ConfigureAwait(false);
 
@@ -66,15 +91,7 @@ namespace CefFlashBrowser.Services.UserScripts
                 if (index < 0)
                     return false;
 
-                int destination;
-                switch (move)
-                {
-                    case UserScriptMove.Up: destination = index - 1; break;
-                    case UserScriptMove.Down: destination = index + 1; break;
-                    case UserScriptMove.First: destination = 0; break;
-                    case UserScriptMove.Last: destination = keys.Count - 1; break;
-                    default: throw new ArgumentOutOfRangeException(nameof(move));
-                }
+                var destination = getDestination(keys, index);
 
                 if (destination == index || destination < 0 || destination >= keys.Count)
                     return false;

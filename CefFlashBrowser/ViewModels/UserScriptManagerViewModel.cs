@@ -430,16 +430,27 @@ namespace CefFlashBrowser.ViewModels
 
         private bool CanMove(UserScriptItemViewModel item, UserScriptMove move)
         {
-            if (IsBusy || _lifetime == null || !(_repository is OrderedUserScriptRepository) || item?.IsInstalled != true)
-                return false;
-
-            var index = Scripts.IndexOf(item);
+            var index = GetReorderableIndex(item);
             if (index < 0)
                 return false;
 
             return move == UserScriptMove.Up || move == UserScriptMove.First
                 ? index > 0 && Scripts[index - 1].IsInstalled
                 : index + 1 < Scripts.Count && Scripts[index + 1].IsInstalled;
+        }
+
+        private int GetReorderableIndex(UserScriptItemViewModel item)
+            => !IsBusy && _lifetime != null && _repository is OrderedUserScriptRepository && item?.IsInstalled == true
+                ? Scripts.IndexOf(item) : -1;
+
+        internal bool CanDragScript(UserScriptItemViewModel item)
+            => CanMove(item, UserScriptMove.Up) || CanMove(item, UserScriptMove.Down);
+
+        internal bool CanMoveRelative(UserScriptItemViewModel item, UserScriptItemViewModel target, bool after)
+        {
+            var index = GetReorderableIndex(item);
+            var destination = OrderedUserScriptRepository.GetRelativeDestination(index, GetReorderableIndex(target), after);
+            return destination >= 0 && destination != index;
         }
 
         internal Task MoveAsync(UserScriptItemViewModel item, UserScriptMove move)
@@ -449,10 +460,25 @@ namespace CefFlashBrowser.ViewModels
 
             var repository = (OrderedUserScriptRepository)_repository;
             var key = item.Installation.ScriptKey;
+            return CommitMoveAsync(token => repository.MoveAsync(key, move, token));
+        }
 
+        internal Task MoveRelativeAsync(UserScriptItemViewModel item, UserScriptItemViewModel target, bool after)
+        {
+            if (!CanMoveRelative(item, target, after))
+                return Task.CompletedTask;
+
+            var repository = (OrderedUserScriptRepository)_repository;
+            var key = item.Installation.ScriptKey;
+            var targetKey = target.Installation.ScriptKey;
+            return CommitMoveAsync(token => repository.MoveRelativeAsync(key, targetKey, after, token));
+        }
+
+        private Task CommitMoveAsync(Func<CancellationToken, Task<bool>> move)
+        {
             return RunAsync(async token =>
             {
-                if (await repository.MoveAsync(key, move, token))
+                if (await move(token))
                 {
                     await RefreshInstalledOrderAsync(token);
                     Status = _text("userScriptManager_refreshPage");

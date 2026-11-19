@@ -103,29 +103,50 @@ namespace CefFlashBrowser.Tests
             await AssertMoveAsync(UserScriptMove.Down, firstItem, secondItem, thirdItem);
             await AssertMoveAsync(UserScriptMove.Last, firstItem, thirdItem, secondItem);
             await AssertMoveAsync(UserScriptMove.First, secondItem, firstItem, thirdItem);
+
+            Assert.IsTrue(manager.CanDragScript(secondItem));
+            Assert.IsFalse(manager.CanDragScript(earlierDraft));
+            foreach (var target in new[] { secondItem, firstItem, earlierDraft })
+            {
+                Assert.IsFalse(manager.CanMoveRelative(secondItem, target, after: false));
+                await manager.MoveRelativeAsync(secondItem, target, after: false);
+            }
+            await manager.MoveRelativeAsync(laterDraft, firstItem, after: true);
+            CollectionAssert.AreEqual(new[] { secondItem, firstItem, thirdItem, earlierDraft, laterDraft }, manager.Scripts.ToArray());
+
+            await manager.MoveRelativeAsync(secondItem, thirdItem, after: true);
+            CollectionAssert.AreEqual(new[] { firstItem, thirdItem, secondItem, earlierDraft, laterDraft }, manager.Scripts.ToArray());
+            await manager.MoveRelativeAsync(secondItem, thirdItem, after: false);
+            CollectionAssert.AreEqual(new[] { firstItem, secondItem, thirdItem, earlierDraft, laterDraft }, manager.Scripts.ToArray());
+            Assert.AreSame(secondItem, manager.SelectedScript);
+            Assert.IsTrue(secondItem.IsDirty);
+            Assert.AreEqual("userScriptManager_refreshPage", manager.Status);
             Assert.AreSame(second, await repository.GetAsync(second.ScriptKey, token));
             Assert.IsFalse(secondItem.IsEnabled);
 
             manager.SelectedScript = laterDraft;
             await manager.SaveAsync();
-            CollectionAssert.AreEqual(new[] { secondItem, firstItem, thirdItem, laterDraft, earlierDraft }, manager.Scripts.ToArray());
+            CollectionAssert.AreEqual(new[] { firstItem, secondItem, thirdItem, laterDraft, earlierDraft }, manager.Scripts.ToArray());
             manager.SelectedScript = earlierDraft;
             await manager.SaveAsync();
-            CollectionAssert.AreEqual(new[] { secondItem, firstItem, thirdItem, laterDraft, earlierDraft }, manager.Scripts.ToArray());
+            CollectionAssert.AreEqual(new[] { firstItem, secondItem, thirdItem, laterDraft, earlierDraft }, manager.Scripts.ToArray());
             await repository.UpdateAsync(second.ScriptKey, Source + "\n// updated", null, token);
             await repository.SetEnabledAsync(second.ScriptKey, true, token);
             await repository.RemoveAsync(third.ScriptKey, token);
+            var orderedRepository = (OrderedUserScriptRepository)repository;
+            Assert.IsFalse(await orderedRepository.MoveRelativeAsync(first.ScriptKey, third.ScriptKey, after: true, token: token));
+            Assert.IsFalse(await orderedRepository.MoveRelativeAsync(third.ScriptKey, first.ScriptKey, after: true, token: token));
 
             manager.Close();
             await manager.OpenAsync();
-            CollectionAssert.AreEqual(new[] { secondItem, firstItem, laterDraft, earlierDraft }, manager.Scripts.ToArray());
+            CollectionAssert.AreEqual(new[] { firstItem, secondItem, laterDraft, earlierDraft }, manager.Scripts.ToArray());
             Assert.IsTrue(secondItem.IsDirty);
             manager.Close();
             await service.StopAsync();
 
             var restarted = Create();
             await restarted.InitializeAsync();
-            CollectionAssert.AreEqual(new[] { second.ScriptKey, first.ScriptKey, laterDraft.Installation.ScriptKey, earlierDraft.Installation.ScriptKey },
+            CollectionAssert.AreEqual(new[] { first.ScriptKey, second.ScriptKey, laterDraft.Installation.ScriptKey, earlierDraft.Installation.ScriptKey },
                 (await restarted.Repository.GetSnapshotAsync(token)).Select(item => item.ScriptKey).ToArray());
         }
 
@@ -145,7 +166,7 @@ namespace CefFlashBrowser.Tests
             await _database.ExecuteAsync("CREATE TRIGGER reject_script_order BEFORE UPDATE OF sort_order ON monkeysharp_scripts " +
                 "WHEN NEW.sort_order = 1 BEGIN SELECT RAISE(ABORT, 'sort test failure'); END");
 
-            await manager.MoveAsync(secondItem, UserScriptMove.First);
+            await manager.MoveRelativeAsync(secondItem, firstItem, after: false);
 
             StringAssert.Contains(manager.Status, "sort test failure");
             CollectionAssert.AreEqual(new[] { firstItem, secondItem }, manager.Scripts.ToArray());

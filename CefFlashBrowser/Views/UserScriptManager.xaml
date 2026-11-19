@@ -157,6 +157,15 @@
             <ListBox x:Name="scriptList"
                      ItemsSource="{Binding Scripts}"
                      SelectedItem="{Binding SelectedScript}"
+                     AllowDrop="True"
+                     PreviewMouseDown="ScriptListPreviewMouseDown"
+                     PreviewMouseUp="ScriptListPreviewMouseUp"
+                     PreviewMouseMove="ScriptListPreviewMouseMove"
+                     MouseLeave="ScriptListMouseLeave"
+                     PreviewDragOver="ScriptListDragOver"
+                     PreviewDragLeave="ScriptListDragLeave"
+                     PreviewDrop="ScriptListDrop"
+                     PreviewQueryContinueDrag="ScriptListQueryContinueDrag"
                      SelectionChanged="SelectionChanged">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem"

@@ -123,6 +123,7 @@ namespace CefFlashBrowser.Views
 
         protected override void OnClosed(EventArgs e)
         {
+            EndScriptDrag();
             ViewModel.PropertyChanged -= ViewModelPropertyChanged;
             ViewModel.ConfirmInstallation = null;
             ViewModel.ConfirmDeletion = null;
