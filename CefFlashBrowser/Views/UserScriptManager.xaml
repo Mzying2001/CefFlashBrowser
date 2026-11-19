@@ -158,15 +158,14 @@
                      ItemsSource="{Binding Scripts}"
                      SelectedItem="{Binding SelectedScript}"
                      AllowDrop="True"
-                     PreviewMouseDown="ScriptListPreviewMouseDown"
-                     PreviewMouseUp="ScriptListPreviewMouseUp"
-                     PreviewMouseMove="ScriptListPreviewMouseMove"
-                     MouseLeave="ScriptListMouseLeave"
-                     PreviewDragOver="ScriptListDragOver"
-                     PreviewDragLeave="ScriptListDragLeave"
-                     PreviewDrop="ScriptListDrop"
-                     PreviewQueryContinueDrag="ScriptListQueryContinueDrag"
                      SelectionChanged="SelectionChanged">
+                <i:Interaction.Behaviors>
+                    <behaviors:ListReorderBehavior
+                        IsDragEnabled="True"
+                        ReorderCommand="{Binding ReorderCommand}"
+                        CanReorderItem="{Binding CanReorderItem}"/>
+                </i:Interaction.Behaviors>
+
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem"
                            BasedOn="{StaticResource ListBoxItemBaseStyle}">

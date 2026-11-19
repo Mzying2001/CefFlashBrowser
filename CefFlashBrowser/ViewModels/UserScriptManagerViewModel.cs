@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Services.UserScripts;
+using CefFlashBrowser.Infrastructure.Collections;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Parsing;
 using Mzying2001.MonkeySharp.Core.Repository;
@@ -37,6 +38,8 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand MoveDownCommand { get; }
         public DelegateCommand MoveToFirstCommand { get; }
         public DelegateCommand MoveToLastCommand { get; }
+        public DelegateCommand ReorderCommand { get; }
+        public Predicate<object> CanReorderItem { get; }
         public DelegateCommand DeleteCommand { get; }
         public DelegateCommand ReloadCommand { get; }
         public DelegateCommand LoadUrlCommand { get; }
@@ -112,6 +115,8 @@ namespace CefFlashBrowser.ViewModels
             MoveDownCommand = CreateMoveCommand(UserScriptMove.Down);
             MoveToFirstCommand = CreateMoveCommand(UserScriptMove.First);
             MoveToLastCommand = CreateMoveCommand(UserScriptMove.Last);
+            CanReorderItem = item => item is UserScriptItemViewModel script && CanDragScript(script);
+            ReorderCommand = new DelegateCommand<ListReorderRequest>(ExecuteReorder) { CanExecuteFunc = CanExecuteReorder };
             ReloadCommand = new DelegateCommand(async () => await ReloadAsync()) { CanExecuteFunc = _ => CanEdit() && SelectedScript.IsInstalled };
             Scripts.CollectionChanged += (_, __) => UpdateMoveCommands();
         }
@@ -446,6 +451,20 @@ namespace CefFlashBrowser.ViewModels
         internal bool CanDragScript(UserScriptItemViewModel item)
             => CanMove(item, UserScriptMove.Up) || CanMove(item, UserScriptMove.Down);
 
+        private bool CanExecuteReorder(object value)
+        {
+            return value is ListReorderRequest request
+                && request.Item is UserScriptItemViewModel item
+                && request.TargetItem is UserScriptItemViewModel target
+                && CanMoveRelative(item, target, request.InsertAfter);
+        }
+
+        private async void ExecuteReorder(ListReorderRequest request)
+        {
+            await MoveRelativeAsync(request?.Item as UserScriptItemViewModel,
+                request?.TargetItem as UserScriptItemViewModel, request?.InsertAfter == true);
+        }
+
         internal bool CanMoveRelative(UserScriptItemViewModel item, UserScriptItemViewModel target, bool after)
         {
             var index = GetReorderableIndex(item);
@@ -652,6 +671,7 @@ namespace CefFlashBrowser.ViewModels
             MoveDownCommand.RaiseCanExecuteChanged();
             MoveToFirstCommand.RaiseCanExecuteChanged();
             MoveToLastCommand.RaiseCanExecuteChanged();
+            ReorderCommand.RaiseCanExecuteChanged();
         }
 
         private void UpdateCommands()

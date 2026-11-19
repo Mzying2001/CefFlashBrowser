@@ -33,6 +33,7 @@ foreach ($file in @(
     'Scenarios\ViewSource.ps1',
     'Scenarios\AuxiliaryWindows.ps1',
     'Scenarios\UserScripts.ps1',
+    'Scenarios\ListReorderBehavior.ps1',
     'Scenarios\UserScriptManager.ps1',
     'Scenarios\UserScriptSettings.ps1',
     'Scenarios\UserScriptNetwork.ps1',
@@ -105,6 +106,7 @@ try {
         Start-RegressionCef $context
         Test-BrowserTabLoadingMenu $context
     } elseif ($Scenario -eq 'Manager') {
+        Test-ListReorderBehavior $context
         Start-RegressionCef $context
         Test-UserScriptManager $context
     } elseif ($Scenario -eq 'UserScriptSettings') {
@@ -123,6 +125,7 @@ try {
         Test-UserScriptSettings $context
         Test-BrowserBeforeInitialization $context
         Test-BrowserTabControl $context
+        Test-ListReorderBehavior $context
         Test-BrowserTabsBeforeShow $context
         Start-RegressionCef $context
         Test-UserScriptManager $context
