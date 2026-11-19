@@ -154,27 +154,83 @@ function Test-ManagerSourceEditor($Context, $Window) {
         Wait-Regression $Context { !$contextItems[2].IsEnabled -and !$contextItems[3].IsEnabled } 'context-menu cut and copy disable without a selection'
         $editor.Options.CutCopyWholeLine = $copyWholeLine
         $contextMenu.IsOpen = $false
+
+        $longSource = (('const value = "' + ('x' * 220) + '";' + "`r`n") * 100)
+        $first.Source = $longSource
+        $editor.CaretOffset = $editor.Document.GetLineByNumber(25).Offset + 45
+        $editor.TextArea.PerformTextInput('first edit ')
         $sameSource = $first.Source
+        $firstDocument = $editor.Document
+        $editor.Select($editor.CaretOffset - 5, 5)
+        $firstCaret = $editor.CaretOffset
+        $firstSelection = $editor.SelectionStart
+        $editor.ScrollToHorizontalOffset(70)
+        $editor.ScrollToVerticalOffset(320)
+        $Window.UpdateLayout()
+        $firstScroll = $editor.TextArea.TextView.ScrollOffset
+        Assert-Regression ($firstScroll.X -gt 1 -and $firstScroll.Y -gt 1) 'the first script is scrolled in both directions'
+
         Send-ManagerShortcut $Context $Window 0x4E
         Wait-Regression $Context { ![object]::ReferenceEquals($first, $model.SelectedScript) } 'Ctrl+N creates a new script from editor focus'
         $second = $model.SelectedScript
         $second.Source = $sameSource
-        Wait-Regression $Context { $editor.Text -ceq $sameSource } 'another script can display identical source'
-        $editor.CaretOffset = $editor.Text.Length
-        $editor.TextArea.PerformTextInput('// second script')
+        $Window.UpdateLayout()
+        Assert-Regression ($editor.Text -ceq $sameSource -and $editor.HorizontalOffset -lt 1 -and $editor.VerticalOffset -lt 1 -and
+            $editor.CaretOffset -eq 0 -and $editor.SelectionLength -eq 0 -and !$editor.CanUndo -and !$editor.CanRedo) 'a new script with identical source starts at the top-left with its own history'
+        $secondDocument = $editor.Document
         $model.SelectedScript = $first
-        Wait-Regression $Context { $editor.Text -ceq $first.Source } 'selection restores the first draft'
-        Assert-Regression (!$editor.Document.UndoStack.CanUndo -and !$editor.Document.UndoStack.CanRedo -and
-            $second.Source.EndsWith('// second script')) 'switching scripts isolates undo and preserves the other draft'
-        $editor.CaretOffset = $editor.Text.Length
-        $editor.TextArea.PerformTextInput('// same-source switch')
-        $second.Source = $first.Source
+        $editor.ScrollToHorizontalOffset($firstScroll.X)
+        $editor.ScrollToVerticalOffset($firstScroll.Y)
+        $Window.UpdateLayout()
         $model.SelectedScript = $second
-        Wait-Regression $Context { $editor.Text -ceq $second.Source } 'identical-source selection is displayed'
-        Assert-Regression (!$editor.Document.UndoStack.CanUndo -and !$editor.Document.UndoStack.CanRedo) 'identical-source script switches also clear undo and redo'
+        $Window.UpdateLayout()
+        Assert-Regression ($editor.HorizontalOffset -lt 1 -and $editor.VerticalOffset -lt 1 -and !$editor.CanUndo) 'switching between identical sources does not carry over scroll position or undo history'
+        $editor.CaretOffset = $editor.Document.GetLineByNumber(40).Offset + 55
+        $editor.TextArea.PerformTextInput('second edit ')
+        $secondDraft = $second.Source
+        $editor.ScrollToHorizontalOffset(140)
+        $editor.ScrollToVerticalOffset(580)
+        $Window.UpdateLayout()
+        $secondScroll = $editor.TextArea.TextView.ScrollOffset
+
+        $model.SelectedScript = $first
+        $model.SelectedScript = $second
+        $model.SelectedScript = $first
+        $Window.UpdateLayout()
+        Assert-Regression ([object]::ReferenceEquals($editor.Document, $firstDocument) -and $editor.Text -ceq $sameSource -and
+            $editor.CaretOffset -eq $firstCaret -and $editor.SelectionStart -eq $firstSelection -and $editor.SelectionLength -eq 5 -and
+            [Math]::Abs($editor.HorizontalOffset - $firstScroll.X) -lt 1 -and
+            [Math]::Abs($editor.VerticalOffset - $firstScroll.Y) -lt 1) 'rapid switching restores the first draft, caret, selection and scroll position'
+        Assert-Regression $editor.CanUndo 'returning to the first script preserves undo'
+        $editMenu.Items[0].Command.Execute($null, $editMenu.Items[0].CommandTarget)
+        Assert-Regression ($first.Source -ceq $longSource -and $second.Source -ceq $secondDraft -and $editor.CanRedo) 'undo after switching only edits the first draft'
+
+        $model.SelectedScript = $second
+        $Window.UpdateLayout()
+        Assert-Regression ([object]::ReferenceEquals($editor.Document, $secondDocument) -and $editor.Text -ceq $secondDraft -and
+            [Math]::Abs($editor.HorizontalOffset - $secondScroll.X) -lt 1 -and
+            [Math]::Abs($editor.VerticalOffset - $secondScroll.Y) -lt 1 -and $editor.CanUndo -and !$editor.CanRedo) 'returning to the second script restores its own scroll position and history'
+        [void]$editor.Undo()
+        Assert-Regression ($second.Source -ceq $sameSource -and $first.Source -ceq $longSource) 'undo after switching also works for the second draft'
+
+        $model.SelectedScript = $first
+        $model.FilterText = 'no matching editor state fixture'
+        Assert-Regression (!$editor.IsEnabled -and $editor.Text -ceq '') 'filtering out the selection clears and disables the editor'
+        $model.FilterText = ''
+        $model.SelectedScript = $first
+        Assert-Regression $editor.CanRedo 'redo survives switching scripts and filtering out the selection'
+        $editMenu.Items[1].Command.Execute($null, $editMenu.Items[1].CommandTarget)
+        Assert-Regression ($first.Source -ceq $sameSource -and $second.Source -ceq $sameSource -and $editor.CanUndo) 'redo after reselecting restores the first edit'
+
+        $second.Source = ''
+        $model.SelectedScript = $second
+        $Window.UpdateLayout()
+        Assert-Regression ($editor.Text -ceq '' -and !$editor.CanUndo -and !$editor.CanRedo -and $editor.CaretOffset -eq 0 -and
+            $editor.HorizontalOffset -lt 1 -and $editor.VerticalOffset -lt 1 -and $first.Source -ceq $sameSource) 'an inactive source replaced with empty text opens with fresh editor state'
     } finally {
         $editor.ContextMenu.IsOpen = $false
         if ($clipboardCaptured) { [UserScriptClipboardProbe]::Restore($clipboard) }
+        $model.FilterText = ''
         $model.SelectedScript = $previousSelection
         if ($null -ne $first) { [void]$model.Scripts.Remove($first) }
         if ($null -ne $second) { [void]$model.Scripts.Remove($second) }
@@ -326,11 +382,12 @@ function Test-ManagerFindReplace($Context, $Window) {
         $second.Source = $first.Source
         $model.SelectedScript = $second
         Assert-Regression ($replaceRow.IsVisible -and $query.Text -ceq '[a]' -and $replacement.Text -ceq '[a]$1' -and
-            $matchCase.IsChecked -and $count.Text -eq '3' -and !$replaceCurrent.IsEnabled -and !$editor.CanUndo) 'identical-source script switch keeps the search inputs and clears the prior selection and undo'
+            $matchCase.IsChecked -and $count.Text -eq '3' -and !$replaceCurrent.IsEnabled -and !$editor.CanUndo) 'identical-source script switch keeps the search inputs and uses the second script selection and history'
         $second.Source = '[A]'
         Assert-Regression ($replaceRow.IsVisible -and $noMatches.IsVisible -and !$replaceAll.IsEnabled) 'source changes refresh the match list without closing the toolbar'
         $model.SelectedScript = $first
-        Assert-Regression ($replaceRow.IsVisible -and $count.Text -eq '3') 'switching to different source refreshes matches for the newly selected script'
+        Assert-Regression ($replaceRow.IsVisible -and $count.Text -eq '3' -and $replaceCurrent.IsEnabled -and
+            $editor.SelectedText -ceq '[a]' -and $editor.CanUndo) 'switching back refreshes matches and restores the first script selection and history'
         $model.SelectedScript = $null
         Wait-Regression $Context { !$bar.IsVisible -and !$editor.IsEnabled } 'no selected script closes the toolbar'
         Assert-Regression (!$findMenu.Command.CanExecute($null, $findMenu.CommandTarget) -and

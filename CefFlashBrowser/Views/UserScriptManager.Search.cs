@@ -26,7 +26,7 @@ namespace CefFlashBrowser.Views
             searchBar.Visibility = Visibility.Visible;
             replaceRow.Visibility = e.Command == ApplicationCommands.Replace ? Visibility.Visible : Visibility.Collapsed;
 
-            ApplySearchQuery(selectMatch: true);
+            ApplySearchQuery();
 
             searchText.Focus();
             searchText.SelectAll();
@@ -35,18 +35,8 @@ namespace CefFlashBrowser.Views
 
         private void OnSearchScriptChanged()
         {
-            if (SearchIsOpen)
-            {
-                if (CanSearch)
-                {
-                    sourceEditor.TextArea.ClearSelection();
-                    ApplySearchQuery(selectMatch: false);
-                }
-                else
-                {
-                    CloseSearch(restoreFocus: false);
-                }
-            }
+            if (SearchIsOpen && !CanSearch)
+                CloseSearch(restoreFocus: false);
 
             CommandManager.InvalidateRequerySuggested();
         }
@@ -58,18 +48,15 @@ namespace CefFlashBrowser.Views
             if (restoreFocus && CanSearch) sourceEditor.Focus();
         }
 
-        private void ApplySearchQuery(bool selectMatch)
+        private void ApplySearchQuery()
         {
             if (!SearchIsOpen || !CanSearch) return;
 
             sourceEditor.Search.SetQuery(searchText.Text, matchCase.IsChecked == true);
             UpdateSearchControls();
-            if (selectMatch)
-            {
-                // The toolbar can change the editor viewport when it opens or its results wrap.
-                sourceEditor.UpdateLayout();
-                sourceEditor.Search.Find(forward: true, includeCurrent: true);
-            }
+            // The toolbar can change the editor viewport when it opens or its results wrap.
+            sourceEditor.UpdateLayout();
+            sourceEditor.Search.Find(forward: true, includeCurrent: true);
         }
 
         private void UpdateSearchControls()
@@ -92,6 +79,7 @@ namespace CefFlashBrowser.Views
             if (!SearchIsOpen) return;
 
             var modifiers = e.KeyboardDevice.Modifiers;
+
             if (e.Key == Key.Escape && modifiers == ModifierKeys.None)
             {
                 CloseSearch(restoreFocus: true);
@@ -105,9 +93,9 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void SearchTextChanged(object sender, TextChangedEventArgs e) => ApplySearchQuery(selectMatch: true);
+        private void SearchTextChanged(object sender, TextChangedEventArgs e) => ApplySearchQuery();
 
-        private void MatchCaseChanged(object sender, RoutedEventArgs e) => ApplySearchQuery(selectMatch: true);
+        private void MatchCaseChanged(object sender, RoutedEventArgs e) => ApplySearchQuery();
 
         private void FindMatchClicked(object sender, RoutedEventArgs e) => sourceEditor.Search.Find(forward: sender == findNext);
 

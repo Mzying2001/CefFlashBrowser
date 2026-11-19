@@ -2,13 +2,19 @@
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Editing;
 using Microsoft.Win32;
 using Mzying2001.MonkeySharp.Core.Domain;
 using SimpleMvvm.Command;
 using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace CefFlashBrowser.Views
@@ -16,6 +22,9 @@ namespace CefFlashBrowser.Views
     public partial class UserScriptManager : Window
     {
         private const double MaxScriptListWidth = 450;
+
+        private readonly ConditionalWeakTable<UserScriptItemViewModel, ScriptEditorState> _editorStates;
+        private UserScriptItemViewModel _displayedScript;
 
         public DelegateCommand ImportFileCommand { get; }
         public DelegateCommand ExportCommand { get; }
@@ -27,14 +36,19 @@ namespace CefFlashBrowser.Views
 
         public UserScriptManager()
         {
+            _editorStates = new ConditionalWeakTable<UserScriptItemViewModel, ScriptEditorState>();
+
             ImportFileCommand = new DelegateCommand(ImportFile) { CanExecuteFunc = _ => !ViewModel.IsBusy };
             ExportCommand = new DelegateCommand(Export) { CanExecuteFunc = _ => !ViewModel.IsBusy && ViewModel.SelectedScript != null };
 
             InitializeComponent();
+
             Loaded += WindowLoaded;
             sourceEditor.TextChanged += (_, __) => UpdateSearchControls();
             sourceEditor.TextArea.SelectionChanged += (_, __) => UpdateSearchControls();
+            scriptList.SelectionChanged += (_, __) => ShowSelectedScript();
 
+            ShowSelectedScript();
             WindowSizeInfo.Apply(GlobalData.Settings.UserScriptManagerSizeInfo, this);
         }
 
@@ -91,14 +105,77 @@ namespace CefFlashBrowser.Views
             item.Focus();
         }
 
-        private void SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ShowSelectedScript()
         {
-            // Undo history belongs to the selected script, even when two scripts have identical text.
-            if (sourceEditor == null)
+            var script = (UserScriptItemViewModel)scriptList.SelectedItem;
+
+            if (ReferenceEquals(script, _displayedScript))
                 return;
 
-            sourceEditor.Document.UndoStack.ClearAll();
+            var textArea = sourceEditor.TextArea;
+
+            if (_displayedScript != null && _editorStates.TryGetValue(_displayedScript, out var previousState))
+            {
+                previousState.CaretPosition = textArea.Caret.Position;
+                previousState.Selection = textArea.Selection;
+                previousState.ScrollOffset = textArea.TextView.ScrollOffset;
+            }
+
+            _displayedScript = script;
+
+            var state = script == null ? null : GetEditorState(script);
+            var binding = script == null ? null : new Binding(nameof(UserScriptItemViewModel.Source))
+            {
+                Source = script,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                TargetNullValue = string.Empty
+            };
+
+            sourceEditor.SetSourceDocument(state?.Document ?? new TextDocument(), binding);
+
+            if (state?.Selection != null)
+            {
+                textArea.Caret.Position = state.CaretPosition;
+                textArea.Selection = state.Selection;
+
+                // Apply to the text view immediately so another selection change can capture the restored offsets.
+                IScrollInfo scrollInfo = textArea.TextView;
+                scrollInfo.SetHorizontalOffset(state.ScrollOffset.X);
+                scrollInfo.SetVerticalOffset(state.ScrollOffset.Y);
+                scrollInfo.ScrollOwner?.InvalidateScrollInfo();
+            }
+
             OnSearchScriptChanged();
+        }
+
+        private ScriptEditorState GetEditorState(UserScriptItemViewModel script)
+        {
+            var source = script.Source ?? string.Empty;
+
+            if (_editorStates.TryGetValue(script, out var state))
+            {
+                if (state.Document.Text == source)
+                    return state;
+
+                _editorStates.Remove(script);
+            }
+
+            state = new ScriptEditorState(source);
+            _editorStates.Add(script, state);
+            return state;
+        }
+
+        private sealed class ScriptEditorState
+        {
+            public TextDocument Document { get; }
+            public TextViewPosition CaretPosition { get; set; }
+            public Selection Selection { get; set; }
+            public Vector ScrollOffset { get; set; }
+
+            public ScriptEditorState(string source)
+            {
+                Document = new TextDocument(source);
+            }
         }
 
         private void ContentSizeChanged(object sender, SizeChangedEventArgs e)

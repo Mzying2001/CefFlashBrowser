@@ -187,8 +187,7 @@
                      ItemsSource="{Binding ScriptsView}"
                      SelectedItem="{Binding SelectedScript}"
                      IsSynchronizedWithCurrentItem="False"
-                     AllowDrop="True"
-                     SelectionChanged="SelectionChanged">
+                     AllowDrop="True">
                 <i:Interaction.Behaviors>
                     <behaviors:ListReorderBehavior
                         IsDragEnabled="{Binding IsReorderingEnabled}"
@@ -457,7 +456,6 @@
                 </Border>
 
                 <c:ScriptEditor x:Name="sourceEditor"
-                                SourceText="{Binding SelectedScript.Source, UpdateSourceTrigger=PropertyChanged, TargetNullValue='', FallbackValue=''}"
                                 ShowLineNumbers="True"
                                 FontFamily="Consolas"
                                 FontSize="14"

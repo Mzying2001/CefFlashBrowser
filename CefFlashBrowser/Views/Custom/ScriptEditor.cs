@@ -1,10 +1,12 @@
 ﻿using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Xml;
@@ -91,10 +93,32 @@ namespace CefFlashBrowser.Views.Custom
             }
         }
 
+        internal void SetSourceDocument(TextDocument document, BindingBase sourceBinding)
+        {
+            // Changing the document raises TextChanged. Keep that notification out of the old draft.
+            _updatingText = true;
+
+            try
+            {
+                BindingOperations.ClearBinding(this, SourceTextProperty);
+                Document = document;
+                SetCurrentValue(SourceTextProperty, document.Text);
+            }
+            finally
+            {
+                _updatingText = false;
+            }
+
+            if (sourceBinding != null)
+            {
+                SetBinding(SourceTextProperty, sourceBinding);
+            }
+        }
+
         private void UpdateText(string text)
         {
             text = text ?? string.Empty;
-            if (Text == text) return;
+            if (_updatingText || Text == text) return;
 
             _updatingText = true;
 
