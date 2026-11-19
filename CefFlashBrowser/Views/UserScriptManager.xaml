@@ -101,6 +101,8 @@
 
         <StatusBar DockPanel.Dock="Bottom">
             <TextBlock Text="{Binding Status}"
+                       TextWrapping="NoWrap"
+                       TextTrimming="CharacterEllipsis"
                        Foreground="{DynamicResource PrimaryTextBrush}"/>
         </StatusBar>
 

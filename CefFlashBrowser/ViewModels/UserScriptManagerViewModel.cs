@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
@@ -140,7 +141,8 @@ namespace CefFlashBrowser.ViewModels
         public string Status
         {
             get => _status;
-            private set => UpdateValue(ref _status, value);
+            private set => UpdateValue(ref _status,
+                value == null ? null : Regex.Replace(value, @"[\r\n\v\f\u0085\u2028\u2029]+", " "));
         }
 
         public UserScriptManagerViewModel(
@@ -726,10 +728,12 @@ namespace CefFlashBrowser.ViewModels
             IsBusy = true;
             Status = _text("userScriptManager_working");
 
+            var workingStatus = Status;
+
             try
             {
                 await operation(lifetime.Token);
-                if (Status == _text("userScriptManager_working")) Status = string.Empty;
+                if (Status == workingStatus) Status = string.Empty;
             }
             catch (OperationCanceledException)
             {

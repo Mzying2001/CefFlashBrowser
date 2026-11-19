@@ -43,6 +43,26 @@ function Open-ManagerEditorContextMenu($Context, $Window) {
     return $editor.ContextMenu
 }
 
+function Test-ManagerStatusLine($Context, $Window) {
+    $model = $Window.DataContext
+    $editor = $Window.FindName('sourceEditor')
+    $statusBar = $Window.Content.Children | Where-Object { $_ -is [Windows.Controls.Primitives.StatusBar] }
+    $statusText = $statusBar.Items[0]
+
+    $editor.SelectAll()
+    $editor.TextArea.PerformTextInput('invalid metadata')
+    Complete-UserScriptTask $Context ($model.SaveAsync()) 'save a draft without metadata'
+    Assert-Regression ($statusText.Text -ceq $Context.LanguageService.GetString('userScriptManager_invalidMetadata')) 'status bar displays the invalid metadata message'
+    $Window.UpdateLayout()
+    $singleLineHeight = $statusBar.ActualHeight
+
+    $editor.Document.Remove(0, $editor.Document.TextLength)
+    Complete-UserScriptTask $Context ($model.SaveAsync()) 'save an empty draft'
+    $Window.UpdateLayout()
+    Assert-Regression ($statusText.Text.Contains('source')) 'empty draft status keeps the error parameter'
+    Assert-Regression ($statusBar.ActualHeight -eq $singleLineHeight) 'empty draft error fits on one status bar line'
+}
+
 function Test-ManagerSourceEditor($Context, $Window) {
     $model = $Window.DataContext
     $editor = $Window.FindName('sourceEditor')
@@ -1097,6 +1117,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Invoke-BrowserCommand $model.NewCommand $null
         $item = $model.SelectedScript
         $editor = $window.FindName('sourceEditor')
+        Test-ManagerStatusLine $Context $window
         $editor.SelectAll()
         $editor.TextArea.PerformTextInput($source)
         Send-ManagerShortcut $Context $window 0x53
