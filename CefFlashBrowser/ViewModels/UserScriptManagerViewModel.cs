@@ -5,6 +5,7 @@ using Mzying2001.MonkeySharp.Core.Repository;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -32,6 +33,10 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand SaveCommand { get; }
         public DelegateCommand InstallCommand { get; }
         public DelegateCommand ToggleCommand { get; }
+        public DelegateCommand MoveUpCommand { get; }
+        public DelegateCommand MoveDownCommand { get; }
+        public DelegateCommand MoveToFirstCommand { get; }
+        public DelegateCommand MoveToLastCommand { get; }
         public DelegateCommand DeleteCommand { get; }
         public DelegateCommand ReloadCommand { get; }
         public DelegateCommand LoadUrlCommand { get; }
@@ -103,7 +108,12 @@ namespace CefFlashBrowser.ViewModels
             SaveCommand = new DelegateCommand(async () => await SaveAsync()) { CanExecuteFunc = _ => CanEdit() };
             ToggleCommand = new DelegateCommand<UserScriptItemViewModel>(async item => await ToggleAsync(item)) { CanExecuteFunc = item => !IsBusy && _repository != null && (item as UserScriptItemViewModel)?.IsInstalled == true };
             DeleteCommand = new DelegateCommand(async () => await DeleteAsync()) { CanExecuteFunc = _ => CanEdit() };
+            MoveUpCommand = CreateMoveCommand(UserScriptMove.Up);
+            MoveDownCommand = CreateMoveCommand(UserScriptMove.Down);
+            MoveToFirstCommand = CreateMoveCommand(UserScriptMove.First);
+            MoveToLastCommand = CreateMoveCommand(UserScriptMove.Last);
             ReloadCommand = new DelegateCommand(async () => await ReloadAsync()) { CanExecuteFunc = _ => CanEdit() && SelectedScript.IsInstalled };
+            Scripts.CollectionChanged += (_, __) => UpdateMoveCommands();
         }
 
         public async Task OpenAsync()
@@ -140,6 +150,7 @@ namespace CefFlashBrowser.ViewModels
                     Synchronize(installation, false);
                 }
 
+                ApplyInstalledOrder(snapshot);
                 SelectedScript = SelectedScript ?? Scripts.FirstOrDefault();
             });
         }
@@ -225,6 +236,9 @@ namespace CefFlashBrowser.ViewModels
                 }
 
                 AcceptSave(item, installation, source);
+
+                if (previous == null)
+                    await RefreshInstalledOrderAsync(token);
 
                 Status = _text("userScriptManager_saved");
                 UpdateCommands();
@@ -328,7 +342,8 @@ namespace CefFlashBrowser.ViewModels
             if (item == null)
             {
                 item = new UserScriptItemViewModel(installation);
-                Scripts.Add(item);
+                InsertInstalledItem(item);
+                await RefreshInstalledOrderAsync(token);
             }
             else
             {
@@ -405,6 +420,46 @@ namespace CefFlashBrowser.ViewModels
             });
         }
 
+        private DelegateCommand CreateMoveCommand(UserScriptMove move)
+        {
+            return new DelegateCommand(async () => await MoveAsync(SelectedScript, move))
+            {
+                CanExecuteFunc = _ => CanMove(SelectedScript, move)
+            };
+        }
+
+        private bool CanMove(UserScriptItemViewModel item, UserScriptMove move)
+        {
+            if (IsBusy || _lifetime == null || !(_repository is OrderedUserScriptRepository) || item?.IsInstalled != true)
+                return false;
+
+            var index = Scripts.IndexOf(item);
+            if (index < 0)
+                return false;
+
+            return move == UserScriptMove.Up || move == UserScriptMove.First
+                ? index > 0 && Scripts[index - 1].IsInstalled
+                : index + 1 < Scripts.Count && Scripts[index + 1].IsInstalled;
+        }
+
+        internal Task MoveAsync(UserScriptItemViewModel item, UserScriptMove move)
+        {
+            if (!CanMove(item, move))
+                return Task.CompletedTask;
+
+            var repository = (OrderedUserScriptRepository)_repository;
+            var key = item.Installation.ScriptKey;
+
+            return RunAsync(async token =>
+            {
+                if (await repository.MoveAsync(key, move, token))
+                {
+                    await RefreshInstalledOrderAsync(token);
+                    Status = _text("userScriptManager_refreshPage");
+                }
+            });
+        }
+
         public Task ReloadAsync()
         {
             var item = SelectedScript;
@@ -471,11 +526,37 @@ namespace CefFlashBrowser.ViewModels
 
             if (item == null)
             {
-                Scripts.Add(new UserScriptItemViewModel(installation));
+                InsertInstalledItem(new UserScriptItemViewModel(installation));
             }
             else
             {
                 item.Synchronize(installation, enabledChanged);
+            }
+        }
+
+        private void InsertInstalledItem(UserScriptItemViewModel item)
+            => Scripts.Insert(Scripts.TakeWhile(value => value.IsInstalled).Count(), item);
+
+        private async Task RefreshInstalledOrderAsync(CancellationToken token)
+        {
+            var snapshot = await _repository.GetSnapshotAsync(token);
+            token.ThrowIfCancellationRequested();
+            ApplyInstalledOrder(snapshot);
+        }
+
+        private void ApplyInstalledOrder(IReadOnlyList<UserScriptInstallation> snapshot)
+        {
+            var ranks = snapshot.Select((installation, index) => new { installation.ScriptKey, Index = index })
+                .ToDictionary(entry => entry.ScriptKey, entry => entry.Index);
+
+            var ordered = Scripts.OrderBy(item => !item.IsInstalled)
+                .ThenBy(item => item.IsInstalled && ranks.TryGetValue(item.Installation.ScriptKey, out var rank) ? rank : int.MaxValue)
+                .ToArray();
+
+            for (var index = 0; index < ordered.Length; index++)
+            {
+                if (Scripts[index] != ordered[index])
+                    Scripts.Move(Scripts.IndexOf(ordered[index]), index);
             }
         }
 
@@ -539,12 +620,21 @@ namespace CefFlashBrowser.ViewModels
             return !IsBusy && _repository != null && SelectedScript != null;
         }
 
+        private void UpdateMoveCommands()
+        {
+            MoveUpCommand.RaiseCanExecuteChanged();
+            MoveDownCommand.RaiseCanExecuteChanged();
+            MoveToFirstCommand.RaiseCanExecuteChanged();
+            MoveToLastCommand.RaiseCanExecuteChanged();
+        }
+
         private void UpdateCommands()
         {
             NewCommand?.RaiseCanExecuteChanged();
             SaveCommand?.RaiseCanExecuteChanged();
             InstallCommand?.RaiseCanExecuteChanged();
             ToggleCommand?.RaiseCanExecuteChanged();
+            UpdateMoveCommands();
             DeleteCommand?.RaiseCanExecuteChanged();
             ReloadCommand?.RaiseCanExecuteChanged();
             LoadUrlCommand?.RaiseCanExecuteChanged();

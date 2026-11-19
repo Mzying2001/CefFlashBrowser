@@ -167,6 +167,15 @@
                         <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                    <MenuItem Header="{DynamicResource common_moveUp}"
+                                              Command="{Binding MoveUpCommand}"/>
+                                    <MenuItem Header="{DynamicResource common_moveDown}"
+                                              Command="{Binding MoveDownCommand}"/>
+                                    <MenuItem Header="{DynamicResource common_moveToTop}"
+                                              Command="{Binding MoveToFirstCommand}"/>
+                                    <MenuItem Header="{DynamicResource common_moveToBottom}"
+                                              Command="{Binding MoveToLastCommand}"/>
+                                    <Separator/>
                                     <MenuItem Header="{DynamicResource userScriptManager_delete}"
                                               Command="{Binding DeleteCommand}"/>
                                 </ContextMenu>

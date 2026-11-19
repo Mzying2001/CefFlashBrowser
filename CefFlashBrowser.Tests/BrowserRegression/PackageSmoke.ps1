@@ -122,7 +122,7 @@ try {
         if ($objects.Count -ne 2 -or @($objects | Where-Object Name -NotMatch '^[0-9a-f]{64}$').Count -ne 0) {
             throw 'Packaged assets must use separate content-addressed object files.'
         }
-        if ($database.ScalarAsync("PRAGMA user_version").GetAwaiter().GetResult() -ne 2 -or
+        if ($database.ScalarAsync("PRAGMA user_version").GetAwaiter().GetResult() -ne 3 -or
             $database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_script_assets").GetAwaiter().GetResult() -ne 2 -or
             $database.ScalarAsync("SELECT COUNT(*) FROM pragma_table_info('monkeysharp_scripts') WHERE name IN ('source','prepared_revision_json','display_name')").GetAwaiter().GetResult() -ne 0) {
             throw 'Packaged persistence must use schema 2 descriptors without source payloads.'

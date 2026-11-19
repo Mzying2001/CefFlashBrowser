@@ -191,6 +191,7 @@ document.documentElement.setAttribute('data-offline-before', String(previous));
     $source = $source.Replace('__BASE__', $fixture.BaseUrl)
     $repository = $Context.UserScriptService.Repository
     $installation = Complete-UserScriptTask $Context ($repository.InstallAsync($source, $null, $true, [Threading.CancellationToken]::None)) 'install prepared fixture'
+    $persistedInstalledAt = [DateTimeOffset]::FromUnixTimeMilliseconds($installation.InstalledAt.ToUnixTimeMilliseconds())
     $healthySource = "// ==UserScript==`n// @name Healthy neighbor`n// @match http://127.0.0.1/*`n// @grant none`n// @run-at document-end`n// ==/UserScript==`ndocument.documentElement.setAttribute('data-healthy-neighbor','ready');"
     $healthy = Complete-UserScriptTask $Context ($repository.InstallAsync($healthySource, $null, $true, [Threading.CancellationToken]::None)) 'install healthy neighbor'
     $window = $null
@@ -208,7 +209,7 @@ document.documentElement.setAttribute('data-offline-before', String(previous));
         Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'new runtime restores source and cached assets'
         $repository = $Context.UserScriptService.Repository
         $restored = Complete-UserScriptTask $Context ($repository.GetAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'restored installation'
-        Assert-Regression ($restored.ScriptKey -eq $installation.ScriptKey -and $restored.InstalledAt -eq $installation.InstalledAt) 'runtime restart preserves installation identity and precise time'
+        Assert-Regression ($restored.ScriptKey -eq $installation.ScriptKey -and $restored.InstalledAt -eq $persistedInstalledAt) 'runtime restart preserves installation identity and millisecond timestamp'
         $window = New-UserScriptTargetWindow $Context ($fixture.BaseUrl + '/page')
         $model = $window.ViewModel.CurrentBrowser
         Wait-Regression $Context { $null -ne $model.Browser -and $model.Browser.Title -eq 'Userscript fixture' -and
@@ -249,7 +250,7 @@ document.documentElement.setAttribute('data-offline-before', String(previous));
         $window = $null
         $fixture.Offline = $false
         $repaired = Complete-UserScriptTask $Context ($repository.ReloadAsync($installation.ScriptKey, [Threading.CancellationToken]::None)) 'reload automatically rebuilds missing assets'
-        Assert-Regression ($repaired.CanExecute -and $repaired.ScriptKey -eq $installation.ScriptKey -and $repaired.InstalledAt -eq $installation.InstalledAt) 'cache rebuild preserves identity and installation time'
+        Assert-Regression ($repaired.CanExecute -and $repaired.ScriptKey -eq $installation.ScriptKey -and $repaired.InstalledAt -eq $persistedInstalledAt) 'cache rebuild preserves identity and installation time'
         Assert-Regression ($fixture.RequestsFor('/dependency.js') -gt 1 -and $fixture.RequestsFor('/resource.txt') -gt 1) 'missing dependencies and resources are downloaded again'
         $requests = $fixture.RequestsFor('/blocked.js')
         $window = New-UserScriptTargetWindow $Context ($fixture.BaseUrl + '/page?restored')

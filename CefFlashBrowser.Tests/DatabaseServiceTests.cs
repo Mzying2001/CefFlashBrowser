@@ -64,7 +64,7 @@ namespace CefFlashBrowser.Tests
                 await Task.WhenAll(initialization, read, write);
                 Assert.AreSame(initialization, _service.InitializeAsync());
                 Assert.AreEqual(1, controlled.InitializationCount);
-                Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+                Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
                 Assert.AreEqual(1, (await _service.GetWebsiteIconsAsync()).Count);
             }
             finally { controlled.ReleaseInitialization.TrySetResult(true); }
@@ -97,15 +97,15 @@ namespace CefFlashBrowser.Tests
 
             await _service.InitializeAsync();
 
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
             Assert.AreEqual("icon", (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
             Assert.AreEqual(0, (await _service.GetUserScriptsAsync()).Count);
         }
 
         [DataTestMethod]
-        [DataRow(2)]
         [DataRow(3)]
         [DataRow(4)]
+        [DataRow(5)]
         public async Task CurrentOrNewerVersion_AllowsReadsAndWrites_WithoutChangingVersion(int version)
         {
             await _service.InitializeAsync();
@@ -117,6 +117,35 @@ namespace CefFlashBrowser.Tests
 
             Assert.AreEqual("https://example.com/icon", (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
             Assert.AreEqual((long)version, await _database.ScalarAsync("PRAGMA user_version"));
+        }
+
+        [TestMethod]
+        public async Task VersionTwoScripts_KeepInstallationOrderWhenMigrated()
+        {
+            var first = ScriptKey.Parse(Guid.NewGuid().ToString());
+            var second = ScriptKey.Parse(Guid.NewGuid().ToString());
+            await _database.TransactionAsync(session =>
+            {
+                session.Execute("CREATE TABLE monkeysharp_scripts (script_id TEXT PRIMARY KEY NOT NULL, " +
+                    "install_order INTEGER NOT NULL UNIQUE, source_origin TEXT NULL, " +
+                    "is_enabled INTEGER NOT NULL CHECK (is_enabled IN (0, 1)), installed_at INTEGER NOT NULL, " +
+                    "updated_at INTEGER NOT NULL, source_sha256 TEXT NOT NULL, commit_id TEXT NOT NULL)");
+                const string insert = "INSERT INTO monkeysharp_scripts VALUES (@id, @order, NULL, 1, 0, 0, @hash, @commit)";
+                session.Execute(insert, new Dictionary<string, object>
+                {
+                    ["@id"] = second.ToString(), ["@order"] = 4, ["@hash"] = new string('b', 64), ["@commit"] = Guid.NewGuid().ToString("D")
+                });
+                session.Execute(insert, new Dictionary<string, object>
+                {
+                    ["@id"] = first.ToString(), ["@order"] = 2, ["@hash"] = new string('a', 64), ["@commit"] = Guid.NewGuid().ToString("D")
+                });
+                session.Execute("PRAGMA user_version = 2");
+            });
+
+            var scripts = await _service.GetUserScriptsAsync();
+            CollectionAssert.AreEqual(new[] { first, second }, scripts.Select(item => item.ScriptKey).ToArray());
+            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_scripts WHERE sort_order IS NOT NULL"));
         }
 
         [TestMethod]
@@ -146,7 +175,7 @@ namespace CefFlashBrowser.Tests
 
             await new DatabaseService(_database).InitializeAsync();
 
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]
@@ -232,7 +261,7 @@ namespace CefFlashBrowser.Tests
                     break;
             }
 
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]
@@ -249,7 +278,7 @@ namespace CefFlashBrowser.Tests
                 () => throw new IOException("source switch failed"), CancellationToken.None));
 
             Assert.IsNull(await _service.GetUserScriptAsync(key));
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(3L, await _database.ScalarAsync("PRAGMA user_version"));
 
             await _service.SaveUserScriptAsync(record, Array.Empty<UserScriptAssetDatabaseRecord>(), null, CancellationToken.None);
 

@@ -120,6 +120,12 @@ namespace CefFlashBrowser.Services
 
                     session.Execute("PRAGMA user_version = 2");
                 }
+
+                if (version < 3)
+                {
+                    session.Execute("ALTER TABLE monkeysharp_scripts ADD COLUMN sort_order INTEGER");
+                    session.Execute("PRAGMA user_version = 3");
+                }
             }).ConfigureAwait(false);
         }
 
@@ -159,8 +165,34 @@ namespace CefFlashBrowser.Services
         {
             await InitializeAsync().ConfigureAwait(false);
 
-            return await _database.QueryAsync(SelectUserScriptSql + " ORDER BY install_order",
+            return await _database.QueryAsync(SelectUserScriptSql + " ORDER BY sort_order IS NULL, sort_order, install_order",
                 ReadUserScript).ConfigureAwait(false);
+        }
+
+        internal async Task SetUserScriptOrderAsync(IReadOnlyList<ScriptKey> keys, CancellationToken token)
+        {
+            await InitializeAsync().ConfigureAwait(false);
+
+            await _database.TransactionAsync(session =>
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (Convert.ToInt64(session.Scalar("SELECT COUNT(*) FROM monkeysharp_scripts")) != keys.Count)
+                    throw new DBConcurrencyException("The installed scripts changed while saving their order.");
+
+                for (var i = 0; i < keys.Count; i++)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    var affected = session.Execute("UPDATE monkeysharp_scripts SET sort_order = @rank WHERE script_id = @id",
+                        new Dictionary<string, object> { ["@rank"] = i, ["@id"] = keys[i].ToString() });
+
+                    if (affected != 1)
+                        throw new DBConcurrencyException("The installed scripts changed while saving their order.");
+                }
+
+                token.ThrowIfCancellationRequested();
+            }).ConfigureAwait(false);
         }
 
         public async Task<UserScriptDatabaseRecord> GetUserScriptAsync(ScriptKey key)

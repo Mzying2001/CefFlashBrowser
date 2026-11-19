@@ -23,7 +23,7 @@ namespace CefFlashBrowser.Services.UserScripts
         private readonly Action<string, Exception> _report;
         private Task _initializeTask;
         private Task _stopTask;
-        private UserScriptRepository _repository;
+        private IUserScriptRepository _repository;
 
         public UserScriptContentService Content { get; }
 
@@ -145,7 +145,7 @@ namespace CefFlashBrowser.Services.UserScripts
                     lock (_lock)
                     {
                         ThrowIfStopping();
-                        _repository = repository;
+                        _repository = new OrderedUserScriptRepository(repository, _storage);
                         InitializationError = null;
                     }
                 }

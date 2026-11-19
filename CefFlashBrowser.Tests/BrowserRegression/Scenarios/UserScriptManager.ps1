@@ -582,8 +582,9 @@ function Open-ManagerContextMenu($Context, $Window, $Script) {
     $menu.PlacementTarget = $container
     $menu.IsOpen = $true
     Wait-Regression $Context {
-        $menu.Items[0].Command -eq $Window.DataContext.DeleteCommand -and
-            $menu.Items[0].Header -eq $Context.LanguageService.GetString('userScriptManager_delete')
+        $menu.Items.Count -eq 6 -and $menu.Items[4] -is [Windows.Controls.Separator] -and
+            $menu.Items[5].Command -eq $Window.DataContext.DeleteCommand -and
+            $menu.Items[5].Header -eq $Context.LanguageService.GetString('userScriptManager_delete')
     } 'script context menu binds to the manager and current language'
     return $menu
 }
@@ -812,6 +813,63 @@ document.documentElement.setAttribute('data-web-install', 'ready');
         $item.Installation.Definition.Source -ceq $Fixture.ScriptSource -and $saved.Value.EncodedValue -ceq $value.EncodedValue) 'manager updates the web installation in place and preserves enabled state and data'
 }
 
+function Test-ManagerExecutionOrder($Context, $Window, $BrowserModel) {
+    $repository = $Context.UserScriptService.Repository
+    $model = $Window.DataContext
+    $token = [Threading.CancellationToken]::None
+    $scriptSource = @'
+// ==UserScript==
+// @name Manager order __MARK__
+// @match file:///*
+// @noframes
+// @grant none
+// @run-at document-end
+// ==/UserScript==
+var root = document.documentElement;
+root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order') || '') + '__MARK__');
+'@
+    $installed = @()
+    try {
+        foreach ($mark in @('A', 'B')) {
+            $installed += Complete-UserScriptTask $Context ($repository.InstallAsync($scriptSource.Replace('__MARK__', $mark), $null, $true, $token)) "install order fixture $mark"
+        }
+        Invoke-BrowserCommand $BrowserModel.Browser.ReloadCommand
+        $readOrder = "document.documentElement && document.documentElement.getAttribute('data-manager-order')"
+        Wait-Regression $Context {
+            (Invoke-JavaScript $Context $BrowserModel.Browser $readOrder) -ceq 'AB'
+        } 'same-stage scripts execute in installation order'
+
+        $key = $installed[1].ScriptKey
+        Wait-Regression $Context { @($model.Scripts | Where-Object { $_.IsInstalled -and $_.Installation.ScriptKey.Equals($key) }).Count -eq 1 } 'manager lists the order fixture'
+        $item = @($model.Scripts | Where-Object { $_.IsInstalled -and $_.Installation.ScriptKey.Equals($key) })[0]
+        $menu = Open-ManagerContextMenu $Context $Window $item
+        $resources = @('common_moveUp', 'common_moveDown', 'common_moveToTop', 'common_moveToBottom')
+        $commands = @($model.MoveUpCommand, $model.MoveDownCommand, $model.MoveToFirstCommand, $model.MoveToLastCommand)
+        for ($i = 0; $i -lt $resources.Count; $i++) {
+            Assert-Regression ($menu.Items[$i].Command -eq $commands[$i] -and
+                $menu.Items[$i].Header -eq $Context.LanguageService.GetString($resources[$i])) "order menu item $i binds to the manager and current language"
+        }
+        Wait-Regression $Context {
+            $menu.Items[0].IsEnabled -and !$menu.Items[1].IsEnabled -and
+                $menu.Items[2].IsEnabled -and !$menu.Items[3].IsEnabled
+        } 'last installed script only offers moves toward the beginning'
+        $move = $menu.Items[2]
+        $menu.IsOpen = $false
+        Invoke-BrowserCommand $move.Command
+        Wait-Regression $Context { !$model.IsBusy -and [object]::ReferenceEquals($model.Scripts[0], $item) } 'move to first commits and updates the list'
+        Assert-Regression ([object]::ReferenceEquals($model.SelectedScript, $item)) 'moving a script preserves selection'
+        Assert-Regression ((Invoke-JavaScript $Context $BrowserModel.Browser $readOrder) -ceq 'AB') 'reordering does not rerun scripts in the existing document'
+        Invoke-BrowserCommand $BrowserModel.Browser.ReloadCommand
+        Wait-Regression $Context {
+            (Invoke-JavaScript $Context $BrowserModel.Browser $readOrder) -ceq 'BA'
+        } 'same-stage scripts follow the custom order after refresh'
+    } finally {
+        foreach ($installation in $installed) {
+            Complete-UserScriptTask $Context ($repository.RemoveAsync($installation.ScriptKey, $token)) 'remove order fixture' | Out-Null
+        }
+    }
+}
+
 function Test-UserScriptManager($Context) {
     $window = $null
     $browserWindow = $null
@@ -864,6 +922,8 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $browser = $browserWindow.ViewModel.CurrentBrowser.Browser
         $browserWindow.ViewModel.CurrentBrowser.Address = $Context.AuxiliaryAddress
         Wait-Regression $Context { (Invoke-JavaScript $Context $browser "document.documentElement && document.documentElement.getAttribute('data-manager')") -eq 'saved' } 'manager-installed script executes in real CEF'
+        Test-ManagerExecutionOrder $Context $window $browserWindow.ViewModel.CurrentBrowser
+        $model.SelectedScript = $item
         $list = $window.FindName('scriptList')
         $list.UpdateLayout()
         $icon = @(Find-FaviconElements ($list.ItemContainerGenerator.ContainerFromItem($item)) ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
@@ -1019,7 +1079,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $draftSource = $deleteDraft.Source
         $model.SelectedScript = $previousSelection
         $menu = Open-ManagerContextMenu $Context $window $deleteTarget
-        Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
+        Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[5] $false
         Assert-Regression ($model.Scripts.Contains($deleteTarget) -and $deleteTarget.Source.EndsWith('keep until approved') -and
             [IO.File]::Exists($deletePath)) 'declined context deletion preserves installed source and unsaved edits'
         $topDelete = @($window.Content.Children[0].Items | ForEach-Object { $_.Items } |
@@ -1027,12 +1087,12 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Invoke-ManagerDeleteWithConfirmation $Context $window $topDelete $null
         Assert-Regression ($model.Scripts.Contains($deleteTarget) -and [IO.File]::Exists($deletePath)) 'closing the top-menu confirmation cancels deletion'
         $menu = Open-ManagerContextMenu $Context $window $deleteTarget
-        Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $true
+        Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[5] $true
         Assert-Regression (!$model.Scripts.Contains($deleteTarget) -and ![IO.File]::Exists($deletePath) -and
             $model.Scripts.Contains($previousSelection) -and $model.Scripts.Count -eq $countBeforeDelete + 1) 'approved context deletion removes only the right-clicked script without retaining its dirty draft'
         $model.SelectedScript = $previousSelection
         $menu = Open-ManagerContextMenu $Context $window $deleteDraft
-        Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
+        Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[5] $false
         Assert-Regression ($model.Scripts.Contains($deleteDraft) -and $deleteDraft.Source -eq $draftSource) 'declined draft deletion preserves its source'
         Invoke-ManagerDeleteWithConfirmation $Context $window $topDelete $true
         Assert-Regression (!$model.Scripts.Contains($deleteDraft) -and $model.Scripts.Count -eq $countBeforeDelete) 'approved top-menu deletion removes the draft'
@@ -1072,7 +1132,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
             }
             $editorMenu.IsOpen = $false
             $menu = Open-ManagerContextMenu $Context $window $previousSelection
-            Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
+            Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[5] $false
         }
         $Context.LanguageService.SetCurrentLanguage('zh-CN')
         $model.SelectedScript = $item
@@ -1134,7 +1194,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
                 (Get-ManagerColorContrast $editorMenu.Background.Color $editor.Background.Color) -lt 2) "editor context menu follows the $appearance theme with readable text"
             $editorMenu.IsOpen = $false
             $menu = Open-ManagerContextMenu $Context $window $item
-            Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[0] $false
+            Invoke-ManagerDeleteWithConfirmation $Context $window $menu.Items[5] $false
             $list = $window.FindName('scriptList')
             $list.ScrollIntoView($item)
             $list.UpdateLayout()
