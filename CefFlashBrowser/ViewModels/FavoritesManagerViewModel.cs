@@ -1,3 +1,4 @@
+using CefFlashBrowser.Infrastructure.Collections;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using SimpleMvvm;
@@ -21,6 +22,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand MoveDownCommand { get; set; }
         public DelegateCommand MoveToTopCommand { get; set; }
         public DelegateCommand MoveToBottomCommand { get; set; }
+        public DelegateCommand ReorderCommand { get; }
 
 
         public ObservableCollection<Website> Favorites
@@ -117,6 +119,42 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        private bool TryGetReorderIndices(object value, out int sourceIndex, out int destinationIndex)
+        {
+            sourceIndex = -1;
+            destinationIndex = -1;
+
+            if (!(value is ListReorderRequest request)
+                || !(request.Item is Website item)
+                || !(request.TargetItem is Website target))
+                return false;
+
+            var favorites = Favorites;
+            sourceIndex = favorites.IndexOf(item);
+            int targetIndex = favorites.IndexOf(target);
+
+            if (sourceIndex < 0 || targetIndex < 0)
+                return false;
+
+            destinationIndex = targetIndex + (request.InsertAfter ? 1 : 0);
+
+            if (sourceIndex < destinationIndex)
+                destinationIndex--;
+
+            return destinationIndex != sourceIndex;
+        }
+
+        private bool CanExecuteReorder(object value)
+        {
+            return TryGetReorderIndices(value, out _, out _);
+        }
+
+        private void Reorder(ListReorderRequest request)
+        {
+            if (TryGetReorderIndices(request, out int sourceIndex, out int destinationIndex))
+                Favorites.Move(sourceIndex, destinationIndex);
+        }
+
         protected override void Init()
         {
             base.Init();
@@ -131,6 +169,7 @@ namespace CefFlashBrowser.ViewModels
             MoveDownCommand = new DelegateCommand<Website>(MoveDown);
             MoveToTopCommand = new DelegateCommand<Website>(MoveToTop);
             MoveToBottomCommand = new DelegateCommand<Website>(MoveToBottom);
+            ReorderCommand = new DelegateCommand<ListReorderRequest>(Reorder) { CanExecuteFunc = CanExecuteReorder };
         }
     }
 }

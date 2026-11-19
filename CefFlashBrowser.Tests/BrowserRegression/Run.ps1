@@ -121,6 +121,7 @@ try {
         Test-LanguageService $context
         Test-LanguageSelectors $context
         Test-FavoritesService $context
+        Test-FavoritesManagerReorder $context
         Test-ProxySettings $context
         Test-UserScriptSettings $context
         Test-BrowserBeforeInitialization $context

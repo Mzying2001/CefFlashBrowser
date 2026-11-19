@@ -58,9 +58,16 @@
                 </Button>
             </StackPanel>
 
-            <ListBox Grid.Row="1"
+            <ListBox x:Name="favoritesList"
+                     Grid.Row="1"
+                     AllowDrop="True"
                      ItemsSource="{Binding Favorites}"
                      SelectedItem="{Binding SelectedWebsite}">
+                <i:Interaction.Behaviors>
+                    <behaviors:ListReorderBehavior
+                        IsDragEnabled="True"
+                        ReorderCommand="{Binding ReorderCommand}"/>
+                </i:Interaction.Behaviors>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <DockPanel>
