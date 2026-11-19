@@ -231,7 +231,7 @@ namespace CefFlashBrowser.Views.Behaviors
 
             var preview = new Border
             {
-                Opacity = 0.9,
+                Opacity = 0.6,
                 BorderThickness = new Thickness(PreviewBorderThickness),
                 BorderBrush = list.TryFindResource("BorderBrush") as Brush ?? SystemColors.ActiveBorderBrush,
                 Background = list.TryFindResource("RegionBrush") as Brush ?? SystemColors.WindowBrush,
