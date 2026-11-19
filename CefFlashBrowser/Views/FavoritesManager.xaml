@@ -29,106 +29,104 @@
         <behaviors:WindowBehavior x:Name="windowBehavior"/>
     </i:Interaction.Behaviors>
 
-    <Grid>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" MinWidth="150" MaxWidth="400"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0"
-              Margin="10,10,0,10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <StackPanel Grid.ColumnSpan="3"
+                    Margin="0,0,0,10"
+                    Orientation="Horizontal">
+            <Button Command="{Binding AddItemCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <svgc:SvgIcon
+                        Width="12"
+                        Height="12"
+                        UriSource="{StaticResource AddIconUri}"/>
+                    <TextBlock
+                        Margin="8,0,0,0"
+                        Text="{DynamicResource favorites_add}"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
 
-            <StackPanel Grid.Column="0"
-                        Margin="0,0,0,7"
-                        Orientation="Horizontal">
-                <Button Margin="0,0,7,0"
-                        Command="{Binding AddItemCommand}">
-                    <StackPanel Orientation="Horizontal">
-                        <svgc:SvgIcon Width="12"
-                                      Height="12"
-                                      UriSource="{StaticResource AddIconUri}"/>
-                        <TextBlock Margin="8,0,0,0"
-                                   Text="{DynamicResource favorites_add}"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
+        <ListBox x:Name="favoritesList"
+                 Grid.Row="1"
+                 AllowDrop="True"
+                 ItemsSource="{Binding Favorites}"
+                 SelectedItem="{Binding SelectedWebsite}">
+            <i:Interaction.Behaviors>
+                <behaviors:ListReorderBehavior
+                    IsDragEnabled="True"
+                    ReorderCommand="{Binding ReorderCommand}"/>
+            </i:Interaction.Behaviors>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel>
+                        <c:BrowserIcon Margin="0,0,8,0">
+                            <c:BrowserIcon.FaviconUrl>
+                                <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
+                                    <Binding Path="Url"/>
+                                    <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
+                                    <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
+                                </MultiBinding>
+                            </c:BrowserIcon.FaviconUrl>
+                        </c:BrowserIcon>
+                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem"
+                       BasedOn="{StaticResource ListBoxItemBaseStyle}">
+                    <Setter Property="Tag"
+                            Value="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=DataContext}"/>
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <ContextMenu.Resources>
+                                    <Style TargetType="MenuItem"
+                                           BasedOn="{StaticResource MenuItemBaseStyle}">
+                                        <Setter Property="Tag"
+                                                Value="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag}"/>
+                                    </Style>
+                                </ContextMenu.Resources>
+                                <MenuItem Header="{DynamicResource common_moveToTop}"
+                                          Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.MoveToTopCommand}"
+                                          CommandParameter="{Binding}"/>
+                                <MenuItem Header="{DynamicResource common_moveToBottom}"
+                                          Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.MoveToBottomCommand}"
+                                          CommandParameter="{Binding}"/>
+                                <Separator/>
+                                <MenuItem Header="{DynamicResource favorites_remove}"
+                                          Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.RemoveItemCommand}"
+                                          CommandParameter="{Binding}"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
 
-            <ListBox x:Name="favoritesList"
-                     Grid.Row="1"
-                     AllowDrop="True"
-                     ItemsSource="{Binding Favorites}"
-                     SelectedItem="{Binding SelectedWebsite}">
-                <i:Interaction.Behaviors>
-                    <behaviors:ListReorderBehavior
-                        IsDragEnabled="True"
-                        ReorderCommand="{Binding ReorderCommand}"/>
-                </i:Interaction.Behaviors>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel>
-                            <c:BrowserIcon Margin="0,0,8,0">
-                                <c:BrowserIcon.FaviconUrl>
-                                    <MultiBinding Converter="{StaticResource WebsiteIconUrlConverter}" Mode="OneWay">
-                                        <Binding Path="Url"/>
-                                        <Binding Source="{StaticResource Locator}" Path="FaviconService"/>
-                                        <Binding Source="{StaticResource Locator}" Path="FaviconService.Revision"/>
-                                    </MultiBinding>
-                                </c:BrowserIcon.FaviconUrl>
-                            </c:BrowserIcon>
-                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                        </DockPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem"
-                           BasedOn="{StaticResource ListBoxItemBaseStyle}">
-                        <Setter Property="Tag"
-                                Value="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=DataContext}"/>
-                        <Setter Property="ContextMenu">
-                            <Setter.Value>
-                                <ContextMenu>
-                                    <ContextMenu.Resources>
-                                        <Style TargetType="MenuItem"
-                                               BasedOn="{StaticResource MenuItemBaseStyle}">
-                                            <Setter Property="Tag"
-                                                    Value="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag}"/>
-                                        </Style>
-                                    </ContextMenu.Resources>
-                                    <MenuItem Header="{DynamicResource common_moveToTop}"
-                                              Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.MoveToTopCommand}"
-                                              CommandParameter="{Binding}"/>
-                                    <MenuItem Header="{DynamicResource common_moveToBottom}"
-                                              Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.MoveToBottomCommand}"
-                                              CommandParameter="{Binding}"/>
-                                    <Separator/>
-                                    <MenuItem Header="{DynamicResource favorites_remove}"
-                                              Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.RemoveItemCommand}"
-                                              CommandParameter="{Binding}"/>
-                                </ContextMenu>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
-        </Grid>
+        <GridSplitter
+            Grid.Row="1"
+            Grid.Column="1"
+            Width="10"
+            Background="Transparent"
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Center"/>
 
-        <GridSplitter Grid.Column="1"
-                      Width="10"
-                      Background="Transparent"
-                      VerticalAlignment="Stretch"
-                      HorizontalAlignment="Center"/>
-
-        <GroupBox Grid.Column="2"
-                  Margin="0,10,10,10"
-                  Header="{DynamicResource favorites_edit}">
-            <GroupBox.Style>
-                <Style TargetType="GroupBox"
-                       BasedOn="{StaticResource {x:Type GroupBox}}">
+        <hc:Card Grid.Row="1"
+                 Grid.Column="2">
+            <hc:Card.Style>
+                <Style TargetType="{x:Type hc:Card}"
+                       BasedOn="{StaticResource {x:Type hc:Card}}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding SelectedWebsite}"
                                      Value="{x:Null}">
@@ -136,7 +134,7 @@
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </GroupBox.Style>
+            </hc:Card.Style>
             <Grid>
                 <Grid.BindingGroup>
                     <BindingGroup x:Name="itemEditingGroup"/>
@@ -218,6 +216,6 @@
                     </DockPanel>
                 </StackPanel>
             </Grid>
-        </GroupBox>
+        </hc:Card>
     </Grid>
 </Window>
