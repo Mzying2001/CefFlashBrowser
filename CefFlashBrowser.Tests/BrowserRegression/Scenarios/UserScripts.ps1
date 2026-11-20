@@ -520,10 +520,23 @@ function Test-UserScriptMenus($Context) {
         }
         $emptyBase = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildWithBaseAsync($model.Browser, $true, $false)) 'build scripts-only menu'
         Assert-Regression ($emptyBase.Commands.Count -eq 1 -and $emptyBase.SubMenus.Count -eq 1) 'scripts-only menu has no leading separator'
-        $rendered = [UserScriptMenuProbe]::Render($menu)
-        $parent = @($rendered.Items | Where-Object { $_ -is [System.Windows.Controls.MenuItem] -and $_.Header -eq 'Runtime menu' })[0]
-        Assert-Regression ($null -eq $parent.Command -and $parent.IsEnabled -and $parent.Items.Count -eq 2 -and
-            $null -ne $parent.Items[0].Command) 'WPF renders a non-executing script parent and executable children'
+        $rendered = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RenderAsync($model.Browser, $menu)) 'render native script menu'
+        try {
+            $parent = $rendered.Items[$menu.Commands.IndexOf($parentId)]
+            Assert-Regression ($null -eq $parent.Command -and $parent.IsEnabled -and $parent.Items.Count -eq 2 -and
+                $null -ne $parent.Items[0].Command) 'WPF renders a non-executing script parent and executable children'
+            Assert-Regression ($parent.Icon -is [CefFlashBrowser.Views.Custom.BrowserIcon] -and
+                $parent.Icon.FaviconUrl -eq ($iconFixture.BaseUrl + '/a-icon.png') -and
+                $parent.Icon.Width -eq 16 -and $parent.Icon.Height -eq 16 -and
+                @($parent.Items | Where-Object { $null -ne $_.Icon }).Count -eq 0) 'only the GM group parent displays its script icon'
+            $manualIcon = $rendered.Items[$manualIndex].Icon
+            Assert-Regression ($manualIcon -is [CefFlashBrowser.Views.Custom.BrowserIcon] -and
+                $null -eq $manualIcon.FaviconUrl -and $manualIcon.DefaultIcon -eq 'M') 'manual item without icon metadata receives the script initial'
+            Assert-Regression ($rendered.Items[$menu.Commands.IndexOf([CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::OpenInNewTab)].Icon -is
+                [SharpVectors.Converters.SvgIcon]) 'built-in new-tab command retains its SVG icon'
+        } finally {
+            $rendered.IsOpen = $false
+        }
         [void](Complete-UserScriptTask $Context ([UserScriptMenuProbe]::InvokeAsync($model.Browser, $parentId)) 'ignore script parent command')
         Assert-Regression ($null -eq (Invoke-JavaScript $Context $model.Browser "document.documentElement.getAttribute('data-runtime-menu')")) 'script parent cannot invoke a registered callback'
         for ($index = 0; $index -lt 5; $index++) {
@@ -775,6 +788,7 @@ GM.registerMenuCommand('Runtime command', function() {
         $empty = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildWithBaseAsync($model.Browser, $true, $false)) 'build empty menu'
         Assert-Regression ($empty.Commands.Count -eq 0) 'an empty menu remains empty'
 
+        Test-UserScriptContextMenuIcons $Context $model $repository $iconFixture $installed
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
         if ($null -ne $window) { $window.ForceCloseWindow() }
@@ -782,6 +796,75 @@ GM.registerMenuCommand('Runtime command', function() {
         foreach ($key in $installed) {
             Complete-UserScriptTask $Context ($repository.RemoveAsync($key, [Threading.CancellationToken]::None)) 'remove menu fixture' | Out-Null
         }
+    }
+}
+
+function Test-UserScriptContextMenuIcons($Context, $Model, $Repository, $IconFixture, $Installed) {
+    $token = [Threading.CancellationToken]::None
+    $origin = $IconFixture.BaseUrl + '/menu-icons.user.js'
+    $aSource = @'
+// ==UserScript==
+// @name Shared menu
+// @namespace menu-icons-a
+// @icon a-icon.png
+// @match file:///*
+// @run-at context-menu
+// @grant none
+// ==/UserScript==
+'@
+    $bSource = $aSource.Replace('menu-icons-a', 'menu-icons-b').Replace('a-icon.png', 'b-icon.png')
+    $a = Complete-UserScriptTask $Context ($Repository.InstallAsync($aSource, $origin, $true, $token)) 'install first same-name menu script'
+    $Installed.Add($a.ScriptKey)
+    $b = Complete-UserScriptTask $Context ($Repository.InstallAsync($bSource, $origin, $true, $token)) 'install second same-name menu script'
+    $Installed.Add($b.ScriptKey)
+
+    $registrations = @()
+    $rendered = $null
+    try {
+        $registrations = @(Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($Model.Browser, $a.ScriptKey, 'Shared command ', 1)) 'register same-installation GM command')
+        foreach ($expected in @(
+            @{ ManualUrl = '/a-icon.png'; GroupUrl = '/a-icon.png' },
+            @{ ManualUrl = '/bad.png'; GroupUrl = '/a-icon.png' },
+            @{ ManualUrl = '/bad.png'; GroupUrl = '/bad.png' }
+        )) {
+            $native = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($Model.Browser)) 'build same-name script menu'
+            $rendered = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RenderAsync($Model.Browser, $native)) 'render same-name script menu'
+            $shared = @($rendered.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] -and $_.Header -eq 'Shared menu' })
+            $direct = @($shared | Where-Object { !$_.HasItems })
+            $groups = @($shared | Where-Object HasItems)
+            Assert-Regression ($direct.Count -eq 2 -and $groups.Count -eq 1 -and
+                $direct[0].Icon.FaviconUrl -eq ($IconFixture.BaseUrl + $expected.ManualUrl) -and
+                $direct[1].Icon.FaviconUrl -eq ($IconFixture.BaseUrl + '/b-icon.png') -and
+                $groups[0].Icon.FaviconUrl -eq ($IconFixture.BaseUrl + $expected.GroupUrl) -and
+                ![object]::ReferenceEquals($direct[0].Icon, $groups[0].Icon) -and
+                $null -eq $groups[0].Items[0].Icon) "same-name direct items and GM group have their own icons ($($expected.ManualUrl), $($expected.GroupUrl))"
+
+            $icon = $direct[0].Icon
+            [void]$icon.ApplyTemplate()
+            if ($expected.ManualUrl -eq '/a-icon.png') {
+                Wait-Regression $Context {
+                    $image = $icon.Template.FindName('favicon', $icon)
+                    $null -ne $image.Source -and !$image.Source.IsDownloading -and !$icon.HasImageFailed
+                } 'right-click menu loads a relative script icon'
+            } else {
+                Wait-Regression $Context { $icon.HasImageFailed } 'right-click menu detects a bad script icon'
+                Assert-Regression ($icon.DefaultIcon -eq 'S' -and $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq 'Visible') 'bad icon shows the script initial'
+            }
+            $rendered.IsOpen = $false
+            Complete-UserScriptTask $Context ([UserScriptMenuProbe]::DismissAsync($Model.Browser)) 'dismiss icon menu'
+
+            if ($expected.ManualUrl -eq '/a-icon.png') {
+                $updatedSource = $aSource.Replace('@icon a-icon.png', '@icon64 bad.png')
+                [void](Complete-UserScriptTask $Context ($Repository.UpdateAsync($a.ScriptKey, $updatedSource, $origin, $token)) 'change the installed menu icon')
+            } elseif ($expected.GroupUrl -eq '/a-icon.png') {
+                foreach ($registration in $registrations) { $registration.Dispose() }
+                Wait-Regression $Context { $Model.UserScriptMenus.Count -eq 0 } 'release the old icon registration'
+                $registrations = @(Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($Model.Browser, $a.ScriptKey, 'Shared command ', 1)) 'reregister with the updated icon')
+            }
+        }
+    } finally {
+        if ($null -ne $rendered) { $rendered.IsOpen = $false }
+        foreach ($registration in $registrations) { $registration.Dispose() }
     }
 }
 

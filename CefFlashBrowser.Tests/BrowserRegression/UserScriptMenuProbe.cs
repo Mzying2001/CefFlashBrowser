@@ -3,11 +3,11 @@ using CefFlashBrowser.Browser.UserScripts;
 using Mzying2001.MonkeySharp.Core.Apis;
 using Mzying2001.MonkeySharp.Core.Domain;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 
 public static class UserScriptMenuProbe
@@ -58,14 +58,21 @@ public static class UserScriptMenuProbe
         });
     }
 
-    public static ContextMenu Render(RegressionMenuModelProxy model)
+    public static Task<ContextMenu> RenderAsync(IWebBrowser browser, RegressionMenuModelProxy model)
     {
-        var handler = typeof(CefFlashBrowser.Browser.Handlers.ContextMenuHandler);
-        var info = handler.Assembly.GetType("CefFlashBrowser.Browser.Handlers.CefMenuItemInfo")
-            .GetMethod("GetMenuItemInfoList").Invoke(null, new[] { model.GetTransparentProxy() });
-        var items = handler.GetMethod("GetMenuItems", BindingFlags.Static | BindingFlags.NonPublic)
-            .Invoke(null, new[] { info, null });
-        return new ContextMenu { ItemsSource = (IEnumerable)items };
+        return Cef.UIThreadTaskFactory.StartNew(() =>
+        {
+            var control = (FrameworkElement)browser;
+            using (var frame = browser.GetBrowser().MainFrame)
+            {
+                if (!browser.MenuHandler.RunContextMenu(browser, browser.GetBrowser(), frame,
+                    (IContextMenuParams)Parameters().GetTransparentProxy(), (IMenuModel)model.GetTransparentProxy(),
+                    new MenuCallback()))
+                    throw new InvalidOperationException("The WPF menu handler did not handle the menu.");
+            }
+
+            return control.Dispatcher.Invoke(() => control.ContextMenu);
+        });
     }
 
     public static Task<RegressionMenuModelProxy> BuildOverflowAsync(IWebBrowser browser)
@@ -122,6 +129,26 @@ public static class UserScriptMenuProbe
     private static RegressionContextMenuParamsProxy Parameters()
     {
         return new RegressionContextMenuParamsProxy { SelectionText = "menu probe", LinkUrl = "about:blank" };
+    }
+
+    private sealed class MenuCallback : IRunContextMenuCallback
+    {
+        public bool IsDisposed { get; private set; }
+
+        public void Continue(CefMenuCommand commandId, CefEventFlags flags)
+        {
+            Dispose();
+        }
+
+        public void Cancel()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            IsDisposed = true;
+        }
     }
 
     private sealed class OverflowHandler : IContextMenuHandler

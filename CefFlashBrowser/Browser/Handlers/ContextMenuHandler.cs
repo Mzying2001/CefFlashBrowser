@@ -1,7 +1,9 @@
+using CefFlashBrowser.Browser.UserScripts;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
+using CefFlashBrowser.Views.Custom;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
@@ -147,6 +149,12 @@ namespace CefFlashBrowser.Browser.Handlers
         {
             var menuItemInfoList = CefMenuItemInfo.GetMenuItemInfoList(model);
 
+            if (menuItemInfoList != null && chromiumWebBrowser.MenuHandler is UserScriptContextMenuHandler scripts)
+            {
+                foreach (var item in menuItemInfoList)
+                    item.ScriptIcon = scripts.GetIcon(item.CommandID);
+            }
+
             ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
             {
                 var menu = new ContextMenu
@@ -194,7 +202,7 @@ namespace CefFlashBrowser.Browser.Handlers
                 yield return new MenuItem
                 {
                     Header = GetHeader(item),
-                    Icon = GetIcon(item.CommandID),
+                    Icon = GetIcon(item),
                     Padding = new Thickness(10, 5, 10, 5),
                     IsChecked = item.IsChecked,
                     IsEnabled = item.IsEnable,
@@ -204,11 +212,25 @@ namespace CefFlashBrowser.Browser.Handlers
             }
         }
 
-        private static SvgIcon GetIcon(CefMenuCommand commandId)
+        private static FrameworkElement GetIcon(CefMenuItemInfo item)
         {
+            if (item.ScriptIcon != null)
+            {
+                var icon = new BrowserIcon
+                {
+                    Width = 16,
+                    Height = 16,
+                    FaviconUrl = item.ScriptIcon.Url,
+                    DefaultIcon = item.ScriptIcon.Initial
+                };
+                icon.SetResourceReference(FrameworkElement.StyleProperty, BrowserIcon.TextFallbackStyleKey);
+                return icon;
+            }
+
             string resourceKey;
             double size;
-            switch (commandId)
+
+            switch (item.CommandID)
             {
                 case OpenInNewTab:
                     resourceKey = "NewTabIconUri";

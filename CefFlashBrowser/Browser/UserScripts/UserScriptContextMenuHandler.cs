@@ -1,6 +1,9 @@
 using CefFlashBrowser.Data;
+using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.ViewModels;
 using CefSharp;
+using Mzying2001.MonkeySharp.CefSharp;
+using Mzying2001.MonkeySharp.Core.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,21 +17,36 @@ namespace CefFlashBrowser.Browser.UserScripts
         private readonly UserScriptMenuService _menus;
         private readonly Func<int> _originalCount;
         private readonly Action _reportLimit;
+        private readonly CefSharpUserScriptHost _host;
+        private readonly Func<ScriptKey, UserScriptMenuIcon> _getScriptIcon;
         private readonly Dictionary<CefMenuCommand, UserScriptMenuCommand> _commands = new Dictionary<CefMenuCommand, UserScriptMenuCommand>();
+        private readonly Dictionary<CefMenuCommand, UserScriptMenuIcon> _icons = new Dictionary<CefMenuCommand, UserScriptMenuIcon>();
 
         public IContextMenuHandler Inner { get; }
 
         public UserScriptContextMenuHandler(IContextMenuHandler inner, UserScriptMenuService menus, Func<int> originalCount, Action reportLimit)
+            : this(inner, menus, originalCount, reportLimit, null, null)
+        {
+        }
+
+        internal UserScriptContextMenuHandler(IContextMenuHandler inner, UserScriptMenuService menus, Func<int> originalCount,
+            Action reportLimit, CefSharpUserScriptHost host, Func<ScriptKey, UserScriptMenuIcon> getScriptIcon)
         {
             Inner = inner;
             _menus = menus;
             _originalCount = originalCount;
             _reportLimit = reportLimit;
+            _host = host;
+            _getScriptIcon = getScriptIcon;
         }
+
+        internal UserScriptMenuIcon GetIcon(CefMenuCommand id)
+            => _icons.TryGetValue(id, out var icon) ? icon : null;
 
         public void OnBeforeContextMenu(IWebBrowser browser, IBrowser native, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
             _commands.Clear();
+            _icons.Clear();
             Inner.OnBeforeContextMenu(browser, native, frame, parameters, model);
 
             if (GlobalData.Settings.DisableBrowserContextMenu)
@@ -57,6 +75,22 @@ namespace CefFlashBrowser.Browser.UserScripts
             if (removed)
                 _reportLimit();
 
+            if (_host != null)
+            {
+                for (var index = originalCount; index < model.Count; index++)
+                {
+                    var id = model.GetCommandIdAt(index);
+
+                    if (id == CefMenuCommand.NotFound || !_host.TryGetContextMenuScriptKey(id, out var key))
+                        continue;
+
+                    var icon = _getScriptIcon(key);
+
+                    if (icon != null)
+                        _icons.Add(id, icon);
+                }
+            }
+
             var command = first + limit;
             var truncated = false;
 
@@ -69,7 +103,10 @@ namespace CefFlashBrowser.Browser.UserScripts
                     break;
                 }
 
-                var submenu = model.AddSubMenu((CefMenuCommand)command++, group.First().ScriptName);
+                var parentId = (CefMenuCommand)command++;
+                var firstItem = group.First();
+                var submenu = model.AddSubMenu(parentId, firstItem.ScriptName);
+                _icons.Add(parentId, new UserScriptMenuIcon(firstItem.ScriptIconUrl, firstItem.ScriptIconInitial));
 
                 foreach (var item in group)
                 {
@@ -113,6 +150,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         public void OnContextMenuDismissed(IWebBrowser browser, IBrowser native, IFrame frame)
         {
             _commands.Clear();
+            _icons.Clear();
             Inner.OnContextMenuDismissed(browser, native, frame);
         }
 

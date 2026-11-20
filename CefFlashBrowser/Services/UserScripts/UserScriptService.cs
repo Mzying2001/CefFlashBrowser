@@ -1,5 +1,6 @@
 using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Services.UserScripts.Persistence;
+using CefFlashBrowser.ViewModels;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Matching;
 using Mzying2001.MonkeySharp.Core.Permissions;
@@ -24,6 +25,7 @@ namespace CefFlashBrowser.Services.UserScripts
         private Task _initializeTask;
         private Task _stopTask;
         private IUserScriptRepository _repository;
+        private Dictionary<ScriptKey, UserScriptMenuIcon> _menuIcons = new Dictionary<ScriptKey, UserScriptMenuIcon>();
 
         public UserScriptContentService Content { get; }
 
@@ -140,12 +142,18 @@ namespace CefFlashBrowser.Services.UserScripts
 
                     await repository.InitializeAsync(linked.Token).ConfigureAwait(false);
                     await _persistence.CollectAsync(linked.Token).ConfigureAwait(false);
+
+                    var scripts = await repository.GetSnapshotAsync(linked.Token).ConfigureAwait(false);
+                    var menuIcons = scripts.ToDictionary(script => script.ScriptKey, CreateMenuIcon);
+
                     linked.Token.ThrowIfCancellationRequested();
 
                     lock (_lock)
                     {
                         ThrowIfStopping();
                         _repository = new OrderedUserScriptRepository(repository, _storage);
+                        _menuIcons = menuIcons;
+                        _repository.Changed += UpdateMenuIcon;
                         InitializationError = null;
                     }
                 }
@@ -162,6 +170,36 @@ namespace CefFlashBrowser.Services.UserScripts
                     throw;
                 }
             }
+        }
+
+        internal UserScriptMenuIcon GetMenuIcon(ScriptKey key)
+        {
+            lock (_lock)
+                return _menuIcons.TryGetValue(key, out var icon) ? icon : null;
+        }
+
+        private void UpdateMenuIcon(object sender, UserScriptRepositoryChangedEventArgs e)
+        {
+            var icon = e.Kind == RepositoryChangeKind.Removed ? null : CreateMenuIcon(e.Installation);
+
+            lock (_lock)
+            {
+                if (_stopTask != null)
+                    return;
+
+                if (icon == null)
+                    _menuIcons.Remove(e.Installation.ScriptKey);
+                else
+                    _menuIcons[e.Installation.ScriptKey] = icon;
+            }
+        }
+
+        private static UserScriptMenuIcon CreateMenuIcon(UserScriptInstallation installation)
+        {
+            var metadata = installation.Definition.Metadata;
+
+            return new UserScriptMenuIcon(UserScriptItemViewModel.ResolveIconUrl(metadata, installation.SourceOrigin),
+                UserScriptItemViewModel.GetIconInitial(metadata?.Name));
         }
 
         public IDisposable RegisterSession(string browserId, Func<Task> stop)
@@ -224,6 +262,14 @@ namespace CefFlashBrowser.Services.UserScripts
                 {
                     // The initialization failure was already reported.
                 }
+            }
+
+            lock (_lock)
+            {
+                if (_repository != null)
+                    _repository.Changed -= UpdateMenuIcon;
+
+                _menuIcons.Clear();
             }
 
             PermissionPolicy.Dispose();

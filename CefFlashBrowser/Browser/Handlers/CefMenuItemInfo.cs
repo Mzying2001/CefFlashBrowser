@@ -1,4 +1,5 @@
-﻿using CefSharp;
+﻿using CefFlashBrowser.Models.UserScripts;
+using CefSharp;
 using System.Collections.Generic;
 
 namespace CefFlashBrowser.Browser.Handlers
@@ -9,6 +10,7 @@ namespace CefFlashBrowser.Browser.Handlers
         public bool IsEnable { get; set; }
         public string Header { get; set; }
         public CefMenuCommand CommandID { get; set; }
+        public UserScriptMenuIcon ScriptIcon { get; set; }
         public IList<CefMenuItemInfo> SubMenuItemInfos { get; set; }
 
 

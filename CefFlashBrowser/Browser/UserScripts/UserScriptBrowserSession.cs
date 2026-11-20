@@ -214,7 +214,7 @@ namespace CefFlashBrowser.Browser.UserScripts
 
             _contextMenu = new UserScriptContextMenuHandler(_browser.MenuHandler, _menus,
                 () => applicationMenu?.LastMenuItemCount ?? 0,
-                () => Log(LogLevel.Warning, "Userscript native menu limit reached for tab " + _model.BrowserId));
+                () => Log(LogLevel.Warning, "Userscript native menu limit reached for tab " + _model.BrowserId), _host, _service.GetMenuIcon);
 
             _browser.MenuHandler = _contextMenu;
         }

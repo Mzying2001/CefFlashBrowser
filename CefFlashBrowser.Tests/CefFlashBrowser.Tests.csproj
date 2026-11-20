@@ -16,7 +16,7 @@
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
     <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
-    <PackageReference Include="Mzying2001.MonkeySharp.Core" Version="4.0.0" />
+    <PackageReference Include="Mzying2001.MonkeySharp.Core" Version="4.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
