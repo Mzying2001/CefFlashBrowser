@@ -288,7 +288,6 @@
     <sys:String x:Key="userScriptBatchUpdate_recheck">업데이트 정보가 만료되었거나 변경되었습니다. 다시 확인하세요.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">다음 스크립트를 업데이트하시겠습니까?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">저장하지 않은 변경 사항을 덮어씁니다.</sys:String>
-    <sys:String x:Key="userScriptBatchUpdate_updated">업데이트 완료</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">업데이트 성공 {0}개, 실패 {1}개.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">사용자 스크립트를 다운로드하지 못했습니다.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">사용자 스크립트를 저장하지 못했습니다.</sys:String>

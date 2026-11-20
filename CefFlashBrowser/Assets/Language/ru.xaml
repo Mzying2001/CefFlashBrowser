@@ -288,7 +288,6 @@
     <sys:String x:Key="userScriptBatchUpdate_recheck">Сведения об обновлении устарели. Проверьте ещё раз.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Обновить эти скрипты?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Несохранённые изменения будут перезаписаны.</sys:String>
-    <sys:String x:Key="userScriptBatchUpdate_updated">Обновлено</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Обновлено скриптов: {0}. Ошибок: {1}.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">Не удалось загрузить пользовательский скрипт.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">Не удалось сохранить пользовательский скрипт.</sys:String>

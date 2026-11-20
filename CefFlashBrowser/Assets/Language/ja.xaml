@@ -288,7 +288,6 @@
     <sys:String x:Key="userScriptBatchUpdate_recheck">更新情報が無効になりました。もう一度確認してください。</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">以下のスクリプトを更新しますか？</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">未保存の変更は上書きされます。</sys:String>
-    <sys:String x:Key="userScriptBatchUpdate_updated">更新済み</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">更新成功 {0} 件、失敗 {1} 件。</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">ユーザースクリプトをダウンロードできませんでした。</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">ユーザースクリプトを保存できませんでした。</sys:String>

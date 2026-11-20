@@ -16,6 +16,31 @@ namespace CefFlashBrowser.Tests
     public class UserScriptBatchUpdateTests
     {
         [TestMethod]
+        public async Task BatchUpdateRequiresAnInstalledScriptAndTracksRepositoryChanges()
+        {
+            var repository = await RepositoryAsync();
+            var manager = await ManagerAsync(repository, (_, __) => Task.FromResult(string.Empty));
+            var available = new List<bool>();
+            manager.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(manager.CanOpenBatchUpdate)) available.Add(manager.CanOpenBatchUpdate);
+            };
+
+            Assert.IsFalse(manager.CanOpenBatchUpdate);
+            manager.NewScript();
+            Assert.IsNull(manager.CreateBatchUpdateViewModel());
+
+            var installation = await InstallAsync(repository, "Disabled script", enabled: false);
+            Assert.IsTrue(manager.CanOpenBatchUpdate);
+
+            await repository.RemoveAsync(installation.ScriptKey, CancellationToken.None);
+            Assert.IsFalse(manager.CanOpenBatchUpdate);
+            Assert.IsNull(manager.CreateBatchUpdateViewModel());
+            CollectionAssert.AreEqual(new[] { false, true, false }, available);
+            manager.Close();
+        }
+
+        [TestMethod]
         public async Task CheckAndUpdateAllUseTheVisibleRowsAndKeepHiddenResults()
         {
             var repository = await RepositoryAsync();
@@ -174,6 +199,8 @@ namespace CefFlashBrowser.Tests
                 batch.ConfirmRow = (metadata, _, warning, __) => metadata.Version == "2.0" && warning == null;
                 await batch.UpdateRowAsync(row);
                 Assert.AreEqual("2.0", row.CurrentVersion);
+                Assert.AreEqual("2.0", row.LatestVersion);
+                Assert.IsFalse(row.HasStatus);
                 Assert.IsFalse(((ICommand)batch.UpdateRowCommand).CanExecute(row));
             }
             manager.Close();

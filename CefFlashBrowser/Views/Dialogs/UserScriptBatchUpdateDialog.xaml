@@ -1,7 +1,11 @@
 <Window x:Class="CefFlashBrowser.Views.Dialogs.UserScriptBatchUpdateDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+        xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         Title="{DynamicResource userScriptBatchUpdate_title}"
         Background="{DynamicResource RegionBrush}"
         Width="710"
@@ -14,13 +18,26 @@
 
     <DockPanel Margin="14" KeyboardNavigation.TabNavigation="Cycle">
         <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10" LastChildFill="False">
-            <hc:TextBox x:Name="scriptFilter"
-                        DockPanel.Dock="Left" Width="220"
-                        MaxLength="100"
-                        IsReadOnly="{Binding IsBusy}"
-                        Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                        AutomationProperties.Name="{DynamicResource common_filterPlaceholder}"
-                        hc:InfoElement.Placeholder="{DynamicResource common_filterPlaceholder}"/>
+            <Grid DockPanel.Dock="Left" Width="220">
+                <hc:TextBox x:Name="scriptFilter"
+                            Padding="28,0,8,0"
+                            MaxLength="100"
+                            IsReadOnly="{Binding IsBusy}"
+                            Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                            AutomationProperties.Name="ScriptFilter"
+                            hc:InfoElement.Placeholder="{DynamicResource common_filterPlaceholder}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:TextBoxSelectAllOnFocus/>
+                    </i:Interaction.Behaviors>
+                </hc:TextBox>
+                <Grid Margin="8,0,0,0"
+                      Width="13" Height="13"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Left"
+                      IsHitTestVisible="False">
+                    <svgc:SvgIcon x:Name="filterSearchIcon" UriSource="{StaticResource SearchIconUri}"/>
+                </Grid>
+            </Grid>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Button x:Name="checkAllButton"
                         Padding="12,0"
@@ -42,65 +59,103 @@
                        Text="{Binding Summary}"/>
         </DockPanel>
 
-        <ListView x:Name="scriptList" ItemsSource="{Binding RowsView}"
-                  IsSynchronizedWithCurrentItem="False"
-                  ItemContainerStyle="{StaticResource AppListViewItemStyle}">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Width="204" Header="{DynamicResource common_name}">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}" TextTrimming="CharacterEllipsis"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="120" Header="{DynamicResource userScriptBatchUpdate_currentVersion}">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding CurrentVersion, TargetNullValue=—}"
-                                           ToolTip="{Binding CurrentVersion}" TextTrimming="CharacterEllipsis"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="202" Header="{DynamicResource userScriptBatchUpdate_latestVersion}">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,4">
-                                    <TextBlock x:Name="versionLink" TextTrimming="CharacterEllipsis" ToolTip="{Binding LatestVersion}">
-                                        <Hyperlink Command="{Binding DataContext.CheckRowCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                                   CommandParameter="{Binding}">
-                                            <Run Text="{Binding LatestVersion, Mode=OneWay}"/>
-                                        </Hyperlink>
-                                    </TextBlock>
-                                    <TextBlock Foreground="{DynamicResource SecondaryTextBrush}"
-                                               Text="{DynamicResource userScriptBatchUpdate_checking}"
-                                               Visibility="{Binding IsChecking, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                    <TextBlock Margin="0,2,0,0" TextWrapping="Wrap"
-                                               Foreground="{DynamicResource SecondaryTextBrush}"
-                                               Text="{Binding Status}"
-                                               ToolTip="{Binding StatusDetail}"
-                                               Visibility="{Binding HasStatus, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                </StackPanel>
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding IsChecking}" Value="True">
-                                        <Setter TargetName="versionLink" Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="{DynamicResource solSaveManager_headerOperations}">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Margin="0,3" Padding="10,0"
-                                        Content="{DynamicResource userScriptInstall_update}"
-                                        Command="{Binding DataContext.UpdateRowCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                        CommandParameter="{Binding}"/>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+        <Grid>
+            <ListView x:Name="scriptList" ItemsSource="{Binding RowsView}"
+                      IsSynchronizedWithCurrentItem="False"
+                      ItemContainerStyle="{StaticResource AppListViewItemStyle}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="204" Header="{DynamicResource common_name}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <DockPanel ToolTip="{Binding Name}">
+                                        <c:BrowserIcon
+                                            DockPanel.Dock="Left"
+                                            Width="16" Height="16"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center"
+                                            FaviconUrl="{Binding IconUrl}"
+                                            DefaultIcon="{Binding IconInitial}"
+                                            Style="{StaticResource {x:Static c:BrowserIcon.TextFallbackStyleKey}}"/>
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Text="{Binding Name}"
+                                            TextTrimming="CharacterEllipsis"/>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="120" Header="{DynamicResource userScriptBatchUpdate_currentVersion}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding CurrentVersion, TargetNullValue=—}"
+                                               ToolTip="{Binding CurrentVersion}" TextTrimming="CharacterEllipsis"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="202" Header="{DynamicResource userScriptBatchUpdate_latestVersion}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,4">
+                                        <TextBlock x:Name="versionLink" TextTrimming="CharacterEllipsis" ToolTip="{Binding LatestVersion}">
+                                            <Hyperlink Command="{Binding DataContext.CheckRowCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                       CommandParameter="{Binding}">
+                                                <Run Text="{Binding LatestVersion, Mode=OneWay}"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                        <TextBlock Foreground="{DynamicResource SecondaryTextBrush}"
+                                                   Text="{DynamicResource userScriptBatchUpdate_checking}"
+                                                   Visibility="{Binding IsChecking, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <TextBlock Margin="0,2,0,0" TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                                   Text="{Binding Status}"
+                                                   ToolTip="{Binding StatusDetail}"
+                                                   Visibility="{Binding HasStatus, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    </StackPanel>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecking}" Value="True">
+                                            <Setter TargetName="versionLink" Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="{DynamicResource solSaveManager_headerOperations}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Margin="0,3" Padding="10,0"
+                                            Content="{DynamicResource userScriptInstall_update}"
+                                            Command="{Binding DataContext.UpdateRowCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                            CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <TextBlock x:Name="scriptListEmptyMessage"
+                       Margin="10"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       IsHitTestVisible="False">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Setter Property="Text" Value="{DynamicResource userScriptManager_noMatchingScripts}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RowsView.SourceCollection.Count}" Value="0">
+                                <Setter Property="Text" Value="{DynamicResource userScriptManager_noInstalledScripts}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ElementName=scriptList, Path=HasItems}" Value="False">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
     </DockPanel>
 </Window>

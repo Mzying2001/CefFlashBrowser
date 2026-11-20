@@ -139,7 +139,9 @@ namespace CefFlashBrowser.ViewModels
             get => _isBusy;
             private set
             {
-                UpdateValue(ref _isBusy, value);
+                if (UpdateValue(ref _isBusy, value))
+                    RaisePropertyChanged(nameof(CanOpenBatchUpdate));
+
                 UpdateCommands();
             }
         }
@@ -164,7 +166,12 @@ namespace CefFlashBrowser.ViewModels
             _fetchSource = fetchSource;
 
             Scripts = new ObservableCollection<UserScriptItemViewModel>();
-            Scripts.CollectionChanged += (_, __) => UpdateMoveCommands();
+
+            Scripts.CollectionChanged += (_, __) =>
+            {
+                UpdateMoveCommands();
+                RaisePropertyChanged(nameof(CanOpenBatchUpdate));
+            };
 
             LoadUrlCommand = new DelegateCommand(async () => await ImportUrlAsync(InstallUrl)) { CanExecuteFunc = CanLoadUrl };
             ShowUrlCommand = new DelegateCommand(() => ShowUrlInput = true) { CanExecuteFunc = CanStartNewScript };
@@ -234,6 +241,7 @@ namespace CefFlashBrowser.ViewModels
             var lifetime = _lifetime;
             _lifetime = null;
             lifetime?.Cancel();
+            RaisePropertyChanged(nameof(CanOpenBatchUpdate));
 
             FilterText = string.Empty;
 
@@ -513,7 +521,8 @@ namespace CefFlashBrowser.ViewModels
             });
         }
 
-        public bool CanOpenBatchUpdate => !IsBusy && _lifetime != null && _repository != null && _fetchSource != null;
+        public bool CanOpenBatchUpdate => !IsBusy && _lifetime != null && _repository != null && _fetchSource != null
+            && Scripts.Any(item => item.IsInstalled);
 
         internal UserScriptBatchUpdateViewModel CreateBatchUpdateViewModel()
         {

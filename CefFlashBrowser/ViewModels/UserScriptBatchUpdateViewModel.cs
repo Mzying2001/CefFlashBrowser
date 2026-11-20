@@ -262,7 +262,7 @@ namespace CefFlashBrowser.ViewModels
             _acceptUpdate(row.Item, check.ExpectedRevisionId, installation);
 
             if (!_disposed && row.Item.Installation.RevisionId == installation.RevisionId)
-                row.SetResult(null, row.CurrentVersion, _text("userScriptBatchUpdate_updated"));
+                row.SetResult(null, row.CurrentVersion, null);
 
             return true;
         }
@@ -409,6 +409,8 @@ namespace CefFlashBrowser.ViewModels
 
         public string Name => Item.Name;
         public string CurrentVersion => Item.Version;
+        public string IconUrl => Item.IconUrl;
+        public string IconInitial => Item.IconInitial;
 
         private bool _isChecking;
         public bool IsChecking
@@ -442,6 +444,8 @@ namespace CefFlashBrowser.ViewModels
             _installation = Item.Installation;
             RaisePropertyChanged(nameof(Name));
             RaisePropertyChanged(nameof(CurrentVersion));
+            RaisePropertyChanged(nameof(IconUrl));
+            RaisePropertyChanged(nameof(IconInitial));
             return true;
         }
 

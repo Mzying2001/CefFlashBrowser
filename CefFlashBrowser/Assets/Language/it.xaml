@@ -288,7 +288,6 @@
     <sys:String x:Key="userScriptBatchUpdate_recheck">Le informazioni sono scadute o sono cambiate. Cerca di nuovo.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Aggiornare questi script?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Le modifiche non salvate verranno sovrascritte.</sys:String>
-    <sys:String x:Key="userScriptBatchUpdate_updated">Aggiornato</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Script aggiornati: {0}. Aggiornamenti non riusciti: {1}.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">Impossibile scaricare lo script utente.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">Impossibile salvare lo script utente.</sys:String>

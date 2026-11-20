@@ -129,6 +129,7 @@
             <MenuItem Header="{DynamicResource common_script}">
                 <MenuItem x:Name="batchUpdateMenuItem"
                           Header="{DynamicResource userScriptBatchUpdate_menu}"
+                          IsEnabled="{Binding CanOpenBatchUpdate}"
                           Command="{Binding ElementName=window, Path=OpenBatchUpdateCommand}"/>
                 <Separator/>
                 <MenuItem x:Name="showDetailsMenuItem"

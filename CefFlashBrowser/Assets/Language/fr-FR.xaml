@@ -288,7 +288,6 @@
     <sys:String x:Key="userScriptBatchUpdate_recheck">Les informations sont périmées. Relancez la recherche.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Mettre à jour ces scripts ?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Les modifications non enregistrées seront remplacées.</sys:String>
-    <sys:String x:Key="userScriptBatchUpdate_updated">Mis à jour</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Scripts mis à jour : {0}. Échecs : {1}.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">Impossible de télécharger le script utilisateur.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">Impossible d’enregistrer le script utilisateur.</sys:String>

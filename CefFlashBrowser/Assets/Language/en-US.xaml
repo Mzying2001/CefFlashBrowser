@@ -288,7 +288,6 @@
     <sys:String x:Key="userScriptBatchUpdate_recheck">Update information expired or changed. Check again.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Update these scripts?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Unsaved changes will be overwritten.</sys:String>
-    <sys:String x:Key="userScriptBatchUpdate_updated">Updated</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Updated {0} scripts. Failed to update {1}.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">Could not download the userscript.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">Could not save the userscript.</sys:String>

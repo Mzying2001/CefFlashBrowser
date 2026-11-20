@@ -1361,6 +1361,9 @@ function Test-ManagerBatchUpdate($Context, $Window) {
             $fixture = $fixtures[$i]
             $path = if ($i -eq 0) { $slowPath } else { '/manager.user.js' }
             $original = $source.Replace('NAME', $names[$i]).Replace('UPDATE_URL', ($fixture.BaseUrl + $path))
+            if ($i -eq 1) {
+                $original = $original.Replace('// ==/UserScript==', "// @icon $($fixture.BaseUrl)/blocked.png`n// ==/UserScript==")
+            }
             $fixture.ScriptSource = $original.Replace('1.0', '2.0')
             Complete-UserScriptTask $Context ($Context.UserScriptService.Repository.InstallAsync($original, $null, ($i -eq 0),
                 [Threading.CancellationToken]::None)) 'install a batch update fixture' | Out-Null
@@ -1385,15 +1388,42 @@ function Test-ManagerBatchUpdate($Context, $Window) {
                     $batch.Title -eq $Context.LanguageService.GetString('userScriptBatchUpdate_title')) 'batch update opens a localized window owned by the manager'
                 $list = $batch.FindName('scriptList')
                 $filter = $batch.FindName('scriptFilter')
+                $searchIcon = $batch.FindName('filterSearchIcon')
+                $emptyMessage = $batch.FindName('scriptListEmptyMessage')
                 $check = $batch.FindName('checkAllButton')
                 $update = $batch.FindName('updateAllButton')
                 Assert-Regression ($list.Items.Count -eq @($manager.Scripts | Where-Object IsInstalled).Count -and
                     $check.IsEnabled -and !$update.IsEnabled) 'batch lists installed scripts and waits for a check before enabling Update All'
+                Assert-Regression ($searchIcon.IsVisible -and $searchIcon.UriSource -eq $Window.FindResource('SearchIconUri') -and
+                    !$searchIcon.IsHitTestVisible -and $filter.Padding.Left -eq 28) 'batch filter uses the manager search icon and inset'
+                Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($filter) -ceq 'ScriptFilter') 'batch filter uses the fixed ScriptFilter automation name'
+                $filter.Text = 'Batch regression'
+                Set-TabWindowForeground $Context $batch
+                [void]$batch.FindName('closeButton').Focus()
+                $filter.Select(0, 0)
+                [void]$filter.Focus()
+                Assert-Regression ($filter.IsKeyboardFocused -and $filter.SelectedText -ceq $filter.Text) 'focusing the batch filter selects the entire query'
+                $filter.Text = 'no matching scripts'
+                $batch.UpdateLayout()
+                $messageOrigin = $emptyMessage.TranslatePoint([Windows.Point]::new(0, 0), $list)
+                Assert-Regression ($list.Items.Count -eq 0 -and $emptyMessage.IsVisible -and
+                    $emptyMessage.Text -ceq $Context.LanguageService.GetString('userScriptManager_noMatchingScripts') -and
+                    [Math]::Abs($messageOrigin.X + ($emptyMessage.ActualWidth - $list.ActualWidth) / 2) -lt 1 -and
+                    [Math]::Abs($messageOrigin.Y + ($emptyMessage.ActualHeight - $list.ActualHeight) / 2) -lt 1) 'batch centers the localized message when the filter returns no scripts'
+                $filter.Text = 'Batch regression B'
+                $batch.UpdateLayout()
+                $iconRow = $list.ItemContainerGenerator.ContainerFromItem($list.Items[0])
+                $declaredIcon = @(Find-FaviconElements $iconRow ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
+                Assert-Regression (!$emptyMessage.IsVisible -and $declaredIcon.IsVisible -and $declaredIcon.ActualWidth -eq 16 -and
+                    $declaredIcon.ActualHeight -eq 16 -and $declaredIcon.FaviconUrl -eq ($fixtures[1].BaseUrl + '/blocked.png')) 'batch shows a declared script icon at 16 by 16'
                 $filter.Text = 'Batch regression A'
                 $batch.UpdateLayout()
                 Assert-Regression ($list.Items.Count -eq 1) 'batch filter matches the script name'
                 $row = $list.Items[0]
                 $container = $list.ItemContainerGenerator.ContainerFromItem($row)
+                $fallbackIcon = @(Find-FaviconElements $container ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
+                Assert-Regression ($fallbackIcon.Width -eq 16 -and $fallbackIcon.Height -eq 16 -and
+                    (Get-ManagerIconText $fallbackIcon).Text -eq 'B') 'batch uses the script initial when no icon is declared'
                 $link = @(Find-FaviconElements $container ([Windows.Controls.TextBlock]) | ForEach-Object { $_.Inlines } |
                     Where-Object { $_ -is [Windows.Documents.Hyperlink] })[0]
                 $rowButton = @(Find-FaviconElements $container ([Windows.Controls.Button]))[0]
@@ -1431,7 +1461,8 @@ function Test-ManagerBatchUpdate($Context, $Window) {
                 }
                 Invoke-BatchUpdateConfirmation $Context $batch $update.Command $null `
                     ([CefFlashBrowser.Views.Dialogs.JsConfirmDialog]) 'yesButton' $warn $checkBatchMessage
-                Assert-Regression (@($list.Items | Where-Object CurrentVersion -eq '2.0').Count -eq 2 -and !$update.IsEnabled -and
+                Assert-Regression (@($list.Items | Where-Object { $_.CurrentVersion -eq '2.0' -and $_.LatestVersion -eq '2.0' -and !$_.HasStatus }).Count -eq 2 -and
+                    !$update.IsEnabled -and
                     $batch.FindName('summaryText').Text -eq ($Context.LanguageService.GetString('userScriptBatchUpdate_summary') -f 2, 0)) 'both rows show the installed versions and the dialog summarizes the update'
                 Assert-Regression (!$edited.IsDirty -and $edited.Source -eq $fixtures[0].ScriptSource -and
                     $Window.FindName('sourceEditor').Text -eq $fixtures[0].ScriptSource) 'the manager editor shows the confirmed replacement source'
@@ -1731,6 +1762,8 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $list = $window.FindName('scriptList')
         $filter = $window.FindName('scriptFilter')
         $emptyMessage = $window.FindName('scriptListEmptyMessage')
+        $batchMenu = $window.FindName('batchUpdateMenuItem')
+        Assert-Regression (!$batchMenu.IsEnabled) 'batch updates are disabled when no script is installed'
         $window.UpdateLayout()
         $messageOrigin = $emptyMessage.TranslatePoint([Windows.Point]::new(0, 0), $list)
         Assert-Regression ($emptyMessage.IsVisible -and
@@ -1760,6 +1793,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $item = $model.SelectedScript
         Assert-Regression ($list.Items.Contains($item) -and !$item.IsInstalled -and
             !$emptyMessage.IsVisible) 'a visible draft hides the empty-list message'
+        Assert-Regression (!$batchMenu.IsEnabled) 'an uninstalled draft does not enable batch updates'
         $editor = $window.FindName('sourceEditor')
         Test-ManagerStatusLine $Context $window
         $editor.SelectAll()
@@ -1767,6 +1801,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Send-ManagerShortcut $Context $window 0x53
         Wait-Regression $Context { !$model.IsBusy -and $item.IsInstalled -and !$item.IsDirty } 'Ctrl+S saves the latest editor text without confirmation'
         Assert-Regression ($item.IsInstalled -and !$item.IsDirty -and $item.IsEnabled) 'new script saves and enables directly'
+        Assert-Regression ($batchMenu.IsEnabled) 'saving the first script enables batch updates immediately'
         $key = $item.Installation.ScriptKey
         $sourcePath = Join-Path (Join-Path $Context.TemporaryPath ('MonkeySharp\' + $key)) 'userscript.js'
         Assert-Regression ([IO.File]::ReadAllText($sourcePath) -eq $source) 'manager persists source through the shared repository'

@@ -288,7 +288,6 @@
     <sys:String x:Key="userScriptBatchUpdate_recheck">更新信息已失效，请重新获取。</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">是否更新以下脚本？</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">未保存的改动将被覆盖。</sys:String>
-    <sys:String x:Key="userScriptBatchUpdate_updated">已更新</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">更新成功 {0} 个，失败 {1} 个。</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">无法下载用户脚本。</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">无法保存用户脚本。</sys:String>

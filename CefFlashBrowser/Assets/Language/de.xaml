@@ -288,7 +288,6 @@
     <sys:String x:Key="userScriptBatchUpdate_recheck">Update-Informationen sind nicht mehr gültig. Erneut suchen.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Diese Skripte aktualisieren?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Ungespeicherte Änderungen werden überschrieben.</sys:String>
-    <sys:String x:Key="userScriptBatchUpdate_updated">Aktualisiert</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">{0} Skripte aktualisiert. {1} fehlgeschlagen.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">Das Benutzerskript konnte nicht heruntergeladen werden.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">Das Benutzerskript konnte nicht gespeichert werden.</sys:String>
