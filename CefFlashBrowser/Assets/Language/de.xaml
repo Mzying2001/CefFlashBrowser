@@ -265,6 +265,8 @@
     <sys:String x:Key="userScriptManager_installUrl">Von URL installieren…</sys:String>
     <sys:String x:Key="userScriptManager_install">Aktuellen Entwurf installieren</sys:String>
     <sys:String x:Key="userScriptManager_export">Quelltext exportieren…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">JavaScript-Datei</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">Benutzerskript</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Dieses Skript installieren?</sys:String>
     <sys:String x:Key="userScriptInstall_install">Installieren</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">Dieses Benutzerskript aktualisieren?</sys:String>

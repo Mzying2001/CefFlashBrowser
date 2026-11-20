@@ -265,6 +265,8 @@
     <sys:String x:Key="userScriptManager_installUrl">URL からインストール…</sys:String>
     <sys:String x:Key="userScriptManager_install">現在の下書きをインストール</sys:String>
     <sys:String x:Key="userScriptManager_export">ソースコードをエクスポート…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">JavaScript ファイル</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">ユーザースクリプト</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">このスクリプトをインストールしますか？</sys:String>
     <sys:String x:Key="userScriptInstall_install">インストール</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">このユーザースクリプトを更新しますか？</sys:String>

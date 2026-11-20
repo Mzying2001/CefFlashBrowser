@@ -265,6 +265,8 @@
     <sys:String x:Key="userScriptManager_installUrl">URL에서 설치…</sys:String>
     <sys:String x:Key="userScriptManager_install">현재 초안 설치</sys:String>
     <sys:String x:Key="userScriptManager_export">소스 코드 내보내기…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">JavaScript 파일</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">사용자 스크립트</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">이 스크립트를 설치하시겠습니까?</sys:String>
     <sys:String x:Key="userScriptInstall_install">설치</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">이 사용자 스크립트를 업데이트하시겠습니까?</sys:String>

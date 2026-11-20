@@ -265,6 +265,8 @@
     <sys:String x:Key="userScriptManager_installUrl">Установить по URL…</sys:String>
     <sys:String x:Key="userScriptManager_install">Установить текущий черновик</sys:String>
     <sys:String x:Key="userScriptManager_export">Экспортировать исходный код…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">Файлы JavaScript</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">Пользовательский скрипт</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Установить этот скрипт?</sys:String>
     <sys:String x:Key="userScriptInstall_install">Установить</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">Обновить этот пользовательский скрипт?</sys:String>

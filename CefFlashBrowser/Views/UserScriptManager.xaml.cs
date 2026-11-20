@@ -1,6 +1,7 @@
 ﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
@@ -8,6 +9,7 @@ using ICSharpCode.AvalonEdit.Editing;
 using Microsoft.Win32;
 using Mzying2001.MonkeySharp.Core.Domain;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -22,6 +24,7 @@ namespace CefFlashBrowser.Views
     public partial class UserScriptManager : Window
     {
         private const double MaxScriptListWidth = 450;
+        private const string UserScriptFileExtension = ".user.js";
 
         private readonly ConditionalWeakTable<UserScriptItemViewModel, ScriptEditorState> _editorStates;
         private UserScriptItemViewModel _displayedScript;
@@ -83,7 +86,13 @@ namespace CefFlashBrowser.Views
 
         private async void ImportFile()
         {
-            var dialog = new OpenFileDialog { Filter = "JavaScript (*.user.js;*.js)|*.user.js;*.js|All files (*.*)|*.*" };
+            var language = SimpleIoc.Global.GetInstance<LanguageService>();
+
+            var dialog = new OpenFileDialog
+            {
+                Filter = $"{language.GetString("userScriptManager_javaScriptFile")}|*{UserScriptFileExtension};*.js|" +
+                         $"{language.GetString("common_allFiles")}|*.*"
+            };
 
             if (dialog.ShowDialog(this) == true)
             {
@@ -93,12 +102,32 @@ namespace CefFlashBrowser.Views
 
         private async void Export()
         {
-            var dialog = new SaveFileDialog { Filter = "Userscript (*.user.js)|*.user.js", DefaultExt = ".user.js", FileName = "script.user.js" };
+            var language = SimpleIoc.Global.GetInstance<LanguageService>();
+
+            var dialog = new SaveFileDialog
+            {
+                Filter = $"{language.GetString("userScriptManager_userScriptFile")}|*{UserScriptFileExtension}",
+                DefaultExt = UserScriptFileExtension,
+                FileName = GetExportFileName(ViewModel.SelectedScript?.Name)
+            };
 
             if (dialog.ShowDialog(this) == true)
             {
                 await ViewModel.ExportAsync(dialog.FileName);
             }
+        }
+
+        private static string GetExportFileName(string scriptName)
+        {
+            var name = scriptName?.Trim().TrimEnd('.', ' ');
+
+            if (name?.EndsWith(UserScriptFileExtension, StringComparison.OrdinalIgnoreCase) == true)
+                name = name.Substring(0, name.Length - UserScriptFileExtension.Length).TrimEnd('.', ' ');
+
+            if (string.IsNullOrWhiteSpace(name?.Replace(".", string.Empty)))
+                name = "script";
+
+            return UserScriptDownloadPaths.SafeFileName(name.Replace('/', '_').Replace('\\', '_')) + UserScriptFileExtension;
         }
 
         private void ScriptPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)

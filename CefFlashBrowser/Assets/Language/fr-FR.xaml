@@ -265,6 +265,8 @@
     <sys:String x:Key="userScriptManager_installUrl">Installer depuis une URL…</sys:String>
     <sys:String x:Key="userScriptManager_install">Installer le brouillon actuel</sys:String>
     <sys:String x:Key="userScriptManager_export">Exporter le code source…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">Fichiers JavaScript</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">Script utilisateur</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Installer ce script ?</sys:String>
     <sys:String x:Key="userScriptInstall_install">Installer</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">Mettre à jour ce script utilisateur ?</sys:String>

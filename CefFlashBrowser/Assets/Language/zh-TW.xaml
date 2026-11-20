@@ -265,6 +265,8 @@
     <sys:String x:Key="userScriptManager_installUrl">從 URL 安裝…</sys:String>
     <sys:String x:Key="userScriptManager_install">安裝目前草稿</sys:String>
     <sys:String x:Key="userScriptManager_export">匯出原始碼…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">JavaScript 檔案</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">使用者腳本</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">是否安裝以下腳本？</sys:String>
     <sys:String x:Key="userScriptInstall_install">安裝</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">是否更新以下腳本？</sys:String>

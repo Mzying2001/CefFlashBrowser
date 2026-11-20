@@ -265,6 +265,8 @@
     <sys:String x:Key="userScriptManager_installUrl">Installa da URL…</sys:String>
     <sys:String x:Key="userScriptManager_install">Installa la bozza attuale</sys:String>
     <sys:String x:Key="userScriptManager_export">Esporta il codice sorgente…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">File JavaScript</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">Script utente</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">Installare questo script?</sys:String>
     <sys:String x:Key="userScriptInstall_install">Installa</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">Aggiornare questo script utente?</sys:String>
