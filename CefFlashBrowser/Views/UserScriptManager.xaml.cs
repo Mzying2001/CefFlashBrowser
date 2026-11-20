@@ -61,6 +61,7 @@ namespace CefFlashBrowser.Views
         {
             ViewModel.ConfirmInstallation = ConfirmInstallation;
             ViewModel.ConfirmDeletion = ConfirmOperation;
+            ViewModel.ShowUpdateResult = (message, token) => WindowManager.ShowAlertDialog(message, Title, this, token);
             ViewModel.ShowDetails = script => WindowManager.ShowUserScriptDetails(script, this);
             ViewModel.PropertyChanged += ViewModelPropertyChanged;
             await ViewModel.OpenAsync();
@@ -140,6 +141,7 @@ namespace CefFlashBrowser.Views
         private void ScriptContextMenuOpened(object sender, RoutedEventArgs e)
         {
             // MenuItem keeps its last CanExecute result when the popup binds the row's CommandParameter.
+            ViewModel.UpdateCommand.RaiseCanExecuteChanged();
             ViewModel.ShowDetailsCommand.RaiseCanExecuteChanged();
         }
 
@@ -241,6 +243,7 @@ namespace CefFlashBrowser.Views
             ViewModel.PropertyChanged -= ViewModelPropertyChanged;
             ViewModel.ConfirmInstallation = null;
             ViewModel.ConfirmDeletion = null;
+            ViewModel.ShowUpdateResult = null;
             ViewModel.ShowDetails = null;
             ViewModel.Close();
             base.OnClosed(e);

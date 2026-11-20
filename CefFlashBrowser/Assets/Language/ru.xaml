@@ -272,6 +272,8 @@
     <sys:String x:Key="userScriptInstall_install">Установить</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">Обновить этот пользовательский скрипт?</sys:String>
     <sys:String x:Key="userScriptInstall_update">Обновить</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">У скрипта «{0}» уже установлена последняя версия.</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">Не удалось проверить обновления скрипта «{0}». Обновления не настроены или отключены.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">Не удалось загрузить пользовательский скрипт.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">Не удалось сохранить пользовательский скрипт.</sys:String>
     <sys:String x:Key="userScriptInstall_conflict">Этому источнику соответствует несколько установок или существующий скрипт изменился. Проверьте скрипт в диспетчере пользовательских скриптов и повторите попытку.</sys:String>

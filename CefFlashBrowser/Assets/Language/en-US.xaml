@@ -272,6 +272,8 @@
     <sys:String x:Key="userScriptInstall_install">Install</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">Update this userscript?</sys:String>
     <sys:String x:Key="userScriptInstall_update">Update</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">“{0}” is already up to date.</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">Could not check for updates to “{0}”. The script has no update configuration or has updates disabled.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">Could not download the userscript.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">Could not save the userscript.</sys:String>
     <sys:String x:Key="userScriptInstall_conflict">This source matches multiple installations or the existing script changed. Review the script in the Userscript Manager and try again.</sys:String>

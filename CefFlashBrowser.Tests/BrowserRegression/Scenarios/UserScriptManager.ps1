@@ -721,7 +721,7 @@ function Test-BrowserIconStyleReuse($Context) {
 }
 
 function Invoke-ManagerWithConfirmation($Context, $Window, [string]$Action, [hashtable]$Expected,
-    [switch]$Update, [scriptblock]$Start = { $Model.SaveAsync() }) {
+    [switch]$Update, [scriptblock]$Start = { $Model.SaveAsync() }, $CommandItem) {
     $model = $Window.DataContext
     $state = @{ Count = 0; Failure = $null }
     $timer = New-Object Windows.Threading.DispatcherTimer
@@ -809,7 +809,12 @@ function Invoke-ManagerWithConfirmation($Context, $Window, [string]$Action, [has
     $timer.add_Tick($handler)
     $timer.Start()
     try {
-        Complete-UserScriptTask $Context (& $Start) 'manager installation confirmation completes'
+        if ($null -eq $CommandItem) {
+            Complete-UserScriptTask $Context (& $Start) 'manager installation confirmation completes'
+        } else {
+            Invoke-BrowserCommand $CommandItem.Command $CommandItem.CommandParameter
+            Wait-Regression $Context { !$model.IsBusy } 'manager update command completes'
+        }
         if ($null -ne $state.Failure) { throw $state.Failure }
         Assert-Regression ($state.Count -eq 1) 'external installation opens exactly one confirmation'
     } finally {
@@ -831,14 +836,17 @@ function Open-ManagerContextMenu($Context, $Window, $Script) {
     $menu.PlacementTarget = $container
     $menu.IsOpen = $true
     Wait-Regression $Context {
-        $menu.Items.Count -eq 8 -and $menu.Items[4] -is [Windows.Controls.Separator] -and
+        $menu.Items.Count -eq 9 -and $menu.Items[4] -is [Windows.Controls.Separator] -and
             $menu.Items[5].Command -eq $Window.DataContext.DeleteCommand -and
             $menu.Items[5].Header -eq $Context.LanguageService.GetString('common_delete') -and
             $menu.Items[6] -is [Windows.Controls.Separator] -and
-            $menu.Items[7].Command -eq $Window.DataContext.ShowDetailsCommand -and
+            $menu.Items[7].Command -eq $Window.DataContext.UpdateCommand -and
             [object]::ReferenceEquals($menu.Items[7].CommandParameter, $Script) -and
-            $menu.Items[7].Header -eq $Context.LanguageService.GetString('userScriptManager_showDetails')
-    } 'script context menu places localized view details after delete and a separator'
+            $menu.Items[7].Header -eq $Context.LanguageService.GetString('userScriptInstall_update') -and
+            $menu.Items[8].Command -eq $Window.DataContext.ShowDetailsCommand -and
+            [object]::ReferenceEquals($menu.Items[8].CommandParameter, $Script) -and
+            $menu.Items[8].Header -eq $Context.LanguageService.GetString('userScriptManager_showDetails')
+    } 'script context menu places update directly before view details and binds both to the row'
     return $menu
 }
 
@@ -989,14 +997,14 @@ function Test-ManagerDetails($Context, $Window, $Item) {
         Wait-Regression $Context { $menu.IsOpen -and $menu.IsVisible } 'right click opens the installed script menu for the first time'
         Assert-Regression ($Item.IsInstalled -and !$Item.IsDirty -and
             [object]::ReferenceEquals($model.SelectedScript, $Item) -and
-            [object]::ReferenceEquals($menu.Items[7].CommandParameter, $Item) -and
-            $menu.Items[7].IsEnabled) 'details is enabled on first open after right-clicking a different installed script'
+            [object]::ReferenceEquals($menu.Items[8].CommandParameter, $Item) -and
+            $menu.Items[8].IsEnabled) 'details is enabled on first open after right-clicking a different installed script'
         $menu.IsOpen = $false
         Wait-Regression $Context { !$menu.IsVisible } 'installed script menu closes'
 
         $menu = Open-ManagerContextMenu $Context $Window $draft
         $model.SelectedScript = $Item
-        Invoke-ManagerDetailsDialog $Context $Window $menu.Items[7] {
+        Invoke-ManagerDetailsDialog $Context $Window $menu.Items[8] {
             param($dialog)
             Assert-Regression ($dialog.FindName('scriptName').Text -ceq 'Draft preview' -and
                 !$dialog.FindName('unknownMetadataSection').IsVisible) 'context details use the row draft with an empty unknown section hidden'
@@ -1118,7 +1126,9 @@ function Test-WebUserScriptInstallation($Context, $Window, $ManagerWindow, $Fixt
     $source = @"
 // ==UserScript==
 // @name Web installation fixture
+// @namespace browser-regression
 // @version 1.0.0
+// @downloadURL $origin
 // @match $page
 // @sandbox DOM
 // @grant none
@@ -1152,7 +1162,7 @@ document.documentElement.setAttribute('data-web-install', 'ready');
         $browser.Address -ceq $page -and $Fixture.RequestsFor('/manager.user.js') -eq ($priorFetches + 2)) 'new-tab install commits the fetched source once and creates no tab or navigation entry'
     Invoke-BrowserCommand $browser.ReloadCommand
     Wait-Regression $Context {
-        (Invoke-JavaScript $Context $browser "document.documentElement.getAttribute('data-web-install')") -eq 'ready'
+        (Invoke-JavaScript $Context $browser "document.documentElement && document.documentElement.getAttribute('data-web-install')") -eq 'ready'
     } 'browser-installed script executes on page refresh'
 
     Complete-UserScriptTask $Context ($repository.SetEnabledAsync($key, $false, $token)) 'disable the web script before update' | Out-Null
@@ -1244,6 +1254,54 @@ document.documentElement.setAttribute('data-web-install', 'ready');
     Assert-Regression (@($Manager.Scripts | Where-Object { $_.IsInstalled -and $_.Origin -ceq $origin }).Count -eq 1 -and
         $item.IsInstalled -and $item.Installation.ScriptKey.Equals($key) -and !$item.IsEnabled -and
         $item.Installation.Definition.Source -ceq $Fixture.ScriptSource -and $saved.Value.EncodedValue -ceq $value.EncodedValue) 'manager updates the web installation in place and preserves enabled state and data'
+
+    $Fixture.ScriptSource = $updated.Replace('2.0.0', '4.0.0')
+    $expected.Text.scriptVersion = '4.0.0'
+    $menu = Open-ManagerContextMenu $Context $ManagerWindow $item
+    $updateItem = $menu.Items[7]
+    Assert-Regression ($updateItem.IsEnabled) 'update is enabled for the installed row'
+    $menu.IsOpen = $false
+    $priorFetches = $Fixture.RequestsFor('/manager.user.js')
+    Invoke-ManagerWithConfirmation $Context $ManagerWindow 'Install' $expected -Update -CommandItem $updateItem
+    Assert-Regression ($Manager.Scripts.Count -eq $scriptCount -and $item.Installation.ScriptKey.Equals($key) -and
+        !$item.IsEnabled -and !$item.IsDirty -and $editor.Text -ceq $Fixture.ScriptSource -and
+        $Fixture.RequestsFor('/manager.user.js') -eq ($priorFetches + 1)) 'row update applies the confirmed source in place with one fetch'
+
+    $menu = Open-ManagerContextMenu $Context $ManagerWindow $item
+    $menu.IsOpen = $false
+    $state = @{ Count = 0; Failure = $null }
+    $timer = New-Object Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(25)
+    $handler = [EventHandler]({
+        $dialog = $Context.Application.Windows | Where-Object {
+            $_.IsVisible -and ($_.Owner -eq $ManagerWindow) -and
+                ($_ -is [CefFlashBrowser.Views.Dialogs.JsAlertDialog] -or $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptInstallDialog])
+        } | Select-Object -First 1
+        if ($null -eq $dialog) { return }
+
+        try {
+            $state.Count++
+            $message = $Context.LanguageService.GetString('userScriptManager_upToDate') -f $item.Name
+            Assert-Regression ($dialog -is [CefFlashBrowser.Views.Dialogs.JsAlertDialog] -and
+                $dialog.Message -ceq $message -and $dialog.Message.Contains($item.Name)) 'the up-to-date alert includes the script name'
+        } catch {
+            $state.Failure = $_
+        } finally {
+            $dialog.Close()
+        }
+    }.GetNewClosure())
+    $timer.add_Tick($handler)
+    $timer.Start()
+    try {
+        $revision = $item.Installation.RevisionId
+        Invoke-BrowserCommand $menu.Items[7].Command $menu.Items[7].CommandParameter
+        Wait-Regression $Context { !$Manager.IsBusy } 'up-to-date check completes'
+        if ($null -ne $state.Failure) { throw $state.Failure }
+        Assert-Regression ($state.Count -eq 1 -and $item.Installation.RevisionId -eq $revision) 'an up-to-date check only shows the result alert'
+    } finally {
+        $timer.Stop()
+        $timer.remove_Tick($handler)
+    }
 }
 
 function Test-ManagerListFilter($Context, $Window, $Item) {
@@ -1371,13 +1429,13 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
         $menu = Open-ManagerContextMenu $Context $Window $item
         Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Collapsed }).Count -eq 5 -and
             $menu.Items[5].IsEnabled -and $menu.Items[6].Visibility -eq [Windows.Visibility]::Visible -and
-            $menu.Items[7].IsEnabled) 'filtering leaves delete and details available with their separator'
+            $menu.Items[7].IsEnabled -and $menu.Items[8].IsEnabled) 'filtering leaves delete, update and details available'
         $menu.IsOpen = $false
         Assert-Regression ($list.Items.Count -eq 2 -and [object]::ReferenceEquals($list.Items[0], $first) -and
             [object]::ReferenceEquals($list.Items[1], $item) -and $editor.Text -ceq $editedSource -and $editor.CanUndo) 'filtered rows retain their order, selection and source edits'
         $filter.Text = ''
         $menu = Open-ManagerContextMenu $Context $Window $item
-        Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Visible }).Count -eq 8 -and
+        Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Visible }).Count -eq 9 -and
             $menu.Items[0].IsEnabled -and $behavior.IsDragEnabled) 'clearing the filter restores the move items, their separator and drag reordering'
         $menu.IsOpen = $false
         Invoke-BrowserCommand $menu.Items[0].Command

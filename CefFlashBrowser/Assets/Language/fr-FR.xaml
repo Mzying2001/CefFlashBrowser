@@ -272,6 +272,8 @@
     <sys:String x:Key="userScriptInstall_install">Installer</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">Mettre à jour ce script utilisateur ?</sys:String>
     <sys:String x:Key="userScriptInstall_update">Mettre à jour</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">« {0} » est déjà à jour.</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">Impossible de vérifier les mises à jour de « {0} ». Elles ne sont pas configurées ou sont désactivées pour ce script.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">Impossible de télécharger le script utilisateur.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">Impossible d’enregistrer le script utilisateur.</sys:String>
     <sys:String x:Key="userScriptInstall_conflict">Cette source correspond à plusieurs installations ou le script existant a changé. Vérifiez le script dans le gestionnaire de scripts utilisateur et réessayez.</sys:String>

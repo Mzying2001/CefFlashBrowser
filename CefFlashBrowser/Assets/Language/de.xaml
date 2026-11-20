@@ -272,6 +272,8 @@
     <sys:String x:Key="userScriptInstall_install">Installieren</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">Dieses Benutzerskript aktualisieren?</sys:String>
     <sys:String x:Key="userScriptInstall_update">Aktualisieren</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">„{0}“ ist bereits auf dem neuesten Stand.</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">Für „{0}“ kann nicht nach Updates gesucht werden. Updates sind für dieses Skript nicht konfiguriert oder deaktiviert.</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">Das Benutzerskript konnte nicht heruntergeladen werden.</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">Das Benutzerskript konnte nicht gespeichert werden.</sys:String>
     <sys:String x:Key="userScriptInstall_conflict">Diese Quelle gehört zu mehreren Installationen oder das vorhandene Skript wurde geändert. Prüfen Sie das Skript in der Benutzerskriptverwaltung und versuchen Sie es erneut.</sys:String>

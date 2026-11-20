@@ -3,6 +3,7 @@ using CefFlashBrowser.Infrastructure.Collections;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Parsing;
 using Mzying2001.MonkeySharp.Core.Repository;
+using Mzying2001.MonkeySharp.Core.Updates;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,6 +61,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ReorderCommand { get; }
         public Predicate<object> CanReorderItem { get; }
         public DelegateCommand DeleteCommand { get; }
+        public DelegateCommand<UserScriptItemViewModel> UpdateCommand { get; }
         public DelegateCommand<UserScriptItemViewModel> ShowDetailsCommand { get; }
         public DelegateCommand ReloadCommand { get; }
         public DelegateCommand LoadUrlCommand { get; }
@@ -67,6 +70,7 @@ namespace CefFlashBrowser.ViewModels
 
         public Func<UserScriptMetadata, string, bool, bool> ConfirmInstallation { private get; set; }
         public Func<string, bool> ConfirmDeletion { private get; set; }
+        public Action<string, CancellationToken> ShowUpdateResult { private get; set; }
         public Action<UserScriptItemViewModel> ShowDetails { private get; set; }
 
         private string _filterText = string.Empty;
@@ -169,6 +173,7 @@ namespace CefFlashBrowser.ViewModels
             SaveCommand = new DelegateCommand(async () => await SaveAsync()) { CanExecuteFunc = CanEdit };
             ToggleCommand = new DelegateCommand<UserScriptItemViewModel>(async item => await ToggleAsync(item)) { CanExecuteFunc = CanToggle };
             DeleteCommand = new DelegateCommand(async () => await DeleteAsync()) { CanExecuteFunc = CanEdit };
+            UpdateCommand = new DelegateCommand<UserScriptItemViewModel>(async item => await UpdateAsync(item)) { CanExecuteFunc = CanUpdate };
             ShowDetailsCommand = new DelegateCommand<UserScriptItemViewModel>(item => ShowDetails?.Invoke(item)) { CanExecuteFunc = CanShowDetails };
             MoveUpCommand = CreateMoveCommand(UserScriptMove.Up);
             MoveDownCommand = CreateMoveCommand(UserScriptMove.Down);
@@ -450,6 +455,72 @@ namespace CefFlashBrowser.ViewModels
 
             SelectScriptForEditing(item);
             Status = _text("userScriptManager_saved");
+        }
+
+        public Task UpdateAsync(UserScriptItemViewModel item)
+        {
+            if (!CanUpdate(item)) return Task.CompletedTask;
+
+            return RunAsync(async token =>
+            {
+                var previous = item.Installation;
+                var name = item.Name;
+                var fetcher = new UpdateSourceFetcher(_fetchSource);
+                var updates = new UserScriptUpdateService(_repository, fetcher);
+
+                try
+                {
+                    var result = await updates.CheckAsync(previous.ScriptKey, token);
+                    token.ThrowIfCancellationRequested();
+
+                    if (result.Status != UserScriptUpdateStatus.Available)
+                    {
+                        var messageKey = result.Status == UserScriptUpdateStatus.UpToDate
+                            ? "userScriptManager_upToDate" : "userScriptManager_updateUnavailable";
+                        ShowUpdateResult?.Invoke(string.Format(_text(messageKey), name), token);
+                        return;
+                    }
+
+                    var source = await fetcher.FetchSourceAsync(previous, result.DownloadUrl, token);
+                    var parsed = new UserScriptMetadataParser().Parse(source);
+
+                    if (!parsed.CanEnable)
+                    {
+                        Status = _text("userScriptManager_invalidMetadata");
+                        return;
+                    }
+
+                    token.ThrowIfCancellationRequested();
+
+                    if (ConfirmInstallation?.Invoke(parsed.Metadata, result.DownloadUrl, true) != true)
+                    {
+                        Status = _text("userScriptManager_cancelled");
+                        return;
+                    }
+
+                    token.ThrowIfCancellationRequested();
+
+                    var installation = await updates.ApplyAsync(result, token);
+                    item.AcceptSave(installation, installation.Definition.Source);
+                    item.Source = installation.Definition.Source;
+                    SelectScriptForEditing(item);
+                    Status = _text("userScriptManager_saved");
+                }
+                catch (MetadataValidationException)
+                {
+                    Status = _text("userScriptManager_invalidMetadata");
+                }
+                catch (Exception e) when (e is KeyNotFoundException
+                    || (e is UserScriptUpdateException updateError && updateError.Code == "MSU005_STALE_CHECK"))
+                {
+                    Status = _text("userScriptManager_conflict");
+                }
+                catch (Exception e) when (e is HttpRequestException
+                    || (e is OperationCanceledException && !token.IsCancellationRequested))
+                {
+                    Status = _text("userScriptInstall_downloadFailed");
+                }
+            });
         }
 
         public Task ExportAsync(string path)
@@ -771,6 +842,8 @@ namespace CefFlashBrowser.ViewModels
         private bool CanToggle(object item)
             => !IsBusy && _repository != null && (item as UserScriptItemViewModel)?.IsInstalled == true;
 
+        private bool CanUpdate(object item) => _lifetime != null && _fetchSource != null && CanToggle(item);
+
         private bool CanShowDetails(object item) => !IsBusy && item is UserScriptItemViewModel;
 
         private bool CanReload(object parameter) => CanEdit(parameter) && SelectedScript.IsInstalled;
@@ -792,10 +865,35 @@ namespace CefFlashBrowser.ViewModels
             ToggleCommand?.RaiseCanExecuteChanged();
             UpdateMoveCommands();
             DeleteCommand?.RaiseCanExecuteChanged();
+            UpdateCommand?.RaiseCanExecuteChanged();
             ShowDetailsCommand?.RaiseCanExecuteChanged();
             ReloadCommand?.RaiseCanExecuteChanged();
             LoadUrlCommand?.RaiseCanExecuteChanged();
             ShowUrlCommand?.RaiseCanExecuteChanged();
+        }
+
+        private sealed class UpdateSourceFetcher : IUserScriptUpdateFetcher
+        {
+            private readonly Func<string, CancellationToken, Task<string>> _fetchSource;
+            private readonly Dictionary<string, string> _sources = new Dictionary<string, string>(StringComparer.Ordinal);
+
+            public UpdateSourceFetcher(Func<string, CancellationToken, Task<string>> fetchSource)
+            {
+                _fetchSource = fetchSource;
+            }
+
+            public async Task<string> FetchSourceAsync(UserScriptInstallation installation, string url, CancellationToken token)
+            {
+                token.ThrowIfCancellationRequested();
+                if (_sources.TryGetValue(url, out var source)) return source;
+
+                source = await _fetchSource(url, token).ConfigureAwait(false);
+                token.ThrowIfCancellationRequested();
+                UserScriptSourceText.Validate(source);
+                // Apply the same source that supplied the confirmation dialog's metadata.
+                _sources.Add(url, source);
+                return source;
+            }
         }
     }
 }

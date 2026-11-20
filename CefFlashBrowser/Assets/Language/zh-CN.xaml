@@ -272,6 +272,8 @@
     <sys:String x:Key="userScriptInstall_install">安装</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">是否更新以下用户脚本？</sys:String>
     <sys:String x:Key="userScriptInstall_update">更新</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">“{0}”已是最新版本。</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">无法检查“{0}”的更新。脚本未配置更新或已禁用更新。</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">无法下载用户脚本。</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">无法保存用户脚本。</sys:String>
     <sys:String x:Key="userScriptInstall_conflict">此来源对应多个安装记录，或已安装的脚本发生了变化。请在用户脚本管理器中检查后重试。</sys:String>

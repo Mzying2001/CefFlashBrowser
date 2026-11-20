@@ -272,6 +272,8 @@
     <sys:String x:Key="userScriptInstall_install">安裝</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">是否更新以下腳本？</sys:String>
     <sys:String x:Key="userScriptInstall_update">更新</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">「{0}」已是最新版本。</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">無法檢查「{0}」的更新。指令碼未設定更新或已停用更新。</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">無法下載使用者腳本。</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">無法儲存使用者腳本。</sys:String>
     <sys:String x:Key="userScriptInstall_conflict">此來源對應多筆安裝記錄，或已安裝的腳本發生了變更。請在使用者腳本管理員中檢查後再試。</sys:String>

@@ -35,6 +35,9 @@
             <MenuItem Header="{DynamicResource common_delete}"
                       Command="{Binding DeleteCommand}"/>
             <Separator/>
+            <MenuItem Header="{DynamicResource userScriptInstall_update}"
+                      Command="{Binding UpdateCommand}"
+                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
             <MenuItem Header="{DynamicResource userScriptManager_showDetails}"
                       Command="{Binding ShowDetailsCommand}"
                       CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>

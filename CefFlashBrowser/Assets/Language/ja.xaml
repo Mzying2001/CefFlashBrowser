@@ -272,6 +272,8 @@
     <sys:String x:Key="userScriptInstall_install">インストール</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">このユーザースクリプトを更新しますか？</sys:String>
     <sys:String x:Key="userScriptInstall_update">更新</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">「{0}」はすでに最新バージョンです。</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">「{0}」の更新を確認できません。更新が設定されていないか、無効になっています。</sys:String>
     <sys:String x:Key="userScriptInstall_downloadFailed">ユーザースクリプトをダウンロードできませんでした。</sys:String>
     <sys:String x:Key="userScriptInstall_saveFailed">ユーザースクリプトを保存できませんでした。</sys:String>
     <sys:String x:Key="userScriptInstall_conflict">この入手元に複数のインストールがあるか、既存のスクリプトが変更されました。ユーザースクリプトマネージャーで確認してから、もう一度お試しください。</sys:String>

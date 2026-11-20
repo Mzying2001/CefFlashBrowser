@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -461,6 +462,145 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(2, (await repository.GetSnapshotAsync(CancellationToken.None)).Count);
             model.Close();
         }
+
+        [TestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task ScriptUpdateReviewsAndOverwritesOnlyItsTarget(bool separateCheckUrl)
+        {
+            const string downloadUrl = "https://example.com/script.user.js";
+            var checkUrl = separateCheckUrl ? "https://example.com/script.meta.js" : downloadUrl;
+            var repository = await RepositoryAsync();
+            var source = UpdateScript("1.0", "// @updateURL " + checkUrl + "\n// @downloadURL " + downloadUrl);
+            var original = await repository.InstallAsync(source, "https://example.com/original.user.js", false, CancellationToken.None);
+            var installedNext = await repository.InstallAsync(UpdateScript("1.0"), null, true, CancellationToken.None);
+            var updatedSource = UpdateScript("2.1") + "\n// complete source";
+            var requests = new List<string>();
+            var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository),
+                key => key, action => action(), (url, _) =>
+                {
+                    requests.Add(url);
+                    return Task.FromResult(url == downloadUrl ? updatedSource : UpdateScript("2.0"));
+                });
+            await model.OpenAsync();
+            var target = model.Scripts[0];
+            model.SelectedScript = model.Scripts[1];
+            var unsaved = source + "\n// unsaved";
+            target.Source = unsaved;
+            var accept = false;
+            var reviews = 0;
+            model.ConfirmInstallation = (metadata, origin, update) =>
+            {
+                reviews++;
+                Assert.AreEqual("2.1", metadata.Version);
+                Assert.AreEqual(downloadUrl, origin);
+                Assert.IsTrue(update);
+                Assert.AreEqual(original.RevisionId, target.Installation.RevisionId);
+                Assert.IsFalse(((ICommand)model.UpdateCommand).CanExecute(target));
+                return accept;
+            };
+
+            await model.UpdateAsync(target);
+            Assert.AreEqual("userScriptManager_cancelled", model.Status);
+            Assert.AreEqual(unsaved, target.Source);
+            Assert.AreEqual(source, (await repository.GetAsync(original.ScriptKey, CancellationToken.None)).Definition.Source);
+            Assert.AreEqual(installedNext.ScriptKey, model.SelectedScript.Installation.ScriptKey);
+
+            accept = true;
+            await model.UpdateAsync(target);
+            Assert.AreEqual("userScriptManager_saved", model.Status);
+            Assert.AreEqual(2, reviews);
+            var expectedRequests = separateCheckUrl ? new[] { checkUrl, downloadUrl } : new[] { downloadUrl };
+            CollectionAssert.AreEqual(expectedRequests.Concat(expectedRequests).ToArray(), requests);
+            var snapshot = await repository.GetSnapshotAsync(CancellationToken.None);
+            CollectionAssert.AreEqual(new[] { original.ScriptKey, installedNext.ScriptKey }, snapshot.Select(item => item.ScriptKey).ToArray());
+            Assert.AreEqual(original.InstalledAt, snapshot[0].InstalledAt);
+            Assert.IsFalse(snapshot[0].IsEnabled);
+            Assert.AreEqual(updatedSource, snapshot[0].Definition.Source);
+            Assert.AreSame(target, model.Scripts[0]);
+            Assert.AreSame(target, model.SelectedScript);
+            Assert.AreEqual(updatedSource, target.Source);
+            Assert.IsFalse(target.IsDirty);
+            model.Close();
+        }
+
+        [TestMethod]
+        [DataRow("2.0.0", "https://example.com/script.user.js", "userScriptManager_upToDate")]
+        [DataRow("1.0", "https://example.com/script.user.js", "userScriptManager_upToDate")]
+        [DataRow(null, null, "userScriptManager_updateUnavailable")]
+        [DataRow(null, "none", "userScriptManager_updateUnavailable")]
+        public async Task ScriptUpdateShowsNamedResultWithoutConfirming(string remoteVersion, string downloadUrl, string messageKey)
+        {
+            var repository = await RepositoryAsync();
+            var declarations = downloadUrl == null ? "" : "// @downloadURL " + downloadUrl;
+            var original = await repository.InstallAsync(UpdateScript("2.0", declarations),
+                "https://example.com/original.user.js", true, CancellationToken.None);
+            var requests = 0;
+            var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository),
+                key => key + " {0}", action => action(), (_, __) =>
+                {
+                    requests++;
+                    return Task.FromResult(UpdateScript(remoteVersion));
+                });
+            await model.OpenAsync();
+            var target = model.SelectedScript;
+            var messages = new List<string>();
+            model.ShowUpdateResult = (message, _) => messages.Add(message);
+            model.ConfirmInstallation = (_, __, ___) => { throw new AssertFailedException("Unexpected confirmation."); };
+
+            await model.UpdateAsync(target);
+
+            CollectionAssert.AreEqual(new[] { messageKey + " Update fixture" }, messages);
+            Assert.AreEqual(remoteVersion == null ? 0 : 1, requests);
+            Assert.AreEqual(original.RevisionId, target.Installation.RevisionId);
+            Assert.AreEqual(string.Empty, model.Status);
+            model.NewScript();
+            Assert.IsFalse(((ICommand)model.UpdateCommand).CanExecute(model.SelectedScript));
+            model.Close();
+        }
+
+        [TestMethod]
+        [DataRow("download", "userScriptInstall_downloadFailed")]
+        [DataRow("metadata", "userScriptManager_invalidMetadata")]
+        [DataRow("stale", "userScriptManager_conflict")]
+        public async Task ScriptUpdateFailuresPreserveCurrentInstallationAndEdits(string failure, string expectedStatus)
+        {
+            var repository = await RepositoryAsync();
+            var source = UpdateScript("1.0", "// @downloadURL https://example.com/script.user.js");
+            var original = await repository.InstallAsync(source, null, true, CancellationToken.None);
+            var model = new UserScriptManagerViewModel(() => Task.FromResult<IUserScriptRepository>(repository),
+                key => key, action => action(), (_, __) =>
+                {
+                    if (failure == "download") throw new HttpRequestException("Download failed.");
+                    return Task.FromResult(failure == "metadata" ? "invalid content" : UpdateScript("2.0"));
+                });
+            await model.OpenAsync();
+            var target = model.SelectedScript;
+            var unsaved = source + "\n// unsaved";
+            target.Source = unsaved;
+            var reviews = 0;
+            var messages = 0;
+            model.ShowUpdateResult = (_, __) => messages++;
+            model.ConfirmInstallation = (_, __, ___) =>
+            {
+                reviews++;
+                repository.SetEnabledAsync(original.ScriptKey, false, CancellationToken.None).GetAwaiter().GetResult();
+                return true;
+            };
+
+            await model.UpdateAsync(target);
+
+            Assert.AreEqual(expectedStatus, model.Status);
+            Assert.AreEqual(failure == "stale" ? 1 : 0, reviews);
+            Assert.AreEqual(0, messages);
+            Assert.AreEqual(unsaved, target.Source);
+            Assert.AreEqual(source, (await repository.GetAsync(original.ScriptKey, CancellationToken.None)).Definition.Source);
+            model.Close();
+        }
+
+        private static string UpdateScript(string version, string declarations = "")
+            => "// ==UserScript==\n// @name Update fixture\n// @namespace tests\n// @match https://example.com/*\n"
+                + "// @version " + version + "\n" + declarations + "\n// ==/UserScript==\n";
 
         [TestMethod]
         public async Task ImportWithHistoricalDuplicatesReportsConflictWithoutAddingDraft()
