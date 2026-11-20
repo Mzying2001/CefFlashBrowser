@@ -164,7 +164,7 @@
                                                ToolTip="{Binding FilePath}">
                                         <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ShowInExplorerCommand}"
                                                    CommandParameter="{Binding}"
-                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=Foreground}">
+                                                   Foreground="{DynamicResource SecondaryTextBrush}">
                                             <Run Text="{Binding PathInWebsiteFolder}"/>
                                         </Hyperlink>
                                     </TextBlock>
