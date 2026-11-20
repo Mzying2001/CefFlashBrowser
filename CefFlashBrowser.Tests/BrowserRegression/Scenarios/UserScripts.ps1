@@ -454,6 +454,18 @@ function Test-UserScriptTabs($Context) {
     }
 }
 
+function Assert-UserScriptContextMenuHeader($Context, $Item, [string]$Title, [bool]$ShouldTrim, [string]$Surface) {
+    Wait-Regression $Context { $Item.IsLoaded -and $Item.ActualWidth -gt 0 } "$Surface is laid out"
+    $header = @(Find-FaviconElements $Item ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -ceq $Title })[0]
+    Assert-Regression ($Item.Header -ceq $Title -and $null -ne $header -and $header.MaxWidth -eq 200 -and
+        $header.ActualWidth -le 200 -and $header.TextWrapping -eq 'NoWrap' -and $header.TextTrimming -eq 'CharacterEllipsis') "$Surface keeps the full header and limits the displayed text to 200"
+    $typeface = [Windows.Media.Typeface]::new($header.FontFamily, $header.FontStyle, $header.FontWeight, $header.FontStretch)
+    $formatted = [Windows.Media.FormattedText]::new($Title, [Globalization.CultureInfo]::CurrentUICulture,
+        $header.FlowDirection, $typeface, $header.FontSize, $header.Foreground,
+        [Windows.Media.VisualTreeHelper]::GetDpi($header).PixelsPerDip)
+    Assert-Regression (($formatted.Width -gt ($header.ActualWidth + 1)) -eq $ShouldTrim) "$Surface trims only overflowing text"
+}
+
 function Test-UserScriptMenus($Context) {
     Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'menu runtime'
     $repository = $Context.UserScriptService.Repository
@@ -532,8 +544,13 @@ function Test-UserScriptMenus($Context) {
             $manualIcon = $rendered.Items[$manualIndex].Icon
             Assert-Regression ($manualIcon -is [CefFlashBrowser.Views.Custom.BrowserIcon] -and
                 $null -eq $manualIcon.FaviconUrl -and $manualIcon.DefaultIcon -eq 'M') 'manual item without icon metadata receives the script initial'
-            Assert-Regression ($rendered.Items[$menu.Commands.IndexOf([CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::OpenInNewTab)].Icon -is
-                [SharpVectors.Converters.SvgIcon]) 'built-in new-tab command retains its SVG icon'
+            $newTab = $rendered.Items[$menu.Commands.IndexOf([CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::OpenInNewTab)]
+            Assert-Regression ($newTab.Icon -is [SharpVectors.Converters.SvgIcon] -and
+                $newTab.ReadLocalValue([Windows.Controls.MenuItem]::HeaderTemplateProperty) -eq [Windows.DependencyProperty]::UnsetValue) 'built-in new-tab command retains its SVG icon and default header style'
+            Assert-UserScriptContextMenuHeader $Context $rendered.Items[$manualIndex] 'Manual 0' $false 'short manual script title'
+            $parent.IsSubmenuOpen = $true
+            Assert-UserScriptContextMenuHeader $Context $parent.Items[1] $frameCommandName $true 'long GM child title'
+            $parent.IsSubmenuOpen = $false
         } finally {
             $rendered.IsOpen = $false
         }
@@ -802,16 +819,17 @@ GM.registerMenuCommand('Runtime command', function() {
 function Test-UserScriptContextMenuIcons($Context, $Model, $Repository, $IconFixture, $Installed) {
     $token = [Threading.CancellationToken]::None
     $origin = $IconFixture.BaseUrl + '/menu-icons.user.js'
-    $aSource = @'
+    $scriptName = 'Shared menu with a long userscript name that exceeds the right-click title width'
+    $aSource = @"
 // ==UserScript==
-// @name Shared menu
+// @name $scriptName
 // @namespace menu-icons-a
 // @icon a-icon.png
 // @match file:///*
 // @run-at context-menu
 // @grant none
 // ==/UserScript==
-'@
+"@
     $bSource = $aSource.Replace('menu-icons-a', 'menu-icons-b').Replace('a-icon.png', 'b-icon.png')
     $a = Complete-UserScriptTask $Context ($Repository.InstallAsync($aSource, $origin, $true, $token)) 'install first same-name menu script'
     $Installed.Add($a.ScriptKey)
@@ -829,7 +847,7 @@ function Test-UserScriptContextMenuIcons($Context, $Model, $Repository, $IconFix
         )) {
             $native = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($Model.Browser)) 'build same-name script menu'
             $rendered = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RenderAsync($Model.Browser, $native)) 'render same-name script menu'
-            $shared = @($rendered.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] -and $_.Header -eq 'Shared menu' })
+            $shared = @($rendered.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] -and $_.Header -eq $scriptName })
             $direct = @($shared | Where-Object { !$_.HasItems })
             $groups = @($shared | Where-Object HasItems)
             Assert-Regression ($direct.Count -eq 2 -and $groups.Count -eq 1 -and
@@ -842,6 +860,8 @@ function Test-UserScriptContextMenuIcons($Context, $Model, $Repository, $IconFix
             $icon = $direct[0].Icon
             [void]$icon.ApplyTemplate()
             if ($expected.ManualUrl -eq '/a-icon.png') {
+                Assert-UserScriptContextMenuHeader $Context $direct[0] $scriptName $true 'long manual script title'
+                Assert-UserScriptContextMenuHeader $Context $groups[0] $scriptName $true 'long GM group title'
                 Wait-Regression $Context {
                     $image = $icon.Template.FindName('favicon', $icon)
                     $null -ne $image.Source -and !$image.Source.IsDownloading -and !$icon.HasImageFailed

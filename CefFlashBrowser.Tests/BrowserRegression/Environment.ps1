@@ -252,6 +252,16 @@ function Initialize-RegressionEnvironment($Context) {
         $Context.Application.Resources.MergedDictionaries.Add($dictionary)
     }
 
+    # Load the production header template into the isolated test application.
+    $appXamlPath = Join-Path $Context.RepositoryPath 'CefFlashBrowser\App.xaml'
+    [xml]$appXaml = [IO.File]::ReadAllText($appXamlPath)
+    $namespaces = [Xml.XmlNamespaceManager]::new($appXaml.NameTable)
+    $namespaces.AddNamespace('wpf', $appXaml.DocumentElement.NamespaceURI)
+    $namespaces.AddNamespace('x', 'http://schemas.microsoft.com/winfx/2006/xaml')
+    $headerKey = 'UserScriptContextMenuHeaderTemplate'
+    $headerTemplate = $appXaml.SelectSingleNode("//wpf:DataTemplate[@x:Key='$headerKey']", $namespaces)
+    $Context.Application.Resources.Add($headerKey, [System.Windows.Markup.XamlReader]::Parse($headerTemplate.OuterXml))
+
     # Match App.xaml's implicit SVG style so local icon styles are tested with theme colors.
     $svgStyle = [System.Windows.Markup.XamlReader]::Parse(@'
 <Style xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"

@@ -147,13 +147,8 @@ namespace CefFlashBrowser.Browser.Handlers
 
         public override bool RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
         {
-            var menuItemInfoList = CefMenuItemInfo.GetMenuItemInfoList(model);
-
-            if (menuItemInfoList != null && chromiumWebBrowser.MenuHandler is UserScriptContextMenuHandler scripts)
-            {
-                foreach (var item in menuItemInfoList)
-                    item.ScriptIcon = scripts.GetIcon(item.CommandID);
-            }
+            var menuItemInfoList = CefMenuItemInfo.GetMenuItemInfoList(model,
+                chromiumWebBrowser.MenuHandler as UserScriptContextMenuHandler);
 
             ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
             {
@@ -199,7 +194,7 @@ namespace CefFlashBrowser.Browser.Handlers
                     Execute = delegate { callback.Continue(item.CommandID, CefEventFlags.None); }
                 };
 
-                yield return new MenuItem
+                var menuItem = new MenuItem
                 {
                     Header = GetHeader(item),
                     Icon = GetIcon(item),
@@ -209,6 +204,11 @@ namespace CefFlashBrowser.Browser.Handlers
                     Command = command,
                     ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback)
                 };
+
+                if (item.IsUserScript)
+                    menuItem.SetResourceReference(MenuItem.HeaderTemplateProperty, "UserScriptContextMenuHeaderTemplate");
+
+                yield return menuItem;
             }
         }
 

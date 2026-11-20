@@ -36,6 +36,15 @@
             </Style>
 
 
+            <!--Trim long userscript context menu headers-->
+            <DataTemplate x:Key="UserScriptContextMenuHeaderTemplate">
+                <TextBlock Text="{Binding}"
+                           MaxWidth="200"
+                           TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis"/>
+            </DataTemplate>
+
+
             <!--Change icon colors according to the theme-->
             <Style TargetType="{x:Type svgc:SvgIcon}">
                 <Setter Property="Fill" Value="{DynamicResource PrimaryTextBrush}"/>
