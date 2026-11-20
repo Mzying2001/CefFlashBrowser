@@ -1304,6 +1304,158 @@ document.documentElement.setAttribute('data-web-install', 'ready');
     }
 }
 
+function Invoke-BatchUpdateConfirmation($Context, $Window, $Command, $Parameter, [Type]$DialogType,
+    [string]$ButtonName, [string]$ExpectedWarning, [scriptblock]$Check) {
+    $state = @{ Count = 0; Failure = $null }
+    $timer = New-Object Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(25)
+    $handler = [EventHandler]({
+        $dialog = $Context.Application.Windows | Where-Object { $_.IsVisible -and $_.Owner -eq $Window } | Select-Object -First 1
+        if ($null -eq $dialog) { return }
+        try {
+            $state.Count++
+            Assert-Regression ($dialog.GetType() -eq $DialogType) 'update confirmation is owned by the batch window'
+            & $Check $dialog $ExpectedWarning
+            $peer = New-Object Windows.Automation.Peers.ButtonAutomationPeer($dialog.FindName($ButtonName))
+            $peer.GetPattern([Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+            Wait-Regression $Context { !$dialog.IsVisible } 'update confirmation dismisses'
+        } catch {
+            $state.Failure = $_
+            $dialog.Close()
+        }
+    }.GetNewClosure())
+    $timer.add_Tick($handler)
+    $timer.Start()
+    try {
+        Invoke-BrowserCommand $Command $Parameter
+        Wait-Regression $Context { !$Window.DataContext.IsBusy } 'batch update action completes'
+        if ($null -ne $state.Failure) { throw $state.Failure }
+        Assert-Regression ($state.Count -eq 1) 'the update action shows exactly one confirmation'
+    } finally {
+        $timer.Stop()
+        $timer.remove_Tick($handler)
+    }
+}
+
+function Test-ManagerBatchUpdate($Context, $Window) {
+    $manager = $Window.DataContext
+    $source = @'
+// ==UserScript==
+// @name Batch regression NAME
+// @namespace CefFlashBrowser.Regression
+// @version 1.0
+// @match https://example.invalid/*
+// @downloadURL UPDATE_URL
+// ==/UserScript==
+'@
+    $fixtures = @((New-Object UserScriptHttpFixture), (New-Object UserScriptHttpFixture))
+    $slowPath = '/slow-install.user.js'
+    $names = @('A', 'B')
+    $menu = $Window.FindName('batchUpdateMenuItem')
+    $scriptMenu = [Windows.Controls.ItemsControl]::ItemsControlFromItemContainer($menu)
+    Assert-Regression ($scriptMenu.Items[0] -eq $menu -and $scriptMenu.Items[1] -is [Windows.Controls.Separator] -and
+        $menu.Header -eq $Context.LanguageService.GetString('userScriptBatchUpdate_menu')) 'batch update is the first Script menu item and is followed by a separator'
+
+    try {
+        for ($i = 0; $i -lt $fixtures.Count; $i++) {
+            $fixture = $fixtures[$i]
+            $path = if ($i -eq 0) { $slowPath } else { '/manager.user.js' }
+            $original = $source.Replace('NAME', $names[$i]).Replace('UPDATE_URL', ($fixture.BaseUrl + $path))
+            $fixture.ScriptSource = $original.Replace('1.0', '2.0')
+            Complete-UserScriptTask $Context ($Context.UserScriptService.Repository.InstallAsync($original, $null, ($i -eq 0),
+                [Threading.CancellationToken]::None)) 'install a batch update fixture' | Out-Null
+        }
+        Wait-Regression $Context { @($manager.Scripts | Where-Object Name -like 'Batch regression *').Count -eq 2 } 'manager observes both batch fixtures'
+        $edited = $manager.Scripts | Where-Object Name -eq 'Batch regression A'
+        $manager.SelectedScript = $edited
+        $edited.Source += "`n// pending editor change"
+        $warn = $Context.LanguageService.GetString('userScriptBatchUpdate_overwriteEdits')
+        $state = @{ Failure = $null; Opened = $false }
+        $timer = New-Object Windows.Threading.DispatcherTimer
+        $timer.Interval = [TimeSpan]::FromMilliseconds(25)
+        $handler = [EventHandler]({
+            $batch = $Context.Application.Windows | Where-Object {
+                $_.IsVisible -and $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptBatchUpdateDialog]
+            } | Select-Object -First 1
+            if ($null -eq $batch) { return }
+            $timer.Stop()
+            $state.Opened = $true
+            try {
+                Assert-Regression ($batch.Owner -eq $Window -and
+                    $batch.Title -eq $Context.LanguageService.GetString('userScriptBatchUpdate_title')) 'batch update opens a localized window owned by the manager'
+                $list = $batch.FindName('scriptList')
+                $filter = $batch.FindName('scriptFilter')
+                $check = $batch.FindName('checkAllButton')
+                $update = $batch.FindName('updateAllButton')
+                Assert-Regression ($list.Items.Count -eq @($manager.Scripts | Where-Object IsInstalled).Count -and
+                    $check.IsEnabled -and !$update.IsEnabled) 'batch lists installed scripts and waits for a check before enabling Update All'
+                $filter.Text = 'Batch regression A'
+                $batch.UpdateLayout()
+                Assert-Regression ($list.Items.Count -eq 1) 'batch filter matches the script name'
+                $row = $list.Items[0]
+                $container = $list.ItemContainerGenerator.ContainerFromItem($row)
+                $link = @(Find-FaviconElements $container ([Windows.Controls.TextBlock]) | ForEach-Object { $_.Inlines } |
+                    Where-Object { $_ -is [Windows.Documents.Hyperlink] })[0]
+                $rowButton = @(Find-FaviconElements $container ([Windows.Controls.Button]))[0]
+                Assert-Regression ($link.IsEnabled -and !$rowButton.IsEnabled -and $row.CurrentVersion -eq '1.0' -and
+                    $link.Inlines.FirstInline.Text -eq $Context.LanguageService.GetString('userScriptBatchUpdate_check')) 'a new row shows a Get Updates link and a disabled Update button'
+
+                Invoke-BrowserCommand $link.Command $link.CommandParameter
+                try {
+                    Wait-Regression $Context { $fixtures[0].RequestsFor($slowPath) -eq 1 } 'version check is waiting for the script source'
+                    $batch.UpdateLayout()
+                    $checking = $Context.LanguageService.GetString('userScriptBatchUpdate_checking')
+                    $labels = @(Find-FaviconElements $container ([Windows.Controls.TextBlock]) | Where-Object { $_.IsVisible })
+                    Assert-Regression (!$link.Parent.IsVisible -and @($labels | Where-Object Text -ceq $checking).Count -eq 1) 'a pending version check shows only the checking label in place of the link'
+                } finally {
+                    $fixtures[0].Release($slowPath)
+                }
+                Wait-Regression $Context { !$batch.DataContext.IsBusy -and $link.Parent.IsVisible -and $link.Inlines.FirstInline.Text -eq '2.0' } 'the link checks its own row and displays the remote version'
+                Assert-Regression ($rowButton.IsEnabled -and $update.IsEnabled -and $fixtures[1].RequestsFor('/manager.user.js') -eq 0) 'a newer version enables row and batch actions without fetching other scripts'
+                $checkWarning = {
+                    param($confirmation, $expectedWarning)
+                    Assert-Regression ($confirmation.FindName('scriptVersion').Text -eq '2.0' -and
+                        $confirmation.FindName('updateWarning').Text -eq $expectedWarning) 'the row confirmation shows the new version and warns about unsaved edits'
+                }
+                Invoke-BatchUpdateConfirmation $Context $batch $rowButton.Command $rowButton.CommandParameter `
+                    ([CefFlashBrowser.Views.Dialogs.UserScriptInstallDialog]) 'cancelButton' $warn $checkWarning
+                Assert-Regression ($edited.IsDirty -and $row.CurrentVersion -eq '1.0') 'cancelling the row update preserves the editor'
+
+                $filter.Text = 'Batch regression'
+                Invoke-BrowserCommand $check.Command $check.CommandParameter
+                Wait-Regression $Context { !$batch.DataContext.IsBusy -and @($list.Items | Where-Object LatestVersion -eq '2.0').Count -eq 2 } 'Check for Updates checks both visible rows'
+                $checkBatchMessage = {
+                    param($confirmation, $expectedWarning)
+                    Assert-Regression ($confirmation.Message.Contains('Batch regression A') -and
+                        $confirmation.Message.Contains('Batch regression B') -and $confirmation.Message.Contains($expectedWarning)) 'one confirmation lists both scripts and flags the edited script'
+                }
+                Invoke-BatchUpdateConfirmation $Context $batch $update.Command $null `
+                    ([CefFlashBrowser.Views.Dialogs.JsConfirmDialog]) 'yesButton' $warn $checkBatchMessage
+                Assert-Regression (@($list.Items | Where-Object CurrentVersion -eq '2.0').Count -eq 2 -and !$update.IsEnabled -and
+                    $batch.FindName('summaryText').Text -eq ($Context.LanguageService.GetString('userScriptBatchUpdate_summary') -f 2, 0)) 'both rows show the installed versions and the dialog summarizes the update'
+                Assert-Regression (!$edited.IsDirty -and $edited.Source -eq $fixtures[0].ScriptSource -and
+                    $Window.FindName('sourceEditor').Text -eq $fixtures[0].ScriptSource) 'the manager editor shows the confirmed replacement source'
+            } catch {
+                $state.Failure = $_
+            } finally {
+                $batch.Close()
+            }
+        }.GetNewClosure())
+        $timer.add_Tick($handler)
+        $timer.Start()
+        try {
+            Invoke-BrowserCommand $menu.Command $menu.CommandParameter
+            if ($null -ne $state.Failure) { throw $state.Failure }
+            Assert-Regression ($state.Opened) 'the batch dialog opens from the Script menu'
+        } finally {
+            $timer.Stop()
+            $timer.remove_Tick($handler)
+        }
+    } finally {
+        foreach ($fixture in $fixtures) { $fixture.Dispose() }
+    }
+}
+
 function Test-ManagerListFilter($Context, $Window, $Item) {
     $model = $Window.DataContext
     $list = $Window.FindName('scriptList')
@@ -1931,6 +2083,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         [void]$editor.Redo()
         Assert-Regression ($item.Source.EndsWith('// theme draft')) 'redo history still works after repeated theme changes'
         Test-WebUserScriptInstallation $Context $browserWindow $window $fixture
+        Test-ManagerBatchUpdate $Context $window
     } finally {
         if ($null -ne $browserWindow) { $browserWindow.ForceCloseWindow() }
         if ($null -ne $window) { $window.Close() }

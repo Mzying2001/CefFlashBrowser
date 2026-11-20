@@ -238,10 +238,10 @@ namespace CefFlashBrowser.Services
         }
 
         internal static bool ConfirmUserScriptInstallation(UserScriptMetadata metadata, string origin,
-            Window owner, bool update = false, CancellationToken token = default)
+            Window owner, bool update = false, CancellationToken token = default, string warning = null)
         {
             var dialog = CreateWindow<UserScriptInstallDialog>();
-            dialog.SetScript(metadata, origin, update);
+            dialog.SetScript(metadata, origin, update, warning);
             return ShowModal(dialog, owner, token);
         }
 
@@ -310,6 +310,14 @@ namespace CefFlashBrowser.Services
         {
             var dialog = ShowConfirmDialog(message, title);
             callback?.Invoke(DialogHelper.GetDialogResult(dialog));
+        }
+
+        internal static bool Confirm(string message, string title, Window owner, CancellationToken token)
+        {
+            var dialog = CreateWindow<JsConfirmDialog>();
+            dialog.Title = title;
+            dialog.Message = message;
+            return ShowModal(dialog, owner, token);
         }
 
         internal static JsConfirmDialog ShowConfirmDialog(string message, string title,

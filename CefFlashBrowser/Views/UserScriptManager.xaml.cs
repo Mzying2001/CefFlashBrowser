@@ -3,6 +3,7 @@ using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
+using CefFlashBrowser.Views.Dialogs;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
@@ -32,6 +33,7 @@ namespace CefFlashBrowser.Views
         public DelegateCommand ImportFileCommand { get; }
         public DelegateCommand ExportCommand { get; }
         public DelegateCommand OpenInDefaultBrowserCommand { get; }
+        public DelegateCommand OpenBatchUpdateCommand { get; }
 
         private UserScriptManagerViewModel ViewModel
         {
@@ -45,6 +47,7 @@ namespace CefFlashBrowser.Views
             ImportFileCommand = new DelegateCommand(ImportFile) { CanExecuteFunc = _ => !ViewModel.IsBusy };
             ExportCommand = new DelegateCommand(Export) { CanExecuteFunc = _ => !ViewModel.IsBusy && ViewModel.SelectedScript != null };
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(WindowManager.OpenInDefaultBrowser);
+            OpenBatchUpdateCommand = new DelegateCommand(OpenBatchUpdate) { CanExecuteFunc = _ => ViewModel.CanOpenBatchUpdate };
 
             InitializeComponent();
 
@@ -71,6 +74,20 @@ namespace CefFlashBrowser.Views
         {
             ImportFileCommand.RaiseCanExecuteChanged();
             ExportCommand.RaiseCanExecuteChanged();
+            OpenBatchUpdateCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OpenBatchUpdate()
+        {
+            using (var model = ViewModel.CreateBatchUpdateViewModel())
+            {
+                if (model == null)
+                    return;
+
+                var dialog = WindowManager.CreateWindow<UserScriptBatchUpdateDialog>();
+                dialog.SetModel(model);
+                DialogHelper.ShowModal(dialog, this);
+            }
         }
 
         private bool ConfirmInstallation(UserScriptMetadata metadata, string origin, bool update)

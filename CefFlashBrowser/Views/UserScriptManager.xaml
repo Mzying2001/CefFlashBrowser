@@ -127,6 +127,10 @@
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource common_script}">
+                <MenuItem x:Name="batchUpdateMenuItem"
+                          Header="{DynamicResource userScriptBatchUpdate_menu}"
+                          Command="{Binding ElementName=window, Path=OpenBatchUpdateCommand}"/>
+                <Separator/>
                 <MenuItem x:Name="showDetailsMenuItem"
                           Header="{DynamicResource userScriptManager_showDetails}"
                           Command="{Binding ShowDetailsCommand}"

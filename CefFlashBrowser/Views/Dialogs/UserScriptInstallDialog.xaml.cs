@@ -31,7 +31,7 @@ namespace CefFlashBrowser.Views.Dialogs
             return string.Join(Environment.NewLine, entries.Where(entry => !string.IsNullOrWhiteSpace(entry)));
         }
 
-        internal void SetScript(UserScriptMetadata metadata, string origin, bool update)
+        internal void SetScript(UserScriptMetadata metadata, string origin, bool update, string warning = null)
         {
             scriptIcon.FaviconUrl = UserScriptItemViewModel.ResolveIconUrl(metadata, origin);
             scriptIcon.DefaultIcon = UserScriptItemViewModel.GetIconInitial(metadata.Name);
@@ -39,6 +39,7 @@ namespace CefFlashBrowser.Views.Dialogs
 
             SetOptionalText(scriptVersion, metadata.Version);
             SetOptionalText(scriptDescription, metadata.Description);
+            SetOptionalText(updateWarning, warning);
             SetOptionalText(scriptAuthor, metadata.Author, authorLabel);
             scriptOrigin.Text = origin;
 

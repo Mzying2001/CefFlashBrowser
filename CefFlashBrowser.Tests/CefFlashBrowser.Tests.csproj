@@ -29,6 +29,7 @@
   <ItemGroup>
     <Compile Include="..\CefFlashBrowser\ViewModels\UserScriptItemViewModel.cs" Link="LinkedSources\UserScripts\UserScriptItemViewModel.cs" />
     <Compile Include="..\CefFlashBrowser\ViewModels\UserScriptManagerViewModel.cs" Link="LinkedSources\UserScripts\UserScriptManagerViewModel.cs" />
+    <Compile Include="..\CefFlashBrowser\ViewModels\UserScriptBatchUpdateViewModel.cs" Link="LinkedSources\UserScripts\UserScriptBatchUpdateViewModel.cs" />
     <Compile Include="..\CefFlashBrowser\Infrastructure\Collections\ListReorderRequest.cs" Link="LinkedSources\ListReorderRequest.cs" />
     <Compile Include="..\CefFlashBrowser\Services\UserScripts\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />
     <Compile Include="..\CefFlashBrowser\Services\UserScripts\Persistence\*.cs" Link="LinkedSources\UserScripts\%(Filename)%(Extension)" />

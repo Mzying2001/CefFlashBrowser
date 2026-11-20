@@ -102,6 +102,13 @@
                            Foreground="{DynamicResource PrimaryTextBrush}"
                            TextWrapping="Wrap"/>
 
+                <TextBlock x:Name="updateWarning"
+                           Margin="0,12,0,0"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed"/>
+
                 <Border Margin="0,14,0,0"
                         Padding="0,6,0,0"
                         BorderBrush="{DynamicResource BorderBrush}"

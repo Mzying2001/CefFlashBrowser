@@ -1,11 +1,12 @@
-﻿using CefFlashBrowser.Services.UserScripts;
-using CefFlashBrowser.Infrastructure.Collections;
+﻿using CefFlashBrowser.Infrastructure.Collections;
+using CefFlashBrowser.Services.UserScripts;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Parsing;
 using Mzying2001.MonkeySharp.Core.Repository;
 using Mzying2001.MonkeySharp.Core.Updates;
 using SimpleMvvm;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -465,8 +466,7 @@ namespace CefFlashBrowser.ViewModels
             {
                 var previous = item.Installation;
                 var name = item.Name;
-                var fetcher = new UpdateSourceFetcher(_fetchSource);
-                var updates = new UserScriptUpdateService(_repository, fetcher);
+                var updates = new UserScriptUpdateOperation(_repository, _fetchSource);
 
                 try
                 {
@@ -481,18 +481,10 @@ namespace CefFlashBrowser.ViewModels
                         return;
                     }
 
-                    var source = await fetcher.FetchSourceAsync(previous, result.DownloadUrl, token);
-                    var parsed = new UserScriptMetadataParser().Parse(source);
-
-                    if (!parsed.CanEnable)
-                    {
-                        Status = _text("userScriptManager_invalidMetadata");
-                        return;
-                    }
-
+                    var metadata = await updates.PrepareAsync(previous, result, token);
                     token.ThrowIfCancellationRequested();
 
-                    if (ConfirmInstallation?.Invoke(parsed.Metadata, result.DownloadUrl, true) != true)
+                    if (ConfirmInstallation?.Invoke(metadata, result.DownloadUrl, true) != true)
                     {
                         Status = _text("userScriptManager_cancelled");
                         return;
@@ -501,8 +493,7 @@ namespace CefFlashBrowser.ViewModels
                     token.ThrowIfCancellationRequested();
 
                     var installation = await updates.ApplyAsync(result, token);
-                    item.AcceptSave(installation, installation.Definition.Source);
-                    item.Source = installation.Definition.Source;
+                    AcceptUpdate(item, result.ExpectedRevisionId, installation);
                     SelectScriptForEditing(item);
                     Status = _text("userScriptManager_saved");
                 }
@@ -510,8 +501,7 @@ namespace CefFlashBrowser.ViewModels
                 {
                     Status = _text("userScriptManager_invalidMetadata");
                 }
-                catch (Exception e) when (e is KeyNotFoundException
-                    || (e is UserScriptUpdateException updateError && updateError.Code == "MSU005_STALE_CHECK"))
+                catch (Exception e) when (UserScriptUpdateOperation.IsStale(e))
                 {
                     Status = _text("userScriptManager_conflict");
                 }
@@ -521,6 +511,36 @@ namespace CefFlashBrowser.ViewModels
                     Status = _text("userScriptInstall_downloadFailed");
                 }
             });
+        }
+
+        public bool CanOpenBatchUpdate => !IsBusy && _lifetime != null && _repository != null && _fetchSource != null;
+
+        internal UserScriptBatchUpdateViewModel CreateBatchUpdateViewModel()
+        {
+            if (!CanOpenBatchUpdate)
+            {
+                return null;
+            }
+            else
+            {
+                return new UserScriptBatchUpdateViewModel(
+                    Scripts, _repository, _fetchSource, _text, AcceptUpdate, _lifetime.Token);
+            }
+        }
+
+        private void AcceptUpdate(UserScriptItemViewModel item, Guid expectedRevision, UserScriptInstallation installation)
+        {
+            // Repository notifications may have already delivered this update, a later revision, or removal.
+            if (!Scripts.Contains(item))
+                return;
+
+            var currentRevision = item.Installation.RevisionId;
+
+            if (currentRevision != expectedRevision && currentRevision != installation.RevisionId)
+                return;
+
+            item.AcceptSave(installation, installation.Definition.Source);
+            item.Source = installation.Definition.Source;
         }
 
         public Task ExportAsync(string path)
@@ -872,28 +892,5 @@ namespace CefFlashBrowser.ViewModels
             ShowUrlCommand?.RaiseCanExecuteChanged();
         }
 
-        private sealed class UpdateSourceFetcher : IUserScriptUpdateFetcher
-        {
-            private readonly Func<string, CancellationToken, Task<string>> _fetchSource;
-            private readonly Dictionary<string, string> _sources = new Dictionary<string, string>(StringComparer.Ordinal);
-
-            public UpdateSourceFetcher(Func<string, CancellationToken, Task<string>> fetchSource)
-            {
-                _fetchSource = fetchSource;
-            }
-
-            public async Task<string> FetchSourceAsync(UserScriptInstallation installation, string url, CancellationToken token)
-            {
-                token.ThrowIfCancellationRequested();
-                if (_sources.TryGetValue(url, out var source)) return source;
-
-                source = await _fetchSource(url, token).ConfigureAwait(false);
-                token.ThrowIfCancellationRequested();
-                UserScriptSourceText.Validate(source);
-                // Apply the same source that supplied the confirmation dialog's metadata.
-                _sources.Add(url, source);
-                return source;
-            }
-        }
     }
 }
