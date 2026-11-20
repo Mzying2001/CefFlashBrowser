@@ -110,7 +110,7 @@
 
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem"
-                           BasedOn="{StaticResource ListViewItemBaseStyle}">
+                           BasedOn="{StaticResource AppListViewItemStyle}">
                         <Setter Property="AllowDrop" Value="True"/>
                         <EventSetter Event="MouseDoubleClick"
                                      Handler="ListViewItemMouseDoubleClick"/>

@@ -19,6 +19,9 @@
                 <!--HandyControl-->
                 <infraWpf:NamedResourceDictionary Name="Skin" Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
                 <infraWpf:NamedResourceDictionary Name="Theme" Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+
+                <!--Translucent list item highlights-->
+                <ResourceDictionary Source="Themes/ListItems.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
 

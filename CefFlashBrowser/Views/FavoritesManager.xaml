@@ -87,7 +87,7 @@
             </ListBox.ItemTemplate>
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem"
-                       BasedOn="{StaticResource ListBoxItemBaseStyle}">
+                       BasedOn="{StaticResource AppListBoxItemStyle}">
                     <Setter Property="Tag"
                             Value="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=DataContext}"/>
                     <Setter Property="ContextMenu">

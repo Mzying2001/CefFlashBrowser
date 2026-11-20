@@ -239,7 +239,7 @@
 
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem"
-                           BasedOn="{StaticResource ListBoxItemBaseStyle}">
+                           BasedOn="{StaticResource AppListBoxItemStyle}">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="Tag"
                                 Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
@@ -247,23 +247,6 @@
                                 Value="{StaticResource ScriptContextMenu}"/>
                         <EventSetter Event="PreviewMouseRightButtonDown"
                                      Handler="ScriptPreviewMouseRightButtonDown"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#20409EFF"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#40409EFF"/>
-                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-                            </Trigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsSelected" Value="True"/>
-                                    <Condition Property="Selector.IsSelectionActive" Value="False"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Background" Value="#40409EFF"/>
-                                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-                            </MultiTrigger>
-                        </Style.Triggers>
                     </Style>
                 </ListBox.ItemContainerStyle>
 

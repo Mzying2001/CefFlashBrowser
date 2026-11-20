@@ -245,7 +245,8 @@ function Initialize-RegressionEnvironment($Context) {
     $Context.Application.Resources.MergedDictionaries.Add($languageDictionary)
     foreach ($dictionaryUri in @(
         'pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml',
-        'pack://application:,,,/HandyControl;component/Themes/Theme.xaml'
+        'pack://application:,,,/HandyControl;component/Themes/Theme.xaml',
+        'pack://application:,,,/CefFlashBrowser;component/Themes/ListItems.xaml'
     )) {
         $dictionary = New-Object System.Windows.ResourceDictionary
         $dictionary.set_Source([Uri]$dictionaryUri)
