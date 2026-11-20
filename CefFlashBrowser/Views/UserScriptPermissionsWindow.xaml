@@ -44,7 +44,7 @@
                   SelectionChanged="PermissionSelectionChanged">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="185" Header="{DynamicResource userscript_permissionScript}">
+                    <GridViewColumn Width="185" Header="{DynamicResource common_script}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel>
@@ -106,7 +106,7 @@
 
         <DockPanel Grid.Row="4" Margin="0,14,0,0">
             <Button x:Name="refreshButton" DockPanel.Dock="Left" MinWidth="80"
-                    Content="{DynamicResource browser_reload}" Click="RefreshClicked"/>
+                    Content="{DynamicResource common_refresh}" Click="RefreshClicked"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="allowButton" MinWidth="80" Margin="0,0,8,0"
                         Content="{DynamicResource userscript_permissionAllow}" Click="AllowClicked" IsEnabled="False"/>
@@ -115,7 +115,7 @@
                 <Button x:Name="clearButton" MinWidth="90" Margin="0,0,8,0"
                         Content="{DynamicResource userscript_permissionClear}" Click="ClearClicked" IsEnabled="False"/>
                 <Button MinWidth="80"
-                        Content="{DynamicResource userscript_notificationClose}" Click="CloseClicked"/>
+                        Content="{DynamicResource common_close}" Click="CloseClicked"/>
             </StackPanel>
         </DockPanel>
     </Grid>

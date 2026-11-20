@@ -158,7 +158,7 @@
                 </Grid.Style>
                 <Button Command="{Binding DataContext.AddChildCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         CommandParameter="{Binding}"
-                        ToolTip="{DynamicResource solEditor_addItem}">
+                        ToolTip="{DynamicResource common_addItem}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="{StaticResource AddIconUri}"/>
@@ -269,19 +269,19 @@
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="{DynamicResource solEditor_file}">
-                <MenuItem Header="{DynamicResource solEditor_save}"
+            <MenuItem Header="{DynamicResource common_file}">
+                <MenuItem Header="{DynamicResource common_save}"
                           Command="{Binding SaveFileCommand}"
                           InputGestureText="Ctrl+S"/>
                 <MenuItem Header="{DynamicResource solEditor_saveAs}"
                           Command="{Binding SaveAsFileCommand}"
                           InputGestureText="Ctrl+Shift+S"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource solEditor_close}"
+                <MenuItem Header="{DynamicResource common_close}"
                           Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"
                           InputGestureText="Ctrl+W"/>
             </MenuItem>
-            <MenuItem Header="{DynamicResource solEditor_edit}">
+            <MenuItem Header="{DynamicResource common_editMenu}">
                 <MenuItem.Style>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -293,7 +293,7 @@
                         </Style.Triggers>
                     </Style>
                 </MenuItem.Style>
-                <MenuItem Header="{DynamicResource solEditor_addItem}"
+                <MenuItem Header="{DynamicResource common_addItem}"
                           Command="{Binding AddChildCommand}"
                           CommandParameter="{Binding SelectedNode}"
                           IsEnabled="{Binding SelectedNode.CanAddChild}"/>
@@ -336,7 +336,7 @@
                                 <Setter Property="Text" Value="{DynamicResource solEditor_statusReady}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:SolEditorStatus.Error}">
-                                <Setter Property="Text" Value="{DynamicResource solEditor_statusError}"/>
+                                <Setter Property="Text" Value="{DynamicResource common_error}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:SolEditorStatus.Modified}">
                                 <Setter Property="Text" Value="{DynamicResource solEditor_statusModified}"/>
@@ -404,7 +404,7 @@
                                                 Value="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                     </Style>
                                 </ContextMenu.Resources>
-                                <MenuItem Header="{DynamicResource solEditor_addItem}"
+                                <MenuItem Header="{DynamicResource common_addItem}"
                                           IsEnabled="{Binding CanAddChild}"
                                           Command="{Binding Tag.AddChildCommand, RelativeSource={RelativeSource Mode=Self}}"
                                           CommandParameter="{Binding}"/>

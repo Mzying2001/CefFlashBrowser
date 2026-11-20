@@ -614,7 +614,7 @@ function Test-UserScriptMenus($Context) {
                 [Math]::Abs($rightInset - $actionsRightInset) -lt 0.5) "script menu side insets ($leftInset, $rightInset) match the actions menu ($actionsLeftInset, $actionsRightInset)"
             $headers = @($actionsMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] } | ForEach-Object { $_.Header })
             Assert-Regression ($headers -notcontains $window.FindResource('userscript_commands') -and
-                $headers -contains $window.FindResource('mainWindow_manageUserScripts') -and
+                $headers -contains $window.FindResource('common_manageUserScripts') -and
                 $headers -contains $window.FindResource('userscript_downloads')) 'actions retain script management and downloads after moving script commands'
         } finally {
             $actionsMenu.IsOpen = $false

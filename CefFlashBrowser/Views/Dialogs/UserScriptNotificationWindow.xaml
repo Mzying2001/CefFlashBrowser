@@ -39,7 +39,7 @@
             <Button x:Name="closeButton"
                     MinWidth="85"
                     Margin="0,0,10,0"
-                    Content="{DynamicResource userscript_notificationClose}"
+                    Content="{DynamicResource common_close}"
                     Click="CloseClick"/>
             <Button x:Name="clickButton"
                     MinWidth="110"

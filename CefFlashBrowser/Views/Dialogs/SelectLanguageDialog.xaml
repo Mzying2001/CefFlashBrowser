@@ -71,7 +71,7 @@
                 <Button Margin="15"
                         MinWidth="70"
                         Style="{StaticResource ButtonPrimary}"
-                        Content="{DynamicResource dialog_ok}"
+                        Content="{DynamicResource common_ok}"
                         Click="OnConfirmButtonClick"/>
             </StackPanel>
         </Grid>

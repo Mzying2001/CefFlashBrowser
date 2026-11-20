@@ -112,7 +112,7 @@
                                 <Setter Property="ContextMenu">
                                     <Setter.Value>
                                         <ContextMenu>
-                                            <MenuItem Header="{DynamicResource favorites_remove}"
+                                            <MenuItem Header="{DynamicResource common_remove}"
                                                       Command="{Binding Source={StaticResource Locator}, Path=FavoritesManagerViewModel.RemoveItemCommand}"
                                                       CommandParameter="{Binding}"/>
                                         </ContextMenu>
@@ -172,7 +172,7 @@
                 <Separator/>
 
                 <!--UserScriptManager-->
-                <MenuItem Header="{DynamicResource mainWindow_manageUserScripts}"
+                <MenuItem Header="{DynamicResource common_manageUserScripts}"
                           Command="{Binding OpenUserScriptManagerCommand}"/>
 
                 <Separator/>

@@ -32,7 +32,7 @@
                       Command="{Binding MoveToLastCommand}"
                       Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <Separator Visibility="{Binding IsReorderingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <MenuItem Header="{DynamicResource userScriptManager_delete}"
+            <MenuItem Header="{DynamicResource common_delete}"
                       Command="{Binding DeleteCommand}"/>
             <Separator/>
             <MenuItem Header="{DynamicResource userScriptManager_showDetails}"
@@ -67,7 +67,7 @@
 
     <DockPanel SizeChanged="ContentSizeChanged">
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="{DynamicResource solEditor_file}">
+            <MenuItem Header="{DynamicResource common_file}">
                 <MenuItem Header="{DynamicResource userScriptManager_new}"
                           Command="{Binding NewCommand}"
                           InputGestureText="Ctrl+N"/>
@@ -78,48 +78,48 @@
                 <MenuItem Header="{DynamicResource userScriptManager_install}"
                           Command="{Binding InstallCommand}"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource solEditor_save}"
+                <MenuItem Header="{DynamicResource common_save}"
                           Command="{Binding SaveCommand}"
                           InputGestureText="Ctrl+S"/>
                 <MenuItem Header="{DynamicResource userScriptManager_export}"
                           Command="{Binding ElementName=window, Path=ExportCommand}"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource userScriptManager_delete}"
+                <MenuItem Header="{DynamicResource common_delete}"
                           Command="{Binding DeleteCommand}"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource solEditor_close}"
+                <MenuItem Header="{DynamicResource common_close}"
                           Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"
                           InputGestureText="Ctrl+W"/>
             </MenuItem>
-            <MenuItem Header="{DynamicResource solEditor_edit}">
-                <MenuItem Header="{DynamicResource userScriptManager_undo}"
+            <MenuItem Header="{DynamicResource common_editMenu}">
+                <MenuItem Header="{DynamicResource common_undo}"
                           Command="ApplicationCommands.Undo"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
-                <MenuItem Header="{DynamicResource userScriptManager_redo}"
+                <MenuItem Header="{DynamicResource common_redo}"
                           Command="ApplicationCommands.Redo"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource userScriptManager_cut}"
+                <MenuItem Header="{DynamicResource common_cut}"
                           Command="ApplicationCommands.Cut"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
-                <MenuItem Header="{DynamicResource userScriptManager_copy}"
+                <MenuItem Header="{DynamicResource common_copy}"
                           Command="ApplicationCommands.Copy"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
-                <MenuItem Header="{DynamicResource userScriptManager_paste}"
+                <MenuItem Header="{DynamicResource common_paste}"
                           Command="ApplicationCommands.Paste"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
-                <MenuItem Header="{DynamicResource userScriptManager_selectAll}"
+                <MenuItem Header="{DynamicResource common_selectAll}"
                           Command="ApplicationCommands.SelectAll"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
                 <Separator/>
-                <MenuItem x:Name="findMenuItem" Header="{DynamicResource browser_find}"
+                <MenuItem x:Name="findMenuItem" Header="{DynamicResource common_find}"
                           InputGestureText="Ctrl+F" Command="ApplicationCommands.Find"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
                 <MenuItem x:Name="replaceMenuItem" Header="{DynamicResource userScriptManager_replace}"
                           InputGestureText="Ctrl+H" Command="ApplicationCommands.Replace"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
             </MenuItem>
-            <MenuItem Header="{DynamicResource userScriptManager_script}">
+            <MenuItem Header="{DynamicResource common_script}">
                 <MenuItem x:Name="showDetailsMenuItem"
                           Header="{DynamicResource userScriptManager_showDetails}"
                           Command="{Binding ShowDetailsCommand}"
@@ -162,7 +162,7 @@
                     DockPanel.Dock="Right"
                     Margin="5,0,0,0"
                     Padding="10,0"
-                    Content="{DynamicResource userScriptManager_cancel}"
+                    Content="{DynamicResource common_cancel}"
                     Command="{Binding HideUrlCommand}"/>
                 <Button
                     DockPanel.Dock="Right"
@@ -203,8 +203,8 @@
                             Padding="28,0,8,0"
                             MaxLength="100"
                             Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                            AutomationProperties.Name="{DynamicResource solSaveManager_filterPlaceholder}"
-                            hc:InfoElement.Placeholder="{DynamicResource solSaveManager_filterPlaceholder}">
+                            AutomationProperties.Name="{DynamicResource common_filterPlaceholder}"
+                            hc:InfoElement.Placeholder="{DynamicResource common_filterPlaceholder}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>
@@ -396,14 +396,14 @@
                                 x:Name="closeSearchButton" DockPanel.Dock="Right" Margin="5,0,0,0"
                                 AutomationProperties.Name="Close"
                                 Width="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Height}"
-                                ToolTip="{DynamicResource solEditor_close}" Click="CloseSearchClicked">
+                                ToolTip="{DynamicResource common_close}" Click="CloseSearchClicked">
                                 <svgc:SvgIcon Width="10" Height="10"
                                               UriSource="{StaticResource CloseIconUri}"/>
                             </Button>
                             <hc:TextBox
                                 x:Name="searchText" TextChanged="SearchTextChanged"
                                 AutomationProperties.Name="Find"
-                                hc:InfoElement.Placeholder="{DynamicResource browser_find}">
+                                hc:InfoElement.Placeholder="{DynamicResource common_find}">
                                 <i:Interaction.Behaviors>
                                     <behaviors:TextBoxSelectAllOnFocus/>
                                 </i:Interaction.Behaviors>
@@ -523,24 +523,24 @@
                     </c:ScriptEditor.Style>
                     <c:ScriptEditor.ContextMenu>
                         <ContextMenu DataContext="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource Self}}">
-                            <MenuItem Header="{DynamicResource userScriptManager_undo}"
+                            <MenuItem Header="{DynamicResource common_undo}"
                                       Command="ApplicationCommands.Undo"
                                       CommandTarget="{Binding}"/>
-                            <MenuItem Header="{DynamicResource userScriptManager_redo}"
+                            <MenuItem Header="{DynamicResource common_redo}"
                                       Command="ApplicationCommands.Redo"
                                       CommandTarget="{Binding}"/>
                             <Separator/>
-                            <MenuItem Header="{DynamicResource userScriptManager_cut}"
+                            <MenuItem Header="{DynamicResource common_cut}"
                                       Command="ApplicationCommands.Cut"
                                       CommandTarget="{Binding}"/>
-                            <MenuItem Header="{DynamicResource userScriptManager_copy}"
+                            <MenuItem Header="{DynamicResource common_copy}"
                                       Command="ApplicationCommands.Copy"
                                       CommandTarget="{Binding}"/>
-                            <MenuItem Header="{DynamicResource userScriptManager_paste}"
+                            <MenuItem Header="{DynamicResource common_paste}"
                                       Command="ApplicationCommands.Paste"
                                       CommandTarget="{Binding}"/>
                             <Separator/>
-                            <MenuItem Header="{DynamicResource userScriptManager_selectAll}"
+                            <MenuItem Header="{DynamicResource common_selectAll}"
                                       Command="ApplicationCommands.SelectAll"
                                       CommandTarget="{Binding}"/>
                         </ContextMenu>

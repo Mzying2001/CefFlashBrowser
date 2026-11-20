@@ -278,7 +278,7 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-                                <Button Content="{DynamicResource userscript_downloadCancel}"
+                                <Button Content="{DynamicResource common_cancel}"
                                         Command="{Binding CancelCommand}"
                                         Padding="6,2"/>
                             </StackPanel>
@@ -290,7 +290,7 @@
             <MenuItem Header="{DynamicResource userscript_managePermissions}"
                       Click="OpenUserScriptPermissions"/>
 
-            <MenuItem Header="{DynamicResource mainWindow_manageUserScripts}"
+            <MenuItem Header="{DynamicResource common_manageUserScripts}"
                       Command="{Binding OpenUserScriptManagerCommand}"/>
 
             <Separator/>

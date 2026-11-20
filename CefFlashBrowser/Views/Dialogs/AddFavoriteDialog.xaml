@@ -45,14 +45,14 @@
         <Grid Grid.Row="0">
             <StackPanel Margin="15">
                 <hc:TextBox x:Name="nameTextBox"
-                            hc:TitleElement.Title="{DynamicResource favorites_name}"
+                            hc:TitleElement.Title="{DynamicResource common_name}"
                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>
                 </hc:TextBox>
                 <hc:TextBox Margin="0,5,0,0"
-                            hc:TitleElement.Title="{DynamicResource favorites_url}"
+                            hc:TitleElement.Title="{DynamicResource common_url}"
                             Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
@@ -66,11 +66,11 @@
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <Button MinWidth="70"
-                        Content="{DynamicResource dialog_cancel}"
+                        Content="{DynamicResource common_cancel}"
                         Command="{Binding CancelCommand}"/>
                 <Button MinWidth="70"
                         Margin="10,0,0,0"
-                        Content="{DynamicResource dialog_ok}"
+                        Content="{DynamicResource common_ok}"
                         Style="{StaticResource ButtonPrimary}"
                         Command="{Binding ConfirmCommand}"/>
             </StackPanel>

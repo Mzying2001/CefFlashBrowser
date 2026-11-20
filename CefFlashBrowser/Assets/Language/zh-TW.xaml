@@ -18,13 +18,36 @@
     <sys:String x:Key="common_moveDown">下移</sys:String>
     <sys:String x:Key="common_moveToTop">移至頂部</sys:String>
     <sys:String x:Key="common_moveToBottom">移至底部</sys:String>
+    <sys:String x:Key="common_ok">確定</sys:String>
+    <sys:String x:Key="common_cancel">取消</sys:String>
+    <sys:String x:Key="common_close">關閉</sys:String>
+    <sys:String x:Key="common_error">錯誤</sys:String>
+    <sys:String x:Key="common_file">檔案</sys:String>
+    <sys:String x:Key="common_name">名稱</sys:String>
+    <sys:String x:Key="common_url">網址</sys:String>
+    <sys:String x:Key="common_editMenu">編輯</sys:String>
+    <sys:String x:Key="common_edit">編輯</sys:String>
+    <sys:String x:Key="common_save">儲存</sys:String>
+    <sys:String x:Key="common_addItem">新增項目</sys:String>
+    <sys:String x:Key="common_remove">移除</sys:String>
+    <sys:String x:Key="common_delete">刪除</sys:String>
+    <sys:String x:Key="common_undo">復原</sys:String>
+    <sys:String x:Key="common_redo">重做</sys:String>
+    <sys:String x:Key="common_cut">剪下</sys:String>
+    <sys:String x:Key="common_copy">複製</sys:String>
+    <sys:String x:Key="common_paste">貼上</sys:String>
+    <sys:String x:Key="common_selectAll">全選</sys:String>
+    <sys:String x:Key="common_find">尋找</sys:String>
+    <sys:String x:Key="common_filterPlaceholder">篩選...</sys:String>
+    <sys:String x:Key="common_refresh">重新整理</sys:String>
+    <sys:String x:Key="common_manageUserScripts">管理使用者腳本</sys:String>
+    <sys:String x:Key="common_script">腳本</sys:String>
 
     <!--主視窗-->
     <sys:String x:Key="mainWindow_title">歡迎</sys:String>
     <sys:String x:Key="mainWindow_go">前往</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理我的最愛</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">管理 SOL 存檔</sys:String>
-    <sys:String x:Key="mainWindow_manageUserScripts">管理使用者腳本</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">開啟 SOL 檔案...</sys:String>
     <sys:String x:Key="mainWindow_languages">語言</sys:String>
     <sys:String x:Key="mainWindow_options">選項</sys:String>
@@ -109,11 +132,6 @@
     <!--我的最愛管理員-->
     <sys:String x:Key="favorites_managerTitle">我的最愛管理員</sys:String>
     <sys:String x:Key="favorites_add">新增</sys:String>
-    <sys:String x:Key="favorites_remove">移除</sys:String>
-    <sys:String x:Key="favorites_edit">編輯</sys:String>
-    <sys:String x:Key="favorites_name">名稱</sys:String>
-    <sys:String x:Key="favorites_url">網址</sys:String>
-    <sys:String x:Key="favorites_save">儲存</sys:String>
     <sys:String x:Key="favorites_defaultName">新我的最愛項目</sys:String>
 
     <!--瀏覽器視窗-->
@@ -121,14 +139,7 @@
     <sys:String x:Key="browser_forward">下一頁</sys:String>
     <sys:String x:Key="browser_reload">重新整理</sys:String>
     <sys:String x:Key="browser_stop">停止</sys:String>
-    <sys:String x:Key="browser_cut">剪下</sys:String>
-    <sys:String x:Key="browser_copy">複製</sys:String>
-    <sys:String x:Key="browser_paste">貼上</sys:String>
-    <sys:String x:Key="browser_selectAll">全選</sys:String>
     <sys:String x:Key="browser_print">列印</sys:String>
-    <sys:String x:Key="browser_redo">重做</sys:String>
-    <sys:String x:Key="browser_undo">復原</sys:String>
-    <sys:String x:Key="browser_find">尋找</sys:String>
     <sys:String x:Key="browser_searchFor">搜尋「{0}」</sys:String>
     <sys:String x:Key="browser_openInNewTab">在新分頁開啟</sys:String>
     <sys:String x:Key="browser_openInNewWindow">在新視窗開啟</sys:String>
@@ -169,22 +180,12 @@
     <sys:String x:Key="solSaveManager_headerFileName">檔案名稱</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">檔案路徑</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">操作</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipReload">重新整理</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipDelete">刪除</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipEdit">編輯</sys:String>
-    <sys:String x:Key="solSaveManager_filterPlaceholder">篩選...</sys:String>
 
     <!--存檔編輯器-->
     <sys:String x:Key="solEditor_title">SOL 編輯器</sys:String>
-    <sys:String x:Key="solEditor_file">檔案</sys:String>
-    <sys:String x:Key="solEditor_save">儲存</sys:String>
     <sys:String x:Key="solEditor_saveAs">另存新檔...</sys:String>
-    <sys:String x:Key="solEditor_close">關閉</sys:String>
-    <sys:String x:Key="solEditor_edit">編輯</sys:String>
-    <sys:String x:Key="solEditor_addItem">新增項目</sys:String>
     <sys:String x:Key="solEditor_removeItem">移除項目</sys:String>
     <sys:String x:Key="solEditor_statusReady">就緒</sys:String>
-    <sys:String x:Key="solEditor_statusError">錯誤</sys:String>
     <sys:String x:Key="solEditor_statusModified">已修改</sys:String>
     <sys:String x:Key="solEditor_statusSaved">已儲存</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">未知狀態</sys:String>
@@ -193,15 +194,10 @@
     <sys:String x:Key="solEditor_amf3SolFile">AMF3 編碼的 SOL 檔案</sys:String>
 
     <!--對話框-->
-    <sys:String x:Key="dialog_ok">確定</sys:String>
-    <sys:String x:Key="dialog_cancel">取消</sys:String>
     <sys:String x:Key="dialog_yes">是</sys:String>
     <sys:String x:Key="dialog_no">否</sys:String>
-    <sys:String x:Key="dialog_error">錯誤</sys:String>
     <sys:String x:Key="dialog_addFavorite">新增我的最愛</sys:String>
     <sys:String x:Key="dialog_selectLanguage">請選擇語言</sys:String>
-    <sys:String x:Key="dialog_addItem">新增項目</sys:String>
-    <sys:String x:Key="dialog_itemName">名稱</sys:String>
     <sys:String x:Key="dialog_assocArray">關聯陣列</sys:String>
 
     <!--使用者指令碼-->
@@ -213,7 +209,6 @@
     <sys:String x:Key="userscript_managePermissions">管理指令碼權限</sys:String>
     <sys:String x:Key="userscript_permissionPage">網頁位址</sys:String>
     <sys:String x:Key="userscript_permissionScope">這裡顯示符合此網頁的指令碼已儲存的決定。修改也會影響這些指令碼在其他網頁上對相同 API 和目標的後續呼叫。</sys:String>
-    <sys:String x:Key="userscript_permissionScript">指令碼</sys:String>
     <sys:String x:Key="userscript_permissionDisabled">已停用</sys:String>
     <sys:String x:Key="userscript_permissionTarget">目標</sys:String>
     <sys:String x:Key="userscript_permissionDecision">決定</sys:String>
@@ -228,7 +223,6 @@
     <sys:String x:Key="userscript_retry">重試並重新導覽</sys:String>
     <sys:String x:Key="userscript_commands">指令碼命令</sys:String>
     <sys:String x:Key="userscript_notification">使用者指令碼通知</sys:String>
-    <sys:String x:Key="userscript_notificationClose">關閉</sys:String>
     <sys:String x:Key="userscript_notificationClick">按一下通知</sys:String>
     <sys:String x:Key="userscript_downloads">指令碼下載</sys:String>
     <sys:String x:Key="userscript_saveDownload">儲存指令碼下載檔案</sys:String>
@@ -238,7 +232,6 @@
     <sys:String x:Key="userscript_downloadCancelled">已取消</sys:String>
     <sys:String x:Key="userscript_downloadTimedOut">已逾時</sys:String>
     <sys:String x:Key="userscript_downloadFailed">失敗</sys:String>
-    <sys:String x:Key="userscript_downloadCancel">取消</sys:String>
 
     <!--Userscript Manager-->
     <sys:String x:Key="userScriptManager_title">使用者腳本管理員</sys:String>
@@ -246,12 +239,6 @@
     <sys:String x:Key="userScriptManager_noMatchingScripts">找不到相符的腳本。</sys:String>
     <sys:String x:Key="userScriptManager_new">新增腳本</sys:String>
     <sys:String x:Key="userScriptManager_newScript">新腳本</sys:String>
-    <sys:String x:Key="userScriptManager_undo">復原</sys:String>
-    <sys:String x:Key="userScriptManager_redo">重做</sys:String>
-    <sys:String x:Key="userScriptManager_cut">剪下</sys:String>
-    <sys:String x:Key="userScriptManager_copy">複製</sys:String>
-    <sys:String x:Key="userScriptManager_paste">貼上</sys:String>
-    <sys:String x:Key="userScriptManager_selectAll">全選</sys:String>
     <sys:String x:Key="userScriptManager_replace">取代</sys:String>
     <sys:String x:Key="userScriptManager_findPrevious">上一個相符項目</sys:String>
     <sys:String x:Key="userScriptManager_findNext">下一個相符項目</sys:String>
@@ -260,7 +247,6 @@
     <sys:String x:Key="userScriptManager_noMatches">沒有相符項目</sys:String>
     <sys:String x:Key="userScriptManager_replaceCurrent">取代目前項目</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">全部取代</sys:String>
-    <sys:String x:Key="userScriptManager_script">腳本</sys:String>
     <sys:String x:Key="userScriptManager_help">說明</sys:String>
     <sys:String x:Key="userScriptManager_aboutMonkeySharp">關於 MonkeySharp</sys:String>
     <sys:String x:Key="userScriptManager_usageGuide">使用者腳本使用指南</sys:String>
@@ -268,7 +254,6 @@
     <sys:String x:Key="userScriptDetails_title">腳本詳細資料</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">未知中繼資料</sys:String>
     <sys:String x:Key="userScriptManager_reload">從磁碟重新載入</sys:String>
-    <sys:String x:Key="userScriptManager_delete">刪除</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">是否刪除腳本「{0}」？</sys:String>
     <sys:String x:Key="userScriptManager_saved">已儲存。重新整理網頁後生效。</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">操作已完成。重新整理網頁以查看效果。</sys:String>
@@ -296,7 +281,6 @@
     <sys:String x:Key="userScriptManager_match">比對範圍</sys:String>
     <sys:String x:Key="userScriptManager_world">執行環境</sys:String>
     <sys:String x:Key="userScriptManager_grants">宣告權限</sys:String>
-    <sys:String x:Key="userScriptManager_cancel">取消</sys:String>
     <sys:String x:Key="userScriptManager_load">載入</sys:String>
     <sys:String x:Key="userScriptManager_toggle">啟用或停用腳本</sys:String>
     <sys:String x:Key="userScriptManager_draft">未安裝草稿</sys:String>

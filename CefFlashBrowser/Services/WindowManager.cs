@@ -340,7 +340,7 @@ namespace CefFlashBrowser.Services
             string title = "Error";
             try
             {
-                title = SimpleIoc.Global.GetInstance<LanguageService>().GetString("dialog_error");
+                title = SimpleIoc.Global.GetInstance<LanguageService>().GetString("common_error");
             }
             catch { }
             MessageBox.Show(errMsg, title, MessageBoxButton.OK, MessageBoxImage.Error);

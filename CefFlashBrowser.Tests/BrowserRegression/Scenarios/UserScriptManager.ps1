@@ -476,7 +476,7 @@ function Test-ManagerSearchAppearance($Context, $Window) {
         foreach ($locale in $Context.LanguageService.GetSupportedLanguage()) {
             $Context.LanguageService.SetCurrentLanguage($locale)
             Assert-Regression ([HandyControl.Controls.InfoElement]::GetPlaceholder($filter) -ceq
-                $Context.LanguageService.GetString('solSaveManager_filterPlaceholder')) "list filter placeholder follows the language in $locale"
+                $Context.LanguageService.GetString('common_filterPlaceholder')) "list filter placeholder follows the language in $locale"
             foreach ($name in @('matchCount', 'noMatches')) {
                 $query.Text = if ($name -eq 'matchCount') { 'const' } else { 'missing search result' }
                 $Window.UpdateLayout()
@@ -608,7 +608,7 @@ function Invoke-ManagerWithConfirmation($Context, $Window, [string]$Action, [has
             $buttonKey = if ($Update) { 'userScriptInstall_update' } else { 'userScriptInstall_install' }
             Assert-Regression ($dialog.Title -ceq $Context.LanguageService.GetString($titleKey) -and
                 $install.Content -ceq $Context.LanguageService.GetString($buttonKey) -and
-                $cancel.Content -ceq $Context.LanguageService.GetString('dialog_cancel')) 'installation dialog localizes the title and actions'
+                $cancel.Content -ceq $Context.LanguageService.GetString('common_cancel')) 'installation dialog localizes the title and actions'
             if ($Expected.Scrolls) {
                 $details = $dialog.FindName('scriptDetails')
                 Assert-Regression ($details.ComputedVerticalScrollBarVisibility -eq [Windows.Visibility]::Visible -and
@@ -668,7 +668,7 @@ function Open-ManagerContextMenu($Context, $Window, $Script) {
     Wait-Regression $Context {
         $menu.Items.Count -eq 8 -and $menu.Items[4] -is [Windows.Controls.Separator] -and
             $menu.Items[5].Command -eq $Window.DataContext.DeleteCommand -and
-            $menu.Items[5].Header -eq $Context.LanguageService.GetString('userScriptManager_delete') -and
+            $menu.Items[5].Header -eq $Context.LanguageService.GetString('common_delete') -and
             $menu.Items[6] -is [Windows.Controls.Separator] -and
             $menu.Items[7].Command -eq $Window.DataContext.ShowDetailsCommand -and
             [object]::ReferenceEquals($menu.Items[7].CommandParameter, $Script) -and
@@ -703,7 +703,7 @@ function Invoke-ManagerDetailsDialog($Context, $Window, $MenuItem, [scriptblock]
             $button = $dialog.FindName('closeButton')
             Assert-Regression ([object]::ReferenceEquals($dialog.Owner, $Window) -and
                 $dialog.Title -ceq $Context.LanguageService.GetString('userScriptDetails_title') -and
-                $button.Content -ceq $Context.LanguageService.GetString('solEditor_close')) 'details dialog is owned by the manager and localized'
+                $button.Content -ceq $Context.LanguageService.GetString('common_close')) 'details dialog is owned by the manager and localized'
             & $Check $dialog
             if ($Dismiss -eq 'Button') {
                 $peer = New-Object Windows.Automation.Peers.ButtonAutomationPeer($button)
@@ -1602,7 +1602,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
             $replaceMenu.Command.Execute($null, $replaceMenu.CommandTarget)
             $searchInput = $window.FindName('searchText')
             $replaceAllLabel = $window.FindName('replaceAll').Content
-            Assert-Regression ([HandyControl.Controls.InfoElement]::GetPlaceholder($searchInput) -ceq $Context.LanguageService.GetString('browser_find') -and
+            Assert-Regression ([HandyControl.Controls.InfoElement]::GetPlaceholder($searchInput) -ceq $Context.LanguageService.GetString('common_find') -and
                 $replaceMenu.Header -ceq $Context.LanguageService.GetString('userScriptManager_replace') -and
                 $window.FindName('matchCase').Content -ceq $Context.LanguageService.GetString('userScriptManager_matchCase') -and
                 $window.FindName('replaceCurrent').ToolTip -ceq $Context.LanguageService.GetString('userScriptManager_replaceCurrent') -and
@@ -1613,9 +1613,9 @@ document.documentElement.setAttribute('data-manager', 'saved');
             }
             $editorMenu = Open-ManagerEditorContextMenu $Context $window
             $editorMenuItems = @($editorMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] })
-            $editorMenuKeys = @('undo', 'redo', 'cut', 'copy', 'paste', 'selectAll')
+            $editorMenuKeys = @('common_undo', 'common_redo', 'common_cut', 'common_copy', 'common_paste', 'common_selectAll')
             for ($index = 0; $index -lt $editorMenuKeys.Count; $index++) {
-                Assert-Regression ($editorMenuItems[$index].Header -eq $Context.LanguageService.GetString('userScriptManager_' + $editorMenuKeys[$index])) "editor context menu localizes $($editorMenuKeys[$index]) in $locale"
+                Assert-Regression ($editorMenuItems[$index].Header -eq $Context.LanguageService.GetString($editorMenuKeys[$index])) "editor context menu localizes $($editorMenuKeys[$index]) in $locale"
             }
             $editorMenu.IsOpen = $false
             $menu = Open-ManagerContextMenu $Context $window $previousSelection

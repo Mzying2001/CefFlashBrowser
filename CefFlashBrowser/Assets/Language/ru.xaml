@@ -18,13 +18,36 @@
     <sys:String x:Key="common_moveDown">Переместить вниз</sys:String>
     <sys:String x:Key="common_moveToTop">Переместить в начало</sys:String>
     <sys:String x:Key="common_moveToBottom">Переместить в конец</sys:String>
+    <sys:String x:Key="common_ok">OK</sys:String>
+    <sys:String x:Key="common_cancel">Отмена</sys:String>
+    <sys:String x:Key="common_close">Закрыть</sys:String>
+    <sys:String x:Key="common_error">Ошибка</sys:String>
+    <sys:String x:Key="common_file">Файл</sys:String>
+    <sys:String x:Key="common_name">Имя</sys:String>
+    <sys:String x:Key="common_url">URL</sys:String>
+    <sys:String x:Key="common_editMenu">Правка</sys:String>
+    <sys:String x:Key="common_edit">Изменить</sys:String>
+    <sys:String x:Key="common_save">Сохранить</sys:String>
+    <sys:String x:Key="common_addItem">Добавить элемент</sys:String>
+    <sys:String x:Key="common_remove">Удалить</sys:String>
+    <sys:String x:Key="common_delete">Удалить</sys:String>
+    <sys:String x:Key="common_undo">Отменить</sys:String>
+    <sys:String x:Key="common_redo">Повторить</sys:String>
+    <sys:String x:Key="common_cut">Вырезать</sys:String>
+    <sys:String x:Key="common_copy">Копировать</sys:String>
+    <sys:String x:Key="common_paste">Вставить</sys:String>
+    <sys:String x:Key="common_selectAll">Выделить все</sys:String>
+    <sys:String x:Key="common_find">Найти</sys:String>
+    <sys:String x:Key="common_filterPlaceholder">Фильтр...</sys:String>
+    <sys:String x:Key="common_refresh">Обновить</sys:String>
+    <sys:String x:Key="common_manageUserScripts">Управление пользовательскими скриптами</sys:String>
+    <sys:String x:Key="common_script">Скрипт</sys:String>
 
     <!--Main Window-->
     <sys:String x:Key="mainWindow_title">Добро пожаловать</sys:String>
     <sys:String x:Key="mainWindow_go">Перейти</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Управление избранным</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">Управление сохранениями SOL</sys:String>
-    <sys:String x:Key="mainWindow_manageUserScripts">Управление пользовательскими скриптами</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">Открыть SOL-файл...</sys:String>
     <sys:String x:Key="mainWindow_languages">Язык</sys:String>
     <sys:String x:Key="mainWindow_options">Параметры</sys:String>
@@ -109,11 +132,6 @@
     <!--Favorites Manager-->
     <sys:String x:Key="favorites_managerTitle">Диспетчер избранного</sys:String>
     <sys:String x:Key="favorites_add">Добавить</sys:String>
-    <sys:String x:Key="favorites_remove">Удалить</sys:String>
-    <sys:String x:Key="favorites_edit">Изменить</sys:String>
-    <sys:String x:Key="favorites_name">Имя</sys:String>
-    <sys:String x:Key="favorites_url">URL</sys:String>
-    <sys:String x:Key="favorites_save">Сохранить</sys:String>
     <sys:String x:Key="favorites_defaultName">Новый элемент избранного</sys:String>
 
     <!--Browser Window-->
@@ -121,14 +139,7 @@
     <sys:String x:Key="browser_forward">Вперед</sys:String>
     <sys:String x:Key="browser_reload">Обновить</sys:String>
     <sys:String x:Key="browser_stop">Остановить</sys:String>
-    <sys:String x:Key="browser_cut">Вырезать</sys:String>
-    <sys:String x:Key="browser_copy">Копировать</sys:String>
-    <sys:String x:Key="browser_paste">Вставить</sys:String>
-    <sys:String x:Key="browser_selectAll">Выделить все</sys:String>
     <sys:String x:Key="browser_print">Печать</sys:String>
-    <sys:String x:Key="browser_redo">Повторить</sys:String>
-    <sys:String x:Key="browser_undo">Отменить</sys:String>
-    <sys:String x:Key="browser_find">Найти</sys:String>
     <sys:String x:Key="browser_searchFor">Искать "{0}"</sys:String>
     <sys:String x:Key="browser_openInNewTab">Открыть в новой вкладке</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Открыть в новом окне</sys:String>
@@ -169,22 +180,12 @@
     <sys:String x:Key="solSaveManager_headerFileName">Имя файла</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">Путь к файлу</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">Операции</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipReload">Обновить</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipDelete">Удалить</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipEdit">Изменить</sys:String>
-    <sys:String x:Key="solSaveManager_filterPlaceholder">Фильтр...</sys:String>
 
     <!--SOL Editor-->
     <sys:String x:Key="solEditor_title">Редактор SOL</sys:String>
-    <sys:String x:Key="solEditor_file">Файл</sys:String>
-    <sys:String x:Key="solEditor_save">Сохранить</sys:String>
     <sys:String x:Key="solEditor_saveAs">Сохранить как...</sys:String>
-    <sys:String x:Key="solEditor_close">Закрыть</sys:String>
-    <sys:String x:Key="solEditor_edit">Правка</sys:String>
-    <sys:String x:Key="solEditor_addItem">Добавить элемент</sys:String>
     <sys:String x:Key="solEditor_removeItem">Удалить элемент</sys:String>
     <sys:String x:Key="solEditor_statusReady">Готово</sys:String>
-    <sys:String x:Key="solEditor_statusError">Ошибка</sys:String>
     <sys:String x:Key="solEditor_statusModified">Изменено</sys:String>
     <sys:String x:Key="solEditor_statusSaved">Сохранено</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">Неизвестное состояние</sys:String>
@@ -193,15 +194,10 @@
     <sys:String x:Key="solEditor_amf3SolFile">SOL-файл, закодированный в AMF3</sys:String>
 
     <!--Dialogs-->
-    <sys:String x:Key="dialog_ok">OK</sys:String>
-    <sys:String x:Key="dialog_cancel">Отмена</sys:String>
     <sys:String x:Key="dialog_yes">Да</sys:String>
     <sys:String x:Key="dialog_no">Нет</sys:String>
-    <sys:String x:Key="dialog_error">Ошибка</sys:String>
     <sys:String x:Key="dialog_addFavorite">Добавить в избранное</sys:String>
     <sys:String x:Key="dialog_selectLanguage">Выберите язык</sys:String>
-    <sys:String x:Key="dialog_addItem">Добавить элемент</sys:String>
-    <sys:String x:Key="dialog_itemName">Имя</sys:String>
     <sys:String x:Key="dialog_assocArray">Ассоциативный массив</sys:String>
 
     <!--Userscripts-->
@@ -213,7 +209,6 @@
     <sys:String x:Key="userscript_managePermissions">Управление разрешениями скриптов</sys:String>
     <sys:String x:Key="userscript_permissionPage">Адрес страницы</sys:String>
     <sys:String x:Key="userscript_permissionScope">Здесь показаны сохранённые решения для скриптов, подходящих для этой страницы. Изменения также действуют для последующих вызовов того же API с той же целью на других страницах.</sys:String>
-    <sys:String x:Key="userscript_permissionScript">Скрипт</sys:String>
     <sys:String x:Key="userscript_permissionDisabled">Отключён</sys:String>
     <sys:String x:Key="userscript_permissionTarget">Цель</sys:String>
     <sys:String x:Key="userscript_permissionDecision">Решение</sys:String>
@@ -228,7 +223,6 @@
     <sys:String x:Key="userscript_retry">Повторить попытку и перезагрузить страницу</sys:String>
     <sys:String x:Key="userscript_commands">Команды скриптов</sys:String>
     <sys:String x:Key="userscript_notification">Уведомление пользовательского скрипта</sys:String>
-    <sys:String x:Key="userscript_notificationClose">Закрыть</sys:String>
     <sys:String x:Key="userscript_notificationClick">Нажать на уведомление</sys:String>
     <sys:String x:Key="userscript_downloads">Загрузки скриптов</sys:String>
     <sys:String x:Key="userscript_saveDownload">Сохранить загрузку скрипта</sys:String>
@@ -238,7 +232,6 @@
     <sys:String x:Key="userscript_downloadCancelled">Отменено</sys:String>
     <sys:String x:Key="userscript_downloadTimedOut">Время ожидания истекло</sys:String>
     <sys:String x:Key="userscript_downloadFailed">Ошибка</sys:String>
-    <sys:String x:Key="userscript_downloadCancel">Отмена</sys:String>
 
     <!--Userscript Manager-->
     <sys:String x:Key="userScriptManager_title">Диспетчер пользовательских скриптов</sys:String>
@@ -246,12 +239,6 @@
     <sys:String x:Key="userScriptManager_noMatchingScripts">Подходящие скрипты не найдены.</sys:String>
     <sys:String x:Key="userScriptManager_new">Новый скрипт</sys:String>
     <sys:String x:Key="userScriptManager_newScript">Новый скрипт</sys:String>
-    <sys:String x:Key="userScriptManager_undo">Отменить</sys:String>
-    <sys:String x:Key="userScriptManager_redo">Повторить</sys:String>
-    <sys:String x:Key="userScriptManager_cut">Вырезать</sys:String>
-    <sys:String x:Key="userScriptManager_copy">Копировать</sys:String>
-    <sys:String x:Key="userScriptManager_paste">Вставить</sys:String>
-    <sys:String x:Key="userScriptManager_selectAll">Выделить все</sys:String>
     <sys:String x:Key="userScriptManager_replace">Заменить</sys:String>
     <sys:String x:Key="userScriptManager_findPrevious">Предыдущее совпадение</sys:String>
     <sys:String x:Key="userScriptManager_findNext">Следующее совпадение</sys:String>
@@ -260,7 +247,6 @@
     <sys:String x:Key="userScriptManager_noMatches">Нет совпадений</sys:String>
     <sys:String x:Key="userScriptManager_replaceCurrent">Заменить выделенное</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">Заменить всё</sys:String>
-    <sys:String x:Key="userScriptManager_script">Скрипт</sys:String>
     <sys:String x:Key="userScriptManager_help">Справка</sys:String>
     <sys:String x:Key="userScriptManager_aboutMonkeySharp">О MonkeySharp</sys:String>
     <sys:String x:Key="userScriptManager_usageGuide">Руководство по пользовательским скриптам</sys:String>
@@ -268,7 +254,6 @@
     <sys:String x:Key="userScriptDetails_title">Сведения о скрипте</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">Неизвестные метаданные</sys:String>
     <sys:String x:Key="userScriptManager_reload">Перезагрузить с диска</sys:String>
-    <sys:String x:Key="userScriptManager_delete">Удалить</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">Удалить скрипт «{0}»?</sys:String>
     <sys:String x:Key="userScriptManager_saved">Сохранено. Перезагрузите страницу, чтобы применить изменения.</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">Готово. Перезагрузите страницу, чтобы увидеть результат.</sys:String>
@@ -296,7 +281,6 @@
     <sys:String x:Key="userScriptManager_match">Соответствующие адреса</sys:String>
     <sys:String x:Key="userScriptManager_world">Среда выполнения</sys:String>
     <sys:String x:Key="userScriptManager_grants">Объявленные разрешения</sys:String>
-    <sys:String x:Key="userScriptManager_cancel">Отмена</sys:String>
     <sys:String x:Key="userScriptManager_load">Загрузить</sys:String>
     <sys:String x:Key="userScriptManager_toggle">Включить или отключить скрипт</sys:String>
     <sys:String x:Key="userScriptManager_draft">Неустановленный черновик</sys:String>

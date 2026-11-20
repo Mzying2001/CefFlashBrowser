@@ -107,7 +107,7 @@
                                           Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.MoveToBottomCommand}"
                                           CommandParameter="{Binding}"/>
                                 <Separator/>
-                                <MenuItem Header="{DynamicResource favorites_remove}"
+                                <MenuItem Header="{DynamicResource common_remove}"
                                           Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.RemoveItemCommand}"
                                           CommandParameter="{Binding}"/>
                             </ContextMenu>
@@ -149,7 +149,7 @@
                             TextBox.TextChanged="TextChangedHandler">
                     <hc:TextBox x:Name="nameTextBox"
                                 Text="{Binding SelectedWebsite.Name, UpdateSourceTrigger=Explicit}"
-                                hc:TitleElement.Title="{DynamicResource favorites_name}">
+                                hc:TitleElement.Title="{DynamicResource common_name}">
                         <i:Interaction.Behaviors>
                             <behaviors:TextBoxSelectAllOnFocus/>
                         </i:Interaction.Behaviors>
@@ -162,7 +162,7 @@
                     <hc:TextBox x:Name="urlTextBox"
                                 Margin="0,5,0,0"
                                 Text="{Binding SelectedWebsite.Url, UpdateSourceTrigger=Explicit}"
-                                hc:TitleElement.Title="{DynamicResource favorites_url}">
+                                hc:TitleElement.Title="{DynamicResource common_url}">
                         <i:Interaction.Behaviors>
                             <behaviors:TextBoxSelectAllOnFocus/>
                         </i:Interaction.Behaviors>
@@ -209,11 +209,11 @@
                                     <Setter Property="MinWidth" Value="75"/>
                                 </Style>
                             </StackPanel.Resources>
-                            <Button Content="{DynamicResource favorites_remove}"
+                            <Button Content="{DynamicResource common_remove}"
                                     Command="{Binding RemoveItemCommand}"
                                     CommandParameter="{Binding SelectedWebsite}"/>
                             <Button Margin="5,0,0,0"
-                                    Content="{DynamicResource favorites_save}"
+                                    Content="{DynamicResource common_save}"
                                     Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CommitEditCommand}"/>
                         </StackPanel>
                     </DockPanel>

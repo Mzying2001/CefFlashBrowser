@@ -198,14 +198,14 @@
                                                               ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                         <Button Margin="5,0,0,0"
-                                                ToolTip="{DynamicResource solSaveManager_toolTipEdit}"
+                                                ToolTip="{DynamicResource common_edit}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.EditSolCommand}"
                                                 CommandParameter="{Binding}">
                                             <ContentPresenter Content="{StaticResource EditIcon}"
                                                               ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                         <Button Margin="5,0,0,0"
-                                                ToolTip="{DynamicResource solSaveManager_toolTipDelete}"
+                                                ToolTip="{DynamicResource common_delete}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.DeleteSolCommand}"
                                                 CommandParameter="{Binding}">
                                             <ContentPresenter Tag="{DynamicResource DangerBrush}"
@@ -236,7 +236,7 @@
 
             <Button Margin="0,0,10,0"
                     Command="{Binding CurrentWorkspace.ReloadSolFilesCommand}"
-                    ToolTip="{DynamicResource solSaveManager_toolTipReload}">
+                    ToolTip="{DynamicResource common_refresh}">
                 <svgc:SvgIcon Width="12"
                               Height="12"
                               UriSource="{StaticResource ReloadIconUri}"/>
@@ -248,7 +248,7 @@
                 <hc:TextBox Padding="28,0,8,0"
                             MaxLength="100"
                             Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                            hc:InfoElement.Placeholder="{DynamicResource solSaveManager_filterPlaceholder}">
+                            hc:InfoElement.Placeholder="{DynamicResource common_filterPlaceholder}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>

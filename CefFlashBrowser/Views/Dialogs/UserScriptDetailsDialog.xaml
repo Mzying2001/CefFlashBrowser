@@ -56,7 +56,7 @@
                 HorizontalAlignment="Right"
                 IsDefault="True"
                 Style="{StaticResource ButtonPrimary}"
-                Content="{DynamicResource solEditor_close}"
+                Content="{DynamicResource common_close}"
                 Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
 
         <ScrollViewer x:Name="scriptDetails"

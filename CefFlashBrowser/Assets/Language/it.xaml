@@ -18,13 +18,36 @@
     <sys:String x:Key="common_moveDown">Sposta giù</sys:String>
     <sys:String x:Key="common_moveToTop">Sposta in cima</sys:String>
     <sys:String x:Key="common_moveToBottom">Sposta in fondo</sys:String>
+    <sys:String x:Key="common_ok">OK</sys:String>
+    <sys:String x:Key="common_cancel">Annulla</sys:String>
+    <sys:String x:Key="common_close">Chiudi</sys:String>
+    <sys:String x:Key="common_error">Errore</sys:String>
+    <sys:String x:Key="common_file">File</sys:String>
+    <sys:String x:Key="common_name">Nome</sys:String>
+    <sys:String x:Key="common_url">Url</sys:String>
+    <sys:String x:Key="common_editMenu">Modifica</sys:String>
+    <sys:String x:Key="common_edit">Modifica</sys:String>
+    <sys:String x:Key="common_save">Salva</sys:String>
+    <sys:String x:Key="common_addItem">Aggiungi elemento</sys:String>
+    <sys:String x:Key="common_remove">Rimuovi</sys:String>
+    <sys:String x:Key="common_delete">Elimina</sys:String>
+    <sys:String x:Key="common_undo">Annulla</sys:String>
+    <sys:String x:Key="common_redo">Rifai</sys:String>
+    <sys:String x:Key="common_cut">Taglia</sys:String>
+    <sys:String x:Key="common_copy">Copia</sys:String>
+    <sys:String x:Key="common_paste">Incolla</sys:String>
+    <sys:String x:Key="common_selectAll">Seleziona tutto</sys:String>
+    <sys:String x:Key="common_find">Trova</sys:String>
+    <sys:String x:Key="common_filterPlaceholder">Filtra...</sys:String>
+    <sys:String x:Key="common_refresh">Aggiorna</sys:String>
+    <sys:String x:Key="common_manageUserScripts">Gestisci script utente</sys:String>
+    <sys:String x:Key="common_script">Script</sys:String>
 
     <!--Finestra Principale-->
     <sys:String x:Key="mainWindow_title">Benvenuto</sys:String>
     <sys:String x:Key="mainWindow_go">Vai</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">Gestisci Preferiti</sys:String>
     <sys:String x:Key="mainWindow_manageSolSaveFiles">Gestione degli archivi SOL</sys:String>
-    <sys:String x:Key="mainWindow_manageUserScripts">Gestisci script utente</sys:String>
     <sys:String x:Key="mainWindow_openSolFile">Apri file SOL...</sys:String>
     <sys:String x:Key="mainWindow_languages">Lingue</sys:String>
     <sys:String x:Key="mainWindow_options">Opzioni</sys:String>
@@ -109,11 +132,6 @@
     <!--Gestione preferiti-->
     <sys:String x:Key="favorites_managerTitle">Gestione preferiti</sys:String>
     <sys:String x:Key="favorites_add">Aggiungi</sys:String>
-    <sys:String x:Key="favorites_remove">Rimuovi</sys:String>
-    <sys:String x:Key="favorites_edit">Modifica</sys:String>
-    <sys:String x:Key="favorites_name">Nome</sys:String>
-    <sys:String x:Key="favorites_url">Url</sys:String>
-    <sys:String x:Key="favorites_save">Salva</sys:String>
     <sys:String x:Key="favorites_defaultName">Nuovo prefeito</sys:String>
 
     <!--Finestra Browser-->
@@ -121,14 +139,7 @@
     <sys:String x:Key="browser_forward">Avanti</sys:String>
     <sys:String x:Key="browser_reload">Ricarica</sys:String>
     <sys:String x:Key="browser_stop">Stop</sys:String>
-    <sys:String x:Key="browser_cut">Taglia</sys:String>
-    <sys:String x:Key="browser_copy">Copia</sys:String>
-    <sys:String x:Key="browser_paste">Incolla</sys:String>
-    <sys:String x:Key="browser_selectAll">Seleziona tutto</sys:String>
     <sys:String x:Key="browser_print">Stampa</sys:String>
-    <sys:String x:Key="browser_redo">Rifai</sys:String>
-    <sys:String x:Key="browser_undo">Annulla</sys:String>
-    <sys:String x:Key="browser_find">Trova</sys:String>
     <sys:String x:Key="browser_searchFor">Cerca "{0}"</sys:String>
     <sys:String x:Key="browser_openInNewTab">Apri in una nuova scheda</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Apri in una nuova finestra</sys:String>
@@ -169,22 +180,12 @@
     <sys:String x:Key="solSaveManager_headerFileName">Nome file</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">Percorso file</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">Operazioni</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipReload">Aggiorna</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipDelete">Elimina</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipEdit">Modifica</sys:String>
-    <sys:String x:Key="solSaveManager_filterPlaceholder">Filtra...</sys:String>
 
     <!--Editor SOL-->
     <sys:String x:Key="solEditor_title">Editor SOL</sys:String>
-    <sys:String x:Key="solEditor_file">File</sys:String>
-    <sys:String x:Key="solEditor_save">Salva</sys:String>
     <sys:String x:Key="solEditor_saveAs">Salva come...</sys:String>
-    <sys:String x:Key="solEditor_close">Chiudi</sys:String>
-    <sys:String x:Key="solEditor_edit">Modifica</sys:String>
-    <sys:String x:Key="solEditor_addItem">Aggiungi elemento</sys:String>
     <sys:String x:Key="solEditor_removeItem">Rimuovi elemento</sys:String>
     <sys:String x:Key="solEditor_statusReady">Pronto</sys:String>
-    <sys:String x:Key="solEditor_statusError">Errore</sys:String>
     <sys:String x:Key="solEditor_statusModified">Modificato</sys:String>
     <sys:String x:Key="solEditor_statusSaved">Salvato</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">Stato sconosciuto</sys:String>
@@ -193,15 +194,10 @@
     <sys:String x:Key="solEditor_amf3SolFile">File SOL codificato con AMF3</sys:String>
 
     <!--Dialoghi-->
-    <sys:String x:Key="dialog_ok">OK</sys:String>
-    <sys:String x:Key="dialog_cancel">Annulla</sys:String>
     <sys:String x:Key="dialog_yes">Si</sys:String>
     <sys:String x:Key="dialog_no">No</sys:String>
-    <sys:String x:Key="dialog_error">Errore</sys:String>
     <sys:String x:Key="dialog_addFavorite">Aggiungi a Preferiti</sys:String>
     <sys:String x:Key="dialog_selectLanguage">Seleziona lingua</sys:String>
-    <sys:String x:Key="dialog_addItem">Aggiungi voce</sys:String>
-    <sys:String x:Key="dialog_itemName">Nome</sys:String>
     <sys:String x:Key="dialog_assocArray">Array associativo</sys:String>
 
     <!--Script utente-->
@@ -213,7 +209,6 @@
     <sys:String x:Key="userscript_managePermissions">Gestisci le autorizzazioni degli script</sys:String>
     <sys:String x:Key="userscript_permissionPage">Indirizzo della pagina</sys:String>
     <sys:String x:Key="userscript_permissionScope">L’elenco mostra le decisioni salvate per gli script che corrispondono a questa pagina. Le modifiche valgono anche per le loro chiamate future alla stessa API e alla stessa destinazione su altre pagine.</sys:String>
-    <sys:String x:Key="userscript_permissionScript">Script</sys:String>
     <sys:String x:Key="userscript_permissionDisabled">Disattivato</sys:String>
     <sys:String x:Key="userscript_permissionTarget">Destinazione</sys:String>
     <sys:String x:Key="userscript_permissionDecision">Decisione</sys:String>
@@ -228,7 +223,6 @@
     <sys:String x:Key="userscript_retry">Riprova e ricarica la pagina</sys:String>
     <sys:String x:Key="userscript_commands">Comandi degli script</sys:String>
     <sys:String x:Key="userscript_notification">Notifica script utente</sys:String>
-    <sys:String x:Key="userscript_notificationClose">Chiudi</sys:String>
     <sys:String x:Key="userscript_notificationClick">Fai clic sulla notifica</sys:String>
     <sys:String x:Key="userscript_downloads">Download degli script</sys:String>
     <sys:String x:Key="userscript_saveDownload">Salva il download dello script</sys:String>
@@ -238,7 +232,6 @@
     <sys:String x:Key="userscript_downloadCancelled">Annullato</sys:String>
     <sys:String x:Key="userscript_downloadTimedOut">Tempo scaduto</sys:String>
     <sys:String x:Key="userscript_downloadFailed">Non riuscito</sys:String>
-    <sys:String x:Key="userscript_downloadCancel">Annulla</sys:String>
 
     <!--Userscript Manager-->
     <sys:String x:Key="userScriptManager_title">Gestione script utente</sys:String>
@@ -246,12 +239,6 @@
     <sys:String x:Key="userScriptManager_noMatchingScripts">Nessuno script corrispondente.</sys:String>
     <sys:String x:Key="userScriptManager_new">Nuovo script</sys:String>
     <sys:String x:Key="userScriptManager_newScript">Nuovo script</sys:String>
-    <sys:String x:Key="userScriptManager_undo">Annulla</sys:String>
-    <sys:String x:Key="userScriptManager_redo">Rifai</sys:String>
-    <sys:String x:Key="userScriptManager_cut">Taglia</sys:String>
-    <sys:String x:Key="userScriptManager_copy">Copia</sys:String>
-    <sys:String x:Key="userScriptManager_paste">Incolla</sys:String>
-    <sys:String x:Key="userScriptManager_selectAll">Seleziona tutto</sys:String>
     <sys:String x:Key="userScriptManager_replace">Sostituisci</sys:String>
     <sys:String x:Key="userScriptManager_findPrevious">Risultato precedente</sys:String>
     <sys:String x:Key="userScriptManager_findNext">Risultato successivo</sys:String>
@@ -260,7 +247,6 @@
     <sys:String x:Key="userScriptManager_noMatches">Nessun risultato</sys:String>
     <sys:String x:Key="userScriptManager_replaceCurrent">Sostituisci selezione</sys:String>
     <sys:String x:Key="userScriptManager_replaceAll">Sostituisci tutto</sys:String>
-    <sys:String x:Key="userScriptManager_script">Script</sys:String>
     <sys:String x:Key="userScriptManager_help">Aiuto</sys:String>
     <sys:String x:Key="userScriptManager_aboutMonkeySharp">Informazioni su MonkeySharp</sys:String>
     <sys:String x:Key="userScriptManager_usageGuide">Guida agli script utente</sys:String>
@@ -268,7 +254,6 @@
     <sys:String x:Key="userScriptDetails_title">Dettagli dello script</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">Metadati sconosciuti</sys:String>
     <sys:String x:Key="userScriptManager_reload">Ricarica dal disco</sys:String>
-    <sys:String x:Key="userScriptManager_delete">Elimina</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">Vuoi eliminare lo script "{0}"?</sys:String>
     <sys:String x:Key="userScriptManager_saved">Salvato. Ricarica la pagina per applicare le modifiche.</sys:String>
     <sys:String x:Key="userScriptManager_refreshPage">Operazione completata. Ricarica la pagina per vedere il risultato.</sys:String>
@@ -296,7 +281,6 @@
     <sys:String x:Key="userScriptManager_match">Indirizzi corrispondenti</sys:String>
     <sys:String x:Key="userScriptManager_world">Ambiente di esecuzione</sys:String>
     <sys:String x:Key="userScriptManager_grants">Autorizzazioni dichiarate</sys:String>
-    <sys:String x:Key="userScriptManager_cancel">Annulla</sys:String>
     <sys:String x:Key="userScriptManager_load">Carica</sys:String>
     <sys:String x:Key="userScriptManager_toggle">Attiva o disattiva lo script</sys:String>
     <sys:String x:Key="userScriptManager_draft">Bozza non installata</sys:String>
