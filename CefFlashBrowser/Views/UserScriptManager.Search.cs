@@ -20,9 +20,12 @@ namespace CefFlashBrowser.Views
             if (!CanSearch)
                 return;
 
+            sourceEditor.CloseCompletion();
+
             if (!SearchIsOpen && !sourceEditor.TextArea.Selection.IsMultiline && sourceEditor.SelectionLength > 0)
                 searchText.Text = sourceEditor.SelectedText;
 
+            sourceEditor.SetSearchOpen(true);
             searchBar.Visibility = Visibility.Visible;
             replaceRow.Visibility = e.Command == ApplicationCommands.Replace ? Visibility.Visible : Visibility.Collapsed;
 
@@ -45,7 +48,12 @@ namespace CefFlashBrowser.Views
         {
             searchBar.Visibility = Visibility.Collapsed;
             sourceEditor.Search.SetQuery(string.Empty, matchCase: false);
-            if (restoreFocus && CanSearch) sourceEditor.Focus();
+            sourceEditor.SetSearchOpen(false);
+
+            if (restoreFocus && CanSearch)
+            {
+                sourceEditor.Focus();
+            }
         }
 
         private void ApplySearchQuery()
@@ -82,12 +90,14 @@ namespace CefFlashBrowser.Views
 
             if (e.Key == Key.Escape && modifiers == ModifierKeys.None)
             {
-                CloseSearch(restoreFocus: true);
+                if (!sourceEditor.TextArea.IsKeyboardFocusWithin || !sourceEditor.CloseCompletion())
+                    CloseSearch(restoreFocus: true);
                 e.Handled = true;
             }
             else if ((e.Key == Key.F3 || (e.Key == Key.Enter && searchText.IsKeyboardFocusWithin)) &&
                 (modifiers == ModifierKeys.None || modifiers == ModifierKeys.Shift))
             {
+                sourceEditor.CloseCompletion();
                 sourceEditor.Search.Find(forward: modifiers == ModifierKeys.None);
                 e.Handled = true;
             }

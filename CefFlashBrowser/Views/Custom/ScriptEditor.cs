@@ -16,10 +16,13 @@ namespace CefFlashBrowser.Views.Custom
     public class ScriptEditor : TextEditor
     {
         private readonly IHighlightingDefinition _javascript;
+        private readonly ScriptEditorCompletion _completion;
+        private readonly ScriptEditorOccurrences _occurrences;
         private bool _updatingText;
 
         internal ScriptEditorSearch Search { get; }
 
+        public static RoutedCommand CompleteCodeCommand { get; } = new RoutedCommand(nameof(CompleteCodeCommand), typeof(ScriptEditor));
 
         public static readonly DependencyProperty SourceTextProperty = DependencyProperty.Register(
             nameof(SourceText), typeof(string), typeof(ScriptEditor),
@@ -50,6 +53,8 @@ namespace CefFlashBrowser.Views.Custom
             }
 
             Search = new ScriptEditorSearch(this);
+            _completion = new ScriptEditorCompletion(this);
+            _occurrences = new ScriptEditorOccurrences(this);
             SyntaxHighlighting = _javascript;
             Options.IndentationSize = 2;
             Options.ConvertTabsToSpaces = true;
@@ -60,6 +65,10 @@ namespace CefFlashBrowser.Views.Custom
             TextArea.SelectionBorder = null;
             UpdatePalette();
         }
+
+        internal bool CloseCompletion() => _completion.Close();
+
+        internal void SetSearchOpen(bool isOpen) => _occurrences.IsSuppressed = isOpen;
 
         protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
         {
@@ -95,6 +104,7 @@ namespace CefFlashBrowser.Views.Custom
 
         internal void SetSourceDocument(TextDocument document, BindingBase sourceBinding)
         {
+            CloseCompletion();
             // Changing the document raises TextChanged. Keep that notification out of the old draft.
             _updatingText = true;
 
@@ -120,6 +130,7 @@ namespace CefFlashBrowser.Views.Custom
             text = text ?? string.Empty;
             if (_updatingText || Text == text) return;
 
+            CloseCompletion();
             _updatingText = true;
 
             try
@@ -146,6 +157,10 @@ namespace CefFlashBrowser.Views.Custom
             {
                 TextArea.Caret.CaretBrush = Foreground;
             }
+            else if (e.Property == IsReadOnlyProperty && IsReadOnly)
+            {
+                _completion?.Close();
+            }
         }
 
         private void UpdatePalette()
@@ -165,6 +180,7 @@ namespace CefFlashBrowser.Views.Custom
             LineNumbersForeground = CreateBrush(dark ? "#9D9D9D" : "#757575");
             TextArea.SelectionBrush = CreateBrush(dark ? "#264F78" : "#ADD6FF");
             Search.MarkerBrush = CreateBrush(dark ? "#453919" : "#FFF0AE");
+            _occurrences.MarkerBrush = CreateBrush(dark ? "#33434B" : "#DFE9ED");
             TextArea.TextView.LinkTextForegroundBrush = CreateBrush(dark ? "#4DAAFC" : "#006AB1");
             TextArea.TextView.Redraw();
         }

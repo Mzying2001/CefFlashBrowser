@@ -240,6 +240,7 @@
     <sys:String x:Key="userScriptManager_new">新規スクリプト</sys:String>
     <sys:String x:Key="userScriptManager_newScript">新しいスクリプト</sys:String>
     <sys:String x:Key="userScriptManager_replace">置換</sys:String>
+    <sys:String x:Key="userScriptManager_completeCode">コード補完</sys:String>
     <sys:String x:Key="userScriptManager_findPrevious">前の一致</sys:String>
     <sys:String x:Key="userScriptManager_findNext">次の一致</sys:String>
     <sys:String x:Key="userScriptManager_matchCase">大文字と小文字を区別</sys:String>

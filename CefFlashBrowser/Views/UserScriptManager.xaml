@@ -118,6 +118,10 @@
                 <MenuItem x:Name="replaceMenuItem" Header="{DynamicResource userScriptManager_replace}"
                           InputGestureText="Ctrl+H" Command="ApplicationCommands.Replace"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
+                <Separator/>
+                <MenuItem x:Name="completeCodeMenuItem" Header="{DynamicResource userScriptManager_completeCode}"
+                          InputGestureText="Ctrl+Space" Command="{x:Static c:ScriptEditor.CompleteCodeCommand}"
+                          CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
             </MenuItem>
             <MenuItem Header="{DynamicResource common_script}">
                 <MenuItem x:Name="showDetailsMenuItem"

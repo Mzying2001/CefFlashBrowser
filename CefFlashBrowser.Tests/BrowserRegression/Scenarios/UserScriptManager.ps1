@@ -23,8 +23,10 @@ function Get-ManagerIconText($Icon) {
 function Send-ManagerShortcut($Context, $Window, [int]$Key) {
     Set-TabWindowForeground $Context $Window
     $editor = $Window.FindName('sourceEditor')
-    [void]$editor.Focus()
-    Wait-Regression $Context { $editor.TextArea.IsKeyboardFocusWithin } 'script editor receives keyboard input'
+    Wait-Regression $Context {
+        if (!$editor.TextArea.IsKeyboardFocusWithin) { [void]$editor.TextArea.Focus() }
+        $editor.TextArea.IsKeyboardFocusWithin
+    } 'script editor receives keyboard input'
     [RegressionKeyboard]::SetKey(0x11, $false)
     try {
         [RegressionKeyboard]::PressKey($Key)
@@ -403,6 +405,169 @@ function Test-ManagerFindReplace($Context, $Window) {
     }
 }
 
+function Get-ManagerCompletion($Window) {
+    $Window.OwnedWindows | Where-Object { $_ -is [ICSharpCode.AvalonEdit.CodeCompletion.CompletionWindow] -and $_.IsVisible }
+}
+
+function Get-RenderedOccurrenceCount($Renderer, $View) {
+    $View.EnsureVisualLines()
+    $drawing = New-Object Windows.Media.DrawingGroup
+    $drawingContext = $drawing.Open()
+    try {
+        $Renderer.Draw($View, $drawingContext)
+    } finally {
+        $drawingContext.Close()
+    }
+    if ($drawing.Children.Count -eq 0) { return 0 }
+    return $drawing.Children[0].Geometry.GetFlattenedPathGeometry().Figures.Count
+}
+
+function Test-ManagerEditorAssistance($Context, $Window) {
+    $model = $Window.DataContext
+    $editor = $Window.FindName('sourceEditor')
+    $bar = $Window.FindName('searchBar')
+    $query = $Window.FindName('searchText')
+    $menu = $Window.FindName('replaceMenuItem')
+    $completionMenu = $Window.FindName('completeCodeMenuItem')
+    $view = $editor.TextArea.TextView
+    $renderer = $view.BackgroundRenderers | Where-Object { $_.GetType().Name -eq 'ScriptEditorOccurrences' }
+    $previousSelection = $model.SelectedScript
+    $theme = [CefFlashBrowser.Data.GlobalData]::Settings.Theme
+    $draft = $null
+    $otherDraft = $null
+    try {
+        $model.NewScript()
+        $draft = $model.SelectedScript
+        $draft.Source = 'c'
+        $editor.CaretOffset = 1
+        Set-TabWindowForeground $Context $Window
+        [void]$editor.Focus()
+        Wait-Regression $Context { $editor.TextArea.IsKeyboardFocusWithin } 'completion editor receives input'
+        $editor.TextArea.PerformTextInput('o')
+        Assert-Regression ($null -ne (Get-ManagerCompletion $Window)) 'typing a two-character prefix opens completion'
+        $editor.TextArea.PerformTextInput('n')
+        $editor.TextArea.PerformTextInput('s')
+        Assert-Regression ((Get-ManagerCompletion $Window).CompletionList.SelectedItem.Text -ceq 'const') 'keyword completion follows the typed prefix'
+        [RegressionKeyboard]::PressKey(0x09)
+        Wait-Regression $Context { $draft.Source -ceq 'const' -and $null -eq (Get-ManagerCompletion $Window) } 'Tab commits the selected completion to the draft'
+        Send-ManagerShortcut $Context $Window 0x5A
+        Wait-Regression $Context { $draft.Source -ceq 'cons' } 'one undo restores the prefix before completion'
+
+        $draft.Source = 'GM.getVxyz();'
+        $editor.CaretOffset = 'GM.getV'.Length
+        # The system IME can consume native Ctrl+Space. Verify its binding and invoke the same command through the menu.
+        $binding = $editor.InputBindings | Where-Object { $_.Command -eq $completionMenu.Command }
+        Assert-Regression ($binding.Key -eq [Windows.Input.Key]::Space -and
+            $binding.Modifiers -eq [Windows.Input.ModifierKeys]::Control) 'Ctrl+Space is bound to the completion command'
+        $completionMenu.Command.Execute($null, $completionMenu.CommandTarget)
+        Assert-Regression ((Get-ManagerCompletion $Window).CompletionList.SelectedItem.Text -ceq 'getValue') 'manual completion offers modern GM members inside a word'
+        [RegressionKeyboard]::PressKey(0x0D)
+        Wait-Regression $Context { $draft.Source -ceq 'GM.getValue();' } 'Enter replaces the token without duplicating its suffix or receiver'
+
+        $draft.Source = 'GM_getV'
+        $editor.CaretOffset = $draft.Source.Length
+        $completionMenu.Command.Execute($null, $completionMenu.CommandTarget)
+        Wait-Regression $Context {
+            (Get-ManagerCompletion $Window).CompletionList.SelectedItem.Text -ceq 'GM_getValue'
+        } 'completion includes the official legacy GM spelling'
+        [RegressionKeyboard]::PressKey(0x28)
+        Wait-Regression $Context { (Get-ManagerCompletion $Window).CompletionList.SelectedItem.Text -ceq 'GM_getValues' } 'Down navigates candidates'
+        [RegressionKeyboard]::PressKey(0x1B)
+        Wait-Regression $Context { $null -eq (Get-ManagerCompletion $Window) } 'Escape dismisses completion'
+        Assert-Regression ($draft.Source -ceq 'GM_getV') 'dismissing completion keeps the original source'
+
+        $draft.Source = '// c'
+        $editor.CaretOffset = $draft.Source.Length
+        $editor.TextArea.PerformTextInput('o')
+        Assert-Regression ($null -eq (Get-ManagerCompletion $Window)) 'typing in a comment skips completion'
+        $draft.Source = 'const value = "c";'
+        $editor.CaretOffset = 'const value = "c'.Length
+        $editor.TextArea.PerformTextInput('o')
+        Assert-Regression ($null -eq (Get-ManagerCompletion $Window)) 'typing in a quoted string skips completion'
+        $draft.Source = 'c'
+        $editor.CaretOffset = 1
+        $editor.TextArea.PerformTextInput('o')
+        Assert-Regression ($null -ne (Get-ManagerCompletion $Window)) 'completion opens before testing a missing candidate'
+        $editor.TextArea.PerformTextInput('z')
+        Assert-Regression ($null -eq (Get-ManagerCompletion $Window)) 'typing an unmatched prefix dismisses completion'
+        [RegressionKeyboard]::PressKey(0x09)
+        Wait-Regression $Context { $draft.Source -ceq 'coz ' } 'Tab indents normally after typing a prefix with no candidates'
+
+        $draft.Source = 'GM.'
+        $editor.CaretOffset = 3
+        $completionMenu.Command.Execute($null, $completionMenu.CommandTarget)
+        Wait-Regression $Context { $null -ne (Get-ManagerCompletion $Window) } 'manual completion opens directly after GM dot'
+        $model.NewScript()
+        $otherDraft = $model.SelectedScript
+        Assert-Regression ($null -eq (Get-ManagerCompletion $Window) -and $draft.Source -ceq 'GM.') 'switching scripts closes completion and preserves the old draft'
+        $model.SelectedScript = $draft
+
+        $fixture = 'count count Count counter $count _count count2 2count' + "`r`n" + '$count 中文 中文 中文名'
+        $draft.Source = ($fixture + "`r`n" + (('other' + "`r`n") * 50) + 'count')
+        $editor.CaretOffset = 0
+        $editor.Select(0, 5)
+        $editor.ScrollToVerticalOffset(0)
+        $Window.UpdateLayout()
+        Assert-Regression ((Get-RenderedOccurrenceCount $renderer $view) -eq 1) 'only other complete, case-sensitive tokens are highlighted in the viewport'
+        $editor.Select($fixture.IndexOf('counter'), 5)
+        Assert-Regression ((Get-RenderedOccurrenceCount $renderer $view) -eq 0) 'a partial token selection suppresses occurrence markers'
+        $editor.Select($fixture.IndexOf('$count'), 6)
+        Assert-Regression ((Get-RenderedOccurrenceCount $renderer $view) -eq 1) 'dollar-prefixed identifiers match as whole tokens'
+        $editor.Select($fixture.IndexOf('中文'), 2)
+        Assert-Regression ((Get-RenderedOccurrenceCount $renderer $view) -eq 1) 'Unicode identifiers use the same word boundaries'
+        $editor.Select(0, 5)
+        $editor.ScrollToEnd()
+        $Window.UpdateLayout()
+        Assert-Regression ((Get-RenderedOccurrenceCount $renderer $view) -eq 1) 'scrolling highlights a newly visible occurrence with the selection retained'
+        $editor.TextArea.ClearSelection()
+        Assert-Regression ((Get-RenderedOccurrenceCount $renderer $view) -eq 0) 'clearing the selection removes occurrence markers'
+
+        $longLine = 'count ' + ('x' * 300) + ' count'
+        $draft.Source = $longLine
+        $editor.Select(0, 5)
+        $editor.ScrollToHorizontalOffset(0)
+        $Window.UpdateLayout()
+        Assert-Regression ((Get-RenderedOccurrenceCount $renderer $view) -eq 0) 'off-screen matches on long lines do not generate markers'
+        $editor.ScrollToHorizontalOffset(10000)
+        $Window.UpdateLayout()
+        Assert-Regression ((Get-RenderedOccurrenceCount $renderer $view) -eq 1) 'horizontal scrolling reveals the matching token'
+
+        $draft.Source = $fixture
+        $editor.ScrollToHorizontalOffset(0)
+        $editor.ScrollToVerticalOffset(0)
+        $editor.Select(0, 5)
+        Set-ManagerRegressionTheme $Context ([CefFlashBrowser.Models.Theme]::Light)
+        $Window.UpdateLayout()
+        $lightBrush = $renderer.MarkerBrush.Color
+        Set-ManagerRegressionTheme $Context ([CefFlashBrowser.Models.Theme]::Dark)
+        $Window.UpdateLayout()
+        Assert-Regression ($lightBrush -ne $renderer.MarkerBrush.Color -and
+            (Get-RenderedOccurrenceCount $renderer $view) -eq 1) 'occurrence markers follow the current editor theme'
+
+        $menu.Command.Execute($null, $menu.CommandTarget)
+        $Window.UpdateLayout()
+        Assert-Regression ($bar.IsVisible -and $query.Text -ceq 'count' -and
+            (Get-RenderedOccurrenceCount $renderer $view) -eq 0) 'opening find and replace gives its search highlights priority'
+        $draft.Source = 'cons'
+        $editor.TextArea.ClearSelection()
+        $editor.CaretOffset = 4
+        $completionMenu.Command.Execute($null, $completionMenu.CommandTarget)
+        Wait-Regression $Context { $null -ne (Get-ManagerCompletion $Window) } 'completion is available with the search bar open'
+        [RegressionKeyboard]::PressKey(0x1B)
+        Wait-Regression $Context { $null -eq (Get-ManagerCompletion $Window) } 'first Escape dismisses completion with the search bar open'
+        Assert-Regression $bar.IsVisible 'first Escape leaves the search bar visible'
+        [RegressionKeyboard]::PressKey(0x1B)
+        Wait-Regression $Context { !$bar.IsVisible } 'second Escape closes the search bar'
+    } finally {
+        Set-ManagerRegressionTheme $Context $theme
+        $model.SelectedScript = $null
+        $query.Clear()
+        $model.SelectedScript = $previousSelection
+        if ($null -ne $draft) { [void]$model.Scripts.Remove($draft) }
+        if ($null -ne $otherDraft) { [void]$model.Scripts.Remove($otherDraft) }
+    }
+}
+
 function Test-ManagerSearchAppearance($Context, $Window) {
     $editor = $Window.FindName('sourceEditor')
     $bar = $Window.FindName('searchBar')
@@ -468,7 +633,7 @@ function Test-ManagerSearchAppearance($Context, $Window) {
                 }
             }
             Assert-Regression ($found) "editor renders match highlights in the $appearance theme"
-            Assert-Regression ($bar.Background.Color -eq $editor.Background.Color) "search toolbar follows the $appearance theme"
+            Assert-Regression ($bar.Background.Color -eq $bar.FindResource('SecondaryRegionBrush').Color) "search toolbar follows the $appearance theme"
         }
         $previous = $Window.FindName('findPrevious')
         $next = $Window.FindName('findNext')
@@ -1375,6 +1540,7 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $filter.Text = ''
         Test-BrowserIconStyleReuse $Context
         Test-ManagerSourceEditor $Context $window
+        Test-ManagerEditorAssistance $Context $window
         Test-ManagerFindReplace $Context $window
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] }).Count -eq 1) 'manager entry reuses a single window'
