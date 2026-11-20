@@ -24,7 +24,7 @@ function Wait-UserScriptNetworkMarker($Context, $Browser, [string]$Name, [string
     } $Name
 }
 
-function Open-UserScriptPermissions($Context, $Window, [string]$Address) {
+function Invoke-UserScriptPermissions($Context, $Window, [string]$Address, [scriptblock]$Check) {
     $menu = Open-BrowserActionsMenu $Context $Window
     $downloadLabel = $Window.FindResource('userscript_downloads')
     $downloads = $menu.Items | Where-Object { $_.Header -eq $downloadLabel } | Select-Object -First 1
@@ -32,16 +32,41 @@ function Open-UserScriptPermissions($Context, $Window, [string]$Address) {
     $item = $menu.Items[$menu.Items.IndexOf($downloads) + 1]
     Assert-Regression ($item.Header -eq $Window.FindResource('userscript_managePermissions')) 'script permissions appear directly after script downloads'
     $menu.IsOpen = $false
-    $item.RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.MenuItem]::ClickEvent)))
 
-    $findWindow = {
+    $ownerHandle = [Windows.Interop.WindowInteropHelper]::new($Window).Handle
+    $findDialog = {
         $Context.Application.Windows | Where-Object {
-            $_ -is [CefFlashBrowser.Views.UserScriptPermissionsWindow] -and $_.Owner -eq $Window -and
-            $_.FindName('pageAddress').Text -eq $Address -and $_.FindName('refreshButton').IsEnabled
+            $_ -is [CefFlashBrowser.Views.UserScriptPermissionsWindow] -and $_.IsVisible
         } | Select-Object -First 1
     }
-    Wait-Regression $Context { $null -ne (& $findWindow) } 'permissions window loads for the selected main document'
-    return (& $findWindow)
+    $state = @{ Dialog = $null; Failure = $null }
+    $inspect = [Action]({
+        try {
+            Wait-Regression $Context {
+                $state.Dialog = & $findDialog
+                $null -ne $state.Dialog -and $state.Dialog.FindName('refreshButton').IsEnabled
+            } 'permissions dialog finishes loading'
+            Assert-Regression ($state.Dialog.Owner -eq $Window -and
+                $state.Dialog.FindName('pageAddress').Text -eq $Address) 'permissions dialog belongs to the browser and shows its current page'
+            Assert-Regression (![CefFlashBrowser.Utils.Win32]::IsWindowEnabled($ownerHandle)) 'permissions dialog disables its browser window'
+            & $Check $state.Dialog
+        } catch {
+            $state.Failure = $_
+        } finally {
+            if ($null -ne $state.Dialog) { $state.Dialog.Close() }
+        }
+    }.GetNewClosure())
+    $interaction = $Window.Dispatcher.BeginInvoke([Windows.Threading.DispatcherPriority]::Background, $inspect)
+    try {
+        $item.RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.MenuItem]::ClickEvent)))
+    } finally {
+        [void]$interaction.Abort()
+        $remainingDialog = & $findDialog
+        if ($null -ne $remainingDialog) { $remainingDialog.Close() }
+    }
+    if ($null -ne $state.Failure) { throw $state.Failure }
+    Assert-Regression ($null -ne $state.Dialog -and $interaction.Status -eq 'Completed') 'permission menu action waits for the modal dialog'
+    Assert-Regression ([CefFlashBrowser.Utils.Win32]::IsWindowEnabled($ownerHandle)) 'closing permissions restores browser input'
 }
 
 function Test-UserScriptPermissions($Context, $Window, $Model, $Fixture, $Peer) {
@@ -52,67 +77,64 @@ function Test-UserScriptPermissions($Context, $Window, $Model, $Fixture, $Peer) 
     $buttonClick = [System.Windows.Controls.Button]::ClickEvent
     $service = $Context.UserScriptService
     $otherScript = Complete-UserScriptTask $Context ($service.Repository.InstallAsync($source, $null, $false, $token)) 'install second tab permissions fixture'
-    $primary = $null
-    $secondary = $null
     try {
         $scope = New-Object Mzying2001.MonkeySharp.Core.Permissions.UserScriptPermissionScope($otherScript.ScriptKey.ToString(), 'GM.xmlHttpRequest', $Fixture.BaseUrl)
         Complete-UserScriptTask $Context ($service.Decisions.SetAsync($scope, 'Deny', $token)) 'save second tab permission' | Out-Null
-        $primary = Open-UserScriptPermissions $Context $Window $currentPage
-        $primaryList = $primary.FindName('permissionList')
-        Assert-Regression ($primaryList.Items.Count -eq 3 -and @($primaryList.Items | Where-Object { $_.Record.Scope.Target -eq $Peer.BaseUrl }).Count -eq 1) 'page shows matching script decisions including cross-origin targets'
-        Assert-Regression ($primaryList.View.Columns[2].Header -eq $Window.FindResource('userscript_permissionTarget')) 'permission columns use localized labels'
+        Invoke-UserScriptPermissions $Context $Window $currentPage ({
+            param($dialog)
+            $list = $dialog.FindName('permissionList')
+            Assert-Regression ($list.Items.Count -eq 3 -and @($list.Items | Where-Object { $_.Record.Scope.Target -eq $Peer.BaseUrl }).Count -eq 1) 'page shows matching script decisions including cross-origin targets'
+            Assert-Regression ($list.View.Columns[2].Header -eq $Window.FindResource('userscript_permissionTarget')) 'permission columns use localized labels'
+
+            $list.SelectedItem = $list.Items | Where-Object {
+                $_.Record.Scope.Kind -eq 'GM.xmlHttpRequest' -and $_.Record.Scope.Target -eq $Fixture.BaseUrl
+            } | Select-Object -First 1
+            $refresh = $dialog.FindName('refreshButton')
+            $dispatch = "document.documentElement.removeAttribute('data-managed-permission'); document.dispatchEvent(new Event('xhrManagedPermission'));"
+            $requestCount = $Fixture.RequestsFor('/echo')
+            $dialog.FindName('denyButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+            Wait-Regression $Context { $refresh.IsEnabled -and $list.SelectedItem.Record.Decision -eq 'Deny' } 'denied decision saved'
+            [void](Invoke-JavaScript $Context $Model.Browser $dispatch)
+            Wait-UserScriptNetworkMarker $Context $Model.Browser 'data-managed-permission' 'MSP005_PERMISSION_DENIED'
+            Assert-Regression ($Fixture.RequestsFor('/echo') -eq $requestCount) 'changed denial applies to the next invocation'
+
+            $dialog.FindName('allowButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+            Wait-Regression $Context { $refresh.IsEnabled -and $list.SelectedItem.Record.Decision -eq 'Allow' } 'allowed decision saved'
+            [void](Invoke-JavaScript $Context $Model.Browser $dispatch)
+            Wait-UserScriptNetworkMarker $Context $Model.Browser 'data-managed-permission' 'allowed'
+            Assert-Regression ($Fixture.RequestsFor('/echo') -eq ($requestCount + 1)) 'changed allowance applies to the next invocation'
+
+            $dialog.FindName('clearButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+            Wait-Regression $Context { $refresh.IsEnabled -and $list.Items.Count -eq 2 -and $list.SelectedIndex -eq -1 } 'clear removes only the selected record'
+            [void](Invoke-JavaScript $Context $Model.Browser $dispatch)
+            $findPrompt = {
+                $Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptPermissionDialog] } | Select-Object -First 1
+            }
+            Wait-Regression $Context { $null -ne (& $findPrompt) } 'cleared permission prompts on the next invocation'
+            Assert-Regression ($Fixture.RequestsFor('/echo') -eq ($requestCount + 1)) 'the repeated prompt waits before sending the request'
+            (& $findPrompt).FindName('allowOnceButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+            Wait-UserScriptNetworkMarker $Context $Model.Browser 'data-managed-permission' 'allowed'
+            $refresh.RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+            Wait-Regression $Context { $refresh.IsEnabled -and $list.Items.Count -eq 2 } 'allow once does not create a managed record'
+        }.GetNewClosure())
 
         [void](New-RegressionTab $Context $Window $otherPage)
-        $secondary = Open-UserScriptPermissions $Context $Window $otherPage
-        $secondaryList = $secondary.FindName('permissionList')
-        Assert-Regression ($secondaryList.Items.Count -eq 1 -and $secondaryList.Items[0].ScriptName -eq 'Login permissions' -and
-            $secondaryList.Items[0].IsScriptDisabled -and $secondaryList.Items[0].Record.Decision -eq 'Deny') 'second tab shows only its matching disabled script and saved denial'
-        Assert-Regression ($primary.FindName('pageAddress').Text -eq $currentPage) 'open permission windows keep their original page'
-        $secondaryList.SelectedIndex = 0
-        Complete-UserScriptTask $Context ($service.Decisions.SetAsync($scope, 'Allow', $token)) 'change permission outside the open window' | Out-Null
-        $secondary.FindName('clearButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
-        Wait-Regression $Context {
-            $secondary.FindName('refreshButton').IsEnabled -and $secondaryList.Items.Count -eq 1 -and
-            $secondaryList.Items[0].Record.Decision -eq 'Allow' -and
-            $secondary.FindName('statusText').Text -eq $secondary.FindResource('userscript_permissionChanged')
-        } 'stale edits refresh the list and report the conflict'
-        $secondary.Close()
-        $secondary = $null
+        Invoke-UserScriptPermissions $Context $Window $otherPage ({
+            param($dialog)
+            $list = $dialog.FindName('permissionList')
+            Assert-Regression ($list.Items.Count -eq 1 -and $list.Items[0].ScriptName -eq 'Login permissions' -and
+                $list.Items[0].IsScriptDisabled -and $list.Items[0].Record.Decision -eq 'Deny') 'second tab shows only its matching disabled script and saved denial'
+            $list.SelectedIndex = 0
+            Complete-UserScriptTask $Context ($service.Decisions.SetAsync($scope, 'Allow', $token)) 'change permission outside the open window' | Out-Null
+            $dialog.FindName('clearButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
+            Wait-Regression $Context {
+                $dialog.FindName('refreshButton').IsEnabled -and $list.Items.Count -eq 1 -and
+                $list.Items[0].Record.Decision -eq 'Allow' -and
+                $dialog.FindName('statusText').Text -eq $dialog.FindResource('userscript_permissionChanged')
+            } 'stale edits refresh the list and report the conflict'
+        }.GetNewClosure())
         $Window.ViewModel.CurrentBrowser = $Model
-
-        $primaryList.SelectedItem = $primaryList.Items | Where-Object {
-            $_.Record.Scope.Kind -eq 'GM.xmlHttpRequest' -and $_.Record.Scope.Target -eq $Fixture.BaseUrl
-        } | Select-Object -First 1
-        $refresh = $primary.FindName('refreshButton')
-        $dispatch = "document.documentElement.removeAttribute('data-managed-permission'); document.dispatchEvent(new Event('xhrManagedPermission'));"
-        $requestCount = $Fixture.RequestsFor('/echo')
-        $primary.FindName('denyButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
-        Wait-Regression $Context { $refresh.IsEnabled -and $primaryList.SelectedItem.Record.Decision -eq 'Deny' } 'denied decision saved'
-        [void](Invoke-JavaScript $Context $Model.Browser $dispatch)
-        Wait-UserScriptNetworkMarker $Context $Model.Browser 'data-managed-permission' 'MSP005_PERMISSION_DENIED'
-        Assert-Regression ($Fixture.RequestsFor('/echo') -eq $requestCount) 'changed denial applies to the next invocation'
-
-        $primary.FindName('allowButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
-        Wait-Regression $Context { $refresh.IsEnabled -and $primaryList.SelectedItem.Record.Decision -eq 'Allow' } 'allowed decision saved'
-        [void](Invoke-JavaScript $Context $Model.Browser $dispatch)
-        Wait-UserScriptNetworkMarker $Context $Model.Browser 'data-managed-permission' 'allowed'
-        Assert-Regression ($Fixture.RequestsFor('/echo') -eq ($requestCount + 1)) 'changed allowance applies to the next invocation'
-
-        $primary.FindName('clearButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
-        Wait-Regression $Context { $refresh.IsEnabled -and $primaryList.Items.Count -eq 2 -and $primaryList.SelectedIndex -eq -1 } 'clear removes only the selected record'
-        [void](Invoke-JavaScript $Context $Model.Browser $dispatch)
-        $findPrompt = {
-            $Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.UserScriptPermissionDialog] } | Select-Object -First 1
-        }
-        Wait-Regression $Context { $null -ne (& $findPrompt) } 'cleared permission prompts on the next invocation'
-        Assert-Regression ($Fixture.RequestsFor('/echo') -eq ($requestCount + 1)) 'the repeated prompt waits before sending the request'
-        (& $findPrompt).FindName('allowOnceButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
-        Wait-UserScriptNetworkMarker $Context $Model.Browser 'data-managed-permission' 'allowed'
-        $refresh.RaiseEvent((New-Object System.Windows.RoutedEventArgs($buttonClick)))
-        Wait-Regression $Context { $refresh.IsEnabled -and $primaryList.Items.Count -eq 2 } 'allow once does not create a managed record'
     } finally {
-        if ($null -ne $secondary) { $secondary.Close() }
-        if ($null -ne $primary) { $primary.Close() }
         Complete-UserScriptTask $Context ($service.Repository.RemoveAsync($otherScript.ScriptKey, $token)) 'remove second tab permissions fixture' | Out-Null
     }
 }

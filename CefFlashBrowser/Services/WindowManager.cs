@@ -232,10 +232,9 @@ namespace CefFlashBrowser.Services
 
         internal static void ShowUserScriptPermissions(BrowserWindow owner, string address)
         {
-            var window = CreateWindow<UserScriptPermissionsWindow>();
-            window.Owner = owner;
-            window.SetPage(SimpleIoc.Global.GetInstance<UserScriptService>(), address);
-            window.Show();
+            var dialog = CreateWindow<UserScriptPermissionsWindow>();
+            dialog.SetPage(SimpleIoc.Global.GetInstance<UserScriptService>(), address);
+            DialogHelper.ShowModal(dialog, owner);
         }
 
         internal static bool ConfirmUserScriptInstallation(UserScriptMetadata metadata, string origin,
