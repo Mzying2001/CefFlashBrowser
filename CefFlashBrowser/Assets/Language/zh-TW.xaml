@@ -233,7 +233,7 @@
     <sys:String x:Key="userscript_downloadTimedOut">已逾時</sys:String>
     <sys:String x:Key="userscript_downloadFailed">失敗</sys:String>
 
-    <!--Userscript Manager-->
+    <!--使用者腳本管理員-->
     <sys:String x:Key="userScriptManager_title">使用者腳本管理員</sys:String>
     <sys:String x:Key="userScriptManager_noInstalledScripts">尚未安裝腳本。</sys:String>
     <sys:String x:Key="userScriptManager_noMatchingScripts">找不到相符的腳本。</sys:String>
@@ -252,8 +252,6 @@
     <sys:String x:Key="userScriptManager_aboutMonkeySharp">關於 MonkeySharp</sys:String>
     <sys:String x:Key="userScriptManager_usageGuide">使用者腳本使用指南</sys:String>
     <sys:String x:Key="userScriptManager_showDetails">檢視詳細資料</sys:String>
-    <sys:String x:Key="userScriptDetails_title">腳本詳細資料</sys:String>
-    <sys:String x:Key="userScriptDetails_unknownMetadata">未知中繼資料</sys:String>
     <sys:String x:Key="userScriptManager_reload">從磁碟重新載入</sys:String>
     <sys:String x:Key="userScriptManager_confirmDelete">是否刪除腳本「{0}」？</sys:String>
     <sys:String x:Key="userScriptManager_saved">已儲存。重新整理網頁後生效。</sys:String>
@@ -269,11 +267,29 @@
     <sys:String x:Key="userScriptManager_javaScriptFile">JavaScript 檔案</sys:String>
     <sys:String x:Key="userScriptManager_userScriptFile">使用者腳本</sys:String>
     <sys:String x:Key="userScriptManager_confirmInstall">是否安裝以下腳本？</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">「{0}」已是最新版本。</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">無法檢查「{0}」的更新。指令碼未設定更新或已停用更新。</sys:String>
+    <sys:String x:Key="userScriptManager_reviewInstall">原始碼已載入，尚未安裝。檢查後選擇「安裝目前草稿」或儲存。</sys:String>
+    <sys:String x:Key="userScriptManager_invalidMetadata">使用者腳本中繼資料無效，請檢查標頭宣告後重試。</sys:String>
+    <sys:String x:Key="userScriptManager_invalidUrl">請輸入有效的 HTTP 或 HTTPS 網址。</sys:String>
+    <sys:String x:Key="userScriptManager_exported">原始碼已匯出。</sys:String>
+    <sys:String x:Key="userScriptManager_match">比對範圍</sys:String>
+    <sys:String x:Key="userScriptManager_world">執行環境</sys:String>
+    <sys:String x:Key="userScriptManager_grants">宣告權限</sys:String>
+    <sys:String x:Key="userScriptManager_load">載入</sys:String>
+    <sys:String x:Key="userScriptManager_toggle">啟用或停用腳本</sys:String>
+    <sys:String x:Key="userScriptManager_draft">未安裝草稿</sys:String>
+    <sys:String x:Key="userScriptManager_unavailable">不可用</sys:String>
+    <sys:String x:Key="userScriptDetails_title">腳本詳細資料</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">未知中繼資料</sys:String>
     <sys:String x:Key="userScriptInstall_install">安裝</sys:String>
     <sys:String x:Key="userScriptInstall_confirmUpdate">是否更新以下腳本？</sys:String>
     <sys:String x:Key="userScriptInstall_update">更新</sys:String>
-    <sys:String x:Key="userScriptManager_upToDate">「{0}」已是最新版本。</sys:String>
-    <sys:String x:Key="userScriptManager_updateUnavailable">無法檢查「{0}」的更新。指令碼未設定更新或已停用更新。</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">無法下載使用者腳本。</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">無法儲存使用者腳本。</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">此來源對應多筆安裝記錄，或已安裝的腳本發生了變更。請在使用者腳本管理員中檢查後再試。</sys:String>
+    <sys:String x:Key="userScriptInstall_author">作者</sys:String>
+    <sys:String x:Key="userScriptInstall_source">來源</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_menu">批次更新…</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_title">批次更新指令碼</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_currentVersion">目前版本</sys:String>
@@ -289,22 +305,6 @@
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">是否更新下列指令碼？</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">未儲存的變更將被覆寫。</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">更新成功 {0} 個，失敗 {1} 個。</sys:String>
-    <sys:String x:Key="userScriptInstall_downloadFailed">無法下載使用者腳本。</sys:String>
-    <sys:String x:Key="userScriptInstall_saveFailed">無法儲存使用者腳本。</sys:String>
-    <sys:String x:Key="userScriptInstall_conflict">此來源對應多筆安裝記錄，或已安裝的腳本發生了變更。請在使用者腳本管理員中檢查後再試。</sys:String>
-    <sys:String x:Key="userScriptInstall_author">作者</sys:String>
-    <sys:String x:Key="userScriptInstall_source">來源</sys:String>
-    <sys:String x:Key="userScriptManager_reviewInstall">原始碼已載入，尚未安裝。檢查後選擇「安裝目前草稿」或儲存。</sys:String>
-    <sys:String x:Key="userScriptManager_invalidMetadata">使用者腳本中繼資料無效，請檢查標頭宣告後重試。</sys:String>
-    <sys:String x:Key="userScriptManager_invalidUrl">請輸入有效的 HTTP 或 HTTPS 網址。</sys:String>
-    <sys:String x:Key="userScriptManager_exported">原始碼已匯出。</sys:String>
-    <sys:String x:Key="userScriptManager_match">比對範圍</sys:String>
-    <sys:String x:Key="userScriptManager_world">執行環境</sys:String>
-    <sys:String x:Key="userScriptManager_grants">宣告權限</sys:String>
-    <sys:String x:Key="userScriptManager_load">載入</sys:String>
-    <sys:String x:Key="userScriptManager_toggle">啟用或停用腳本</sys:String>
-    <sys:String x:Key="userScriptManager_draft">未安裝草稿</sys:String>
-    <sys:String x:Key="userScriptManager_unavailable">不可用</sys:String>
 
     <!--提示訊息-->
     <sys:String x:Key="message_emptyUrl">請輸入網址。</sys:String>
