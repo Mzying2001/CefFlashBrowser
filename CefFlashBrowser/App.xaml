@@ -44,7 +44,8 @@
                 <TextBlock Text="{Binding}"
                            MaxWidth="200"
                            TextWrapping="NoWrap"
-                           TextTrimming="CharacterEllipsis"/>
+                           TextTrimming="CharacterEllipsis"
+                           HorizontalAlignment="Left"/>
             </DataTemplate>
 
 
