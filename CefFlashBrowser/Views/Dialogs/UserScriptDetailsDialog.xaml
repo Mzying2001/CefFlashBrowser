@@ -20,18 +20,21 @@
                     <ColumnDefinition Width="144"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Margin="0,0,12,0"
-                           Foreground="{DynamicResource SecondaryTextBrush}"
-                           TextWrapping="Wrap"
-                           Text="{Binding Key, Mode=OneWay}"/>
-                <TextBox Grid.Column="1"
-                         Padding="0"
-                         BorderThickness="0"
-                         Background="Transparent"
-                         Foreground="{DynamicResource PrimaryTextBrush}"
-                         IsReadOnly="True"
-                         TextWrapping="Wrap"
-                         Text="{Binding Value, Mode=OneWay}"/>
+                <TextBlock
+                    Margin="0,0,12,0"
+                    Foreground="{DynamicResource SecondaryTextBrush}"
+                    TextWrapping="Wrap"
+                    Text="{Binding Key, Mode=OneWay}"/>
+                <TextBox
+                    Grid.Column="1"
+                    Style="{x:Null}"
+                    Padding="0"
+                    BorderThickness="0"
+                    Background="Transparent"
+                    Foreground="{DynamicResource PrimaryTextBrush}"
+                    IsReadOnly="True"
+                    TextWrapping="Wrap"
+                    Text="{Binding Value, Mode=OneWay}"/>
             </Grid>
         </DataTemplate>
     </Window.Resources>

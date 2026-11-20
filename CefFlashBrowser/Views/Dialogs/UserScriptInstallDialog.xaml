@@ -126,7 +126,7 @@
                         <TextBlock x:Name="scriptAuthor" Grid.Column="1" Style="{StaticResource DetailValue}"/>
 
                         <TextBlock Grid.Row="1" Style="{StaticResource DetailLabel}" Text="{DynamicResource userScriptInstall_source}"/>
-                        <TextBox x:Name="scriptOrigin" Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" Padding="0" BorderThickness="0"
+                        <TextBox x:Name="scriptOrigin" Style="{x:Null}" Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" Padding="0" BorderThickness="0"
                                  IsReadOnly="True" TextWrapping="Wrap" Background="Transparent" Foreground="{DynamicResource PrimaryTextBrush}"/>
 
                         <TextBlock x:Name="matchesLabel" Grid.Row="2" Style="{StaticResource DetailLabel}" Text="{DynamicResource userScriptManager_match}"/>
