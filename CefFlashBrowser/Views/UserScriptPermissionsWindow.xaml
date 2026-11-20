@@ -67,7 +67,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="145" Header="API" DisplayMemberBinding="{Binding Record.Scope.Kind}"/>
+                    <GridViewColumn Width="150" Header="API" DisplayMemberBinding="{Binding Record.Scope.Kind}"/>
                     <GridViewColumn Width="250" Header="{DynamicResource userscript_permissionTarget}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -76,7 +76,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="105" Header="{DynamicResource userscript_permissionDecision}">
+                    <GridViewColumn Width="80" Header="{DynamicResource userscript_permissionDecision}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock>
