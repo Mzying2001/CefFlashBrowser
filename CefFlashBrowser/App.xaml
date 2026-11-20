@@ -39,8 +39,8 @@
             </Style>
 
 
-            <!--Trim long userscript context menu headers-->
-            <DataTemplate x:Key="UserScriptContextMenuHeaderTemplate">
+            <!--Trim long context menu headers-->
+            <DataTemplate x:Key="TrimmedContextMenuHeaderTemplate">
                 <TextBlock Text="{Binding}"
                            MaxWidth="200"
                            TextWrapping="NoWrap"

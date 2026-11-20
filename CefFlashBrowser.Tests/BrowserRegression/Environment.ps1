@@ -259,7 +259,7 @@ function Initialize-RegressionEnvironment($Context) {
     $namespaces = [Xml.XmlNamespaceManager]::new($appXaml.NameTable)
     $namespaces.AddNamespace('wpf', $appXaml.DocumentElement.NamespaceURI)
     $namespaces.AddNamespace('x', 'http://schemas.microsoft.com/winfx/2006/xaml')
-    $headerKey = 'UserScriptContextMenuHeaderTemplate'
+    $headerKey = 'TrimmedContextMenuHeaderTemplate'
     $headerTemplate = $appXaml.SelectSingleNode("//wpf:DataTemplate[@x:Key='$headerKey']", $namespaces)
     $Context.Application.Resources.Add($headerKey, [System.Windows.Markup.XamlReader]::Parse($headerTemplate.OuterXml))
 

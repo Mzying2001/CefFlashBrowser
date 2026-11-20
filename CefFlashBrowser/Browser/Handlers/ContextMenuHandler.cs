@@ -36,24 +36,22 @@ namespace CefFlashBrowser.Browser.Handlers
             {
                 model.Clear();
                 LastMenuItemCount = 0;
-
                 return;
             }
 
             int count = 0;
+            var selectionText = parameters.SelectionText;
 
-            if (!string.IsNullOrWhiteSpace(parameters.SelectionText))
+            if (!string.IsNullOrWhiteSpace(selectionText))
             {
-                var selectionText = parameters.SelectionText;
-                var truncatedText = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
-
-                var header = LanguageService.GetFormattedString("browser_searchFor", truncatedText.Replace('\n', ' '));
+                var displayText = ReplaceLineBreaksWithSpaces(selectionText);
+                var header = LanguageService.GetFormattedString("browser_searchFor", displayText);
                 model.InsertItemAt(0, Search, header);
                 count++;
 
                 if (UrlHelper.IsUrl(selectionText))
                 {
-                    header = LanguageService.GetFormattedString("browser_openSelectedUrl", truncatedText);
+                    header = LanguageService.GetFormattedString("browser_openSelectedUrl", displayText);
                     model.InsertCheckItemAt(0, OpenSelectedUrl, header);
                     count++;
                 }
@@ -205,8 +203,8 @@ namespace CefFlashBrowser.Browser.Handlers
                     ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback)
                 };
 
-                if (item.IsUserScript)
-                    menuItem.SetResourceReference(MenuItem.HeaderTemplateProperty, "UserScriptContextMenuHeaderTemplate");
+                if (item.IsUserScript || item.CommandID == Search || item.CommandID == OpenSelectedUrl)
+                    menuItem.SetResourceReference(MenuItem.HeaderTemplateProperty, "TrimmedContextMenuHeaderTemplate");
 
                 yield return menuItem;
             }
@@ -250,6 +248,11 @@ namespace CefFlashBrowser.Browser.Handlers
                 Height = size,
                 UriSource = (Uri)Application.Current.FindResource(resourceKey)
             };
+        }
+
+        private static string ReplaceLineBreaksWithSpaces(string text)
+        {
+            return text.Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ');
         }
 
         private static string GetHeader(CefMenuItemInfo menuItemInfo)

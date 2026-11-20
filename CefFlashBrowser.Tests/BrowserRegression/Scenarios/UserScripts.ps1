@@ -454,18 +454,6 @@ function Test-UserScriptTabs($Context) {
     }
 }
 
-function Assert-UserScriptContextMenuHeader($Context, $Item, [string]$Title, [bool]$ShouldTrim, [string]$Surface) {
-    Wait-Regression $Context { $Item.IsLoaded -and $Item.ActualWidth -gt 0 } "$Surface is laid out"
-    $header = @(Find-FaviconElements $Item ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -ceq $Title })[0]
-    Assert-Regression ($Item.Header -ceq $Title -and $null -ne $header -and $header.MaxWidth -eq 200 -and
-        $header.ActualWidth -le 200 -and $header.TextWrapping -eq 'NoWrap' -and $header.TextTrimming -eq 'CharacterEllipsis') "$Surface keeps the full header and limits the displayed text to 200"
-    $typeface = [Windows.Media.Typeface]::new($header.FontFamily, $header.FontStyle, $header.FontWeight, $header.FontStretch)
-    $formatted = [Windows.Media.FormattedText]::new($Title, [Globalization.CultureInfo]::CurrentUICulture,
-        $header.FlowDirection, $typeface, $header.FontSize, $header.Foreground,
-        [Windows.Media.VisualTreeHelper]::GetDpi($header).PixelsPerDip)
-    Assert-Regression (($formatted.Width -gt ($header.ActualWidth + 1)) -eq $ShouldTrim) "$Surface trims only overflowing text"
-}
-
 function Test-UserScriptMenus($Context) {
     Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'menu runtime'
     $repository = $Context.UserScriptService.Repository
@@ -547,9 +535,9 @@ function Test-UserScriptMenus($Context) {
             $newTab = $rendered.Items[$menu.Commands.IndexOf([CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::OpenInNewTab)]
             Assert-Regression ($newTab.Icon -is [SharpVectors.Converters.SvgIcon] -and
                 $newTab.ReadLocalValue([Windows.Controls.MenuItem]::HeaderTemplateProperty) -eq [Windows.DependencyProperty]::UnsetValue) 'built-in new-tab command retains its SVG icon and default header style'
-            Assert-UserScriptContextMenuHeader $Context $rendered.Items[$manualIndex] 'Manual 0' $false 'short manual script title'
+            Assert-TrimmedContextMenuHeader $Context $rendered.Items[$manualIndex] 'Manual 0' $false 'short manual script title'
             $parent.IsSubmenuOpen = $true
-            Assert-UserScriptContextMenuHeader $Context $parent.Items[1] $frameCommandName $true 'long GM child title'
+            Assert-TrimmedContextMenuHeader $Context $parent.Items[1] $frameCommandName $true 'long GM child title'
             $parent.IsSubmenuOpen = $false
         } finally {
             $rendered.IsOpen = $false
@@ -860,8 +848,8 @@ function Test-UserScriptContextMenuIcons($Context, $Model, $Repository, $IconFix
             $icon = $direct[0].Icon
             [void]$icon.ApplyTemplate()
             if ($expected.ManualUrl -eq '/a-icon.png') {
-                Assert-UserScriptContextMenuHeader $Context $direct[0] $scriptName $true 'long manual script title'
-                Assert-UserScriptContextMenuHeader $Context $groups[0] $scriptName $true 'long GM group title'
+                Assert-TrimmedContextMenuHeader $Context $direct[0] $scriptName $true 'long manual script title'
+                Assert-TrimmedContextMenuHeader $Context $groups[0] $scriptName $true 'long GM group title'
                 Wait-Regression $Context {
                     $image = $icon.Template.FindName('favicon', $icon)
                     $null -ne $image.Source -and !$image.Source.IsDownloading -and !$icon.HasImageFailed

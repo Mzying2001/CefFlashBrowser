@@ -3,7 +3,7 @@ function Test-ContextMenuRouting($Context) {
     $savedEngine = [CefFlashBrowser.Data.GlobalData]::Settings.SearchEngine
     try {
         [CefFlashBrowser.Data.GlobalData]::Settings.SearchEngine = [CefFlashBrowser.Models.SearchEngine]::DuckDuckGo
-        $selection = 'context menu & + search'
+        $selection = "context menu & + search with a long selection`r`nand a second line"
         $searchUrl = [CefFlashBrowser.Utils.UrlHelper]::GetSearchUrl(
             [CefFlashBrowser.Data.GlobalData]::Settings.SearchEngine, $selection)
         foreach ($behavior in [Enum]::GetValues([CefFlashBrowser.Models.NewPageBehavior])) {
@@ -111,6 +111,57 @@ function Test-ContextMenuItems($Context) {
     }
 }
 
+function Assert-TrimmedContextMenuHeader($Context, $Item, [string]$Title, [bool]$ShouldTrim, [string]$Surface) {
+    Wait-Regression $Context { $Item.IsLoaded -and $Item.ActualWidth -gt 0 } "$Surface is laid out"
+    $header = @(Find-FaviconElements $Item ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -ceq $Title })[0]
+    Assert-Regression ($Item.Header -ceq $Title -and $null -ne $header -and $header.MaxWidth -eq 200 -and
+        $header.ActualWidth -le 200 -and $header.TextWrapping -eq 'NoWrap' -and $header.TextTrimming -eq 'CharacterEllipsis') "$Surface keeps the full header and limits the displayed text to 200"
+    $typeface = [Windows.Media.Typeface]::new($header.FontFamily, $header.FontStyle, $header.FontWeight, $header.FontStretch)
+    $formatted = [Windows.Media.FormattedText]::new($Title, [Globalization.CultureInfo]::CurrentUICulture,
+        $header.FlowDirection, $typeface, $header.FontSize, $header.Foreground,
+        [Windows.Media.VisualTreeHelper]::GetDpi($header).PixelsPerDip)
+    Assert-Regression (($formatted.Width -gt ($header.ActualWidth + 1)) -eq $ShouldTrim) "$Surface trims only overflowing text"
+}
+
+function Test-ContextMenuSelectionHeaders($Context) {
+    $savedDisabled = [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu
+    $window = New-RegressionWindow $Context
+    try {
+        [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $false
+        $browser = $window.ViewModel.CurrentBrowser.Browser
+        $handler = New-Object CefFlashBrowser.Browser.Handlers.ContextMenuHandler
+        $search = [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::Search
+        $openSelectedUrl = [CefFlashBrowser.Browser.Handlers.ContextMenuHandler]::OpenSelectedUrl
+        $shortUrl = 'https://x.io'
+        $longUrl = 'https://example.com/a/long/path/that/exceeds/the/width/of/the/context/menu'
+        $firstLine = 'A long selection from the browser context menu'
+        foreach ($scenario in @(
+            @{ Command = $search; Text = 'text'; DisplayText = 'text'; ShouldTrim = $false },
+            @{ Command = $search; Text = "$firstLine`r`nsecond line`rthird line`nfourth line"; DisplayText = "$firstLine second line third line fourth line"; ShouldTrim = $true },
+            @{ Command = $openSelectedUrl; Text = $shortUrl; DisplayText = $shortUrl; ShouldTrim = $false },
+            @{ Command = $openSelectedUrl; Text = $longUrl; DisplayText = $longUrl; ShouldTrim = $true }
+        )) {
+            $parameters = New-Object RegressionContextMenuParamsProxy
+            $parameters.SelectionText = $scenario.Text
+            $menu = New-Object RegressionMenuModelProxy
+            $handler.OnBeforeContextMenu($null, $null, $null, $parameters.GetTransparentProxy(), $menu.GetTransparentProxy())
+            $index = $menu.Commands.IndexOf($scenario.Command)
+            $titleKey = if ($scenario.Command -eq $search) { 'browser_searchFor' } else { 'browser_openSelectedUrl' }
+            $title = $Context.LanguageService.GetFormattedString($titleKey, @($scenario.DisplayText))
+            Assert-Regression ($index -ge 0 -and $menu.Labels[$index] -ceq $title) "$titleKey menu model keeps the complete single-line title"
+            $rendered = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RenderAsync($browser, $menu)) "render $titleKey menu"
+            try {
+                Assert-TrimmedContextMenuHeader $Context $rendered.Items[$index] $title $scenario.ShouldTrim "$titleKey menu title"
+            } finally {
+                $rendered.IsOpen = $false
+            }
+        }
+    } finally {
+        $window.ForceCloseWindow()
+        [CefFlashBrowser.Data.GlobalData]::Settings.DisableBrowserContextMenu = $savedDisabled
+    }
+}
+
 function Test-AuxiliaryContextMenu($Context) {
     $savedBehavior = [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior
     try {
@@ -150,5 +201,6 @@ function Test-AuxiliaryContextMenu($Context) {
 function Test-ContextMenu($Context) {
     Test-ContextMenuRouting $Context
     Test-ContextMenuItems $Context
+    Test-ContextMenuSelectionHeaders $Context
     Test-AuxiliaryContextMenu $Context
 }
