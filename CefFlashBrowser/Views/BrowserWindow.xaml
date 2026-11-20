@@ -303,7 +303,7 @@
             <MenuItem Header="{DynamicResource browser_openInDefaultBrowser}"
                       Command="{Binding OpenInDefaultBrowserCommand}"
                       CommandParameter="{Binding CurrentBrowser.Address}"
-                      InputGestureText="Ctrl+O"/>
+                      InputGestureText="Ctrl+Shift+O"/>
 
             <Separator/>
 
@@ -499,7 +499,7 @@
                     Command="{Binding SelectNextBrowserCommand}"/>
         <KeyBinding Gesture="Ctrl+PageUp"
                     Command="{Binding SelectPreviousBrowserCommand}"/>
-        <KeyBinding Gesture="Ctrl+O"
+        <KeyBinding Gesture="Ctrl+Shift+O"
                     Command="{Binding OpenInDefaultBrowserCommand}"
                     CommandParameter="{Binding CurrentBrowser.Address}"/>
         <KeyBinding Gesture="Ctrl+P"
