@@ -1084,6 +1084,7 @@ document.documentElement.setAttribute('data-web-install', 'ready');
 function Test-ManagerListFilter($Context, $Window, $Item) {
     $model = $Window.DataContext
     $list = $Window.FindName('scriptList')
+    $emptyMessage = $Window.FindName('scriptListEmptyMessage')
     $filter = $Window.FindName('scriptFilter')
     $source = $Item.Source
     $drafts = @()
@@ -1096,8 +1097,11 @@ function Test-ManagerListFilter($Context, $Window, $Item) {
         $filter.Text = '1.0.0'
         Assert-Regression ($list.Items.Count -eq 0 -and $null -eq $model.SelectedScript -and
             $Item.Source -ceq $editedSource) 'a version-only query hides the script and preserves its unsaved source'
+        Assert-Regression ($emptyMessage.IsVisible -and $emptyMessage.Text -ceq
+            $Context.LanguageService.GetString('userScriptManager_noMatchingScripts')) 'a filter with no results shows the matching-script message'
         $filter.Text = '   '
         Assert-Regression ($list.Items.Count -eq $model.Scripts.Count -and $model.IsReorderingEnabled) 'whitespace shows the complete list and permits reordering'
+        Assert-Regression (!$emptyMessage.IsVisible) 'clearing the filter hides the empty-list message'
         $filter.Text = 'workflow'
         $model.SelectedScript = $Item
         $Item.Source = $source.Replace('Manager workflow', 'Renamed filter fixture')
@@ -1349,6 +1353,26 @@ document.documentElement.setAttribute('data-manager', 'saved');
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] })[0]
         Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager initialized'
+        $list = $window.FindName('scriptList')
+        $filter = $window.FindName('scriptFilter')
+        $emptyMessage = $window.FindName('scriptListEmptyMessage')
+        $window.UpdateLayout()
+        $messageOrigin = $emptyMessage.TranslatePoint([Windows.Point]::new(0, 0), $list)
+        Assert-Regression ($emptyMessage.IsVisible -and
+            [Math]::Abs($messageOrigin.X + ($emptyMessage.ActualWidth - $list.ActualWidth) / 2) -lt 1 -and
+            [Math]::Abs($messageOrigin.Y + ($emptyMessage.ActualHeight - $list.ActualHeight) / 2) -lt 1) 'the empty-list message is centered in the script list'
+        $noInstalledScripts = $Context.LanguageService.GetString('userScriptManager_noInstalledScripts')
+        Assert-Regression ($emptyMessage.Text -ceq $noInstalledScripts) 'an empty manager shows the no-installed-scripts message'
+        $filter.Text = 'missing script'
+        Assert-Regression ($emptyMessage.IsVisible -and $emptyMessage.Text -ceq $noInstalledScripts) 'filtering an empty manager keeps the no-installed-scripts message'
+        $nextLanguage = if ($language -eq 'en-US') { 'zh-CN' } else { 'en-US' }
+        $Context.LanguageService.SetCurrentLanguage($nextLanguage)
+        Wait-Regression $Context {
+            $emptyMessage.Text -cne $noInstalledScripts -and $emptyMessage.Text -ceq
+            $Context.LanguageService.GetString('userScriptManager_noInstalledScripts')
+        } 'the visible empty-list message follows language changes'
+        $Context.LanguageService.SetCurrentLanguage($language)
+        $filter.Text = ''
         Test-BrowserIconStyleReuse $Context
         Test-ManagerSourceEditor $Context $window
         Test-ManagerFindReplace $Context $window
@@ -1358,6 +1382,8 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Assert-Regression (($gestures -join ',') -eq 'Ctrl+N,Ctrl+S,Ctrl+W,Ctrl+F,Ctrl+H') 'manager exposes new, save, close, find and replace keyboard bindings'
         Invoke-BrowserCommand $model.NewCommand $null
         $item = $model.SelectedScript
+        Assert-Regression ($list.Items.Contains($item) -and !$item.IsInstalled -and
+            !$emptyMessage.IsVisible) 'a visible draft hides the empty-list message'
         $editor = $window.FindName('sourceEditor')
         Test-ManagerStatusLine $Context $window
         $editor.SelectAll()

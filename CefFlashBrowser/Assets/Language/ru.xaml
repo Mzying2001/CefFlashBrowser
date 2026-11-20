@@ -242,6 +242,8 @@
 
     <!--Userscript Manager-->
     <sys:String x:Key="userScriptManager_title">Диспетчер пользовательских скриптов</sys:String>
+    <sys:String x:Key="userScriptManager_noInstalledScripts">Нет установленных скриптов.</sys:String>
+    <sys:String x:Key="userScriptManager_noMatchingScripts">Подходящие скрипты не найдены.</sys:String>
     <sys:String x:Key="userScriptManager_new">Новый скрипт</sys:String>
     <sys:String x:Key="userScriptManager_newScript">Новый скрипт</sys:String>
     <sys:String x:Key="userScriptManager_undo">Отменить</sys:String>

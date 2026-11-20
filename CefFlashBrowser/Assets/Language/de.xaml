@@ -242,6 +242,8 @@
 
     <!--Userscript Manager-->
     <sys:String x:Key="userScriptManager_title">Benutzerskriptverwaltung</sys:String>
+    <sys:String x:Key="userScriptManager_noInstalledScripts">Keine Skripte installiert.</sys:String>
+    <sys:String x:Key="userScriptManager_noMatchingScripts">Keine passenden Skripte gefunden.</sys:String>
     <sys:String x:Key="userScriptManager_new">Neues Skript</sys:String>
     <sys:String x:Key="userScriptManager_newScript">Neues Skript</sys:String>
     <sys:String x:Key="userScriptManager_undo">Rückgängig</sys:String>

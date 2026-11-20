@@ -242,6 +242,8 @@
 
     <!--Userscript Manager-->
     <sys:String x:Key="userScriptManager_title">사용자 스크립트 관리자</sys:String>
+    <sys:String x:Key="userScriptManager_noInstalledScripts">설치된 스크립트가 없습니다.</sys:String>
+    <sys:String x:Key="userScriptManager_noMatchingScripts">일치하는 스크립트가 없습니다.</sys:String>
     <sys:String x:Key="userScriptManager_new">새 스크립트</sys:String>
     <sys:String x:Key="userScriptManager_newScript">새 스크립트</sys:String>
     <sys:String x:Key="userScriptManager_undo">실행 취소</sys:String>

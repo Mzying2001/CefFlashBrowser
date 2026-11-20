@@ -242,6 +242,8 @@
 
     <!--Userscript Manager-->
     <sys:String x:Key="userScriptManager_title">Gestione script utente</sys:String>
+    <sys:String x:Key="userScriptManager_noInstalledScripts">Nessuno script installato.</sys:String>
+    <sys:String x:Key="userScriptManager_noMatchingScripts">Nessuno script corrispondente.</sys:String>
     <sys:String x:Key="userScriptManager_new">Nuovo script</sys:String>
     <sys:String x:Key="userScriptManager_newScript">Nuovo script</sys:String>
     <sys:String x:Key="userScriptManager_undo">Annulla</sys:String>

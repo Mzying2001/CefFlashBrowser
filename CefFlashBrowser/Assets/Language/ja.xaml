@@ -242,6 +242,8 @@
 
     <!--Userscript Manager-->
     <sys:String x:Key="userScriptManager_title">ユーザースクリプトマネージャー</sys:String>
+    <sys:String x:Key="userScriptManager_noInstalledScripts">インストール済みのスクリプトはありません。</sys:String>
+    <sys:String x:Key="userScriptManager_noMatchingScripts">一致するスクリプトが見つかりませんでした。</sys:String>
     <sys:String x:Key="userScriptManager_new">新規スクリプト</sys:String>
     <sys:String x:Key="userScriptManager_newScript">新しいスクリプト</sys:String>
     <sys:String x:Key="userScriptManager_undo">元に戻す</sys:String>

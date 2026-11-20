@@ -337,6 +337,35 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
+            <TextBlock x:Name="scriptListEmptyMessage"
+                       Grid.Row="1"
+                       Margin="10"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       IsHitTestVisible="False">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Setter Property="Text" Value="{DynamicResource userScriptManager_noMatchingScripts}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Scripts.Count}" Value="0">
+                                <Setter Property="Text" Value="{DynamicResource userScriptManager_noInstalledScripts}"/>
+                            </DataTrigger>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding ElementName=scriptList, Path=HasItems}" Value="False"/>
+                                    <Condition Binding="{Binding IsBusy}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
             <GridSplitter Grid.Column="1"
                           Grid.RowSpan="2"
                           Width="10"

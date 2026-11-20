@@ -242,6 +242,8 @@
 
     <!--Userscript Manager-->
     <sys:String x:Key="userScriptManager_title">用户脚本管理器</sys:String>
+    <sys:String x:Key="userScriptManager_noInstalledScripts">尚未安装脚本。</sys:String>
+    <sys:String x:Key="userScriptManager_noMatchingScripts">没有找到匹配的脚本。</sys:String>
     <sys:String x:Key="userScriptManager_new">新建脚本</sys:String>
     <sys:String x:Key="userScriptManager_newScript">新脚本</sys:String>
     <sys:String x:Key="userScriptManager_undo">撤销</sys:String>
