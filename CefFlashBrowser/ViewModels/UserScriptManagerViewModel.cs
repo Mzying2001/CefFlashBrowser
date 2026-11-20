@@ -161,22 +161,22 @@ namespace CefFlashBrowser.ViewModels
             Scripts = new ObservableCollection<UserScriptItemViewModel>();
             Scripts.CollectionChanged += (_, __) => UpdateMoveCommands();
 
-            LoadUrlCommand = new DelegateCommand(async () => await ImportUrlAsync(InstallUrl)) { CanExecuteFunc = _ => !IsBusy && _repository != null };
-            ShowUrlCommand = new DelegateCommand(() => ShowUrlInput = true) { CanExecuteFunc = _ => !IsBusy };
+            LoadUrlCommand = new DelegateCommand(async () => await ImportUrlAsync(InstallUrl)) { CanExecuteFunc = CanLoadUrl };
+            ShowUrlCommand = new DelegateCommand(() => ShowUrlInput = true) { CanExecuteFunc = CanStartNewScript };
             HideUrlCommand = new DelegateCommand(() => ShowUrlInput = false);
-            NewCommand = new DelegateCommand(NewScript) { CanExecuteFunc = _ => !IsBusy };
-            InstallCommand = new DelegateCommand(async () => await SaveAsync()) { CanExecuteFunc = _ => CanEdit() && !SelectedScript.IsInstalled };
-            SaveCommand = new DelegateCommand(async () => await SaveAsync()) { CanExecuteFunc = _ => CanEdit() };
-            ToggleCommand = new DelegateCommand<UserScriptItemViewModel>(async item => await ToggleAsync(item)) { CanExecuteFunc = item => !IsBusy && _repository != null && (item as UserScriptItemViewModel)?.IsInstalled == true };
-            DeleteCommand = new DelegateCommand(async () => await DeleteAsync()) { CanExecuteFunc = _ => CanEdit() };
-            ShowDetailsCommand = new DelegateCommand<UserScriptItemViewModel>(item => ShowDetails?.Invoke(item)) { CanExecuteFunc = item => !IsBusy && item is UserScriptItemViewModel };
+            NewCommand = new DelegateCommand(NewScript) { CanExecuteFunc = CanStartNewScript };
+            InstallCommand = new DelegateCommand(async () => await SaveAsync()) { CanExecuteFunc = CanInstall };
+            SaveCommand = new DelegateCommand(async () => await SaveAsync()) { CanExecuteFunc = CanEdit };
+            ToggleCommand = new DelegateCommand<UserScriptItemViewModel>(async item => await ToggleAsync(item)) { CanExecuteFunc = CanToggle };
+            DeleteCommand = new DelegateCommand(async () => await DeleteAsync()) { CanExecuteFunc = CanEdit };
+            ShowDetailsCommand = new DelegateCommand<UserScriptItemViewModel>(item => ShowDetails?.Invoke(item)) { CanExecuteFunc = CanShowDetails };
             MoveUpCommand = CreateMoveCommand(UserScriptMove.Up);
             MoveDownCommand = CreateMoveCommand(UserScriptMove.Down);
             MoveToFirstCommand = CreateMoveCommand(UserScriptMove.First);
             MoveToLastCommand = CreateMoveCommand(UserScriptMove.Last);
-            CanReorderItem = item => item is UserScriptItemViewModel script && CanDragScript(script);
+            CanReorderItem = CanDragItem;
             ReorderCommand = new DelegateCommand<ListReorderRequest>(ExecuteReorder) { CanExecuteFunc = CanExecuteReorder };
-            ReloadCommand = new DelegateCommand(async () => await ReloadAsync()) { CanExecuteFunc = _ => CanEdit() && SelectedScript.IsInstalled };
+            ReloadCommand = new DelegateCommand(async () => await ReloadAsync()) { CanExecuteFunc = CanReload };
         }
 
         public async Task OpenAsync()
@@ -521,8 +521,10 @@ namespace CefFlashBrowser.ViewModels
         {
             return new DelegateCommand(async () => await MoveAsync(SelectedScript, move))
             {
-                CanExecuteFunc = _ => CanMove(SelectedScript, move)
+                CanExecuteFunc = CanExecuteMove
             };
+
+            bool CanExecuteMove(object _) => CanMove(SelectedScript, move);
         }
 
         private bool CanMove(UserScriptItemViewModel item, UserScriptMove move)
@@ -542,6 +544,9 @@ namespace CefFlashBrowser.ViewModels
 
         internal bool CanDragScript(UserScriptItemViewModel item)
             => CanMove(item, UserScriptMove.Up) || CanMove(item, UserScriptMove.Down);
+
+        private bool CanDragItem(object item)
+            => item is UserScriptItemViewModel script && CanDragScript(script);
 
         private bool CanExecuteReorder(object value)
         {
@@ -755,10 +760,20 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private bool CanEdit()
-        {
-            return !IsBusy && _repository != null && SelectedScript != null;
-        }
+        private bool CanStartNewScript(object _) => !IsBusy;
+
+        private bool CanLoadUrl(object _) => !IsBusy && _repository != null;
+
+        private bool CanEdit(object _) => !IsBusy && _repository != null && SelectedScript != null;
+
+        private bool CanInstall(object parameter) => CanEdit(parameter) && !SelectedScript.IsInstalled;
+
+        private bool CanToggle(object item)
+            => !IsBusy && _repository != null && (item as UserScriptItemViewModel)?.IsInstalled == true;
+
+        private bool CanShowDetails(object item) => !IsBusy && item is UserScriptItemViewModel;
+
+        private bool CanReload(object parameter) => CanEdit(parameter) && SelectedScript.IsInstalled;
 
         private void UpdateMoveCommands()
         {
