@@ -18,10 +18,17 @@ namespace CefFlashBrowser.Services
             "anonymous, overwrite, is_local_body, body_path, etag, last_modified, encoded, received, total, " +
             "state, error, created_at, finished_at";
 
-        private const string InsertDownloadSql = "INSERT INTO downloads (" + DownloadColumns + ") VALUES (" +
+        private const string UpsertDownloadSql = "INSERT INTO downloads (" + DownloadColumns + ") VALUES (" +
             "@id, @url, @file_name, @file_path, @partial_path, @source, @source_page, @method, @protected_headers, " +
             "@anonymous, @overwrite, @is_local_body, @body_path, @etag, @last_modified, @encoded, @received, @total, " +
-            "@state, @error, @created_at, @finished_at)";
+            "@state, @error, @created_at, @finished_at) " +
+            "ON CONFLICT(id) DO UPDATE SET url = excluded.url, file_name = excluded.file_name, " +
+            "file_path = excluded.file_path, partial_path = excluded.partial_path, source = excluded.source, " +
+            "source_page = excluded.source_page, method = excluded.method, protected_headers = excluded.protected_headers, " +
+            "anonymous = excluded.anonymous, overwrite = excluded.overwrite, is_local_body = excluded.is_local_body, " +
+            "body_path = excluded.body_path, etag = excluded.etag, last_modified = excluded.last_modified, " +
+            "encoded = excluded.encoded, received = excluded.received, total = excluded.total, state = excluded.state, " +
+            "error = excluded.error, created_at = excluded.created_at, finished_at = excluded.finished_at";
 
         private static void CreateDownloadsTable(IDatabaseSession session)
         {
@@ -71,16 +78,20 @@ namespace CefFlashBrowser.Services
             return records;
         }
 
-        internal async Task ReplaceDownloadsAsync(IReadOnlyList<DownloadRecord> records)
+        internal async Task ApplyDownloadChangesAsync(IReadOnlyList<DownloadRecord> upserts, IReadOnlyList<string> removedIds)
         {
+            if (upserts.Count == 0 && removedIds.Count == 0)
+                return;
+
             await InitializeAsync().ConfigureAwait(false);
-            var snapshots = await Task.Run(() => records.Select(SnapshotDownload).ToArray()).ConfigureAwait(false);
+            var snapshots = await Task.Run(() => upserts.Select(SnapshotDownload).ToArray()).ConfigureAwait(false);
 
             await _database.TransactionAsync(session =>
             {
-                session.Execute("DELETE FROM downloads");
+                foreach (var id in removedIds)
+                    session.Execute("DELETE FROM downloads WHERE id = @id", new Dictionary<string, object> { ["@id"] = id });
                 foreach (var snapshot in snapshots)
-                    session.Execute(InsertDownloadSql, snapshot);
+                    session.Execute(UpsertDownloadSql, snapshot);
             }).ConfigureAwait(false);
         }
 

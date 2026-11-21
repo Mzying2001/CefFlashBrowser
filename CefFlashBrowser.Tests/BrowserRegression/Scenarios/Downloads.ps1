@@ -120,7 +120,27 @@ function Test-DownloadManagerWindow($Context) {
     $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0]
     Assert-Regression ($window.FindName('downloadList').Items.Count -eq 1) 'closing the download window retains application history'
     $window.Close()
-    Complete-UserScriptTask $Context ($manager.RemoveAsync($manager.Items[0])) 'remove shell regression record'
+    [IO.File]::WriteAllBytes($record.FilePath, [byte[]]@(1,2,3))
+    $recordCountSql = "SELECT COUNT(*) FROM downloads WHERE id = '$($record.Id)'"
+    Wait-Regression $Context {
+        $Context.Database.ScalarAsync($recordCountSql).GetAwaiter().GetResult() -eq 1
+    } 'completed download appears in the database'
+
+    $blockRemovalSql = "CREATE TRIGGER block_download_removal BEFORE DELETE ON downloads " +
+        "WHEN OLD.id = '$($record.Id)' BEGIN SELECT RAISE(ABORT, 'Simulated download history write failure'); END"
+    [void](Complete-UserScriptTask $Context ($Context.Database.ExecuteAsync($blockRemovalSql)) 'block download history deletion temporarily')
+    try {
+        Complete-UserScriptTask $Context ($manager.RemoveAsync($completedItem)) 'remove completed download while the database rejects deletion'
+        Assert-Regression (!$manager.Items.Contains($completedItem)) 'failed database deletion leaves the record removed from the window'
+        $remaining = Complete-UserScriptTask $Context ($Context.Database.ScalarAsync($recordCountSql)) 'read record after failed deletion'
+        Assert-Regression ($remaining -eq 1) 'failed deletion leaves the database row intact until retry'
+    } finally {
+        [void](Complete-UserScriptTask $Context ($Context.Database.ExecuteAsync('DROP TRIGGER block_download_removal')) 'allow download history deletion again')
+    }
+    Wait-Regression $Context {
+        $Context.Database.ScalarAsync($recordCountSql).GetAwaiter().GetResult() -eq 0
+    } 'timer retries the pending download history deletion'
+    Assert-Regression ([IO.File]::Exists($record.FilePath)) 'removing download history preserves the completed file'
 
     $directory = [CefFlashBrowser.Data.GlobalData]::Settings.DownloadDirectory
     try {

@@ -27,7 +27,6 @@ namespace CefFlashBrowser.Services.Downloads
 
         private readonly Dispatcher _dispatcher;
         private readonly DatabaseService _database;
-        private readonly bool _historyLoaded;
         private readonly Dictionary<string, IDownloadTransfer> _transfers = new Dictionary<string, IDownloadTransfer>();
         private readonly List<Task> _cleanup = new List<Task>();
         private readonly DispatcherTimer _timer;
@@ -37,7 +36,8 @@ namespace CefFlashBrowser.Services.Downloads
         private CefSharpHttpRequestService _http;
         private IRequestContext _context;
         private Task _stop;
-        private bool _dirty;
+        // A null record represents a pending deletion for that ID.
+        private Dictionary<string, DownloadRecord> _pending = new Dictionary<string, DownloadRecord>();
         private int _ticks;
         private bool _checkingFiles;
         private HwndSource _nativeHost;
@@ -57,7 +57,6 @@ namespace CefFlashBrowser.Services.Downloads
             {
                 foreach (var record in _database.GetDownloadsAsync().GetAwaiter().GetResult())
                     Items.Add(CreateItem(record));
-                _historyLoaded = true;
             }
             catch (Exception error)
             {
@@ -111,7 +110,7 @@ namespace CefFlashBrowser.Services.Downloads
             if (!Items.Any(item => item.Record.Id == transfer.Record.Id))
                 Items.Insert(0, CreateItem(transfer.Record));
 
-            _dirty = true;
+            _pending[transfer.Record.Id] = transfer.Record;
             Refresh();
         }
 
@@ -152,20 +151,28 @@ namespace CefFlashBrowser.Services.Downloads
             }
 
             _ = transfer.StartAsync();
-            await SaveAsync();
+            await SaveRecordAsync(record);
         }
 
         public async Task PauseAsync(DownloadRecord record)
         {
             var transfer = Find(record);
-            if (transfer != null)
-                await transfer.PauseAsync();
+            if (transfer == null)
+                return;
 
+            await transfer.PauseAsync();
             Refresh();
-            await SaveAsync();
+            await SaveRecordAsync(record);
         }
 
         public async Task CancelAsync(DownloadRecord record)
+        {
+            await CancelTransferAsync(record);
+            Refresh();
+            await SaveRecordAsync(record);
+        }
+
+        private async Task CancelTransferAsync(DownloadRecord record)
         {
             var transfer = Find(record);
             if (transfer != null)
@@ -176,9 +183,6 @@ namespace CefFlashBrowser.Services.Downloads
                 DownloadFiles.DeletePartial(record.BodyPath);
                 record.State = DownloadState.Cancelled;
             }
-
-            Refresh();
-            await SaveAsync();
         }
 
         public async Task RemoveAsync(DownloadItemViewModel item)
@@ -187,24 +191,20 @@ namespace CefFlashBrowser.Services.Downloads
                 return;
 
             if (item.Record.State != DownloadState.Completed)
-                await CancelAsync(item.Record);
+                await CancelTransferAsync(item.Record);
 
-            if (_transfers.TryGetValue(item.Record.Id, out var transfer))
-                Unsubscribe(transfer);
-
-            _transfers.Remove(item.Record.Id);
-            Items.Remove(item);
+            RemoveItem(item);
             await SaveAsync();
         }
 
-        public async Task DeleteFileAsync(DownloadRecord record)
+        public Task DeleteFileAsync(DownloadRecord record)
         {
             if (!Confirm("downloads_confirmDeleteFile"))
-                return;
+                return Task.CompletedTask;
 
             File.Delete(record.FilePath);
             Refresh();
-            await SaveAsync();
+            return Task.CompletedTask;
         }
 
         public async Task ClearFinishedAsync()
@@ -216,15 +216,22 @@ namespace CefFlashBrowser.Services.Downloads
                     DownloadFiles.DeletePartial(item.Record.PartialPath);
                     DownloadFiles.DeletePartial(item.Record.BodyPath);
                 }
-
-                if (_transfers.TryGetValue(item.Record.Id, out var transfer))
-                    Unsubscribe(transfer);
-
-                _transfers.Remove(item.Record.Id);
-                Items.Remove(item);
+                RemoveItem(item);
             }
 
             await SaveAsync();
+        }
+
+        private void RemoveItem(DownloadItemViewModel item)
+        {
+            var id = item.Record.Id;
+
+            if (_transfers.TryGetValue(id, out var transfer))
+                Unsubscribe(transfer);
+
+            _transfers.Remove(id);
+            _pending[id] = null;
+            Items.Remove(item);
         }
 
         public async Task<bool> SelectDestinationAsync(DownloadRecord record, CancellationToken token)
@@ -260,32 +267,39 @@ namespace CefFlashBrowser.Services.Downloads
 
         private void TransferChanged(object sender, EventArgs e)
         {
+            var transfer = (IDownloadTransfer)sender;
+
             Post(() =>
             {
-                _dirty = true;
+                if (!IsCurrentTransfer(transfer))
+                    return;
+
+                _pending[transfer.Record.Id] = transfer.Record;
                 Refresh(false);
             });
         }
 
         private void TransferFinished(object sender, EventArgs e)
         {
+            var transfer = (IDownloadTransfer)sender;
+
             Post(() =>
             {
-                var transfer = (IDownloadTransfer)sender;
+                if (!IsCurrentTransfer(transfer))
+                    return;
 
-                if (_transfers.TryGetValue(transfer.Record.Id, out var current) && ReferenceEquals(current, transfer))
-                {
-                    Unsubscribe(transfer);
-                    _transfers.Remove(transfer.Record.Id);
-                }
-
-                _dirty = true;
+                Unsubscribe(transfer);
+                _transfers.Remove(transfer.Record.Id);
+                _pending[transfer.Record.Id] = transfer.Record;
                 Refresh(false);
 
                 if (!IsStopping)
                     _ = SaveAsync();
             });
         }
+
+        private bool IsCurrentTransfer(IDownloadTransfer transfer) =>
+            _transfers.TryGetValue(transfer.Record.Id, out var current) && ReferenceEquals(current, transfer);
 
         private void Post(Action action)
         {
@@ -302,7 +316,7 @@ namespace CefFlashBrowser.Services.Downloads
                 if (Application.Current.Windows.OfType<Views.DownloadManagerWindow>().Any(window => window.IsVisible))
                     _ = CheckFilesAsync();
 
-                if (_dirty)
+                if (_pending.Count != 0 && _saves.CurrentCount != 0)
                     _ = SaveAsync();
             }
         }
@@ -347,22 +361,39 @@ namespace CefFlashBrowser.Services.Downloads
             }
         }
 
-        public async Task SaveAsync()
+        internal Task SaveRecordAsync(DownloadRecord record)
         {
-            // Replacing the history is safe only after the existing snapshot has loaded.
-            if (!_historyLoaded)
-                return;
+            _dispatcher.VerifyAccess();
 
+            if (!Items.Any(item => ReferenceEquals(item.Record, record)))
+                return Task.CompletedTask;
+
+            _pending[record.Id] = record;
+            return SaveAsync();
+        }
+
+        private async Task SaveAsync()
+        {
             await _saves.WaitAsync();
+            var batch = _pending;
 
             try
             {
-                _dirty = false;
-                await _database.ReplaceDownloadsAsync(Items.Select(item => item.Record).ToArray());
+                if (batch.Count == 0)
+                    return;
+
+                _pending = new Dictionary<string, DownloadRecord>();
+                var upserts = batch.Values.Where(record => record != null).ToArray();
+                var removedIds = batch.Where(change => change.Value == null).Select(change => change.Key).ToArray();
+                await _database.ApplyDownloadChangesAsync(upserts, removedIds);
             }
             catch (Exception error)
             {
-                _dirty = true;
+                foreach (var change in batch)
+                {
+                    if (!_pending.ContainsKey(change.Key))
+                        _pending.Add(change.Key, change.Value);
+                }
                 LogHelper.LogError("Failed to save download history", error);
             }
             finally
@@ -447,6 +478,10 @@ namespace CefFlashBrowser.Services.Downloads
 
             await Task.WhenAll(_transfers.Values.Select(transfer => transfer.ShutdownAsync()));
             await Task.WhenAll(_cleanup.ToArray());
+
+            foreach (var transfer in _transfers.Values)
+                _pending[transfer.Record.Id] = transfer.Record;
+
             await SaveAsync();
 
             _http?.Dispose();
@@ -458,7 +493,10 @@ namespace CefFlashBrowser.Services.Downloads
             _nativeHost?.Dispose();
         }
 
-        public static string Text(string key) => SimpleIoc.Global.GetInstance<LanguageService>().GetString(key);
+        public static string Text(string key)
+        {
+            return SimpleIoc.Global.GetInstance<LanguageService>().GetString(key);
+        }
 
         private static bool Confirm(string key)
         {

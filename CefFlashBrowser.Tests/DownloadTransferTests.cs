@@ -135,7 +135,7 @@ namespace CefFlashBrowser.Tests
             var path = Path.Combine(_directory, "browser.db");
             using (var database = new SqliteDatabase(path))
             {
-                await new DatabaseService(database).ReplaceDownloadsAsync(new[] { record });
+                await new DatabaseService(database).ApplyDownloadChangesAsync(new[] { record }, Array.Empty<string>());
                 var protectedHeaders = (string)await database.ScalarAsync("SELECT protected_headers FROM downloads");
                 StringAssert.StartsWith(protectedHeaders, "dpapi:v1:");
                 Assert.IsFalse(protectedHeaders.Contains("test-secret"));
@@ -155,7 +155,7 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public async Task HistoryReplacesRecordsAtomically()
+        public async Task HistoryAppliesOnlyChangedRecordsAndRollsBackFailedBatches()
         {
             using (var database = new SqliteDatabase(Path.Combine(_directory, "browser.db")))
             {
@@ -174,8 +174,13 @@ namespace CefFlashBrowser.Tests
                 waiting.PartialPath = Path.Combine(_directory, "missing.part");
                 waiting.Received = 5;
 
-                await service.ReplaceDownloadsAsync(new[] { completed, waiting });
-                await Assert.ThrowsExceptionAsync<SQLiteException>(() => service.ReplaceDownloadsAsync(new[] { completed, completed }));
+                await service.ApplyDownloadChangesAsync(new[] { completed, waiting }, Array.Empty<string>());
+
+                waiting.Error = "Uncommitted change";
+                var invalid = CreateRecord();
+                invalid.Url = null;
+                await Assert.ThrowsExceptionAsync<SQLiteException>(() =>
+                    service.ApplyDownloadChangesAsync(new[] { waiting, invalid }, new[] { completed.Id }));
 
                 var restored = await service.GetDownloadsAsync();
                 CollectionAssert.AreEqual(new[] { waiting.Id, completed.Id }, restored.Select(record => record.Id).ToArray());
@@ -183,6 +188,7 @@ namespace CefFlashBrowser.Tests
                 Assert.AreEqual(0L, restored[0].Received);
                 Assert.IsNull(restored[0].Total);
                 Assert.IsNull(restored[0].Finished);
+                Assert.IsNull(restored[0].Error);
                 Assert.AreEqual(DownloadState.Completed, restored[1].State);
                 Assert.AreEqual(completed.Finished, restored[1].Finished);
                 Assert.AreEqual(completed.Total, restored[1].Total);
@@ -191,11 +197,23 @@ namespace CefFlashBrowser.Tests
                 Assert.IsFalse(restored[1].FileMissing);
                 Assert.AreEqual(0d, restored[1].Speed);
 
-                await service.ReplaceDownloadsAsync(new[] { completed });
-                Assert.AreEqual(completed.Id, (await service.GetDownloadsAsync()).Single().Id);
+                foreach (var operation in new[] { "INSERT", "UPDATE", "DELETE" })
+                {
+                    var row = operation == "INSERT" ? "NEW" : "OLD";
+                    await database.ExecuteAsync($"CREATE TRIGGER protect_completed_{operation} BEFORE {operation} ON downloads " +
+                        $"WHEN {row}.id = '{completed.Id}' BEGIN SELECT RAISE(ABORT, 'Unrelated history write'); END");
+                }
 
-                await service.ReplaceDownloadsAsync(Array.Empty<DownloadRecord>());
-                Assert.AreEqual(0, (await service.GetDownloadsAsync()).Count);
+                var added = CreateRecord();
+                waiting.State = DownloadState.Paused;
+                await service.ApplyDownloadChangesAsync(new[] { waiting, added }, Array.Empty<string>());
+                restored = await service.GetDownloadsAsync();
+                Assert.AreEqual(3, restored.Count);
+                Assert.AreEqual(DownloadState.Paused, restored.Single(record => record.Id == waiting.Id).State);
+                Assert.AreEqual(waiting.Error, restored.Single(record => record.Id == waiting.Id).Error);
+
+                await service.ApplyDownloadChangesAsync(Array.Empty<DownloadRecord>(), new[] { waiting.Id, added.Id });
+                Assert.AreEqual(completed.Id, (await service.GetDownloadsAsync()).Single().Id);
             }
         }
 

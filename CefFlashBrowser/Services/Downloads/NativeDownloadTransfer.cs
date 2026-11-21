@@ -73,7 +73,7 @@ namespace CefFlashBrowser.Services.Downloads
 
                     Record.State = DownloadState.Downloading;
                     Changed?.Invoke(this, EventArgs.Empty);
-                    await _manager.SaveAsync();
+                    await _manager.SaveRecordAsync(Record);
                 }
                 finally
                 {
