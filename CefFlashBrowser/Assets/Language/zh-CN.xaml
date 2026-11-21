@@ -373,4 +373,5 @@
     <sys:String x:Key="downloads_invalidPath">请选择有效的绝对文件路径。</sys:String>
     <sys:String x:Key="downloads_sourceUnavailable">下载来源已不可用，请从原页面重新发起下载。</sys:String>
     <sys:String x:Key="downloads_restartRequired">服务器无法安全续传已保存的数据，正在从头下载。</sys:String>
+    <sys:String x:Key="downloads_nativeInterrupted">下载连接已中断，可以尝试继续或从来源重新下载。</sys:String>
 </ResourceDictionary>

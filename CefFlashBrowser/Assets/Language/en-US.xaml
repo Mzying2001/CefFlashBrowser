@@ -373,4 +373,5 @@
     <sys:String x:Key="downloads_invalidPath">Choose a valid absolute file path.</sys:String>
     <sys:String x:Key="downloads_sourceUnavailable">The source is unavailable. Start this download again from its original page.</sys:String>
     <sys:String x:Key="downloads_restartRequired">This server cannot safely resume the saved data. Downloading again from the beginning.</sys:String>
+    <sys:String x:Key="downloads_nativeInterrupted">The download connection was interrupted. Try resuming or start again from its source.</sys:String>
 </ResourceDictionary>

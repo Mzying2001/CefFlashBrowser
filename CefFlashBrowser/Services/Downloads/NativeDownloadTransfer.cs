@@ -73,6 +73,8 @@ namespace CefFlashBrowser.Services.Downloads
             catch (OperationCanceledException) { }
             catch (Exception error)
             {
+                await ControlAsync(callback => callback.Cancel());
+                _before.Dispose();
                 Record.Error = error.Message;
                 Record.State = DownloadState.Failed;
                 Release();
@@ -93,7 +95,7 @@ namespace CefFlashBrowser.Services.Downloads
                 previous?.Dispose();
                 Record.Received = item.ReceivedBytes;
                 Record.Total = item.TotalBytes > 0 ? (long?)item.TotalBytes : null;
-                Record.Speed = _paused ? 0 : item.CurrentSpeed;
+                Record.Speed = _paused ? 0 : Math.Max(0, item.CurrentSpeed);
                 if (item.IsComplete)
                 {
                     _stopping = true;
@@ -265,9 +267,12 @@ namespace CefFlashBrowser.Services.Downloads
                 _callback?.Dispose();
                 _callback = null;
             }
-            Changed?.Invoke(this, EventArgs.Empty);
-            Finished?.Invoke(this, EventArgs.Empty);
-            _released.TrySetResult(true);
+            try
+            {
+                Changed?.Invoke(this, EventArgs.Empty);
+                Finished?.Invoke(this, EventArgs.Empty);
+            }
+            finally { _released.TrySetResult(true); }
         }
     }
 }

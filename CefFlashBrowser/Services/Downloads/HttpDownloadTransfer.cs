@@ -95,10 +95,9 @@ namespace CefFlashBrowser.Services.Downloads
             {
                 lock (Record.SyncRoot)
                 {
-                    DownloadFiles.DeletePartial(Record.PartialPath);
-                    DownloadFiles.DeletePartial(Record.BodyPath);
                     Record.State = DownloadState.Cancelled;
                     Record.Speed = 0;
+                    CleanupCancelledFiles();
                 }
                 Changed?.Invoke(this, EventArgs.Empty);
                 NotifyFinished();
@@ -122,11 +121,10 @@ namespace CefFlashBrowser.Services.Downloads
                     Directory.CreateDirectory(Path.GetDirectoryName(Record.FilePath));
                     Record.PartialPath = Record.PartialPath ?? Record.FilePath + "." + Record.Id + ".part";
 
-                    if (Record.IsLocalBody)
-                        await StageBodyAsync(linked.Token).ConfigureAwait(false);
-
                     timeout.CancelAfter(_remaining > TimeSpan.Zero ? _remaining : TimeSpan.FromMilliseconds(1));
                     active.Start();
+                    if (Record.IsLocalBody)
+                        await StageBodyAsync(linked.Token).ConfigureAwait(false);
                     lock (Record.SyncRoot)
                         Record.State = DownloadState.Downloading;
                     Changed?.Invoke(this, EventArgs.Empty);
@@ -137,7 +135,11 @@ namespace CefFlashBrowser.Services.Downloads
                         _offset = _output.Length;
                         if (Record.Encoded || (string.IsNullOrEmpty(Record.ETag) && string.IsNullOrEmpty(Record.LastModified)
                             && !Record.IsLocalBody))
+                        {
+                            if (_offset > 0)
+                                Record.Error = "downloads_restartRequired";
                             _offset = 0;
+                        }
                         _output.SetLength(_offset);
                         _output.Position = _offset;
                         Record.Received = _offset;
@@ -166,8 +168,13 @@ namespace CefFlashBrowser.Services.Downloads
                         Record.Finished = DateTime.UtcNow;
                         Record.FileMissing = false;
                     }
-                    DownloadFiles.DeletePartial(Record.BodyPath);
-                    Record.BodyPath = null;
+                    try
+                    {
+                        DownloadFiles.DeletePartial(Record.BodyPath);
+                        Record.BodyPath = null;
+                    }
+                    catch (IOException error) { Record.Error = error.Message; }
+                    catch (UnauthorizedAccessException error) { Record.Error = error.Message; }
                 }
                 catch (OperationCanceledException)
                 {
@@ -199,10 +206,7 @@ namespace CefFlashBrowser.Services.Downloads
                         _cancellation = null;
                     }
                     if (Record.State == DownloadState.Cancelled)
-                    {
-                        DownloadFiles.DeletePartial(Record.PartialPath);
-                        DownloadFiles.DeletePartial(Record.BodyPath);
-                    }
+                        CleanupCancelledFiles();
                     Changed?.Invoke(this, EventArgs.Empty);
                     if (Record.State != DownloadState.Paused && Record.State != DownloadState.Interrupted)
                         NotifyFinished();
@@ -266,6 +270,8 @@ namespace CefFlashBrowser.Services.Downloads
                 _output.Position = 0;
                 _offset = 0;
                 Record.Received = 0;
+                _speedBytes = 0;
+                _speedClock.Restart();
                 Record.Error = "downloads_restartRequired";
                 await SendAsync(token).ConfigureAwait(false);
             }
@@ -367,6 +373,20 @@ namespace CefFlashBrowser.Services.Downloads
         {
             if (Interlocked.Exchange(ref _terminal, 1) == 0)
                 Finished?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void CleanupCancelledFiles()
+        {
+            try
+            {
+                DownloadFiles.DeletePartial(Record.PartialPath);
+                DownloadFiles.DeletePartial(Record.BodyPath);
+            }
+            catch (Exception error) when (error is IOException || error is UnauthorizedAccessException)
+            {
+                Record.State = DownloadState.Failed;
+                Record.Error = error.Message;
+            }
         }
 
         private sealed class RestartDownloadException : IOException

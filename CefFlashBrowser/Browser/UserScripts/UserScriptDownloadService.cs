@@ -42,8 +42,9 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 if (!_accepting || _manager.IsStopping)
                     throw new ObjectDisposedException(nameof(UserScriptDownloadService));
-                var operation = new Operation(this, request, token);
+                var operation = new Operation(this, request);
                 _operations.Add(operation.DownloadId, operation);
+                operation.AttachCancellation(token);
                 return Task.FromResult<IDownloadOperation>(operation);
             }
         }
@@ -81,8 +82,8 @@ namespace CefFlashBrowser.Browser.UserScripts
         {
             private readonly UserScriptDownloadService _owner;
             private readonly HttpDownloadTransfer _transfer;
-            private readonly TaskCompletionSource<bool> _completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            private readonly CancellationTokenRegistration _registration;
+            private readonly TaskCompletionSource<object> _completion = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private CancellationTokenRegistration _registration;
             private int _started;
             private int _terminal;
 
@@ -95,7 +96,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             public event EventHandler TimedOut;
             public event EventHandler<UserScriptDownloadFailure> Failed;
 
-            public Operation(UserScriptDownloadService owner, DownloadRequest request, CancellationToken token)
+            public Operation(UserScriptDownloadService owner, DownloadRequest request)
             {
                 _owner = owner;
                 var record = new DownloadRecord
@@ -113,7 +114,13 @@ namespace CefFlashBrowser.Browser.UserScripts
                     (item, cancellation) => owner.SelectDestinationAsync(item, request, cancellation), request);
                 _transfer.Changed += TransferChanged;
                 _transfer.Finished += TransferFinished;
+            }
+
+            public void AttachCancellation(CancellationToken token)
+            {
                 _registration = token.Register(Abort);
+                if (Volatile.Read(ref _terminal) != 0)
+                    _registration.Dispose();
             }
 
             public void Start()
@@ -139,7 +146,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 if (record.State == DownloadState.Interrupted && _owner._manager.IsStopping)
                     Finish(DownloadState.Interrupted, null);
                 else if (record.State == DownloadState.Downloading)
-                    Progress?.Invoke(this, new UserScriptDownloadProgress(record.Received, record.Total));
+                    Notify(() => Progress?.Invoke(this, new UserScriptDownloadProgress(record.Received, record.Total)));
             }
 
             private void TransferFinished(object sender, EventArgs e) => Finish(_transfer.Record.State, null);
@@ -158,23 +165,23 @@ namespace CefFlashBrowser.Browser.UserScripts
                     {
                         case DownloadState.Completed:
                             Result = new DownloadResult(DownloadId, new Uri(record.Url), record.FileName, record.Received);
-                            Completed?.Invoke(this, EventArgs.Empty);
-                            _completion.TrySetResult(true);
+                            Notify(() => Completed?.Invoke(this, EventArgs.Empty));
+                            _completion.TrySetResult(null);
                             break;
                         case DownloadState.Cancelled:
-                            Aborted?.Invoke(this, EventArgs.Empty);
+                            Notify(() => Aborted?.Invoke(this, EventArgs.Empty));
                             _completion.TrySetCanceled();
                             break;
                         case DownloadState.Interrupted:
                             _completion.TrySetCanceled();
                             break;
                         case DownloadState.TimedOut:
-                            TimedOut?.Invoke(this, EventArgs.Empty);
+                            Notify(() => TimedOut?.Invoke(this, EventArgs.Empty));
                             _completion.TrySetException(new TimeoutException("The download timed out."));
                             break;
                         default:
                             error = error ?? new IOException(record.Error ?? "The download failed.");
-                            Failed?.Invoke(this, new UserScriptDownloadFailure(error));
+                            Notify(() => Failed?.Invoke(this, new UserScriptDownloadFailure(error)));
                             _completion.TrySetException(error);
                             break;
                     }
@@ -193,6 +200,12 @@ namespace CefFlashBrowser.Browser.UserScripts
                     Finish(DownloadState.Cancelled, null);
                 else
                     _ = _transfer.CancelAsync();
+            }
+
+            private static void Notify(Action callback)
+            {
+                try { callback(); }
+                catch (Exception error) { LogHelper.LogError("Userscript download callback failed", error); }
             }
 
             public void Dispose() => Abort();

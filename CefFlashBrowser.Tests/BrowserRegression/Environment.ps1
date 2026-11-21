@@ -322,14 +322,14 @@ function Initialize-RegressionEnvironment($Context) {
     $Context.AuxiliarySecondAddress = ([Uri]$auxiliarySecondFile).AbsoluteUri
 }
 
-function Start-RegressionCef($Context) {
+function Start-RegressionCef($Context, [string]$CachePath = '') {
     [Environment]::SetEnvironmentVariable('ComSpec',
         (Join-Path $Context.ApplicationPath 'Binaries\CmdProxy\CmdProxy.exe'))
     $cefSettings = New-Object CefFlashBrowser.FlashBrowser.CefFlashSettings
     $cefSettings.BrowserSubprocessPath = Join-Path $Context.CefPath 'CefSharp.BrowserSubprocess.exe'
     $cefSettings.ResourcesDirPath = $Context.CefPath
     $cefSettings.LocalesDirPath = Join-Path $Context.CefPath 'locales'
-    $cefSettings.CachePath = Join-Path $Context.TemporaryPath 'Cache'
+    $cefSettings.CachePath = if ($CachePath) { $CachePath } else { Join-Path $Context.TemporaryPath 'Cache' }
     $cefSettings.LogFile = Join-Path $Context.TemporaryPath 'cef.log'
     $cefSettings.CefCommandLineArgs['disable-gpu'] = '1'
     $Context.CefStarted = [CefSharp.Cef]::Initialize($cefSettings)

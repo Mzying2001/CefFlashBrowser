@@ -373,4 +373,5 @@
     <sys:String x:Key="downloads_invalidPath">請選擇有效的絕對檔案路徑。</sys:String>
     <sys:String x:Key="downloads_sourceUnavailable">下載來源已無法使用，請從原頁面重新開始下載。</sys:String>
     <sys:String x:Key="downloads_restartRequired">伺服器無法安全續傳已儲存的資料，正在重新下載。</sys:String>
+    <sys:String x:Key="downloads_nativeInterrupted">下載連線已中斷，可以嘗試繼續或從來源重新下載。</sys:String>
 </ResourceDictionary>

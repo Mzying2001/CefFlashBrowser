@@ -39,6 +39,7 @@ namespace CefFlashBrowser.Services.Downloads
         private Task _stop;
         private bool _dirty;
         private int _ticks;
+        private bool _checkingFiles;
         private HwndSource _nativeHost;
         private readonly HashSet<WinformCefSharp4WPF.ChromiumWebBrowser> _retainedBrowsers = new HashSet<WinformCefSharp4WPF.ChromiumWebBrowser>();
 
@@ -54,7 +55,7 @@ namespace CefFlashBrowser.Services.Downloads
             try
             {
                 foreach (var record in _history.Load().OrderByDescending(record => record.Created))
-                    Items.Add(new DownloadItemViewModel(record));
+                    Items.Add(CreateItem(record));
             }
             catch (Exception error) { LogHelper.LogError("Failed to load download history", error); }
             _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), DispatcherPriority.Background, Tick, _dispatcher);
@@ -95,7 +96,7 @@ namespace CefFlashBrowser.Services.Downloads
             transfer.Changed += TransferChanged;
             transfer.Finished += TransferFinished;
             if (!Items.Any(item => item.Record.Id == transfer.Record.Id))
-                Items.Insert(0, new DownloadItemViewModel(transfer.Record));
+                Items.Insert(0, CreateItem(transfer.Record));
             _dirty = true;
             Refresh();
         }
@@ -104,6 +105,11 @@ namespace CefFlashBrowser.Services.Downloads
         {
             _dispatcher.VerifyAccess();
             return _transfers.TryGetValue(record.Id, out var transfer) ? transfer : null;
+        }
+
+        private DownloadItemViewModel CreateItem(DownloadRecord record)
+        {
+            return new DownloadItemViewModel(record, () => Find(record)?.CanResume == true || CanRestore(record));
         }
 
         public bool CanRestore(DownloadRecord record)
@@ -221,12 +227,23 @@ namespace CefFlashBrowser.Services.Downloads
 
         private void TransferChanged(object sender, EventArgs e)
         {
-            Post(() => { _dirty = true; Refresh(); });
+            Post(() => { _dirty = true; Refresh(false); });
         }
 
         private void TransferFinished(object sender, EventArgs e)
         {
-            Post(() => { _dirty = true; Refresh(); _ = SaveAsync(); });
+            Post(() =>
+            {
+                var transfer = (IDownloadTransfer)sender;
+                if (_transfers.TryGetValue(transfer.Record.Id, out var current) && ReferenceEquals(current, transfer))
+                {
+                    Unsubscribe(transfer);
+                    _transfers.Remove(transfer.Record.Id);
+                }
+                _dirty = true;
+                Refresh(false);
+                _ = SaveAsync();
+            });
         }
 
         private void Post(Action action)
@@ -237,19 +254,44 @@ namespace CefFlashBrowser.Services.Downloads
 
         private void Tick(object sender, EventArgs e)
         {
-            Refresh();
-            if (++_ticks % 4 == 0 && _dirty)
-                _ = SaveAsync();
+            Refresh(false);
+            if (++_ticks % 4 == 0)
+            {
+                if (Application.Current.Windows.OfType<Views.DownloadManagerWindow>().Any(window => window.IsVisible))
+                    _ = CheckFilesAsync();
+                if (_dirty)
+                    _ = SaveAsync();
+            }
         }
 
-        public void Refresh()
+        public void Refresh(bool checkFiles = true)
         {
             foreach (var item in Items)
-            {
-                item.Record.FileMissing = item.Record.State == DownloadState.Completed && !File.Exists(item.Record.FilePath);
                 item.Refresh();
-            }
             Refreshed?.Invoke(this, EventArgs.Empty);
+            if (checkFiles)
+                _ = CheckFilesAsync();
+        }
+
+        private async Task CheckFilesAsync()
+        {
+            if (_checkingFiles || IsStopping)
+                return;
+            _checkingFiles = true;
+            try
+            {
+                var records = Items.Where(item => item.Record.State == DownloadState.Completed)
+                    .Select(item => Tuple.Create(item.Record, item.Record.FilePath)).ToArray();
+                var missing = await Task.Run(() => records.Select(item => !File.Exists(item.Item2)).ToArray());
+                for (int index = 0; index < records.Length; index++)
+                {
+                    var record = records[index].Item1;
+                    if (record.State == DownloadState.Completed && record.FilePath == records[index].Item2)
+                        record.FileMissing = missing[index];
+                }
+                Refresh(false);
+            }
+            finally { _checkingFiles = false; }
         }
 
         public async Task SaveAsync()
@@ -272,7 +314,13 @@ namespace CefFlashBrowser.Services.Downloads
 
         public void RetainUntil(Task completion, Action release)
         {
+            RetainUntil(completion, () => { release(); return Task.CompletedTask; });
+        }
+
+        public void RetainUntil(Task completion, Func<Task> release)
+        {
             _dispatcher.VerifyAccess();
+            _cleanup.RemoveAll(task => task.Status == TaskStatus.RanToCompletion);
             _cleanup.Add(ReleaseAsync(completion, release));
         }
 
@@ -296,10 +344,10 @@ namespace CefFlashBrowser.Services.Downloads
             return true;
         }
 
-        private static async Task ReleaseAsync(Task completion, Action release)
+        private static async Task ReleaseAsync(Task completion, Func<Task> release)
         {
             try { await completion; }
-            finally { release(); }
+            finally { await release(); }
         }
 
         private async Task StopCoreAsync()
@@ -311,6 +359,8 @@ namespace CefFlashBrowser.Services.Downloads
             await Task.WhenAll(_cleanup.ToArray());
             await SaveAsync();
             _http?.Dispose();
+            if (_http != null)
+                await Cef.UIThreadTaskFactory.StartNew(() => { });
             _context?.Dispose();
             _nativeHost?.Dispose();
         }

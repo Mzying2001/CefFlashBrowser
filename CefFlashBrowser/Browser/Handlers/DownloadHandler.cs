@@ -14,6 +14,7 @@ namespace CefFlashBrowser.Browser.Handlers
     {
         private readonly object _sync = new object();
         private readonly Dictionary<int, NativeDownloadTransfer> _downloads = new Dictionary<int, NativeDownloadTransfer>();
+        private readonly HashSet<int> _finished = new HashSet<int>();
         private readonly Dictionary<int, Tuple<DownloadItem, IDownloadItemCallback>> _pending = new Dictionary<int, Tuple<DownloadItem, IDownloadItemCallback>>();
         private readonly Dictionary<string, DownloadRecord> _responses = new Dictionary<string, DownloadRecord>(StringComparer.Ordinal);
         private bool _retired;
@@ -28,6 +29,9 @@ namespace CefFlashBrowser.Browser.Handlers
             lock (_sync)
             {
                 _retired = true;
+                foreach (var pending in _pending.Values)
+                    pending.Item2.Dispose();
+                _pending.Clear();
                 return Task.WhenAll(_downloads.Values.Select(transfer => transfer.Released));
             }
         }
@@ -54,6 +58,11 @@ namespace CefFlashBrowser.Browser.Handlers
             {
                 if (_responses.Count >= 128)
                     _responses.Clear();
+                if (_responses.TryGetValue(request.Url, out var previous)
+                    && (previous.Method != record.Method || previous.ETag != record.ETag
+                        || previous.Headers.Count != record.Headers.Count
+                        || previous.Headers.Any(header => !record.Headers.TryGetValue(header.Key, out var value) || value != header.Value)))
+                    record.Method = string.Empty;
                 _responses[request.Url] = record;
             }
         }
@@ -88,6 +97,14 @@ namespace CefFlashBrowser.Browser.Handlers
                             return;
                         }
                         _downloads[item.Id] = transfer;
+                        _ = transfer.Released.ContinueWith(completed =>
+                        {
+                            lock (_sync)
+                            {
+                                _downloads.Remove(item.Id);
+                                _finished.Add(item.Id);
+                            }
+                        }, TaskScheduler.Default);
                         if (_pending.TryGetValue(item.Id, out var pending))
                         {
                             transfer.Update(pending.Item1, pending.Item2);
@@ -116,7 +133,7 @@ namespace CefFlashBrowser.Browser.Handlers
             {
                 if (_downloads.TryGetValue(item.Id, out var transfer))
                     transfer.Update(item, callback);
-                else if (!_retired)
+                else if (!_retired && !_finished.Contains(item.Id))
                 {
                     if (_pending.TryGetValue(item.Id, out var previous))
                         previous.Item2.Dispose();

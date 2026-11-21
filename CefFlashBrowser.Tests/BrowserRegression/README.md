@@ -25,6 +25,10 @@ For x86, build and run with the matching 32-bit PowerShell process:
 
 To test Release, build with `-p:Configuration=Release` and pass `-Configuration Release` to the runner. Defaults are `-Platform x64 -Configuration Debug`.
 
+Download checks can be run independently with `Run.ps1 -Scenario DownloadManager`, `-Scenario BrowserDownloads`, or `-Scenario Downloads` for the userscript contract. They cover the shared window and destination dialog, native keyboard entry, actual file bytes, pause/resume, POST and Blob sources, background native ownership, and file actions. The default suite includes these scenarios.
+
+Run `Run.ps1 -Scenario DownloadRestart` separately for cross-process recovery. It starts an isolated HTTP fixture and two hidden STA PowerShell processes against the same temporary download profile and CEF cache. The first process saves unfinished browser and manual tasks before shutdown. The second restores them, verifies the persisted Range offsets and cookies, and compares the final files with the fixture payload. All profiles, files and process logs remain under the printed temporary directory.
+
 After `publish`, validate each actual zip in a fresh process of the matching architecture:
 
 ```cmd

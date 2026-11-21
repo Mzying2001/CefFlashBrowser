@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CefSharp;
 
 public sealed class DownloadHttpFixture : IDisposable
 {
@@ -41,6 +42,11 @@ public sealed class DownloadHttpFixture : IDisposable
     {
         string value;
         return cookies.TryGetValue(path, out value) ? value : "";
+    }
+
+    public static void RegisterUnrelatedResource(IWebBrowser browser, string url)
+    {
+        browser.RegisterResourceHandler(url, new MemoryStream(Encoding.UTF8.GetBytes("registered")), "text/plain");
     }
 
     private async Task AcceptAsync()
@@ -94,7 +100,7 @@ public sealed class DownloadHttpFixture : IDisposable
                 if (path == "/page")
                 {
                     var html = Encoding.UTF8.GetBytes("<title>Download fixture</title><a href='/slow' download>Download</a><form id='post' method='post' action='/post'><input name='data' value='test'></form>");
-                    var head = Encoding.ASCII.GetBytes("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + html.Length + "\r\nSet-Cookie: download-session=present; Path=/\r\nConnection: close\r\n\r\n");
+                    var head = Encoding.ASCII.GetBytes("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + html.Length + "\r\nSet-Cookie: download-session=present; Max-Age=3600; Path=/\r\nConnection: close\r\n\r\n");
                     await stream.WriteAsync(head, 0, head.Length).ConfigureAwait(false);
                     await stream.WriteAsync(html, 0, html.Length).ConfigureAwait(false);
                     return;

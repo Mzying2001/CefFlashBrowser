@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory')][string]$Scenario = 'All'
+    [ValidateSet('All', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -50,6 +50,8 @@ try {
     Initialize-RegressionEnvironment $context
     if ($Scenario -eq 'DownloadManager') {
         Test-DownloadManagerWindow $context
+    } elseif ($Scenario -eq 'DownloadRestart') {
+        Test-DownloadRestart $context
     } elseif ($Scenario -eq 'BrowserDownloads') {
         Start-RegressionCef $context
         Test-BrowserDownloads $context
@@ -131,6 +133,7 @@ try {
         Test-ProxySettings $context
         Test-UserScriptSettings $context
         Test-BrowserBeforeInitialization $context
+        Test-DownloadManagerWindow $context
         Test-BrowserTabControl $context
         Test-ListReorderBehavior $context
         Test-BrowserTabsBeforeShow $context
@@ -143,6 +146,7 @@ try {
         Test-UserScriptTabs $context
         Test-UserScriptInteractions $context
         Test-UserScriptDownloadsAndAudio $context
+        Test-BrowserDownloads $context
         Test-UserScriptNetwork $context
         Test-UserScriptFrames $context
         Test-UserScriptOfflineRecovery $context

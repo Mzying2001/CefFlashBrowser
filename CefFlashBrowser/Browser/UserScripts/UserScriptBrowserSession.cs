@@ -429,9 +429,11 @@ namespace CefFlashBrowser.Browser.UserScripts
                     _audio.StateChanged -= AudioStateChanged;
                     _audio.Dispose();
                     var drain = Task.WhenAll(_retiredHosts.Select(retired => retired.Drain).ToArray());
-                    DownloadManagerService.Current.RetainUntil(drain, () =>
+                    DownloadManagerService.Current.RetainUntil(drain, async () =>
                     {
                         _http?.Dispose();
+                        if (_http != null)
+                            await Cef.UIThreadTaskFactory.StartNew(() => { });
                         _webRequests?.Dispose();
                         if (_ownsRequestContext)
                             _requestContext?.Dispose();

@@ -45,7 +45,7 @@ namespace CefFlashBrowser.ViewModels
             { CanExecuteFunc = _ => _selected?.IsActive == true || _selected?.Record.State == DownloadState.Interrupted };
             OpenCommand = new DelegateCommand(Open) { CanExecuteFunc = _ => _selected?.CanOpen == true };
             FolderCommand = new DelegateCommand(OpenFolder)
-            { CanExecuteFunc = _ => !string.IsNullOrEmpty(_selected?.FilePath) && Directory.Exists(Path.GetDirectoryName(_selected.FilePath)) };
+            { CanExecuteFunc = _ => !string.IsNullOrEmpty(_selected?.FilePath) };
             RemoveCommand = new DelegateCommand(() => RunAsync(() => service.RemoveAsync(_selected)))
             { CanExecuteFunc = _ => _selected != null };
             DeleteFileCommand = new DelegateCommand(() => RunAsync(() => service.DeleteFileAsync(_selected.Record)))

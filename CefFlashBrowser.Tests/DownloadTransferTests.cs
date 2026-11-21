@@ -118,10 +118,75 @@ namespace CefFlashBrowser.Tests
             CollectionAssert.AreEqual(http.Payload, File.ReadAllBytes(restored.FilePath));
         }
 
+        [TestMethod]
+        public async Task CancelBeforeStartHasOneTerminalAndStartsNoNetwork()
+        {
+            var http = new FakeHttp();
+            var transfer = new HttpDownloadTransfer(CreateRecord(), http, null);
+            int finished = 0;
+            transfer.Finished += (_, __) => finished++;
+            await transfer.CancelAsync();
+            await transfer.CancelAsync();
+            await transfer.StartAsync();
+            Assert.AreEqual(1, finished);
+            Assert.AreEqual(0, http.Ranges.Count);
+        }
+
+        [TestMethod]
+        public async Task CancelPausedTaskPublishesTerminalAndRemovesItsPartial()
+        {
+            var record = CreateRecord();
+            var http = new FakeHttp { HoldFirst = true };
+            var transfer = new HttpDownloadTransfer(record, http, null);
+            int finished = 0;
+            transfer.Finished += (_, __) => finished++;
+            var running = transfer.StartAsync();
+            await http.FirstChunk.Task;
+            await transfer.PauseAsync();
+            await transfer.CancelAsync();
+            await running;
+            Assert.AreEqual(1, finished);
+            Assert.AreEqual(DownloadState.Cancelled, record.State);
+            Assert.IsFalse(File.Exists(record.PartialPath));
+        }
+
+        [TestMethod]
+        public async Task MalformedRangeRestartsAndUnknownLengthCanComplete()
+        {
+            var record = CreateRecord();
+            record.PartialPath = record.FilePath + ".part";
+            File.WriteAllBytes(record.PartialPath, new byte[] { 1, 2, 3, 4 });
+            record.ETag = "\"old\"";
+            var http = new FakeHttp { MalformedRange = true, UnknownLength = true };
+            await new HttpDownloadTransfer(record, http, null).StartAsync();
+            Assert.AreEqual(DownloadState.Completed, record.State);
+            CollectionAssert.AreEqual(http.Payload, File.ReadAllBytes(record.FilePath));
+            Assert.AreEqual(2, http.Ranges.Count);
+        }
+
+        [TestMethod]
+        public async Task TruncatedResponseFailsAndPreservesPartialWithoutCommitting()
+        {
+            var record = CreateRecord();
+            await new HttpDownloadTransfer(record, new FakeHttp { ShortResponse = true }, null).StartAsync();
+            Assert.AreEqual(DownloadState.Failed, record.State);
+            Assert.IsFalse(File.Exists(record.FilePath));
+            Assert.AreEqual(4L, new FileInfo(record.PartialPath).Length);
+        }
+
+        [TestMethod]
+        public void InvalidDownloadDirectoriesUseTheSystemFolder()
+        {
+            var expected = CefFlashBrowser.Utils.UserScriptDownloadPaths.DefaultDirectory();
+            Assert.AreEqual(expected, DownloadFiles.DirectoryOrDefault(null));
+            Assert.AreEqual(expected, DownloadFiles.DirectoryOrDefault("relative\\path"));
+            Assert.AreEqual(expected, DownloadFiles.DirectoryOrDefault("C:\\invalid|name"));
+        }
+
         private sealed class FakeHttp : IHttpRequestService
         {
             public byte[] Payload { get; } = Enumerable.Range(0, 12).Select(value => (byte)value).ToArray();
-            public bool HoldFirst, IgnoreRange, ChangedVersion;
+            public bool HoldFirst, IgnoreRange, ChangedVersion, MalformedRange, UnknownLength, ShortResponse;
             public List<string> Ranges { get; } = new List<string>();
             public TaskCompletionSource<bool> FirstChunk { get; } = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -132,7 +197,9 @@ namespace CefFlashBrowser.Tests
                 var offset = range == null || IgnoreRange ? 0 : int.Parse(range.Substring(6).TrimEnd('-'));
                 var headers = new Dictionary<string, string> { ["ETag"] = ChangedVersion ? "\"new\"" : "\"old\"", ["Content-Length"] = (Payload.Length - offset).ToString() };
                 if (offset != 0)
-                    headers["Content-Range"] = "bytes " + offset + "-11/12";
+                    headers["Content-Range"] = MalformedRange ? "bytes 0-11/12" : "bytes " + offset + "-11/12";
+                if (UnknownLength)
+                    headers.Remove("Content-Length");
                 var response = new UserScriptHttpResponse(offset == 0 ? 200 : 206, "OK", request.Url, headers, null, null, null);
                 return new FakeOperation(Task.Run(async () =>
                 {
@@ -142,7 +209,8 @@ namespace CefFlashBrowser.Tests
                     if (HoldFirst && Ranges.Count == 1)
                         await Task.Delay(Timeout.Infinite, token);
                     token.ThrowIfCancellationRequested();
-                    observer.OnResponseData(Payload, offset + 4, Payload.Length - offset - 4);
+                    if (!ShortResponse)
+                        observer.OnResponseData(Payload, offset + 4, Payload.Length - offset - 4);
                     return response;
                 }, token));
             }

@@ -58,32 +58,70 @@ namespace CefFlashBrowser.Views
                 IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload,
                 string requestInitiator, ref bool disableDefaultHandling)
             {
+                if (browser.IsPopup)
+                    return null;
+                if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var url)
+                    || url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps)
+                    return null;
+                var factory = chromiumWebBrowser.ResourceRequestHandlerFactory;
+                IResourceRequestHandler registered = null;
+                if (factory?.HasHandlers == true)
+                    registered = factory.GetResourceRequestHandler(chromiumWebBrowser, browser, frame,
+                        request, isNavigation, isDownload, requestInitiator, ref disableDefaultHandling);
                 return new DownloadResponseHandler(_view.browser.DownloadHandler as Browser.Handlers.DownloadHandler,
-                    frame?.Url, isDownload);
+                    frame?.Url, isDownload, registered);
             }
         }
 
-        private sealed class DownloadResponseHandler : CefSharp.Handler.ResourceRequestHandler
+        private sealed class DownloadResponseHandler : IResourceRequestHandler
         {
             private readonly Browser.Handlers.DownloadHandler _downloads;
             private readonly string _page;
             private readonly bool _isDownload;
+            private readonly IResourceRequestHandler _inner;
 
-            public DownloadResponseHandler(Browser.Handlers.DownloadHandler downloads, string page, bool isDownload)
+            public DownloadResponseHandler(Browser.Handlers.DownloadHandler downloads, string page, bool isDownload,
+                IResourceRequestHandler inner)
             {
                 _downloads = downloads;
                 _page = page;
                 _isDownload = isDownload;
+                _inner = inner;
             }
 
-            protected override bool OnResourceResponse(IWebBrowser chromiumWebBrowser, IBrowser browser,
+            public bool OnResourceResponse(IWebBrowser chromiumWebBrowser, IBrowser browser,
                 IFrame frame, IRequest request, IResponse response)
             {
+                var handled = _inner?.OnResourceResponse(chromiumWebBrowser, browser, frame, request, response) ?? false;
                 if (_isDownload || request.ResourceType == ResourceType.MainFrame || request.ResourceType == ResourceType.SubFrame
                     || !string.IsNullOrEmpty(response.Headers["Content-Disposition"]))
                     _downloads?.RememberResponse(request, response, _page);
-                return false;
+                return handled;
             }
+
+            public ICookieAccessFilter GetCookieAccessFilter(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request)
+                => _inner?.GetCookieAccessFilter(control, browser, frame, request);
+
+            public CefReturnValue OnBeforeResourceLoad(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, IRequestCallback callback)
+                => _inner?.OnBeforeResourceLoad(control, browser, frame, request, callback) ?? CefReturnValue.Continue;
+
+            public IResourceHandler GetResourceHandler(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request)
+                => _inner?.GetResourceHandler(control, browser, frame, request);
+
+            public void OnResourceRedirect(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, IResponse response, ref string newUrl)
+                => _inner?.OnResourceRedirect(control, browser, frame, request, response, ref newUrl);
+
+            public IResponseFilter GetResourceResponseFilter(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, IResponse response)
+                => _inner?.GetResourceResponseFilter(control, browser, frame, request, response);
+
+            public void OnResourceLoadComplete(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, IResponse response,
+                UrlRequestStatus status, long receivedContentLength)
+                => _inner?.OnResourceLoadComplete(control, browser, frame, request, response, status, receivedContentLength);
+
+            public bool OnProtocolExecution(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request)
+                => _inner?.OnProtocolExecution(control, browser, frame, request) ?? false;
+
+            public void Dispose() => _inner?.Dispose();
         }
 
         private class BrowserLifeSpanHandler : LifeSpanHandler

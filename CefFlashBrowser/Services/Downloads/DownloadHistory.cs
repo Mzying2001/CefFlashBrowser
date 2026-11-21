@@ -38,7 +38,6 @@ namespace CefFlashBrowser.Services.Downloads
                 if (record.State != DownloadState.Completed && !string.IsNullOrEmpty(record.PartialPath))
                     record.Received = File.Exists(record.PartialPath) ? new FileInfo(record.PartialPath).Length : 0;
 
-                record.FileMissing = record.State == DownloadState.Completed && !File.Exists(record.FilePath);
             }
             return records;
         }
