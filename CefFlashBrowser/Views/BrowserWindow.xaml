@@ -1,6 +1,7 @@
-﻿<Window x:Class="CefFlashBrowser.Views.BrowserWindow"
+<Window x:Class="CefFlashBrowser.Views.BrowserWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:services="clr-namespace:CefFlashBrowser.Services"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
@@ -211,81 +212,9 @@
 
             <Separator/>
 
-            <MenuItem Header="{DynamicResource userscript_downloads}"
-                      ItemsSource="{Binding CurrentBrowser.UserScriptDownloads}">
-                <MenuItem.Style>
-                    <Style TargetType="MenuItem"
-                           BasedOn="{StaticResource {x:Type MenuItem}}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding CurrentBrowser.UserScriptDownloads.Count}" Value="0">
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </MenuItem.Style>
-
-                <MenuItem.ItemContainerStyle>
-                    <Style TargetType="MenuItem"
-                           BasedOn="{StaticResource {x:Type MenuItem}}">
-                        <Setter Property="StaysOpenOnClick" Value="True"/>
-                    </Style>
-                </MenuItem.ItemContainerStyle>
-
-                <MenuItem.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel MinWidth="220"
-                                    MaxWidth="360">
-                            <TextBlock Text="{Binding FileName}"
-                                       TextTrimming="CharacterEllipsis"/>
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="0,4,0,0">
-                                <TextBlock Text="{Binding Received, Converter={StaticResource BinaryToSizeStringConverter}}"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,8,0"/>
-                                <TextBlock VerticalAlignment="Center"
-                                           Margin="0,0,10,0">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text"
-                                                    Value="{DynamicResource userscript_downloadWaiting}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding State}"
-                                                             Value="{x:Static vm:UserScriptDownloadState.Downloading}">
-                                                    <Setter Property="Text"
-                                                            Value="{DynamicResource userscript_downloading}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding State}"
-                                                             Value="{x:Static vm:UserScriptDownloadState.Completed}">
-                                                    <Setter Property="Text"
-                                                            Value="{DynamicResource userscript_downloadCompleted}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding State}"
-                                                             Value="{x:Static vm:UserScriptDownloadState.Cancelled}">
-                                                    <Setter Property="Text"
-                                                            Value="{DynamicResource userscript_downloadCancelled}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding State}"
-                                                             Value="{x:Static vm:UserScriptDownloadState.TimedOut}">
-                                                    <Setter Property="Text"
-                                                            Value="{DynamicResource userscript_downloadTimedOut}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding State}"
-                                                             Value="{x:Static vm:UserScriptDownloadState.Failed}">
-                                                    <Setter Property="Text"
-                                                            Value="{DynamicResource userscript_downloadFailed}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <Button Content="{DynamicResource common_cancel}"
-                                        Command="{Binding CancelCommand}"
-                                        Padding="6,2"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </DataTemplate>
-                </MenuItem.ItemTemplate>
-            </MenuItem>
+            <MenuItem Header="{DynamicResource downloads_title}"
+                      Command="{x:Static services:WindowManager.OpenDownloadsCommand}"
+                      InputGestureText="Ctrl+J"/>
 
             <MenuItem Header="{DynamicResource userscript_managePermissions}"
                       Click="OpenUserScriptPermissions"/>
@@ -460,6 +389,7 @@
 
 
     <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+J" Command="{x:Static services:WindowManager.OpenDownloadsCommand}"/>
         <!--<KeyBinding Key="Esc"
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>-->
         <KeyBinding Key="F5"

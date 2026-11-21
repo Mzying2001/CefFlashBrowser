@@ -21,6 +21,9 @@ namespace CefFlashBrowser.Services
 {
     public static class WindowManager
     {
+        public static SimpleMvvm.Command.DelegateCommand OpenDownloadsCommand { get; }
+            = new SimpleMvvm.Command.DelegateCommand(ShowDownloadManager);
+
         // store singleton window instances
         private static readonly Dictionary<Type, Window> _singletonWindows;
 
@@ -221,6 +224,11 @@ namespace CefFlashBrowser.Services
         public static void ShowUserScriptManager()
         {
             ShowWindow<UserScriptManager>(singleton: true);
+        }
+
+        public static void ShowDownloadManager()
+        {
+            ShowWindow<DownloadManagerWindow>(singleton: true);
         }
 
         internal static void ShowUserScriptDetails(UserScriptItemViewModel script, UserScriptManager owner)

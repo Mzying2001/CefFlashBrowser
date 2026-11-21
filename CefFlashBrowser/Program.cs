@@ -246,7 +246,7 @@ namespace CefFlashBrowser
         internal static void StopUserScriptsForExit()
         {
             // Do not resolve an unused service during failed/forwarding startup.
-            var work = _userScriptService?.StopAsync() ?? Task.CompletedTask;
+            var work = StopDownloadsAndScriptsAsync();
 
             if (!work.IsCompleted && Application.Current?.Dispatcher is Dispatcher dispatcher
                 && dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
@@ -258,6 +258,13 @@ namespace CefFlashBrowser
             }
 
             work.GetAwaiter().GetResult();
+        }
+
+        private static async Task StopDownloadsAndScriptsAsync()
+        {
+            await Services.Downloads.DownloadManagerService.StopForExitAsync();
+            if (_userScriptService != null)
+                await _userScriptService.StopAsync();
         }
 
         public static void Restart()

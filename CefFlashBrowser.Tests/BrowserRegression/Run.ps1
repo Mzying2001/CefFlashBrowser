@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory')][string]$Scenario = 'All'
+    [ValidateSet('All', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -24,6 +24,7 @@ foreach ($file in @(
     'Environment.ps1',
     'Helpers.ps1',
     'Scenarios\Language.ps1',
+    'Scenarios\Downloads.ps1',
     'Scenarios\Favorites.ps1',
     'Scenarios\ProxySettings.ps1',
     'Scenarios\BrowserWindow.ps1',
@@ -47,7 +48,9 @@ $context = New-RegressionContext $PSScriptRoot $Platform $Configuration
 $failure = $null
 try {
     Initialize-RegressionEnvironment $context
-    if ($Scenario -eq 'BrowserDisposal') {
+    if ($Scenario -eq 'DownloadManager') {
+        Test-DownloadManagerWindow $context
+    } elseif ($Scenario -eq 'BrowserDisposal') {
         Start-RegressionCef $context
         Test-BrowserFrameLoadStartAfterDisposal $context
     } elseif ($Scenario -eq 'TabClosing') {

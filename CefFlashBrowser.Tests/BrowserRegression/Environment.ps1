@@ -358,6 +358,13 @@ function Stop-RegressionEnvironment($Context) {
     }
     if ($null -ne $Context.UserScriptService) {
         try {
+            $downloads = [CefFlashBrowser.Services.Downloads.DownloadManagerService]::StopForExitAsync()
+            Wait-Regression $Context { $downloads.IsCompleted } 'download manager shutdown'
+            [void]$downloads.GetAwaiter().GetResult()
+        } catch {
+            $cleanupErrors.Add($_)
+        }
+        try {
             $scripts = $Context.UserScriptService.StopAsync()
             Wait-Regression $Context { $scripts.IsCompleted } 'userscript runtime shutdown'
             [void]$scripts.GetAwaiter().GetResult()

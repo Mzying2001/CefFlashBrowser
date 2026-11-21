@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -107,6 +107,9 @@ namespace CefFlashBrowser.Data
             {
                 var json = File.ReadAllText(SettingsPath, Encoding.UTF8);
                 Settings = JsonConvert.DeserializeObject<Settings>(json);
+                if (JObject.Parse(json).Property(nameof(Settings.DownloadDirectory)) == null
+                    && !string.IsNullOrWhiteSpace(Settings.UserScriptDownloadDirectory))
+                    Settings.DownloadDirectory = Settings.UserScriptDownloadDirectory;
                 Settings.SetNullPropertiesToDefault();
             }
             catch (JsonException)

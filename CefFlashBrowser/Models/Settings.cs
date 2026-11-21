@@ -1,4 +1,4 @@
-﻿namespace CefFlashBrowser.Models
+namespace CefFlashBrowser.Models
 {
     public class Settings
     {
@@ -171,6 +171,9 @@
         /// The directory for userscript downloads; defaults to the system Downloads folder when blank
         /// </summary>
         public string UserScriptDownloadDirectory { get; set; }
+
+        /// <summary>The remembered download directory, or null for the system Downloads folder.</summary>
+        public string DownloadDirectory { get; set; }
 
 
         /// <summary>
