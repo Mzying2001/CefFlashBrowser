@@ -317,7 +317,8 @@
     <sys:String x:Key="downloads_title">Загрузки</sys:String>
     <sys:String x:Key="downloads_new">Новая загрузка</sys:String>
     <sys:String x:Key="downloads_pause">Пауза</sys:String>
-    <sys:String x:Key="downloads_resume">Продолжить / Повторить</sys:String>
+    <sys:String x:Key="downloads_resume">Продолжить</sys:String>
+    <sys:String x:Key="downloads_retry">Повторить</sys:String>
     <sys:String x:Key="downloads_open">Открыть файл</sys:String>
     <sys:String x:Key="downloads_folder">Показать в папке</sys:String>
     <sys:String x:Key="downloads_remove">Удалить запись</sys:String>

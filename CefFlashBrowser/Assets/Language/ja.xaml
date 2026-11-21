@@ -317,7 +317,8 @@
     <sys:String x:Key="downloads_title">ダウンロード管理</sys:String>
     <sys:String x:Key="downloads_new">新しいダウンロード</sys:String>
     <sys:String x:Key="downloads_pause">一時停止</sys:String>
-    <sys:String x:Key="downloads_resume">再開 / 再試行</sys:String>
+    <sys:String x:Key="downloads_resume">再開</sys:String>
+    <sys:String x:Key="downloads_retry">再試行</sys:String>
     <sys:String x:Key="downloads_open">ファイルを開く</sys:String>
     <sys:String x:Key="downloads_folder">保存先を開く</sys:String>
     <sys:String x:Key="downloads_remove">履歴から削除</sys:String>

@@ -317,7 +317,8 @@
     <sys:String x:Key="downloads_title">下载管理</sys:String>
     <sys:String x:Key="downloads_new">新建下载</sys:String>
     <sys:String x:Key="downloads_pause">暂停</sys:String>
-    <sys:String x:Key="downloads_resume">继续 / 重试</sys:String>
+    <sys:String x:Key="downloads_resume">继续</sys:String>
+    <sys:String x:Key="downloads_retry">重试</sys:String>
     <sys:String x:Key="downloads_open">打开文件</sys:String>
     <sys:String x:Key="downloads_folder">打开所在位置</sys:String>
     <sys:String x:Key="downloads_remove">移除记录</sys:String>

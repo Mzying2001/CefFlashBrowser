@@ -14,6 +14,17 @@
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
+        <Style x:Key="DownloadResumeMenuItemStyle"
+               TargetType="MenuItem"
+               BasedOn="{StaticResource {x:Type MenuItem}}">
+            <Setter Property="Header" Value="{DynamicResource downloads_resume}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedItem.IsRetry}" Value="True">
+                    <Setter Property="Header" Value="{DynamicResource downloads_retry}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <ContextMenu x:Key="DownloadRowMenu"
                      DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
             <MenuItem Header="{DynamicResource downloads_open}"
@@ -23,7 +34,7 @@
             <Separator/>
             <MenuItem Header="{DynamicResource downloads_pause}"
                       Command="{Binding PauseCommand}"/>
-            <MenuItem Header="{DynamicResource downloads_resume}"
+            <MenuItem Style="{StaticResource DownloadResumeMenuItemStyle}"
                       Command="{Binding ResumeCommand}"/>
             <MenuItem Header="{DynamicResource common_cancel}"
                       Command="{Binding CancelCommand}"/>
@@ -72,7 +83,7 @@
             <MenuItem Header="{DynamicResource downloads_taskMenu}">
                 <MenuItem Header="{DynamicResource downloads_pause}"
                           Command="{Binding PauseCommand}"/>
-                <MenuItem Header="{DynamicResource downloads_resume}"
+                <MenuItem Style="{StaticResource DownloadResumeMenuItemStyle}"
                           Command="{Binding ResumeCommand}"/>
                 <MenuItem Header="{DynamicResource common_cancel}"
                           Command="{Binding CancelCommand}"/>

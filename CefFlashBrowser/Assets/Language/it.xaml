@@ -317,7 +317,8 @@
     <sys:String x:Key="downloads_title">Download</sys:String>
     <sys:String x:Key="downloads_new">Nuovo download</sys:String>
     <sys:String x:Key="downloads_pause">Pausa</sys:String>
-    <sys:String x:Key="downloads_resume">Riprendi / Riprova</sys:String>
+    <sys:String x:Key="downloads_resume">Riprendi</sys:String>
+    <sys:String x:Key="downloads_retry">Riprova</sys:String>
     <sys:String x:Key="downloads_open">Apri file</sys:String>
     <sys:String x:Key="downloads_folder">Mostra nella cartella</sys:String>
     <sys:String x:Key="downloads_remove">Rimuovi voce</sys:String>

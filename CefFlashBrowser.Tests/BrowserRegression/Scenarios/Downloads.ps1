@@ -12,6 +12,10 @@ function Test-DownloadManagerWindow($Context) {
     $details = $window.FindName('downloadDetails')
     $errorField = $window.FindName('detailError')
     $emptyMessage = $window.FindName('emptyDownloadMessage')
+    $resumeText = $Context.LanguageService.GetString('downloads_resume')
+    $retryText = $Context.LanguageService.GetString('downloads_retry')
+    $taskMenu = $window.Content.Children[0].Items | Where-Object { $_.Header -eq $Context.LanguageService.GetString('downloads_taskMenu') }
+    $taskResume = $taskMenu.Items | Where-Object { $_.Command -eq $model.ResumeCommand }
     Assert-Regression ($details.Visibility -eq 'Collapsed' -and $emptyMessage.Visibility -eq 'Visible' -and
         $emptyMessage.Text -eq $Context.LanguageService.GetString('downloads_empty')) 'empty download history leaves the details panel collapsed'
     $record = New-Object CefFlashBrowser.Models.Downloads.DownloadRecord
@@ -76,6 +80,21 @@ function Test-DownloadManagerWindow($Context) {
     try {
         Wait-Regression $Context { $menu.Items[0].Command -eq $model.OpenCommand } 'row context menu binds to the download commands'
         Assert-Regression (@($menu.Items | Where-Object { $_.Header -eq $Context.LanguageService.GetString('downloads_details') }).Count -eq 0) 'row context menu has no details action'
+        $rowResume = $menu.Items | Where-Object { $_.Command -eq $model.ResumeCommand }
+        Assert-Regression ($taskResume.Header -eq $retryText -and $rowResume.Header -eq $retryText -and $rowResume.IsEnabled) 'selecting a failed download shows Retry in both menus'
+
+        $actionTextByState = [ordered]@{
+            Paused = $resumeText
+            Interrupted = $resumeText
+            Cancelled = $retryText
+            TimedOut = $retryText
+            Failed = $retryText
+        }
+        foreach ($state in $actionTextByState.GetEnumerator()) {
+            $failure.State = [CefFlashBrowser.Models.Downloads.DownloadState]$state.Key
+            $manager.Refresh($false)
+            Assert-Regression ($taskResume.Header -eq $state.Value -and $rowResume.Header -eq $state.Value) "both menus update the action text for a $($state.Key) download"
+        }
     } finally {
         $menu.IsOpen = $false
     }
@@ -93,8 +112,15 @@ function Test-DownloadManagerWindow($Context) {
     }
     $list.SelectedItem = $completedItem
     Assert-Regression ($details.Visibility -eq 'Visible' -and $errorField.Visibility -eq 'Collapsed') 'details follow selection and hide cleared errors'
+    Assert-Regression ($taskResume.Header -eq $resumeText) 'selecting a completed download restores the default Resume label'
     $list.SelectedItem = $null
     Assert-Regression ($details.Visibility -eq 'Collapsed') 'clearing selection returns the details space to the list'
+    $taskMenu.IsSubmenuOpen = $true
+    try {
+        Wait-Regression $Context { $taskMenu.IsSubmenuOpen -and $taskResume.Header -eq $resumeText -and !$taskResume.IsEnabled } 'the task menu shows a disabled Resume action without a selection'
+    } finally {
+        $taskMenu.IsSubmenuOpen = $false
+    }
     Set-TabWindowForeground $Context $window
     $filter.Text = 'failed.bin'
     $list.SelectedItem = $failedItem
@@ -115,6 +141,7 @@ function Test-DownloadManagerWindow($Context) {
     $manager.Refresh()
     Wait-Regression $Context { $record.FileMissing } 'refresh detects the deleted file asynchronously'
     Assert-Regression ($record.FileMissing -and !$canExecute.Invoke($model.OpenCommand, [object[]]@($null))) 'externally deleted file updates its state and open action'
+    Assert-Regression ($taskResume.Header -eq $retryText -and $canExecute.Invoke($model.ResumeCommand, [object[]]@($null))) 'a missing file changes the action to Retry'
     $window.Close()
     [CefFlashBrowser.Services.WindowManager]::ShowDownloadManager()
     $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0]
