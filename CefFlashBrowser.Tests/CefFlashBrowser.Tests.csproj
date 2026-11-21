@@ -38,6 +38,12 @@
 
   <!-- Link source files from the main app -->
   <ItemGroup>
+    <Compile Include="..\CefFlashBrowser\Models\Downloads\*.cs" Link="LinkedSources\Downloads\%(Filename)%(Extension)" />
+    <Compile Include="..\CefFlashBrowser\Services\Downloads\IDownloadTransfer.cs" Link="LinkedSources\Downloads\IDownloadTransfer.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\Downloads\HttpDownloadTransfer.cs" Link="LinkedSources\Downloads\HttpDownloadTransfer.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\Downloads\DownloadFiles.cs" Link="LinkedSources\Downloads\DownloadFiles.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\Downloads\DownloadHistory.cs" Link="LinkedSources\Downloads\DownloadHistory.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\FileHelper.cs" Link="LinkedSources\FileHelper.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\PasswordProtector.cs" Link="LinkedSources\PasswordProtector.cs" />
     <Compile Include="..\CefFlashBrowser\Services\DatabaseService.cs" Link="LinkedSources\DatabaseService.cs" />
     <Compile Include="..\CefFlashBrowser\Models\WebsiteIconRecord.cs" Link="LinkedSources\WebsiteIconRecord.cs" />
