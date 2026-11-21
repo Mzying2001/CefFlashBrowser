@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.WinformCefSharp4WPF.Internals;
+using CefFlashBrowser.WinformCefSharp4WPF.Internals;
 using CefSharp;
 using CefSharp.Internals;
 using SimpleMvvm.Command;
@@ -33,10 +33,35 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         private volatile bool hasInitialBlank;
         private Task disposalTask;
         private bool disposalPrepared;
+        private bool downloadRetained;
 
         public Func<Task> BeforeDisposeAsync { get; set; }
 
         public Task DisposalCompletion => disposalTask ?? Task.CompletedTask;
+
+        /// <summary>Transfers native ownership to a hidden download host while the WPF host closes.</summary>
+        public IDisposable RetainNativeHost(IntPtr parentHandle)
+        {
+            Dispatcher.VerifyAccess();
+            if (browser.IsDisposed || downloadRetained)
+                throw new InvalidOperationException("The native browser cannot be retained.");
+            Win32.SetParent(browser.Handle, parentHandle);
+            browser.Visible = false;
+            downloadRetained = true;
+            return new NativeDownloadLease(() =>
+            {
+                Dispatcher.VerifyAccess();
+                downloadRetained = false;
+                browser.Dispose();
+            });
+        }
+
+        private sealed class NativeDownloadLease : IDisposable
+        {
+            private Action release;
+            public NativeDownloadLease(Action releaseAction) { release = releaseAction; }
+            public void Dispose() { Interlocked.Exchange(ref release, null)?.Invoke(); }
+        }
 
         // Set before hosting. The callback owns preparation and navigation; history
         // and page-initiated navigation continue to be handled by CEF.
@@ -478,7 +503,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             navigationVersion++;
             navigationCancellation?.Cancel();
 
-            if (!browser.IsDisposed)
+            if (!browser.IsDisposed && !downloadRetained)
             {
                 browser.Dispose();
             }
@@ -524,7 +549,8 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 browser.TitleChanged -= OnTitleChanged;
                 browser.IsBrowserInitializedChanged -= OnIsBrowserInitializedChanged;
 
-                browser.Dispose();
+                if (!downloadRetained)
+                    browser.Dispose();
             }
 
             Cef.RemoveDisposable(this);

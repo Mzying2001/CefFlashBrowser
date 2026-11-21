@@ -17,7 +17,8 @@ namespace CefFlashBrowser.ViewModels
         public string Error => Record.Error == "downloads_restartRequired" ? DownloadManagerService.Text(Record.Error) : Record.Error;
         public string Size => FormatSize(Record.Received) + " / " + (Record.Total.HasValue ? FormatSize(Record.Total.Value) : "—");
         public string Speed => Record.State == DownloadState.Downloading ? FormatSize(Record.Speed) + "/s" : "—";
-        public double Progress => Record.Total > 0 ? Math.Min(100, 100.0 * Record.Received / Record.Total.Value) : 0;
+        public double Progress => Record.State == DownloadState.Completed ? 100
+            : Record.Total > 0 ? Math.Min(100, 100.0 * Record.Received / Record.Total.Value) : 0;
         public bool IsIndeterminate => Record.State == DownloadState.Downloading && !Record.Total.HasValue;
         public bool IsActive => Record.State == DownloadState.Waiting || Record.State == DownloadState.Downloading || Record.State == DownloadState.Paused;
         public bool CanOpen => Record.State == DownloadState.Completed && !Record.FileMissing;

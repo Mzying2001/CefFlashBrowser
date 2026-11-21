@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Browser.UserScripts;
+using CefFlashBrowser.Browser.UserScripts;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.FlashBrowser.Handlers;
@@ -6,6 +6,7 @@ using CefFlashBrowser.Log;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Services.UserScripts;
+using CefFlashBrowser.Services.Downloads;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefSharp;
@@ -51,6 +52,37 @@ namespace CefFlashBrowser.Views
                         || targetDisposition == WindowOpenDisposition.NewForegroundTab
                         || targetDisposition == WindowOpenDisposition.NewWindow)
                     && _view.TryQueueUserScriptInstall(targetUrl);
+            }
+
+            protected override IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser,
+                IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload,
+                string requestInitiator, ref bool disableDefaultHandling)
+            {
+                return new DownloadResponseHandler(_view.browser.DownloadHandler as Browser.Handlers.DownloadHandler,
+                    frame?.Url, isDownload);
+            }
+        }
+
+        private sealed class DownloadResponseHandler : CefSharp.Handler.ResourceRequestHandler
+        {
+            private readonly Browser.Handlers.DownloadHandler _downloads;
+            private readonly string _page;
+            private readonly bool _isDownload;
+
+            public DownloadResponseHandler(Browser.Handlers.DownloadHandler downloads, string page, bool isDownload)
+            {
+                _downloads = downloads;
+                _page = page;
+                _isDownload = isDownload;
+            }
+
+            protected override bool OnResourceResponse(IWebBrowser chromiumWebBrowser, IBrowser browser,
+                IFrame frame, IRequest request, IResponse response)
+            {
+                if (_isDownload || request.ResourceType == ResourceType.MainFrame || request.ResourceType == ResourceType.SubFrame
+                    || !string.IsNullOrEmpty(response.Headers["Content-Disposition"]))
+                    _downloads?.RememberResponse(request, response, _page);
+                return false;
             }
         }
 
@@ -556,6 +588,11 @@ namespace CefFlashBrowser.Views
 
         private void DestroyClosedBrowser()
         {
+            if (RetainBrowserDownloads())
+            {
+                Dispose();
+                return;
+            }
             if (!browser.IsNativeControlCreated)
             {
                 Dispatcher.InvokeAsync(Dispose);
@@ -615,6 +652,7 @@ namespace CefFlashBrowser.Views
             if (_isClosed)
                 return;
 
+            RetainBrowserDownloads();
             _isClosed = true;
 
             // Normal accepted closes already awaited this task. Preserve the same
@@ -670,6 +708,12 @@ namespace CefFlashBrowser.Views
             // fall back to sending WM_CLOSE to a surviving multi-tab window.
             browser.Dispose();
             _closeCompletion?.TrySetResult(true);
+        }
+
+        private bool RetainBrowserDownloads()
+        {
+            return browser.DownloadHandler is Browser.Handlers.DownloadHandler downloads
+                && DownloadManagerService.Current.RetainBrowser(browser, downloads);
         }
 
         private void DevToolsOpenedHandler(object msg)

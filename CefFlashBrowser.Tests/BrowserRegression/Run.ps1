@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory')][string]$Scenario = 'All'
+    [ValidateSet('All', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -50,6 +50,9 @@ try {
     Initialize-RegressionEnvironment $context
     if ($Scenario -eq 'DownloadManager') {
         Test-DownloadManagerWindow $context
+    } elseif ($Scenario -eq 'BrowserDownloads') {
+        Start-RegressionCef $context
+        Test-BrowserDownloads $context
     } elseif ($Scenario -eq 'BrowserDisposal') {
         Start-RegressionCef $context
         Test-BrowserFrameLoadStartAfterDisposal $context

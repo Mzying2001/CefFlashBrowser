@@ -173,6 +173,7 @@ function Initialize-RegressionEnvironment($Context) {
         (Join-Path $Context.ScriptPath 'UserScriptMenuProbe.cs'),
         (Join-Path $Context.ScriptPath 'UserScriptInteractionProbe.cs'),
         (Join-Path $Context.ScriptPath 'UserScriptHttpFixture.cs'),
+        (Join-Path $Context.ScriptPath 'DownloadHttpFixture.cs'),
         (Join-Path $Context.ScriptPath 'UserScriptFrameProbe.cs'),
         (Join-Path $Context.ScriptPath 'UserScriptRuntimeProbe.cs')
     )

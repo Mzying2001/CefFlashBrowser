@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Threading;
 
 namespace CefFlashBrowser.Services.Downloads
@@ -38,6 +39,8 @@ namespace CefFlashBrowser.Services.Downloads
         private Task _stop;
         private bool _dirty;
         private int _ticks;
+        private HwndSource _nativeHost;
+        private readonly HashSet<WinformCefSharp4WPF.ChromiumWebBrowser> _retainedBrowsers = new HashSet<WinformCefSharp4WPF.ChromiumWebBrowser>();
 
         public ObservableCollection<DownloadItemViewModel> Items { get; } = new ObservableCollection<DownloadItemViewModel>();
         public bool IsStopping => _stop != null;
@@ -273,6 +276,26 @@ namespace CefFlashBrowser.Services.Downloads
             _cleanup.Add(ReleaseAsync(completion, release));
         }
 
+        public bool RetainBrowser(WinformCefSharp4WPF.ChromiumWebBrowser browser, Browser.Handlers.DownloadHandler handler)
+        {
+            _dispatcher.VerifyAccess();
+            if (_retainedBrowsers.Contains(browser))
+                return true;
+            if (!handler.HasActiveDownloads || IsStopping)
+                return false;
+            if (_nativeHost == null)
+                _nativeHost = new HwndSource(new HwndSourceParameters("CefFlashBrowser downloads")
+                { WindowStyle = unchecked((int)0x80000000), Width = 1, Height = 1 });
+            var lease = browser.RetainNativeHost(_nativeHost.Handle);
+            _retainedBrowsers.Add(browser);
+            RetainUntil(handler.Retire(), () =>
+            {
+                lease.Dispose();
+                _retainedBrowsers.Remove(browser);
+            });
+            return true;
+        }
+
         private static async Task ReleaseAsync(Task completion, Action release)
         {
             try { await completion; }
@@ -289,6 +312,7 @@ namespace CefFlashBrowser.Services.Downloads
             await SaveAsync();
             _http?.Dispose();
             _context?.Dispose();
+            _nativeHost?.Dispose();
         }
 
         public static string Text(string key) => SimpleIoc.Global.GetInstance<LanguageService>().GetString(key);
