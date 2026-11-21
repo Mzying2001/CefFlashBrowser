@@ -7,7 +7,8 @@ function Complete-UserScriptTask($Context, $Task, [string]$Message) {
 function Test-UserScriptDownloadsAndAudio($Context) {
     Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'download runtime'
     $fixture = New-Object UserScriptHttpFixture
-    $directory = [CefFlashBrowser.Data.GlobalData]::Settings.UserScriptDownloadDirectory
+    $directory = [CefFlashBrowser.Data.GlobalData]::Settings.DownloadDirectory
+    $manager = [CefFlashBrowser.Services.Downloads.DownloadManagerService]::Current
     $source = @'
 // ==UserScript==
 // @name Download and audio probe
@@ -79,7 +80,7 @@ function Test-UserScriptDownloadsAndAudio($Context) {
         $session = $view.GetType().GetField('_userScriptSession', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($view)
         $downloads = $session.GetType().GetField('_downloads', [Reflection.BindingFlags]'Instance,NonPublic').GetValue($session)
         $probe = New-Object UserScriptDownloadProbe($downloads, $installation.ScriptKey, ($fixture.BaseUrl + '/download'))
-        Assert-Regression ($fixture.RequestsFor('/download') -eq 0 -and !$probe.Operation.Completion.IsCompleted -and $model.UserScriptDownloads.Count -eq 0) 'download creation starts neither UI nor network work'
+        Assert-Regression ($fixture.RequestsFor('/download') -eq 0 -and !$probe.Operation.Completion.IsCompleted -and $manager.Items.Count -eq 0) 'download creation starts neither UI nor network work'
         $probe.Operation.Start()
         $probe.Operation.Start()
         Complete-UserScriptTask $Context $probe.Operation.Completion 'unstarted download commit'
@@ -119,30 +120,37 @@ function Test-UserScriptDownloadsAndAudio($Context) {
             (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-download-state')") -eq 'completed'
         } 'renderer Blob download is committed'
         Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'blob.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'Blob download preserves staged bytes'
-        $picker = New-Object UserScriptSaveDialogProbe($model.Browser, $Context.LanguageService.GetString('userscript_saveDownload'))
+        $dialogState = @{ Seen = $false }
+        $dialogTimer = New-Object Windows.Threading.DispatcherTimer
+        $dialogTimer.Interval = [TimeSpan]::FromMilliseconds(30)
+        $dialogTimer.Add_Tick({
+            $dialog = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.DownloadDialog] -and $_.IsVisible })
+            if ($dialog.Count -gt 0) { $dialogState.Seen = $true }
+        }.GetNewClosure())
+        $dialogTimer.Start()
         try {
             [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadSaveAs'))")
-            Wait-Regression $Context { $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].FileName -eq 'saveas.bin' -and
-                $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::Cancelled } 'abort closes the native save picker'
-            Assert-Regression ($picker.Seen -and ![IO.File]::Exists((Join-Path $directory 'saveas.bin'))) 'saveAs starts native UI and aborts without committing'
-        } finally { $picker.Dispose() }
+            Wait-Regression $Context { $manager.Items[0].FileName -eq 'saveas.bin' -and
+                $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Cancelled } 'abort closes the shared download dialog'
+            Assert-Regression ($dialogState.Seen -and ![IO.File]::Exists((Join-Path $directory 'saveas.bin'))) 'saveAs opens the shared dialog and aborts without committing'
+        } finally { $dialogTimer.Stop() }
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadUiCancel'))")
-        Wait-Regression $Context { $fixture.RequestsFor('/slow-ui-cancel') -eq 1 -and $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].FileName -eq 'ui-cancel.bin' } 'download history exposes an active cancel action'
-        $cancelItem = $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1]
-        Invoke-BrowserCommand $cancelItem.CancelCommand
-        Wait-Regression $Context { $cancelItem.State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::Cancelled } 'download UI cancels the accepted operation'
+        Wait-Regression $Context { $fixture.RequestsFor('/slow-ui-cancel') -eq 1 -and $manager.Items[0].FileName -eq 'ui-cancel.bin' } 'download history exposes an active cancel action'
+        $cancelItem = $manager.Items[0]
+        Complete-UserScriptTask $Context ($manager.CancelAsync($cancelItem.Record)) 'cancel from download manager'
+        Wait-Regression $Context { $cancelItem.Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Cancelled } 'download UI cancels the accepted operation'
 
 
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadFailed'))")
-        Wait-Regression $Context { $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::Failed } 'failed response reaches terminal UI state'
+        Wait-Regression $Context { $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Failed } 'failed response reaches terminal UI state'
         Assert-Regression (![IO.File]::Exists((Join-Path $directory 'failed.bin'))) 'failed download does not commit a file'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadAbort'))")
         Wait-Regression $Context { $fixture.RequestsFor('/slow-abort') -eq 1 } 'abort fixture starts transfer'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadCancel'))")
-        Wait-Regression $Context { $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::Cancelled } 'explicit abort reaches terminal UI state'
+        Wait-Regression $Context { $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Cancelled } 'explicit abort reaches terminal UI state'
         Assert-Regression (![IO.File]::Exists((Join-Path $directory 'abort.bin'))) 'aborted download does not commit a file'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadTimeout'))")
-        Wait-Regression $Context { $model.UserScriptDownloads[$model.UserScriptDownloads.Count - 1].State -eq [CefFlashBrowser.ViewModels.UserScriptDownloadState]::TimedOut } 'timeout reaches terminal UI state'
+        Wait-Regression $Context { $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::TimedOut } 'timeout reaches terminal UI state'
         Assert-Regression (![IO.File]::Exists((Join-Path $directory 'timeout.bin'))) 'timed-out download does not commit a file'
 
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadNavigation'))")
@@ -174,7 +182,9 @@ function Test-UserScriptDownloadsAndAudio($Context) {
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadClose'))")
         Wait-Regression $Context { $fixture.RequestsFor('/slow-close') -eq 1 } 'pending transfer before close'
         $window.ForceCloseWindow()
-        Assert-Regression (![IO.File]::Exists((Join-Path $directory 'close.bin')) -and @(Get-ChildItem -LiteralPath $directory -Filter '*.part').Count -eq 0) 'tab close cancels transfers and drains partial-file cleanup'
+        $fixture.Release('/slow-close')
+        Wait-Regression $Context { [IO.File]::Exists((Join-Path $directory 'close.bin')) } 'tab close retains the accepted transfer'
+        Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'close.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'closed source download commits the exact response bytes'
     } finally {
         if ($null -ne $window) { $window.ForceCloseWindow() }
         $fixture.Dispose()
@@ -633,7 +643,7 @@ function Test-UserScriptMenus($Context) {
             $headers = @($actionsMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] } | ForEach-Object { $_.Header })
             Assert-Regression ($headers -notcontains $window.FindResource('userscript_commands') -and
                 $headers -contains $window.FindResource('common_manageUserScripts') -and
-                $headers -contains $window.FindResource('userscript_downloads')) 'actions retain script management and downloads after moving script commands'
+                $headers -contains $window.FindResource('downloads_title')) 'actions retain script management and downloads after moving script commands'
         } finally {
             $actionsMenu.IsOpen = $false
         }

@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Utils;
 using CefSharp;
@@ -47,7 +47,6 @@ namespace CefFlashBrowser.ViewModels
 
 
         public ObservableCollection<UserScriptMenuCommand> UserScriptMenus { get; }
-        public ObservableCollection<UserScriptDownloadItem> UserScriptDownloads { get; }
 
 
         private UserScriptState _userScriptState;
@@ -126,7 +125,6 @@ namespace CefFlashBrowser.ViewModels
         public BrowserViewModel()
         {
             UserScriptMenus = new ObservableCollection<UserScriptMenuCommand>();
-            UserScriptDownloads = new ObservableCollection<UserScriptDownloadItem>();
 
             if (GlobalData.Settings.SaveZoomLevel)
             {

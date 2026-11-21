@@ -3,6 +3,7 @@ using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Services.UserScripts;
+using CefFlashBrowser.Services.Downloads;
 using CefFlashBrowser.Services.UserScripts.Persistence;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
@@ -262,12 +263,7 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         private UserScriptDownloadService CreateDownloadService(IHttpRequestService http)
         {
-            var directory = string.IsNullOrWhiteSpace(GlobalData.Settings.UserScriptDownloadDirectory)
-                ? UserScriptDownloadPaths.DefaultDirectory()
-                : GlobalData.Settings.UserScriptDownloadDirectory;
-
-            return _downloads = new UserScriptDownloadService(http, _model, _ownerWindow,
-                _dispatcher, directory, _lifetime.Token);
+            return _downloads = new UserScriptDownloadService(http, _model, _dispatcher);
         }
 
         public async Task NavigateAsync(string address, CancellationToken token)
@@ -400,9 +396,6 @@ namespace CefFlashBrowser.Browser.UserScripts
             SetState(UserScriptState.Stopping);
             _lifetime.Cancel();
 
-            foreach (var retired in _retiredHosts.ToArray())
-                retired.Downloads.Dispose();
-
             if (_initialization != null)
             {
                 try
@@ -433,21 +426,19 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 try
                 {
-                    await Task.WhenAll(_retiredHosts.Select(retired => retired.Drain).ToArray());
                     _audio.StateChanged -= AudioStateChanged;
                     _audio.Dispose();
-                    _http?.Dispose();
-
-                    if (_http != null)
-                        await Cef.UIThreadTaskFactory.StartNew(() => { });
+                    var drain = Task.WhenAll(_retiredHosts.Select(retired => retired.Drain).ToArray());
+                    DownloadManagerService.Current.RetainUntil(drain, () =>
+                    {
+                        _http?.Dispose();
+                        _webRequests?.Dispose();
+                        if (_ownsRequestContext)
+                            _requestContext?.Dispose();
+                    });
                 }
                 finally
                 {
-                    _webRequests?.Dispose();
-
-                    if (_ownsRequestContext)
-                        _requestContext?.Dispose();
-
                     try
                     {
                         if (_tabState != null)
@@ -482,9 +473,6 @@ namespace CefFlashBrowser.Browser.UserScripts
 
             downloads?.Retire();
 
-            if (closing)
-                downloads?.Dispose();
-
             host.Diagnostic -= Diagnostic;
 
             if (_contextMenu != null && ReferenceEquals(_browser.MenuHandler, _contextMenu))
@@ -508,7 +496,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     menus?.Dispose();
                     runtimeRepository?.Dispose();
 
-                    if (!closing && downloads != null && downloads.ActiveCount != 0)
+                    if (downloads != null && downloads.ActiveCount != 0)
                     {
                         var retired = new RetiredHost
                         {

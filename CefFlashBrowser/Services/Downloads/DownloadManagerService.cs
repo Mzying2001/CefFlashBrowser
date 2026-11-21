@@ -28,6 +28,7 @@ namespace CefFlashBrowser.Services.Downloads
         private readonly Dispatcher _dispatcher;
         private readonly DownloadHistory _history;
         private readonly Dictionary<string, IDownloadTransfer> _transfers = new Dictionary<string, IDownloadTransfer>();
+        private readonly List<Task> _cleanup = new List<Task>();
         private readonly DispatcherTimer _timer;
         private readonly SemaphoreSlim _dialogs = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim _saves = new SemaphoreSlim(1, 1);
@@ -266,12 +267,25 @@ namespace CefFlashBrowser.Services.Downloads
 
         public Task StopAsync() => _stop ?? (_stop = StopCoreAsync());
 
+        public void RetainUntil(Task completion, Action release)
+        {
+            _dispatcher.VerifyAccess();
+            _cleanup.Add(ReleaseAsync(completion, release));
+        }
+
+        private static async Task ReleaseAsync(Task completion, Action release)
+        {
+            try { await completion; }
+            finally { release(); }
+        }
+
         private async Task StopCoreAsync()
         {
             await Task.Yield();
             _timer.Stop();
             _lifetime.Cancel();
             await Task.WhenAll(_transfers.Values.Select(transfer => transfer.ShutdownAsync()));
+            await Task.WhenAll(_cleanup.ToArray());
             await SaveAsync();
             _http?.Dispose();
             _context?.Dispose();

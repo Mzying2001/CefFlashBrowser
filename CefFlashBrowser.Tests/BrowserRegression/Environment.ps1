@@ -200,6 +200,7 @@ function Initialize-RegressionEnvironment($Context) {
     $globalDataType.GetField('<SwfPlayerPath>k__BackingField', $privateStatic).SetValue(
         $null, (Join-Path $Context.ApplicationPath 'Assets\SwfPlayer\swfplayer.html'))
     [CefFlashBrowser.Data.GlobalData]::Settings.UserScriptDownloadDirectory = Join-Path $Context.TemporaryPath 'Downloads'
+    [CefFlashBrowser.Data.GlobalData]::Settings.DownloadDirectory = Join-Path $Context.TemporaryPath 'Downloads'
     [CefFlashBrowser.Data.GlobalData]::IsStartWithoutMainWindow = $true
     $locator = New-Object CefFlashBrowser.ViewModels.ViewModelLocator
     $Context.Application.Resources.Add('Locator', $locator.PSObject.BaseObject)

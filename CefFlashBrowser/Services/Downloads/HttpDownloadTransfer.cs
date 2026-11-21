@@ -85,6 +85,12 @@ namespace CefFlashBrowser.Services.Downloads
             }
             await running.ConfigureAwait(false);
 
+            if (shutdown && Record.State == DownloadState.Paused)
+            {
+                lock (Record.SyncRoot) Record.State = DownloadState.Interrupted;
+                Changed?.Invoke(this, EventArgs.Empty);
+            }
+
             if (cancel)
             {
                 lock (Record.SyncRoot)
@@ -281,7 +287,9 @@ namespace CefFlashBrowser.Services.Downloads
                 _request?.RedirectAllowed ?? ((target, cancellation) => Task.FromResult(true)),
                 new UserScriptHttpRequestOptions { Anonymous = Record.Anonymous }, _request?.OriginFrame);
             var operation = _http.SendAsync(request, this, token);
-            var response = await operation.Completion.ConfigureAwait(false);
+            UserScriptHttpResponse response;
+            try { response = await operation.Completion.ConfigureAwait(false); }
+            catch (Exception) when (_responseError != null) { throw _responseError; }
             if (_responseError != null)
                 throw _responseError;
             Record.Url = response.FinalUrl.AbsoluteUri;
