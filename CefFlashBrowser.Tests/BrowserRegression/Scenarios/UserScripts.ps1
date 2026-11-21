@@ -104,6 +104,7 @@ function Test-UserScriptDownloadsAndAudio($Context) {
         $permission.FindName('allowRememberButton').RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Button]::ClickEvent)))
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-download-state')") -eq 'completed' } 'modern download completion acknowledgement'
         Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $directory 'actual.bin'))) -eq [Convert]::ToBase64String($fixture.Payload)) 'modern GM download resolves after bytes are committed'
+        Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] }).Count -eq 0) 'GM download completes with the download manager closed'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadSimple'))")
         Wait-Regression $Context { [IO.File]::Exists((Join-Path $directory 'actual (1).bin')) -and
             (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-download-state')") -eq 'completed' } 'default collision uniquifies the file'

@@ -64,15 +64,30 @@ namespace CefFlashBrowser.Services.Downloads
 
                     Record.PartialPath = Record.FilePath + "." + Record.Id + ".part";
 
-                    await Cef.UIThreadTaskFactory.StartNew(() =>
+                    var continued = await Cef.UIThreadTaskFactory.StartNew(() =>
                     {
-                        if (!_before.IsDisposed)
+                        var canContinue = !_before.IsDisposed;
+                        if (canContinue)
                             _before.Continue(Record.PartialPath, false);
                         _before.Dispose();
+                        return canContinue;
                     });
 
                     Record.State = DownloadState.Downloading;
                     Changed?.Invoke(this, EventArgs.Empty);
+
+                    if (continued && !_manager.IsStopping)
+                    {
+                        try
+                        {
+                            WindowManager.ShowDownloadManager();
+                        }
+                        catch (Exception error)
+                        {
+                            LogHelper.LogError("Failed to open the download manager", error);
+                        }
+                    }
+
                     await _manager.SaveRecordAsync(Record);
                 }
                 finally

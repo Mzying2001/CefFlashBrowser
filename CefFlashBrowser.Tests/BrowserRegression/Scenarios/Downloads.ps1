@@ -221,12 +221,13 @@ function Test-BrowserDownloads($Context) {
     $window = New-RegressionWindow $Context
     $model = $window.ViewModel.CurrentBrowser
     $model.Address = $fixture.BaseUrl + '/page'
-    $dialogState = @{ Seen = $false; CancelNext = $false; ConfirmFileAction = $false }
+    $dialogState = @{ Seen = $false; CancelNext = $false; ConfirmFileAction = $false; ManagerVisibleBeforeConfirmation = $false }
     $timer = New-Object Windows.Threading.DispatcherTimer
     $timer.Interval = [TimeSpan]::FromMilliseconds(30)
     $timer.Add_Tick({
         foreach ($dialog in @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.DownloadDialog] -and $_.IsVisible })) {
             $dialogState.Seen = $true
+            $dialogState.ManagerVisibleBeforeConfirmation = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] -and $_.IsVisible }).Count -gt 0
             if ($dialogState.CancelNext) {
                 $dialogState.CancelNext = $false
                 $dialog.FindName('cancelButton').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
@@ -266,10 +267,28 @@ function Test-BrowserDownloads($Context) {
             }
             @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0].Close()
         }
+
+        $dialogState.CancelNext = $true
+        $model.Browser.GetBrowser().GetHost().StartDownload($fixture.BaseUrl + '/slow-dismiss')
+        Wait-Regression $Context {
+            $manager.Items.Count -gt 0 -and $manager.Items[0].FileName -eq 'slow-dismiss.bin' -and
+                $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Cancelled
+        } 'native download confirmation is cancelled'
+        Assert-Regression (!$dialogState.ManagerVisibleBeforeConfirmation -and
+            @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] }).Count -eq 0) 'cancelling confirmation keeps the download manager closed'
+
+        $dialogState.Seen = $false
         $model.Browser.GetBrowser().GetHost().StartDownload($fixture.BaseUrl + '/slow')
-        Wait-Regression $Context { $manager.Items.Count -gt 0 -and $manager.Items[0].Record.Received -gt 16384 } 'native browser download receives bytes'
-        $record = $manager.Items[0].Record
+        Wait-Regression $Context { $manager.Items[0].FileName -eq 'slow.bin' -and $manager.Items[0].Record.Received -gt 16384 } 'native browser download receives bytes'
+        $downloadItem = $manager.Items[0]
+        $record = $downloadItem.Record
         Assert-Regression ($dialogState.Seen -and $record.Source -eq 'browser' -and $record.Method -eq 'GET') 'native download uses shared confirmation and preserves request metadata'
+        Assert-Regression (!$dialogState.ManagerVisibleBeforeConfirmation) 'download manager stays closed while confirmation is pending'
+        Wait-Regression $Context {
+            $downloads = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] -and $_.IsVisible })
+            $downloads.Count -eq 1 -and $downloads[0].FindName('downloadList').Items.Contains($downloadItem)
+        } 'native download opens the download manager with the new task'
+        $managerWindow = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0]
         Complete-UserScriptTask $Context ($manager.PauseAsync($record)) 'native download pause'
         Assert-Regression ($record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Paused) 'native pause reaches the shared task state'
         Complete-UserScriptTask $Context ($manager.ResumeAsync($record)) 'native download resume'
@@ -283,9 +302,13 @@ function Test-BrowserDownloads($Context) {
         $model = $window.ViewModel.CurrentBrowser
         $model.Address = $fixture.BaseUrl + '/page'
         Wait-Regression $Context { $model.Browser.CanExecuteJavascriptInMainFrame -and $model.Browser.Title -eq 'Download fixture' } 'POST download source ready'
+        $managerWindow.WindowState = [Windows.WindowState]::Minimized
         [void](Invoke-JavaScript $Context $model.Browser "document.getElementById('post').submit()")
         Wait-Regression $Context { $manager.Items[0].FileName -eq 'post.bin' -and $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Completed } 'POST response downloads through native transport'
         Assert-Regression ($fixture.PostCount -eq 1 -and $manager.Items[0].Record.Method -eq 'POST') 'browser download preserves POST without repeating it'
+        Wait-Regression $Context { $managerWindow.WindowState -eq [Windows.WindowState]::Normal } 'another native download restores the minimized download manager'
+        $downloadWindows = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })
+        Assert-Regression ($downloadWindows.Count -eq 1 -and [object]::ReferenceEquals($downloadWindows[0], $managerWindow)) 'native downloads reuse the same download manager window'
 
         [void](Invoke-JavaScript $Context $model.Browser "var a=document.createElement('a');a.download='native-blob.bin';a.href=URL.createObjectURL(new Blob([new Uint8Array([0,1,2,255,127])]));a.click()")
         Wait-Regression $Context { $manager.Items[0].FileName -eq 'native-blob.bin' -and $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Completed } 'native Blob download completes'
