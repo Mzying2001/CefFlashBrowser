@@ -19,9 +19,7 @@ $context = New-RegressionContext $PSScriptRoot $Platform $Configuration
 $timer = $null
 
 try {
-    Initialize-RegressionEnvironment $context
-    $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
-    [CefFlashBrowser.Data.GlobalData].GetField('<DataPath>k__BackingField', $privateStatic).SetValue($null, $ProfilePath)
+    Initialize-RegressionEnvironment $context (Join-Path $ProfilePath 'browser.db')
     [CefFlashBrowser.Data.GlobalData]::Settings.DownloadDirectory = Join-Path $ProfilePath 'Files'
     Start-RegressionCef $context (Join-Path $ProfilePath 'Cache')
     $manager = [CefFlashBrowser.Services.Downloads.DownloadManagerService]::Current

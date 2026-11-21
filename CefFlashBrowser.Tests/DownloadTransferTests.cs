@@ -1,9 +1,12 @@
+using CefFlashBrowser.Database;
 using CefFlashBrowser.Models.Downloads;
+using CefFlashBrowser.Services;
 using CefFlashBrowser.Services.Downloads;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mzying2001.MonkeySharp.Core.Apis;
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -126,18 +129,74 @@ namespace CefFlashBrowser.Tests
             await transfer.ShutdownAsync();
             await running;
 
-            var path = Path.Combine(_directory, "history.json");
-            var history = new DownloadHistory(path);
-            history.Save(new[] { record });
-            Assert.IsFalse(File.ReadAllText(path).Contains("test-secret"));
-            var restored = history.Load().Single();
+            // Simulate the last snapshot before an abrupt exit, with more bytes reported than were flushed.
+            record.State = DownloadState.Downloading;
+            record.Received = 10;
+            var path = Path.Combine(_directory, "browser.db");
+            using (var database = new SqliteDatabase(path))
+            {
+                await new DatabaseService(database).ReplaceDownloadsAsync(new[] { record });
+                var protectedHeaders = (string)await database.ScalarAsync("SELECT protected_headers FROM downloads");
+                StringAssert.StartsWith(protectedHeaders, "dpapi:v1:");
+                Assert.IsFalse(protectedHeaders.Contains("test-secret"));
+            }
+
+            DownloadRecord restored;
+            using (var database = new SqliteDatabase(path))
+                restored = (await new DatabaseService(database).GetDownloadsAsync()).Single();
+
             Assert.AreEqual(DownloadState.Interrupted, restored.State);
             Assert.AreEqual(4L, restored.Received);
-            Assert.AreEqual("test-secret", restored.Headers["Authorization"]);
+            Assert.AreEqual("test-secret", restored.Headers["authorization"]);
 
             await new HttpDownloadTransfer(restored, new FakeHttp(), null).StartAsync();
 
             CollectionAssert.AreEqual(http.Payload, File.ReadAllBytes(restored.FilePath));
+        }
+
+        [TestMethod]
+        public async Task HistoryReplacesRecordsAtomically()
+        {
+            using (var database = new SqliteDatabase(Path.Combine(_directory, "browser.db")))
+            {
+                var service = new DatabaseService(database);
+                var completed = CreateRecord();
+                completed.State = DownloadState.Completed;
+                completed.Finished = completed.Created.AddSeconds(1);
+                completed.Received = 12;
+                completed.Total = 12;
+                completed.Overwrite = true;
+                completed.FileMissing = true;
+                completed.Speed = 12;
+
+                var waiting = CreateRecord();
+                waiting.Created = completed.Created.AddSeconds(2);
+                waiting.PartialPath = Path.Combine(_directory, "missing.part");
+                waiting.Received = 5;
+
+                await service.ReplaceDownloadsAsync(new[] { completed, waiting });
+                await Assert.ThrowsExceptionAsync<SQLiteException>(() => service.ReplaceDownloadsAsync(new[] { completed, completed }));
+
+                var restored = await service.GetDownloadsAsync();
+                CollectionAssert.AreEqual(new[] { waiting.Id, completed.Id }, restored.Select(record => record.Id).ToArray());
+                Assert.AreEqual(DownloadState.Interrupted, restored[0].State);
+                Assert.AreEqual(0L, restored[0].Received);
+                Assert.IsNull(restored[0].Total);
+                Assert.IsNull(restored[0].Finished);
+                Assert.AreEqual(DownloadState.Completed, restored[1].State);
+                Assert.AreEqual(completed.Finished, restored[1].Finished);
+                Assert.AreEqual(completed.Total, restored[1].Total);
+                Assert.AreEqual(completed.Received, restored[1].Received);
+                Assert.IsTrue(restored[1].Overwrite);
+                Assert.IsFalse(restored[1].FileMissing);
+                Assert.AreEqual(0d, restored[1].Speed);
+
+                await service.ReplaceDownloadsAsync(new[] { completed });
+                Assert.AreEqual(completed.Id, (await service.GetDownloadsAsync()).Single().Id);
+
+                await service.ReplaceDownloadsAsync(Array.Empty<DownloadRecord>());
+                Assert.AreEqual(0, (await service.GetDownloadsAsync()).Count);
+            }
         }
 
         [TestMethod]

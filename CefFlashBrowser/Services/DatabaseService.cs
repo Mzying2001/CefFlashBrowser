@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace CefFlashBrowser.Services
 {
     // The application owns the injected database and closes it after its consumers stop.
-    public class DatabaseService
+    public partial class DatabaseService
     {
         private const string SelectUserScriptSql =
             "SELECT script_id, source_origin, is_enabled, installed_at, updated_at, " +
@@ -125,6 +125,12 @@ namespace CefFlashBrowser.Services
                 {
                     session.Execute("ALTER TABLE monkeysharp_scripts ADD COLUMN sort_order INTEGER");
                     session.Execute("PRAGMA user_version = 3");
+                }
+
+                if (version < 4)
+                {
+                    CreateDownloadsTable(session);
+                    session.Execute("PRAGMA user_version = 4");
                 }
             }).ConfigureAwait(false);
         }

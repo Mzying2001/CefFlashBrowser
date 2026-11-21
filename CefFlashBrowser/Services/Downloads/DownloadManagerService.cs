@@ -1,4 +1,3 @@
-using CefFlashBrowser.Data;
 using CefFlashBrowser.Models.Downloads;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
@@ -27,7 +26,8 @@ namespace CefFlashBrowser.Services.Downloads
         public static Task StopForExitAsync() => _current?.StopAsync() ?? Task.CompletedTask;
 
         private readonly Dispatcher _dispatcher;
-        private readonly DownloadHistory _history;
+        private readonly DatabaseService _database;
+        private readonly bool _historyLoaded;
         private readonly Dictionary<string, IDownloadTransfer> _transfers = new Dictionary<string, IDownloadTransfer>();
         private readonly List<Task> _cleanup = new List<Task>();
         private readonly DispatcherTimer _timer;
@@ -51,12 +51,13 @@ namespace CefFlashBrowser.Services.Downloads
         {
             _dispatcher = Application.Current.Dispatcher;
             _dispatcher.VerifyAccess();
-            _history = new DownloadHistory(Path.Combine(GlobalData.DataPath, "downloads.json"));
+            _database = SimpleIoc.Global.GetInstance<DatabaseService>();
 
             try
             {
-                foreach (var record in _history.Load().OrderByDescending(record => record.Created))
+                foreach (var record in _database.GetDownloadsAsync().GetAwaiter().GetResult())
                     Items.Add(CreateItem(record));
+                _historyLoaded = true;
             }
             catch (Exception error)
             {
@@ -280,7 +281,9 @@ namespace CefFlashBrowser.Services.Downloads
 
                 _dirty = true;
                 Refresh(false);
-                _ = SaveAsync();
+
+                if (!IsStopping)
+                    _ = SaveAsync();
             });
         }
 
@@ -346,17 +349,20 @@ namespace CefFlashBrowser.Services.Downloads
 
         public async Task SaveAsync()
         {
-            var records = Items.Select(item => item.Record).ToArray();
-            _dirty = false;
+            // Replacing the history is safe only after the existing snapshot has loaded.
+            if (!_historyLoaded)
+                return;
 
             await _saves.WaitAsync();
 
             try
             {
-                await Task.Run(() => _history.Save(records));
+                _dirty = false;
+                await _database.ReplaceDownloadsAsync(Items.Select(item => item.Record).ToArray());
             }
             catch (Exception error)
             {
+                _dirty = true;
                 LogHelper.LogError("Failed to save download history", error);
             }
             finally

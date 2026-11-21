@@ -77,7 +77,7 @@ function Expand-RegressionEmbeddedAssemblies($Context) {
     }
 }
 
-function Initialize-RegressionEnvironment($Context) {
+function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
     $dependencies = @(
         'ICSharpCode.AvalonEdit.dll',
         'Mzying2001.MonkeySharp.Core.dll',
@@ -186,11 +186,12 @@ function Initialize-RegressionEnvironment($Context) {
     [System.Windows.Application]::ResourceAssembly = $applicationAssembly
     $Context.Application = New-Object System.Windows.Application
     $Context.Application.ShutdownMode = [System.Windows.ShutdownMode]::OnExplicitShutdown
+    if (!$DatabasePath) { $DatabasePath = Join-Path $Context.TemporaryPath 'browser.db' }
     foreach ($dataPath in @{
         DataPath = $Context.TemporaryPath
         FavoritesPath = (Join-Path $Context.TemporaryPath 'favorites.json')
         SettingsPath = (Join-Path $Context.TemporaryPath 'settings.json')
-        DatabasePath = (Join-Path $Context.TemporaryPath 'browser.db')
+        DatabasePath = $DatabasePath
         MonkeySharpPath = (Join-Path $Context.TemporaryPath 'MonkeySharp')
         UserScriptCachePath = (Join-Path $Context.TemporaryPath 'Caches\UserScripts')
     }.GetEnumerator()) {
@@ -221,7 +222,7 @@ function Initialize-RegressionEnvironment($Context) {
 
     [Threading.SynchronizationContext]::SetSynchronizationContext(
         (New-Object System.Windows.Threading.DispatcherSynchronizationContext($Context.Application.Dispatcher)))
-    $Context.Database = New-Object CefFlashBrowser.Database.SqliteDatabase((Join-Path $Context.TemporaryPath 'browser.db'))
+    $Context.Database = New-Object CefFlashBrowser.Database.SqliteDatabase($DatabasePath)
     $Context.DatabaseService = New-Object CefFlashBrowser.Services.DatabaseService($Context.Database)
     $Context.FaviconService = New-Object CefFlashBrowser.Services.FaviconService($Context.DatabaseService, $Context.Logger)
     [void]$registerInstance.MakeGenericMethod([CefFlashBrowser.Database.IDatabase]).Invoke(

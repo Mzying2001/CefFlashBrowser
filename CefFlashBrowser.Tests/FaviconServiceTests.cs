@@ -415,7 +415,7 @@ namespace CefFlashBrowser.Tests
 
             Assert.AreEqual("https://example.com/saved-icon", _service.GetIconUrl("https://example.com/saved"));
             Assert.AreEqual("https://example.com/icon", _service.GetIconUrl("https://example.com/a"));
-            Assert.AreEqual(3L, _database.ScalarAsync("PRAGMA user_version").GetAwaiter().GetResult());
+            Assert.AreEqual(4L, _database.ScalarAsync("PRAGMA user_version").GetAwaiter().GetResult());
             Assert.AreEqual(2L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
         }
 
