@@ -477,7 +477,7 @@
                 </Border>
 
                 <Border DockPanel.Dock="Bottom"
-                        Padding="10,5"
+                        MaxHeight="100"
                         BorderThickness="1,0,1,1"
                         Background="{DynamicResource SecondaryRegionBrush}"
                         BorderBrush="{DynamicResource BorderBrush}">
@@ -493,9 +493,12 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <TextBlock Text="{Binding SelectedScript.Problem}"
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBlock Margin="10,5"
+                                   Text="{Binding SelectedScript.Problem}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </ScrollViewer>
                 </Border>
 
                 <c:ScriptEditor x:Name="sourceEditor"
