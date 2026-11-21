@@ -334,6 +334,8 @@
     <sys:String x:Key="downloads_browse">Parcourir…</sys:String>
     <sys:String x:Key="downloads_rememberDirectory">Mémoriser ce dossier</sys:String>
     <sys:String x:Key="downloads_start">Télécharger</sys:String>
+    <sys:String x:Key="downloads_systemDownload">Télécharger avec Windows</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows n’a pas pu démarrer le téléchargement.</sys:String>
     <sys:String x:Key="downloads_missing">Fichier supprimé</sys:String>
     <sys:String x:Key="downloads_Waiting">En attente</sys:String>
     <sys:String x:Key="downloads_Downloading">Téléchargement en cours</sys:String>

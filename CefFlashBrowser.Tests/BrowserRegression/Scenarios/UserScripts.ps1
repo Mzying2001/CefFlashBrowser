@@ -126,7 +126,10 @@ function Test-UserScriptDownloadsAndAudio($Context) {
         $dialogTimer.Interval = [TimeSpan]::FromMilliseconds(30)
         $dialogTimer.Add_Tick({
             $dialog = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.DownloadDialog] -and $_.IsVisible })
-            if ($dialog.Count -gt 0) { $dialogState.Seen = $true }
+            if ($dialog.Count -gt 0) {
+                $dialogState.Seen = $true
+                $dialogState.SystemButtonHidden = $dialog[0].FindName('systemDownloadButton').Visibility -eq [Windows.Visibility]::Collapsed
+            }
         }.GetNewClosure())
         $dialogTimer.Start()
         try {
@@ -134,6 +137,7 @@ function Test-UserScriptDownloadsAndAudio($Context) {
             Wait-Regression $Context { $manager.Items[0].FileName -eq 'saveas.bin' -and
                 $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Cancelled } 'abort closes the shared download dialog'
             Assert-Regression ($dialogState.Seen -and ![IO.File]::Exists((Join-Path $directory 'saveas.bin'))) 'saveAs opens the shared dialog and aborts without committing'
+            Assert-Regression $dialogState.SystemButtonHidden 'userscript download hides the system download button'
         } finally { $dialogTimer.Stop() }
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('downloadUiCancel'))")
         Wait-Regression $Context { $fixture.RequestsFor('/slow-ui-cancel') -eq 1 -and $manager.Items[0].FileName -eq 'ui-cancel.bin' } 'download history exposes an active cancel action'

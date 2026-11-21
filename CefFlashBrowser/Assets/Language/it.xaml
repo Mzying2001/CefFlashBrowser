@@ -334,6 +334,8 @@
     <sys:String x:Key="downloads_browse">Sfoglia…</sys:String>
     <sys:String x:Key="downloads_rememberDirectory">Ricorda questa cartella</sys:String>
     <sys:String x:Key="downloads_start">Scarica</sys:String>
+    <sys:String x:Key="downloads_systemDownload">Scarica con Windows</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows non ha potuto avviare il download.</sys:String>
     <sys:String x:Key="downloads_missing">File eliminato</sys:String>
     <sys:String x:Key="downloads_Waiting">In attesa</sys:String>
     <sys:String x:Key="downloads_Downloading">Download in corso</sys:String>

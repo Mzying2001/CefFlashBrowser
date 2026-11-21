@@ -334,6 +334,8 @@
     <sys:String x:Key="downloads_browse">Durchsuchen…</sys:String>
     <sys:String x:Key="downloads_rememberDirectory">Diesen Ordner merken</sys:String>
     <sys:String x:Key="downloads_start">Herunterladen</sys:String>
+    <sys:String x:Key="downloads_systemDownload">Mit Windows herunterladen</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows konnte den Download nicht starten.</sys:String>
     <sys:String x:Key="downloads_missing">Datei gelöscht</sys:String>
     <sys:String x:Key="downloads_Waiting">Wartet</sys:String>
     <sys:String x:Key="downloads_Downloading">Wird heruntergeladen</sys:String>

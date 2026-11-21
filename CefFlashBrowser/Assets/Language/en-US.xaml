@@ -334,6 +334,8 @@
     <sys:String x:Key="downloads_browse">Browse…</sys:String>
     <sys:String x:Key="downloads_rememberDirectory">Remember this folder</sys:String>
     <sys:String x:Key="downloads_start">Download</sys:String>
+    <sys:String x:Key="downloads_systemDownload">Download with Windows</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows could not start the download.</sys:String>
     <sys:String x:Key="downloads_missing">File deleted</sys:String>
     <sys:String x:Key="downloads_Waiting">Waiting</sys:String>
     <sys:String x:Key="downloads_Downloading">Downloading</sys:String>

@@ -334,6 +334,8 @@
     <sys:String x:Key="downloads_browse">찾아보기…</sys:String>
     <sys:String x:Key="downloads_rememberDirectory">이 폴더 기억</sys:String>
     <sys:String x:Key="downloads_start">다운로드</sys:String>
+    <sys:String x:Key="downloads_systemDownload">Windows로 다운로드</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows에서 다운로드를 시작하지 못했습니다.</sys:String>
     <sys:String x:Key="downloads_missing">파일 삭제됨</sys:String>
     <sys:String x:Key="downloads_Waiting">대기 중</sys:String>
     <sys:String x:Key="downloads_Downloading">다운로드 중</sys:String>

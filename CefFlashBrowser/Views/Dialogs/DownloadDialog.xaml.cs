@@ -6,6 +6,7 @@ using CefFlashBrowser.Utils;
 using Microsoft.Win32;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,6 +17,9 @@ namespace CefFlashBrowser.Views.Dialogs
         private DownloadRecord _record;
         private string _directory;
 
+        internal Func<string, int> StartSystemDownload { get; set; } = Win32.DoFileDownload;
+        internal bool SystemDownloadStarted { get; private set; }
+
         public DownloadDialog()
         {
             InitializeComponent();
@@ -23,12 +27,21 @@ namespace CefFlashBrowser.Views.Dialogs
 
         public void Initialize(DownloadRecord record)
         {
+            Initialize(record, false);
+        }
+
+        internal void Initialize(DownloadRecord record, bool offerSystemDownload)
+        {
             _record = record;
             _directory = DownloadFiles.DirectoryOrDefault(GlobalData.Settings.DownloadDirectory);
             urlBox.Text = record.Url ?? string.Empty;
             urlBox.IsReadOnly = record.Source != "manual";
             pathBox.Text = DownloadFiles.AvailablePath(Path.Combine(_directory,
                 UserScriptDownloadPaths.SafeFileName(record.FileName)));
+            systemDownloadButton.Visibility = offerSystemDownload ? Visibility.Visible : Visibility.Collapsed;
+            systemDownloadButton.IsEnabled = offerSystemDownload && record.Method == "GET"
+                && Uri.TryCreate(record.Url, UriKind.Absolute, out var url)
+                && (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps);
 
             if (string.IsNullOrEmpty(record.Url))
                 urlBox.Focus();
@@ -94,6 +107,41 @@ namespace CefFlashBrowser.Views.Dialogs
             catch (Exception error)
             {
                 WindowManager.ShowError(error.Message);
+            }
+        }
+
+        private void SystemDownload(object sender, RoutedEventArgs e)
+        {
+            if (!systemDownloadButton.IsEnabled || SystemDownloadStarted)
+                return;
+
+            IsEnabled = false;
+            try
+            {
+                Marshal.ThrowExceptionForHR(StartSystemDownload(_record.Url), new IntPtr(-1));
+                SystemDownloadStarted = true;
+            }
+            catch (Exception error)
+            {
+                LogHelper.LogError("Failed to start the system download", error);
+            }
+            finally
+            {
+                IsEnabled = true;
+            }
+
+            if (!IsVisible)
+                return;
+
+            if (SystemDownloadStarted)
+            {
+                DialogHelper.SetDialogResult(this, false);
+            }
+            else
+            {
+                WindowManager.ShowAlertDialog(
+                    DownloadManagerService.Text("downloads_systemDownloadFailed"),
+                    DownloadManagerService.Text("common_error"), this);
             }
         }
 

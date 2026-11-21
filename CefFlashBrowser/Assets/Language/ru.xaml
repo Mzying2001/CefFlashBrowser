@@ -334,6 +334,8 @@
     <sys:String x:Key="downloads_browse">Обзор…</sys:String>
     <sys:String x:Key="downloads_rememberDirectory">Запомнить эту папку</sys:String>
     <sys:String x:Key="downloads_start">Загрузить</sys:String>
+    <sys:String x:Key="downloads_systemDownload">Загрузить через Windows</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows не удалось начать загрузку.</sys:String>
     <sys:String x:Key="downloads_missing">Файл удалён</sys:String>
     <sys:String x:Key="downloads_Waiting">Ожидание</sys:String>
     <sys:String x:Key="downloads_Downloading">Загрузка</sys:String>

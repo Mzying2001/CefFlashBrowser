@@ -334,6 +334,8 @@
     <sys:String x:Key="downloads_browse">浏览…</sys:String>
     <sys:String x:Key="downloads_rememberDirectory">记住保存目录</sys:String>
     <sys:String x:Key="downloads_start">下载</sys:String>
+    <sys:String x:Key="downloads_systemDownload">系统下载</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows 无法启动此下载。</sys:String>
     <sys:String x:Key="downloads_missing">文件已删除</sys:String>
     <sys:String x:Key="downloads_Waiting">等待中</sys:String>
     <sys:String x:Key="downloads_Downloading">下载中</sys:String>

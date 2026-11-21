@@ -21,6 +21,13 @@ namespace CefFlashBrowser.Services.Downloads
 {
     public sealed class DownloadManagerService
     {
+        internal enum DestinationChoice
+        {
+            Cancelled,
+            Application,
+            System
+        }
+
         private static DownloadManagerService _current;
         public static DownloadManagerService Current => _current ?? (_current = new DownloadManagerService());
         public static Task StopForExitAsync() => _current?.StopAsync() ?? Task.CompletedTask;
@@ -236,6 +243,17 @@ namespace CefFlashBrowser.Services.Downloads
 
         public async Task<bool> SelectDestinationAsync(DownloadRecord record, CancellationToken token)
         {
+            return await SelectDestinationAsync(record, token, false).ConfigureAwait(false) == DestinationChoice.Application;
+        }
+
+        internal Task<DestinationChoice> SelectBrowserDestinationAsync(DownloadRecord record, CancellationToken token)
+        {
+            return SelectDestinationAsync(record, token, true);
+        }
+
+        private async Task<DestinationChoice> SelectDestinationAsync(DownloadRecord record, CancellationToken token,
+            bool offerSystemDownload)
+        {
             using (var linked = CancellationTokenSource.CreateLinkedTokenSource(token, _lifetime.Token))
             {
                 await _dialogs.WaitAsync(linked.Token).ConfigureAwait(false);
@@ -246,7 +264,7 @@ namespace CefFlashBrowser.Services.Downloads
                         linked.Token.ThrowIfCancellationRequested();
 
                         var dialog = WindowManager.CreateWindow<DownloadDialog>();
-                        dialog.Initialize(record);
+                        dialog.Initialize(record, offerSystemDownload);
 
                         using (linked.Token.Register(() => _dispatcher.BeginInvoke(new Action(() =>
                         {
@@ -254,7 +272,10 @@ namespace CefFlashBrowser.Services.Downloads
                                 dialog.Close();
                         }))))
                         {
-                            return DialogHelper.ShowModal(dialog) == true;
+                            if (DialogHelper.ShowModal(dialog) == true)
+                                return DestinationChoice.Application;
+
+                            return dialog.SystemDownloadStarted ? DestinationChoice.System : DestinationChoice.Cancelled;
                         }
                     });
                 }
@@ -263,6 +284,19 @@ namespace CefFlashBrowser.Services.Downloads
                     _dialogs.Release();
                 }
             }
+        }
+
+        internal async Task CompleteSystemDownloadHandoffAsync(NativeDownloadTransfer transfer)
+        {
+            // Detach the CEF transfer before cancellation so its final updates cannot restore the history entry.
+            var item = Items.FirstOrDefault(candidate => ReferenceEquals(candidate.Record, transfer.Record));
+            var current = Find(transfer.Record);
+
+            if (item != null && (current == null || ReferenceEquals(current, transfer)))
+                RemoveItem(item);
+
+            await transfer.CancelAsync();
+            await SaveAsync();
         }
 
         private void TransferChanged(object sender, EventArgs e)
@@ -383,6 +417,7 @@ namespace CefFlashBrowser.Services.Downloads
                     return;
 
                 _pending = new Dictionary<string, DownloadRecord>();
+
                 var upserts = batch.Values.Where(record => record != null).ToArray();
                 var removedIds = batch.Where(change => change.Value == null).Select(change => change.Key).ToArray();
                 await _database.ApplyDownloadChangesAsync(upserts, removedIds);

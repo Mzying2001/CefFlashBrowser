@@ -40,18 +40,26 @@
                   Content="{DynamicResource downloads_rememberDirectory}"
                   Margin="0,14,0,16"/>
 
-        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="downloadButton"
-                    Content="{DynamicResource downloads_start}"
-                    Click="StartDownload"
-                    IsDefault="True"
-                    MinWidth="85"/>
-            <Button x:Name="cancelButton"
-                    Content="{DynamicResource common_cancel}"
-                    Click="Cancel"
-                    IsCancel="True"
+        <Grid Grid.Row="5">
+            <Button x:Name="systemDownloadButton"
+                    Content="{DynamicResource downloads_systemDownload}"
+                    Click="SystemDownload"
+                    HorizontalAlignment="Left"
                     MinWidth="85"
-                    Margin="8,0,0,0"/>
-        </StackPanel>
+                    Visibility="Collapsed"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="downloadButton"
+                        Content="{DynamicResource downloads_start}"
+                        Click="StartDownload"
+                        IsDefault="True"
+                        MinWidth="85"/>
+                <Button x:Name="cancelButton"
+                        Content="{DynamicResource common_cancel}"
+                        Click="Cancel"
+                        IsCancel="True"
+                        MinWidth="85"
+                        Margin="8,0,0,0"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

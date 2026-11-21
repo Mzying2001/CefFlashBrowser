@@ -334,6 +334,8 @@
     <sys:String x:Key="downloads_browse">参照…</sys:String>
     <sys:String x:Key="downloads_rememberDirectory">この保存先を記憶する</sys:String>
     <sys:String x:Key="downloads_start">ダウンロード</sys:String>
+    <sys:String x:Key="downloads_systemDownload">Windows でダウンロード</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows でダウンロードを開始できませんでした。</sys:String>
     <sys:String x:Key="downloads_missing">ファイルは削除済み</sys:String>
     <sys:String x:Key="downloads_Waiting">待機中</sys:String>
     <sys:String x:Key="downloads_Downloading">ダウンロード中</sys:String>

@@ -151,6 +151,7 @@ function Test-DownloadManagerWindow($Context) {
         $dialogRecord.FileName = 'test.bin'
         $dialog = New-Object CefFlashBrowser.Views.Dialogs.DownloadDialog
         $dialog.Initialize($dialogRecord)
+        Assert-Regression ($dialog.FindName('systemDownloadButton').Visibility -eq [Windows.Visibility]::Collapsed) 'manual download hides the system download button'
         Assert-Regression ([IO.Path]::GetDirectoryName($dialog.FindName('pathBox').Text) -eq [CefFlashBrowser.Utils.UserScriptDownloadPaths]::DefaultDirectory()) 'invalid configured folder falls back to system Downloads'
         $chosen = Join-Path $Context.TemporaryPath 'Remembered\chosen.bin'
         $dialog.FindName('pathBox').Text = $chosen
@@ -163,6 +164,18 @@ function Test-DownloadManagerWindow($Context) {
         $nextDialog.Initialize($dialogRecord)
         Assert-Regression ([IO.Path]::GetDirectoryName($nextDialog.FindName('pathBox').Text) -eq [IO.Path]::GetDirectoryName($chosen)) 'next confirmation uses the remembered folder'
         $nextDialog.Close()
+
+        $unknownRecord = New-Object CefFlashBrowser.Models.Downloads.DownloadRecord
+        $unknownRecord.Source = 'browser'
+        $unknownRecord.Url = $dialogRecord.Url
+        $unknownRecord.FileName = $dialogRecord.FileName
+        $unknownRecord.Method = ''
+        $unknownDialog = New-Object CefFlashBrowser.Views.Dialogs.DownloadDialog
+        $initialize = $unknownDialog.GetType().GetMethod('Initialize', [Reflection.BindingFlags]'Instance,NonPublic')
+        [void]$initialize.Invoke($unknownDialog, [object[]]@($unknownRecord.PSObject.BaseObject, $true))
+        $systemButton = $unknownDialog.FindName('systemDownloadButton')
+        Assert-Regression ($systemButton.Visibility -eq [Windows.Visibility]::Visible -and !$systemButton.IsEnabled) 'unknown browser request method disables system download'
+        $unknownDialog.Close()
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.DownloadDirectory = $directory
         [void][CefFlashBrowser.Data.GlobalData]::SaveSettings()
@@ -221,13 +234,50 @@ function Test-BrowserDownloads($Context) {
     $window = New-RegressionWindow $Context
     $model = $window.ViewModel.CurrentBrowser
     $model.Address = $fixture.BaseUrl + '/page'
-    $dialogState = @{ Seen = $false; CancelNext = $false; ConfirmFileAction = $false; ManagerVisibleBeforeConfirmation = $false }
+    $dialogState = @{ Seen = $false; CancelNext = $false; ConfirmFileAction = $false; ManagerVisibleBeforeConfirmation = $false; SystemDownload = $null }
     $timer = New-Object Windows.Threading.DispatcherTimer
     $timer.Interval = [TimeSpan]::FromMilliseconds(30)
     $timer.Add_Tick({
         foreach ($dialog in @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.DownloadDialog] -and $_.IsVisible })) {
             $dialogState.Seen = $true
             $dialogState.ManagerVisibleBeforeConfirmation = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] -and $_.IsVisible }).Count -gt 0
+            $systemButton = $dialog.FindName('systemDownloadButton')
+            $dialogState.SystemButtonDisabled = $systemButton.Visibility -eq [Windows.Visibility]::Visible -and !$systemButton.IsEnabled
+            if ($null -ne $dialogState.SystemDownload) {
+                $handoff = $dialogState.SystemDownload
+                if ($handoff.Result -ge 0) {
+                    $handoff.Record = $manager.Items[0].Record
+                    $handoff.Transfer = $manager.Find($handoff.Record)
+                    $handoff.Sql = "SELECT COUNT(*) FROM downloads WHERE id = '$($handoff.Record.Id)'"
+                    $handoff.RowPersisted = $Context.Database.ScalarAsync($handoff.Sql).GetAwaiter().GetResult() -eq 1
+                    if (!$handoff.RowPersisted -and $handoff.Wait.Elapsed.TotalSeconds -lt 8) { continue }
+                }
+                $dialogState.SystemDownload = $null
+                $systemPosition = $systemButton.TranslatePoint([Windows.Point]::new(0, 0), $dialog)
+                $downloadPosition = $dialog.FindName('downloadButton').TranslatePoint([Windows.Point]::new(0, 0), $dialog)
+                $handoff.ButtonOnLeft = $systemPosition.X -lt $downloadPosition.X -and [Math]::Abs($systemPosition.Y - $downloadPosition.Y) -lt 1
+                $start = [Func[string,int]]({
+                    param($url)
+                    $handoff.RequestedUrl = $url
+                    $handoff.DialogDisabled = !$dialog.IsEnabled
+                    return $handoff.Result
+                }.GetNewClosure())
+                $dialog.GetType().GetProperty('StartSystemDownload', [Reflection.BindingFlags]'Instance,NonPublic').SetValue($dialog, $start.PSObject.BaseObject)
+                if ($handoff.Result -lt 0) {
+                    [void]$Context.Application.Dispatcher.BeginInvoke([Windows.Threading.DispatcherPriority]::Background, [Action]({
+                        foreach ($alert in @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.JsAlertDialog] -and $_.IsVisible })) {
+                            $handoff.FailureShown = $alert.Owner -eq $dialog -and $alert.Message -eq [CefFlashBrowser.Services.Downloads.DownloadManagerService]::Text('downloads_systemDownloadFailed')
+                            $alert.FindName('okButton').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
+                        }
+                    }.GetNewClosure()))
+                }
+                $systemButton.RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
+                if ($handoff.Result -ge 0) {
+                    if ($dialog.IsVisible) { $dialog.FindName('cancelButton').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent))) }
+                    continue
+                }
+                $handoff.FallbackAvailable = $dialog.IsVisible -and $dialog.IsEnabled
+            }
             if ($dialogState.CancelNext) {
                 $dialogState.CancelNext = $false
                 $dialog.FindName('cancelButton').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
@@ -268,6 +318,17 @@ function Test-BrowserDownloads($Context) {
             @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0].Close()
         }
 
+        $systemUrl = $fixture.BaseUrl + '/slow-system'
+        $handoff = @{ Result = 0; Wait = [Diagnostics.Stopwatch]::StartNew() }
+        $dialogState.SystemDownload = $handoff
+        $model.Browser.GetBrowser().GetHost().StartDownload($systemUrl)
+        Wait-Regression $Context { $null -ne $handoff.Transfer -and $handoff.Transfer.Released.IsCompleted } 'system handoff releases the original CEF transfer'
+        Assert-Regression ($handoff.ButtonOnLeft -and $handoff.DialogDisabled -and $handoff.RequestedUrl -ceq $systemUrl) 'system button is left of Download and hands Windows the original URL'
+        Assert-Regression ($handoff.RowPersisted -and $null -eq $handoff.Record.FilePath -and $null -eq $handoff.Record.PartialPath -and
+            @($manager.Items | Where-Object { $_.Record.Id -eq $handoff.Record.Id }).Count -eq 0) 'system handoff removes the original task before CEF starts writing'
+        Wait-Regression $Context { $Context.Database.ScalarAsync($handoff.Sql).GetAwaiter().GetResult() -eq 0 } 'system handoff deletes the persisted download row'
+        Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] }).Count -eq 0) 'system handoff leaves the download manager closed'
+
         $dialogState.CancelNext = $true
         $model.Browser.GetBrowser().GetHost().StartDownload($fixture.BaseUrl + '/slow-dismiss')
         Wait-Regression $Context {
@@ -278,10 +339,13 @@ function Test-BrowserDownloads($Context) {
             @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] }).Count -eq 0) 'cancelling confirmation keeps the download manager closed'
 
         $dialogState.Seen = $false
+        $failedHandoff = @{ Result = -2147467259 }
+        $dialogState.SystemDownload = $failedHandoff
         $model.Browser.GetBrowser().GetHost().StartDownload($fixture.BaseUrl + '/slow')
         Wait-Regression $Context { $manager.Items[0].FileName -eq 'slow.bin' -and $manager.Items[0].Record.Received -gt 16384 } 'native browser download receives bytes'
         $downloadItem = $manager.Items[0]
         $record = $downloadItem.Record
+        Assert-Regression ($failedHandoff.FailureShown -and $failedHandoff.FallbackAvailable) 'system download failure leaves the same dialog usable for CEF download'
         Assert-Regression ($dialogState.Seen -and $record.Source -eq 'browser' -and $record.Method -eq 'GET') 'native download uses shared confirmation and preserves request metadata'
         Assert-Regression (!$dialogState.ManagerVisibleBeforeConfirmation) 'download manager stays closed while confirmation is pending'
         Wait-Regression $Context {
@@ -305,6 +369,7 @@ function Test-BrowserDownloads($Context) {
         $managerWindow.WindowState = [Windows.WindowState]::Minimized
         [void](Invoke-JavaScript $Context $model.Browser "document.getElementById('post').submit()")
         Wait-Regression $Context { $manager.Items[0].FileName -eq 'post.bin' -and $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Completed } 'POST response downloads through native transport'
+        Assert-Regression $dialogState.SystemButtonDisabled 'POST download keeps the system button visible and disabled'
         Assert-Regression ($fixture.PostCount -eq 1 -and $manager.Items[0].Record.Method -eq 'POST') 'browser download preserves POST without repeating it'
         Wait-Regression $Context { $managerWindow.WindowState -eq [Windows.WindowState]::Normal } 'another native download restores the minimized download manager'
         $downloadWindows = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })
@@ -312,6 +377,7 @@ function Test-BrowserDownloads($Context) {
 
         [void](Invoke-JavaScript $Context $model.Browser "var a=document.createElement('a');a.download='native-blob.bin';a.href=URL.createObjectURL(new Blob([new Uint8Array([0,1,2,255,127])]));a.click()")
         Wait-Regression $Context { $manager.Items[0].FileName -eq 'native-blob.bin' -and $manager.Items[0].Record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Completed } 'native Blob download completes'
+        Assert-Regression $dialogState.SystemButtonDisabled 'Blob download keeps the system button visible and disabled'
         Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes($manager.Items[0].FilePath)) -eq [Convert]::ToBase64String([byte[]]@(0,1,2,255,127))) 'browser Blob download keeps the original bytes'
 
         $model.Browser.GetBrowser().GetHost().StartDownload($fixture.BaseUrl + '/slow-snapshot')
