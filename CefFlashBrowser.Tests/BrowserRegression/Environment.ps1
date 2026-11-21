@@ -18,6 +18,7 @@ function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$
         FavoritesService = $null
         Database = $null
         DatabaseService = $null
+        DownloadManagerService = $null
         FaviconService = $null
         UserScriptService = $null
         CefStarted = $false
@@ -311,6 +312,21 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
         $Context.Application.FindResource('language_name') -eq 'English') 'language construction applies the saved language before CEF starts'
     $languageService.SetCurrentLanguage($savedLanguage)
 
+    $registerFactory = [SimpleMvvm.Ioc.SimpleIoc].GetMethods() | Where-Object {
+        $parameters = $_.GetParameters()
+        $_.Name -eq 'Register' -and $_.IsGenericMethodDefinition -and $parameters.Count -eq 2 -and
+        $parameters[0].ParameterType.IsGenericType -and
+        $parameters[0].ParameterType.GetGenericTypeDefinition().FullName -eq 'System.Func`1'
+    }
+    $downloadManagerType = [CefFlashBrowser.Services.Downloads.DownloadManagerService]
+    $downloadManagerFactory = [Func[CefFlashBrowser.Services.Downloads.DownloadManagerService]]({
+        $Context.DownloadManagerService = New-Object CefFlashBrowser.Services.Downloads.DownloadManagerService(
+            $Context.DatabaseService, $Context.Logger, $Context.LanguageService, $Context.Application)
+        return $Context.DownloadManagerService
+    }.GetNewClosure())
+    [void]$registerFactory.MakeGenericMethod($downloadManagerType).Invoke(
+        [SimpleMvvm.Ioc.SimpleIoc]::Global, @($downloadManagerFactory, [SimpleMvvm.Ioc.Lifetime]::Singleton))
+
     $auxiliaryFile = Join-Path $Context.TemporaryPath 'auxiliary.html'
     $auxiliarySecondFile = Join-Path $Context.TemporaryPath 'auxiliary-second.html'
     [IO.File]::WriteAllText($auxiliaryFile, '<title>Auxiliary regression</title><p>auxiliary-source-token</p>')
@@ -355,14 +371,16 @@ function Stop-RegressionEnvironment($Context) {
             $cleanupErrors.Add($_)
         }
     }
-    if ($null -ne $Context.UserScriptService) {
+    if ($null -ne $Context.DownloadManagerService) {
         try {
-            $downloads = [CefFlashBrowser.Services.Downloads.DownloadManagerService]::StopForExitAsync()
+            $downloads = $Context.DownloadManagerService.StopAsync()
             Wait-Regression $Context { $downloads.IsCompleted } 'download manager shutdown'
             [void]$downloads.GetAwaiter().GetResult()
         } catch {
             $cleanupErrors.Add($_)
         }
+    }
+    if ($null -ne $Context.UserScriptService) {
         try {
             $scripts = $Context.UserScriptService.StopAsync()
             Wait-Regression $Context { $scripts.IsCompleted } 'userscript runtime shutdown'

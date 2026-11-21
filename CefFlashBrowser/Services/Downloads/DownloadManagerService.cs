@@ -1,3 +1,4 @@
+using CefFlashBrowser.Log;
 using CefFlashBrowser.Models.Downloads;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
@@ -5,7 +6,6 @@ using CefFlashBrowser.Views.Dialogs;
 using CefSharp;
 using Mzying2001.MonkeySharp.CefSharp;
 using Mzying2001.MonkeySharp.Core.Apis;
-using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -28,12 +28,11 @@ namespace CefFlashBrowser.Services.Downloads
             System
         }
 
-        private static DownloadManagerService _current;
-        public static DownloadManagerService Current => _current ?? (_current = new DownloadManagerService());
-        public static Task StopForExitAsync() => _current?.StopAsync() ?? Task.CompletedTask;
-
+        private readonly Application _application;
         private readonly Dispatcher _dispatcher;
         private readonly DatabaseService _database;
+        private readonly ILogger _logger;
+        private readonly LanguageService _language;
         private readonly Dictionary<string, IDownloadTransfer> _transfers = new Dictionary<string, IDownloadTransfer>();
         private readonly List<Task> _cleanup = new List<Task>();
         private readonly DispatcherTimer _timer;
@@ -54,11 +53,14 @@ namespace CefFlashBrowser.Services.Downloads
         public bool IsStopping => _stop != null;
         public event EventHandler Refreshed;
 
-        public DownloadManagerService()
+        public DownloadManagerService(DatabaseService database, ILogger logger, LanguageService language, Application application)
         {
-            _dispatcher = Application.Current.Dispatcher;
+            _database = database ?? throw new ArgumentNullException(nameof(database));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _language = language ?? throw new ArgumentNullException(nameof(language));
+            _application = application ?? throw new ArgumentNullException(nameof(application));
+            _dispatcher = _application.Dispatcher;
             _dispatcher.VerifyAccess();
-            _database = SimpleIoc.Global.GetInstance<DatabaseService>();
 
             try
             {
@@ -67,7 +69,7 @@ namespace CefFlashBrowser.Services.Downloads
             }
             catch (Exception error)
             {
-                LogHelper.LogError("Failed to load download history", error);
+                _logger.Log(LogLevel.Error, "Failed to load download history", error);
             }
 
             _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), DispatcherPriority.Background, Tick, _dispatcher);
@@ -129,7 +131,7 @@ namespace CefFlashBrowser.Services.Downloads
 
         private DownloadItemViewModel CreateItem(DownloadRecord record)
         {
-            return new DownloadItemViewModel(record, () => Find(record)?.CanResume == true || CanRestore(record));
+            return new DownloadItemViewModel(record, () => Find(record)?.CanResume == true || CanRestore(record), _language);
         }
 
         public bool CanRestore(DownloadRecord record)
@@ -144,10 +146,12 @@ namespace CefFlashBrowser.Services.Downloads
                 return;
 
             var transfer = Find(record);
+
             if (transfer == null || !transfer.CanResume)
             {
                 if (!CanRestore(record))
-                    throw new IOException(Text("downloads_sourceUnavailable"));
+                    throw new IOException(_language.GetString("downloads_sourceUnavailable"));
+
                 if (transfer != null)
                     Unsubscribe(transfer);
 
@@ -346,7 +350,7 @@ namespace CefFlashBrowser.Services.Downloads
 
             if (++_ticks % 4 == 0)
             {
-                if (Application.Current.Windows.OfType<Views.DownloadManagerWindow>().Any(window => window.IsVisible))
+                if (_application.Windows.OfType<Views.DownloadManagerWindow>().Any(window => window.IsVisible))
                     _ = CheckFilesAsync();
 
                 if (_pending.Count != 0 && _saves.CurrentCount != 0)
@@ -428,7 +432,7 @@ namespace CefFlashBrowser.Services.Downloads
                     if (!_pending.ContainsKey(change.Key))
                         _pending.Add(change.Key, change.Value);
                 }
-                LogHelper.LogError("Failed to save download history", error);
+                _logger.Log(LogLevel.Error, "Failed to save download history", error);
             }
             finally
             {
@@ -535,15 +539,10 @@ namespace CefFlashBrowser.Services.Downloads
             _nativeHost?.Dispose();
         }
 
-        public static string Text(string key)
-        {
-            return SimpleIoc.Global.GetInstance<LanguageService>().GetString(key);
-        }
-
-        private static bool Confirm(string key)
+        private bool Confirm(string key)
         {
             bool result = false;
-            WindowManager.Confirm(Text(key), Text("downloads_title"), value => result = value == true);
+            WindowManager.Confirm(_language.GetString(key), _language.GetString("downloads_title"), value => result = value == true);
             return result;
         }
     }

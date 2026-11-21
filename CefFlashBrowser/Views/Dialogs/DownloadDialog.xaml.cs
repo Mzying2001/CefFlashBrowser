@@ -1,9 +1,11 @@
 using CefFlashBrowser.Data;
+using CefFlashBrowser.Log;
 using CefFlashBrowser.Models.Downloads;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Services.Downloads;
 using CefFlashBrowser.Utils;
 using Microsoft.Win32;
+using SimpleMvvm.Ioc;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -14,6 +16,8 @@ namespace CefFlashBrowser.Views.Dialogs
 {
     public partial class DownloadDialog : Window
     {
+        private readonly LanguageService _language;
+        private readonly ILogger _logger;
         private DownloadRecord _record;
         private string _directory;
 
@@ -22,6 +26,8 @@ namespace CefFlashBrowser.Views.Dialogs
 
         public DownloadDialog()
         {
+            _language = SimpleIoc.Global.GetInstance<LanguageService>();
+            _logger = SimpleIoc.Global.GetInstance<ILogger>();
             InitializeComponent();
         }
 
@@ -73,20 +79,23 @@ namespace CefFlashBrowser.Views.Dialogs
             {
                 if (!Uri.TryCreate(urlBox.Text.Trim(), UriKind.Absolute, out var url)
                     || _record.Source == "manual" && url.Scheme != "http" && url.Scheme != "https")
-                    throw new ArgumentException(DownloadManagerService.Text("downloads_invalidUrl"));
+                    throw new ArgumentException(_language.GetString("downloads_invalidUrl"));
 
                 var path = pathBox.Text.Trim();
+
                 if (!Path.IsPathRooted(path) || Path.GetFileName(path) != UserScriptDownloadPaths.SafeFileName(Path.GetFileName(path)))
-                    throw new ArgumentException(DownloadManagerService.Text("downloads_invalidPath"));
+                    throw new ArgumentException(_language.GetString("downloads_invalidPath"));
+
                 path = Path.GetFullPath(path);
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
+
                 if (Directory.Exists(path))
-                    throw new ArgumentException(DownloadManagerService.Text("downloads_invalidPath"));
+                    throw new ArgumentException(_language.GetString("downloads_invalidPath"));
 
                 bool overwrite = false;
                 if (File.Exists(path))
                 {
-                    WindowManager.Confirm(DownloadManagerService.Text("downloads_confirmOverwrite"), Title, value => overwrite = value == true);
+                    WindowManager.Confirm(_language.GetString("downloads_confirmOverwrite"), Title, value => overwrite = value == true);
                     if (!overwrite)
                         return;
                 }
@@ -123,7 +132,7 @@ namespace CefFlashBrowser.Views.Dialogs
             }
             catch (Exception error)
             {
-                LogHelper.LogError("Failed to start the system download", error);
+                _logger.Log(LogLevel.Error, "Failed to start the system download", error);
             }
             finally
             {
@@ -140,8 +149,8 @@ namespace CefFlashBrowser.Views.Dialogs
             else
             {
                 WindowManager.ShowAlertDialog(
-                    DownloadManagerService.Text("downloads_systemDownloadFailed"),
-                    DownloadManagerService.Text("common_error"), this);
+                    _language.GetString("downloads_systemDownloadFailed"),
+                    _language.GetString("common_error"), this);
             }
         }
 

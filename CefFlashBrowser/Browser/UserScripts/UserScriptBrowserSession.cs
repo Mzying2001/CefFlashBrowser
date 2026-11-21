@@ -29,6 +29,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         private readonly BrowserViewModel _model;
         private readonly UserScriptService _service;
         private readonly ILogger _logger;
+        private readonly Lazy<DownloadManagerService> _downloadManager;
         private readonly Action _mount;
         private readonly Dispatcher _dispatcher;
         private readonly CancellationTokenSource _lifetime = new CancellationTokenSource();
@@ -62,12 +63,14 @@ namespace CefFlashBrowser.Browser.UserScripts
         public bool IsStopped => _stop?.IsCompleted == true;
 
         public UserScriptBrowserSession(ChromiumFlashBrowser browser, BrowserViewModel model,
-            UserScriptService service, ILogger logger, Action mount, Func<Window> owner, Func<Task<bool>> close)
+            UserScriptService service, ILogger logger, Lazy<DownloadManagerService> downloadManager,
+            Action mount, Func<Window> owner, Func<Task<bool>> close)
         {
             _browser = browser;
             _model = model;
             _service = service;
             _logger = logger;
+            _downloadManager = downloadManager;
             _mount = mount;
             _dispatcher = browser.Dispatcher;
             _ownerWindow = owner;
@@ -166,6 +169,7 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         private void BuildHost()
         {
+            var downloadManager = _downloadManager.Value;
             ConfigureBrowserHandlers();
             InitializeNetworkServices();
 
@@ -198,7 +202,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 .UseHttpRequestService(_http)
                 .UseWebRequestService(_webRequests)
                 .UseTabAudioService(_audio)
-                .UseDownloadServiceFactory(CreateDownloadService)
+                .UseDownloadServiceFactory(http => _downloads = new UserScriptDownloadService(http, _model, _dispatcher, downloadManager))
                 .UseMenuService(_menus)
                 .UseClipboardService(new UserScriptClipboardService(_dispatcher, _lifetime.Token))
                 .UseNotificationService(_notifications)
@@ -259,11 +263,6 @@ namespace CefFlashBrowser.Browser.UserScripts
                 _webRequests = new InMemoryWebRequestService();
                 _http = new CefSharpHttpRequestService(_requestContext, _webRequests);
             }
-        }
-
-        private UserScriptDownloadService CreateDownloadService(IHttpRequestService http)
-        {
-            return _downloads = new UserScriptDownloadService(http, _model, _dispatcher);
         }
 
         public async Task NavigateAsync(string address, CancellationToken token)
@@ -428,17 +427,21 @@ namespace CefFlashBrowser.Browser.UserScripts
                 {
                     _audio.StateChanged -= AudioStateChanged;
                     _audio.Dispose();
-                    var drain = Task.WhenAll(_retiredHosts.Select(retired => retired.Drain).ToArray());
-                    DownloadManagerService.Current.RetainUntil(drain, async () =>
-                    {
-                        _http?.Dispose();
-                        if (_http != null)
-                            await Cef.UIThreadTaskFactory.StartNew(() => { });
 
-                        _webRequests?.Dispose();
-                        if (_ownsRequestContext)
-                            _requestContext?.Dispose();
-                    });
+                    if (_requestContext != null || _webRequests != null || _http != null)
+                    {
+                        var drain = Task.WhenAll(_retiredHosts.Select(retired => retired.Drain).ToArray());
+                        _downloadManager.Value.RetainUntil(drain, async () =>
+                        {
+                            _http?.Dispose();
+                            if (_http != null)
+                                await Cef.UIThreadTaskFactory.StartNew(() => { });
+
+                            _webRequests?.Dispose();
+                            if (_ownsRequestContext)
+                                _requestContext?.Dispose();
+                        });
+                    }
                 }
                 finally
                 {

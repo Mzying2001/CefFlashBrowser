@@ -35,12 +35,13 @@ namespace CefFlashBrowser.Browser.UserScripts
             }
         }
 
-        public UserScriptDownloadService(IHttpRequestService http, BrowserViewModel model, Dispatcher dispatcher)
+        public UserScriptDownloadService(IHttpRequestService http, BrowserViewModel model, Dispatcher dispatcher,
+            DownloadManagerService manager)
         {
             _http = http;
             _dispatcher = dispatcher;
             _sourcePage = model.Address;
-            _manager = DownloadManagerService.Current;
+            _manager = manager;
         }
 
         public Task<IDownloadOperation> CreateAsync(DownloadRequest request, CancellationToken token)

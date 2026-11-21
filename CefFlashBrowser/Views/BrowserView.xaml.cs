@@ -228,6 +228,8 @@ namespace CefFlashBrowser.Views
 
 
         private readonly ChromiumFlashBrowser browser;
+        private readonly Lazy<DownloadManagerService> _downloadManager =
+            new Lazy<DownloadManagerService>(() => SimpleIoc.Global.GetInstance<DownloadManagerService>());
         private UserScriptBrowserSession _userScriptSession;
         private volatile bool _isClosed;
         private Window _ownerWindow;
@@ -341,7 +343,8 @@ namespace CefFlashBrowser.Views
             };
 
             browser.JsDialogHandler = new Browser.Handlers.JsDialogHandler();
-            browser.DownloadHandler = new Browser.Handlers.DownloadHandler();
+            browser.DownloadHandler = new Browser.Handlers.DownloadHandler(
+                _downloadManager, Dispatcher, SimpleIoc.Global.GetInstance<ILogger>());
             browser.RequestHandler = new BrowserRequestHandler(this);
             browser.LifeSpanHandler = new BrowserLifeSpanHandler(this);
             browser.MenuHandler = new BrowserMenuHandler(this);
@@ -466,7 +469,7 @@ namespace CefFlashBrowser.Views
                 {
                     _userScriptSession = new UserScriptBrowserSession(browser, ViewModel,
                         SimpleIoc.Global.GetInstance<UserScriptService>(), SimpleIoc.Global.GetInstance<ILogger>(),
-                        MountBrowser, () => _ownerWindow ?? Window.GetWindow(this), () => RequestCloseAsync(false));
+                        _downloadManager, MountBrowser, () => _ownerWindow ?? Window.GetWindow(this), () => RequestCloseAsync(false));
                 }
             }
 
@@ -754,8 +757,8 @@ namespace CefFlashBrowser.Views
 
         private bool RetainBrowserDownloads()
         {
-            return browser.DownloadHandler is Browser.Handlers.DownloadHandler downloads
-                && DownloadManagerService.Current.RetainBrowser(browser, downloads);
+            return _downloadManager.IsValueCreated && browser.DownloadHandler is Browser.Handlers.DownloadHandler downloads
+                && _downloadManager.Value.RetainBrowser(browser, downloads);
         }
 
         private void DevToolsOpenedHandler(object msg)

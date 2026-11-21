@@ -4,6 +4,7 @@ using CefFlashBrowser.Database;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Services.Downloads;
 using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.Services.UserScripts.Persistence;
 using CefFlashBrowser.Singleton;
@@ -36,6 +37,7 @@ namespace CefFlashBrowser
         private static FavoritesService _favoritesService;
         private static FaviconService _faviconService;
         private static UserScriptService _userScriptService;
+        private static DownloadManagerService _downloadManagerService;
 
         private const string InsufficientDirectoryPermissionsMessage =
             "CefFlashBrowser 需要对程序运行目录拥有读取、写入和删除文件的权限，无法继续运行。\r\n\r\n" +
@@ -262,7 +264,9 @@ namespace CefFlashBrowser
 
         private static async Task StopDownloadsAndScriptsAsync()
         {
-            await Services.Downloads.DownloadManagerService.StopForExitAsync();
+            if (_downloadManagerService != null)
+                await _downloadManagerService.StopAsync();
+
             if (_userScriptService != null)
                 await _userScriptService.StopAsync();
         }
@@ -288,6 +292,11 @@ namespace CefFlashBrowser
 
             SimpleIoc.Global.Register<DatabaseService>(
                 () => new DatabaseService(SimpleIoc.Global.GetInstance<IDatabase>()), Lifetime.Singleton);
+
+            SimpleIoc.Global.Register<DownloadManagerService>(
+                () => _downloadManagerService = new DownloadManagerService(
+                    SimpleIoc.Global.GetInstance<DatabaseService>(), SimpleIoc.Global.GetInstance<ILogger>(),
+                    SimpleIoc.Global.GetInstance<LanguageService>(), Application.Current), Lifetime.Singleton);
 
             SimpleIoc.Global.Register<FavoritesService>(
                 () => _favoritesService = new FavoritesService(
@@ -355,6 +364,9 @@ namespace CefFlashBrowser
 
             if (!stopTask.Wait(TimeSpan.FromSeconds(5)))
                 LogHelper.LogWtf("Timed out waiting for favicon writes; the database will close after queued operations finish.");
+
+            SimpleIoc.Global.Unregister<DownloadManagerService>(false);
+            _downloadManagerService = null;
 
             SimpleIoc.Global.Unregister<UserScriptService>(false);
             SimpleIoc.Global.Unregister<FaviconService>(false);

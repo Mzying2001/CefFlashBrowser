@@ -4,8 +4,12 @@ function Test-DownloadManagerWindow($Context) {
     Assert-Regression ($null -ne $window -and $window.IsVisible) 'download manager opens through the global command'
     Invoke-BrowserCommand ([CefFlashBrowser.Services.WindowManager]::OpenDownloadsCommand)
     Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] }).Count -eq 1) 'download manager entry reuses its single window'
-    $manager = [CefFlashBrowser.Services.Downloads.DownloadManagerService]::Current
+    $ioc = [SimpleMvvm.Ioc.SimpleIoc]::Global
+    $manager = $ioc.GetInstance([CefFlashBrowser.Services.Downloads.DownloadManagerService], @())
     $model = $window.DataContext
+    Assert-Regression ([object]::ReferenceEquals($manager, $ioc.GetInstance(
+        [CefFlashBrowser.Services.Downloads.DownloadManagerService], @())) -and
+        [object]::ReferenceEquals($model.Items, $manager.Items)) 'the download window and container share one download manager and history list'
     $canExecute = [Windows.Input.ICommand].GetMethod('CanExecute')
     $list = $window.FindName('downloadList')
     $filter = $window.FindName('downloadFilter')
@@ -300,7 +304,7 @@ function Test-DownloadRestart($Context) {
 
 function Test-BrowserDownloads($Context) {
     $fixture = New-Object DownloadHttpFixture
-    $manager = [CefFlashBrowser.Services.Downloads.DownloadManagerService]::Current
+    $manager = [SimpleMvvm.Ioc.SimpleIoc]::Global.GetInstance([CefFlashBrowser.Services.Downloads.DownloadManagerService], @())
     $window = New-RegressionWindow $Context
     $model = $window.ViewModel.CurrentBrowser
     $model.Address = $fixture.BaseUrl + '/page'
@@ -337,9 +341,10 @@ function Test-BrowserDownloads($Context) {
                 $dialog.GetType().GetProperty('StartSystemDownload', [Reflection.BindingFlags]'Instance,NonPublic').SetValue($dialog, $start.PSObject.BaseObject)
                 if ($handoff.Result -lt 0) {
                     $application = $Context.Application
+                    $failureMessage = $Context.LanguageService.GetString('downloads_systemDownloadFailed')
                     [void]$application.Dispatcher.BeginInvoke([Windows.Threading.DispatcherPriority]::Background, [Action]({
                         foreach ($alert in @($application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.Dialogs.JsAlertDialog] -and $_.IsVisible })) {
-                            $handoff.FailureShown = $alert.Owner -eq $dialog -and $alert.Message -eq [CefFlashBrowser.Services.Downloads.DownloadManagerService]::Text('downloads_systemDownloadFailed')
+                            $handoff.FailureShown = $alert.Owner -eq $dialog -and $alert.Message -eq $failureMessage
                             $alert.FindName('okButton').RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
                         }
                     }.GetNewClosure()))

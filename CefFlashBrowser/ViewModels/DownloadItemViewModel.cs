@@ -1,5 +1,5 @@
 using CefFlashBrowser.Models.Downloads;
-using CefFlashBrowser.Services.Downloads;
+using CefFlashBrowser.Services;
 using SimpleMvvm;
 using System;
 
@@ -8,23 +8,25 @@ namespace CefFlashBrowser.ViewModels
     public sealed class DownloadItemViewModel : ViewModelBase
     {
         private readonly Func<bool> _canRecover;
+        private readonly LanguageService _language;
 
         public DownloadRecord Record { get; }
 
-        public DownloadItemViewModel(DownloadRecord record, Func<bool> canRecover)
+        public DownloadItemViewModel(DownloadRecord record, Func<bool> canRecover, LanguageService language)
         {
             Record = record;
             _canRecover = canRecover;
+            _language = language;
         }
 
         public string FileName => Record.FileName;
         public string FilePath => Record.FilePath;
         public string Url => Record.Url;
-        public string Source => DownloadManagerService.Text("downloads_" + Record.Source);
-        public string State => DownloadManagerService.Text(Record.FileMissing ? "downloads_missing" : "downloads_" + Record.State);
+        public string Source => _language.GetString("downloads_" + Record.Source);
+        public string State => _language.GetString(Record.FileMissing ? "downloads_missing" : "downloads_" + Record.State);
         public string Error => Record.State == DownloadState.Interrupted && !_canRecover()
-            ? DownloadManagerService.Text("downloads_sourceUnavailable")
-            : (Record.Error?.StartsWith("downloads_", StringComparison.Ordinal) == true ? DownloadManagerService.Text(Record.Error) : Record.Error);
+            ? _language.GetString("downloads_sourceUnavailable")
+            : (Record.Error?.StartsWith("downloads_", StringComparison.Ordinal) == true ? _language.GetString(Record.Error) : Record.Error);
         public bool HasError => !string.IsNullOrWhiteSpace(Error);
         public string Size => FormatSize(Record.Received) + " / " + (Record.Total.HasValue ? FormatSize(Record.Total.Value) : "—");
         public string Speed => Record.State == DownloadState.Downloading ? FormatSize(Record.Speed) + "/s" : "—";

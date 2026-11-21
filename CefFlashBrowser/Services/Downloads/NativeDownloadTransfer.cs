@@ -1,3 +1,4 @@
+using CefFlashBrowser.Log;
 using CefFlashBrowser.Models.Downloads;
 using CefFlashBrowser.Utils;
 using CefSharp;
@@ -13,6 +14,7 @@ namespace CefFlashBrowser.Services.Downloads
     {
         private readonly DownloadManagerService _manager;
         private readonly IBeforeDownloadCallback _before;
+        private readonly ILogger _logger;
         private readonly CancellationTokenSource _selection = new CancellationTokenSource();
         private readonly SemaphoreSlim _commands = new SemaphoreSlim(1, 1);
         private readonly TaskCompletionSource<bool> _released = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -30,11 +32,12 @@ namespace CefFlashBrowser.Services.Downloads
         public event EventHandler Changed;
         public event EventHandler Finished;
 
-        public NativeDownloadTransfer(DownloadManagerService manager, DownloadRecord record, IBeforeDownloadCallback before)
+        public NativeDownloadTransfer(DownloadManagerService manager, DownloadRecord record, IBeforeDownloadCallback before, ILogger logger)
         {
             _manager = manager;
             Record = record;
             _before = before;
+            _logger = logger;
         }
 
         public async Task StartAsync()
@@ -89,7 +92,7 @@ namespace CefFlashBrowser.Services.Downloads
                         }
                         catch (Exception error)
                         {
-                            LogHelper.LogError("Failed to open the download manager", error);
+                            _logger.Log(LogLevel.Error, "Failed to open the download manager", error);
                         }
                     }
 

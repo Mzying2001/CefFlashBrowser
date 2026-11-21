@@ -1,3 +1,4 @@
+using CefFlashBrowser.Log;
 using CefFlashBrowser.Models.Downloads;
 using CefFlashBrowser.Services.Downloads;
 using CefFlashBrowser.Utils;
@@ -6,18 +7,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Threading;
 
 namespace CefFlashBrowser.Browser.Handlers
 {
     public sealed class DownloadHandler : FlashBrowser.Handlers.DownloadHandler
     {
+        private readonly Lazy<DownloadManagerService> _downloadManager;
+        private readonly Dispatcher _dispatcher;
+        private readonly ILogger _logger;
         private readonly object _sync = new object();
         private readonly Dictionary<int, NativeDownloadTransfer> _downloads = new Dictionary<int, NativeDownloadTransfer>();
         private readonly HashSet<int> _finished = new HashSet<int>();
         private readonly Dictionary<int, Tuple<DownloadItem, IDownloadItemCallback>> _pending = new Dictionary<int, Tuple<DownloadItem, IDownloadItemCallback>>();
         private readonly Dictionary<string, DownloadRecord> _responses = new Dictionary<string, DownloadRecord>(StringComparer.Ordinal);
         private bool _retired;
+
+        public DownloadHandler(Lazy<DownloadManagerService> downloadManager, Dispatcher dispatcher, ILogger logger)
+        {
+            _downloadManager = downloadManager;
+            _dispatcher = dispatcher;
+            _logger = logger;
+        }
 
         public bool HasActiveDownloads
         {
@@ -33,8 +44,10 @@ namespace CefFlashBrowser.Browser.Handlers
             lock (_sync)
             {
                 _retired = true;
+
                 foreach (var pending in _pending.Values)
                     pending.Item2.Dispose();
+
                 _pending.Clear();
                 return Task.WhenAll(_downloads.Values.Select(transfer => transfer.Released));
             }
@@ -79,6 +92,7 @@ namespace CefFlashBrowser.Browser.Handlers
         public override void OnBeforeDownload(IWebBrowser chromiumWebBrowser, IBrowser browser, DownloadItem item, IBeforeDownloadCallback callback)
         {
             DownloadRecord record;
+
             lock (_sync)
             {
                 if (_retired)
@@ -89,17 +103,18 @@ namespace CefFlashBrowser.Browser.Handlers
 
                 if (!_responses.TryGetValue(item.Url, out record))
                     record = new DownloadRecord { Url = item.Url, Method = string.Empty };
+
                 _responses.Remove(item.Url);
                 record.Source = "browser";
                 record.FileName = UserScriptDownloadPaths.SafeFileName(item.SuggestedFileName);
             }
 
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            _dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
-                    var manager = DownloadManagerService.Current;
-                    var transfer = new NativeDownloadTransfer(manager, record, callback);
+                    var manager = _downloadManager.Value;
+                    var transfer = new NativeDownloadTransfer(manager, record, callback, _logger);
 
                     lock (_sync)
                     {
@@ -110,6 +125,7 @@ namespace CefFlashBrowser.Browser.Handlers
                         }
 
                         _downloads[item.Id] = transfer;
+
                         _ = transfer.Released.ContinueWith(completed =>
                         {
                             lock (_sync)
@@ -132,7 +148,7 @@ namespace CefFlashBrowser.Browser.Handlers
                 catch (Exception error)
                 {
                     callback.Dispose();
-                    LogHelper.LogError("Failed to accept browser download", error);
+                    _logger.Log(LogLevel.Error, "Failed to accept browser download", error);
                 }
             }));
         }
@@ -148,7 +164,9 @@ namespace CefFlashBrowser.Browser.Handlers
             lock (_sync)
             {
                 if (_downloads.TryGetValue(item.Id, out var transfer))
+                {
                     transfer.Update(item, callback);
+                }
                 else if (!_retired && !_finished.Contains(item.Id))
                 {
                     if (_pending.TryGetValue(item.Id, out var previous))
@@ -156,7 +174,9 @@ namespace CefFlashBrowser.Browser.Handlers
                     _pending[item.Id] = Tuple.Create(item, callback);
                 }
                 else
+                {
                     callback.Dispose();
+                }
             }
         }
     }

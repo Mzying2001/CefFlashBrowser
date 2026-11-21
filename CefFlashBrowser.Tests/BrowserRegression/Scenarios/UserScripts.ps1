@@ -8,7 +8,7 @@ function Test-UserScriptDownloadsAndAudio($Context) {
     Complete-UserScriptTask $Context ($Context.UserScriptService.InitializeAsync()) 'download runtime'
     $fixture = New-Object UserScriptHttpFixture
     $directory = [CefFlashBrowser.Data.GlobalData]::Settings.DownloadDirectory
-    $manager = [CefFlashBrowser.Services.Downloads.DownloadManagerService]::Current
+    $manager = [SimpleMvvm.Ioc.SimpleIoc]::Global.GetInstance([CefFlashBrowser.Services.Downloads.DownloadManagerService], @())
     $source = @'
 // ==UserScript==
 // @name Download and audio probe

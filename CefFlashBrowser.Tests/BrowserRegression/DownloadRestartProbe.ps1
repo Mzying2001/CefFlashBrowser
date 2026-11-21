@@ -22,7 +22,7 @@ try {
     Initialize-RegressionEnvironment $context (Join-Path $ProfilePath 'browser.db')
     [CefFlashBrowser.Data.GlobalData]::Settings.DownloadDirectory = Join-Path $ProfilePath 'Files'
     Start-RegressionCef $context (Join-Path $ProfilePath 'Cache')
-    $manager = [CefFlashBrowser.Services.Downloads.DownloadManagerService]::Current
+    $manager = [SimpleMvvm.Ioc.SimpleIoc]::Global.GetInstance([CefFlashBrowser.Services.Downloads.DownloadManagerService], @())
     if ($Phase -eq 'Save') {
         $window = New-RegressionWindow $context
         $model = $window.ViewModel.CurrentBrowser

@@ -1,6 +1,7 @@
 using CefFlashBrowser.Services.Downloads;
 using CefFlashBrowser.ViewModels;
 using SimpleMvvm.Command;
+using SimpleMvvm.Ioc;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,14 +17,15 @@ namespace CefFlashBrowser.Views
         {
             InitializeComponent();
 
-            _model = new DownloadManagerViewModel(DownloadManagerService.Current);
+            var service = SimpleIoc.Global.GetInstance<DownloadManagerService>();
+            _model = new DownloadManagerViewModel(service);
             DataContext = _model;
 
             InputBindings.Add(new KeyBinding(_model.NewCommand, new KeyGesture(Key.N, ModifierKeys.Control)));
             downloadList.InputBindings.Add(new KeyBinding(_model.RemoveCommand, new KeyGesture(Key.Delete)));
             InputBindings.Add(new KeyBinding(new DelegateCommand(Close), new KeyGesture(Key.W, ModifierKeys.Control)));
 
-            Activated += (_, __) => DownloadManagerService.Current.Refresh();
+            Activated += (_, __) => service.Refresh();
             Closed += (_, __) => _model.Dispose();
         }
 
