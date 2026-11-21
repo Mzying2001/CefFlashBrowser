@@ -55,6 +55,31 @@
             </Style>
 
 
+            <!--Use the shared SVG as a mask. The presenter can specify a theme brush in Tag.-->
+            <DataTemplate x:Key="SharedSvgIconTemplate">
+                <Rectangle Width="{Binding Width}"
+                           Height="{Binding Height}">
+                    <Rectangle.OpacityMask>
+                        <VisualBrush Stretch="Uniform" Visual="{Binding}"/>
+                    </Rectangle.OpacityMask>
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Setter Property="Tag"
+                                    Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Tag}"/>
+                            <Setter Property="Fill"
+                                    Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag}"/>
+                            <Style.Triggers>
+                                <Trigger Property="Tag" Value="{x:Null}">
+                                    <Setter Property="Fill"
+                                            Value="{DynamicResource PrimaryTextBrush}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
+            </DataTemplate>
+
+
             <!--Icon resources-->
             <sys:Uri x:Key="AddIconUri">/Assets/Svgs/add.svg</sys:Uri>
             <sys:Uri x:Key="BackIconUri">/Assets/Svgs/back.svg</sys:Uri>
@@ -70,11 +95,13 @@
             <sys:Uri x:Key="MuteModeIconUri">/Assets/Svgs/mute-mode.svg</sys:Uri>
             <sys:Uri x:Key="NewTabIconUri">/Assets/Svgs/new-tab.svg</sys:Uri>
             <sys:Uri x:Key="PageIconUri">/Assets/Svgs/page.svg</sys:Uri>
+            <sys:Uri x:Key="PlayIconUri">/Assets/Svgs/play.svg</sys:Uri>
             <sys:Uri x:Key="PluginIconUri">/Assets/Svgs/plugin.svg</sys:Uri>
             <sys:Uri x:Key="ReloadIconUri">/Assets/Svgs/reload.svg</sys:Uri>
             <sys:Uri x:Key="SearchIconUri">/Assets/Svgs/search.svg</sys:Uri>
             <sys:Uri x:Key="SettingsIconUri">/Assets/Svgs/settings.svg</sys:Uri>
             <sys:Uri x:Key="StarIconUri">/Assets/Svgs/star.svg</sys:Uri>
+            <sys:Uri x:Key="StopIconUri">/Assets/Svgs/stop.svg</sys:Uri>
             <sys:Uri x:Key="SubIconUri">/Assets/Svgs/sub.svg</sys:Uri>
             <sys:Uri x:Key="TrashIconUri">/Assets/Svgs/trash.svg</sys:Uri>
             <sys:Uri x:Key="UpIconUri">/Assets/Svgs/up.svg</sys:Uri>

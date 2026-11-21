@@ -31,7 +31,8 @@ namespace CefFlashBrowser.ViewModels
         public double Progress => Record.State == DownloadState.Completed ? 100 : Record.Total > 0 ? Math.Min(100, 100.0 * Record.Received / Record.Total.Value) : 0;
         public bool IsIndeterminate => Record.State == DownloadState.Downloading && !Record.Total.HasValue;
         public string ProgressText => Record.State == DownloadState.Completed || Record.Total > 0 ? Progress.ToString("0.#") + "%" : "—";
-        public bool IsActive => Record.State == DownloadState.Waiting || Record.State == DownloadState.Downloading || Record.State == DownloadState.Paused;
+        public bool IsRunning => Record.State == DownloadState.Waiting || Record.State == DownloadState.Downloading;
+        public bool IsActive => IsRunning || Record.State == DownloadState.Paused;
         public bool CanOpen => Record.State == DownloadState.Completed && !Record.FileMissing;
         public bool IsRetry => Record.State == DownloadState.Failed || Record.State == DownloadState.TimedOut
             || Record.State == DownloadState.Cancelled || (Record.State == DownloadState.Completed && Record.FileMissing);

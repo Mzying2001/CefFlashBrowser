@@ -10,6 +10,7 @@ function Test-DownloadManagerWindow($Context) {
     $list = $window.FindName('downloadList')
     $filter = $window.FindName('downloadFilter')
     $details = $window.FindName('downloadDetails')
+    $sourceField = $window.FindName('detailSource')
     $errorField = $window.FindName('detailError')
     $emptyMessage = $window.FindName('emptyDownloadMessage')
     $resumeText = $Context.LanguageService.GetString('downloads_resume')
@@ -44,11 +45,17 @@ function Test-DownloadManagerWindow($Context) {
     Assert-Regression ($details.Visibility -eq 'Collapsed') 'populated history hides details until a download is selected'
     $list.SelectedItem = $completedItem
     $manager.Refresh()
+    $list.UpdateLayout()
+    $completedRow = $list.ItemContainerGenerator.ContainerFromItem($completedItem)
+    $completedTransfer = Find-CommandButton $completedRow $model.ToggleTransferCommand
+    Assert-Regression (!$completedTransfer.IsEnabled -and [object]::ReferenceEquals($completedTransfer.Content, $window.Resources['PlayIcon'])) 'the completed row shows a disabled play icon'
     Assert-Regression ($canExecute.Invoke($model.OpenCommand, [object[]]@($null)) -and
         $window.FindName('openFolderButton').IsEnabled) 'completed download enables file and folder actions'
     Save-DownloadManagerCapture $window (Join-Path $Context.TemporaryPath 'DownloadManager.png')
 
     Assert-Regression ($details.Visibility -eq 'Visible' -and $errorField.Visibility -eq 'Collapsed') 'selecting a completed download automatically shows details without an error row'
+    Assert-Regression ($sourceField.Text -eq $Context.LanguageService.GetString('downloads_manual') -and
+        $sourceField.IsReadOnly -and $list.View.Columns[5].Header -eq $Context.LanguageService.GetString('downloads_operations')) 'download source appears in details and the list has an operations column'
     $filter.Text = '  EXAMPLE.BIN  '
     Assert-Regression ($list.Items.Count -eq 1 -and $list.SelectedItem -eq $completedItem -and $details.Visibility -eq 'Visible') 'name filter trims whitespace and keeps a matching selection and its details'
     $filter.Text = 'ALTERNATE'
@@ -69,11 +76,19 @@ function Test-DownloadManagerWindow($Context) {
     $list.ScrollIntoView($failedItem)
     $list.UpdateLayout()
     $row = $list.ItemContainerGenerator.ContainerFromItem($failedItem)
+    $rowTransfer = Find-CommandButton $row $model.ToggleTransferCommand
+    $rowRemove = Find-CommandButton $row $model.RemoveRowCommand
+    Assert-Regression ($rowTransfer.IsEnabled -and $rowTransfer.ToolTip -eq $retryText -and
+        [object]::ReferenceEquals($rowTransfer.CommandParameter, $failedItem) -and
+        [object]::ReferenceEquals($rowTransfer.Content, $window.Resources['PlayIcon'])) 'an unselected failed row offers Retry using the shared play icon'
+    Assert-Regression ($rowRemove.IsEnabled -and [object]::ReferenceEquals($rowRemove.CommandParameter, $failedItem) -and
+        [object]::ReferenceEquals($rowRemove.Content.Content, $window.Resources['TrashIcon'])) 'the remove button refers to its own row and uses the shared trash icon'
     $right = New-Object Windows.Input.MouseButtonEventArgs([Windows.Input.Mouse]::PrimaryDevice, 0, [Windows.Input.MouseButton]::Right)
     $right.RoutedEvent = [Windows.UIElement]::PreviewMouseRightButtonDownEvent
     $row.RaiseEvent($right)
     Assert-Regression ($model.SelectedItem -eq $failedItem -and
         !$canExecute.Invoke($model.OpenCommand, [object[]]@($null))) 'right click selects the clicked download and updates available actions'
+    Assert-Regression ($sourceField.Text -eq $Context.LanguageService.GetString('downloads_browser')) 'source details follow selection'
     $menu = $row.ContextMenu
     $menu.PlacementTarget = $row
     $menu.IsOpen = $true
@@ -93,13 +108,30 @@ function Test-DownloadManagerWindow($Context) {
         foreach ($state in $actionTextByState.GetEnumerator()) {
             $failure.State = [CefFlashBrowser.Models.Downloads.DownloadState]$state.Key
             $manager.Refresh($false)
-            Assert-Regression ($taskResume.Header -eq $state.Value -and $rowResume.Header -eq $state.Value) "both menus update the action text for a $($state.Key) download"
+            Assert-Regression ($taskResume.Header -eq $state.Value -and $rowResume.Header -eq $state.Value -and
+                $rowTransfer.ToolTip -eq $state.Value -and
+                [Windows.Automation.AutomationProperties]::GetName($rowTransfer) -eq $state.Value) "menus and row button update the action text for a $($state.Key) download"
         }
     } finally {
         $menu.IsOpen = $false
     }
     Assert-Regression ($details.Visibility -eq 'Visible' -and $errorField.Visibility -eq 'Visible' -and
         $errorField.Text -eq $failure.Error) 'failed downloads show the actual error in details'
+    $window.UpdateLayout()
+    $detailGrid = $sourceField.Parent
+    $detailFields = @($detailGrid.Children | Where-Object { $_ -is [Windows.Controls.TextBox] })
+    $gaps = for ($index = 1; $index -lt $detailFields.Count; $index++) {
+        $previous = $detailFields[$index - 1]
+        $bottom = $previous.TranslatePoint([Windows.Point]::new(0, $previous.ActualHeight), $detailGrid).Y
+        $top = $detailFields[$index].TranslatePoint([Windows.Point]::new(0, 0), $detailGrid).Y
+        $top - $bottom
+    }
+    $unevenGaps = @($gaps | Where-Object { [Math]::Abs($_ - $gaps[0]) -gt 1 })
+    Assert-Regression ($gaps.Count -eq 3 -and $unevenGaps.Count -eq 0) "download details have even row gaps (measured: $($gaps -join ', ') DIP)"
+    $failure.Method = 'POST'
+    $manager.Refresh($false)
+    Assert-Regression (!$rowTransfer.IsEnabled) 'an unrecoverable failed download disables Retry'
+    $failure.Method = 'GET'
 
     $window.Width = $window.MinWidth
     $window.Height = $window.MinHeight
@@ -221,6 +253,17 @@ function Save-DownloadManagerCapture($Window, [string]$Path) {
     } finally {
         $stream.Dispose()
     }
+}
+
+function Invoke-DownloadRowButton($Window, $Item, $Command) {
+    $list = $Window.FindName('downloadList')
+    $list.ScrollIntoView($Item)
+    $list.UpdateLayout()
+    $row = $list.ItemContainerGenerator.ContainerFromItem($Item)
+    $button = Find-CommandButton $row $Command
+    Assert-Regression ($null -ne $button -and $button.IsEnabled) 'download row action is available'
+    $peer = New-Object Windows.Automation.Peers.ButtonAutomationPeer($button)
+    $peer.GetPattern([Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
 }
 
 function Test-DownloadRestart($Context) {
@@ -391,9 +434,19 @@ function Test-BrowserDownloads($Context) {
             $downloads.Count -eq 1 -and $downloads[0].FindName('downloadList').Items.Contains($downloadItem)
         } 'native download opens the download manager with the new task'
         $managerWindow = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0]
-        Complete-UserScriptTask $Context ($manager.PauseAsync($record)) 'native download pause'
-        Assert-Regression ($record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Paused) 'native pause reaches the shared task state'
-        Complete-UserScriptTask $Context ($manager.ResumeAsync($record)) 'native download resume'
+        $list = $managerWindow.FindName('downloadList')
+        $list.UpdateLayout()
+        $row = $list.ItemContainerGenerator.ContainerFromItem($downloadItem)
+        $transferButton = Find-CommandButton $row $managerWindow.DataContext.ToggleTransferCommand
+        Assert-Regression ($transferButton.ToolTip -eq $Context.LanguageService.GetString('downloads_pause') -and
+            [object]::ReferenceEquals($transferButton.Content, $managerWindow.Resources['StopIcon'])) 'the running row shows the shared stop icon and Pause'
+        Invoke-DownloadRowButton $managerWindow $downloadItem $managerWindow.DataContext.ToggleTransferCommand
+        Wait-Regression $Context {
+            $record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Paused -and
+            $transferButton.ToolTip -eq $Context.LanguageService.GetString('downloads_resume') -and $transferButton.IsEnabled
+        } 'the row button pauses the native download and switches to Resume'
+        Invoke-DownloadRowButton $managerWindow $downloadItem $managerWindow.DataContext.ToggleTransferCommand
+        Wait-Regression $Context { $record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Downloading } 'the row button resumes the native download'
         $nativeBrowser = $model.Browser
         $window.ForceCloseWindow()
         Wait-Regression $Context { $record.State -eq [CefFlashBrowser.Models.Downloads.DownloadState]::Completed } 'native download continues after source close'
@@ -448,7 +501,9 @@ function Test-BrowserDownloads($Context) {
             $manualItem = $manager.Items[0]
             $manualPath = $manualItem.FilePath
             Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes($manualPath)) -eq [Convert]::ToBase64String($fixture.Payload)) 'manual dialog download preserves response bytes'
-            Complete-UserScriptTask $Context ($manager.RemoveAsync($manualItem)) 'remove completed manual record'
+            $managerWindow.DataContext.SelectedItem = $null
+            Invoke-DownloadRowButton $managerWindow $manualItem $managerWindow.DataContext.RemoveRowCommand
+            Wait-Regression $Context { !$manager.Items.Contains($manualItem) } 'the row button removes the unselected completed record'
             Assert-Regression ([IO.File]::Exists($manualPath) -and !($manager.Items -contains $manualItem)) 'removing a completed record preserves its file'
             $count = $manager.Items.Count
             $dialogState.CancelNext = $true
@@ -461,6 +516,8 @@ function Test-BrowserDownloads($Context) {
             Complete-UserScriptTask $Context ($manager.DeleteFileAsync($manualRecord)) 'delete downloaded file through confirmation'
             Wait-Regression $Context { $manualRecord.FileMissing } 'deleting a file updates its retained record'
             Assert-Regression (![IO.File]::Exists($manualRecord.FilePath) -and $manager.Items[0].Record -eq $manualRecord) 'delete-file action retains download history'
+            Invoke-DownloadRowButton $managerWindow $manager.Items[0] $managerWindow.DataContext.ToggleTransferCommand
+            Wait-Regression $Context { !$manualRecord.FileMissing -and [IO.File]::Exists($manualRecord.FilePath) } 'Retry in the row restores the missing file'
         } finally {
             $managerWindow.Close()
         }

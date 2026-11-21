@@ -330,6 +330,7 @@
     <sys:String x:Key="downloads_speed">Скорость</sys:String>
     <sys:String x:Key="downloads_state">Состояние</sys:String>
     <sys:String x:Key="downloads_source">Источник</sys:String>
+    <sys:String x:Key="downloads_operations">Операции</sys:String>
     <sys:String x:Key="downloads_url">Адрес загрузки</sys:String>
     <sys:String x:Key="downloads_savePath">Путь сохранения</sys:String>
     <sys:String x:Key="downloads_browse">Обзор…</sys:String>

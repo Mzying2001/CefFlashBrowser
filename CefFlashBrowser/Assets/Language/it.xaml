@@ -330,6 +330,7 @@
     <sys:String x:Key="downloads_speed">Velocità</sys:String>
     <sys:String x:Key="downloads_state">Stato</sys:String>
     <sys:String x:Key="downloads_source">Origine</sys:String>
+    <sys:String x:Key="downloads_operations">Operazioni</sys:String>
     <sys:String x:Key="downloads_url">URL del download</sys:String>
     <sys:String x:Key="downloads_savePath">Percorso di salvataggio</sys:String>
     <sys:String x:Key="downloads_browse">Sfoglia…</sys:String>

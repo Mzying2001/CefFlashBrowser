@@ -14,6 +14,39 @@
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
+        <svgc:SvgIcon x:Key="PlayIcon" Width="12" Height="12"
+                      UriSource="{StaticResource PlayIconUri}"/>
+        <svgc:SvgIcon x:Key="StopIcon" Width="10" Height="10"
+                      UriSource="{StaticResource StopIconUri}"/>
+        <svgc:SvgIcon x:Key="TrashIcon" Width="14" Height="14"
+                      UriSource="{StaticResource TrashIconUri}"/>
+
+        <Style x:Key="DownloadRowButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="AutomationProperties.Name" Value="{Binding ToolTip, RelativeSource={RelativeSource Self}}"/>
+        </Style>
+
+        <Style x:Key="DownloadTransferButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource DownloadRowButtonStyle}">
+            <Setter Property="Content" Value="{StaticResource PlayIcon}"/>
+            <Setter Property="ToolTip" Value="{DynamicResource downloads_resume}"/>
+            <Setter Property="ContentTemplate" Value="{StaticResource SharedSvgIconTemplate}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsRetry}" Value="True">
+                    <Setter Property="ToolTip" Value="{DynamicResource downloads_retry}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                    <Setter Property="Content" Value="{StaticResource StopIcon}"/>
+                    <Setter Property="ToolTip" Value="{DynamicResource downloads_pause}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="DownloadResumeMenuItemStyle"
                TargetType="MenuItem"
                BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -47,8 +80,8 @@
 
         <Style x:Key="DetailLabelStyle"
                TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
             <Setter Property="Margin" Value="0,4,16,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
         </Style>
 
         <Style x:Key="DetailValueStyle"
@@ -182,16 +215,25 @@
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="4"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <TextBlock
-                                x:Name="detailPathLabel" Style="{StaticResource DetailLabelStyle}"
+                                x:Name="detailSourceLabel" Style="{StaticResource DetailLabelStyle}"
+                                Text="{DynamicResource downloads_source}"/>
+                            <TextBox
+                                x:Name="detailSource" Grid.Column="1"
+                                Style="{StaticResource DetailValueStyle}"
+                                Text="{Binding SelectedItem.Source, Mode=OneWay}"
+                                AutomationProperties.LabeledBy="{Binding ElementName=detailSourceLabel}"/>
+
+                            <TextBlock
+                                x:Name="detailPathLabel" Grid.Row="1" Style="{StaticResource DetailLabelStyle}"
                                 Text="{DynamicResource downloads_savePath}"/>
                             <TextBox
-                                Grid.Column="1"
+                                Grid.Row="1" Grid.Column="1"
                                 Style="{StaticResource DetailValueStyle}"
                                 Text="{Binding SelectedItem.FilePath, Mode=OneWay}"
                                 AutomationProperties.LabeledBy="{Binding ElementName=detailPathLabel}"/>
@@ -207,13 +249,11 @@
 
                             <TextBlock
                                 x:Name="detailErrorLabel" Grid.Row="3" Style="{StaticResource DetailLabelStyle}"
-                                Margin="0,8,16,0"
                                 Text="{DynamicResource common_error}"
                                 Visibility="{Binding SelectedItem.HasError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                             <TextBox
                                 x:Name="detailError" Grid.Row="3" Grid.Column="1"
                                 Style="{StaticResource DetailValueStyle}"
-                                Margin="0,8,0,0"
                                 Foreground="{DynamicResource DangerBrush}"
                                 Text="{Binding SelectedItem.Error, Mode=OneWay}"
                                 Visibility="{Binding SelectedItem.HasError, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -236,11 +276,12 @@
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem"
                                BasedOn="{StaticResource AppListViewItemStyle}">
-                            <Setter Property="MinHeight" Value="36"/>
-                            <Setter Property="Height" Value="36"/>
+                            <Setter Property="MinHeight"
+                                    Value="36"/>
                             <Setter Property="Tag"
                                     Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListView}}"/>
-                            <Setter Property="ContextMenu" Value="{StaticResource DownloadRowMenu}"/>
+                            <Setter Property="ContextMenu"
+                                    Value="{StaticResource DownloadRowMenu}"/>
                             <EventSetter Event="PreviewMouseRightButtonDown" Handler="SelectDownloadRow"/>
                         </Style>
                     </ListView.ItemContainerStyle>
@@ -299,9 +340,29 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Header="{DynamicResource downloads_source}"
-                                            Width="80"
-                                            DisplayMemberBinding="{Binding Source}"/>
+                            <GridViewColumn Header="{DynamicResource downloads_operations}" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel x:Name="downloadRowActions"
+                                                    Orientation="Horizontal"
+                                                    Background="Transparent">
+                                            <Button Style="{StaticResource DownloadTransferButtonStyle}"
+                                                    Command="{Binding DataContext.ToggleTransferCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Margin="5,0,0,0"
+                                                    Style="{StaticResource DownloadRowButtonStyle}"
+                                                    ToolTip="{DynamicResource downloads_remove}"
+                                                    Command="{Binding DataContext.RemoveRowCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                    CommandParameter="{Binding}">
+                                                <ContentPresenter
+                                                    Tag="{DynamicResource DangerBrush}"
+                                                    Content="{StaticResource TrashIcon}"
+                                                    ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>

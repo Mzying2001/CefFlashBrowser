@@ -256,15 +256,21 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
         $Context.Application.Resources.MergedDictionaries.Add($dictionary)
     }
 
-    # Load the production header template into the isolated test application.
+    # Load shared UI resources from App.xaml into the isolated test application.
     $appXamlPath = Join-Path $Context.RepositoryPath 'CefFlashBrowser\App.xaml'
     [xml]$appXaml = [IO.File]::ReadAllText($appXamlPath)
     $namespaces = [Xml.XmlNamespaceManager]::new($appXaml.NameTable)
     $namespaces.AddNamespace('wpf', $appXaml.DocumentElement.NamespaceURI)
     $namespaces.AddNamespace('x', 'http://schemas.microsoft.com/winfx/2006/xaml')
-    $headerKey = 'TrimmedContextMenuHeaderTemplate'
-    $headerTemplate = $appXaml.SelectSingleNode("//wpf:DataTemplate[@x:Key='$headerKey']", $namespaces)
-    $Context.Application.Resources.Add($headerKey, [System.Windows.Markup.XamlReader]::Parse($headerTemplate.OuterXml))
+    $namespaces.AddNamespace('sys', $appXaml.DocumentElement.GetNamespaceOfPrefix('sys'))
+    foreach ($key in @('TrimmedContextMenuHeaderTemplate', 'SharedSvgIconTemplate')) {
+        $template = $appXaml.SelectSingleNode("//wpf:DataTemplate[@x:Key='$key']", $namespaces)
+        $Context.Application.Resources.Add($key, [System.Windows.Markup.XamlReader]::Parse($template.OuterXml))
+    }
+    foreach ($icon in $appXaml.SelectNodes('//sys:Uri[@x:Key]', $namespaces)) {
+        $key = $icon.GetAttribute('Key', $namespaces.LookupNamespace('x'))
+        $Context.Application.Resources.Add($key, [Uri]::new($icon.InnerText, [UriKind]::Relative))
+    }
 
     # Match App.xaml's implicit SVG style so local icon styles are tested with theme colors.
     $svgStyle = [System.Windows.Markup.XamlReader]::Parse(@'
@@ -304,16 +310,6 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
         $languageService.GetLocale('en-US') -eq 'en-US' -and
         $Context.Application.FindResource('language_name') -eq 'English') 'language construction applies the saved language before CEF starts'
     $languageService.SetCurrentLanguage($savedLanguage)
-
-    # Keep this list in sync with the <sys:Uri> icon resources declared in App.xaml;
-    # a missing icon here crashes template instantiation with XamlParseException.
-    foreach ($icon in @('Add', 'Sub', 'Back', 'Forward', 'Reload', 'Warning', 'Search', 'More', 'Mute', 'Volume', 'Up', 'Down', 'Page', 'Close', 'Language', 'Settings', 'Star', 'Plugin')) {
-        $Context.Application.Resources.Add($icon + 'IconUri', [Uri]::new(('/Assets/Svgs/' + $icon.ToLowerInvariant() + '.svg'), [UriKind]::Relative))
-    }
-    $Context.Application.Resources.Add('NewTabIconUri', [Uri]::new('/Assets/Svgs/new-tab.svg', [UriKind]::Relative))
-    $Context.Application.Resources.Add('MuteModeIconUri', [Uri]::new('/Assets/Svgs/mute-mode.svg', [UriKind]::Relative))
-    $Context.Application.Resources.Add('ZoomInIconUri', [Uri]::new('/Assets/Svgs/zoom-in.svg', [UriKind]::Relative))
-    $Context.Application.Resources.Add('ZoomOutIconUri', [Uri]::new('/Assets/Svgs/zoom-out.svg', [UriKind]::Relative))
 
     $auxiliaryFile = Join-Path $Context.TemporaryPath 'auxiliary.html'
     $auxiliarySecondFile = Join-Path $Context.TemporaryPath 'auxiliary-second.html'

@@ -330,6 +330,7 @@
     <sys:String x:Key="downloads_speed">속도</sys:String>
     <sys:String x:Key="downloads_state">상태</sys:String>
     <sys:String x:Key="downloads_source">출처</sys:String>
+    <sys:String x:Key="downloads_operations">작업</sys:String>
     <sys:String x:Key="downloads_url">다운로드 URL</sys:String>
     <sys:String x:Key="downloads_savePath">저장 경로</sys:String>
     <sys:String x:Key="downloads_browse">찾아보기…</sys:String>

@@ -50,33 +50,6 @@
                       Height="14"
                       UriSource="{StaticResource TrashIconUri}"/>
 
-        <!--Icon shape via OpacityMask (shared SvgIcon); fill color from
-            ContentPresenter.Tag (DynamicResource), falls back to PrimaryTextBrush.-->
-        <DataTemplate x:Key="SharedSvgIconTemplate"
-                      DataType="{x:Type svgc:SvgIcon}">
-            <Rectangle Width="{Binding Width}"
-                       Height="{Binding Height}">
-                <Rectangle.OpacityMask>
-                    <VisualBrush Stretch="Uniform"
-                                 Visual="{Binding}"/>
-                </Rectangle.OpacityMask>
-                <Rectangle.Style>
-                    <Style TargetType="Rectangle">
-                        <Setter Property="Tag"
-                                Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Tag}"/>
-                        <Setter Property="Fill"
-                                Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag}"/>
-                        <Style.Triggers>
-                            <Trigger Property="Tag" Value="{x:Null}">
-                                <Setter Property="Fill"
-                                        Value="{DynamicResource PrimaryTextBrush}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Rectangle.Style>
-            </Rectangle>
-        </DataTemplate>
-
         <DataTemplate x:Key="WorkspaceTemplate"
                       DataType="{x:Type vm:SaveMgrWorkspaceViewModel}">
             <ListView VirtualizingStackPanel.IsVirtualizing="True"

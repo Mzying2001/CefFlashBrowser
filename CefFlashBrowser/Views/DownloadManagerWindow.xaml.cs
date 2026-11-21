@@ -4,6 +4,7 @@ using SimpleMvvm.Command;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace CefFlashBrowser.Views
 {
@@ -37,14 +38,26 @@ namespace CefFlashBrowser.Views
 
         private void OpenSelected(object sender, MouseButtonEventArgs e)
         {
-            ICommand open = _model.OpenCommand;
+            if (e.ChangedButton != MouseButton.Left)
+                return;
 
-            if (e.ChangedButton == MouseButton.Left
-                && ItemsControl.ContainerFromElement(downloadList, e.OriginalSource as DependencyObject) is ListViewItem
-                && open.CanExecute(null))
+            var source = e.OriginalSource as DependencyObject;
+            var row = ItemsControl.ContainerFromElement(downloadList, source) as ListViewItem;
+            if (row == null)
+                return;
+
+            for (var element = source; element != null && element != row;)
             {
-                open.Execute(null);
+                if (element is FrameworkElement cell && cell.Name == "downloadRowActions")
+                    return;
+
+                element = element is Visual ? VisualTreeHelper.GetParent(element)
+                    : element is FrameworkContentElement content ? content.Parent : LogicalTreeHelper.GetParent(element);
             }
+
+            ICommand open = _model.OpenCommand;
+            if (open.CanExecute(null))
+                open.Execute(null);
         }
     }
 }

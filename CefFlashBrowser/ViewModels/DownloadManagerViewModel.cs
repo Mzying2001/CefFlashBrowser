@@ -49,10 +49,12 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand NewCommand { get; }
         public DelegateCommand PauseCommand { get; }
         public DelegateCommand ResumeCommand { get; }
+        public DelegateCommand<DownloadItemViewModel> ToggleTransferCommand { get; }
         public DelegateCommand CancelCommand { get; }
         public DelegateCommand OpenCommand { get; }
         public DelegateCommand FolderCommand { get; }
         public DelegateCommand RemoveCommand { get; }
+        public DelegateCommand<DownloadItemViewModel> RemoveRowCommand { get; }
         public DelegateCommand DeleteFileCommand { get; }
         public DelegateCommand ClearCommand { get; }
 
@@ -65,15 +67,23 @@ namespace CefFlashBrowser.ViewModels
 
             PauseCommand = new DelegateCommand(() => RunAsync(() => service.PauseAsync(_selected.Record)))
             {
-                CanExecuteFunc = _ => _selected != null && service.Find(_selected.Record)?.CanPause == true
+                CanExecuteFunc = _ => CanPause(_selected)
             };
 
             ResumeCommand = new DelegateCommand(() => RunAsync(() => service.ResumeAsync(_selected.Record)))
             {
-                CanExecuteFunc = _ => _selected != null && !_selected.CanOpen
-                    && _selected.Record.State != DownloadState.Downloading
-                    && _selected.Record.State != DownloadState.Waiting
-                    && (service.Find(_selected.Record)?.CanResume == true || service.CanRestore(_selected.Record))
+                CanExecuteFunc = _ => CanResume(_selected)
+            };
+
+            ToggleTransferCommand = new DelegateCommand<DownloadItemViewModel>(item =>
+            {
+                if (CanPause(item))
+                    RunAsync(() => service.PauseAsync(item.Record));
+                else if (CanResume(item))
+                    RunAsync(() => service.ResumeAsync(item.Record));
+            })
+            {
+                CanExecuteFunc = item => item is DownloadItemViewModel row && (CanPause(row) || CanResume(row))
             };
 
             CancelCommand = new DelegateCommand(() => RunAsync(() => service.CancelAsync(_selected.Record)))
@@ -96,6 +106,11 @@ namespace CefFlashBrowser.ViewModels
                 CanExecuteFunc = _ => _selected != null
             };
 
+            RemoveRowCommand = new DelegateCommand<DownloadItemViewModel>(item => RunAsync(() => service.RemoveAsync(item)))
+            {
+                CanExecuteFunc = item => item is DownloadItemViewModel
+            };
+
             DeleteFileCommand = new DelegateCommand(() => RunAsync(() => service.DeleteFileAsync(_selected.Record)))
             {
                 CanExecuteFunc = _ => _selected?.CanOpen == true
@@ -105,6 +120,11 @@ namespace CefFlashBrowser.ViewModels
 
             service.Refreshed += ServiceRefreshed;
         }
+
+        private bool CanPause(DownloadItemViewModel item) => item != null && _service.Find(item.Record)?.CanPause == true;
+
+        private bool CanResume(DownloadItemViewModel item) => item != null && !item.CanOpen && !item.IsRunning
+            && (_service.Find(item.Record)?.CanResume == true || _service.CanRestore(item.Record));
 
         private async void RunAsync(Func<Task> action)
         {
@@ -179,6 +199,7 @@ namespace CefFlashBrowser.ViewModels
                 RefreshItemsView();
 
             RefreshCommands();
+            ToggleTransferCommand.RaiseCanExecuteChanged();
         }
 
         private void RefreshCommands()
