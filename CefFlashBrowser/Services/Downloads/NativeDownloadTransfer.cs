@@ -50,15 +50,13 @@ namespace CefFlashBrowser.Services.Downloads
             try
             {
                 var destination = await _manager.SelectBrowserDestinationAsync(Record, _selection.Token);
-                if (destination == DownloadManagerService.DestinationChoice.System)
-                {
-                    await _manager.CompleteSystemDownloadHandoffAsync(this);
+                if (destination == DownloadManagerService.DestinationChoice.Cancelled &&
+                    (_selection.IsCancellationRequested || _manager.IsStopping))
                     return;
-                }
 
-                if (destination == DownloadManagerService.DestinationChoice.Cancelled)
+                if (destination != DownloadManagerService.DestinationChoice.Application)
                 {
-                    await CancelAsync();
+                    await _manager.RemoveUnconfirmedBrowserDownloadAsync(this);
                     return;
                 }
 

@@ -286,7 +286,7 @@ namespace CefFlashBrowser.Services.Downloads
             }
         }
 
-        internal async Task CompleteSystemDownloadHandoffAsync(NativeDownloadTransfer transfer)
+        internal Task RemoveUnconfirmedBrowserDownloadAsync(NativeDownloadTransfer transfer)
         {
             // Detach the CEF transfer before cancellation so its final updates cannot restore the history entry.
             var item = Items.FirstOrDefault(candidate => ReferenceEquals(candidate.Record, transfer.Record));
@@ -295,8 +295,7 @@ namespace CefFlashBrowser.Services.Downloads
             if (item != null && (current == null || ReferenceEquals(current, transfer)))
                 RemoveItem(item);
 
-            await transfer.CancelAsync();
-            await SaveAsync();
+            return RetainUntilAsync(transfer.CancelAsync(), SaveAsync);
         }
 
         private void TransferChanged(object sender, EventArgs e)
@@ -456,9 +455,17 @@ namespace CefFlashBrowser.Services.Downloads
 
         public void RetainUntil(Task completion, Func<Task> release)
         {
+            RetainUntilAsync(completion, release);
+        }
+
+        private Task RetainUntilAsync(Task completion, Func<Task> release)
+        {
             _dispatcher.VerifyAccess();
             _cleanup.RemoveAll(task => task.Status == TaskStatus.RanToCompletion);
-            _cleanup.Add(ReleaseAsync(completion, release));
+
+            var cleanup = ReleaseAsync(completion, release);
+            _cleanup.Add(cleanup);
+            return cleanup;
         }
 
         public bool RetainBrowser(WinformCefSharp4WPF.ChromiumWebBrowser browser, Browser.Handlers.DownloadHandler handler)
