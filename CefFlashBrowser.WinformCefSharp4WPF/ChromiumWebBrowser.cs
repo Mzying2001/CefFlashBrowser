@@ -45,6 +45,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             Dispatcher.VerifyAccess();
             if (browser.IsDisposed || downloadRetained)
                 throw new InvalidOperationException("The native browser cannot be retained.");
+
             Win32.SetParent(browser.Handle, parentHandle);
             browser.Visible = false;
             downloadRetained = true;
@@ -59,8 +60,16 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         private sealed class NativeDownloadLease : IDisposable
         {
             private Action release;
-            public NativeDownloadLease(Action releaseAction) { release = releaseAction; }
-            public void Dispose() { Interlocked.Exchange(ref release, null)?.Invoke(); }
+
+            public NativeDownloadLease(Action releaseAction)
+            {
+                release = releaseAction;
+            }
+
+            public void Dispose()
+            {
+                Interlocked.Exchange(ref release, null)?.Invoke();
+            }
         }
 
         // Set before hosting. The callback owns preparation and navigation; history

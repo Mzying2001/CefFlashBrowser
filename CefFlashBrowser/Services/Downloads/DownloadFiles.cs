@@ -29,12 +29,15 @@ namespace CefFlashBrowser.Services.Downloads
             var directory = Path.GetDirectoryName(path);
             var name = Path.GetFileNameWithoutExtension(path);
             var extension = Path.GetExtension(path);
+
             for (int suffix = 0; suffix < 10000; suffix++)
             {
                 var candidate = suffix == 0 ? path : Path.Combine(directory, name + " (" + suffix + ")" + extension);
+
                 if (!File.Exists(candidate) && !Directory.Exists(candidate))
                     return candidate;
             }
+
             throw new IOException("No unused download file name was available.");
         }
 
@@ -59,6 +62,7 @@ namespace CefFlashBrowser.Services.Downloads
                 }
                 catch (IOException) when (File.Exists(available)) { }
             }
+
             throw new IOException("No unused download file name was available.");
         }
 

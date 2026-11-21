@@ -21,7 +21,11 @@ namespace CefFlashBrowser.Browser.Handlers
 
         public bool HasActiveDownloads
         {
-            get { lock (_sync) return _downloads.Values.Any(transfer => !transfer.Released.IsCompleted); }
+            get
+            {
+                lock (_sync)
+                    return _downloads.Values.Any(transfer => !transfer.Released.IsCompleted);
+            }
         }
 
         public Task Retire()
@@ -39,9 +43,11 @@ namespace CefFlashBrowser.Browser.Handlers
         public void RememberResponse(IRequest request, IResponse response, string page)
         {
             var headers = request.Headers.AllKeys.ToDictionary(key => key, key => request.Headers[key], StringComparer.OrdinalIgnoreCase);
+
             // URLRequest uses the retained browser context's cookie jar.
             headers.Remove("Cookie");
             headers.Remove("Cookie2");
+
             var etag = response.Headers["ETag"];
             var record = new DownloadRecord
             {
@@ -54,15 +60,18 @@ namespace CefFlashBrowser.Browser.Handlers
                     && response.Headers["Content-Encoding"] != "identity",
                 SourcePage = page
             };
+
             lock (_sync)
             {
                 if (_responses.Count >= 128)
                     _responses.Clear();
+
                 if (_responses.TryGetValue(request.Url, out var previous)
                     && (previous.Method != record.Method || previous.ETag != record.ETag
                         || previous.Headers.Count != record.Headers.Count
                         || previous.Headers.Any(header => !record.Headers.TryGetValue(header.Key, out var value) || value != header.Value)))
                     record.Method = string.Empty;
+
                 _responses[request.Url] = record;
             }
         }
@@ -77,18 +86,21 @@ namespace CefFlashBrowser.Browser.Handlers
                     callback.Dispose();
                     return;
                 }
+
                 if (!_responses.TryGetValue(item.Url, out record))
                     record = new DownloadRecord { Url = item.Url, Method = string.Empty };
                 _responses.Remove(item.Url);
                 record.Source = "browser";
                 record.FileName = UserScriptDownloadPaths.SafeFileName(item.SuggestedFileName);
             }
+
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
                     var manager = DownloadManagerService.Current;
                     var transfer = new NativeDownloadTransfer(manager, record, callback);
+
                     lock (_sync)
                     {
                         if (_retired || manager.IsStopping)
@@ -96,6 +108,7 @@ namespace CefFlashBrowser.Browser.Handlers
                             callback.Dispose();
                             return;
                         }
+
                         _downloads[item.Id] = transfer;
                         _ = transfer.Released.ContinueWith(completed =>
                         {
@@ -105,12 +118,14 @@ namespace CefFlashBrowser.Browser.Handlers
                                 _finished.Add(item.Id);
                             }
                         }, TaskScheduler.Default);
+
                         if (_pending.TryGetValue(item.Id, out var pending))
                         {
                             transfer.Update(pending.Item1, pending.Item2);
                             _pending.Remove(item.Id);
                         }
                     }
+
                     manager.Accept(transfer);
                     _ = transfer.StartAsync();
                 }
@@ -129,6 +144,7 @@ namespace CefFlashBrowser.Browser.Handlers
                 callback.Dispose();
                 return;
             }
+
             lock (_sync)
             {
                 if (_downloads.TryGetValue(item.Id, out var transfer))

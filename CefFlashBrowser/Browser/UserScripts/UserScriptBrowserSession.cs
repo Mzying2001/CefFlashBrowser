@@ -434,6 +434,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                         _http?.Dispose();
                         if (_http != null)
                             await Cef.UIThreadTaskFactory.StartNew(() => { });
+
                         _webRequests?.Dispose();
                         if (_ownsRequestContext)
                             _requestContext?.Dispose();

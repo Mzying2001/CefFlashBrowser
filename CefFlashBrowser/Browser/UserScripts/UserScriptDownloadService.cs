@@ -25,7 +25,15 @@ namespace CefFlashBrowser.Browser.UserScripts
         private bool _accepting = true;
 
         public string DownloadMode => "browser";
-        public int ActiveCount { get { lock (_sync) return _operations.Count; } }
+
+        public int ActiveCount
+        {
+            get
+            {
+                lock (_sync)
+                    return _operations.Count;
+            }
+        }
 
         public UserScriptDownloadService(IHttpRequestService http, BrowserViewModel model, Dispatcher dispatcher)
         {
@@ -42,6 +50,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 if (!_accepting || _manager.IsStopping)
                     throw new ObjectDisposedException(nameof(UserScriptDownloadService));
+
                 var operation = new Operation(this, request);
                 _operations.Add(operation.DownloadId, operation);
                 operation.AttachCancellation(token);
@@ -49,7 +58,11 @@ namespace CefFlashBrowser.Browser.UserScripts
             }
         }
 
-        public void Retire() { lock (_sync) _accepting = false; }
+        public void Retire()
+        {
+            lock (_sync)
+                _accepting = false;
+        }
 
         public Task DrainAsync()
         {
@@ -61,8 +74,11 @@ namespace CefFlashBrowser.Browser.UserScripts
         public void Dispose()
         {
             Retire();
+
             Operation[] operations;
-            lock (_sync) operations = _operations.Values.ToArray();
+            lock (_sync)
+                operations = _operations.Values.ToArray();
+
             foreach (var operation in operations)
                 operation.Dispose();
         }
@@ -74,6 +90,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             if (request.SaveAs || request.ConflictAction == "prompt"
                 || request.ConflictAction == "overwrite" && File.Exists(path))
                 return _manager.SelectDestinationAsync(record, token);
+
             record.FilePath = path;
             return Task.FromResult(true);
         }
@@ -127,16 +144,21 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 if (Interlocked.Exchange(ref _started, 1) != 0)
                     return;
+
                 _owner._dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (Volatile.Read(ref _terminal) != 0)
                         return;
+
                     try
                     {
                         _owner._manager.Accept(_transfer);
                         _ = _transfer.StartAsync();
                     }
-                    catch (Exception error) { Finish(DownloadState.Failed, error); }
+                    catch (Exception error)
+                    {
+                        Finish(DownloadState.Failed, error);
+                    }
                 }));
             }
 
@@ -155,9 +177,11 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 if (Interlocked.Exchange(ref _terminal, 1) != 0)
                     return;
+
                 _transfer.Changed -= TransferChanged;
                 _transfer.Finished -= TransferFinished;
                 _registration.Dispose();
+
                 var record = _transfer.Record;
                 try
                 {
@@ -188,7 +212,8 @@ namespace CefFlashBrowser.Browser.UserScripts
                 }
                 finally
                 {
-                    lock (_owner._sync) _owner._operations.Remove(DownloadId);
+                    lock (_owner._sync)
+                        _owner._operations.Remove(DownloadId);
                 }
             }
 
@@ -196,6 +221,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             {
                 if (Volatile.Read(ref _terminal) != 0)
                     return;
+
                 if (Volatile.Read(ref _started) == 0)
                     Finish(DownloadState.Cancelled, null);
                 else
@@ -204,8 +230,14 @@ namespace CefFlashBrowser.Browser.UserScripts
 
             private static void Notify(Action callback)
             {
-                try { callback(); }
-                catch (Exception error) { LogHelper.LogError("Userscript download callback failed", error); }
+                try
+                {
+                    callback();
+                }
+                catch (Exception error)
+                {
+                    LogHelper.LogError("Userscript download callback failed", error);
+                }
             }
 
             public void Dispose() => Abort();

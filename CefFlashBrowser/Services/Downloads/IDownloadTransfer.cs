@@ -6,11 +6,12 @@ namespace CefFlashBrowser.Services.Downloads
 {
     public interface IDownloadTransfer
     {
+        event EventHandler Changed;
+        event EventHandler Finished;
+
         DownloadRecord Record { get; }
         bool CanPause { get; }
         bool CanResume { get; }
-        event EventHandler Changed;
-        event EventHandler Finished;
         Task StartAsync();
         Task PauseAsync();
         Task CancelAsync();

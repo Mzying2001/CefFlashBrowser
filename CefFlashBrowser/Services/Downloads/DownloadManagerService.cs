@@ -52,12 +52,17 @@ namespace CefFlashBrowser.Services.Downloads
             _dispatcher = Application.Current.Dispatcher;
             _dispatcher.VerifyAccess();
             _history = new DownloadHistory(Path.Combine(GlobalData.DataPath, "downloads.json"));
+
             try
             {
                 foreach (var record in _history.Load().OrderByDescending(record => record.Created))
                     Items.Add(CreateItem(record));
             }
-            catch (Exception error) { LogHelper.LogError("Failed to load download history", error); }
+            catch (Exception error)
+            {
+                LogHelper.LogError("Failed to load download history", error);
+            }
+
             _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), DispatcherPriority.Background, Tick, _dispatcher);
         }
 
@@ -71,6 +76,7 @@ namespace CefFlashBrowser.Services.Downloads
                     _context = Cef.GetGlobalRequestContext();
                     _http = new CefSharpHttpRequestService(_context);
                 }
+
                 return _http;
             }
         }
@@ -79,9 +85,12 @@ namespace CefFlashBrowser.Services.Downloads
         {
             if (IsStopping)
                 return;
+
             var record = new DownloadRecord { Source = "manual" };
+
             if (!await SelectDestinationAsync(record, _lifetime.Token))
                 return;
+
             var transfer = new HttpDownloadTransfer(record, Http, SelectDestinationAsync);
             Accept(transfer);
             _ = transfer.StartAsync();
@@ -90,13 +99,17 @@ namespace CefFlashBrowser.Services.Downloads
         public void Accept(IDownloadTransfer transfer)
         {
             _dispatcher.VerifyAccess();
+
             if (IsStopping)
                 throw new InvalidOperationException("The download manager is stopping.");
+
             _transfers[transfer.Record.Id] = transfer;
             transfer.Changed += TransferChanged;
             transfer.Finished += TransferFinished;
+
             if (!Items.Any(item => item.Record.Id == transfer.Record.Id))
                 Items.Insert(0, CreateItem(transfer.Record));
+
             _dirty = true;
             Refresh();
         }
@@ -122,6 +135,7 @@ namespace CefFlashBrowser.Services.Downloads
         {
             if (IsStopping)
                 return;
+
             var transfer = Find(record);
             if (transfer == null || !transfer.CanResume)
             {
@@ -129,11 +143,13 @@ namespace CefFlashBrowser.Services.Downloads
                     throw new IOException(Text("downloads_sourceUnavailable"));
                 if (transfer != null)
                     Unsubscribe(transfer);
+
                 record.State = DownloadState.Interrupted;
                 record.Finished = null;
                 transfer = new HttpDownloadTransfer(record, Http, SelectDestinationAsync);
                 Accept(transfer);
             }
+
             _ = transfer.StartAsync();
             await SaveAsync();
         }
@@ -143,6 +159,7 @@ namespace CefFlashBrowser.Services.Downloads
             var transfer = Find(record);
             if (transfer != null)
                 await transfer.PauseAsync();
+
             Refresh();
             await SaveAsync();
         }
@@ -158,6 +175,7 @@ namespace CefFlashBrowser.Services.Downloads
                 DownloadFiles.DeletePartial(record.BodyPath);
                 record.State = DownloadState.Cancelled;
             }
+
             Refresh();
             await SaveAsync();
         }
@@ -166,10 +184,13 @@ namespace CefFlashBrowser.Services.Downloads
         {
             if (item.IsActive && !Confirm("downloads_confirmRemoveActive"))
                 return;
+
             if (item.Record.State != DownloadState.Completed)
                 await CancelAsync(item.Record);
+
             if (_transfers.TryGetValue(item.Record.Id, out var transfer))
                 Unsubscribe(transfer);
+
             _transfers.Remove(item.Record.Id);
             Items.Remove(item);
             await SaveAsync();
@@ -179,6 +200,7 @@ namespace CefFlashBrowser.Services.Downloads
         {
             if (!Confirm("downloads_confirmDeleteFile"))
                 return;
+
             File.Delete(record.FilePath);
             Refresh();
             await SaveAsync();
@@ -193,11 +215,14 @@ namespace CefFlashBrowser.Services.Downloads
                     DownloadFiles.DeletePartial(item.Record.PartialPath);
                     DownloadFiles.DeletePartial(item.Record.BodyPath);
                 }
+
                 if (_transfers.TryGetValue(item.Record.Id, out var transfer))
                     Unsubscribe(transfer);
+
                 _transfers.Remove(item.Record.Id);
                 Items.Remove(item);
             }
+
             await SaveAsync();
         }
 
@@ -211,23 +236,34 @@ namespace CefFlashBrowser.Services.Downloads
                     return await _dispatcher.InvokeAsync(() =>
                     {
                         linked.Token.ThrowIfCancellationRequested();
+
                         var dialog = WindowManager.CreateWindow<DownloadDialog>();
                         dialog.Initialize(record);
+
                         using (linked.Token.Register(() => _dispatcher.BeginInvoke(new Action(() =>
                         {
                             if (dialog.IsVisible)
                                 dialog.Close();
                         }))))
+                        {
                             return DialogHelper.ShowModal(dialog) == true;
+                        }
                     });
                 }
-                finally { _dialogs.Release(); }
+                finally
+                {
+                    _dialogs.Release();
+                }
             }
         }
 
         private void TransferChanged(object sender, EventArgs e)
         {
-            Post(() => { _dirty = true; Refresh(false); });
+            Post(() =>
+            {
+                _dirty = true;
+                Refresh(false);
+            });
         }
 
         private void TransferFinished(object sender, EventArgs e)
@@ -235,11 +271,13 @@ namespace CefFlashBrowser.Services.Downloads
             Post(() =>
             {
                 var transfer = (IDownloadTransfer)sender;
+
                 if (_transfers.TryGetValue(transfer.Record.Id, out var current) && ReferenceEquals(current, transfer))
                 {
                     Unsubscribe(transfer);
                     _transfers.Remove(transfer.Record.Id);
                 }
+
                 _dirty = true;
                 Refresh(false);
                 _ = SaveAsync();
@@ -255,10 +293,12 @@ namespace CefFlashBrowser.Services.Downloads
         private void Tick(object sender, EventArgs e)
         {
             Refresh(false);
+
             if (++_ticks % 4 == 0)
             {
                 if (Application.Current.Windows.OfType<Views.DownloadManagerWindow>().Any(window => window.IsVisible))
                     _ = CheckFilesAsync();
+
                 if (_dirty)
                     _ = SaveAsync();
             }
@@ -268,7 +308,9 @@ namespace CefFlashBrowser.Services.Downloads
         {
             foreach (var item in Items)
                 item.Refresh();
+
             Refreshed?.Invoke(this, EventArgs.Empty);
+
             if (checkFiles)
                 _ = CheckFilesAsync();
         }
@@ -277,31 +319,50 @@ namespace CefFlashBrowser.Services.Downloads
         {
             if (_checkingFiles || IsStopping)
                 return;
+
             _checkingFiles = true;
+
             try
             {
                 var records = Items.Where(item => item.Record.State == DownloadState.Completed)
                     .Select(item => Tuple.Create(item.Record, item.Record.FilePath)).ToArray();
                 var missing = await Task.Run(() => records.Select(item => !File.Exists(item.Item2)).ToArray());
+
                 for (int index = 0; index < records.Length; index++)
                 {
                     var record = records[index].Item1;
+
                     if (record.State == DownloadState.Completed && record.FilePath == records[index].Item2)
                         record.FileMissing = missing[index];
                 }
+
                 Refresh(false);
             }
-            finally { _checkingFiles = false; }
+            finally
+            {
+                _checkingFiles = false;
+            }
         }
 
         public async Task SaveAsync()
         {
             var records = Items.Select(item => item.Record).ToArray();
             _dirty = false;
+
             await _saves.WaitAsync();
-            try { await Task.Run(() => _history.Save(records)); }
-            catch (Exception error) { LogHelper.LogError("Failed to save download history", error); }
-            finally { _saves.Release(); }
+
+            try
+            {
+                await Task.Run(() => _history.Save(records));
+            }
+            catch (Exception error)
+            {
+                LogHelper.LogError("Failed to save download history", error);
+            }
+            finally
+            {
+                _saves.Release();
+            }
         }
 
         private void Unsubscribe(IDownloadTransfer transfer)
@@ -314,7 +375,11 @@ namespace CefFlashBrowser.Services.Downloads
 
         public void RetainUntil(Task completion, Action release)
         {
-            RetainUntil(completion, () => { release(); return Task.CompletedTask; });
+            RetainUntil(completion, () =>
+            {
+                release();
+                return Task.CompletedTask;
+            });
         }
 
         public void RetainUntil(Task completion, Func<Task> release)
@@ -327,15 +392,26 @@ namespace CefFlashBrowser.Services.Downloads
         public bool RetainBrowser(WinformCefSharp4WPF.ChromiumWebBrowser browser, Browser.Handlers.DownloadHandler handler)
         {
             _dispatcher.VerifyAccess();
+
             if (_retainedBrowsers.Contains(browser))
                 return true;
+
             if (!handler.HasActiveDownloads || IsStopping)
                 return false;
+
             if (_nativeHost == null)
+            {
                 _nativeHost = new HwndSource(new HwndSourceParameters("CefFlashBrowser downloads")
-                { WindowStyle = unchecked((int)0x80000000), Width = 1, Height = 1 });
+                {
+                    WindowStyle = unchecked((int)0x80000000),
+                    Width = 1,
+                    Height = 1
+                });
+            }
+
             var lease = browser.RetainNativeHost(_nativeHost.Handle);
             _retainedBrowsers.Add(browser);
+
             RetainUntil(handler.Retire(), () =>
             {
                 lease.Dispose();
@@ -346,26 +422,38 @@ namespace CefFlashBrowser.Services.Downloads
 
         private static async Task ReleaseAsync(Task completion, Func<Task> release)
         {
-            try { await completion; }
-            finally { await release(); }
+            try
+            {
+                await completion;
+            }
+            finally
+            {
+                await release();
+            }
         }
 
         private async Task StopCoreAsync()
         {
             await Task.Yield();
+
             _timer.Stop();
             _lifetime.Cancel();
+
             await Task.WhenAll(_transfers.Values.Select(transfer => transfer.ShutdownAsync()));
             await Task.WhenAll(_cleanup.ToArray());
             await SaveAsync();
+
             _http?.Dispose();
+
             if (_http != null)
                 await Cef.UIThreadTaskFactory.StartNew(() => { });
+
             _context?.Dispose();
             _nativeHost?.Dispose();
         }
 
         public static string Text(string key) => SimpleIoc.Global.GetInstance<LanguageService>().GetString(key);
+
         private static bool Confirm(string key)
         {
             bool result = false;

@@ -15,11 +15,17 @@ namespace CefFlashBrowser.ViewModels
     {
         private readonly DownloadManagerService _service;
         private DownloadItemViewModel _selected;
+
         public ObservableCollection<DownloadItemViewModel> Items => _service.Items;
+
         public DownloadItemViewModel SelectedItem
         {
             get => _selected;
-            set { UpdateValue(ref _selected, value); RefreshCommands(); }
+            set
+            {
+                UpdateValue(ref _selected, value);
+                RefreshCommands();
+            }
         }
 
         public DelegateCommand NewCommand { get; }
@@ -35,40 +41,83 @@ namespace CefFlashBrowser.ViewModels
         public DownloadManagerViewModel(DownloadManagerService service)
         {
             _service = service;
+
             NewCommand = new DelegateCommand(() => RunAsync(service.NewAsync));
+
             PauseCommand = new DelegateCommand(() => RunAsync(() => service.PauseAsync(_selected.Record)))
-            { CanExecuteFunc = _ => _selected != null && service.Find(_selected.Record)?.CanPause == true };
+            {
+                CanExecuteFunc = _ => _selected != null && service.Find(_selected.Record)?.CanPause == true
+            };
+
             ResumeCommand = new DelegateCommand(() => RunAsync(() => service.ResumeAsync(_selected.Record)))
-            { CanExecuteFunc = _ => _selected != null && !_selected.CanOpen && _selected.Record.State != DownloadState.Downloading
-                && _selected.Record.State != DownloadState.Waiting && (service.Find(_selected.Record)?.CanResume == true || service.CanRestore(_selected.Record)) };
+            {
+                CanExecuteFunc = _ => _selected != null && !_selected.CanOpen
+                    && _selected.Record.State != DownloadState.Downloading
+                    && _selected.Record.State != DownloadState.Waiting
+                    && (service.Find(_selected.Record)?.CanResume == true || service.CanRestore(_selected.Record))
+            };
+
             CancelCommand = new DelegateCommand(() => RunAsync(() => service.CancelAsync(_selected.Record)))
-            { CanExecuteFunc = _ => _selected?.IsActive == true || _selected?.Record.State == DownloadState.Interrupted };
-            OpenCommand = new DelegateCommand(Open) { CanExecuteFunc = _ => _selected?.CanOpen == true };
+            {
+                CanExecuteFunc = _ => _selected?.IsActive == true || _selected?.Record.State == DownloadState.Interrupted
+            };
+
+            OpenCommand = new DelegateCommand(Open)
+            {
+                CanExecuteFunc = _ => _selected?.CanOpen == true
+            };
+
             FolderCommand = new DelegateCommand(OpenFolder)
-            { CanExecuteFunc = _ => !string.IsNullOrEmpty(_selected?.FilePath) };
+            {
+                CanExecuteFunc = _ => !string.IsNullOrEmpty(_selected?.FilePath)
+            };
+
             RemoveCommand = new DelegateCommand(() => RunAsync(() => service.RemoveAsync(_selected)))
-            { CanExecuteFunc = _ => _selected != null };
+            {
+                CanExecuteFunc = _ => _selected != null
+            };
+
             DeleteFileCommand = new DelegateCommand(() => RunAsync(() => service.DeleteFileAsync(_selected.Record)))
-            { CanExecuteFunc = _ => _selected?.CanOpen == true };
+            {
+                CanExecuteFunc = _ => _selected?.CanOpen == true
+            };
+
             ClearCommand = new DelegateCommand(() => RunAsync(service.ClearFinishedAsync));
+
             service.Refreshed += ServiceRefreshed;
         }
 
         private async void RunAsync(Func<Task> action)
         {
-            try { await action(); }
+            try
+            {
+                await action();
+            }
             catch (OperationCanceledException) { }
-            catch (Exception error) { WindowManager.ShowError(error.Message); }
+            catch (Exception error)
+            {
+                WindowManager.ShowError(error.Message);
+            }
+
             _service.Refresh();
         }
 
         private void Open()
         {
             _service.Refresh();
+
             if (_selected?.CanOpen != true)
                 return;
-            try { Process.Start(new ProcessStartInfo(_selected.FilePath) { UseShellExecute = true })?.Dispose(); }
-            catch (Exception error) { _service.Refresh(); WindowManager.ShowError(error.Message); }
+
+            try
+            {
+                Process.Start(new ProcessStartInfo(_selected.FilePath) { UseShellExecute = true })?.Dispose();
+            }
+            catch (Exception error)
+            {
+                _service.Refresh();
+                WindowManager.ShowError(error.Message);
+            }
         }
 
         private void OpenFolder()
@@ -76,11 +125,18 @@ namespace CefFlashBrowser.ViewModels
             try
             {
                 if (File.Exists(_selected.FilePath))
+                {
                     Process.Start("explorer.exe", "/select,\"" + _selected.FilePath + "\"")?.Dispose();
+                }
                 else
+                {
                     Process.Start(new ProcessStartInfo(Path.GetDirectoryName(_selected.FilePath)) { UseShellExecute = true })?.Dispose();
+                }
             }
-            catch (Exception error) { WindowManager.ShowError(error.Message); }
+            catch (Exception error)
+            {
+                WindowManager.ShowError(error.Message);
+            }
         }
 
         private void ServiceRefreshed(object sender, EventArgs e) => RefreshCommands();
@@ -96,6 +152,9 @@ namespace CefFlashBrowser.ViewModels
             DeleteFileCommand.RaiseCanExecuteChanged();
         }
 
-        public void Dispose() { _service.Refreshed -= ServiceRefreshed; }
+        public void Dispose()
+        {
+            _service.Refreshed -= ServiceRefreshed;
+        }
     }
 }

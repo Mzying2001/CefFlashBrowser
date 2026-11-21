@@ -16,7 +16,10 @@ namespace CefFlashBrowser.Views.Dialogs
         private DownloadRecord _record;
         private string _directory;
 
-        public DownloadDialog() { InitializeComponent(); }
+        public DownloadDialog()
+        {
+            InitializeComponent();
+        }
 
         public void Initialize(DownloadRecord record)
         {
@@ -26,6 +29,7 @@ namespace CefFlashBrowser.Views.Dialogs
             urlBox.IsReadOnly = record.Source != "manual";
             pathBox.Text = DownloadFiles.AvailablePath(Path.Combine(_directory,
                 UserScriptDownloadPaths.SafeFileName(record.FileName)));
+
             if (string.IsNullOrEmpty(record.Url))
                 urlBox.Focus();
         }
@@ -39,7 +43,13 @@ namespace CefFlashBrowser.Views.Dialogs
 
         private void Browse(object sender, RoutedEventArgs e)
         {
-            var picker = new SaveFileDialog { FileName = pathBox.Text, AddExtension = false, OverwritePrompt = false };
+            var picker = new SaveFileDialog
+            {
+                FileName = pathBox.Text,
+                AddExtension = false,
+                OverwritePrompt = false
+            };
+
             if (picker.ShowDialog(this) == true)
                 pathBox.Text = picker.FileName;
         }
@@ -51,6 +61,7 @@ namespace CefFlashBrowser.Views.Dialogs
                 if (!Uri.TryCreate(urlBox.Text.Trim(), UriKind.Absolute, out var url)
                     || _record.Source == "manual" && url.Scheme != "http" && url.Scheme != "https")
                     throw new ArgumentException(DownloadManagerService.Text("downloads_invalidUrl"));
+
                 var path = pathBox.Text.Trim();
                 if (!Path.IsPathRooted(path) || Path.GetFileName(path) != UserScriptDownloadPaths.SafeFileName(Path.GetFileName(path)))
                     throw new ArgumentException(DownloadManagerService.Text("downloads_invalidPath"));
@@ -58,6 +69,7 @@ namespace CefFlashBrowser.Views.Dialogs
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 if (Directory.Exists(path))
                     throw new ArgumentException(DownloadManagerService.Text("downloads_invalidPath"));
+
                 bool overwrite = false;
                 if (File.Exists(path))
                 {
@@ -65,20 +77,29 @@ namespace CefFlashBrowser.Views.Dialogs
                     if (!overwrite)
                         return;
                 }
+
                 _record.Url = url.AbsoluteUri;
                 _record.FilePath = path;
                 _record.FileName = Path.GetFileName(path);
                 _record.Overwrite = overwrite;
+
                 if (rememberBox.IsChecked == true)
                 {
                     GlobalData.Settings.DownloadDirectory = Path.GetDirectoryName(path);
                     GlobalData.SaveSettings();
                 }
+
                 DialogHelper.SetDialogResult(this, true);
             }
-            catch (Exception error) { WindowManager.ShowError(error.Message); }
+            catch (Exception error)
+            {
+                WindowManager.ShowError(error.Message);
+            }
         }
 
-        private void Cancel(object sender, RoutedEventArgs e) { DialogHelper.SetDialogResult(this, false); }
+        private void Cancel(object sender, RoutedEventArgs e)
+        {
+            DialogHelper.SetDialogResult(this, false);
+        }
     }
 }

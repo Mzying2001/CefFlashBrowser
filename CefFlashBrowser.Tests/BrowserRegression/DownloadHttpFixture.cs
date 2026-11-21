@@ -58,10 +58,20 @@ public sealed class DownloadHttpFixture : IDisposable
                 var client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
                 var work = RespondAsync(client);
                 clients[client] = work;
-                Task cleanup = work.ContinueWith(completed => { Task ignored; clients.TryRemove(client, out ignored); }, TaskScheduler.Default);
+                Task cleanup = work.ContinueWith(completed =>
+                {
+                    Task ignored;
+                    clients.TryRemove(client, out ignored);
+                }, TaskScheduler.Default);
             }
             catch (ObjectDisposedException) { break; }
-            catch (SocketException) { if (cancellation.IsCancellationRequested) break; throw; }
+            catch (SocketException)
+            {
+                if (cancellation.IsCancellationRequested)
+                    break;
+
+                throw;
+            }
         }
     }
 
@@ -74,15 +84,20 @@ public sealed class DownloadHttpFixture : IDisposable
                 var stream = client.GetStream();
                 var reader = new StreamReader(stream, Encoding.ASCII, false, 1024, true);
                 var line = await reader.ReadLineAsync().ConfigureAwait(false);
-                if (line == null) return;
+                if (line == null)
+                    return;
+
                 var parts = line.Split(' ');
                 var path = parts[1];
                 var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
                 while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync().ConfigureAwait(false)))
                 {
                     int colon = line.IndexOf(':');
-                    if (colon > 0) headers[line.Substring(0, colon)] = line.Substring(colon + 1).Trim();
+                    if (colon > 0)
+                        headers[line.Substring(0, colon)] = line.Substring(colon + 1).Trim();
                 }
+
                 string contentLength;
                 int bodyLength;
                 if (headers.TryGetValue("Content-Length", out contentLength) && int.TryParse(contentLength, out bodyLength))
@@ -92,11 +107,15 @@ public sealed class DownloadHttpFixture : IDisposable
                     while (offset < bodyLength)
                     {
                         int count = await reader.ReadAsync(buffer, offset, bodyLength - offset).ConfigureAwait(false);
-                        if (count == 0) break;
+                        if (count == 0)
+                            break;
                         offset += count;
                     }
                 }
-                if (parts[0] == "POST") Interlocked.Increment(ref postCount);
+
+                if (parts[0] == "POST")
+                    Interlocked.Increment(ref postCount);
+
                 if (path == "/page")
                 {
                     var html = Encoding.UTF8.GetBytes("<title>Download fixture</title><a href='/slow' download>Download</a><form id='post' method='post' action='/post'><input name='data' value='test'></form>");
@@ -105,6 +124,7 @@ public sealed class DownloadHttpFixture : IDisposable
                     await stream.WriteAsync(html, 0, html.Length).ConfigureAwait(false);
                     return;
                 }
+
                 string range;
                 headers.TryGetValue("Range", out range);
                 ranges[path] = range ?? "";
@@ -114,10 +134,14 @@ public sealed class DownloadHttpFixture : IDisposable
                 int start = 0;
                 if (path != "/ignore-range" && range != null && range.StartsWith("bytes="))
                     int.TryParse(range.Substring(6).TrimEnd('-'), out start);
-                if (start >= Payload.Length) start = 0;
+                if (start >= Payload.Length)
+                    start = 0;
+
                 var status = start == 0 ? "200 OK" : "206 Partial Content";
                 var response = "HTTP/1.1 " + status + "\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment; filename=\"" + path.TrimStart('/') + ".bin\"\r\nContent-Length: " + (Payload.Length - start) + "\r\nAccept-Ranges: bytes\r\nETag: \"" + (ChangedVersion ? "v2" : "v1") + "\"\r\nConnection: close\r\n";
-                if (start != 0) response += "Content-Range: bytes " + start + "-" + (Payload.Length - 1) + "/" + Payload.Length + "\r\n";
+                if (start != 0)
+                    response += "Content-Range: bytes " + start + "-" + (Payload.Length - 1) + "/" + Payload.Length + "\r\n";
+
                 var bytes = Encoding.ASCII.GetBytes(response + "\r\n");
                 await stream.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
                 for (int offset = start; offset < Payload.Length; offset += 8192)
@@ -125,7 +149,8 @@ public sealed class DownloadHttpFixture : IDisposable
                     cancellation.Token.ThrowIfCancellationRequested();
                     int count = Math.Min(8192, Payload.Length - offset);
                     await stream.WriteAsync(Payload, offset, count).ConfigureAwait(false);
-                    if (path.StartsWith("/slow")) await Task.Delay(15, cancellation.Token).ConfigureAwait(false);
+                    if (path.StartsWith("/slow"))
+                        await Task.Delay(15, cancellation.Token).ConfigureAwait(false);
                 }
             }
             catch (IOException) { }
@@ -139,9 +164,16 @@ public sealed class DownloadHttpFixture : IDisposable
     {
         cancellation.Cancel();
         listener.Stop();
-        foreach (var client in clients.Keys) client.Close();
-        try { accept.GetAwaiter().GetResult(); Task.WaitAll(new List<Task>(clients.Values).ToArray(), 2000); }
+        foreach (var client in clients.Keys)
+            client.Close();
+
+        try
+        {
+            accept.GetAwaiter().GetResult();
+            Task.WaitAll(new List<Task>(clients.Values).ToArray(), 2000);
+        }
         catch (AggregateException) { }
+
         cancellation.Dispose();
     }
 }

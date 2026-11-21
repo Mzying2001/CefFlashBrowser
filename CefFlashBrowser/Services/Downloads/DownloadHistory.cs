@@ -14,7 +14,10 @@ namespace CefFlashBrowser.Services.Downloads
         private readonly string _path;
         private readonly object _sync = new object();
 
-        public DownloadHistory(string path) { _path = path; }
+        public DownloadHistory(string path)
+        {
+            _path = path;
+        }
 
         public DownloadRecord[] Load()
         {
@@ -23,6 +26,7 @@ namespace CefFlashBrowser.Services.Downloads
 
             var records = JsonConvert.DeserializeObject<DownloadRecord[]>(File.ReadAllText(_path, Encoding.UTF8))
                 ?? new DownloadRecord[0];
+
             foreach (var record in records)
             {
                 if (!Guid.TryParseExact(record.Id, "N", out _) || string.IsNullOrEmpty(record.Url))
@@ -37,8 +41,8 @@ namespace CefFlashBrowser.Services.Downloads
 
                 if (record.State != DownloadState.Completed && !string.IsNullOrEmpty(record.PartialPath))
                     record.Received = File.Exists(record.PartialPath) ? new FileInfo(record.PartialPath).Length : 0;
-
             }
+
             return records;
         }
 
@@ -55,6 +59,7 @@ namespace CefFlashBrowser.Services.Downloads
                         return JsonConvert.DeserializeObject<DownloadRecord>(JsonConvert.SerializeObject(record));
                     }
                 }).ToArray();
+
                 Directory.CreateDirectory(Path.GetDirectoryName(_path));
                 FileHelper.SafeWriteFile(_path, JsonConvert.SerializeObject(snapshots, Formatting.Indented), Encoding.UTF8);
             }

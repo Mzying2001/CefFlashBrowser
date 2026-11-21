@@ -63,11 +63,13 @@ namespace CefFlashBrowser.Views
                 if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var url)
                     || url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps)
                     return null;
+
                 var factory = chromiumWebBrowser.ResourceRequestHandlerFactory;
                 IResourceRequestHandler registered = null;
                 if (factory?.HasHandlers == true)
                     registered = factory.GetResourceRequestHandler(chromiumWebBrowser, browser, frame,
                         request, isNavigation, isDownload, requestInitiator, ref disableDefaultHandling);
+
                 return new DownloadResponseHandler(_view.browser.DownloadHandler as Browser.Handlers.DownloadHandler,
                     frame?.Url, isDownload, registered);
             }
@@ -96,6 +98,7 @@ namespace CefFlashBrowser.Views
                 if (_isDownload || request.ResourceType == ResourceType.MainFrame || request.ResourceType == ResourceType.SubFrame
                     || !string.IsNullOrEmpty(response.Headers["Content-Disposition"]))
                     _downloads?.RememberResponse(request, response, _page);
+
                 return handled;
             }
 
@@ -631,6 +634,7 @@ namespace CefFlashBrowser.Views
                 Dispose();
                 return;
             }
+
             if (!browser.IsNativeControlCreated)
             {
                 Dispatcher.InvokeAsync(Dispose);

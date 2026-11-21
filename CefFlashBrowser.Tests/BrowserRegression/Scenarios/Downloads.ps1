@@ -25,7 +25,12 @@ function Test-DownloadManagerWindow($Context) {
     $encoder = New-Object Windows.Media.Imaging.PngBitmapEncoder
     $encoder.Frames.Add([Windows.Media.Imaging.BitmapFrame]::Create($bitmap))
     $stream = [IO.File]::Create((Join-Path $Context.TemporaryPath 'DownloadManager.png'))
-    try { $encoder.Save($stream) } finally { $stream.Dispose() }
+    try {
+        $encoder.Save($stream)
+    } finally {
+        $stream.Dispose()
+    }
+
     [IO.File]::Delete($record.FilePath)
     $manager.Refresh()
     Wait-Regression $Context { $record.FileMissing } 'refresh detects the deleted file asynchronously'
@@ -91,7 +96,9 @@ function Test-DownloadRestart($Context) {
             Assert-Regression ($fixture.RangeFor($path) -eq ('bytes=' + $offset.Offset + '-')) 'new process requests the persisted durable offset'
         }
         Assert-Regression ($fixture.CookieFor('/slow-restart-native').Contains('download-session=present')) 'restarted native download uses persisted browser cookies'
-    } finally { $fixture.Dispose() }
+    } finally {
+        $fixture.Dispose()
+    }
 }
 
 function Test-BrowserDownloads($Context) {
@@ -140,7 +147,9 @@ function Test-BrowserDownloads($Context) {
                     }
                     return $false
                 } "real Ctrl+J opens downloads (address focus=$addressFocus)"
-            } finally { [RegressionKeyboard]::SetKey(0x11, $true) }
+            } finally {
+                [RegressionKeyboard]::SetKey(0x11, $true)
+            }
             @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0].Close()
         }
         $model.Browser.GetBrowser().GetHost().StartDownload($fixture.BaseUrl + '/slow')
@@ -210,7 +219,9 @@ function Test-BrowserDownloads($Context) {
             Complete-UserScriptTask $Context ($manager.DeleteFileAsync($manualRecord)) 'delete downloaded file through confirmation'
             Wait-Regression $Context { $manualRecord.FileMissing } 'deleting a file updates its retained record'
             Assert-Regression (![IO.File]::Exists($manualRecord.FilePath) -and $manager.Items[0].Record -eq $manualRecord) 'delete-file action retains download history'
-        } finally { $managerWindow.Close() }
+        } finally {
+            $managerWindow.Close()
+        }
 
         $player = New-AuxiliaryWindow $Context ([CefFlashBrowser.Views.SwfPlayerWindow]) -WaitForLoad
         try {
@@ -226,7 +237,9 @@ function Test-BrowserDownloads($Context) {
         }
     } finally {
         $timer.Stop()
-        if ($null -ne $window) { $window.ForceCloseWindow() }
+        if ($null -ne $window) {
+            $window.ForceCloseWindow()
+        }
         $fixture.Dispose()
     }
 }
