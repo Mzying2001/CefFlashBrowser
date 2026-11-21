@@ -134,12 +134,12 @@
                 </ListView.View>
             </ListView>
             <TextBlock x:Name="scriptListEmptyMessage"
-                       Margin="10"
+                       Margin="10,50,10,10"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        TextAlignment="Center"
                        TextWrapping="Wrap"
-                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       Foreground="{DynamicResource SecondaryTextBrush}"
                        IsHitTestVisible="False">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">

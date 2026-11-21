@@ -296,7 +296,7 @@
                 </ListView>
 
                 <TextBlock x:Name="emptyDownloadMessage"
-                           Margin="16,60,16,16"
+                           Margin="10,50,10,10"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            TextWrapping="Wrap"
