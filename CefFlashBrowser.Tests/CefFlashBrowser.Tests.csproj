@@ -45,6 +45,8 @@
     <Compile Include="..\CefFlashBrowser\Utils\PasswordProtector.cs" Link="LinkedSources\PasswordProtector.cs" />
     <Compile Include="..\CefFlashBrowser\Services\DatabaseService.cs" Link="LinkedSources\DatabaseService.cs" />
     <Compile Include="..\CefFlashBrowser\Services\DatabaseService.Downloads.cs" Link="LinkedSources\DatabaseService.Downloads.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\DatabaseService.UserScripts.cs" Link="LinkedSources\DatabaseService.UserScripts.cs" />
+    <Compile Include="..\CefFlashBrowser\Services\DatabaseService.WebsiteIcons.cs" Link="LinkedSources\DatabaseService.WebsiteIcons.cs" />
     <Compile Include="..\CefFlashBrowser\Models\WebsiteIconRecord.cs" Link="LinkedSources\WebsiteIconRecord.cs" />
     <Compile Include="..\CefFlashBrowser\Services\FaviconService.cs" Link="LinkedSources\FaviconService.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\WebsiteIconUrlConverter.cs" Link="LinkedSources\WebsiteIconUrlConverter.cs" />
