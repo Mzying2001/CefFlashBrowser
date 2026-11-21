@@ -1,6 +1,7 @@
 using CefFlashBrowser.Models.Downloads;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Services.Downloads;
+using CefFlashBrowser.Utils;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
@@ -163,13 +164,15 @@ namespace CefFlashBrowser.ViewModels
         {
             try
             {
-                if (File.Exists(_selected.FilePath))
+                var filePath = _selected.FilePath;
+
+                if (File.Exists(filePath))
                 {
-                    Process.Start("explorer.exe", "/select,\"" + _selected.FilePath + "\"")?.Dispose();
+                    ExplorerHelper.SelectFile(filePath);
                 }
                 else
                 {
-                    Process.Start(new ProcessStartInfo(Path.GetDirectoryName(_selected.FilePath)) { UseShellExecute = true })?.Dispose();
+                    ExplorerHelper.OpenDirectory(Path.GetDirectoryName(filePath));
                 }
             }
             catch (Exception error)
