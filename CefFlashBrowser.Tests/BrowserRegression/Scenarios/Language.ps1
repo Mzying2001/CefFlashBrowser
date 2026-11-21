@@ -92,6 +92,11 @@ function Test-LanguageSelectors($Context) {
         $menu = $mainWindow.FindName('languageMenu')
         $menu.Parent.IsSubmenuOpen = $true
         $menu.IsSubmenuOpen = $true
+        $downloadCommand = [CefFlashBrowser.Services.WindowManager]::OpenDownloadsCommand
+        $downloads = $menu.Parent.Items | Where-Object { $_.Command -eq $downloadCommand } | Select-Object -First 1
+        Assert-Regression ($null -ne $downloads -and $downloads.Header -eq $service.GetString('downloads_menu') -and
+            [string]::IsNullOrEmpty($downloads.InputGestureText) -and
+            @($mainWindow.InputBindings | Where-Object { $_.Command -eq $downloadCommand }).Count -eq 0) 'main window has a localized download menu item without a shortcut'
         $list = $dialog.FindName('langList')
         $languages = $service.GetSupportedLanguage()
         Wait-Regression $Context {
@@ -129,6 +134,8 @@ function Test-LanguageSelectors($Context) {
         Wait-Regression $Context {
             $service.CurrentLanguage -eq 'zh-CN' -and $settings.Language -eq 'zh-CN' -and $list.SelectedItem -eq 'zh-CN'
         } 'language menu commands switch the language and update the open dialog'
+        Assert-Regression ($downloads.Header -eq $service.GetString('downloads_menu') -and
+            $downloads.Header -ne $service.GetString('downloads_title')) 'Chinese menu label is distinct from the download manager title'
         $list.ScrollIntoView('en-US')
         $list.UpdateLayout()
         $list.ItemContainerGenerator.ContainerFromItem('en-US').IsSelected = $true

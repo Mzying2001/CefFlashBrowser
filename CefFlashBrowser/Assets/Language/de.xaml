@@ -306,34 +306,14 @@
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Ungespeicherte Änderungen werden überschrieben.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">{0} Skripte aktualisiert. {1} fehlgeschlagen.</sys:String>
 
-    <!--Message-->
-    <sys:String x:Key="message_emptyUrl">Bitte geben Sie die URL ein.</sys:String>
-    <sys:String x:Key="message_deleteCache">Möchten Sie wirklich alle Caches löschen? Der Browser wird neu gestartet.</sys:String>
-    <sys:String x:Key="message_restart">Möchten Sie das Programm neu starten?</sys:String>
-    <sys:String x:Key="message_removeItem">Möchten Sie "{0}" wirklich entfernen?</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">Möchten Sie diese Seite verlassen?</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">Möchten Sie diese Seite neu laden?</sys:String>
-    <sys:String x:Key="message_deleteFile">Möchten Sie die Datei "{0}" löschen?</sys:String>
-    <sys:String x:Key="message_deleted">Löschen erfolgreich.</sys:String>
-    <sys:String x:Key="message_imported">Import erfolgreich.</sys:String>
-    <sys:String x:Key="message_exported">Export erfolgreich.</sys:String>
-    <sys:String x:Key="message_askSaveChange">Möchten Sie die Änderungen an "{0}" speichern?</sys:String>
-    <sys:String x:Key="message_renameItem">"{0}" umbenennen:</sys:String>
-    <sys:String x:Key="message_askImportFile">Möchten Sie die Datei "{0}" nach "{1}" importieren?</sys:String>
-
-    <!--Error Messages-->
-    <sys:String x:Key="error_message">Fehlermeldung</sys:String>
-    <sys:String x:Key="error_webSiteEmptyName">Der Name darf nicht leer sein.</sys:String>
-    <sys:String x:Key="error_webSiteEmptyUrl">Die URL darf nicht leer sein.</sys:String>
-    <sys:String x:Key="error_deleteCachesRetry">Beim Leeren des Caches ist ein Fehler aufgetreten. Möchten Sie es erneut versuchen?</sys:String>
-    <sys:String x:Key="error_arrKeyAreadyExists">Ein Array-Schlüssel mit dem Namen "{0}" ist bereits vorhanden.</sys:String>
-    <sys:String x:Key="error_objPropAreadyExists">Eine Objekteigenschaft mit dem Namen "{0}" ist bereits vorhanden.</sys:String>
-    <sys:String x:Key="error_keyOrPropEmpty">Schlüssel-/Eigenschaftsname darf nicht leer sein.</sys:String>
-    <sys:String x:Key="error_keyOrPropAreadyExists">Ein Schlüssel/eine Eigenschaft mit dem Namen "{0}" ist bereits vorhanden.</sys:String>
-    <sys:String x:Key="error_notSolFile">Die Datei "{0}" ist keine SOL-Datei.</sys:String>
-    <sys:String x:Key="error_unknownSearchEngine">Unbekannte Suchmaschine.</sys:String>
-
     <!--Download manager-->
+    <sys:String x:Key="downloads_menu">Downloads</sys:String>
+    <sys:String x:Key="downloads_taskMenu">Aufgabe</sys:String>
+    <sys:String x:Key="downloads_historyMenu">Verlauf</sys:String>
+    <sys:String x:Key="downloads_details">Download-Details</sys:String>
+    <sys:String x:Key="downloads_filter">Nach Name, Pfad oder URL filtern…</sys:String>
+    <sys:String x:Key="downloads_empty">Kein Download-Verlauf</sys:String>
+    <sys:String x:Key="downloads_noMatches">Keine passenden Downloads</sys:String>
     <sys:String x:Key="downloads_title">Downloads</sys:String>
     <sys:String x:Key="downloads_new">Neuer Download</sys:String>
     <sys:String x:Key="downloads_pause">Pausieren</sys:String>
@@ -374,4 +354,31 @@
     <sys:String x:Key="downloads_sourceUnavailable">Die Quelle ist nicht mehr verfügbar. Starten Sie den Download auf der ursprünglichen Seite erneut.</sys:String>
     <sys:String x:Key="downloads_restartRequired">Der Server kann die gespeicherten Daten nicht sicher fortsetzen. Der Download beginnt erneut.</sys:String>
     <sys:String x:Key="downloads_nativeInterrupted">Die Verbindung wurde unterbrochen. Setzen Sie den Download fort oder starten Sie ihn an der Quelle erneut.</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">Bitte geben Sie die URL ein.</sys:String>
+    <sys:String x:Key="message_deleteCache">Möchten Sie wirklich alle Caches löschen? Der Browser wird neu gestartet.</sys:String>
+    <sys:String x:Key="message_restart">Möchten Sie das Programm neu starten?</sys:String>
+    <sys:String x:Key="message_removeItem">Möchten Sie "{0}" wirklich entfernen?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">Möchten Sie diese Seite verlassen?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">Möchten Sie diese Seite neu laden?</sys:String>
+    <sys:String x:Key="message_deleteFile">Möchten Sie die Datei "{0}" löschen?</sys:String>
+    <sys:String x:Key="message_deleted">Löschen erfolgreich.</sys:String>
+    <sys:String x:Key="message_imported">Import erfolgreich.</sys:String>
+    <sys:String x:Key="message_exported">Export erfolgreich.</sys:String>
+    <sys:String x:Key="message_askSaveChange">Möchten Sie die Änderungen an "{0}" speichern?</sys:String>
+    <sys:String x:Key="message_renameItem">"{0}" umbenennen:</sys:String>
+    <sys:String x:Key="message_askImportFile">Möchten Sie die Datei "{0}" nach "{1}" importieren?</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">Fehlermeldung</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">Der Name darf nicht leer sein.</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">Die URL darf nicht leer sein.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">Beim Leeren des Caches ist ein Fehler aufgetreten. Möchten Sie es erneut versuchen?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">Ein Array-Schlüssel mit dem Namen "{0}" ist bereits vorhanden.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">Eine Objekteigenschaft mit dem Namen "{0}" ist bereits vorhanden.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Schlüssel-/Eigenschaftsname darf nicht leer sein.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">Ein Schlüssel/eine Eigenschaft mit dem Namen "{0}" ist bereits vorhanden.</sys:String>
+    <sys:String x:Key="error_notSolFile">Die Datei "{0}" ist keine SOL-Datei.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">Unbekannte Suchmaschine.</sys:String>
 </ResourceDictionary>

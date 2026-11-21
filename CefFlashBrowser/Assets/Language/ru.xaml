@@ -306,34 +306,14 @@
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Несохранённые изменения будут перезаписаны.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Обновлено скриптов: {0}. Ошибок: {1}.</sys:String>
 
-    <!--Message-->
-    <sys:String x:Key="message_emptyUrl">Введите URL.</sys:String>
-    <sys:String x:Key="message_deleteCache">Удалить весь кэш? Браузер будет перезапущен.</sys:String>
-    <sys:String x:Key="message_restart">Перезапустить программу?</sys:String>
-    <sys:String x:Key="message_removeItem">Удалить "{0}"?</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">Покинуть эту страницу?</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">Перезагрузить эту страницу?</sys:String>
-    <sys:String x:Key="message_deleteFile">Удалить файл "{0}"?</sys:String>
-    <sys:String x:Key="message_deleted">Удаление выполнено.</sys:String>
-    <sys:String x:Key="message_imported">Импорт выполнен.</sys:String>
-    <sys:String x:Key="message_exported">Экспорт выполнен.</sys:String>
-    <sys:String x:Key="message_askSaveChange">Сохранить изменения в "{0}"?</sys:String>
-    <sys:String x:Key="message_renameItem">Переименовать "{0}":</sys:String>
-    <sys:String x:Key="message_askImportFile">Импортировать файл "{0}" в "{1}"?</sys:String>
-
-    <!--Error Messages-->
-    <sys:String x:Key="error_message">Сообщение об ошибке</sys:String>
-    <sys:String x:Key="error_webSiteEmptyName">Имя не может быть пустым.</sys:String>
-    <sys:String x:Key="error_webSiteEmptyUrl">URL не может быть пустым.</sys:String>
-    <sys:String x:Key="error_deleteCachesRetry">При очистке кэша произошла ошибка. Повторить попытку?</sys:String>
-    <sys:String x:Key="error_arrKeyAreadyExists">Ключ массива с именем "{0}" уже существует.</sys:String>
-    <sys:String x:Key="error_objPropAreadyExists">Свойство объекта с именем "{0}" уже существует.</sys:String>
-    <sys:String x:Key="error_keyOrPropEmpty">Имя ключа/свойства не может быть пустым.</sys:String>
-    <sys:String x:Key="error_keyOrPropAreadyExists">Ключ/свойство с именем "{0}" уже существует.</sys:String>
-    <sys:String x:Key="error_notSolFile">Файл "{0}" не является SOL-файлом.</sys:String>
-    <sys:String x:Key="error_unknownSearchEngine">Неизвестная поисковая система.</sys:String>
-
     <!--Download manager-->
+    <sys:String x:Key="downloads_menu">Загрузки</sys:String>
+    <sys:String x:Key="downloads_taskMenu">Задача</sys:String>
+    <sys:String x:Key="downloads_historyMenu">История</sys:String>
+    <sys:String x:Key="downloads_details">Сведения о загрузке</sys:String>
+    <sys:String x:Key="downloads_filter">Фильтр по имени, пути или URL…</sys:String>
+    <sys:String x:Key="downloads_empty">История загрузок пуста</sys:String>
+    <sys:String x:Key="downloads_noMatches">Подходящих загрузок нет</sys:String>
     <sys:String x:Key="downloads_title">Загрузки</sys:String>
     <sys:String x:Key="downloads_new">Новая загрузка</sys:String>
     <sys:String x:Key="downloads_pause">Пауза</sys:String>
@@ -374,4 +354,31 @@
     <sys:String x:Key="downloads_sourceUnavailable">Источник недоступен. Начните загрузку заново на исходной странице.</sys:String>
     <sys:String x:Key="downloads_restartRequired">Сервер не может безопасно продолжить загрузку сохранённых данных. Загрузка начнётся заново.</sys:String>
     <sys:String x:Key="downloads_nativeInterrupted">Соединение прервано. Попробуйте продолжить загрузку или начать её заново из источника.</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">Введите URL.</sys:String>
+    <sys:String x:Key="message_deleteCache">Удалить весь кэш? Браузер будет перезапущен.</sys:String>
+    <sys:String x:Key="message_restart">Перезапустить программу?</sys:String>
+    <sys:String x:Key="message_removeItem">Удалить "{0}"?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">Покинуть эту страницу?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">Перезагрузить эту страницу?</sys:String>
+    <sys:String x:Key="message_deleteFile">Удалить файл "{0}"?</sys:String>
+    <sys:String x:Key="message_deleted">Удаление выполнено.</sys:String>
+    <sys:String x:Key="message_imported">Импорт выполнен.</sys:String>
+    <sys:String x:Key="message_exported">Экспорт выполнен.</sys:String>
+    <sys:String x:Key="message_askSaveChange">Сохранить изменения в "{0}"?</sys:String>
+    <sys:String x:Key="message_renameItem">Переименовать "{0}":</sys:String>
+    <sys:String x:Key="message_askImportFile">Импортировать файл "{0}" в "{1}"?</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">Сообщение об ошибке</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">Имя не может быть пустым.</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">URL не может быть пустым.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">При очистке кэша произошла ошибка. Повторить попытку?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">Ключ массива с именем "{0}" уже существует.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">Свойство объекта с именем "{0}" уже существует.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Имя ключа/свойства не может быть пустым.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">Ключ/свойство с именем "{0}" уже существует.</sys:String>
+    <sys:String x:Key="error_notSolFile">Файл "{0}" не является SOL-файлом.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">Неизвестная поисковая система.</sys:String>
 </ResourceDictionary>

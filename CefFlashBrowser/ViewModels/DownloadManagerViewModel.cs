@@ -7,7 +7,9 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -15,16 +17,32 @@ namespace CefFlashBrowser.ViewModels
     {
         private readonly DownloadManagerService _service;
         private DownloadItemViewModel _selected;
+        private string _filterText = string.Empty;
+        private string _filterTerm = string.Empty;
 
         public ObservableCollection<DownloadItemViewModel> Items => _service.Items;
+        public ListCollectionView ItemsView { get; }
+
+        public string FilterText
+        {
+            get => _filterText;
+            set
+            {
+                if (!UpdateValue(ref _filterText, value ?? string.Empty))
+                    return;
+
+                _filterTerm = _filterText.Trim();
+                RefreshItemsView();
+            }
+        }
 
         public DownloadItemViewModel SelectedItem
         {
             get => _selected;
             set
             {
-                UpdateValue(ref _selected, value);
-                RefreshCommands();
+                if (UpdateValue(ref _selected, value))
+                    RefreshCommands();
             }
         }
 
@@ -41,6 +59,7 @@ namespace CefFlashBrowser.ViewModels
         public DownloadManagerViewModel(DownloadManagerService service)
         {
             _service = service;
+            ItemsView = new ListCollectionView(Items) { Filter = item => MatchesFilter((DownloadItemViewModel)item) };
 
             NewCommand = new DelegateCommand(() => RunAsync(service.NewAsync));
 
@@ -139,7 +158,28 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void ServiceRefreshed(object sender, EventArgs e) => RefreshCommands();
+        private bool MatchesFilter(DownloadItemViewModel item) => _filterTerm.Length == 0
+            || ContainsFilterTerm(item.FileName) || ContainsFilterTerm(item.FilePath) || ContainsFilterTerm(item.Url);
+
+        private bool ContainsFilterTerm(string value) => value != null
+            && value.IndexOf(_filterTerm, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        private void RefreshItemsView()
+        {
+            if (_selected != null && !MatchesFilter(_selected))
+                SelectedItem = null;
+
+            ItemsView.Refresh();
+        }
+
+        private void ServiceRefreshed(object sender, EventArgs e)
+        {
+            // Redirects and destination conflicts can change which downloads match while the filter is active.
+            if (_filterTerm.Length != 0 && !Items.Where(MatchesFilter).SequenceEqual(ItemsView.Cast<DownloadItemViewModel>()))
+                RefreshItemsView();
+
+            RefreshCommands();
+        }
 
         private void RefreshCommands()
         {
@@ -155,6 +195,7 @@ namespace CefFlashBrowser.ViewModels
         public void Dispose()
         {
             _service.Refreshed -= ServiceRefreshed;
+            ItemsView.DetachFromSourceCollection();
         }
     }
 }

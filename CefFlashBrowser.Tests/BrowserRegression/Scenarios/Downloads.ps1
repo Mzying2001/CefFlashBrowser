@@ -5,6 +5,15 @@ function Test-DownloadManagerWindow($Context) {
     Invoke-BrowserCommand ([CefFlashBrowser.Services.WindowManager]::OpenDownloadsCommand)
     Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] }).Count -eq 1) 'download manager entry reuses its single window'
     $manager = [CefFlashBrowser.Services.Downloads.DownloadManagerService]::Current
+    $model = $window.DataContext
+    $canExecute = [Windows.Input.ICommand].GetMethod('CanExecute')
+    $list = $window.FindName('downloadList')
+    $filter = $window.FindName('downloadFilter')
+    $details = $window.FindName('downloadDetails')
+    $errorField = $window.FindName('detailError')
+    $emptyMessage = $window.FindName('emptyDownloadMessage')
+    Assert-Regression ($details.Visibility -eq 'Collapsed' -and $emptyMessage.Visibility -eq 'Visible' -and
+        $emptyMessage.Text -eq $Context.LanguageService.GetString('downloads_empty')) 'empty download history leaves the details panel collapsed'
     $record = New-Object CefFlashBrowser.Models.Downloads.DownloadRecord
     $record.Source = 'manual'
     $record.Url = 'https://example.test/download'
@@ -16,25 +25,96 @@ function Test-DownloadManagerWindow($Context) {
     [IO.File]::WriteAllBytes($record.FilePath, [byte[]]@(1,2,3))
     $transfer = New-Object CefFlashBrowser.Services.Downloads.HttpDownloadTransfer($record, $null, $null)
     $manager.Accept($transfer)
-    $window.DataContext.SelectedItem = $manager.Items[0]
+    $completedItem = $manager.Items[0]
+
+    $failure = New-Object CefFlashBrowser.Models.Downloads.DownloadRecord
+    $failure.Source = 'browser'
+    $failure.Url = 'https://example.test/failed-request'
+    $failure.FileName = 'failed.bin'
+    $failure.FilePath = Join-Path $Context.TemporaryPath 'alternate\failed.bin'
+    $failure.State = [CefFlashBrowser.Models.Downloads.DownloadState]::Failed
+    $failure.Error = 'The server closed the connection.'
+    $manager.Accept((New-Object CefFlashBrowser.Services.Downloads.HttpDownloadTransfer($failure, $null, $null)))
+    $failedItem = $manager.Items[0]
+
+    Assert-Regression ($details.Visibility -eq 'Collapsed') 'populated history hides details until a download is selected'
+    $list.SelectedItem = $completedItem
     $manager.Refresh()
-    Assert-Regression ($window.DataContext.SelectedItem.CanOpen) 'completed download enables opening its file'
-    $window.UpdateLayout()
-    $bitmap = New-Object Windows.Media.Imaging.RenderTargetBitmap([int]$window.Content.ActualWidth, [int]$window.Content.ActualHeight, 96, 96, [Windows.Media.PixelFormats]::Pbgra32)
-    $bitmap.Render($window.Content)
-    $encoder = New-Object Windows.Media.Imaging.PngBitmapEncoder
-    $encoder.Frames.Add([Windows.Media.Imaging.BitmapFrame]::Create($bitmap))
-    $stream = [IO.File]::Create((Join-Path $Context.TemporaryPath 'DownloadManager.png'))
+    Assert-Regression ($canExecute.Invoke($model.OpenCommand, [object[]]@($null)) -and
+        $window.FindName('openFolderButton').IsEnabled) 'completed download enables file and folder actions'
+    Save-DownloadManagerCapture $window (Join-Path $Context.TemporaryPath 'DownloadManager.png')
+
+    Assert-Regression ($details.Visibility -eq 'Visible' -and $errorField.Visibility -eq 'Collapsed') 'selecting a completed download automatically shows details without an error row'
+    $filter.Text = '  EXAMPLE.BIN  '
+    Assert-Regression ($list.Items.Count -eq 1 -and $list.SelectedItem -eq $completedItem -and $details.Visibility -eq 'Visible') 'name filter trims whitespace and keeps a matching selection and its details'
+    $filter.Text = 'ALTERNATE'
+    Assert-Regression ($list.Items.Count -eq 1 -and $list.Items[0] -eq $failedItem) 'filter matches the saved path'
+    Assert-Regression ($null -eq $model.SelectedItem -and $null -eq $list.SelectedItem -and $details.Visibility -eq 'Collapsed') 'filtering out the selected download clears selection and closes details'
+    Assert-Regression (!$canExecute.Invoke($model.OpenCommand, [object[]]@($null)) -and
+        !$window.FindName('openFolderButton').IsEnabled) 'row actions are disabled when filtering out the selected download'
+    $filter.Text = 'failed-request'
+    Assert-Regression ($list.Items.Count -eq 1 -and $list.Items[0] -eq $failedItem) 'filter matches the download URL'
+    $failure.Url = 'https://example.test/redirected'
+    $manager.Refresh($false)
+    Assert-Regression ($list.Items.Count -eq 0 -and $emptyMessage.Visibility -eq 'Visible' -and
+        $emptyMessage.Text -eq $Context.LanguageService.GetString('downloads_noMatches')) 'a URL change updates filter results and the empty-results message'
+    $filter.Text = ''
+    Assert-Regression ($list.Items.Count -eq 2 -and $emptyMessage.Visibility -eq 'Collapsed') 'clearing the filter restores all history'
+
+    $list.SelectedItem = $completedItem
+    $list.ScrollIntoView($failedItem)
+    $list.UpdateLayout()
+    $row = $list.ItemContainerGenerator.ContainerFromItem($failedItem)
+    $right = New-Object Windows.Input.MouseButtonEventArgs([Windows.Input.Mouse]::PrimaryDevice, 0, [Windows.Input.MouseButton]::Right)
+    $right.RoutedEvent = [Windows.UIElement]::PreviewMouseRightButtonDownEvent
+    $row.RaiseEvent($right)
+    Assert-Regression ($model.SelectedItem -eq $failedItem -and
+        !$canExecute.Invoke($model.OpenCommand, [object[]]@($null))) 'right click selects the clicked download and updates available actions'
+    $menu = $row.ContextMenu
+    $menu.PlacementTarget = $row
+    $menu.IsOpen = $true
     try {
-        $encoder.Save($stream)
+        Wait-Regression $Context { $menu.Items[0].Command -eq $model.OpenCommand } 'row context menu binds to the download commands'
+        Assert-Regression (@($menu.Items | Where-Object { $_.Header -eq $Context.LanguageService.GetString('downloads_details') }).Count -eq 0) 'row context menu has no details action'
     } finally {
-        $stream.Dispose()
+        $menu.IsOpen = $false
     }
+    Assert-Regression ($details.Visibility -eq 'Visible' -and $errorField.Visibility -eq 'Visible' -and
+        $errorField.Text -eq $failure.Error) 'failed downloads show the actual error in details'
+
+    $window.Width = $window.MinWidth
+    $window.Height = $window.MinHeight
+    Set-ManagerRegressionTheme $Context ([CefFlashBrowser.Models.Theme]::Dark)
+    try {
+        Save-DownloadManagerCapture $window (Join-Path $Context.TemporaryPath 'DownloadManager-Dark.png')
+        Assert-Regression ($list.ActualHeight -gt 80 -and $details.ActualHeight -gt 0) 'the minimum window size leaves space for the list and details'
+    } finally {
+        Set-ManagerRegressionTheme $Context ([CefFlashBrowser.Models.Theme]::Light)
+    }
+    $list.SelectedItem = $completedItem
+    Assert-Regression ($details.Visibility -eq 'Visible' -and $errorField.Visibility -eq 'Collapsed') 'details follow selection and hide cleared errors'
+    $list.SelectedItem = $null
+    Assert-Regression ($details.Visibility -eq 'Collapsed') 'clearing selection returns the details space to the list'
+    Set-TabWindowForeground $Context $window
+    $filter.Text = 'failed.bin'
+    $list.SelectedItem = $failedItem
+    [void]$filter.Focus()
+    $filter.Select($filter.Text.Length - 1, 0)
+    [RegressionKeyboard]::PressKey(0x2E)
+    Wait-Regression $Context { $filter.Text -eq 'failed.bi' } 'Delete edits the filter text'
+    Assert-Regression ($manager.Items.Contains($failedItem) -and $list.SelectedItem -eq $failedItem) 'Delete in the filter leaves the selected record intact'
+    $list.UpdateLayout()
+    [void]$list.ItemContainerGenerator.ContainerFromItem($failedItem).Focus()
+    [RegressionKeyboard]::PressKey(0x2E)
+    Wait-Regression $Context { !$manager.Items.Contains($failedItem) } 'Delete in the list removes the selected record'
+    Assert-Regression ($details.Visibility -eq 'Collapsed') 'removing the only visible record hides details'
+    $filter.Text = ''
+    $list.SelectedItem = $completedItem
 
     [IO.File]::Delete($record.FilePath)
     $manager.Refresh()
     Wait-Regression $Context { $record.FileMissing } 'refresh detects the deleted file asynchronously'
-    Assert-Regression ($record.FileMissing -and !$window.DataContext.SelectedItem.CanOpen) 'externally deleted file updates its state and open action'
+    Assert-Regression ($record.FileMissing -and !$canExecute.Invoke($model.OpenCommand, [object[]]@($null))) 'externally deleted file updates its state and open action'
     $window.Close()
     [CefFlashBrowser.Services.WindowManager]::ShowDownloadManager()
     $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0]
@@ -66,6 +146,20 @@ function Test-DownloadManagerWindow($Context) {
     } finally {
         [CefFlashBrowser.Data.GlobalData]::Settings.DownloadDirectory = $directory
         [void][CefFlashBrowser.Data.GlobalData]::SaveSettings()
+    }
+}
+
+function Save-DownloadManagerCapture($Window, [string]$Path) {
+    $Window.UpdateLayout()
+    $bitmap = New-Object Windows.Media.Imaging.RenderTargetBitmap([int]$Window.Content.ActualWidth, [int]$Window.Content.ActualHeight, 96, 96, [Windows.Media.PixelFormats]::Pbgra32)
+    $bitmap.Render($Window.Content)
+    $encoder = New-Object Windows.Media.Imaging.PngBitmapEncoder
+    $encoder.Frames.Add([Windows.Media.Imaging.BitmapFrame]::Create($bitmap))
+    $stream = [IO.File]::Create($Path)
+    try {
+        $encoder.Save($stream)
+    } finally {
+        $stream.Dispose()
     }
 }
 

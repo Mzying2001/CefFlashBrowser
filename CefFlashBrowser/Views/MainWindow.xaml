@@ -23,7 +23,6 @@
         FocusManager.FocusedElement="{Binding ElementName=inputTextBox}">
 
     <Window.InputBindings>
-        <KeyBinding Gesture="Ctrl+J" Command="{x:Static services:WindowManager.OpenDownloadsCommand}"/>
         <KeyBinding Gesture="Ctrl+W"
                     Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"/>
     </Window.InputBindings>
@@ -173,10 +172,11 @@
 
                 <Separator/>
 
+                <!--DownloadManager-->
+                <MenuItem Header="{DynamicResource downloads_menu}"
+                          Command="{x:Static services:WindowManager.OpenDownloadsCommand}"/>
+
                 <!--UserScriptManager-->
-                <MenuItem Header="{DynamicResource downloads_title}"
-                          Command="{x:Static services:WindowManager.OpenDownloadsCommand}"
-                          InputGestureText="Ctrl+J"/>
                 <MenuItem Header="{DynamicResource common_manageUserScripts}"
                           Command="{Binding OpenUserScriptManagerCommand}"/>
 

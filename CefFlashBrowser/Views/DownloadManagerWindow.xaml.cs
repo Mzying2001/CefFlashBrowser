@@ -19,19 +19,31 @@ namespace CefFlashBrowser.Views
             DataContext = _model;
 
             InputBindings.Add(new KeyBinding(_model.NewCommand, new KeyGesture(Key.N, ModifierKeys.Control)));
-            InputBindings.Add(new KeyBinding(_model.RemoveCommand, new KeyGesture(Key.Delete)));
+            downloadList.InputBindings.Add(new KeyBinding(_model.RemoveCommand, new KeyGesture(Key.Delete)));
             InputBindings.Add(new KeyBinding(new DelegateCommand(Close), new KeyGesture(Key.W, ModifierKeys.Control)));
 
             Activated += (_, __) => DownloadManagerService.Current.Refresh();
             Closed += (_, __) => _model.Dispose();
         }
 
+        private void CloseWindow(object sender, RoutedEventArgs e) => Close();
+
+        private void SelectDownloadRow(object sender, MouseButtonEventArgs e)
+        {
+            var row = (ListViewItem)sender;
+            row.IsSelected = true;
+            row.Focus();
+        }
+
         private void OpenSelected(object sender, MouseButtonEventArgs e)
         {
-            if (ItemsControl.ContainerFromElement(downloadList, e.OriginalSource as DependencyObject) is ListViewItem
-                && _model.OpenCommand.CanExecute)
+            ICommand open = _model.OpenCommand;
+
+            if (e.ChangedButton == MouseButton.Left
+                && ItemsControl.ContainerFromElement(downloadList, e.OriginalSource as DependencyObject) is ListViewItem
+                && open.CanExecute(null))
             {
-                _model.OpenCommand.Execute(null);
+                open.Execute(null);
             }
         }
     }

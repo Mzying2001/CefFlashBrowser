@@ -306,34 +306,14 @@
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Les modifications non enregistrées seront remplacées.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Scripts mis à jour : {0}. Échecs : {1}.</sys:String>
 
-    <!--Message-->
-    <sys:String x:Key="message_emptyUrl">Veuillez saisir l'url.</sys:String>
-    <sys:String x:Key="message_deleteCache">Êtes-vous sûr de vouloir supprimer les caches ? Le navigateur devra redémarrer.</sys:String>
-    <sys:String x:Key="message_restart">Voulez-vous redémarrer le programme?</sys:String>
-    <sys:String x:Key="message_removeItem">Êtes-vous sûr de vouloir supprimer "{0}" ?</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">Voulez-vous quitter cette page ?</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">Voulez-vous recharger cette page ?</sys:String>
-    <sys:String x:Key="message_deleteFile">Voulez-vous supprimer le fichier "{0}" ?</sys:String>
-    <sys:String x:Key="message_deleted">Suppression réussie.</sys:String>
-    <sys:String x:Key="message_imported">Importation réussie.</sys:String>
-    <sys:String x:Key="message_exported">Exportation réussie.</sys:String>
-    <sys:String x:Key="message_askSaveChange">Souhaitez-vous enregistrer les modifications apportées à "{0}" ?</sys:String>
-    <sys:String x:Key="message_renameItem">Renommer "{0}":</sys:String>
-    <sys:String x:Key="message_askImportFile">Voulez-vous importer le fichier "{0}" dans "{1}"?</sys:String>
-
-    <!--Error Messages-->
-    <sys:String x:Key="error_message">Message d'erreur</sys:String>
-    <sys:String x:Key="error_webSiteEmptyName">Le nom ne peut pas être vide.</sys:String>
-    <sys:String x:Key="error_webSiteEmptyUrl">L'URL ne peut pas être vide.</sys:String>
-    <sys:String x:Key="error_deleteCachesRetry">Une erreur s'est produite lors de la suppression du cache. Voulez-vous réessayer ?</sys:String>
-    <sys:String x:Key="error_arrKeyAreadyExists">La clé "{0}" existe déjà dans ce tableau.</sys:String>
-    <sys:String x:Key="error_objPropAreadyExists">La propriété "{0}" existe déjà dans cette objet.</sys:String>
-    <sys:String x:Key="error_keyOrPropEmpty">Le nom de la clé ou de la propriété ne peut pas être vide.</sys:String>
-    <sys:String x:Key="error_keyOrPropAreadyExists">La clé ou propriété "{0}" existe déjà.</sys:String>
-    <sys:String x:Key="error_notSolFile">Le fichier "{0}" n'est pas un fichier SOL.</sys:String>
-    <sys:String x:Key="error_unknownSearchEngine">Moteur de recherche inconnu.</sys:String>
-
     <!--Download manager-->
+    <sys:String x:Key="downloads_menu">Téléchargements</sys:String>
+    <sys:String x:Key="downloads_taskMenu">Tâche</sys:String>
+    <sys:String x:Key="downloads_historyMenu">Historique</sys:String>
+    <sys:String x:Key="downloads_details">Détails du téléchargement</sys:String>
+    <sys:String x:Key="downloads_filter">Filtrer par nom, chemin ou URL…</sys:String>
+    <sys:String x:Key="downloads_empty">Aucun historique de téléchargement</sys:String>
+    <sys:String x:Key="downloads_noMatches">Aucun téléchargement correspondant</sys:String>
     <sys:String x:Key="downloads_title">Téléchargements</sys:String>
     <sys:String x:Key="downloads_new">Nouveau téléchargement</sys:String>
     <sys:String x:Key="downloads_pause">Suspendre</sys:String>
@@ -374,4 +354,31 @@
     <sys:String x:Key="downloads_sourceUnavailable">La source est indisponible. Relancez le téléchargement depuis sa page d’origine.</sys:String>
     <sys:String x:Key="downloads_restartRequired">Le serveur ne peut pas reprendre les données enregistrées de manière fiable. Le téléchargement recommence.</sys:String>
     <sys:String x:Key="downloads_nativeInterrupted">La connexion a été interrompue. Essayez de reprendre le téléchargement ou relancez-le depuis sa source.</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">Veuillez saisir l'url.</sys:String>
+    <sys:String x:Key="message_deleteCache">Êtes-vous sûr de vouloir supprimer les caches ? Le navigateur devra redémarrer.</sys:String>
+    <sys:String x:Key="message_restart">Voulez-vous redémarrer le programme?</sys:String>
+    <sys:String x:Key="message_removeItem">Êtes-vous sûr de vouloir supprimer "{0}" ?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">Voulez-vous quitter cette page ?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">Voulez-vous recharger cette page ?</sys:String>
+    <sys:String x:Key="message_deleteFile">Voulez-vous supprimer le fichier "{0}" ?</sys:String>
+    <sys:String x:Key="message_deleted">Suppression réussie.</sys:String>
+    <sys:String x:Key="message_imported">Importation réussie.</sys:String>
+    <sys:String x:Key="message_exported">Exportation réussie.</sys:String>
+    <sys:String x:Key="message_askSaveChange">Souhaitez-vous enregistrer les modifications apportées à "{0}" ?</sys:String>
+    <sys:String x:Key="message_renameItem">Renommer "{0}":</sys:String>
+    <sys:String x:Key="message_askImportFile">Voulez-vous importer le fichier "{0}" dans "{1}"?</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">Message d'erreur</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">Le nom ne peut pas être vide.</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">L'URL ne peut pas être vide.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">Une erreur s'est produite lors de la suppression du cache. Voulez-vous réessayer ?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">La clé "{0}" existe déjà dans ce tableau.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">La propriété "{0}" existe déjà dans cette objet.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Le nom de la clé ou de la propriété ne peut pas être vide.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">La clé ou propriété "{0}" existe déjà.</sys:String>
+    <sys:String x:Key="error_notSolFile">Le fichier "{0}" n'est pas un fichier SOL.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">Moteur de recherche inconnu.</sys:String>
 </ResourceDictionary>

@@ -306,34 +306,14 @@
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">未保存的改动将被覆盖。</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">更新成功 {0} 个，失败 {1} 个。</sys:String>
 
-    <!--提示信息-->
-    <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
-    <sys:String x:Key="message_deleteCache">确定要清除所有缓存吗？浏览器将会重启。</sys:String>
-    <sys:String x:Key="message_restart">是否要重启程序？</sys:String>
-    <sys:String x:Key="message_removeItem">确定要移除“{0}”吗？</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">要离开此页面吗？</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">要重新加载此页面吗？</sys:String>
-    <sys:String x:Key="message_deleteFile">是否删除文件“{0}”？</sys:String>
-    <sys:String x:Key="message_deleted">删除成功。</sys:String>
-    <sys:String x:Key="message_imported">导入成功。</sys:String>
-    <sys:String x:Key="message_exported">导出成功。</sys:String>
-    <sys:String x:Key="message_askSaveChange">是否将更改保存到“{0}”？</sys:String>
-    <sys:String x:Key="message_renameItem">重命名“{0}”：</sys:String>
-    <sys:String x:Key="message_askImportFile">是否导入文件“{0}”到“{1}”？</sys:String>
-
-    <!--错误信息-->
-    <sys:String x:Key="error_message">错误信息</sys:String>
-    <sys:String x:Key="error_webSiteEmptyName">名称不能为空。</sys:String>
-    <sys:String x:Key="error_webSiteEmptyUrl">网址不能为空。</sys:String>
-    <sys:String x:Key="error_deleteCachesRetry">清除缓存时发生错误，是否重试？</sys:String>
-    <sys:String x:Key="error_arrKeyAreadyExists">数组已经存在名称为“{0}”的键值。</sys:String>
-    <sys:String x:Key="error_objPropAreadyExists">对象已经存在名称为“{0}”的属性。</sys:String>
-    <sys:String x:Key="error_keyOrPropEmpty">键值/属性名不能为空。</sys:String>
-    <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
-    <sys:String x:Key="error_notSolFile">文件“{0}”不是 SOL 文件。</sys:String>
-    <sys:String x:Key="error_unknownSearchEngine">未知的搜索引擎。</sys:String>
-
-    <!--Download manager-->
+    <!--下载-->
+    <sys:String x:Key="downloads_menu">下载</sys:String>
+    <sys:String x:Key="downloads_taskMenu">任务</sys:String>
+    <sys:String x:Key="downloads_historyMenu">记录</sys:String>
+    <sys:String x:Key="downloads_details">下载详情</sys:String>
+    <sys:String x:Key="downloads_filter">筛选文件名、路径或链接…</sys:String>
+    <sys:String x:Key="downloads_empty">暂无下载记录</sys:String>
+    <sys:String x:Key="downloads_noMatches">没有匹配的下载</sys:String>
     <sys:String x:Key="downloads_title">下载管理</sys:String>
     <sys:String x:Key="downloads_new">新建下载</sys:String>
     <sys:String x:Key="downloads_pause">暂停</sys:String>
@@ -374,4 +354,31 @@
     <sys:String x:Key="downloads_sourceUnavailable">下载来源已不可用，请从原页面重新发起下载。</sys:String>
     <sys:String x:Key="downloads_restartRequired">服务器无法安全续传已保存的数据，正在从头下载。</sys:String>
     <sys:String x:Key="downloads_nativeInterrupted">下载连接已中断，可以尝试继续或从来源重新下载。</sys:String>
+
+    <!--提示信息-->
+    <sys:String x:Key="message_emptyUrl">请输入网址。</sys:String>
+    <sys:String x:Key="message_deleteCache">确定要清除所有缓存吗？浏览器将会重启。</sys:String>
+    <sys:String x:Key="message_restart">是否要重启程序？</sys:String>
+    <sys:String x:Key="message_removeItem">确定要移除“{0}”吗？</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">要离开此页面吗？</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">要重新加载此页面吗？</sys:String>
+    <sys:String x:Key="message_deleteFile">是否删除文件“{0}”？</sys:String>
+    <sys:String x:Key="message_deleted">删除成功。</sys:String>
+    <sys:String x:Key="message_imported">导入成功。</sys:String>
+    <sys:String x:Key="message_exported">导出成功。</sys:String>
+    <sys:String x:Key="message_askSaveChange">是否将更改保存到“{0}”？</sys:String>
+    <sys:String x:Key="message_renameItem">重命名“{0}”：</sys:String>
+    <sys:String x:Key="message_askImportFile">是否导入文件“{0}”到“{1}”？</sys:String>
+
+    <!--错误信息-->
+    <sys:String x:Key="error_message">错误信息</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">名称不能为空。</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">网址不能为空。</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">清除缓存时发生错误，是否重试？</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">数组已经存在名称为“{0}”的键值。</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">对象已经存在名称为“{0}”的属性。</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">键值/属性名不能为空。</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">已经存在名称为“{0}”的键值/属性。</sys:String>
+    <sys:String x:Key="error_notSolFile">文件“{0}”不是 SOL 文件。</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">未知的搜索引擎。</sys:String>
 </ResourceDictionary>

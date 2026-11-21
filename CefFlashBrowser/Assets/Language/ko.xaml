@@ -306,34 +306,14 @@
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">저장하지 않은 변경 사항을 덮어씁니다.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">업데이트 성공 {0}개, 실패 {1}개.</sys:String>
 
-    <!--Message-->
-    <sys:String x:Key="message_emptyUrl">URL을 입력하세요.</sys:String>
-    <sys:String x:Key="message_deleteCache">모든 캐시를 삭제하시겠습니까? 브라우저가 다시 시작됩니다.</sys:String>
-    <sys:String x:Key="message_restart">프로그램을 다시 시작하시겠습니까?</sys:String>
-    <sys:String x:Key="message_removeItem">"{0}"을(를) 제거하시겠습니까?</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">이 페이지를 떠나시겠습니까?</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">이 페이지를 새로 고치시겠습니까?</sys:String>
-    <sys:String x:Key="message_deleteFile">파일 "{0}"을(를) 삭제하시겠습니까?</sys:String>
-    <sys:String x:Key="message_deleted">삭제되었습니다.</sys:String>
-    <sys:String x:Key="message_imported">가져오기가 완료되었습니다.</sys:String>
-    <sys:String x:Key="message_exported">내보내기가 완료되었습니다.</sys:String>
-    <sys:String x:Key="message_askSaveChange">"{0}"의 변경 사항을 저장하시겠습니까?</sys:String>
-    <sys:String x:Key="message_renameItem">"{0}" 이름 바꾸기:</sys:String>
-    <sys:String x:Key="message_askImportFile">파일 "{0}"을(를) "{1}"(으)로 가져오시겠습니까?</sys:String>
-
-    <!--Error Messages-->
-    <sys:String x:Key="error_message">오류 메시지</sys:String>
-    <sys:String x:Key="error_webSiteEmptyName">이름은 비워 둘 수 없습니다.</sys:String>
-    <sys:String x:Key="error_webSiteEmptyUrl">URL은 비워 둘 수 없습니다.</sys:String>
-    <sys:String x:Key="error_deleteCachesRetry">캐시를 지우는 중 오류가 발생했습니다. 다시 시도하시겠습니까?</sys:String>
-    <sys:String x:Key="error_arrKeyAreadyExists">"{0}" 이름의 배열 키가 이미 있습니다.</sys:String>
-    <sys:String x:Key="error_objPropAreadyExists">"{0}" 이름의 개체 속성이 이미 있습니다.</sys:String>
-    <sys:String x:Key="error_keyOrPropEmpty">키/속성 이름은 비워 둘 수 없습니다.</sys:String>
-    <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" 이름의 키/속성이 이미 있습니다.</sys:String>
-    <sys:String x:Key="error_notSolFile">파일 "{0}"은(는) SOL 파일이 아닙니다.</sys:String>
-    <sys:String x:Key="error_unknownSearchEngine">알 수 없는 검색 엔진입니다.</sys:String>
-
     <!--Download manager-->
+    <sys:String x:Key="downloads_menu">다운로드</sys:String>
+    <sys:String x:Key="downloads_taskMenu">작업</sys:String>
+    <sys:String x:Key="downloads_historyMenu">기록</sys:String>
+    <sys:String x:Key="downloads_details">다운로드 세부 정보</sys:String>
+    <sys:String x:Key="downloads_filter">이름, 경로 또는 URL로 필터링…</sys:String>
+    <sys:String x:Key="downloads_empty">다운로드 기록이 없습니다</sys:String>
+    <sys:String x:Key="downloads_noMatches">일치하는 다운로드가 없습니다</sys:String>
     <sys:String x:Key="downloads_title">다운로드 관리</sys:String>
     <sys:String x:Key="downloads_new">새 다운로드</sys:String>
     <sys:String x:Key="downloads_pause">일시 중지</sys:String>
@@ -374,4 +354,31 @@
     <sys:String x:Key="downloads_sourceUnavailable">다운로드 출처를 사용할 수 없습니다. 원래 페이지에서 다시 다운로드하세요.</sys:String>
     <sys:String x:Key="downloads_restartRequired">서버에서 저장된 데이터를 안전하게 이어받을 수 없어 처음부터 다시 다운로드합니다.</sys:String>
     <sys:String x:Key="downloads_nativeInterrupted">다운로드 연결이 중단되었습니다. 계속하거나 원래 출처에서 다시 시작하세요.</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">URL을 입력하세요.</sys:String>
+    <sys:String x:Key="message_deleteCache">모든 캐시를 삭제하시겠습니까? 브라우저가 다시 시작됩니다.</sys:String>
+    <sys:String x:Key="message_restart">프로그램을 다시 시작하시겠습니까?</sys:String>
+    <sys:String x:Key="message_removeItem">"{0}"을(를) 제거하시겠습니까?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">이 페이지를 떠나시겠습니까?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">이 페이지를 새로 고치시겠습니까?</sys:String>
+    <sys:String x:Key="message_deleteFile">파일 "{0}"을(를) 삭제하시겠습니까?</sys:String>
+    <sys:String x:Key="message_deleted">삭제되었습니다.</sys:String>
+    <sys:String x:Key="message_imported">가져오기가 완료되었습니다.</sys:String>
+    <sys:String x:Key="message_exported">내보내기가 완료되었습니다.</sys:String>
+    <sys:String x:Key="message_askSaveChange">"{0}"의 변경 사항을 저장하시겠습니까?</sys:String>
+    <sys:String x:Key="message_renameItem">"{0}" 이름 바꾸기:</sys:String>
+    <sys:String x:Key="message_askImportFile">파일 "{0}"을(를) "{1}"(으)로 가져오시겠습니까?</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">오류 메시지</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">이름은 비워 둘 수 없습니다.</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">URL은 비워 둘 수 없습니다.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">캐시를 지우는 중 오류가 발생했습니다. 다시 시도하시겠습니까?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">"{0}" 이름의 배열 키가 이미 있습니다.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">"{0}" 이름의 개체 속성이 이미 있습니다.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">키/속성 이름은 비워 둘 수 없습니다.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" 이름의 키/속성이 이미 있습니다.</sys:String>
+    <sys:String x:Key="error_notSolFile">파일 "{0}"은(는) SOL 파일이 아닙니다.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">알 수 없는 검색 엔진입니다.</sys:String>
 </ResourceDictionary>

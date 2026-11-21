@@ -306,34 +306,14 @@
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">未儲存的變更將被覆寫。</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">更新成功 {0} 個，失敗 {1} 個。</sys:String>
 
-    <!--提示訊息-->
-    <sys:String x:Key="message_emptyUrl">請輸入網址。</sys:String>
-    <sys:String x:Key="message_deleteCache">確定要清除所有快取嗎？瀏覽器將會重新啟動。</sys:String>
-    <sys:String x:Key="message_restart">是否要重新啟動程式？</sys:String>
-    <sys:String x:Key="message_removeItem">確定要移除「{0}」嗎？</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">確定要離開此頁面嗎？</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">確定要重新載入此頁面嗎？</sys:String>
-    <sys:String x:Key="message_deleteFile">是否刪除檔案「{0}」？</sys:String>
-    <sys:String x:Key="message_deleted">刪除成功。</sys:String>
-    <sys:String x:Key="message_imported">匯入成功。</sys:String>
-    <sys:String x:Key="message_exported">匯出成功。</sys:String>
-    <sys:String x:Key="message_askSaveChange">是否將變更儲存到「{0}」？</sys:String>
-    <sys:String x:Key="message_renameItem">重新命名「{0}」：</sys:String>
-    <sys:String x:Key="message_askImportFile">是否要將檔案「{0}」匯入至「{1}」？</sys:String>
-
-    <!--錯誤訊息-->
-    <sys:String x:Key="error_message">錯誤訊息</sys:String>
-    <sys:String x:Key="error_webSiteEmptyName">名稱不能為空白。</sys:String>
-    <sys:String x:Key="error_webSiteEmptyUrl">網址不能為空白。</sys:String>
-    <sys:String x:Key="error_deleteCachesRetry">清除快取時發生錯誤，是否重試？</sys:String>
-    <sys:String x:Key="error_arrKeyAreadyExists">陣列中已經存在名稱為「{0}」的鍵值。</sys:String>
-    <sys:String x:Key="error_objPropAreadyExists">物件中已經存在名稱為「{0}」的屬性。</sys:String>
-    <sys:String x:Key="error_keyOrPropEmpty">鍵值/屬性名稱不能為空。</sys:String>
-    <sys:String x:Key="error_keyOrPropAreadyExists">已經存在名稱為「{0}」的鍵值/屬性。</sys:String>
-    <sys:String x:Key="error_notSolFile">檔案「{0}」不是 SOL 檔案。</sys:String>
-    <sys:String x:Key="error_unknownSearchEngine">未知的搜尋引擎。</sys:String>
-
-    <!--Download manager-->
+    <!--下載-->
+    <sys:String x:Key="downloads_menu">下載</sys:String>
+    <sys:String x:Key="downloads_taskMenu">工作</sys:String>
+    <sys:String x:Key="downloads_historyMenu">記錄</sys:String>
+    <sys:String x:Key="downloads_details">下載詳細資料</sys:String>
+    <sys:String x:Key="downloads_filter">篩選檔名、路徑或連結…</sys:String>
+    <sys:String x:Key="downloads_empty">目前沒有下載記錄</sys:String>
+    <sys:String x:Key="downloads_noMatches">沒有符合條件的下載</sys:String>
     <sys:String x:Key="downloads_title">下載管理</sys:String>
     <sys:String x:Key="downloads_new">新增下載</sys:String>
     <sys:String x:Key="downloads_pause">暫停</sys:String>
@@ -374,4 +354,31 @@
     <sys:String x:Key="downloads_sourceUnavailable">下載來源已無法使用，請從原頁面重新開始下載。</sys:String>
     <sys:String x:Key="downloads_restartRequired">伺服器無法安全續傳已儲存的資料，正在重新下載。</sys:String>
     <sys:String x:Key="downloads_nativeInterrupted">下載連線已中斷，可以嘗試繼續或從來源重新下載。</sys:String>
+
+    <!--提示訊息-->
+    <sys:String x:Key="message_emptyUrl">請輸入網址。</sys:String>
+    <sys:String x:Key="message_deleteCache">確定要清除所有快取嗎？瀏覽器將會重新啟動。</sys:String>
+    <sys:String x:Key="message_restart">是否要重新啟動程式？</sys:String>
+    <sys:String x:Key="message_removeItem">確定要移除「{0}」嗎？</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">確定要離開此頁面嗎？</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">確定要重新載入此頁面嗎？</sys:String>
+    <sys:String x:Key="message_deleteFile">是否刪除檔案「{0}」？</sys:String>
+    <sys:String x:Key="message_deleted">刪除成功。</sys:String>
+    <sys:String x:Key="message_imported">匯入成功。</sys:String>
+    <sys:String x:Key="message_exported">匯出成功。</sys:String>
+    <sys:String x:Key="message_askSaveChange">是否將變更儲存到「{0}」？</sys:String>
+    <sys:String x:Key="message_renameItem">重新命名「{0}」：</sys:String>
+    <sys:String x:Key="message_askImportFile">是否要將檔案「{0}」匯入至「{1}」？</sys:String>
+
+    <!--錯誤訊息-->
+    <sys:String x:Key="error_message">錯誤訊息</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">名稱不能為空白。</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">網址不能為空白。</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">清除快取時發生錯誤，是否重試？</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">陣列中已經存在名稱為「{0}」的鍵值。</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">物件中已經存在名稱為「{0}」的屬性。</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">鍵值/屬性名稱不能為空。</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">已經存在名稱為「{0}」的鍵值/屬性。</sys:String>
+    <sys:String x:Key="error_notSolFile">檔案「{0}」不是 SOL 檔案。</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">未知的搜尋引擎。</sys:String>
 </ResourceDictionary>

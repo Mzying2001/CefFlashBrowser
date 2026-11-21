@@ -25,6 +25,7 @@ namespace CefFlashBrowser.ViewModels
         public string Error => Record.State == DownloadState.Interrupted && !_canRecover()
             ? DownloadManagerService.Text("downloads_sourceUnavailable")
             : (Record.Error?.StartsWith("downloads_", StringComparison.Ordinal) == true ? DownloadManagerService.Text(Record.Error) : Record.Error);
+        public bool HasError => !string.IsNullOrWhiteSpace(Error);
         public string Size => FormatSize(Record.Received) + " / " + (Record.Total.HasValue ? FormatSize(Record.Total.Value) : "—");
         public string Speed => Record.State == DownloadState.Downloading ? FormatSize(Record.Speed) + "/s" : "—";
         public double Progress => Record.State == DownloadState.Completed ? 100 : Record.Total > 0 ? Math.Min(100, 100.0 * Record.Received / Record.Total.Value) : 0;

@@ -212,7 +212,7 @@
 
             <Separator/>
 
-            <MenuItem Header="{DynamicResource downloads_title}"
+            <MenuItem Header="{DynamicResource downloads_menu}"
                       Command="{x:Static services:WindowManager.OpenDownloadsCommand}"
                       InputGestureText="Ctrl+J"/>
 

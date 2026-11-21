@@ -306,34 +306,14 @@
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">未保存の変更は上書きされます。</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">更新成功 {0} 件、失敗 {1} 件。</sys:String>
 
-    <!--Message-->
-    <sys:String x:Key="message_emptyUrl">URL を入力してください。</sys:String>
-    <sys:String x:Key="message_deleteCache">すべてのキャッシュを削除しますか？ブラウザーが再起動します。</sys:String>
-    <sys:String x:Key="message_restart">プログラムを再起動しますか？</sys:String>
-    <sys:String x:Key="message_removeItem">"{0}" を削除してもよろしいですか？</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">このページを離れますか？</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">このページを再読み込みしますか？</sys:String>
-    <sys:String x:Key="message_deleteFile">ファイル "{0}" を削除しますか？</sys:String>
-    <sys:String x:Key="message_deleted">削除しました。</sys:String>
-    <sys:String x:Key="message_imported">インポートしました。</sys:String>
-    <sys:String x:Key="message_exported">エクスポートしました。</sys:String>
-    <sys:String x:Key="message_askSaveChange">"{0}" への変更を保存しますか？</sys:String>
-    <sys:String x:Key="message_renameItem">"{0}" の名前を変更:</sys:String>
-    <sys:String x:Key="message_askImportFile">ファイル "{0}" を "{1}" にインポートしますか？</sys:String>
-
-    <!--Error Messages-->
-    <sys:String x:Key="error_message">エラーメッセージ</sys:String>
-    <sys:String x:Key="error_webSiteEmptyName">名前を空にすることはできません。</sys:String>
-    <sys:String x:Key="error_webSiteEmptyUrl">URL を空にすることはできません。</sys:String>
-    <sys:String x:Key="error_deleteCachesRetry">キャッシュの削除中にエラーが発生しました。再試行しますか？</sys:String>
-    <sys:String x:Key="error_arrKeyAreadyExists">"{0}" という名前の配列キーは既に存在します。</sys:String>
-    <sys:String x:Key="error_objPropAreadyExists">"{0}" という名前のオブジェクトプロパティは既に存在します。</sys:String>
-    <sys:String x:Key="error_keyOrPropEmpty">キー/プロパティ名を空にすることはできません。</sys:String>
-    <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" という名前のキー/プロパティは既に存在します。</sys:String>
-    <sys:String x:Key="error_notSolFile">ファイル "{0}" は SOL ファイルではありません。</sys:String>
-    <sys:String x:Key="error_unknownSearchEngine">不明な検索エンジンです。</sys:String>
-
     <!--Download manager-->
+    <sys:String x:Key="downloads_menu">ダウンロード</sys:String>
+    <sys:String x:Key="downloads_taskMenu">タスク</sys:String>
+    <sys:String x:Key="downloads_historyMenu">履歴</sys:String>
+    <sys:String x:Key="downloads_details">ダウンロードの詳細</sys:String>
+    <sys:String x:Key="downloads_filter">ファイル名、パス、URLで絞り込む…</sys:String>
+    <sys:String x:Key="downloads_empty">ダウンロード履歴はありません</sys:String>
+    <sys:String x:Key="downloads_noMatches">一致するダウンロードはありません</sys:String>
     <sys:String x:Key="downloads_title">ダウンロード管理</sys:String>
     <sys:String x:Key="downloads_new">新しいダウンロード</sys:String>
     <sys:String x:Key="downloads_pause">一時停止</sys:String>
@@ -374,4 +354,31 @@
     <sys:String x:Key="downloads_sourceUnavailable">ダウンロード元を利用できません。元のページから再度ダウンロードしてください。</sys:String>
     <sys:String x:Key="downloads_restartRequired">保存済みデータを安全に再開できないため、最初からダウンロードします。</sys:String>
     <sys:String x:Key="downloads_nativeInterrupted">接続が中断されました。再開するか、ダウンロード元からやり直してください。</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">URL を入力してください。</sys:String>
+    <sys:String x:Key="message_deleteCache">すべてのキャッシュを削除しますか？ブラウザーが再起動します。</sys:String>
+    <sys:String x:Key="message_restart">プログラムを再起動しますか？</sys:String>
+    <sys:String x:Key="message_removeItem">"{0}" を削除してもよろしいですか？</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">このページを離れますか？</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">このページを再読み込みしますか？</sys:String>
+    <sys:String x:Key="message_deleteFile">ファイル "{0}" を削除しますか？</sys:String>
+    <sys:String x:Key="message_deleted">削除しました。</sys:String>
+    <sys:String x:Key="message_imported">インポートしました。</sys:String>
+    <sys:String x:Key="message_exported">エクスポートしました。</sys:String>
+    <sys:String x:Key="message_askSaveChange">"{0}" への変更を保存しますか？</sys:String>
+    <sys:String x:Key="message_renameItem">"{0}" の名前を変更:</sys:String>
+    <sys:String x:Key="message_askImportFile">ファイル "{0}" を "{1}" にインポートしますか？</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">エラーメッセージ</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">名前を空にすることはできません。</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">URL を空にすることはできません。</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">キャッシュの削除中にエラーが発生しました。再試行しますか？</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">"{0}" という名前の配列キーは既に存在します。</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">"{0}" という名前のオブジェクトプロパティは既に存在します。</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">キー/プロパティ名を空にすることはできません。</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">"{0}" という名前のキー/プロパティは既に存在します。</sys:String>
+    <sys:String x:Key="error_notSolFile">ファイル "{0}" は SOL ファイルではありません。</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">不明な検索エンジンです。</sys:String>
 </ResourceDictionary>

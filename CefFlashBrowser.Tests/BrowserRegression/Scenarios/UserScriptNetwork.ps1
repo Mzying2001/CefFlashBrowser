@@ -26,7 +26,7 @@ function Wait-UserScriptNetworkMarker($Context, $Browser, [string]$Name, [string
 
 function Invoke-UserScriptPermissions($Context, $Window, [string]$Address, [scriptblock]$Check) {
     $menu = Open-BrowserActionsMenu $Context $Window
-    $downloadLabel = $Window.FindResource('downloads_title')
+    $downloadLabel = $Window.FindResource('downloads_menu')
     $downloads = $menu.Items | Where-Object { $_.Header -eq $downloadLabel } | Select-Object -First 1
     Assert-Regression ($null -ne $downloads) 'actions contain script downloads'
     $item = $menu.Items[$menu.Items.IndexOf($downloads) + 1]

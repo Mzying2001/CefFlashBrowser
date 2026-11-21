@@ -643,7 +643,7 @@ function Test-UserScriptMenus($Context) {
             $headers = @($actionsMenu.Items | Where-Object { $_ -is [Windows.Controls.MenuItem] } | ForEach-Object { $_.Header })
             Assert-Regression ($headers -notcontains $window.FindResource('userscript_commands') -and
                 $headers -contains $window.FindResource('common_manageUserScripts') -and
-                $headers -contains $window.FindResource('downloads_title')) 'actions retain script management and downloads after moving script commands'
+                $headers -contains $window.FindResource('downloads_menu')) 'actions retain script management and downloads after moving script commands'
         } finally {
             $actionsMenu.IsOpen = $false
         }

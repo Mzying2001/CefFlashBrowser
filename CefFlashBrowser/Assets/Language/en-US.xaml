@@ -306,34 +306,14 @@
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Unsaved changes will be overwritten.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Updated {0} scripts. Failed to update {1}.</sys:String>
 
-    <!--Message-->
-    <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>
-    <sys:String x:Key="message_deleteCache">Are you sure to delete all caches? The browser will restart.</sys:String>
-    <sys:String x:Key="message_restart">Do you want to restart the program?</sys:String>
-    <sys:String x:Key="message_removeItem">Are you sure to remove "{0}"?</sys:String>
-    <sys:String x:Key="message_askWhetherToLeave">Do you want to leave this page?</sys:String>
-    <sys:String x:Key="message_askWhetherToReload">Do you want to reload this page?</sys:String>
-    <sys:String x:Key="message_deleteFile">Do you want to delete the file "{0}"?</sys:String>
-    <sys:String x:Key="message_deleted">Deletion successful.</sys:String>
-    <sys:String x:Key="message_imported">Import successful.</sys:String>
-    <sys:String x:Key="message_exported">Export successful.</sys:String>
-    <sys:String x:Key="message_askSaveChange">Would you like to save changes to "{0}"?</sys:String>
-    <sys:String x:Key="message_renameItem">Rename "{0}":</sys:String>
-    <sys:String x:Key="message_askImportFile">Do you want to import the file "{0}" into "{1}"?</sys:String>
-
-    <!--Error Messages-->
-    <sys:String x:Key="error_message">Error Message</sys:String>
-    <sys:String x:Key="error_webSiteEmptyName">Name cannot be empty.</sys:String>
-    <sys:String x:Key="error_webSiteEmptyUrl">The URL cannot be empty.</sys:String>
-    <sys:String x:Key="error_deleteCachesRetry">An error occurred while clearing the cache. Do you want to try again?</sys:String>
-    <sys:String x:Key="error_arrKeyAreadyExists">An array key named "{0}" already exists.</sys:String>
-    <sys:String x:Key="error_objPropAreadyExists">An object property named "{0}" already exists.</sys:String>
-    <sys:String x:Key="error_keyOrPropEmpty">Key/Property name cannot be empty.</sys:String>
-    <sys:String x:Key="error_keyOrPropAreadyExists">A key/property named "{0}" already exists.</sys:String>
-    <sys:String x:Key="error_notSolFile">The file "{0}" is not a SOL file.</sys:String>
-    <sys:String x:Key="error_unknownSearchEngine">Unknown search engine.</sys:String>
-
     <!--Download manager-->
+    <sys:String x:Key="downloads_menu">Downloads</sys:String>
+    <sys:String x:Key="downloads_taskMenu">Task</sys:String>
+    <sys:String x:Key="downloads_historyMenu">History</sys:String>
+    <sys:String x:Key="downloads_details">Download details</sys:String>
+    <sys:String x:Key="downloads_filter">Filter by name, path, or URL…</sys:String>
+    <sys:String x:Key="downloads_empty">No download history</sys:String>
+    <sys:String x:Key="downloads_noMatches">No matching downloads</sys:String>
     <sys:String x:Key="downloads_title">Downloads</sys:String>
     <sys:String x:Key="downloads_new">New download</sys:String>
     <sys:String x:Key="downloads_pause">Pause</sys:String>
@@ -374,4 +354,31 @@
     <sys:String x:Key="downloads_sourceUnavailable">The source is unavailable. Start this download again from its original page.</sys:String>
     <sys:String x:Key="downloads_restartRequired">This server cannot safely resume the saved data. Downloading again from the beginning.</sys:String>
     <sys:String x:Key="downloads_nativeInterrupted">The download connection was interrupted. Try resuming or start again from its source.</sys:String>
+
+    <!--Message-->
+    <sys:String x:Key="message_emptyUrl">Please enter the url.</sys:String>
+    <sys:String x:Key="message_deleteCache">Are you sure to delete all caches? The browser will restart.</sys:String>
+    <sys:String x:Key="message_restart">Do you want to restart the program?</sys:String>
+    <sys:String x:Key="message_removeItem">Are you sure to remove "{0}"?</sys:String>
+    <sys:String x:Key="message_askWhetherToLeave">Do you want to leave this page?</sys:String>
+    <sys:String x:Key="message_askWhetherToReload">Do you want to reload this page?</sys:String>
+    <sys:String x:Key="message_deleteFile">Do you want to delete the file "{0}"?</sys:String>
+    <sys:String x:Key="message_deleted">Deletion successful.</sys:String>
+    <sys:String x:Key="message_imported">Import successful.</sys:String>
+    <sys:String x:Key="message_exported">Export successful.</sys:String>
+    <sys:String x:Key="message_askSaveChange">Would you like to save changes to "{0}"?</sys:String>
+    <sys:String x:Key="message_renameItem">Rename "{0}":</sys:String>
+    <sys:String x:Key="message_askImportFile">Do you want to import the file "{0}" into "{1}"?</sys:String>
+
+    <!--Error Messages-->
+    <sys:String x:Key="error_message">Error Message</sys:String>
+    <sys:String x:Key="error_webSiteEmptyName">Name cannot be empty.</sys:String>
+    <sys:String x:Key="error_webSiteEmptyUrl">The URL cannot be empty.</sys:String>
+    <sys:String x:Key="error_deleteCachesRetry">An error occurred while clearing the cache. Do you want to try again?</sys:String>
+    <sys:String x:Key="error_arrKeyAreadyExists">An array key named "{0}" already exists.</sys:String>
+    <sys:String x:Key="error_objPropAreadyExists">An object property named "{0}" already exists.</sys:String>
+    <sys:String x:Key="error_keyOrPropEmpty">Key/Property name cannot be empty.</sys:String>
+    <sys:String x:Key="error_keyOrPropAreadyExists">A key/property named "{0}" already exists.</sys:String>
+    <sys:String x:Key="error_notSolFile">The file "{0}" is not a SOL file.</sys:String>
+    <sys:String x:Key="error_unknownSearchEngine">Unknown search engine.</sys:String>
 </ResourceDictionary>
