@@ -5,11 +5,15 @@ function Start-ListReorderDrag($Behavior, $Item) {
 }
 
 function Invoke-ListReorderDragEvent($List, $Data, [Windows.Point]$Point, [Windows.RoutedEvent]$Event) {
+    Invoke-RegressionDragEvent $List $Data $Point $Event ([Windows.DragDropEffects]::Move)
+}
+
+function Invoke-RegressionDragEvent($Target, $Data, [Windows.Point]$Point, [Windows.RoutedEvent]$Event, [Windows.DragDropEffects]$AllowedEffects) {
     $constructor = [Windows.DragEventArgs].GetConstructors([Reflection.BindingFlags]'Instance,NonPublic')[0]
     $eventArgs = $constructor.Invoke([object[]]@($Data.PSObject.BaseObject, [Windows.DragDropKeyStates]::LeftMouseButton,
-        [Windows.DragDropEffects]::Move, $List.PSObject.BaseObject, $Point))
+        $AllowedEffects, $Target.PSObject.BaseObject, $Point))
     $eventArgs.RoutedEvent = $Event
-    $List.RaiseEvent($eventArgs)
+    $Target.RaiseEvent($eventArgs)
     return $eventArgs
 }
 

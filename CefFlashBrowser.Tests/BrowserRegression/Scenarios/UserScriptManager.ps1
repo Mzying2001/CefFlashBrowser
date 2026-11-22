@@ -1735,6 +1735,63 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
     }
 }
 
+function Invoke-ManagerFileDragEvent($Target, [string[]]$Paths, [Windows.RoutedEvent]$Event) {
+    $data = [Windows.DataObject]::new([Windows.DataFormats]::FileDrop, $Paths)
+    Invoke-RegressionDragEvent $Target $data ([Windows.Point]::new(0, 0)) $Event ([Windows.DragDropEffects]::Copy)
+}
+
+function Import-ManagerFileByDrop($Context, $Window, [string]$Path, [string]$Source) {
+    $model = $Window.DataContext
+    $list = $Window.FindName('scriptList')
+    $editor = $Window.FindName('sourceEditor')
+    $enter = [Windows.DragDrop]::PreviewDragEnterEvent
+    $over = [Windows.DragDrop]::PreviewDragOverEvent
+    $drop = [Windows.DragDrop]::PreviewDropEvent
+    $copy = [Windows.DragDropEffects]::Copy
+    $none = [Windows.DragDropEffects]::None
+    $userScript = Join-Path $Context.TemporaryPath 'manager-drag.user.js'
+    $textFile = Join-Path $Context.TemporaryPath 'manager-drag.txt'
+    $directory = Join-Path $Context.TemporaryPath 'manager-directory.js'
+    [IO.File]::WriteAllText($userScript, $Source)
+    [IO.File]::WriteAllText($textFile, $Source)
+    [void][IO.Directory]::CreateDirectory($directory)
+
+    $result = Invoke-ManagerFileDragEvent $list $userScript $enter
+    Assert-Regression ($result.Handled -and $result.Effects -eq $copy) 'the script list accepts a .user.js file'
+    $result = Invoke-ManagerFileDragEvent $editor.TextArea $Path $over
+    Assert-Regression ($result.Handled -and $result.Effects -eq $copy) 'the editor accepts an uppercase .JS file'
+
+    $invalidDrops = @(
+        @{ Paths = @($textFile); Description = 'a non-JavaScript file' }
+        @{ Paths = @($directory); Description = 'a directory with a .js suffix' }
+        @{ Paths = @($Path, $userScript); Description = 'multiple script files' }
+    )
+    foreach ($invalid in $invalidDrops) {
+        $preview = Invoke-ManagerFileDragEvent $editor.TextArea $invalid.Paths $over
+        $result = Invoke-ManagerFileDragEvent $editor.TextArea $invalid.Paths $drop
+        Assert-Regression ($preview.Handled -and $preview.Effects -eq $none -and
+            $result.Handled -and $result.Effects -eq $none) "the manager rejects $($invalid.Description)"
+    }
+
+    $setBusy = $model.GetType().GetProperty('IsBusy').GetSetMethod($true)
+    try {
+        $setBusy.Invoke($model, @($true))
+        $preview = Invoke-ManagerFileDragEvent $list $Path $over
+        $result = Invoke-ManagerFileDragEvent $list $Path $drop
+        Assert-Regression ($preview.Handled -and $preview.Effects -eq $none -and
+            $result.Handled -and $result.Effects -eq $none) 'the manager rejects file drops while busy'
+    } finally {
+        $setBusy.Invoke($model, @($false))
+    }
+
+    $count = $model.Scripts.Count
+    $result = Invoke-ManagerFileDragEvent $editor.TextArea $Path $drop
+    Assert-Regression ($result.Handled -and $result.Effects -eq $copy) 'the manager accepts the file dropped on the editor'
+    Wait-Regression $Context { !$model.IsBusy -and $model.SelectedScript.Origin -ceq $Path } 'load dropped script into the editor'
+    Assert-Regression ($model.Scripts.Count -eq ($count + 1) -and !$model.SelectedScript.IsInstalled -and
+        $model.SelectedScript.RequiresConfirmation -and $editor.Text -ceq $Source) 'a dropped file opens as an editable draft awaiting installation'
+}
+
 function Test-UserScriptManager($Context) {
     $window = $null
     $browserWindow = $null
@@ -1887,10 +1944,10 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Assert-Regression ($window.FindName('scriptFilter').Text.Length -eq 0) 'reopening the manager clears the list filter'
         Assert-Regression ([object]::ReferenceEquals($draft, $model.SelectedScript) -and $item.IsDirty -and $item.Source.Contains('unsaved session draft')) 'selection and unsaved drafts survive manager closure'
         Assert-Regression ($editor.Text -ceq $draft.Source) 'reopened editor displays the selected unsaved draft'
-        $path = Join-Path $Context.TemporaryPath 'manager-import.user.js'
+        $path = Join-Path $Context.TemporaryPath 'manager-import.JS'
         $minimalSource = $source -replace '(?m)^// @(match|sandbox|grant).*\r?\n', ''
         [IO.File]::WriteAllText($path, $minimalSource, (New-Object Text.UTF8Encoding($true)))
-        Complete-UserScriptTask $Context ($model.ImportFileAsync($path)) 'load local file draft'
+        Import-ManagerFileByDrop $Context $window $path $minimalSource
         $expected = @{
             Text = @{
                 scriptName = 'Manager workflow'; scriptVersion = '1.0.0'; scriptDescription = ''; scriptAuthor = ''; scriptOrigin = $path
