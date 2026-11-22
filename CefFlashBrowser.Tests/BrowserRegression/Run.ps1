@@ -8,7 +8,8 @@ See README.md for x86 and Release commands.
 [CmdletBinding()]
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
-    [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug'
+    [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
+    [ValidateSet('All', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -23,6 +24,7 @@ foreach ($file in @(
     'Environment.ps1',
     'Helpers.ps1',
     'Scenarios\Language.ps1',
+    'Scenarios\Downloads.ps1',
     'Scenarios\Favorites.ps1',
     'Scenarios\ProxySettings.ps1',
     'Scenarios\BrowserWindow.ps1',
@@ -31,6 +33,11 @@ foreach ($file in @(
     'Scenarios\ContextMenu.ps1',
     'Scenarios\ViewSource.ps1',
     'Scenarios\AuxiliaryWindows.ps1',
+    'Scenarios\UserScripts.ps1',
+    'Scenarios\ListReorderBehavior.ps1',
+    'Scenarios\UserScriptManager.ps1',
+    'Scenarios\UserScriptSettings.ps1',
+    'Scenarios\UserScriptNetwork.ps1',
     'Scenarios\Lifecycle.ps1'
     'Scenarios\Favicons.ps1'
 )) {
@@ -41,24 +48,126 @@ $context = New-RegressionContext $PSScriptRoot $Platform $Configuration
 $failure = $null
 try {
     Initialize-RegressionEnvironment $context
-    Test-LanguageService $context
-    Test-LanguageSelectors $context
-    Test-FavoritesService $context
-    Test-ProxySettings $context
-    Test-BrowserBeforeInitialization $context
-    Test-BrowserTabControl $context
-    Test-BrowserTabsBeforeShow $context
-    Start-RegressionCef $context
-    Test-NavigationBeforeHosting $context
-    Test-AuxiliaryBeforeShow $context
-    Test-BrowserWindow $context
-    Test-Favicons $context
-    Test-BrowserCloseDuringInitialization $context
-    Test-BrowserTabs $context
-    Test-ContextMenu $context
-    Test-ViewSource $context
-    Test-AuxiliaryWindows $context
-    Test-CloseAllBrowsers $context
+    if ($Scenario -eq 'DownloadManager') {
+        Test-DownloadManagerWindow $context
+    } elseif ($Scenario -eq 'DownloadRestart') {
+        Test-DownloadRestart $context
+    } elseif ($Scenario -eq 'BrowserDownloads') {
+        Start-RegressionCef $context
+        Test-BrowserDownloads $context
+    } elseif ($Scenario -eq 'BrowserDisposal') {
+        Start-RegressionCef $context
+        Test-BrowserFrameLoadStartAfterDisposal $context
+    } elseif ($Scenario -eq 'TabClosing') {
+        Start-RegressionCef $context
+        Test-BrowserTabCloseKeyboardCancellation $context
+        Test-BrowserTabOpenerClosePending $context
+        Test-BrowserTabsReloadClose $context
+    } elseif ($Scenario -eq 'Recovery') {
+        Start-RegressionCef $context
+        Test-UserScriptOfflineRecovery $context
+    } elseif ($Scenario -eq 'Frames') {
+        Start-RegressionCef $context
+        Test-UserScriptFrames $context
+    } elseif ($Scenario -eq 'Network') {
+        Start-RegressionCef $context
+        Test-UserScriptNetwork $context
+    } elseif ($Scenario -eq 'Audio') {
+        Start-RegressionCef $context
+        Test-BrowserMute $context
+    } elseif ($Scenario -eq 'Downloads') {
+        Start-RegressionCef $context
+        Test-UserScriptDownloadsAndAudio $context
+    } elseif ($Scenario -eq 'Interactions') {
+        Start-RegressionCef $context
+        Test-UserScriptInteractions $context
+    } elseif ($Scenario -eq 'ContextMenu') {
+        Start-RegressionCef $context
+        Test-ContextMenu $context
+    } elseif ($Scenario -eq 'ScriptTabs') {
+        Start-RegressionCef $context
+        Test-UserScriptTabs $context
+    } elseif ($Scenario -eq 'Menus') {
+        Start-RegressionCef $context
+        Test-UserScriptMenus $context
+    } elseif ($Scenario -eq 'Closing') {
+        Start-RegressionCef $context
+        Test-UserScriptCloseCancellation $context
+    } elseif ($Scenario -eq 'Auxiliary') {
+        Start-RegressionCef $context
+        Test-AuxiliaryWindows $context
+    } elseif ($Scenario -eq 'PageSwfs') {
+        Start-RegressionCef $context -EnableFlash
+        Test-StandaloneBrowserPageSwfs $context
+        Test-BrowserPageSwfs $context
+        Test-SwfPlayerPageContext $context
+        Test-LocalSwfPlayerPageContext $context
+    } elseif ($Scenario -eq 'ViewSource') {
+        Start-RegressionCef $context
+        Test-ViewSourceMinimal $context
+    } elseif ($Scenario -eq 'Lifecycle') {
+        Start-RegressionCef $context
+        Test-BrowserCloseDuringInitialization $context
+        Test-AuxiliaryBeforeShow $context
+        Test-CloseAllBrowsers $context
+    } elseif ($Scenario -eq 'TabRouting') {
+        Start-RegressionCef $context
+        Test-BrowserTabNewPageRouting $context
+    } elseif ($Scenario -eq 'TabHistory') {
+        Start-RegressionCef $context
+        Test-BrowserTabHistory $context
+    } elseif ($Scenario -eq 'Loading') {
+        Start-RegressionCef $context
+        Test-BrowserTabLoadingMenu $context
+    } elseif ($Scenario -eq 'Manager') {
+        Test-ListReorderBehavior $context
+        Start-RegressionCef $context
+        Test-UserScriptManager $context
+    } elseif ($Scenario -eq 'UserScriptSettings') {
+        Test-UserScriptSettings $context
+    } elseif ($Scenario -eq 'UserScripts') {
+        Start-RegressionCef $context
+        Test-UserScripts $context
+    } elseif ($Scenario -eq 'UserScriptSeams') {
+        Start-RegressionCef $context
+        Test-UserScriptSeams $context
+    } else {
+        Test-LanguageService $context
+        Test-LanguageSelectors $context
+        Test-FavoritesService $context
+        Test-FavoritesManagerReorder $context
+        Test-ProxySettings $context
+        Test-UserScriptSettings $context
+        Test-BrowserBeforeInitialization $context
+        Test-DownloadManagerWindow $context
+        Test-BrowserTabControl $context
+        Test-ListReorderBehavior $context
+        Test-BrowserTabsBeforeShow $context
+        Start-RegressionCef $context -EnableFlash
+        Test-UserScriptManager $context
+        Test-UserScriptSeams $context
+        Test-UserScripts $context
+        Test-UserScriptCloseCancellation $context
+        Test-UserScriptMenus $context
+        Test-UserScriptTabs $context
+        Test-UserScriptInteractions $context
+        Test-UserScriptDownloadsAndAudio $context
+        Test-BrowserDownloads $context
+        Test-UserScriptNetwork $context
+        Test-UserScriptFrames $context
+        Test-UserScriptOfflineRecovery $context
+        Test-NavigationBeforeHosting $context
+        Test-BrowserTabHistory $context
+        Test-AuxiliaryBeforeShow $context
+        Test-BrowserWindow $context
+        Test-Favicons $context
+        Test-BrowserCloseDuringInitialization $context
+        Test-BrowserTabs $context
+        Test-ContextMenu $context
+        Test-ViewSource $context
+        Test-AuxiliaryWindows $context
+        Test-CloseAllBrowsers $context
+    }
 } catch {
     $failure = $_
     throw

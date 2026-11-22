@@ -117,13 +117,13 @@ namespace CefFlashBrowser.Utils
         /// <summary>
         /// Find the devtools window that has the specified owner
         /// </summary>
-        public static IntPtr FindDevTools(IntPtr pid, IntPtr hOwner)
+        public static IntPtr FindDevTools(uint pid, IntPtr hOwner)
         {
             IntPtr hDevTools = IntPtr.Zero;
 
             Win32.EnumWindows((hWnd, lParam) =>
             {
-                Win32.GetWindowThreadProcessId(hWnd, out IntPtr pidWnd);
+                Win32.GetWindowThreadProcessId(hWnd, out uint pidWnd);
 
                 if (pidWnd == pid
                     && IsDevToolsWindow(hWnd)
@@ -141,7 +141,7 @@ namespace CefFlashBrowser.Utils
         /// <summary>
         /// Find the devtools window that has no owner
         /// </summary>
-        public static IntPtr FindDevTools(IntPtr pid)
+        public static IntPtr FindDevTools(uint pid)
         {
             return FindDevTools(pid, IntPtr.Zero);
         }
@@ -155,7 +155,7 @@ namespace CefFlashBrowser.Utils
                 && Window.GetWindow(obj) is Window w)
             {
                 IntPtr hwnd = new WindowInteropHelper(w).Handle;
-                Win32.GetWindowThreadProcessId(hwnd, out IntPtr pidWnd);
+                Win32.GetWindowThreadProcessId(hwnd, out uint pidWnd);
                 return FindDevTools(pidWnd, hwnd);
             }
 

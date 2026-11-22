@@ -1,17 +1,24 @@
+using CefFlashBrowser.Browser.UserScripts;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Database;
 using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Services.Downloads;
+using CefFlashBrowser.Services.UserScripts;
+using CefFlashBrowser.Services.UserScripts.Persistence;
 using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using Newtonsoft.Json;
 using SimpleMvvm.Ioc;
+using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -31,6 +38,8 @@ namespace CefFlashBrowser
         private static FileLogger _logger;
         private static FavoritesService _favoritesService;
         private static FaviconService _faviconService;
+        private static UserScriptService _userScriptService;
+        private static DownloadManagerService _downloadManagerService;
 
         private const string InsufficientDirectoryPermissionsMessage =
             "CefFlashBrowser 需要对程序运行目录拥有读取、写入和删除文件的权限，无法继续运行。\r\n\r\n" +
@@ -48,26 +57,37 @@ namespace CefFlashBrowser
         {
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            if (DirectoryHelper.CanReadAndWriteDirectory(appDirectory))
-            {
-                Run(args);
-            }
-            else
+            if (!DirectoryHelper.CanReadAndWriteDirectory(appDirectory))
             {
                 MessageBox.Show(
                     string.Format(InsufficientDirectoryPermissionsMessage, appDirectory),
                     "CefFlashBrowser - Insufficient Permissions",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
+                return;
             }
+
+            try
+            {
+                InitializeDllDirectories();
+            }
+            catch (Win32Exception e)
+            {
+                MessageBox.Show(
+                    $"{e.Message}\r\n\r\n{new Win32Exception(e.NativeErrorCode).Message} ({e.NativeErrorCode})",
+                    "CefFlashBrowser", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            Run(args);
         }
 
+        // The CLR can resolve mixed-mode dependencies while compiling Run.
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void Run(string[] args)
         {
             try
             {
-                InitializeDllDirectories();
-
                 RegisterServices();
                 _mutex = new Mutex(true, "CefFlashBrowser", out bool isNewInstance);
 
@@ -128,13 +148,41 @@ namespace CefFlashBrowser
 
         private static void InitializeDllDirectories()
         {
+            const int _X86 = 0b01;
+            const int _X64 = 0b10;
+
             if (!Win32.SetDefaultDllDirectories(Win32.LOAD_LIBRARY_SEARCH_DEFAULT_DIRS))
                 throw new Win32Exception(Marshal.GetLastWin32Error(), "Failed to configure native DLL search directories.");
 
-            foreach (string directory in new[] { GlobalData.CefDllPath, GlobalData.SqliteDllPath })
+            foreach (string directory in new[] { GlobalData.CefDllPath, GlobalData.SqliteDllPath, GlobalData.VcRuntimeDllPath })
             {
                 if (Win32.AddDllDirectory(directory) == IntPtr.Zero)
                     throw new Win32Exception(Marshal.GetLastWin32Error(), $"Failed to add native DLL search directory '{directory}'.");
+            }
+
+            // Preload these for the process lifetime. CefSharp has its own copies for the subprocess.
+            var preloads = new[]
+            {
+                new { name = "vcruntime140.dll",   architecture = _X86 | _X64 },
+                new { name = "vcruntime140_1.dll", architecture = _X64 },
+                new { name = "msvcp140.dll",       architecture = _X86 | _X64 },
+            };
+            foreach (var dll in preloads)
+            {
+                if ((dll.architecture & (Environment.Is64BitProcess ? _X64 : _X86)) == 0)
+                    continue;
+                LoadRuntimeLibrary(dll.name);
+            }
+        }
+
+        private static void LoadRuntimeLibrary(string fileName)
+        {
+            string path = Path.Combine(GlobalData.VcRuntimeDllPath, fileName);
+            const uint flags = Win32.LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | Win32.LOAD_LIBRARY_SEARCH_SYSTEM32;
+
+            if (Win32.LoadLibraryExW(path, IntPtr.Zero, flags) == IntPtr.Zero)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error(), $"Failed to load the bundled VC++ runtime library '{path}'.");
             }
         }
 
@@ -155,6 +203,8 @@ namespace CefFlashBrowser
 
         private static void InitCefFlash()
         {
+            CefSharpSettings.ConcurrentTaskExecution = true;
+            CefSharpSettings.WcfEnabled = false;
             Environment.SetEnvironmentVariable("ComSpec", GlobalData.CommandProxyPath); // Filter the Flash diagnostic; forward other commands to cmd.
 
             var settings = new CefFlashSettings()
@@ -219,6 +269,8 @@ namespace CefFlashBrowser
                 GlobalData.SaveData();
             }
 
+            StopUserScriptsForExit();
+
             if (Cef.IsInitialized)
             {
                 Cef.Shutdown();
@@ -234,9 +286,37 @@ namespace CefFlashBrowser
             }
         }
 
+        internal static void StopUserScriptsForExit()
+        {
+            // Do not resolve an unused service during failed/forwarding startup.
+            var work = StopDownloadsAndScriptsAsync();
+
+            if (!work.IsCompleted && Application.Current?.Dispatcher is Dispatcher dispatcher
+                && dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
+            {
+                var frame = new DispatcherFrame();
+
+                work.GetAwaiter().OnCompleted(() => dispatcher.InvokeAsync(() => frame.Continue = false));
+                Dispatcher.PushFrame(frame);
+            }
+
+            work.GetAwaiter().GetResult();
+        }
+
+        private static async Task StopDownloadsAndScriptsAsync()
+        {
+            if (_downloadManagerService != null)
+                await _downloadManagerService.StopAsync();
+
+            if (_userScriptService != null)
+                await _userScriptService.StopAsync();
+        }
+
         public static void Restart()
         {
             _restart = true;
+            Messenger.Global.Send(MessageTokens.CLOSE_ALL_BROWSERS, null);
+            StopUserScriptsForExit();
             Application.Current.Shutdown();
         }
 
@@ -254,9 +334,21 @@ namespace CefFlashBrowser
             SimpleIoc.Global.Register<DatabaseService>(
                 () => new DatabaseService(SimpleIoc.Global.GetInstance<IDatabase>()), Lifetime.Singleton);
 
+            SimpleIoc.Global.Register<DownloadManagerService>(
+                () => _downloadManagerService = new DownloadManagerService(
+                    SimpleIoc.Global.GetInstance<DatabaseService>(), SimpleIoc.Global.GetInstance<ILogger>(),
+                    SimpleIoc.Global.GetInstance<LanguageService>(), Application.Current), Lifetime.Singleton);
+
             SimpleIoc.Global.Register<FavoritesService>(
                 () => _favoritesService = new FavoritesService(
                     GlobalData.FavoritesPath, SimpleIoc.Global.GetInstance<ILogger>()), Lifetime.Singleton);
+
+            SimpleIoc.Global.Register<UserScriptService>(
+                () => _userScriptService = new UserScriptService(
+                    new UserScriptStorage(SimpleIoc.Global.GetInstance<DatabaseService>()),
+                    GlobalData.MonkeySharpPath, GlobalData.UserScriptCachePath,
+                    new UserScriptContentService(GlobalData.Settings.ProxySettings),
+                    new UserScriptPermissionPrompt(), LogShutdownError), Lifetime.Singleton);
 
             SimpleIoc.Global.Register<FaviconService>(
                 () => _faviconService = new FaviconService(
@@ -271,8 +363,14 @@ namespace CefFlashBrowser
 
         private static async Task StopDatabaseAsync(Task faviconWork)
         {
-            try { await faviconWork.ConfigureAwait(false); }
-            catch (Exception e) { LogShutdownError("Failed to stop the favicon service", e); }
+            try
+            {
+                await faviconWork.ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                LogShutdownError("Failed to stop application storage consumers", e);
+            }
 
             try
             {
@@ -285,7 +383,10 @@ namespace CefFlashBrowser
             }
             finally
             {
-                try { _logger?.Dispose(); }
+                try
+                {
+                    _logger?.Dispose();
+                }
                 catch { }
             }
         }
@@ -299,11 +400,16 @@ namespace CefFlashBrowser
         private static void UnregisterServices()
         {
             var faviconWork = _faviconService?.StopAsync() ?? Task.CompletedTask;
-            var stopTask = StopDatabaseAsync(faviconWork);
+            var scriptWork = _userScriptService?.StopAsync() ?? Task.CompletedTask;
+            var stopTask = StopDatabaseAsync(Task.WhenAll(faviconWork, scriptWork));
 
             if (!stopTask.Wait(TimeSpan.FromSeconds(5)))
                 LogHelper.LogWtf("Timed out waiting for favicon writes; the database will close after queued operations finish.");
 
+            SimpleIoc.Global.Unregister<DownloadManagerService>(false);
+            _downloadManagerService = null;
+
+            SimpleIoc.Global.Unregister<UserScriptService>(false);
             SimpleIoc.Global.Unregister<FaviconService>(false);
             SimpleIoc.Global.Unregister<FavoritesService>(false);
             SimpleIoc.Global.Unregister<DatabaseService>(false);

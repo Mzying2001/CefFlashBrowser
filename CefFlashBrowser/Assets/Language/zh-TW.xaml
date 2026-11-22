@@ -1,12 +1,12 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="locale">zh-TW</sys:String>
     <sys:String x:Key="language_name">中文（繁體）</sys:String>
 
     <!-- 共用欄位 -->
-    <sys:String x:Key="common_swfFile">SWF檔案</sys:String>
-    <sys:String x:Key="common_solFile">SOL檔案</sys:String>
+    <sys:String x:Key="common_swfFile">SWF 檔案</sys:String>
+    <sys:String x:Key="common_solFile">SOL 檔案</sys:String>
     <sys:String x:Key="common_shortcut">捷徑</sys:String>
     <sys:String x:Key="common_allFiles">所有檔案</sys:String>
     <sys:String x:Key="common_favorites">我的最愛</sys:String>
@@ -18,17 +18,41 @@
     <sys:String x:Key="common_moveDown">下移</sys:String>
     <sys:String x:Key="common_moveToTop">移至頂部</sys:String>
     <sys:String x:Key="common_moveToBottom">移至底部</sys:String>
+    <sys:String x:Key="common_ok">確定</sys:String>
+    <sys:String x:Key="common_cancel">取消</sys:String>
+    <sys:String x:Key="common_close">關閉</sys:String>
+    <sys:String x:Key="common_error">錯誤</sys:String>
+    <sys:String x:Key="common_file">檔案</sys:String>
+    <sys:String x:Key="common_name">名稱</sys:String>
+    <sys:String x:Key="common_url">網址</sys:String>
+    <sys:String x:Key="common_editMenu">編輯</sys:String>
+    <sys:String x:Key="common_edit">編輯</sys:String>
+    <sys:String x:Key="common_save">儲存</sys:String>
+    <sys:String x:Key="common_addItem">新增項目</sys:String>
+    <sys:String x:Key="common_remove">移除</sys:String>
+    <sys:String x:Key="common_delete">刪除</sys:String>
+    <sys:String x:Key="common_undo">復原</sys:String>
+    <sys:String x:Key="common_redo">重做</sys:String>
+    <sys:String x:Key="common_cut">剪下</sys:String>
+    <sys:String x:Key="common_copy">複製</sys:String>
+    <sys:String x:Key="common_paste">貼上</sys:String>
+    <sys:String x:Key="common_selectAll">全選</sys:String>
+    <sys:String x:Key="common_find">尋找</sys:String>
+    <sys:String x:Key="common_filterPlaceholder">篩選...</sys:String>
+    <sys:String x:Key="common_refresh">重新整理</sys:String>
+    <sys:String x:Key="common_manageUserScripts">管理使用者腳本</sys:String>
+    <sys:String x:Key="common_script">腳本</sys:String>
 
     <!--主視窗-->
     <sys:String x:Key="mainWindow_title">歡迎</sys:String>
     <sys:String x:Key="mainWindow_go">前往</sys:String>
     <sys:String x:Key="mainWindow_manageFavorites">管理我的最愛</sys:String>
-    <sys:String x:Key="mainWindow_manageSolSaveFiles">管理SOL存檔</sys:String>
-    <sys:String x:Key="mainWindow_openSolFile">開啟SOL檔案...</sys:String>
+    <sys:String x:Key="mainWindow_manageSolSaveFiles">管理 SOL 存檔</sys:String>
+    <sys:String x:Key="mainWindow_openSolFile">開啟 SOL 檔案...</sys:String>
     <sys:String x:Key="mainWindow_languages">語言</sys:String>
     <sys:String x:Key="mainWindow_options">選項</sys:String>
-    <sys:String x:Key="mainWindow_loadSwf">載入本機SWF檔案...</sys:String>
-    <sys:String x:Key="mainWindow_viewGithub">在GitHub檢視</sys:String>
+    <sys:String x:Key="mainWindow_loadSwf">載入本機 SWF 檔案...</sys:String>
+    <sys:String x:Key="mainWindow_viewGithub">在 GitHub 檢視</sys:String>
 
     <!--設定視窗-->
     <sys:String x:Key="settings_headerMainWindow">主視窗</sys:String>
@@ -36,6 +60,12 @@
     <sys:String x:Key="settings_headerOther">其他</sys:String>
     <sys:String x:Key="settings_headerBrowser">瀏覽器</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">網站行為</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">使用者指令碼</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">啟用使用者指令碼</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">允許使用者指令碼在網頁環境中使用特權 API</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">變更會在新開啟的分頁中生效。</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">預設權限行為</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">僅在沒有已儲存的權限決定時使用。</sys:String>
     <sys:String x:Key="settings_headerAdvanced">進階</sys:String>
     <sys:String x:Key="settings_headerAboutCef">關於 CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">在網址列使用搜尋引擎</sys:String>
@@ -48,25 +78,25 @@
     <sys:String x:Key="settings_disableOnBeforeUnloadDialog">阻止網頁重新整理/關閉時的確認對話框</sys:String>
     <sys:String x:Key="settings_enableProxy">使用代理伺服器</sys:String>
     <sys:String x:Key="settings_enableCustomUserAgent">自訂使用者代理（UA）</sys:String>
-    <sys:String x:Key="settings_enableFakeFlashVersion">偽造Flash版本</sys:String>
-    <sys:String x:Key="settings_cefVersion">CefSharp版本</sys:String>
+    <sys:String x:Key="settings_enableFakeFlashVersion">偽造 Flash 版本</sys:String>
+    <sys:String x:Key="settings_cefVersion">CefSharp 版本</sys:String>
     <sys:String x:Key="settings_server">伺服器</sys:String>
     <sys:String x:Key="settings_username">使用者名稱</sys:String>
     <sys:String x:Key="settings_password">密碼</sys:String>
     <sys:String x:Key="settings_userAgent">使用者代理</sys:String>
-    <sys:String x:Key="settings_flashVersion">Flash版本</sys:String>
+    <sys:String x:Key="settings_flashVersion">Flash 版本</sys:String>
     <sys:String x:Key="settings_buttonDeleteCache">清除</sys:String>
     <sys:String x:Key="settings_buttonViewDetails">詳細資料</sys:String>
     <sys:String x:Key="settings_buttonRestart">重新啟動</sys:String>
     <sys:String x:Key="settings_needRestart">此部分設定需重新啟動程式後生效。</sys:String>
-    <sys:String x:Key="settings_ip">IP位址</sys:String>
+    <sys:String x:Key="settings_ip">IP 位址</sys:String>
     <sys:String x:Key="settings_port">通訊埠</sys:String>
     <sys:String x:Key="settings_optional">（選填）</sys:String>
     <sys:String x:Key="settings_saveZoomLevel">儲存網頁縮放比例</sys:String>
     <sys:String x:Key="settings_alwaysShowTabStrip">一律顯示分頁列</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">將開發者工具嵌入至瀏覽器視窗</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止網頁進入全螢幕模式</sys:String>
-    <sys:String x:Key="settings_disableGpuAcceleration">停用GPU加速</sys:String>
+    <sys:String x:Key="settings_disableGpuAcceleration">停用 GPU 加速</sys:String>
     <sys:String x:Key="settings_disableBrowserContextMenu">停用右鍵選單</sys:String>
 
     <!--主視窗網址列-->
@@ -78,6 +108,11 @@
     <sys:String x:Key="newPageBehavior_originalWindow">原視窗</sys:String>
     <sys:String x:Key="newPageBehavior_newWindow">新視窗</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">新分頁</sys:String>
+
+    <!--使用者指令碼預設權限行為-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">顯示提示視窗</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">直接允許</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">直接拒絕</sys:String>
 
     <!--搜尋引擎-->
     <sys:String x:Key="searchEngine_baidu">百度</sys:String>
@@ -97,11 +132,6 @@
     <!--我的最愛管理員-->
     <sys:String x:Key="favorites_managerTitle">我的最愛管理員</sys:String>
     <sys:String x:Key="favorites_add">新增</sys:String>
-    <sys:String x:Key="favorites_remove">移除</sys:String>
-    <sys:String x:Key="favorites_edit">編輯</sys:String>
-    <sys:String x:Key="favorites_name">名稱</sys:String>
-    <sys:String x:Key="favorites_url">網址</sys:String>
-    <sys:String x:Key="favorites_save">儲存</sys:String>
     <sys:String x:Key="favorites_defaultName">新我的最愛項目</sys:String>
 
     <!--瀏覽器視窗-->
@@ -109,14 +139,7 @@
     <sys:String x:Key="browser_forward">下一頁</sys:String>
     <sys:String x:Key="browser_reload">重新整理</sys:String>
     <sys:String x:Key="browser_stop">停止</sys:String>
-    <sys:String x:Key="browser_cut">剪下</sys:String>
-    <sys:String x:Key="browser_copy">複製</sys:String>
-    <sys:String x:Key="browser_paste">貼上</sys:String>
-    <sys:String x:Key="browser_selectAll">全選</sys:String>
     <sys:String x:Key="browser_print">列印</sys:String>
-    <sys:String x:Key="browser_redo">重做</sys:String>
-    <sys:String x:Key="browser_undo">復原</sys:String>
-    <sys:String x:Key="browser_find">尋找</sys:String>
     <sys:String x:Key="browser_searchFor">搜尋「{0}」</sys:String>
     <sys:String x:Key="browser_openInNewTab">在新分頁開啟</sys:String>
     <sys:String x:Key="browser_openInNewWindow">在新視窗開啟</sys:String>
@@ -130,7 +153,6 @@
     <sys:String x:Key="browser_openInDefaultBrowser">在預設瀏覽器開啟</sys:String>
     <sys:String x:Key="browser_createShortcut">建立網頁捷徑</sys:String>
     <sys:String x:Key="browser_addFavorite">將此網站加入我的最愛</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">部分Flash內容可能被Chromium核心封鎖，您可以在SWF播放器中播放：</sys:String>
     <sys:String x:Key="browser_toolTipBack">上一頁（Alt+向左鍵）</sys:String>
     <sys:String x:Key="browser_toolTipForward">下一頁（Alt+向右鍵）</sys:String>
     <sys:String x:Key="browser_toolTipReload">重新整理（Ctrl+R）</sys:String>
@@ -138,7 +160,7 @@
     <sys:String x:Key="browser_toolTipNewTab">新分頁（Ctrl+T）</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">關閉分頁（Ctrl+W）</sys:String>
     <sys:String x:Key="browser_toolTipMore">更多功能</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">被封鎖的Flash內容</sys:String>
+    <sys:String x:Key="browser_toolTipPageSwfs">目前頁面的 SWF 檔案</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加號鍵）</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">縮小（Ctrl+減號鍵）</sys:String>
     <sys:String x:Key="browser_loading">載入中...</sys:String>
@@ -153,44 +175,188 @@
     <sys:String x:Key="browser_openTabInNewWindow">在新視窗中開啟分頁</sys:String>
 
     <!--存檔管理員-->
-    <sys:String x:Key="solSaveManager_title">SOL存檔管理員</sys:String>
+    <sys:String x:Key="solSaveManager_title">SOL 存檔管理員</sys:String>
     <sys:String x:Key="solSaveManager_headerFileName">檔案名稱</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">檔案路徑</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">操作</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipReload">重新整理</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipDelete">刪除</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipEdit">編輯</sys:String>
-    <sys:String x:Key="solSaveManager_filterPlaceholder">篩選...</sys:String>
 
     <!--存檔編輯器-->
-    <sys:String x:Key="solEditor_title">SOL編輯器</sys:String>
-    <sys:String x:Key="solEditor_file">檔案</sys:String>
-    <sys:String x:Key="solEditor_save">儲存</sys:String>
+    <sys:String x:Key="solEditor_title">SOL 編輯器</sys:String>
     <sys:String x:Key="solEditor_saveAs">另存新檔...</sys:String>
-    <sys:String x:Key="solEditor_close">關閉</sys:String>
-    <sys:String x:Key="solEditor_edit">編輯</sys:String>
-    <sys:String x:Key="solEditor_addItem">新增項目</sys:String>
     <sys:String x:Key="solEditor_removeItem">移除項目</sys:String>
     <sys:String x:Key="solEditor_statusReady">就緒</sys:String>
-    <sys:String x:Key="solEditor_statusError">錯誤</sys:String>
     <sys:String x:Key="solEditor_statusModified">已修改</sys:String>
     <sys:String x:Key="solEditor_statusSaved">已儲存</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">未知狀態</sys:String>
     <sys:String x:Key="solEditor_emptyString">（空）</sys:String>
-    <sys:String x:Key="solEditor_amf0SolFile">AMF0編碼的SOL檔案</sys:String>
-    <sys:String x:Key="solEditor_amf3SolFile">AMF3編碼的SOL檔案</sys:String>
+    <sys:String x:Key="solEditor_amf0SolFile">AMF0 編碼的 SOL 檔案</sys:String>
+    <sys:String x:Key="solEditor_amf3SolFile">AMF3 編碼的 SOL 檔案</sys:String>
 
     <!--對話框-->
-    <sys:String x:Key="dialog_ok">確定</sys:String>
-    <sys:String x:Key="dialog_cancel">取消</sys:String>
     <sys:String x:Key="dialog_yes">是</sys:String>
     <sys:String x:Key="dialog_no">否</sys:String>
-    <sys:String x:Key="dialog_error">錯誤</sys:String>
     <sys:String x:Key="dialog_addFavorite">新增我的最愛</sys:String>
     <sys:String x:Key="dialog_selectLanguage">請選擇語言</sys:String>
-    <sys:String x:Key="dialog_addItem">新增項目</sys:String>
-    <sys:String x:Key="dialog_itemName">名稱</sys:String>
     <sys:String x:Key="dialog_assocArray">關聯陣列</sys:String>
+
+    <!--使用者指令碼-->
+    <sys:String x:Key="userscript_permissionTitle">使用者指令碼權限</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">指令碼：{0}&#xA;功能：{1}&#xA;目標：{2}&#xA;&#xA;是否允許此指令碼使用這項功能？</sys:String>
+    <sys:String x:Key="userscript_denyRemember">拒絕並記住</sys:String>
+    <sys:String x:Key="userscript_allowOnce">允許一次</sys:String>
+    <sys:String x:Key="userscript_allowRemember">允許並記住</sys:String>
+    <sys:String x:Key="userscript_managePermissions">管理指令碼權限</sys:String>
+    <sys:String x:Key="userscript_permissionPage">網頁位址</sys:String>
+    <sys:String x:Key="userscript_permissionScope">這裡顯示符合此網頁的指令碼已儲存的決定。修改也會影響這些指令碼在其他網頁上對相同 API 和目標的後續呼叫。</sys:String>
+    <sys:String x:Key="userscript_permissionDisabled">已停用</sys:String>
+    <sys:String x:Key="userscript_permissionTarget">目標</sys:String>
+    <sys:String x:Key="userscript_permissionDecision">決定</sys:String>
+    <sys:String x:Key="userscript_permissionAllow">允許</sys:String>
+    <sys:String x:Key="userscript_permissionDeny">拒絕</sys:String>
+    <sys:String x:Key="userscript_permissionClear">清除決定</sys:String>
+    <sys:String x:Key="userscript_permissionLoading">正在載入指令碼權限…</sys:String>
+    <sys:String x:Key="userscript_permissionEmpty">符合此網頁的指令碼沒有已儲存的權限決定。</sys:String>
+    <sys:String x:Key="userscript_permissionChanged">這項決定已在其他位置變更或清除。清單已重新整理。</sys:String>
+    <sys:String x:Key="userscript_permissionError">無法讀取或更新指令碼權限。請重新整理後再試。</sys:String>
+    <sys:String x:Key="userscript_unavailable">此頁面無法使用使用者指令碼</sys:String>
+    <sys:String x:Key="userscript_retry">重試並重新導覽</sys:String>
+    <sys:String x:Key="userscript_commands">指令碼命令</sys:String>
+    <sys:String x:Key="userscript_notification">使用者指令碼通知</sys:String>
+    <sys:String x:Key="userscript_notificationClick">按一下通知</sys:String>
+    <sys:String x:Key="userscript_downloads">指令碼下載</sys:String>
+    <sys:String x:Key="userscript_saveDownload">儲存指令碼下載檔案</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">等待中</sys:String>
+    <sys:String x:Key="userscript_downloading">下載中</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">已完成</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">已取消</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">已逾時</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">失敗</sys:String>
+
+    <!--使用者腳本管理員-->
+    <sys:String x:Key="userScriptManager_title">使用者腳本管理員</sys:String>
+    <sys:String x:Key="userScriptManager_noInstalledScripts">尚未安裝腳本。</sys:String>
+    <sys:String x:Key="userScriptManager_noMatchingScripts">找不到相符的腳本。</sys:String>
+    <sys:String x:Key="userScriptManager_new">新增腳本</sys:String>
+    <sys:String x:Key="userScriptManager_newScript">新腳本</sys:String>
+    <sys:String x:Key="userScriptManager_replace">取代</sys:String>
+    <sys:String x:Key="userScriptManager_completeCode">程式碼補全</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">上一個相符項目</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">下一個相符項目</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">區分大小寫</sys:String>
+    <sys:String x:Key="userScriptManager_matches">相符項目</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">沒有相符項目</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">取代目前項目</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">全部取代</sys:String>
+    <sys:String x:Key="userScriptManager_help">說明</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">關於 MonkeySharp</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">使用者腳本使用指南</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">檢視詳細資料</sys:String>
+    <sys:String x:Key="userScriptManager_reload">從磁碟重新載入</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">是否刪除腳本「{0}」？</sys:String>
+    <sys:String x:Key="userScriptManager_saved">已儲存。重新整理網頁後生效。</sys:String>
+    <sys:String x:Key="userScriptManager_refreshPage">操作已完成。重新整理網頁以查看效果。</sys:String>
+    <sys:String x:Key="userScriptManager_deleted">已刪除。</sys:String>
+    <sys:String x:Key="userScriptManager_working">正在處理…</sys:String>
+    <sys:String x:Key="userScriptManager_cancelled">操作已取消，草稿已保留。</sys:String>
+    <sys:String x:Key="userScriptManager_conflict">腳本或磁碟原始碼已變更，草稿已保留。請先重新載入，再比對草稿。</sys:String>
+    <sys:String x:Key="userScriptManager_installFile">從檔案安裝…</sys:String>
+    <sys:String x:Key="userScriptManager_installUrl">從 URL 安裝…</sys:String>
+    <sys:String x:Key="userScriptManager_install">安裝目前草稿</sys:String>
+    <sys:String x:Key="userScriptManager_export">匯出原始碼…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">JavaScript 檔案</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">使用者腳本</sys:String>
+    <sys:String x:Key="userScriptManager_confirmInstall">是否安裝以下腳本？</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">「{0}」已是最新版本。</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">無法檢查「{0}」的更新。指令碼未設定更新或已停用更新。</sys:String>
+    <sys:String x:Key="userScriptManager_reviewInstall">原始碼已載入，尚未安裝。檢查後選擇「安裝目前草稿」或儲存。</sys:String>
+    <sys:String x:Key="userScriptManager_invalidMetadata">使用者腳本中繼資料無效，請檢查標頭宣告後重試。</sys:String>
+    <sys:String x:Key="userScriptManager_invalidUrl">請輸入有效的 HTTP 或 HTTPS 網址。</sys:String>
+    <sys:String x:Key="userScriptManager_exported">原始碼已匯出。</sys:String>
+    <sys:String x:Key="userScriptManager_match">比對範圍</sys:String>
+    <sys:String x:Key="userScriptManager_world">執行環境</sys:String>
+    <sys:String x:Key="userScriptManager_grants">宣告權限</sys:String>
+    <sys:String x:Key="userScriptManager_load">載入</sys:String>
+    <sys:String x:Key="userScriptManager_toggle">啟用或停用腳本</sys:String>
+    <sys:String x:Key="userScriptManager_draft">未安裝草稿</sys:String>
+    <sys:String x:Key="userScriptManager_unavailable">不可用</sys:String>
+    <sys:String x:Key="userScriptDetails_title">腳本詳細資料</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">未知中繼資料</sys:String>
+    <sys:String x:Key="userScriptInstall_install">安裝</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">是否更新以下腳本？</sys:String>
+    <sys:String x:Key="userScriptInstall_update">更新</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">無法下載使用者腳本。</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">無法儲存使用者腳本。</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">此來源對應多筆安裝記錄，或已安裝的腳本發生了變更。請在使用者腳本管理員中檢查後再試。</sys:String>
+    <sys:String x:Key="userScriptInstall_author">作者</sys:String>
+    <sys:String x:Key="userScriptInstall_source">來源</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_menu">批次更新…</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_title">批次更新指令碼</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_currentVersion">目前版本</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_latestVersion">最新版本</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_check">取得更新</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_checking">正在取得…</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_all">全部更新</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_notConfigured">未設定更新。</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_disabled">指令碼已停用更新。</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_checkFailed">檢查更新失敗。</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_applyFailed">安裝更新失敗。</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_recheck">更新資訊已失效，請重新取得。</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_confirmAll">是否更新下列指令碼？</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">未儲存的變更將被覆寫。</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_summary">更新成功 {0} 個，失敗 {1} 個。</sys:String>
+
+    <!--下載-->
+    <sys:String x:Key="downloads_menu">下載</sys:String>
+    <sys:String x:Key="downloads_taskMenu">工作</sys:String>
+    <sys:String x:Key="downloads_historyMenu">記錄</sys:String>
+    <sys:String x:Key="downloads_details">下載詳細資料</sys:String>
+    <sys:String x:Key="downloads_filter">篩選檔名、路徑或連結…</sys:String>
+    <sys:String x:Key="downloads_empty">目前沒有下載記錄</sys:String>
+    <sys:String x:Key="downloads_noMatches">沒有符合條件的下載</sys:String>
+    <sys:String x:Key="downloads_title">下載管理</sys:String>
+    <sys:String x:Key="downloads_new">新增下載</sys:String>
+    <sys:String x:Key="downloads_pause">暫停</sys:String>
+    <sys:String x:Key="downloads_resume">繼續</sys:String>
+    <sys:String x:Key="downloads_retry">重試</sys:String>
+    <sys:String x:Key="downloads_open">開啟檔案</sys:String>
+    <sys:String x:Key="downloads_folder">開啟所在位置</sys:String>
+    <sys:String x:Key="downloads_remove">移除紀錄</sys:String>
+    <sys:String x:Key="downloads_deleteFile">刪除檔案</sys:String>
+    <sys:String x:Key="downloads_clear">清除已結束紀錄</sys:String>
+    <sys:String x:Key="downloads_fileName">檔案名稱</sys:String>
+    <sys:String x:Key="downloads_progress">進度</sys:String>
+    <sys:String x:Key="downloads_size">大小</sys:String>
+    <sys:String x:Key="downloads_speed">速度</sys:String>
+    <sys:String x:Key="downloads_state">狀態</sys:String>
+    <sys:String x:Key="downloads_source">來源</sys:String>
+    <sys:String x:Key="downloads_operations">操作</sys:String>
+    <sys:String x:Key="downloads_url">下載連結</sys:String>
+    <sys:String x:Key="downloads_savePath">儲存路徑</sys:String>
+    <sys:String x:Key="downloads_browse">瀏覽…</sys:String>
+    <sys:String x:Key="downloads_rememberDirectory">記住儲存目錄</sys:String>
+    <sys:String x:Key="downloads_start">下載</sys:String>
+    <sys:String x:Key="downloads_systemDownload">系統下載</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows 無法啟動此下載。</sys:String>
+    <sys:String x:Key="downloads_missing">檔案已刪除</sys:String>
+    <sys:String x:Key="downloads_Waiting">等待中</sys:String>
+    <sys:String x:Key="downloads_Downloading">下載中</sys:String>
+    <sys:String x:Key="downloads_Paused">已暫停</sys:String>
+    <sys:String x:Key="downloads_Completed">已完成</sys:String>
+    <sys:String x:Key="downloads_Cancelled">已取消</sys:String>
+    <sys:String x:Key="downloads_Failed">失敗</sys:String>
+    <sys:String x:Key="downloads_TimedOut">已逾時</sys:String>
+    <sys:String x:Key="downloads_Interrupted">已中斷</sys:String>
+    <sys:String x:Key="downloads_browser">瀏覽器</sys:String>
+    <sys:String x:Key="downloads_script">指令碼</sys:String>
+    <sys:String x:Key="downloads_manual">手動</sys:String>
+    <sys:String x:Key="downloads_confirmRemoveActive">是否停止此下載並移除紀錄？</sys:String>
+    <sys:String x:Key="downloads_confirmDeleteFile">是否刪除下載的檔案？下載紀錄將保留。</sys:String>
+    <sys:String x:Key="downloads_confirmOverwrite">是否取代現有檔案？</sys:String>
+    <sys:String x:Key="downloads_invalidUrl">請輸入 HTTP 或 HTTPS 下載連結。</sys:String>
+    <sys:String x:Key="downloads_invalidPath">請選擇有效的絕對檔案路徑。</sys:String>
+    <sys:String x:Key="downloads_sourceUnavailable">下載來源已無法使用，請從原頁面重新開始下載。</sys:String>
+    <sys:String x:Key="downloads_restartRequired">伺服器無法安全續傳已儲存的資料，正在重新下載。</sys:String>
+    <sys:String x:Key="downloads_nativeInterrupted">下載連線已中斷，可以嘗試繼續或從來源重新下載。</sys:String>
 
     <!--提示訊息-->
     <sys:String x:Key="message_emptyUrl">請輸入網址。</sys:String>
@@ -216,6 +382,6 @@
     <sys:String x:Key="error_objPropAreadyExists">物件中已經存在名稱為「{0}」的屬性。</sys:String>
     <sys:String x:Key="error_keyOrPropEmpty">鍵值/屬性名稱不能為空。</sys:String>
     <sys:String x:Key="error_keyOrPropAreadyExists">已經存在名稱為「{0}」的鍵值/屬性。</sys:String>
-    <sys:String x:Key="error_notSolFile">檔案「{0}」不是SOL檔案。</sys:String>
+    <sys:String x:Key="error_notSolFile">檔案「{0}」不是 SOL 檔案。</sys:String>
     <sys:String x:Key="error_unknownSearchEngine">未知的搜尋引擎。</sys:String>
 </ResourceDictionary>

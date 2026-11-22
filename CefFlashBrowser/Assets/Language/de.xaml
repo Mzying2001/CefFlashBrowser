@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="locale">de</sys:String>
@@ -18,6 +18,30 @@
     <sys:String x:Key="common_moveDown">Nach unten</sys:String>
     <sys:String x:Key="common_moveToTop">Ganz nach oben</sys:String>
     <sys:String x:Key="common_moveToBottom">Ganz nach unten</sys:String>
+    <sys:String x:Key="common_ok">OK</sys:String>
+    <sys:String x:Key="common_cancel">Abbrechen</sys:String>
+    <sys:String x:Key="common_close">Schließen</sys:String>
+    <sys:String x:Key="common_error">Fehler</sys:String>
+    <sys:String x:Key="common_file">Datei</sys:String>
+    <sys:String x:Key="common_name">Name</sys:String>
+    <sys:String x:Key="common_url">URL</sys:String>
+    <sys:String x:Key="common_editMenu">Bearbeiten</sys:String>
+    <sys:String x:Key="common_edit">Bearbeiten</sys:String>
+    <sys:String x:Key="common_save">Speichern</sys:String>
+    <sys:String x:Key="common_addItem">Eintrag hinzufügen</sys:String>
+    <sys:String x:Key="common_remove">Entfernen</sys:String>
+    <sys:String x:Key="common_delete">Löschen</sys:String>
+    <sys:String x:Key="common_undo">Rückgängig</sys:String>
+    <sys:String x:Key="common_redo">Wiederholen</sys:String>
+    <sys:String x:Key="common_cut">Ausschneiden</sys:String>
+    <sys:String x:Key="common_copy">Kopieren</sys:String>
+    <sys:String x:Key="common_paste">Einfügen</sys:String>
+    <sys:String x:Key="common_selectAll">Alles auswählen</sys:String>
+    <sys:String x:Key="common_find">Suchen</sys:String>
+    <sys:String x:Key="common_filterPlaceholder">Filtern...</sys:String>
+    <sys:String x:Key="common_refresh">Aktualisieren</sys:String>
+    <sys:String x:Key="common_manageUserScripts">Benutzerskripte verwalten</sys:String>
+    <sys:String x:Key="common_script">Skript</sys:String>
 
     <!--Main Window-->
     <sys:String x:Key="mainWindow_title">Willkommen</sys:String>
@@ -36,6 +60,12 @@
     <sys:String x:Key="settings_headerOther">Sonstiges</sys:String>
     <sys:String x:Key="settings_headerBrowser">Browser</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Website-Verhalten</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">Benutzerskripte</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">Benutzerskripte aktivieren</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">Privilegierte APIs für Benutzerskripte im Seitenkontext zulassen</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">Änderungen gelten für neu geöffnete Tabs.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">Standardverhalten für Berechtigungen</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">Gilt, wenn keine Entscheidung zur Berechtigung gespeichert ist.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Erweitert</sys:String>
     <sys:String x:Key="settings_headerAboutCef">Über CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">Suchmaschinen in der Adressleiste verwenden</sys:String>
@@ -79,6 +109,11 @@
     <sys:String x:Key="newPageBehavior_newWindow">Neues Fenster</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">Neuer Tab</sys:String>
 
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">Nachfragen</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">Automatisch erlauben</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">Automatisch verweigern</sys:String>
+
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
     <sys:String x:Key="searchEngine_google">Google</sys:String>
@@ -97,11 +132,6 @@
     <!--Favorites Manager-->
     <sys:String x:Key="favorites_managerTitle">Favoritenverwaltung</sys:String>
     <sys:String x:Key="favorites_add">Hinzufügen</sys:String>
-    <sys:String x:Key="favorites_remove">Entfernen</sys:String>
-    <sys:String x:Key="favorites_edit">Bearbeiten</sys:String>
-    <sys:String x:Key="favorites_name">Name</sys:String>
-    <sys:String x:Key="favorites_url">URL</sys:String>
-    <sys:String x:Key="favorites_save">Speichern</sys:String>
     <sys:String x:Key="favorites_defaultName">Neuer Favorit</sys:String>
 
     <!--Browser Window-->
@@ -109,14 +139,7 @@
     <sys:String x:Key="browser_forward">Vorwärts</sys:String>
     <sys:String x:Key="browser_reload">Neu laden</sys:String>
     <sys:String x:Key="browser_stop">Stopp</sys:String>
-    <sys:String x:Key="browser_cut">Ausschneiden</sys:String>
-    <sys:String x:Key="browser_copy">Kopieren</sys:String>
-    <sys:String x:Key="browser_paste">Einfügen</sys:String>
-    <sys:String x:Key="browser_selectAll">Alles auswählen</sys:String>
     <sys:String x:Key="browser_print">Drucken</sys:String>
-    <sys:String x:Key="browser_redo">Wiederholen</sys:String>
-    <sys:String x:Key="browser_undo">Rückgängig</sys:String>
-    <sys:String x:Key="browser_find">Suchen</sys:String>
     <sys:String x:Key="browser_searchFor">Nach "{0}" suchen</sys:String>
     <sys:String x:Key="browser_openInNewTab">In neuem Tab öffnen</sys:String>
     <sys:String x:Key="browser_openInNewWindow">In neuem Fenster öffnen</sys:String>
@@ -130,7 +153,6 @@
     <sys:String x:Key="browser_openInDefaultBrowser">Im Standardbrowser öffnen</sys:String>
     <sys:String x:Key="browser_createShortcut">Verknüpfung erstellen</sys:String>
     <sys:String x:Key="browser_addFavorite">Diese Website zu Favoriten hinzufügen</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">Einige Flash-Inhalte scheinen vom Chromium-Kern blockiert zu werden. Sie können sie im SWF-Player abspielen:</sys:String>
     <sys:String x:Key="browser_toolTipBack">Zurück (Alt+Links)</sys:String>
     <sys:String x:Key="browser_toolTipForward">Vorwärts (Alt+Rechts)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Neu laden (Ctrl+R)</sys:String>
@@ -138,7 +160,7 @@
     <sys:String x:Key="browser_toolTipNewTab">Neuer Tab (Ctrl+T)</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">Tab schließen (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Mehr</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">Blockierte Flash-Inhalte</sys:String>
+    <sys:String x:Key="browser_toolTipPageSwfs">SWF-Dateien auf dieser Seite</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Vergrößern (Strg+Plus)</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">Verkleinern (Strg+Minus)</sys:String>
     <sys:String x:Key="browser_loading">Wird geladen...</sys:String>
@@ -157,22 +179,12 @@
     <sys:String x:Key="solSaveManager_headerFileName">Dateiname</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">Dateipfad</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">Aktionen</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipReload">Aktualisieren</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipDelete">Löschen</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipEdit">Bearbeiten</sys:String>
-    <sys:String x:Key="solSaveManager_filterPlaceholder">Filtern...</sys:String>
 
     <!--SOL Editor-->
     <sys:String x:Key="solEditor_title">SOL-Editor</sys:String>
-    <sys:String x:Key="solEditor_file">Datei</sys:String>
-    <sys:String x:Key="solEditor_save">Speichern</sys:String>
     <sys:String x:Key="solEditor_saveAs">Speichern unter...</sys:String>
-    <sys:String x:Key="solEditor_close">Schließen</sys:String>
-    <sys:String x:Key="solEditor_edit">Bearbeiten</sys:String>
-    <sys:String x:Key="solEditor_addItem">Eintrag hinzufügen</sys:String>
     <sys:String x:Key="solEditor_removeItem">Eintrag entfernen</sys:String>
     <sys:String x:Key="solEditor_statusReady">Bereit</sys:String>
-    <sys:String x:Key="solEditor_statusError">Fehler</sys:String>
     <sys:String x:Key="solEditor_statusModified">Geändert</sys:String>
     <sys:String x:Key="solEditor_statusSaved">Gespeichert</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">Unbekannter Status</sys:String>
@@ -181,16 +193,170 @@
     <sys:String x:Key="solEditor_amf3SolFile">Mit AMF3 codierte SOL-Datei</sys:String>
 
     <!--Dialogs-->
-    <sys:String x:Key="dialog_ok">OK</sys:String>
-    <sys:String x:Key="dialog_cancel">Abbrechen</sys:String>
     <sys:String x:Key="dialog_yes">Ja</sys:String>
     <sys:String x:Key="dialog_no">Nein</sys:String>
-    <sys:String x:Key="dialog_error">Fehler</sys:String>
     <sys:String x:Key="dialog_addFavorite">Favorit hinzufügen</sys:String>
     <sys:String x:Key="dialog_selectLanguage">Sprache auswählen</sys:String>
-    <sys:String x:Key="dialog_addItem">Eintrag hinzufügen</sys:String>
-    <sys:String x:Key="dialog_itemName">Name</sys:String>
     <sys:String x:Key="dialog_assocArray">Assoziatives Array</sys:String>
+
+    <!--Userscripts-->
+    <sys:String x:Key="userscript_permissionTitle">Berechtigung für Benutzerskripte</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Skript: {0}&#xA;Funktion: {1}&#xA;Ziel: {2}&#xA;&#xA;Diesem Skript erlauben, diese Funktion zu verwenden?</sys:String>
+    <sys:String x:Key="userscript_denyRemember">Ablehnen und merken</sys:String>
+    <sys:String x:Key="userscript_allowOnce">Einmal erlauben</sys:String>
+    <sys:String x:Key="userscript_allowRemember">Erlauben und merken</sys:String>
+    <sys:String x:Key="userscript_managePermissions">Skriptberechtigungen verwalten</sys:String>
+    <sys:String x:Key="userscript_permissionPage">Seitenadresse</sys:String>
+    <sys:String x:Key="userscript_permissionScope">Hier stehen gespeicherte Entscheidungen für Skripte, die zu dieser Seite passen. Änderungen gelten auch für spätere Aufrufe derselben API und desselben Ziels auf anderen Seiten.</sys:String>
+    <sys:String x:Key="userscript_permissionDisabled">Deaktiviert</sys:String>
+    <sys:String x:Key="userscript_permissionTarget">Ziel</sys:String>
+    <sys:String x:Key="userscript_permissionDecision">Entscheidung</sys:String>
+    <sys:String x:Key="userscript_permissionAllow">Erlauben</sys:String>
+    <sys:String x:Key="userscript_permissionDeny">Verweigern</sys:String>
+    <sys:String x:Key="userscript_permissionClear">Entscheidung löschen</sys:String>
+    <sys:String x:Key="userscript_permissionLoading">Skriptberechtigungen werden geladen…</sys:String>
+    <sys:String x:Key="userscript_permissionEmpty">Für Skripte auf dieser Seite sind keine Entscheidungen gespeichert.</sys:String>
+    <sys:String x:Key="userscript_permissionChanged">Diese Entscheidung wurde an anderer Stelle geändert oder gelöscht. Die Liste wurde aktualisiert.</sys:String>
+    <sys:String x:Key="userscript_permissionError">Skriptberechtigungen konnten nicht gelesen oder geändert werden. Aktualisieren Sie die Liste und versuchen Sie es erneut.</sys:String>
+    <sys:String x:Key="userscript_unavailable">Benutzerskripte sind auf dieser Seite nicht verfügbar</sys:String>
+    <sys:String x:Key="userscript_retry">Erneut versuchen und Seite neu laden</sys:String>
+    <sys:String x:Key="userscript_commands">Skriptbefehle</sys:String>
+    <sys:String x:Key="userscript_notification">Benutzerskript-Benachrichtigung</sys:String>
+    <sys:String x:Key="userscript_notificationClick">Benachrichtigung anklicken</sys:String>
+    <sys:String x:Key="userscript_downloads">Skript-Downloads</sys:String>
+    <sys:String x:Key="userscript_saveDownload">Skript-Download speichern</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">Warten</sys:String>
+    <sys:String x:Key="userscript_downloading">Wird heruntergeladen</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">Abgeschlossen</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">Abgebrochen</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">Zeitüberschreitung</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">Fehlgeschlagen</sys:String>
+
+    <!--Userscript Manager-->
+    <sys:String x:Key="userScriptManager_title">Benutzerskriptverwaltung</sys:String>
+    <sys:String x:Key="userScriptManager_noInstalledScripts">Keine Skripte installiert.</sys:String>
+    <sys:String x:Key="userScriptManager_noMatchingScripts">Keine passenden Skripte gefunden.</sys:String>
+    <sys:String x:Key="userScriptManager_new">Neues Skript</sys:String>
+    <sys:String x:Key="userScriptManager_newScript">Neues Skript</sys:String>
+    <sys:String x:Key="userScriptManager_replace">Ersetzen</sys:String>
+    <sys:String x:Key="userScriptManager_completeCode">Codevervollständigung</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">Vorheriger Treffer</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">Nächster Treffer</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">Groß-/Kleinschreibung beachten</sys:String>
+    <sys:String x:Key="userScriptManager_matches">Treffer</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">Keine Treffer</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">Treffer ersetzen</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">Alle ersetzen</sys:String>
+    <sys:String x:Key="userScriptManager_help">Hilfe</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">Über MonkeySharp</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">Benutzerskript-Anleitung</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">Details anzeigen</sys:String>
+    <sys:String x:Key="userScriptManager_reload">Von Datenträger neu laden</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">Möchten Sie das Skript „{0}“ löschen?</sys:String>
+    <sys:String x:Key="userScriptManager_saved">Gespeichert. Laden Sie die Seite neu, um die Änderungen anzuwenden.</sys:String>
+    <sys:String x:Key="userScriptManager_refreshPage">Fertig. Laden Sie die Seite neu, um das Ergebnis zu sehen.</sys:String>
+    <sys:String x:Key="userScriptManager_deleted">Gelöscht.</sys:String>
+    <sys:String x:Key="userScriptManager_working">Wird verarbeitet…</sys:String>
+    <sys:String x:Key="userScriptManager_cancelled">Abgebrochen. Die Entwürfe wurden beibehalten.</sys:String>
+    <sys:String x:Key="userScriptManager_conflict">Das Skript oder die Quelldatei wurde geändert. Ihr Entwurf wurde beibehalten. Laden Sie die Datei neu und vergleichen Sie sie vor dem Speichern mit Ihrem Entwurf.</sys:String>
+    <sys:String x:Key="userScriptManager_installFile">Aus Datei installieren…</sys:String>
+    <sys:String x:Key="userScriptManager_installUrl">Von URL installieren…</sys:String>
+    <sys:String x:Key="userScriptManager_install">Aktuellen Entwurf installieren</sys:String>
+    <sys:String x:Key="userScriptManager_export">Quelltext exportieren…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">JavaScript-Datei</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">Benutzerskript</sys:String>
+    <sys:String x:Key="userScriptManager_confirmInstall">Dieses Skript installieren?</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">„{0}“ ist bereits auf dem neuesten Stand.</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">Für „{0}“ kann nicht nach Updates gesucht werden. Updates sind für dieses Skript nicht konfiguriert oder deaktiviert.</sys:String>
+    <sys:String x:Key="userScriptManager_reviewInstall">Quelltext geladen, noch nicht installiert. Prüfen Sie ihn und wählen Sie dann „Aktuellen Entwurf installieren“ oder „Speichern“.</sys:String>
+    <sys:String x:Key="userScriptManager_invalidMetadata">Ungültige Benutzerskript-Metadaten. Prüfen Sie den Metadatenkopf und versuchen Sie es erneut.</sys:String>
+    <sys:String x:Key="userScriptManager_invalidUrl">Geben Sie eine gültige HTTP- oder HTTPS-URL ein.</sys:String>
+    <sys:String x:Key="userScriptManager_exported">Quelltext exportiert.</sys:String>
+    <sys:String x:Key="userScriptManager_match">Übereinstimmende Adressen</sys:String>
+    <sys:String x:Key="userScriptManager_world">Ausführungsumgebung</sys:String>
+    <sys:String x:Key="userScriptManager_grants">Deklarierte Berechtigungen</sys:String>
+    <sys:String x:Key="userScriptManager_load">Laden</sys:String>
+    <sys:String x:Key="userScriptManager_toggle">Skript aktivieren oder deaktivieren</sys:String>
+    <sys:String x:Key="userScriptManager_draft">Nicht installierter Entwurf</sys:String>
+    <sys:String x:Key="userScriptManager_unavailable">Nicht verfügbar</sys:String>
+    <sys:String x:Key="userScriptDetails_title">Skriptdetails</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">Unbekannte Metadaten</sys:String>
+    <sys:String x:Key="userScriptInstall_install">Installieren</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">Dieses Benutzerskript aktualisieren?</sys:String>
+    <sys:String x:Key="userScriptInstall_update">Aktualisieren</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">Das Benutzerskript konnte nicht heruntergeladen werden.</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">Das Benutzerskript konnte nicht gespeichert werden.</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">Diese Quelle gehört zu mehreren Installationen oder das vorhandene Skript wurde geändert. Prüfen Sie das Skript in der Benutzerskriptverwaltung und versuchen Sie es erneut.</sys:String>
+    <sys:String x:Key="userScriptInstall_author">Autor</sys:String>
+    <sys:String x:Key="userScriptInstall_source">Quelle</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_menu">Sammelaktualisierung…</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_title">Skripte gesammelt aktualisieren</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_currentVersion">Aktuelle Version</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_latestVersion">Neueste Version</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_check">Nach Updates suchen</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_checking">Suche läuft…</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_all">Alle aktualisieren</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_notConfigured">Updates sind nicht eingerichtet.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_disabled">Updates sind für dieses Skript deaktiviert.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_checkFailed">Die Suche nach Updates ist fehlgeschlagen.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_applyFailed">Das Update konnte nicht installiert werden.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_recheck">Update-Informationen sind nicht mehr gültig. Erneut suchen.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_confirmAll">Diese Skripte aktualisieren?</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Ungespeicherte Änderungen werden überschrieben.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_summary">{0} Skripte aktualisiert. {1} fehlgeschlagen.</sys:String>
+
+    <!--Download manager-->
+    <sys:String x:Key="downloads_menu">Downloads</sys:String>
+    <sys:String x:Key="downloads_taskMenu">Aufgabe</sys:String>
+    <sys:String x:Key="downloads_historyMenu">Verlauf</sys:String>
+    <sys:String x:Key="downloads_details">Download-Details</sys:String>
+    <sys:String x:Key="downloads_filter">Nach Name, Pfad oder URL filtern…</sys:String>
+    <sys:String x:Key="downloads_empty">Kein Download-Verlauf</sys:String>
+    <sys:String x:Key="downloads_noMatches">Keine passenden Downloads</sys:String>
+    <sys:String x:Key="downloads_title">Downloads</sys:String>
+    <sys:String x:Key="downloads_new">Neuer Download</sys:String>
+    <sys:String x:Key="downloads_pause">Pausieren</sys:String>
+    <sys:String x:Key="downloads_resume">Fortsetzen</sys:String>
+    <sys:String x:Key="downloads_retry">Erneut versuchen</sys:String>
+    <sys:String x:Key="downloads_open">Datei öffnen</sys:String>
+    <sys:String x:Key="downloads_folder">Im Ordner anzeigen</sys:String>
+    <sys:String x:Key="downloads_remove">Eintrag entfernen</sys:String>
+    <sys:String x:Key="downloads_deleteFile">Datei löschen</sys:String>
+    <sys:String x:Key="downloads_clear">Beendete Einträge entfernen</sys:String>
+    <sys:String x:Key="downloads_fileName">Dateiname</sys:String>
+    <sys:String x:Key="downloads_progress">Fortschritt</sys:String>
+    <sys:String x:Key="downloads_size">Größe</sys:String>
+    <sys:String x:Key="downloads_speed">Geschwindigkeit</sys:String>
+    <sys:String x:Key="downloads_state">Status</sys:String>
+    <sys:String x:Key="downloads_source">Quelle</sys:String>
+    <sys:String x:Key="downloads_operations">Aktionen</sys:String>
+    <sys:String x:Key="downloads_url">Download-URL</sys:String>
+    <sys:String x:Key="downloads_savePath">Speicherpfad</sys:String>
+    <sys:String x:Key="downloads_browse">Durchsuchen…</sys:String>
+    <sys:String x:Key="downloads_rememberDirectory">Diesen Ordner merken</sys:String>
+    <sys:String x:Key="downloads_start">Herunterladen</sys:String>
+    <sys:String x:Key="downloads_systemDownload">Mit Windows herunterladen</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows konnte den Download nicht starten.</sys:String>
+    <sys:String x:Key="downloads_missing">Datei gelöscht</sys:String>
+    <sys:String x:Key="downloads_Waiting">Wartet</sys:String>
+    <sys:String x:Key="downloads_Downloading">Wird heruntergeladen</sys:String>
+    <sys:String x:Key="downloads_Paused">Pausiert</sys:String>
+    <sys:String x:Key="downloads_Completed">Abgeschlossen</sys:String>
+    <sys:String x:Key="downloads_Cancelled">Abgebrochen</sys:String>
+    <sys:String x:Key="downloads_Failed">Fehlgeschlagen</sys:String>
+    <sys:String x:Key="downloads_TimedOut">Zeitüberschreitung</sys:String>
+    <sys:String x:Key="downloads_Interrupted">Unterbrochen</sys:String>
+    <sys:String x:Key="downloads_browser">Browser</sys:String>
+    <sys:String x:Key="downloads_script">Skript</sys:String>
+    <sys:String x:Key="downloads_manual">Manuell</sys:String>
+    <sys:String x:Key="downloads_confirmRemoveActive">Diesen Download stoppen und den Eintrag entfernen?</sys:String>
+    <sys:String x:Key="downloads_confirmDeleteFile">Die heruntergeladene Datei löschen? Der Eintrag bleibt erhalten.</sys:String>
+    <sys:String x:Key="downloads_confirmOverwrite">Die vorhandene Datei ersetzen?</sys:String>
+    <sys:String x:Key="downloads_invalidUrl">Geben Sie eine HTTP- oder HTTPS-Download-URL ein.</sys:String>
+    <sys:String x:Key="downloads_invalidPath">Wählen Sie einen gültigen absoluten Dateipfad.</sys:String>
+    <sys:String x:Key="downloads_sourceUnavailable">Die Quelle ist nicht mehr verfügbar. Starten Sie den Download auf der ursprünglichen Seite erneut.</sys:String>
+    <sys:String x:Key="downloads_restartRequired">Der Server kann die gespeicherten Daten nicht sicher fortsetzen. Der Download beginnt erneut.</sys:String>
+    <sys:String x:Key="downloads_nativeInterrupted">Die Verbindung wurde unterbrochen. Setzen Sie den Download fort oder starten Sie ihn an der Quelle erneut.</sys:String>
 
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">Bitte geben Sie die URL ein.</sys:String>

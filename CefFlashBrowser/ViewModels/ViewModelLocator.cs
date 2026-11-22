@@ -2,6 +2,7 @@
 using SimpleMvvm.Ioc;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -30,10 +31,29 @@ namespace CefFlashBrowser.ViewModels
             SimpleIoc.Global.Register<SettingsWindowViewModel>();
             SimpleIoc.Global.Register<FavoritesManagerViewModel>();
             SimpleIoc.Global.Register<LanguageSelectorViewModel>();
+            SimpleIoc.Global.Register(UserScriptManagerViewModelFactory);
 
             SimpleIoc.Global.Register(BrowserViewModelFactory, Lifetime.Transient);
             SimpleIoc.Global.Register<BrowserWindowViewModel>(Lifetime.Transient);
             SimpleIoc.Global.Register<SolSaveManagerViewModel>(Lifetime.Transient);
+        }
+
+        private static UserScriptManagerViewModel UserScriptManagerViewModelFactory(object[] parameters)
+        {
+            async Task<Mzying2001.MonkeySharp.Core.Repository.IUserScriptRepository> initialize()
+            {
+                var service = SimpleIoc.Global.GetInstance<Services.UserScripts.UserScriptService>();
+                await service.InitializeAsync();
+                return service.Repository;
+            }
+
+            var viewModel = new UserScriptManagerViewModel(
+                initialize,
+                key => SimpleIoc.Global.GetInstance<LanguageService>().GetString(key),
+                action => System.Windows.Application.Current.Dispatcher.InvokeAsync(action),
+                (url, token) => SimpleIoc.Global.GetInstance<Services.UserScripts.UserScriptService>().Content.FetchSourceAsync(null, url, token));
+
+            return viewModel;
         }
 
         private static BrowserViewModel BrowserViewModelFactory(object[] parameters)
@@ -79,6 +99,11 @@ namespace CefFlashBrowser.ViewModels
         public FavoritesManagerViewModel FavoritesManagerViewModel
         {
             get => SimpleIoc.Global.GetInstance<FavoritesManagerViewModel>();
+        }
+
+        public UserScriptManagerViewModel UserScriptManagerViewModel
+        {
+            get => SimpleIoc.Global.GetInstance<UserScriptManagerViewModel>();
         }
 
         public LanguageSelectorViewModel LanguageSelectorViewModel

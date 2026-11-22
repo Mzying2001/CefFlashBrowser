@@ -1,7 +1,9 @@
+using CefFlashBrowser.Browser.UserScripts;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
+using CefFlashBrowser.Views.Custom;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Command;
@@ -21,33 +23,35 @@ namespace CefFlashBrowser.Browser.Handlers
             get => SimpleIoc.Global.GetInstance<LanguageService>();
         }
 
-        public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserFirst + 1;
-        public const CefMenuCommand Search = CefMenuCommand.UserFirst + 2;
-        public const CefMenuCommand OpenSelectedUrl = CefMenuCommand.UserFirst + 3;
-        public const CefMenuCommand OpenInNewTab = CefMenuCommand.UserFirst + 4;
+        public const CefMenuCommand OpenInNewWindow = CefMenuCommand.UserLast - 3;
+        public const CefMenuCommand Search = CefMenuCommand.UserLast - 2;
+        public const CefMenuCommand OpenSelectedUrl = CefMenuCommand.UserLast - 1;
+        public const CefMenuCommand OpenInNewTab = CefMenuCommand.UserLast;
+
+        public int LastMenuItemCount { get; private set; }
 
         public override void OnBeforeContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
         {
             if (GlobalData.Settings.DisableBrowserContextMenu)
             {
                 model.Clear();
+                LastMenuItemCount = 0;
                 return;
             }
 
             int count = 0;
+            var selectionText = parameters.SelectionText;
 
-            if (!string.IsNullOrWhiteSpace(parameters.SelectionText))
+            if (!string.IsNullOrWhiteSpace(selectionText))
             {
-                var selectionText = parameters.SelectionText;
-                var truncatedText = selectionText.Length > 32 ? selectionText.Substring(0, 32) + "..." : selectionText;
-
-                var header = LanguageService.GetFormattedString("browser_searchFor", truncatedText.Replace('\n', ' '));
+                var displayText = ReplaceLineBreaksWithSpaces(selectionText);
+                var header = LanguageService.GetFormattedString("browser_searchFor", displayText);
                 model.InsertItemAt(0, Search, header);
                 count++;
 
                 if (UrlHelper.IsUrl(selectionText))
                 {
-                    header = LanguageService.GetFormattedString("browser_openSelectedUrl", truncatedText);
+                    header = LanguageService.GetFormattedString("browser_openSelectedUrl", displayText);
                     model.InsertCheckItemAt(0, OpenSelectedUrl, header);
                     count++;
                 }
@@ -68,6 +72,8 @@ namespace CefFlashBrowser.Browser.Handlers
             {
                 model.InsertSeparatorAt(count);
             }
+
+            LastMenuItemCount = model.Count;
         }
 
         public override bool OnContextMenuCommand(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
@@ -139,7 +145,8 @@ namespace CefFlashBrowser.Browser.Handlers
 
         public override bool RunContextMenu(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
         {
-            var menuItemInfoList = CefMenuItemInfo.GetMenuItemInfoList(model);
+            var menuItemInfoList = CefMenuItemInfo.GetMenuItemInfoList(model,
+                chromiumWebBrowser.MenuHandler as UserScriptContextMenuHandler);
 
             ((IWpfWebBrowser)chromiumWebBrowser).Dispatcher.Invoke(() =>
             {
@@ -179,28 +186,49 @@ namespace CefFlashBrowser.Browser.Handlers
                     continue;
                 }
 
-                yield return new MenuItem
+                var command = item.SubMenuItemInfos != null ? null : new DelegateCommand
+                {
+                    CanExecute = item.IsEnable,
+                    Execute = delegate { callback.Continue(item.CommandID, CefEventFlags.None); }
+                };
+
+                var menuItem = new MenuItem
                 {
                     Header = GetHeader(item),
-                    Icon = GetIcon(item.CommandID),
+                    Icon = GetIcon(item),
                     Padding = new Thickness(10, 5, 10, 5),
                     IsChecked = item.IsChecked,
-                    ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback),
-
-                    Command = new DelegateCommand
-                    {
-                        CanExecute = item.IsEnable,
-                        Execute = delegate { callback.Continue(item.CommandID, CefEventFlags.None); }
-                    }
+                    IsEnabled = item.IsEnable,
+                    Command = command,
+                    ItemsSource = GetMenuItems(item.SubMenuItemInfos, callback)
                 };
+
+                if (item.IsUserScript || item.CommandID == Search || item.CommandID == OpenSelectedUrl)
+                    menuItem.SetResourceReference(MenuItem.HeaderTemplateProperty, "TrimmedContextMenuHeaderTemplate");
+
+                yield return menuItem;
             }
         }
 
-        private static SvgIcon GetIcon(CefMenuCommand commandId)
+        private static FrameworkElement GetIcon(CefMenuItemInfo item)
         {
+            if (item.ScriptIcon != null)
+            {
+                var icon = new BrowserIcon
+                {
+                    Width = 16,
+                    Height = 16,
+                    FaviconUrl = item.ScriptIcon.Url,
+                    DefaultIcon = item.ScriptIcon.Initial
+                };
+                icon.SetResourceReference(FrameworkElement.StyleProperty, BrowserIcon.TextFallbackStyleKey);
+                return icon;
+            }
+
             string resourceKey;
             double size;
-            switch (commandId)
+
+            switch (item.CommandID)
             {
                 case OpenInNewTab:
                     resourceKey = "NewTabIconUri";
@@ -222,6 +250,11 @@ namespace CefFlashBrowser.Browser.Handlers
             };
         }
 
+        private static string ReplaceLineBreaksWithSpaces(string text)
+        {
+            return text.Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ');
+        }
+
         private static string GetHeader(CefMenuItemInfo menuItemInfo)
         {
             if (_menuItemHeaderKeys.TryGetValue(menuItemInfo.CommandID, out string key))
@@ -238,16 +271,16 @@ namespace CefFlashBrowser.Browser.Handlers
         {
             [CefMenuCommand.Back] = "browser_back",
             [CefMenuCommand.Forward] = "browser_forward",
-            [CefMenuCommand.Cut] = "browser_cut",
-            [CefMenuCommand.Copy] = "browser_copy",
-            [CefMenuCommand.Paste] = "browser_paste",
+            [CefMenuCommand.Cut] = "common_cut",
+            [CefMenuCommand.Copy] = "common_copy",
+            [CefMenuCommand.Paste] = "common_paste",
             [CefMenuCommand.Print] = "browser_print",
             [CefMenuCommand.ViewSource] = "browser_viewSource",
-            [CefMenuCommand.Undo] = "browser_undo",
+            [CefMenuCommand.Undo] = "common_undo",
             [CefMenuCommand.StopLoad] = "browser_stop",
-            [CefMenuCommand.SelectAll] = "browser_selectAll",
-            [CefMenuCommand.Redo] = "browser_redo",
-            [CefMenuCommand.Find] = "browser_find",
+            [CefMenuCommand.SelectAll] = "common_selectAll",
+            [CefMenuCommand.Redo] = "common_redo",
+            [CefMenuCommand.Find] = "common_find",
             [CefMenuCommand.AddToDictionary] = "browser_addToDictionary",
             [CefMenuCommand.Reload] = "browser_reload",
             [CefMenuCommand.ReloadNoCache] = "browser_reloadNoCache",

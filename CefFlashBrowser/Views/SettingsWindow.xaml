@@ -155,6 +155,34 @@
                     </c:SettingItem>
                 </c:SettingGroup>
 
+                <!--userscripts-->
+                <c:SettingGroup x:Name="userScriptSettings"
+                                Header="{DynamicResource settings_headerUserScripts}">
+                    <c:SettingItem Description="{DynamicResource settings_enableUserScripts}"
+                                   ToolTip="{DynamicResource settings_userScriptNewTabTooltip}">
+                        <CheckBox x:Name="enableUserScripts"
+                                  AutomationProperties.Name="EnableUserScripts"
+                                  IsChecked="{Binding EnableUserScripts}"/>
+                    </c:SettingItem>
+
+                    <c:SettingItem Description="{DynamicResource settings_trustedUserScriptPageWorld}"
+                                   ToolTip="{DynamicResource settings_userScriptNewTabTooltip}">
+                        <CheckBox x:Name="trustedUserScriptPageWorld"
+                                  AutomationProperties.Name="TrustedUserScriptPageWorld"
+                                  IsChecked="{Binding TrustedUserScriptPageWorld}"/>
+                    </c:SettingItem>
+
+                    <c:SettingItem Description="{DynamicResource settings_defaultUserScriptPermissionBehavior}"
+                                   ToolTip="{DynamicResource settings_defaultUserScriptPermissionBehaviorTooltip}">
+                        <ComboBox x:Name="defaultUserScriptPermissionBehavior"
+                                  AutomationProperties.Name="DefaultUserScriptPermissionBehavior"
+                                  ItemsSource="{Binding UserScriptPermissionBehaviors}"
+                                  SelectedValue="{Binding DefaultUserScriptPermissionBehavior}"
+                                  DisplayMemberPath="Name"
+                                  SelectedValuePath="Value"/>
+                    </c:SettingItem>
+                </c:SettingGroup>
+
                 <!--advance-->
                 <c:SettingGroup Header="{DynamicResource settings_headerAdvanced}">
                     <!--disable GPU acceleration-->

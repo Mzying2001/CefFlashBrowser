@@ -1,4 +1,6 @@
+using CefFlashBrowser.Browser;
 using CefFlashBrowser.Data;
+using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
@@ -11,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -19,6 +20,7 @@ namespace CefFlashBrowser.ViewModels
 {
     public class BrowserWindowViewModel : ViewModelBase
     {
+        public DelegateCommand OpenUserScriptManagerCommand { get; set; }
         public DelegateCommand ShowMainWindowCommand { get; set; }
         public DelegateCommand ViewSourceCommand { get; set; }
         public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
@@ -132,15 +134,7 @@ namespace CefFlashBrowser.ViewModels
 
         public void OpenInDefaultBrowser(string url)
         {
-            try
-            {
-                Process.Start(url);
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError($"Failed to open URL in default browser: {url}", e);
-                WindowManager.ShowError(e.Message);
-            }
+            WindowManager.OpenInDefaultBrowser(url);
         }
 
         private static bool IsBrowserReady(BrowserViewModel browser)
@@ -236,6 +230,20 @@ namespace CefFlashBrowser.ViewModels
             WindowManager.ShowSwfPlayer(url);
         }
 
+        private async void OpenPageSwf(SwfResourceRecord resource)
+        {
+            if (IsClosing || resource == null || !(CurrentBrowser?.Browser is ChromiumFlashBrowser browser)
+                || !browser.PageSwfs.Contains(resource))
+                return;
+
+            var context = await SwfPageContext.TryReadAsync(browser, resource);
+
+            if (!IsClosing && !browser.Dispatcher.HasShutdownStarted)
+            {
+                WindowManager.ShowSwfPlayer(resource.Url, context);
+            }
+        }
+
         public void NewBrowserWindow(string url)
         {
             if (!IsClosing)
@@ -272,6 +280,18 @@ namespace CefFlashBrowser.ViewModels
         public BrowserViewModel AddBrowser(string address = "about:blank", bool activate = true)
         {
             return InsertBrowser(_browsers.Count, address, activate);
+        }
+
+        internal BrowserViewModel OpenUserScriptTab(BrowserViewModel source, string address, bool active,
+            bool insert, bool setParent, int? insertIndex)
+        {
+            if (source != null && !_browsers.Contains(source))
+                throw new InvalidOperationException("The source tab is no longer available.");
+
+            var index = insertIndex.HasValue ? Math.Min(insertIndex.Value, _browsers.Count)
+                : insert && source != null ? _browsers.IndexOf(source) + 1 : _browsers.Count;
+
+            return InsertBrowser(index, address, active, setParent ? source : null);
         }
 
         private void AddBrowserCommandImpl(string address)
@@ -357,6 +377,8 @@ namespace CefFlashBrowser.ViewModels
                 CurrentBrowser = (opener != null && _browsers.Contains(opener)) ? opener
                     : (_browsers.Count == 0 ? null : _browsers[Math.Min(index, _browsers.Count - 1)]);
             }
+
+            browser.MarkClosed();
         }
 
         public void ToggleDevTools(BrowserViewModel browser)
@@ -483,13 +505,14 @@ namespace CefFlashBrowser.ViewModels
             Browsers = new ReadOnlyObservableCollection<BrowserViewModel>(_browsers);
             AddBrowser(null);
 
+            OpenUserScriptManagerCommand = new DelegateCommand(WindowManager.ShowUserScriptManager);
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
             ViewSourceCommand = new DelegateCommand<BrowserViewModel>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
             CreateShortcutCommand = new DelegateCommand<BrowserViewModel>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<BrowserViewModel>(AddFavorite);
             ToggleLoadingStateCommand = new DelegateCommand<BrowserViewModel>(ToggleLoadingState);
-            OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
+            OpenInSwfPlayerCommand = new DelegateCommand<SwfResourceRecord>(OpenPageSwf);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             AddBrowserCommand = new DelegateCommand<string>(AddBrowserCommandImpl);
             CloseBrowserCommand = new DelegateCommand<BrowserViewModel>(CloseBrowser);

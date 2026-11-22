@@ -1,14 +1,17 @@
+using CefFlashBrowser.Browser;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
-using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -21,13 +24,17 @@ namespace CefFlashBrowser.Views
     public partial class SwfPlayerWindow : Window
     {
         private const string PlayerResourceName = "CefFlashBrowser.Assets.SwfPlayer.swfplayer.html";
+        private static readonly Lazy<string> PlayerTemplate = new Lazy<string>(ReadPlayerTemplate);
 
         private bool _doClose = false;
         private bool _isClosed = false;
-        private ChromiumWebBrowser _browserPendingClose;
+        private Task _windowCloseTask;
         private bool _forceClosePending;
 
+        internal bool IsClosing => _doClose || _forceClosePending || _windowCloseTask != null && !_windowCloseTask.IsCompleted;
+
         private BrowserViewModel ViewModel => browserView?.ViewModel;
+        private static string LocalPlayerUrl => new Uri(GlobalData.SwfPlayerPath).AbsoluteUri;
 
         public string FileName
         {
@@ -43,6 +50,13 @@ namespace CefFlashBrowser.Views
             var window = (SwfPlayerWindow)d;
             var browser = window.ViewModel?.Browser;
 
+            if (window.browserView.PlayerPage != null)
+            {
+                window.browserView.PlayerPage = null;
+                window.ViewModel.Address = LocalPlayerUrl;
+                return;
+            }
+
             if (window._isClosed || !window.browserView.IsLoaded
                 || browser == null || browser.IsDisposed)
             {
@@ -51,7 +65,7 @@ namespace CefFlashBrowser.Views
 
             try
             {
-                if (browser.CanExecuteJavascriptInMainFrame)
+                if (browser.CanExecuteJavascriptInMainFrame && IsLocalPlayerPage(browser.Address))
                 {
                     window.LoadSwf(e.NewValue as string);
                 }
@@ -71,115 +85,69 @@ namespace CefFlashBrowser.Views
             ViewModel.Browser.FrameLoadEnd += OnBrowserFrameLoadEnd;
             ViewModel.Browser.DragHandler = new Browser.Handlers.DisableDragHandler();
 
-            using (var stream = typeof(SwfPlayerWindow).Assembly.GetManifestResourceStream(PlayerResourceName))
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(PlayerTemplate.Value)))
             {
-                if (stream == null)
-                    throw new InvalidOperationException($"Embedded SWF player page not found: {PlayerResourceName}");
-
-                ViewModel.Browser.RegisterResourceHandler(new Uri(GlobalData.SwfPlayerPath).AbsoluteUri, stream, "text/html");
+                ViewModel.Browser.RegisterResourceHandler(LocalPlayerUrl, stream, "text/html");
             }
 
             Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
         }
 
+        internal void OpenFromPage(SwfPageContext context)
+        {
+            FileName = context.Resource.Url;
+            var page = new SwfPlayerPage(context, LocalPlayerUrl, PlayerTemplate.Value);
+            browserView.PlayerPage = page;
+            ViewModel.Address = page.StartUrl;
+        }
+
+        private static string ReadPlayerTemplate()
+        {
+            using (var stream = typeof(SwfPlayerWindow).Assembly.GetManifestResourceStream(PlayerResourceName))
+            {
+                if (stream == null)
+                    throw new InvalidOperationException($"Embedded SWF player page not found: {PlayerResourceName}");
+
+                using (var reader = new StreamReader(stream))
+                    return reader.ReadToEnd();
+            }
+        }
+
         protected override void OnClosing(CancelEventArgs e)
         {
             var browser = ViewModel?.Browser;
-
             if (_doClose || browser == null || browser.IsDisposed)
             {
                 GlobalData.Settings.SwfWindowSizeInfo = WindowSizeInfo.GetSizeInfo(this);
             }
-            else if (browser is ChromiumWebBrowser wpfBrowser && !browser.IsBrowserInitialized)
-            {
-                DeferCloseUntilBrowserInitialized(wpfBrowser);
-                e.Cancel = true;
-            }
             else
             {
-                try
-                {
-                    var cefBrowser = browser.GetBrowser();
-                    if (cefBrowser != null)
-                    {
-                        cefBrowser.CloseBrowser(_forceClosePending || GlobalData.Settings.DisableOnBeforeUnloadDialog);
-                        e.Cancel = true;
-                    }
-                    else
-                    {
-                        _doClose = true;
-                    }
-                }
-                catch (ObjectDisposedException)
-                {
-                    _doClose = true;
-                }
+                e.Cancel = true;
+
+                if (_windowCloseTask == null || _windowCloseTask.IsCompleted)
+                    _windowCloseTask = CloseBrowserAsync(false);
             }
+
             base.OnClosing(e);
         }
 
-        private void DeferCloseUntilBrowserInitialized(ChromiumWebBrowser browser)
+        private async Task CloseBrowserAsync(bool force)
         {
-            if (_browserPendingClose == browser)
-                return;
+            // Leave WPF's Closing event before requesting or completing a close.
+            await Task.Yield();
 
-            _browserPendingClose = browser;
-            browser.IsBrowserInitializedChanged += BrowserInitializedForClose;
-        }
-
-        private void BrowserInitializedForClose(object sender, EventArgs e)
-        {
-            var browser = _browserPendingClose;
-
-            if (browser == null || !browser.IsBrowserInitialized)
-                return;
-
-            browser.IsBrowserInitializedChanged -= BrowserInitializedForClose;
-            _browserPendingClose = null;
-
-            // The initialized notification can reach WPF before CEF has returned
-            // from OnAfterCreated. Wait for that callback before destroying its HWND.
-            InvokeAfterCefCallback(() =>
+            if (await browserView.RequestCloseAsync(force) && !_isClosed)
             {
-                if (!_isClosed)
-                {
-                    if (_forceClosePending)
-                    {
-                        try
-                        {
-                            browser.GetBrowser()?.CloseBrowser(true);
-                        }
-                        catch (ObjectDisposedException)
-                        {
-                            _doClose = true;
-                            Close();
-                        }
-                    }
-                    else
-                    {
-                        Close();
-                    }
-                }
-            });
-        }
-
-        private void InvokeAfterCefCallback(Action action)
-        {
-            // Let CEF's current callback return before running the action on WPF.
-            Cef.UIThreadTaskFactory.StartNew(() => Dispatcher.InvokeAsync(action));
+                _doClose = true;
+                Close();
+            }
         }
 
         protected override void OnClosed(EventArgs e)
         {
             _isClosed = true;
-
-            if (_browserPendingClose != null)
-            {
-                _browserPendingClose.IsBrowserInitializedChanged -= BrowserInitializedForClose;
-                _browserPendingClose = null;
-            }
-
-            ViewModel.Browser.FrameLoadEnd -= OnBrowserFrameLoadEnd;
+            browserView.PlayerPage = null;
+            ViewModel?.MarkClosed();
 
             Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
             base.OnClosed(e);
@@ -195,12 +163,16 @@ namespace CefFlashBrowser.Views
         {
             var browser = ViewModel?.Browser;
 
-            if (!_isClosed && browserView.IsLoaded && browser != null && !browser.IsDisposed
-                && e.Frame.IsMain
-                && string.Equals(e.Url, new Uri(GlobalData.SwfPlayerPath).AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+            if (!_isClosed && browserView.PlayerPage == null && browserView.IsLoaded && browser != null && !browser.IsDisposed
+                && e.Frame.IsMain && IsLocalPlayerPage(e.Url))
             {
                 LoadSwf(FileName);
             }
+        }
+
+        private static bool IsLocalPlayerPage(string address)
+        {
+            return string.Equals(address, LocalPlayerUrl, StringComparison.OrdinalIgnoreCase);
         }
 
         private void CloseBrowserHandler(object msg)
@@ -213,55 +185,26 @@ namespace CefFlashBrowser.Views
             if (_isClosed || _forceClosePending)
                 return;
 
-            var browser = ViewModel?.Browser;
-            if (browser != null && !browser.IsDisposed)
+            _forceClosePending = true;
+
+            try
             {
-                // Keep the native parent alive until asynchronous CEF creation finishes.
-                // Pump WPF so a caller can safely shut CEF down as soon as this returns.
-                _forceClosePending = true;
+                var closing = CloseBrowserAsync(true);
 
-                var frame = new DispatcherFrame();
-
-                EventHandler closed = (s, e) => frame.Continue = false;
-                Closed += closed;
-
-                try
+                if (!closing.IsCompleted)
                 {
-                    if (browser is ChromiumWebBrowser wpfBrowser && !browser.IsBrowserInitialized)
-                    {
-                        DeferCloseUntilBrowserInitialized(wpfBrowser);
-                    }
-                    else
-                    {
-                        InvokeAfterCefCallback(() =>
-                        {
-                            if (!_isClosed)
-                            {
-                                try
-                                {
-                                    browser.GetBrowser()?.CloseBrowser(true);
-                                }
-                                catch (ObjectDisposedException)
-                                {
-                                    _doClose = true;
-                                    Close();
-                                }
-                            }
-                        });
-                    }
+                    var frame = new DispatcherFrame();
 
+                    closing.GetAwaiter().OnCompleted(() => Dispatcher.InvokeAsync(() => frame.Continue = false));
                     Dispatcher.PushFrame(frame);
                 }
-                finally
-                {
-                    Closed -= closed;
-                    _forceClosePending = false;
-                }
-                return;
-            }
 
-            _doClose = true;
-            Close();
+                closing.GetAwaiter().GetResult();
+            }
+            finally
+            {
+                _forceClosePending = false;
+            }
         }
 
         private void DevToolsOpened(object sender, RoutedEventArgs e)
@@ -280,17 +223,20 @@ namespace CefFlashBrowser.Views
             }
         }
 
-        private void BrowserDoClose(object sender, BrowserDoCloseEventArgs e)
+        private async void BrowserDoClose(object sender, BrowserDoCloseEventArgs e)
         {
             if (!_isClosed && !e.IsPopup && !e.IsDevTools)
             {
-                _doClose = true;
+                // Suppress CEF's parent WM_CLOSE until the shared view has drained
+                // its host, accepted work and DevTools with native context intact.
+                e.Handled = true;
+                await browserView.CompleteCloseAsync();
 
-                // Return from CEF's DoClose callback before destroying its parent HWND.
-                InvokeAfterCefCallback(() =>
+                if (!_isClosed)
                 {
-                    if (!_isClosed) Close();
-                });
+                    _doClose = true;
+                    Close();
+                }
             }
         }
 

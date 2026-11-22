@@ -129,6 +129,14 @@ namespace CefFlashBrowser
             DrainPendingArgs();
         }
 
+        protected override void OnExit(ExitEventArgs e)
+        {
+            // The Dispatcher and CEF are still available at this boundary.
+            // Program.OnTerminate later observes the same completed stop task.
+            Program.StopUserScriptsForExit();
+            base.OnExit(e);
+        }
+
         private void ExecuteArguments(string[] args)
         {
             if (args.Length == 0)

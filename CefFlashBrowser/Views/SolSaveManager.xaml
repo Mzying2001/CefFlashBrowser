@@ -50,33 +50,6 @@
                       Height="14"
                       UriSource="{StaticResource TrashIconUri}"/>
 
-        <!--Icon shape via OpacityMask (shared SvgIcon); fill color from
-            ContentPresenter.Tag (DynamicResource), falls back to PrimaryTextBrush.-->
-        <DataTemplate x:Key="SharedSvgIconTemplate"
-                      DataType="{x:Type svgc:SvgIcon}">
-            <Rectangle Width="{Binding Width}"
-                       Height="{Binding Height}">
-                <Rectangle.OpacityMask>
-                    <VisualBrush Stretch="Uniform"
-                                 Visual="{Binding}"/>
-                </Rectangle.OpacityMask>
-                <Rectangle.Style>
-                    <Style TargetType="Rectangle">
-                        <Setter Property="Tag"
-                                Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Tag}"/>
-                        <Setter Property="Fill"
-                                Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag}"/>
-                        <Style.Triggers>
-                            <Trigger Property="Tag" Value="{x:Null}">
-                                <Setter Property="Fill"
-                                        Value="{DynamicResource PrimaryTextBrush}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Rectangle.Style>
-            </Rectangle>
-        </DataTemplate>
-
         <DataTemplate x:Key="WorkspaceTemplate"
                       DataType="{x:Type vm:SaveMgrWorkspaceViewModel}">
             <ListView VirtualizingStackPanel.IsVirtualizing="True"
@@ -110,7 +83,7 @@
 
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem"
-                           BasedOn="{StaticResource ListViewItemBaseStyle}">
+                           BasedOn="{StaticResource AppListViewItemStyle}">
                         <Setter Property="AllowDrop" Value="True"/>
                         <EventSetter Event="MouseDoubleClick"
                                      Handler="ListViewItemMouseDoubleClick"/>
@@ -164,7 +137,7 @@
                                                ToolTip="{Binding FilePath}">
                                         <Hyperlink Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ShowInExplorerCommand}"
                                                    CommandParameter="{Binding}"
-                                                   Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=Foreground}">
+                                                   Foreground="{DynamicResource SecondaryTextBrush}">
                                             <Run Text="{Binding PathInWebsiteFolder}"/>
                                         </Hyperlink>
                                     </TextBlock>
@@ -198,14 +171,14 @@
                                                               ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                         <Button Margin="5,0,0,0"
-                                                ToolTip="{DynamicResource solSaveManager_toolTipEdit}"
+                                                ToolTip="{DynamicResource common_edit}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.EditSolCommand}"
                                                 CommandParameter="{Binding}">
                                             <ContentPresenter Content="{StaticResource EditIcon}"
                                                               ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                         <Button Margin="5,0,0,0"
-                                                ToolTip="{DynamicResource solSaveManager_toolTipDelete}"
+                                                ToolTip="{DynamicResource common_delete}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.DeleteSolCommand}"
                                                 CommandParameter="{Binding}">
                                             <ContentPresenter Tag="{DynamicResource DangerBrush}"
@@ -236,7 +209,7 @@
 
             <Button Margin="0,0,10,0"
                     Command="{Binding CurrentWorkspace.ReloadSolFilesCommand}"
-                    ToolTip="{DynamicResource solSaveManager_toolTipReload}">
+                    ToolTip="{DynamicResource common_refresh}">
                 <svgc:SvgIcon Width="12"
                               Height="12"
                               UriSource="{StaticResource ReloadIconUri}"/>
@@ -248,7 +221,7 @@
                 <hc:TextBox Padding="28,0,8,0"
                             MaxLength="100"
                             Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                            hc:InfoElement.Placeholder="{DynamicResource solSaveManager_filterPlaceholder}">
+                            hc:InfoElement.Placeholder="{DynamicResource common_filterPlaceholder}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
                     </i:Interaction.Behaviors>

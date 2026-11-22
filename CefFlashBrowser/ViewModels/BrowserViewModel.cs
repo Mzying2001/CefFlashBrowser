@@ -1,15 +1,18 @@
-﻿using CefFlashBrowser.Data;
-using CefFlashBrowser.FlashBrowser;
+using CefFlashBrowser.Data;
+using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Utils;
 using CefSharp;
 using SimpleMvvm;
 using SimpleMvvm.Messaging;
 using System;
+using System.Collections.ObjectModel;
 
 namespace CefFlashBrowser.ViewModels
 {
     public class BrowserViewModel : ViewModelBase
     {
+        public string BrowserId { get; } = Guid.NewGuid().ToString("D");
+
         private IWebBrowser _browser;
         public IWebBrowser Browser
         {
@@ -31,6 +34,49 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+
+        private volatile bool _isClosed;
+        public bool IsClosed => _isClosed;
+
+
+        public event EventHandler Closed;
+
+
+        public bool IsClosing { get; internal set; }
+        public bool HasDocument { get; internal set; }
+
+
+        public ObservableCollection<UserScriptMenuCommand> UserScriptMenus { get; }
+
+
+        private UserScriptState _userScriptState;
+        public UserScriptState UserScriptState
+        {
+            get => _userScriptState;
+            internal set => UpdateValue(ref _userScriptState, value);
+        }
+
+        private string _userScriptError;
+        public string UserScriptError
+        {
+            get => _userScriptError;
+            internal set => UpdateValue(ref _userScriptError, value);
+        }
+
+        private bool _userScriptsUnavailable;
+        public bool UserScriptsUnavailable
+        {
+            get => _userScriptsUnavailable;
+            internal set => UpdateValue(ref _userScriptsUnavailable, value);
+        }
+
+        private int _userScriptMatchCount;
+        public int UserScriptMatchCount
+        {
+            get => _userScriptMatchCount;
+            internal set => UpdateValue(ref _userScriptMatchCount, value);
+        }
+
         private string _address;
         public string Address
         {
@@ -45,6 +91,7 @@ namespace CefFlashBrowser.ViewModels
             set => UpdateValue(ref _title, value);
         }
 
+        private int _muteRequestVersion;
         private bool _isMuted;
         public bool IsMuted
         {
@@ -77,6 +124,8 @@ namespace CefFlashBrowser.ViewModels
 
         public BrowserViewModel()
         {
+            UserScriptMenus = new ObservableCollection<UserScriptMenuCommand>();
+
             if (GlobalData.Settings.SaveZoomLevel)
             {
                 ZoomLevel = GlobalData.Settings.BrowserZoomLevel;
@@ -85,9 +134,32 @@ namespace CefFlashBrowser.ViewModels
 
 
 
+        internal void MarkClosed()
+        {
+            if (_isClosed)
+                return;
+
+            _isClosed = true;
+
+            var handlers = Closed;
+
+            if (handlers == null)
+                return;
+
+            foreach (EventHandler handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    handler(this, EventArgs.Empty);
+                }
+                catch { }
+            }
+        }
+
         public bool IsBrowserReady()
         {
-            return Browser != null && !Browser.IsDisposed && Browser.IsBrowserInitialized;
+            return !IsClosing && Browser != null && !Browser.IsDisposed && Browser.IsBrowserInitialized
+                && (HasDocument || Browser.IsLoading || Browser.CanExecuteJavascriptInMainFrame);
         }
 
         public void OnDevToolsOpened(IntPtr hDevTools)
@@ -122,16 +194,41 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        public void ToggleMute()
+        internal void UpdateMuteState(bool isMuted)
+        {
+            IsMuted = isMuted;
+        }
+
+        public async void ToggleMute()
         {
             if (!IsBrowserReady())
                 return;
 
-            if (Browser is ChromiumWebBrowserEx browser)
+            if (Browser is FlashBrowser.ChromiumWebBrowserEx browser)
             {
-                var isMuted = !IsMuted;
-                browser.SetAudioMuted(isMuted);
-                IsMuted = isMuted;
+                var version = ++_muteRequestVersion;
+                var previous = IsMuted;
+
+                IsMuted = !previous;
+
+                try
+                {
+                    await browser.SetAudioMutedAsync(!previous);
+                    var isMuted = await browser.GetAudioMutedAsync();
+
+                    if (version == _muteRequestVersion && !IsClosing && !IsClosed)
+                        IsMuted = isMuted;
+                }
+                catch (ObjectDisposedException)
+                {
+                    if (version == _muteRequestVersion && !IsClosing && !IsClosed)
+                        IsMuted = previous;
+                }
+                catch (InvalidOperationException)
+                {
+                    if (version == _muteRequestVersion && !IsClosing && !IsClosed)
+                        IsMuted = previous;
+                }
             }
         }
 

@@ -22,9 +22,6 @@ CefFlashBrowser 是一个自带 Flash Player 插件的浏览器，可以正常�
 
 > [!NOTE]
 > 软件运行依赖 `.NET Framework 4.6.2`，若运行时提示应用程序无法启动，前往[这里](https://dotnet.microsoft.com/zh-cn/download/dotnet-framework/net462)下载安装即可运行。
-<!---->
-> [!NOTE]
-> 若打开软件时提示 `System.IO.FileNotFoundException` 异常，一般是由于缺少 `Microsoft Visual C++ Redistributable` 导致的，前往[这里](https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist#latest-microsoft-visual-c-redistributable-version)下载安装后即可正常打开。
 
 ## 存档管理
 

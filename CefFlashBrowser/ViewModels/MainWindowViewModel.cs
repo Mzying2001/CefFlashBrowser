@@ -20,6 +20,7 @@ namespace CefFlashBrowser.ViewModels
 
         private bool _disposed;
 
+        public DelegateCommand OpenUserScriptManagerCommand { get; set; }
         public DelegateCommand OpenUrlCommand { get; set; }
         public DelegateCommand OpenSettingsWindowCommand { get; set; }
         public DelegateCommand OpenFavoritesManagerCommand { get; set; }
@@ -200,6 +201,7 @@ namespace CefFlashBrowser.ViewModels
         {
             OpenUrlCommand = new DelegateCommand<string>(OpenUrl);
             OpenSettingsWindowCommand = new DelegateCommand(OpenSettingsWindow);
+            OpenUserScriptManagerCommand = new DelegateCommand(WindowManager.ShowUserScriptManager);
             OpenFavoritesManagerCommand = new DelegateCommand(OpenFavoritesManager);
             LoadSwfCommand = new DelegateCommand(LoadSwf);
             ViewGithubCommand = new DelegateCommand(ViewGithub);

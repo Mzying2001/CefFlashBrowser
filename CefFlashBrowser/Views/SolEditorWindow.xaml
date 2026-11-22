@@ -39,19 +39,61 @@
         <DataTemplate x:Key="DisplayNothingTemplate">
         </DataTemplate>
 
+        <!-- Keep HandyControl's tree layout while matching the script manager's row colors. -->
+        <ControlTemplate x:Key="SolTreeViewItemTemplate" TargetType="TreeViewItem">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition MinHeight="{TemplateBinding MinHeight}"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border x:Name="Bd"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding hc:BorderElement.CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        SnapsToDevicePixels="True">
+                    <DockPanel Margin="{Binding RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource TreeViewItemMarginConverter}}">
+                        <ToggleButton
+                            x:Name="Expander"
+                            Style="{StaticResource ExpandCollapseToggleStyle}"
+                            IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                            ClickMode="Press"/>
+                        <ContentPresenter
+                            x:Name="PART_Header"
+                            ContentSource="Header"
+                            VerticalAlignment="Center"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </DockPanel>
+                </Border>
+                <ItemsPresenter x:Name="ItemsHost" Grid.Row="1"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger SourceName="Bd" Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="#20409EFF"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="#40409EFF"/>
+                    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+                </Trigger>
+                <Trigger Property="IsExpanded" Value="False">
+                    <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+                <Trigger Property="HasItems" Value="False">
+                    <Setter TargetName="Expander" Property="Visibility" Value="Hidden"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.4"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
         <!--Bool Editor-->
         <DataTemplate x:Key="BoolNodeTemplate"
                       DataType="{x:Type vm:SolNodeViewModel}">
             <CheckBox HorizontalAlignment="Right"
                       Style="{StaticResource ToggleButtonSwitch}"
-                      IsChecked="{Binding Value}">
-                <CheckBox.Effect>
-                    <DropShadowEffect Color="White"
-                                      Opacity="0.5"
-                                      Direction="0"
-                                      ShadowDepth="0"/>
-                </CheckBox.Effect>
-            </CheckBox>
+                      IsChecked="{Binding Value}"/>
         </DataTemplate>
 
         <!--Int Editor-->
@@ -116,7 +158,7 @@
                 </Grid.Style>
                 <Button Command="{Binding DataContext.AddChildCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                         CommandParameter="{Binding}"
-                        ToolTip="{DynamicResource solEditor_addItem}">
+                        ToolTip="{DynamicResource common_addItem}">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="{StaticResource AddIconUri}"/>
@@ -227,19 +269,19 @@
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="{DynamicResource solEditor_file}">
-                <MenuItem Header="{DynamicResource solEditor_save}"
+            <MenuItem Header="{DynamicResource common_file}">
+                <MenuItem Header="{DynamicResource common_save}"
                           Command="{Binding SaveFileCommand}"
                           InputGestureText="Ctrl+S"/>
                 <MenuItem Header="{DynamicResource solEditor_saveAs}"
                           Command="{Binding SaveAsFileCommand}"
                           InputGestureText="Ctrl+Shift+S"/>
                 <Separator/>
-                <MenuItem Header="{DynamicResource solEditor_close}"
+                <MenuItem Header="{DynamicResource common_close}"
                           Command="{Binding ElementName=windowBehavior, Path=CloseWindowCommand}"
                           InputGestureText="Ctrl+W"/>
             </MenuItem>
-            <MenuItem Header="{DynamicResource solEditor_edit}">
+            <MenuItem Header="{DynamicResource common_editMenu}">
                 <MenuItem.Style>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -251,7 +293,7 @@
                         </Style.Triggers>
                     </Style>
                 </MenuItem.Style>
-                <MenuItem Header="{DynamicResource solEditor_addItem}"
+                <MenuItem Header="{DynamicResource common_addItem}"
                           Command="{Binding AddChildCommand}"
                           CommandParameter="{Binding SelectedNode}"
                           IsEnabled="{Binding SelectedNode.CanAddChild}"/>
@@ -294,7 +336,7 @@
                                 <Setter Property="Text" Value="{DynamicResource solEditor_statusReady}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:SolEditorStatus.Error}">
-                                <Setter Property="Text" Value="{DynamicResource solEditor_statusError}"/>
+                                <Setter Property="Text" Value="{DynamicResource common_error}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:SolEditorStatus.Modified}">
                                 <Setter Property="Text" Value="{DynamicResource solEditor_statusModified}"/>
@@ -337,23 +379,8 @@
                         <StackPanel Orientation="Horizontal"
                                     VerticalAlignment="Center">
                             <TextBlock Text="{Binding DisplayName}"/>
-                            <TextBlock>
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock"
-                                           BasedOn="{StaticResource {x:Type TextBlock}}">
-                                        <Setter Property="Text" Value="{Binding TypeString, Mode=OneWay, StringFormat=': {0}'}"/>
-                                        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding TypeString}" Value="">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=IsSelected}" Value="True">
-                                                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType=TreeViewItem}, Path=Foreground}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                            <TextBlock Foreground="{DynamicResource SecondaryTextBrush}"
+                                       Text="{Binding TypeString, Mode=OneWay, StringFormat=': {0}'}"/>
                         </StackPanel>
                     </DockPanel>
                 </HierarchicalDataTemplate>
@@ -362,6 +389,7 @@
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}"
                        BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                    <Setter Property="Template" Value="{StaticResource SolTreeViewItemTemplate}"/>
                     <Setter Property="IsExpanded" Value="True"/>
                     <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
                     <Setter Property="Tag"
@@ -376,7 +404,7 @@
                                                 Value="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                     </Style>
                                 </ContextMenu.Resources>
-                                <MenuItem Header="{DynamicResource solEditor_addItem}"
+                                <MenuItem Header="{DynamicResource common_addItem}"
                                           IsEnabled="{Binding CanAddChild}"
                                           Command="{Binding Tag.AddChildCommand, RelativeSource={RelativeSource Mode=Self}}"
                                           CommandParameter="{Binding}"/>

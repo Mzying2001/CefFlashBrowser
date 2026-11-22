@@ -1,58 +1,109 @@
 ﻿using CefSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Threading;
 
 namespace CefFlashBrowser.FlashBrowser
 {
     public class ChromiumFlashBrowser : ChromiumWebBrowserEx
     {
-        public ICollection<string> BlockedSwfs { get; }
+        private readonly ObservableCollection<SwfResourceRecord> _pageSwfs = new ObservableCollection<SwfResourceRecord>();
+        private readonly HashSet<string> _pageSwfUrls = new HashSet<string>(StringComparer.Ordinal);
+        private readonly ConcurrentDictionary<long, long> _swfFrameVersions = new ConcurrentDictionary<long, long>();
+        private long _swfPageVersion;
+        private long _nextSwfFrameVersion;
 
-        public ChromiumFlashBrowser()
+        public ReadOnlyObservableCollection<SwfResourceRecord> PageSwfs { get; }
+
+        public ChromiumFlashBrowser() : this(false)
         {
-            BlockedSwfs = new ObservableCollection<string>();
+        }
+
+        public ChromiumFlashBrowser(bool deferNativeCreation) : base(deferNativeCreation)
+        {
+            PageSwfs = new ReadOnlyObservableCollection<SwfResourceRecord>(_pageSwfs);
         }
 
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
         {
-            base.OnFrameLoadStart(e);
-
-            if (e.Frame.IsMain)
+            if (!IsDisposed)
             {
-                BlockedSwfs.Clear();
+                if (e.Frame.IsMain)
+                {
+                    Interlocked.Increment(ref _swfPageVersion);
+                    _swfFrameVersions.Clear();
+                    _pageSwfUrls.Clear();
+                    _pageSwfs.Clear();
+                }
+
+                _swfFrameVersions[e.Frame.Identifier] = ++_nextSwfFrameVersion;
             }
+
+            base.OnFrameLoadStart(e);
         }
 
-        protected override void OnConsoleMessage(ConsoleMessageEventArgs e)
+        protected override Action<string, string> CreateResourceRequestObserver(
+            IBrowser browser, IFrame frame, IRequest request, string requestInitiator)
         {
-            base.OnConsoleMessage(e);
+            var pageVersion = Interlocked.Read(ref _swfPageVersion);
 
-            if (e.Level != LogSeverity.Info)
+            if (IsDisposed || browser == null || browser.IsPopup || frame?.IsValid != true
+                || request.ResourceType == ResourceType.MainFrame
+                || !Uri.TryCreate(request.Url, UriKind.Absolute, out var url))
+                return null;
+
+            if (url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps
+                && (!url.IsFile || !url.AbsolutePath.EndsWith(".swf", StringComparison.OrdinalIgnoreCase)))
+                return null;
+
+            var frameId = frame.Identifier;
+            var frameUrl = frame.Url;
+            _swfFrameVersions.TryGetValue(frameId, out var frameVersion);
+            var requestedUrl = request.Url;
+            var referrerUrl = request.ReferrerUrl;
+            var referrerPolicy = request.ReferrerPolicy;
+            var hasOpaqueInitiator = requestInitiator == "null";
+
+            return (address, mimeType) =>
             {
-                return;
-            }
+                if (!TryGetSwfUrl(pageVersion, address, mimeType, out var swfUrl))
+                    return;
 
-            var msg = e.Message;
-            if (msg == null || !msg.StartsWith("Cross-origin plugin content from", StringComparison.Ordinal))
-            {
-                return;
-            }
+                var swf = new SwfResourceRecord(address, swfUrl, requestedUrl, frameId,
+                    frameUrl, frameVersion, referrerUrl, referrerPolicy, hasOpaqueInitiator);
+                Dispatcher.InvokeAsync(() =>
+                {
+                    if (!IsDisposed && pageVersion == Interlocked.Read(ref _swfPageVersion) && _pageSwfUrls.Add(address))
+                        _pageSwfs.Add(swf);
+                });
+            };
+        }
 
-            var parts = msg.Split(' ');
-            if (parts.Length <= 4)
-            {
-                return;
-            }
+        public bool IsSwfSourceCurrent(SwfResourceRecord swf)
+        {
+            return !IsDisposed && _pageSwfs.Contains(swf)
+                && _swfFrameVersions.TryGetValue(swf.FrameId, out var version) && version == swf.FrameVersion;
+        }
 
-            var url = parts[4];
-            if (string.IsNullOrWhiteSpace(url) || BlockedSwfs.Contains(url))
-            {
-                return;
-            }
+        private bool TryGetSwfUrl(long pageVersion, string address, string mimeType, out Uri url)
+        {
+            url = null;
+            if (pageVersion != Interlocked.Read(ref _swfPageVersion) || IsDisposed
+                || !Uri.TryCreate(address, UriKind.Absolute, out url))
+                return false;
 
-            BlockedSwfs.Add(url);
+            if (url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps && !url.IsFile)
+                return false;
+
+            if (!url.AbsolutePath.EndsWith(".swf", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(mimeType, "application/x-shockwave-flash", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(mimeType, "application/vnd.adobe.flash.movie", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return !Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished;
         }
 
         protected override void OnIsBrowserInitializedChanged(EventArgs e)

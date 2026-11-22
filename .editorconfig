@@ -1,0 +1,40 @@
+root = true
+
+# C# formatting rules.
+[*.cs]
+
+# Use four spaces per indentation level and Windows line endings.
+indent_style = space
+indent_size = 4
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Keep using directives outside namespaces, without prioritizing System.
+csharp_using_directive_placement = outside_namespace
+dotnet_sort_system_directives_first = false
+dotnet_separate_import_directive_groups = false
+
+# Keep the existing block-scoped namespace style.
+csharp_style_namespace_declarations = block_scoped
+
+# Indent block contents and switch cases, keeping braces aligned.
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+csharp_indent_switch_labels = true
+csharp_indent_case_contents = true
+
+# Use Allman braces and place else, catch, and finally on new lines.
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# Preserve existing single-line blocks and statements.
+csharp_preserve_single_line_blocks = true
+csharp_preserve_single_line_statements = true
+
+# XML, C# project, and manifest formatting rules.
+[*.{xml,csproj,manifest}]
+indent_style = space
+indent_size = 2

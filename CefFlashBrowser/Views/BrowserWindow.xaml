@@ -1,6 +1,7 @@
-﻿<Window x:Class="CefFlashBrowser.Views.BrowserWindow"
+<Window x:Class="CefFlashBrowser.Views.BrowserWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:services="clr-namespace:CefFlashBrowser.Services"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
@@ -184,8 +185,10 @@
                                 </c:BrowserIcon>
                             </DataTemplate>
                         </Style.Resources>
-                        <!--<Setter Property="Header"
-                                Value="{Binding Name}"/>-->
+                        <Setter Property="MinWidth" Value="250"/>
+                        <Setter Property="MaxWidth" Value="300"/>
+                        <Setter Property="Template"
+                                Value="{StaticResource MenuItemWithoutShortcutTemplate}"/>
                         <Setter Property="Icon"
                                 Value="{Binding}"/>
                         <Setter Property="Command"
@@ -196,10 +199,10 @@
                 </MenuItem.ItemContainerStyle>
                 <MenuItem.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
-                        <TextBlock MaxWidth="200"
-                                   VerticalAlignment="Center"
-                                   TextTrimming="CharacterEllipsis"
-                                   Text="{Binding Name}"/>
+                        <TextBlock VerticalAlignment="Center"
+                                   HorizontalAlignment="Left"
+                                   Text="{Binding Name}"
+                                   TextTrimming="CharacterEllipsis"/>
                     </DataTemplate>
                 </MenuItem.ItemTemplate>
             </MenuItem>
@@ -211,6 +214,18 @@
 
             <Separator/>
 
+            <MenuItem Header="{DynamicResource downloads_menu}"
+                      Command="{x:Static services:WindowManager.OpenDownloadsCommand}"
+                      InputGestureText="Ctrl+J"/>
+
+            <MenuItem Header="{DynamicResource common_manageUserScripts}"
+                      Command="{Binding OpenUserScriptManagerCommand}"/>
+
+            <MenuItem Header="{DynamicResource userscript_managePermissions}"
+                      Click="OpenUserScriptPermissions"/>
+
+            <Separator/>
+
             <MenuItem Header="{DynamicResource browser_createShortcut}"
                       Command="{Binding CreateShortcutCommand}"
                       CommandParameter="{Binding CurrentBrowser}"
@@ -219,7 +234,7 @@
             <MenuItem Header="{DynamicResource browser_openInDefaultBrowser}"
                       Command="{Binding OpenInDefaultBrowserCommand}"
                       CommandParameter="{Binding CurrentBrowser.Address}"
-                      InputGestureText="Ctrl+O"/>
+                      InputGestureText="Ctrl+Shift+O"/>
 
             <Separator/>
 
@@ -234,58 +249,129 @@
                       InputGestureText="Ctrl+U"/>
         </ContextMenu>
 
-        <!--Blocked SWFs menu-->
-        <ContextMenu x:Key="blockedSwfsMenu"
+        <!--Script commands menu-->
+        <ContextMenu x:Key="scriptCommandsMenu"
+                     MinWidth="250"
+                     MaxWidth="300"
                      VerticalOffset="-8"
-                     HorizontalOffset="8">
+                     HorizontalOffset="8"
+                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+            <ContextMenu.Resources>
+                <CollectionViewSource x:Key="scriptCommandGroups" Source="{Binding CurrentBrowser.UserScriptMenus}">
+                    <CollectionViewSource.GroupDescriptions>
+                        <PropertyGroupDescription PropertyName="ScriptKey"/>
+                    </CollectionViewSource.GroupDescriptions>
+                </CollectionViewSource>
+                <sys:Double x:Key="scriptCommandRowMinHeight">32</sys:Double>
+                <Thickness x:Key="scriptCommandTextMargin">36,3,10,3</Thickness>
+            </ContextMenu.Resources>
+            <ContextMenu.ItemsSource>
+                <Binding Source="{StaticResource scriptCommandGroups}"/>
+            </ContextMenu.ItemsSource>
+            <ContextMenu.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="GroupItem"
+                               BasedOn="{StaticResource {x:Type GroupItem}}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="GroupItem">
+                                        <StackPanel>
+                                            <ContentPresenter x:Name="PART_Header"/>
+                                            <ItemsPresenter/>
+                                        </StackPanel>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <Grid MinHeight="{StaticResource scriptCommandRowMinHeight}">
+                                <c:BrowserIcon
+                                    Width="16"
+                                    Height="16"
+                                    Margin="10,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FaviconUrl="{Binding Items[0].ScriptIconUrl}"
+                                    DefaultIcon="{Binding Items[0].ScriptIconInitial}"
+                                    Style="{StaticResource {x:Static c:BrowserIcon.TextFallbackStyleKey}}"/>
+                                <TextBlock
+                                    Margin="{StaticResource scriptCommandTextMargin}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    TextTrimming="CharacterEllipsis"
+                                    Foreground="{DynamicResource PrimaryTextBrush}"
+                                    Text="{Binding Items[0].ScriptName}"
+                                    ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </ContextMenu.GroupStyle>
             <ContextMenu.ItemContainerStyle>
-                <Style TargetType="MenuItem">
+                <Style TargetType="MenuItem"
+                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Setter Property="MinHeight" Value="{StaticResource scriptCommandRowMinHeight}"/>
+                    <Setter Property="Header" Value="{Binding Name}"/>
+                    <Setter Property="ToolTip" Value="{Binding Description}"/>
+                    <Setter Property="Command" Value="{Binding InvokeCommand}"/>
+                    <Setter Property="StaysOpenOnClick" Value="{Binding StaysOpenOnClick}"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="MenuItem">
-                                <ContentPresenter Content="{TemplateBinding Header}"/>
+                                <Border x:Name="Bd"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="{TemplateBinding hc:BorderElement.CornerRadius}">
+                                    <TextBlock Margin="{StaticResource scriptCommandTextMargin}"
+                                               VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
+                                               Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                </Border>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
                 </Style>
             </ContextMenu.ItemContainerStyle>
-            <ContextMenu.ItemsSource>
-                <x:Array Type="{x:Type sys:Object}">
-                    <TextBlock Margin="35,10"
-                               MaxWidth="250"
-                               TextWrapping="Wrap"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="{DynamicResource browser_tipsBlockedSwfs}"/>
-                    <ItemsControl ItemsSource="{Binding Source={x:Reference Name=window}, Path=DataContext.CurrentBrowser.Browser.BlockedSwfs}">
-                        <ItemsControl.Resources>
-                            <Style TargetType="MenuItem"
-                                   BasedOn="{StaticResource {x:Type MenuItem}}">
-                                <Setter Property="Tag"
-                                        Value="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
-                            </Style>
-                        </ItemsControl.Resources>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type sys:String}">
-                                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.OpenInSwfPlayerCommand}"
-                                          CommandParameter="{Binding}">
-                                    <MenuItem.Header>
-                                        <TextBlock MaxWidth="250"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Text="{Binding Converter={StaticResource UrlGetFileNameConverter}}"
-                                                   ToolTip="{Binding}"/>
-                                    </MenuItem.Header>
-                                </MenuItem>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </x:Array>
-            </ContextMenu.ItemsSource>
+        </ContextMenu>
+
+        <!--Page SWFs menu-->
+        <ContextMenu x:Key="pageSwfsMenu"
+                     VerticalOffset="-8"
+                     HorizontalOffset="8"
+                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                     ItemsSource="{Binding CurrentBrowser.Browser.PageSwfs}">
+            <ContextMenu.ItemContainerStyle>
+                <Style TargetType="MenuItem"
+                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Setter Property="AutomationProperties.Name"
+                            Value="{Binding FileName}"/>
+                    <Setter Property="ToolTip"
+                            Value="{Binding Url}"/>
+                    <Setter Property="Command"
+                            Value="{Binding DataContext.OpenInSwfPlayerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <Setter Property="CommandParameter"
+                            Value="{Binding}"/>
+                </Style>
+            </ContextMenu.ItemContainerStyle>
+            <ContextMenu.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock MaxWidth="250"
+                               TextTrimming="CharacterEllipsis"
+                               Text="{Binding FileName}"/>
+                </DataTemplate>
+            </ContextMenu.ItemTemplate>
         </ContextMenu>
     </Window.Resources>
 
 
     <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+J" Command="{x:Static services:WindowManager.OpenDownloadsCommand}"/>
         <!--<KeyBinding Key="Esc"
                     Command="{Binding ElementName=browser, Path=StopCommand}"/>-->
         <KeyBinding Key="F5"
@@ -325,7 +411,7 @@
                     Command="{Binding SelectNextBrowserCommand}"/>
         <KeyBinding Gesture="Ctrl+PageUp"
                     Command="{Binding SelectPreviousBrowserCommand}"/>
-        <KeyBinding Gesture="Ctrl+O"
+        <KeyBinding Gesture="Ctrl+Shift+O"
                     Command="{Binding OpenInDefaultBrowserCommand}"
                     CommandParameter="{Binding CurrentBrowser.Address}"/>
         <KeyBinding Gesture="Ctrl+P"
@@ -454,27 +540,50 @@
                                   UriSource="{StaticResource NewTabIconUri}"/>
                 </Button>
 
-                <!--blocked swfs button-->
-                <Button Margin="0,0,10,0"
-                        ToolTip="{DynamicResource browser_toolTipBlockedSwfs}">
+                <!--script commands button-->
+                <Button x:Name="toolbarScriptCommandsButton"
+                        Margin="0,0,10,0"
+                        AutomationProperties.Name="{DynamicResource userscript_commands}"
+                        ToolTip="{DynamicResource userscript_commands}">
                     <i:Interaction.Behaviors>
-                        <behaviors:ContextMenuBehavior Menu="{DynamicResource blockedSwfsMenu}"/>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource scriptCommandsMenu}"/>
                     </i:Interaction.Behaviors>
                     <Button.Style>
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.BlockedSwfs.Count}"
-                                             Value="0">
-                                    <Setter Property="Visibility"
-                                            Value="Collapsed"/>
+                                <DataTrigger Binding="{Binding CurrentBrowser.UserScriptMenus.Count, FallbackValue=0}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
-                    <svgc:SvgIcon Width="14"
-                                  Height="14"
-                                  UriSource="{StaticResource WarningIconUri}"/>
+                    <svgc:SvgIcon Width="13"
+                                  Height="13"
+                                  UriSource="{StaticResource PluginIconUri}"/>
+                </Button>
+
+                <!--page swfs button-->
+                <Button x:Name="toolbarPageSwfsButton"
+                        Margin="0,0,10,0"
+                        AutomationProperties.Name="PageSwfs"
+                        ToolTip="{DynamicResource browser_toolTipPageSwfs}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource pageSwfsMenu}"/>
+                    </i:Interaction.Behaviors>
+                    <Button.Style>
+                        <Style TargetType="Button"
+                               BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.PageSwfs.Count, FallbackValue=0}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource SwfIconUri}"/>
                 </Button>
 
                 <!--find button-->
@@ -488,10 +597,8 @@
                         <Style TargetType="ToggleButton"
                                BasedOn="{StaticResource {x:Type ToggleButton}}">
                             <Style.Triggers>
-                                <Trigger Property="IsChecked"
-                                         Value="False">
-                                    <Setter Property="Visibility"
-                                            Value="Collapsed"/>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -502,7 +609,8 @@
                 </ToggleButton>
 
                 <!--menu button-->
-                <Button ToolTip="{DynamicResource browser_toolTipMore}">
+                <Button x:Name="toolbarActionsButton"
+                        ToolTip="{DynamicResource browser_toolTipMore}">
                     <i:Interaction.Behaviors>
                         <behaviors:ContextMenuBehavior Menu="{DynamicResource browserActionsMenu}"/>
                     </i:Interaction.Behaviors>
@@ -678,9 +786,9 @@
                                BasedOn="{StaticResource {x:Static c:BrowserTab.ItemContainerStyleKey}}">
                             <Setter Property="ToolTip">
                                 <Setter.Value>
-                                    <StackPanel>
+                                    <StackPanel MaxWidth="500">
                                         <TextBlock Text="{Binding Title}"
-                                                   TextTrimming="CharacterEllipsis"/>
+                                                   TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Address}"
                                                    TextTrimming="CharacterEllipsis"
                                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
@@ -836,7 +944,7 @@
                                     x:Name="closeTabButton"
                                     DockPanel.Dock="Right"
                                     Padding="0"
-                                    Margin="6,0,0,0"
+                                    Margin="4,0,0,0"
                                     Width="20"
                                     Height="20"
                                     BorderThickness="0"
@@ -941,7 +1049,8 @@
             <ItemsControl x:Name="browsersControl" ItemsSource="{Binding Browsers}">
                 <ItemsControl.Resources>
                     <Style TargetType="{x:Type local:BrowserView}">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <!-- Hidden tabs still participate in native hosting and preparation. -->
+                        <Setter Property="Visibility" Value="Hidden"/>
                         <Style.Triggers>
                             <DataTrigger Value="True">
                                 <DataTrigger.Binding>

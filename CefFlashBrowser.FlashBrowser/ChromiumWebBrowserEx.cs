@@ -4,6 +4,8 @@ using CefSharp;
 using SimpleMvvm.Command;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -62,13 +64,18 @@ namespace CefFlashBrowser.FlashBrowser
         }
 
 
-        public ChromiumWebBrowserEx()
+        public ChromiumWebBrowserEx() : this(false)
+        {
+        }
+
+        public ChromiumWebBrowserEx(bool deferNativeCreation) : base(deferNativeCreation)
         {
             // Apply decorator handlers
             FocusHandler = null;
             KeyboardHandler = null;
             DisplayHandler = null;
             RenderProcessMessageHandler = null;
+            ResourceRequestHandlerFactory = null;
 
             LoadUrlCommand = new DelegateCommand<string>(Load);
             CloseBrowserCommand = new DelegateCommand<bool>(CloseBrowser);
@@ -79,56 +86,54 @@ namespace CefFlashBrowser.FlashBrowser
 
         public override IFocusHandler FocusHandler
         {
-            get
-            {
-                var handler = base.FocusHandler;
-                return handler is WpfFocusHandler wpfFocusHandler ? wpfFocusHandler.InnerHandler : handler;
-            }
-            set
-            {
-                base.FocusHandler = new WpfFocusHandler(value);
-            }
+            get => (base.FocusHandler as WpfFocusHandler)?.InnerHandler;
+            set => base.FocusHandler = new WpfFocusHandler(value);
         }
 
         public override IKeyboardHandler KeyboardHandler
         {
-            get
-            {
-                var handler = base.KeyboardHandler;
-                return handler is WpfKeyboardHandler wpfKeyboardHandler ? wpfKeyboardHandler.InnerHandler : handler;
-            }
-            set
-            {
-                base.KeyboardHandler = new WpfKeyboardHandler(value);
-            }
+            get => (base.KeyboardHandler as WpfKeyboardHandler)?.InnerHandler;
+            set => base.KeyboardHandler = new WpfKeyboardHandler(value);
         }
 
         public override IDisplayHandler DisplayHandler
         {
-            get
-            {
-                var handler = base.DisplayHandler;
-                return handler is MyDisplayHandler myDisplayHandler ? myDisplayHandler.InnerHandler : handler;
-            }
-            set
-            {
-                base.DisplayHandler = new MyDisplayHandler(value);
-            }
+            get => (base.DisplayHandler as DecoratedDisplayHandler)?.InnerHandler;
+            set => base.DisplayHandler = new DecoratedDisplayHandler(value);
         }
 
         public override IRenderProcessMessageHandler RenderProcessMessageHandler
         {
-            get
-            {
-                var handler = base.RenderProcessMessageHandler;
-                return handler is MyRenderProcessMessageHandler myHandler ? myHandler.InnerHandler : handler;
-            }
-            set
-            {
-                base.RenderProcessMessageHandler = new MyRenderProcessMessageHandler(value);
-            }
+            get => (base.RenderProcessMessageHandler as DecoratedRenderProcessMessageHandler)?.InnerHandler;
+            set => base.RenderProcessMessageHandler = new DecoratedRenderProcessMessageHandler(value);
         }
 
+        public override IRequestHandler RequestHandler
+        {
+            get => (base.RequestHandler as DecoratedRequestHandler)?.InnerHandler;
+            set => base.RequestHandler = value == null ? null : new DecoratedRequestHandler(this, value);
+        }
+
+        public override IResourceRequestHandlerFactory ResourceRequestHandlerFactory
+        {
+            get => (base.ResourceRequestHandlerFactory as DecoratedResourceRequestHandlerFactory)?.InnerFactory;
+            set => base.ResourceRequestHandlerFactory = new DecoratedResourceRequestHandlerFactory(this, value);
+        }
+
+
+        // Capture any state needed by the observer before the factory can dispose the request.
+        // The observer receives the URL and response MIME type, or null before the request is sent.
+        protected virtual Action<string, string> CreateResourceRequestObserver(
+            IBrowser browser, IFrame frame, IRequest request)
+        {
+            return null;
+        }
+
+        protected virtual Action<string, string> CreateResourceRequestObserver(
+            IBrowser browser, IFrame frame, IRequest request, string requestInitiator)
+        {
+            return CreateResourceRequestObserver(browser, frame, request);
+        }
 
         public void CloseBrowser(bool forceClose)
         {
@@ -145,23 +150,50 @@ namespace CefFlashBrowser.FlashBrowser
             GetBrowser().CloseDevTools();
         }
 
-        public void SetAudioMuted(bool mute)
+        public Task<bool> GetAudioMutedAsync()
         {
-            if (IsDisposed || !IsBrowserInitialized)
-                return;
-
-            Cef.UIThreadTaskFactory.StartNew(() =>
+            return Cef.UIThreadTaskFactory.StartNew(() =>
             {
+                if (IsDisposed || !IsBrowserInitialized)
+                    return false;
+
                 try
                 {
-                    if (IsDisposed)
-                        return;
+                    var native = GetBrowser();
 
+                    if (native == null || native.IsDisposed)
+                        return false;
+
+                    var host = native.GetHost();
+
+                    if (host == null || host.IsDisposed)
+                        return false;
+
+                    return host.IsAudioMuted;
+                }
+                catch (ObjectDisposedException)
+                {
+                    return false;
+                }
+            });
+        }
+
+        public Task SetAudioMutedAsync(bool mute)
+        {
+            return Cef.UIThreadTaskFactory.StartNew(() =>
+            {
+                if (IsDisposed || !IsBrowserInitialized)
+                    return;
+
+                try
+                {
                     var browser = GetBrowser();
+
                     if (browser == null || browser.IsDisposed)
                         return;
 
                     var host = browser.GetHost();
+
                     if (host != null && !host.IsDisposed)
                         host.SetAudioMuted(mute);
                 }
@@ -285,11 +317,154 @@ namespace CefFlashBrowser.FlashBrowser
 
 
         #region Inner Classes
-        class MyDisplayHandler : IDisplayHandler
+        private sealed class DecoratedRequestHandler : IRequestHandler
+        {
+            private readonly ChromiumWebBrowserEx _owner;
+            public IRequestHandler InnerHandler { get; }
+
+            public DecoratedRequestHandler(ChromiumWebBrowserEx owner, IRequestHandler innerHandler)
+            {
+                _owner = owner;
+                InnerHandler = innerHandler;
+            }
+
+            public IResourceRequestHandler GetResourceRequestHandler(IWebBrowser control, IBrowser browser, IFrame frame,
+                IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
+            {
+                var observe = _owner.CreateResourceRequestObserver(browser, frame, request, requestInitiator);
+                var handler = InnerHandler.GetResourceRequestHandler(control, browser, frame, request, isNavigation,
+                    isDownload, requestInitiator, ref disableDefaultHandling);
+
+                // A null return lets CefSharp look up the registered factory next.
+                return handler != null && observe != null ? new ObservedResourceRequestHandler(handler, observe) : handler;
+            }
+
+            public bool OnBeforeBrowse(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, bool userGesture, bool isRedirect)
+                => InnerHandler.OnBeforeBrowse(control, browser, frame, request, userGesture, isRedirect);
+
+            public bool OnOpenUrlFromTab(IWebBrowser control, IBrowser browser, IFrame frame,
+                string targetUrl, WindowOpenDisposition targetDisposition, bool userGesture)
+                => InnerHandler.OnOpenUrlFromTab(control, browser, frame, targetUrl, targetDisposition, userGesture);
+
+            public bool GetAuthCredentials(IWebBrowser control, IBrowser browser, string originUrl, bool isProxy,
+                string host, int port, string realm, string scheme, IAuthCallback callback)
+                => InnerHandler.GetAuthCredentials(control, browser, originUrl, isProxy, host, port, realm, scheme, callback);
+
+            public bool OnQuotaRequest(IWebBrowser control, IBrowser browser, string originUrl, long newSize, IRequestCallback callback)
+                => InnerHandler.OnQuotaRequest(control, browser, originUrl, newSize, callback);
+
+            public bool OnCertificateError(IWebBrowser control, IBrowser browser, CefErrorCode errorCode, string requestUrl,
+                ISslInfo sslInfo, IRequestCallback callback)
+                => InnerHandler.OnCertificateError(control, browser, errorCode, requestUrl, sslInfo, callback);
+
+            public bool OnSelectClientCertificate(IWebBrowser control, IBrowser browser, bool isProxy, string host, int port,
+                X509Certificate2Collection certificates, ISelectClientCertificateCallback callback)
+                => InnerHandler.OnSelectClientCertificate(control, browser, isProxy, host, port, certificates, callback);
+
+            public void OnPluginCrashed(IWebBrowser control, IBrowser browser, string pluginPath)
+                => InnerHandler.OnPluginCrashed(control, browser, pluginPath);
+
+            public void OnRenderViewReady(IWebBrowser control, IBrowser browser)
+                => InnerHandler.OnRenderViewReady(control, browser);
+
+            public void OnRenderProcessTerminated(IWebBrowser control, IBrowser browser, CefTerminationStatus status)
+                => InnerHandler.OnRenderProcessTerminated(control, browser, status);
+
+            public void OnDocumentAvailableInMainFrame(IWebBrowser control, IBrowser browser)
+                => InnerHandler.OnDocumentAvailableInMainFrame(control, browser);
+        }
+
+        private sealed class DecoratedResourceRequestHandlerFactory : IResourceRequestHandlerFactory
+        {
+            private readonly ChromiumWebBrowserEx _owner;
+            public IResourceRequestHandlerFactory InnerFactory { get; }
+
+            // Derived controls can decorate requests that have no registered handler.
+            public bool HasHandlers => true;
+
+            public DecoratedResourceRequestHandlerFactory(ChromiumWebBrowserEx owner, IResourceRequestHandlerFactory innerFactory)
+            {
+                _owner = owner;
+                InnerFactory = innerFactory;
+            }
+
+            public IResourceRequestHandler GetResourceRequestHandler(IWebBrowser control, IBrowser browser, IFrame frame,
+                IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
+            {
+                // CefSharp's factory disposes the request before returning.
+                var observe = _owner.CreateResourceRequestObserver(browser, frame, request, requestInitiator);
+                IResourceRequestHandler handler = null;
+
+                if (InnerFactory?.HasHandlers == true)
+                {
+                    handler = InnerFactory.GetResourceRequestHandler(control, browser, frame, request, isNavigation,
+                        isDownload, requestInitiator, ref disableDefaultHandling);
+                }
+
+                if (handler == null && disableDefaultHandling)
+                    return null;
+
+                return observe != null ? new ObservedResourceRequestHandler(handler, observe) : handler;
+            }
+        }
+
+        private sealed class ObservedResourceRequestHandler : IResourceRequestHandler
+        {
+            private readonly IResourceRequestHandler _innerHandler;
+            private readonly Action<string, string> _observe;
+
+            public ObservedResourceRequestHandler(IResourceRequestHandler innerHandler, Action<string, string> observe)
+            {
+                _innerHandler = innerHandler;
+                _observe = observe;
+            }
+
+            public CefReturnValue OnBeforeResourceLoad(IWebBrowser control, IBrowser browser, IFrame frame,
+                IRequest request, IRequestCallback callback)
+            {
+                var result = _innerHandler?.OnBeforeResourceLoad(control, browser, frame, request, callback) ?? CefReturnValue.Continue;
+                if (result == CefReturnValue.Continue)
+                    _observe(request.Url, null);
+
+                return result;
+            }
+
+            public bool OnResourceResponse(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, IResponse response)
+            {
+                var handled = _innerHandler?.OnResourceResponse(control, browser, frame, request, response) ?? false;
+                if (!handled)
+                    _observe(request.Url, response.MimeType);
+
+                return handled;
+            }
+
+            public ICookieAccessFilter GetCookieAccessFilter(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request)
+                => _innerHandler?.GetCookieAccessFilter(control, browser, frame, request);
+
+            public IResourceHandler GetResourceHandler(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request)
+                => _innerHandler?.GetResourceHandler(control, browser, frame, request);
+
+            public void OnResourceRedirect(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, IResponse response, ref string newUrl)
+                => _innerHandler?.OnResourceRedirect(control, browser, frame, request, response, ref newUrl);
+
+            public IResponseFilter GetResourceResponseFilter(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, IResponse response)
+                => _innerHandler?.GetResourceResponseFilter(control, browser, frame, request, response);
+
+            public void OnResourceLoadComplete(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, IResponse response,
+                UrlRequestStatus status, long receivedContentLength)
+                => _innerHandler?.OnResourceLoadComplete(control, browser, frame, request, response, status, receivedContentLength);
+
+            public bool OnProtocolExecution(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request)
+                => _innerHandler?.OnProtocolExecution(control, browser, frame, request) ?? false;
+
+            public void Dispose() => _innerHandler?.Dispose();
+        }
+
+        class DecoratedDisplayHandler : IDisplayHandler
         {
             public IDisplayHandler InnerHandler { get; }
 
-            public MyDisplayHandler(IDisplayHandler innerHandler)
+            public DecoratedDisplayHandler(IDisplayHandler innerHandler)
             {
                 InnerHandler = innerHandler;
             }
@@ -356,11 +531,11 @@ namespace CefFlashBrowser.FlashBrowser
             }
         }
 
-        class MyRenderProcessMessageHandler : IRenderProcessMessageHandler
+        class DecoratedRenderProcessMessageHandler : IRenderProcessMessageHandler
         {
             public IRenderProcessMessageHandler InnerHandler { get; }
 
-            public MyRenderProcessMessageHandler(IRenderProcessMessageHandler innerHandler)
+            public DecoratedRenderProcessMessageHandler(IRenderProcessMessageHandler innerHandler)
             {
                 InnerHandler = innerHandler;
             }

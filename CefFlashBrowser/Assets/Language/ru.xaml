@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <sys:String x:Key="locale">ru</sys:String>
@@ -18,6 +18,30 @@
     <sys:String x:Key="common_moveDown">Переместить вниз</sys:String>
     <sys:String x:Key="common_moveToTop">Переместить в начало</sys:String>
     <sys:String x:Key="common_moveToBottom">Переместить в конец</sys:String>
+    <sys:String x:Key="common_ok">OK</sys:String>
+    <sys:String x:Key="common_cancel">Отмена</sys:String>
+    <sys:String x:Key="common_close">Закрыть</sys:String>
+    <sys:String x:Key="common_error">Ошибка</sys:String>
+    <sys:String x:Key="common_file">Файл</sys:String>
+    <sys:String x:Key="common_name">Имя</sys:String>
+    <sys:String x:Key="common_url">URL</sys:String>
+    <sys:String x:Key="common_editMenu">Правка</sys:String>
+    <sys:String x:Key="common_edit">Изменить</sys:String>
+    <sys:String x:Key="common_save">Сохранить</sys:String>
+    <sys:String x:Key="common_addItem">Добавить элемент</sys:String>
+    <sys:String x:Key="common_remove">Удалить</sys:String>
+    <sys:String x:Key="common_delete">Удалить</sys:String>
+    <sys:String x:Key="common_undo">Отменить</sys:String>
+    <sys:String x:Key="common_redo">Повторить</sys:String>
+    <sys:String x:Key="common_cut">Вырезать</sys:String>
+    <sys:String x:Key="common_copy">Копировать</sys:String>
+    <sys:String x:Key="common_paste">Вставить</sys:String>
+    <sys:String x:Key="common_selectAll">Выделить все</sys:String>
+    <sys:String x:Key="common_find">Найти</sys:String>
+    <sys:String x:Key="common_filterPlaceholder">Фильтр...</sys:String>
+    <sys:String x:Key="common_refresh">Обновить</sys:String>
+    <sys:String x:Key="common_manageUserScripts">Управление пользовательскими скриптами</sys:String>
+    <sys:String x:Key="common_script">Скрипт</sys:String>
 
     <!--Main Window-->
     <sys:String x:Key="mainWindow_title">Добро пожаловать</sys:String>
@@ -36,6 +60,12 @@
     <sys:String x:Key="settings_headerOther">Другое</sys:String>
     <sys:String x:Key="settings_headerBrowser">Браузер</sys:String>
     <sys:String x:Key="settings_headerWebsiteBehavior">Поведение сайтов</sys:String>
+    <sys:String x:Key="settings_headerUserScripts">Пользовательские скрипты</sys:String>
+    <sys:String x:Key="settings_enableUserScripts">Включить пользовательские скрипты</sys:String>
+    <sys:String x:Key="settings_trustedUserScriptPageWorld">Разрешить привилегированные API пользовательских скриптов в контексте страницы</sys:String>
+    <sys:String x:Key="settings_userScriptNewTabTooltip">Изменения вступают в силу в новых вкладках.</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehavior">Поведение разрешений по умолчанию</sys:String>
+    <sys:String x:Key="settings_defaultUserScriptPermissionBehaviorTooltip">Применяется, если решение о разрешении не сохранено.</sys:String>
     <sys:String x:Key="settings_headerAdvanced">Дополнительно</sys:String>
     <sys:String x:Key="settings_headerAboutCef">О CEF</sys:String>
     <sys:String x:Key="settings_useSearchEngine">Использовать поисковые системы в адресной строке</sys:String>
@@ -79,6 +109,11 @@
     <sys:String x:Key="newPageBehavior_newWindow">Новое окно</sys:String>
     <sys:String x:Key="newPageBehavior_newTab">Новая вкладка</sys:String>
 
+    <!--Default userscript permission behaviors-->
+    <sys:String x:Key="userScriptPermissionBehavior_prompt">Показывать запрос</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_allow">Разрешать автоматически</sys:String>
+    <sys:String x:Key="userScriptPermissionBehavior_deny">Запрещать автоматически</sys:String>
+
     <!--Search Engine-->
     <sys:String x:Key="searchEngine_baidu">Baidu</sys:String>
     <sys:String x:Key="searchEngine_google">Google</sys:String>
@@ -97,11 +132,6 @@
     <!--Favorites Manager-->
     <sys:String x:Key="favorites_managerTitle">Диспетчер избранного</sys:String>
     <sys:String x:Key="favorites_add">Добавить</sys:String>
-    <sys:String x:Key="favorites_remove">Удалить</sys:String>
-    <sys:String x:Key="favorites_edit">Изменить</sys:String>
-    <sys:String x:Key="favorites_name">Имя</sys:String>
-    <sys:String x:Key="favorites_url">URL</sys:String>
-    <sys:String x:Key="favorites_save">Сохранить</sys:String>
     <sys:String x:Key="favorites_defaultName">Новый элемент избранного</sys:String>
 
     <!--Browser Window-->
@@ -109,14 +139,7 @@
     <sys:String x:Key="browser_forward">Вперед</sys:String>
     <sys:String x:Key="browser_reload">Обновить</sys:String>
     <sys:String x:Key="browser_stop">Остановить</sys:String>
-    <sys:String x:Key="browser_cut">Вырезать</sys:String>
-    <sys:String x:Key="browser_copy">Копировать</sys:String>
-    <sys:String x:Key="browser_paste">Вставить</sys:String>
-    <sys:String x:Key="browser_selectAll">Выделить все</sys:String>
     <sys:String x:Key="browser_print">Печать</sys:String>
-    <sys:String x:Key="browser_redo">Повторить</sys:String>
-    <sys:String x:Key="browser_undo">Отменить</sys:String>
-    <sys:String x:Key="browser_find">Найти</sys:String>
     <sys:String x:Key="browser_searchFor">Искать "{0}"</sys:String>
     <sys:String x:Key="browser_openInNewTab">Открыть в новой вкладке</sys:String>
     <sys:String x:Key="browser_openInNewWindow">Открыть в новом окне</sys:String>
@@ -130,7 +153,6 @@
     <sys:String x:Key="browser_openInDefaultBrowser">Открыть в браузере по умолчанию</sys:String>
     <sys:String x:Key="browser_createShortcut">Создать ярлык</sys:String>
     <sys:String x:Key="browser_addFavorite">Добавить этот сайт в избранное</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">Некоторое Flash-содержимое, похоже, заблокировано ядром Chromium. Его можно воспроизвести в SWF-плеере:</sys:String>
     <sys:String x:Key="browser_toolTipBack">Назад (Alt+Left)</sys:String>
     <sys:String x:Key="browser_toolTipForward">Вперед (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Обновить (Ctrl+R)</sys:String>
@@ -138,7 +160,7 @@
     <sys:String x:Key="browser_toolTipNewTab">Новая вкладка (Ctrl+T)</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">Закрыть вкладку (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Еще</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">Заблокированное Flash-содержимое</sys:String>
+    <sys:String x:Key="browser_toolTipPageSwfs">Файлы SWF на этой странице</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Увеличить (Ctrl+Plus)</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">Уменьшить (Ctrl+Minus)</sys:String>
     <sys:String x:Key="browser_loading">Загрузка...</sys:String>
@@ -157,22 +179,12 @@
     <sys:String x:Key="solSaveManager_headerFileName">Имя файла</sys:String>
     <sys:String x:Key="solSaveManager_headerFileDir">Путь к файлу</sys:String>
     <sys:String x:Key="solSaveManager_headerOperations">Операции</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipReload">Обновить</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipDelete">Удалить</sys:String>
-    <sys:String x:Key="solSaveManager_toolTipEdit">Изменить</sys:String>
-    <sys:String x:Key="solSaveManager_filterPlaceholder">Фильтр...</sys:String>
 
     <!--SOL Editor-->
     <sys:String x:Key="solEditor_title">Редактор SOL</sys:String>
-    <sys:String x:Key="solEditor_file">Файл</sys:String>
-    <sys:String x:Key="solEditor_save">Сохранить</sys:String>
     <sys:String x:Key="solEditor_saveAs">Сохранить как...</sys:String>
-    <sys:String x:Key="solEditor_close">Закрыть</sys:String>
-    <sys:String x:Key="solEditor_edit">Правка</sys:String>
-    <sys:String x:Key="solEditor_addItem">Добавить элемент</sys:String>
     <sys:String x:Key="solEditor_removeItem">Удалить элемент</sys:String>
     <sys:String x:Key="solEditor_statusReady">Готово</sys:String>
-    <sys:String x:Key="solEditor_statusError">Ошибка</sys:String>
     <sys:String x:Key="solEditor_statusModified">Изменено</sys:String>
     <sys:String x:Key="solEditor_statusSaved">Сохранено</sys:String>
     <sys:String x:Key="solEditor_statusUnknown">Неизвестное состояние</sys:String>
@@ -181,16 +193,170 @@
     <sys:String x:Key="solEditor_amf3SolFile">SOL-файл, закодированный в AMF3</sys:String>
 
     <!--Dialogs-->
-    <sys:String x:Key="dialog_ok">OK</sys:String>
-    <sys:String x:Key="dialog_cancel">Отмена</sys:String>
     <sys:String x:Key="dialog_yes">Да</sys:String>
     <sys:String x:Key="dialog_no">Нет</sys:String>
-    <sys:String x:Key="dialog_error">Ошибка</sys:String>
     <sys:String x:Key="dialog_addFavorite">Добавить в избранное</sys:String>
     <sys:String x:Key="dialog_selectLanguage">Выберите язык</sys:String>
-    <sys:String x:Key="dialog_addItem">Добавить элемент</sys:String>
-    <sys:String x:Key="dialog_itemName">Имя</sys:String>
     <sys:String x:Key="dialog_assocArray">Ассоциативный массив</sys:String>
+
+    <!--Userscripts-->
+    <sys:String x:Key="userscript_permissionTitle">Разрешение для пользовательского скрипта</sys:String>
+    <sys:String x:Key="userscript_permissionMessage" xml:space="preserve">Скрипт: {0}&#xA;Функция: {1}&#xA;Цель: {2}&#xA;&#xA;Разрешить этому скрипту использовать эту функцию?</sys:String>
+    <sys:String x:Key="userscript_denyRemember">Запретить и запомнить</sys:String>
+    <sys:String x:Key="userscript_allowOnce">Разрешить один раз</sys:String>
+    <sys:String x:Key="userscript_allowRemember">Разрешить и запомнить</sys:String>
+    <sys:String x:Key="userscript_managePermissions">Управление разрешениями скриптов</sys:String>
+    <sys:String x:Key="userscript_permissionPage">Адрес страницы</sys:String>
+    <sys:String x:Key="userscript_permissionScope">Здесь показаны сохранённые решения для скриптов, подходящих для этой страницы. Изменения также действуют для последующих вызовов того же API с той же целью на других страницах.</sys:String>
+    <sys:String x:Key="userscript_permissionDisabled">Отключён</sys:String>
+    <sys:String x:Key="userscript_permissionTarget">Цель</sys:String>
+    <sys:String x:Key="userscript_permissionDecision">Решение</sys:String>
+    <sys:String x:Key="userscript_permissionAllow">Разрешить</sys:String>
+    <sys:String x:Key="userscript_permissionDeny">Запретить</sys:String>
+    <sys:String x:Key="userscript_permissionClear">Сбросить решение</sys:String>
+    <sys:String x:Key="userscript_permissionLoading">Загрузка разрешений скриптов…</sys:String>
+    <sys:String x:Key="userscript_permissionEmpty">Для скриптов, подходящих для этой страницы, нет сохранённых решений.</sys:String>
+    <sys:String x:Key="userscript_permissionChanged">Это решение было изменено или сброшено в другом окне. Список обновлён.</sys:String>
+    <sys:String x:Key="userscript_permissionError">Не удалось прочитать или изменить разрешения скриптов. Обновите список и повторите попытку.</sys:String>
+    <sys:String x:Key="userscript_unavailable">Пользовательские скрипты недоступны на этой странице</sys:String>
+    <sys:String x:Key="userscript_retry">Повторить попытку и перезагрузить страницу</sys:String>
+    <sys:String x:Key="userscript_commands">Команды скриптов</sys:String>
+    <sys:String x:Key="userscript_notification">Уведомление пользовательского скрипта</sys:String>
+    <sys:String x:Key="userscript_notificationClick">Нажать на уведомление</sys:String>
+    <sys:String x:Key="userscript_downloads">Загрузки скриптов</sys:String>
+    <sys:String x:Key="userscript_saveDownload">Сохранить загрузку скрипта</sys:String>
+    <sys:String x:Key="userscript_downloadWaiting">Ожидание</sys:String>
+    <sys:String x:Key="userscript_downloading">Загрузка</sys:String>
+    <sys:String x:Key="userscript_downloadCompleted">Завершено</sys:String>
+    <sys:String x:Key="userscript_downloadCancelled">Отменено</sys:String>
+    <sys:String x:Key="userscript_downloadTimedOut">Время ожидания истекло</sys:String>
+    <sys:String x:Key="userscript_downloadFailed">Ошибка</sys:String>
+
+    <!--Userscript Manager-->
+    <sys:String x:Key="userScriptManager_title">Диспетчер пользовательских скриптов</sys:String>
+    <sys:String x:Key="userScriptManager_noInstalledScripts">Нет установленных скриптов.</sys:String>
+    <sys:String x:Key="userScriptManager_noMatchingScripts">Подходящие скрипты не найдены.</sys:String>
+    <sys:String x:Key="userScriptManager_new">Новый скрипт</sys:String>
+    <sys:String x:Key="userScriptManager_newScript">Новый скрипт</sys:String>
+    <sys:String x:Key="userScriptManager_replace">Заменить</sys:String>
+    <sys:String x:Key="userScriptManager_completeCode">Дополнить код</sys:String>
+    <sys:String x:Key="userScriptManager_findPrevious">Предыдущее совпадение</sys:String>
+    <sys:String x:Key="userScriptManager_findNext">Следующее совпадение</sys:String>
+    <sys:String x:Key="userScriptManager_matchCase">С учётом регистра</sys:String>
+    <sys:String x:Key="userScriptManager_matches">Совпадения</sys:String>
+    <sys:String x:Key="userScriptManager_noMatches">Нет совпадений</sys:String>
+    <sys:String x:Key="userScriptManager_replaceCurrent">Заменить выделенное</sys:String>
+    <sys:String x:Key="userScriptManager_replaceAll">Заменить всё</sys:String>
+    <sys:String x:Key="userScriptManager_help">Справка</sys:String>
+    <sys:String x:Key="userScriptManager_aboutMonkeySharp">О MonkeySharp</sys:String>
+    <sys:String x:Key="userScriptManager_usageGuide">Руководство по пользовательским скриптам</sys:String>
+    <sys:String x:Key="userScriptManager_showDetails">Показать сведения</sys:String>
+    <sys:String x:Key="userScriptManager_reload">Перезагрузить с диска</sys:String>
+    <sys:String x:Key="userScriptManager_confirmDelete">Удалить скрипт «{0}»?</sys:String>
+    <sys:String x:Key="userScriptManager_saved">Сохранено. Перезагрузите страницу, чтобы применить изменения.</sys:String>
+    <sys:String x:Key="userScriptManager_refreshPage">Готово. Перезагрузите страницу, чтобы увидеть результат.</sys:String>
+    <sys:String x:Key="userScriptManager_deleted">Удалено.</sys:String>
+    <sys:String x:Key="userScriptManager_working">Обработка…</sys:String>
+    <sys:String x:Key="userScriptManager_cancelled">Операция отменена. Черновики сохранены.</sys:String>
+    <sys:String x:Key="userScriptManager_conflict">Скрипт или исходный файл изменён. Ваш черновик сохранён. Перезагрузите файл и сравните его с черновиком перед сохранением.</sys:String>
+    <sys:String x:Key="userScriptManager_installFile">Установить из файла…</sys:String>
+    <sys:String x:Key="userScriptManager_installUrl">Установить по URL…</sys:String>
+    <sys:String x:Key="userScriptManager_install">Установить текущий черновик</sys:String>
+    <sys:String x:Key="userScriptManager_export">Экспортировать исходный код…</sys:String>
+    <sys:String x:Key="userScriptManager_javaScriptFile">Файлы JavaScript</sys:String>
+    <sys:String x:Key="userScriptManager_userScriptFile">Пользовательский скрипт</sys:String>
+    <sys:String x:Key="userScriptManager_confirmInstall">Установить этот скрипт?</sys:String>
+    <sys:String x:Key="userScriptManager_upToDate">У скрипта «{0}» уже установлена последняя версия.</sys:String>
+    <sys:String x:Key="userScriptManager_updateUnavailable">Не удалось проверить обновления скрипта «{0}». Обновления не настроены или отключены.</sys:String>
+    <sys:String x:Key="userScriptManager_reviewInstall">Исходный код загружен и ожидает установки. Проверьте его, затем выберите «Установить текущий черновик» или «Сохранить».</sys:String>
+    <sys:String x:Key="userScriptManager_invalidMetadata">Недопустимые метаданные пользовательского скрипта. Проверьте заголовок метаданных и повторите попытку.</sys:String>
+    <sys:String x:Key="userScriptManager_invalidUrl">Введите допустимый URL с протоколом HTTP или HTTPS.</sys:String>
+    <sys:String x:Key="userScriptManager_exported">Исходный код экспортирован.</sys:String>
+    <sys:String x:Key="userScriptManager_match">Соответствующие адреса</sys:String>
+    <sys:String x:Key="userScriptManager_world">Среда выполнения</sys:String>
+    <sys:String x:Key="userScriptManager_grants">Объявленные разрешения</sys:String>
+    <sys:String x:Key="userScriptManager_load">Загрузить</sys:String>
+    <sys:String x:Key="userScriptManager_toggle">Включить или отключить скрипт</sys:String>
+    <sys:String x:Key="userScriptManager_draft">Неустановленный черновик</sys:String>
+    <sys:String x:Key="userScriptManager_unavailable">Недоступно</sys:String>
+    <sys:String x:Key="userScriptDetails_title">Сведения о скрипте</sys:String>
+    <sys:String x:Key="userScriptDetails_unknownMetadata">Неизвестные метаданные</sys:String>
+    <sys:String x:Key="userScriptInstall_install">Установить</sys:String>
+    <sys:String x:Key="userScriptInstall_confirmUpdate">Обновить этот пользовательский скрипт?</sys:String>
+    <sys:String x:Key="userScriptInstall_update">Обновить</sys:String>
+    <sys:String x:Key="userScriptInstall_downloadFailed">Не удалось загрузить пользовательский скрипт.</sys:String>
+    <sys:String x:Key="userScriptInstall_saveFailed">Не удалось сохранить пользовательский скрипт.</sys:String>
+    <sys:String x:Key="userScriptInstall_conflict">Этому источнику соответствует несколько установок или существующий скрипт изменился. Проверьте скрипт в диспетчере пользовательских скриптов и повторите попытку.</sys:String>
+    <sys:String x:Key="userScriptInstall_author">Автор</sys:String>
+    <sys:String x:Key="userScriptInstall_source">Источник</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_menu">Групповое обновление…</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_title">Групповое обновление скриптов</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_currentVersion">Текущая версия</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_latestVersion">Последняя версия</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_check">Проверить обновления</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_checking">Проверка…</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_all">Обновить все</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_notConfigured">Обновления не настроены.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_disabled">Обновления для этого скрипта отключены.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_checkFailed">Не удалось проверить обновления.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_applyFailed">Не удалось установить обновление.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_recheck">Сведения об обновлении устарели. Проверьте ещё раз.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_confirmAll">Обновить эти скрипты?</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Несохранённые изменения будут перезаписаны.</sys:String>
+    <sys:String x:Key="userScriptBatchUpdate_summary">Обновлено скриптов: {0}. Ошибок: {1}.</sys:String>
+
+    <!--Download manager-->
+    <sys:String x:Key="downloads_menu">Загрузки</sys:String>
+    <sys:String x:Key="downloads_taskMenu">Задача</sys:String>
+    <sys:String x:Key="downloads_historyMenu">История</sys:String>
+    <sys:String x:Key="downloads_details">Сведения о загрузке</sys:String>
+    <sys:String x:Key="downloads_filter">Фильтр по имени, пути или URL…</sys:String>
+    <sys:String x:Key="downloads_empty">История загрузок пуста</sys:String>
+    <sys:String x:Key="downloads_noMatches">Подходящих загрузок нет</sys:String>
+    <sys:String x:Key="downloads_title">Загрузки</sys:String>
+    <sys:String x:Key="downloads_new">Новая загрузка</sys:String>
+    <sys:String x:Key="downloads_pause">Пауза</sys:String>
+    <sys:String x:Key="downloads_resume">Продолжить</sys:String>
+    <sys:String x:Key="downloads_retry">Повторить</sys:String>
+    <sys:String x:Key="downloads_open">Открыть файл</sys:String>
+    <sys:String x:Key="downloads_folder">Показать в папке</sys:String>
+    <sys:String x:Key="downloads_remove">Удалить запись</sys:String>
+    <sys:String x:Key="downloads_deleteFile">Удалить файл</sys:String>
+    <sys:String x:Key="downloads_clear">Очистить завершённые</sys:String>
+    <sys:String x:Key="downloads_fileName">Имя файла</sys:String>
+    <sys:String x:Key="downloads_progress">Ход загрузки</sys:String>
+    <sys:String x:Key="downloads_size">Размер</sys:String>
+    <sys:String x:Key="downloads_speed">Скорость</sys:String>
+    <sys:String x:Key="downloads_state">Состояние</sys:String>
+    <sys:String x:Key="downloads_source">Источник</sys:String>
+    <sys:String x:Key="downloads_operations">Операции</sys:String>
+    <sys:String x:Key="downloads_url">Адрес загрузки</sys:String>
+    <sys:String x:Key="downloads_savePath">Путь сохранения</sys:String>
+    <sys:String x:Key="downloads_browse">Обзор…</sys:String>
+    <sys:String x:Key="downloads_rememberDirectory">Запомнить эту папку</sys:String>
+    <sys:String x:Key="downloads_start">Загрузить</sys:String>
+    <sys:String x:Key="downloads_systemDownload">Загрузить через Windows</sys:String>
+    <sys:String x:Key="downloads_systemDownloadFailed">Windows не удалось начать загрузку.</sys:String>
+    <sys:String x:Key="downloads_missing">Файл удалён</sys:String>
+    <sys:String x:Key="downloads_Waiting">Ожидание</sys:String>
+    <sys:String x:Key="downloads_Downloading">Загрузка</sys:String>
+    <sys:String x:Key="downloads_Paused">Приостановлено</sys:String>
+    <sys:String x:Key="downloads_Completed">Завершено</sys:String>
+    <sys:String x:Key="downloads_Cancelled">Отменено</sys:String>
+    <sys:String x:Key="downloads_Failed">Ошибка</sys:String>
+    <sys:String x:Key="downloads_TimedOut">Время ожидания истекло</sys:String>
+    <sys:String x:Key="downloads_Interrupted">Прервано</sys:String>
+    <sys:String x:Key="downloads_browser">Браузер</sys:String>
+    <sys:String x:Key="downloads_script">Скрипт</sys:String>
+    <sys:String x:Key="downloads_manual">Вручную</sys:String>
+    <sys:String x:Key="downloads_confirmRemoveActive">Остановить загрузку и удалить запись?</sys:String>
+    <sys:String x:Key="downloads_confirmDeleteFile">Удалить загруженный файл? Запись будет сохранена.</sys:String>
+    <sys:String x:Key="downloads_confirmOverwrite">Заменить существующий файл?</sys:String>
+    <sys:String x:Key="downloads_invalidUrl">Введите адрес загрузки HTTP или HTTPS.</sys:String>
+    <sys:String x:Key="downloads_invalidPath">Выберите допустимый абсолютный путь к файлу.</sys:String>
+    <sys:String x:Key="downloads_sourceUnavailable">Источник недоступен. Начните загрузку заново на исходной странице.</sys:String>
+    <sys:String x:Key="downloads_restartRequired">Сервер не может безопасно продолжить загрузку сохранённых данных. Загрузка начнётся заново.</sys:String>
+    <sys:String x:Key="downloads_nativeInterrupted">Соединение прервано. Попробуйте продолжить загрузку или начать её заново из источника.</sys:String>
 
     <!--Message-->
     <sys:String x:Key="message_emptyUrl">Введите URL.</sys:String>

@@ -48,7 +48,7 @@
                     HorizontalAlignment="Right"
                     Orientation="Horizontal">
             <Button MinWidth="70"
-                    Content="{DynamicResource dialog_cancel}"
+                    Content="{DynamicResource common_cancel}"
                     Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
                 <Button.CommandParameter>
                     <sys:Boolean>False</sys:Boolean>
@@ -56,7 +56,7 @@
             </Button>
             <Button Margin="10,0,0,0"
                     MinWidth="70"
-                    Content="{DynamicResource dialog_ok}"
+                    Content="{DynamicResource common_ok}"
                     Style="{StaticResource ButtonPrimary}"
                     Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
                 <Button.CommandParameter>

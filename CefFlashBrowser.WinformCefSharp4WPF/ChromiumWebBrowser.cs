@@ -1,9 +1,11 @@
-﻿using CefFlashBrowser.WinformCefSharp4WPF.Internals;
+using CefFlashBrowser.WinformCefSharp4WPF.Internals;
 using CefSharp;
 using CefSharp.Internals;
 using SimpleMvvm.Command;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -22,8 +24,61 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         /// The base browser
         /// </summary>
         private readonly CefSharp.WinForms.ChromiumWebBrowser browser;
+
         private bool isHosted;
         private string pendingAddress;
+        private volatile bool isBrowserInitialized;
+        private CancellationTokenSource navigationCancellation;
+        private long navigationVersion;
+        private volatile bool hasInitialBlank;
+        private Task disposalTask;
+        private bool disposalPrepared;
+        private bool downloadRetained;
+
+        public Func<Task> BeforeDisposeAsync { get; set; }
+
+        public Task DisposalCompletion => disposalTask ?? Task.CompletedTask;
+
+        /// <summary>Transfers native ownership to a hidden download host while the WPF host closes.</summary>
+        public IDisposable RetainNativeHost(IntPtr parentHandle)
+        {
+            Dispatcher.VerifyAccess();
+            if (browser.IsDisposed || downloadRetained)
+                throw new InvalidOperationException("The native browser cannot be retained.");
+
+            Win32.SetParent(browser.Handle, parentHandle);
+            browser.Visible = false;
+            downloadRetained = true;
+            return new NativeDownloadLease(() =>
+            {
+                Dispatcher.VerifyAccess();
+                downloadRetained = false;
+                browser.Dispose();
+            });
+        }
+
+        private sealed class NativeDownloadLease : IDisposable
+        {
+            private Action release;
+
+            public NativeDownloadLease(Action releaseAction)
+            {
+                release = releaseAction;
+            }
+
+            public void Dispose()
+            {
+                Interlocked.Exchange(ref release, null)?.Invoke();
+            }
+        }
+
+        // Set before hosting. The callback owns preparation and navigation; history
+        // and page-initiated navigation continue to be handled by CEF.
+        public Func<string, CancellationToken, Task> NavigationHandler { get; set; }
+
+        public event EventHandler<NavigationFailedEventArgs> NavigationFailed;
+
+        public bool IsNativeControlCreated => browser.IsHandleCreated;
 
 
 
@@ -235,7 +290,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         public bool IsBrowserInitialized
         {
-            get => (bool)GetValue(IsBrowserInitializedProperty);
+            get => isBrowserInitialized;
         }
 
         public bool IsDisposed
@@ -394,11 +449,15 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 nameof(StatusText), typeof(string), typeof(ChromiumWebBrowser), new PropertyMetadata(null));
         }
 
-        public ChromiumWebBrowser()
+        public ChromiumWebBrowser() : this(false)
+        {
+        }
+
+        public ChromiumWebBrowser(bool deferNativeCreation)
         {
 #pragma warning disable CS0618 // type or member is obsolete
             browser = new CefSharp.WinForms.ChromiumWebBrowser();
-            browser.CreateControl();
+            if (!deferNativeCreation) browser.CreateControl();
 #pragma warning restore CS0618 // type or member is obsolete
 
             Cef.AddDisposable(this);
@@ -431,12 +490,14 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             browser.AddressChanged += OnAddressChanged;
             browser.TitleChanged += OnTitleChanged;
             browser.IsBrowserInitializedChanged += OnIsBrowserInitializedChanged;
+            isBrowserInitialized = browser.IsBrowserInitialized;
         }
 
 
 
         protected override HandleRef BuildWindowCore(HandleRef hwndParent)
         {
+            browser.CreateControl();
             Win32.SetParent(browser.Handle, hwndParent.Handle);
             isHosted = true;
             LoadPendingAddress();
@@ -446,9 +507,12 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         protected override void DestroyWindowCore(HandleRef hwnd)
         {
             isHosted = false;
+            isBrowserInitialized = false;
             pendingAddress = null;
+            navigationVersion++;
+            navigationCancellation?.Cancel();
 
-            if (!browser.IsDisposed)
+            if (!browser.IsDisposed && !downloadRetained)
             {
                 browser.Dispose();
             }
@@ -456,8 +520,30 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         protected override void Dispose(bool disposing)
         {
+            if (disposing && !disposalPrepared && BeforeDisposeAsync != null)
+            {
+                if (disposalTask != null)
+                    return;
+
+                var preparation = BeforeDisposeAsync();
+
+                if (!preparation.IsCompleted)
+                {
+                    // A CEF callback can be waiting for this Dispatcher. Return
+                    // from it before awaiting native cleanup or destroying HWNDs.
+                    disposalTask = CompleteDisposalAsync(preparation);
+                    return;
+                }
+
+                preparation.GetAwaiter().GetResult();
+                disposalPrepared = true;
+            }
+
             isHosted = false;
+            isBrowserInitialized = false;
             pendingAddress = null;
+            navigationVersion++;
+            navigationCancellation?.Cancel();
 
             if (!browser.IsDisposed)
             {
@@ -472,11 +558,25 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 browser.TitleChanged -= OnTitleChanged;
                 browser.IsBrowserInitializedChanged -= OnIsBrowserInitializedChanged;
 
-                browser.Dispose();
+                if (!downloadRetained)
+                    browser.Dispose();
             }
 
             Cef.RemoveDisposable(this);
             base.Dispose(disposing);
+        }
+
+        private async Task CompleteDisposalAsync(Task preparation)
+        {
+            await preparation;
+            disposalPrepared = true;
+            Dispose(true);
+        }
+
+        public Task DisposeAsync()
+        {
+            Dispose();
+            return DisposalCompletion;
         }
 
         protected override bool TabIntoCore(TraversalRequest request)
@@ -590,14 +690,56 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             LoadPendingAddress();
         }
 
-        private void LoadPendingAddress()
+        private async void LoadPendingAddress()
         {
             if (!isHosted || browser.IsDisposed || pendingAddress == null)
                 return;
 
             var url = pendingAddress;
             pendingAddress = null;
-            browser.Load(url);
+
+            var version = ++navigationVersion;
+
+            navigationCancellation?.Cancel();
+            navigationCancellation?.Dispose();
+
+            var cancellation = navigationCancellation = new CancellationTokenSource();
+            var token = cancellation.Token;
+
+            try
+            {
+                if (NavigationHandler == null)
+                    browser.Load(url);
+                else
+                    await NavigationHandler(url, token);
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+            }
+            catch (Exception e)
+            {
+                if (!browser.IsDisposed && version == navigationVersion)
+                    NavigationFailed?.Invoke(this, new NavigationFailedEventArgs(url, e));
+            }
+        }
+
+        // Navigation handlers use this only after their preparation has completed.
+        // Calling Load would re-enter the handler through the Address binding.
+        public void LoadPrepared(string url)
+        {
+            if (isHosted && !browser.IsDisposed)
+                browser.Load(url);
+        }
+
+        // On CEF 84, loading about:blank starts the renderer so MonkeySharp can
+        // prepare its isolated userscript runtime before the first target navigation.
+        public void LoadInitialBlank()
+        {
+            if (!isHosted || browser.IsDisposed)
+                return;
+
+            hasInitialBlank = true;
+            browser.Load("about:blank");
         }
 
         private void OnJavascriptMessageReceived(object sender, JavascriptMessageReceivedEventArgs e)
@@ -672,6 +814,14 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnLoadError(object sender, LoadErrorEventArgs e)
         {
+            // A committed error page can also be the first target in history.
+            if (hasInitialBlank && !browser.IsDisposed && !e.Browser.IsDisposed
+                && e.Frame.IsMain && e.ErrorCode != CefErrorCode.Aborted && e.FailedUrl != "about:blank"
+                && TryRemoveInitialBlank(e.Browser.GetHost(), e.FailedUrl))
+            {
+                hasInitialBlank = false;
+            }
+
             InvokeOnUIThread(delegate { OnLoadError(e); }, invokeAsync: false);
         }
 
@@ -699,12 +849,24 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnAddressChanged(object sender, AddressChangedEventArgs e)
         {
+            bool isInitialBlank;
+
             try
             {
                 if (browser.IsDisposed || e.Browser.IsDisposed)
                     return;
 
-                var entry = e.Browser.GetHost()?.GetVisibleNavigationEntry();
+                var host = e.Browser.GetHost();
+                var hadInitialBlank = hasInitialBlank;
+                isInitialBlank = hadInitialBlank && e.Address == "about:blank";
+
+                if (hadInitialBlank && !isInitialBlank)
+                {
+                    hasInitialBlank = false;
+                    TryRemoveInitialBlank(host, e.Address);
+                }
+
+                var entry = host?.GetVisibleNavigationEntry();
 
                 // CEF reports the underlying URL for source pages. Read the visible
                 // entry on the CEF UI thread before dispatching to WPF.
@@ -719,28 +881,83 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 return;
             }
 
-            InvokeOnUIThread(delegate { OnAddressChanged(e); });
+            InvokeOnUIThread(delegate
+            {
+                // Keep the requested address visible while the renderer warms up.
+                if (!isInitialBlank || Address == "about:blank")
+                    OnAddressChanged(e);
+            });
+        }
+
+        private static bool TryRemoveInitialBlank(IBrowserHost host, string address)
+        {
+            if (host == null)
+                return false;
+
+            // CEF adds the warm-up to history. The reset keeps only the current entry.
+            // Verify synchronously on the CEF UI thread that the warm-up and the first
+            // target are the entire history.
+            var history = new InitialBlankHistoryVisitor(address);
+            host.GetNavigationEntries(history, false);
+
+            return history.CanRemoveInitialBlank && host.ExecuteDevToolsMethod(0, "Page.resetNavigationHistory", "{}") > 0;
+        }
+
+        private sealed class InitialBlankHistoryVisitor : INavigationEntryVisitor
+        {
+            private readonly string _address;
+
+            public InitialBlankHistoryVisitor(string address) => _address = address;
+
+            public bool CanRemoveInitialBlank { get; private set; }
+
+            public bool Visit(NavigationEntry entry, bool current, int index, int total)
+            {
+                if (total != 2 || !entry.IsValid)
+                    return false;
+
+                if (index == 0)
+                    return !current && entry.Url == "about:blank";
+
+                CanRemoveInitialBlank = current && entry.Url == _address;
+                return false;
+            }
+
+            public void Dispose() { }
         }
 
         protected virtual void OnAddressChanged(AddressChangedEventArgs e)
         {
             // Initial CEF notifications must not replace an unhosted navigation request.
-            if (!isHosted || browser.IsDisposed)
+            if (!isHosted || browser.IsDisposed || pendingAddress != null)
                 return;
 
+            SetDocumentAddress(e.Address);
+            AddressChanged?.Invoke(this, e);
+        }
+
+        public void RestoreAddressAfterCanceledNavigation(string address)
+        {
+            Dispatcher.VerifyAccess();
+
+            if (isHosted && !browser.IsDisposed && pendingAddress == null)
+                SetDocumentAddress(string.IsNullOrEmpty(address) ? "about:blank" : address);
+        }
+
+        private void SetDocumentAddress(string address)
+        {
             lock (onNotifyAddressChangedLock)
             {
                 onNotifyAddressChanged = true;
                 try
                 {
-                    SetCurrentValue(AddressProperty, e.Address);
+                    SetCurrentValue(AddressProperty, address);
                 }
                 finally
                 {
                     onNotifyAddressChanged = false;
                 }
             }
-            AddressChanged?.Invoke(this, e);
         }
 
         private void OnTitleChanged(object sender, TitleChangedEventArgs e)
@@ -756,12 +973,17 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
 
         private void OnIsBrowserInitializedChanged(object sender, EventArgs e)
         {
+            // CEF and worker threads must never read WPF dependency properties.
+            isBrowserInitialized = !browser.IsDisposed && browser.IsBrowserInitialized;
             InvokeOnUIThread(delegate { OnIsBrowserInitializedChanged(e); });
         }
 
         protected virtual void OnIsBrowserInitializedChanged(EventArgs e)
         {
-            SetCurrentValue(IsBrowserInitializedProperty, browser.IsBrowserInitialized);
+            if (browser.IsDisposed)
+                return;
+
+            SetCurrentValue(IsBrowserInitializedProperty, isBrowserInitialized);
             IsBrowserInitializedChanged?.Invoke(this, e);
         }
 

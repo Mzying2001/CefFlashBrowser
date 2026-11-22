@@ -1,5 +1,7 @@
 using CefFlashBrowser.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CefFlashBrowser.Tests
 {
@@ -38,6 +40,30 @@ namespace CefFlashBrowser.Tests
             Assert.IsFalse(settings.DisableGpuAcceleration);
             Assert.IsNull(settings.CustomEmoticon);
             Assert.IsFalse(settings.DisableBrowserContextMenu);
+            Assert.AreEqual(UserScriptPermissionBehavior.Prompt, settings.DefaultUserScriptPermissionBehavior);
+        }
+
+        [TestMethod]
+        public void Deserialize_LegacySettingsDefaultToPrompt()
+        {
+            var settings = JsonConvert.DeserializeObject<Settings>("{\"Language\":\"en-US\"}");
+
+            Assert.AreEqual(UserScriptPermissionBehavior.Prompt, settings.DefaultUserScriptPermissionBehavior);
+        }
+
+        [DataTestMethod]
+        [DataRow(UserScriptPermissionBehavior.Prompt, 0)]
+        [DataRow(UserScriptPermissionBehavior.Allow, 1)]
+        [DataRow(UserScriptPermissionBehavior.Deny, 2)]
+        public void UserScriptPermissionBehavior_RoundTripsAsANumber(UserScriptPermissionBehavior behavior, int expected)
+        {
+            var settings = new Settings { DefaultUserScriptPermissionBehavior = behavior };
+            var json = JObject.FromObject(settings);
+            var value = json[nameof(Settings.DefaultUserScriptPermissionBehavior)];
+
+            Assert.AreEqual(JTokenType.Integer, value.Type);
+            Assert.AreEqual(expected, (int)value);
+            Assert.AreEqual(behavior, json.ToObject<Settings>().DefaultUserScriptPermissionBehavior);
         }
 
         [TestMethod]

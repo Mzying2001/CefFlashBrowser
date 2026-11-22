@@ -28,13 +28,23 @@
                               MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth, Converter={StaticResource TwoThirdConverter}}"/>
         </Grid.ColumnDefinitions>
 
-        <flash:ChromiumFlashBrowser
-            x:Name="browser"
-            ZoomLevelIncrement="0.25"
-            ZoomLevel="{Binding ZoomLevel, Mode=TwoWay}"
-            Address="{Binding Address, Mode=TwoWay}"
-            TitleChanged="BrowserTitleChanged"
-            FullscreenModeChanged="BrowserFullscreenModeChanged"/>
+        <ContentControl x:Name="browserContainer"
+                        HorizontalContentAlignment="Stretch"
+                        VerticalContentAlignment="Stretch"/>
+
+        <Border VerticalAlignment="Top"
+                Background="{DynamicResource RegionBrush}"
+                Padding="8"
+                Visibility="{Binding UserScriptsUnavailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{DynamicResource userscript_unavailable}"
+                           ToolTip="{Binding UserScriptError}"
+                           VerticalAlignment="Center"/>
+                <Button Margin="10,0,0,0"
+                        Content="{DynamicResource userscript_retry}"
+                        Click="RetryUserScripts"/>
+            </StackPanel>
+        </Border>
 
         <GridSplitter
             Grid.Column="1"

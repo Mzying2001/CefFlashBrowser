@@ -58,7 +58,7 @@
                     MinWidth="70"
                     HorizontalAlignment="Right"
                     Style="{StaticResource ButtonPrimary}"
-                    Content="{DynamicResource dialog_ok}"
+                    Content="{DynamicResource common_ok}"
                     Click="OnOkButtonClick"/>
         </Grid>
     </Grid>

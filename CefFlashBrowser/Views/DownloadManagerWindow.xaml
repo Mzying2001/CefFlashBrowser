@@ -1,0 +1,395 @@
+<Window x:Class="CefFlashBrowser.Views.DownloadManagerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+        
+        Title="{DynamicResource downloads_title}"
+        Width="800"
+        Height="500"
+        MinWidth="600"
+        MinHeight="400"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <svgc:SvgIcon x:Key="PlayIcon" Width="12" Height="12"
+                      UriSource="{StaticResource PlayIconUri}"/>
+        <svgc:SvgIcon x:Key="StopIcon" Width="10" Height="10"
+                      UriSource="{StaticResource StopIconUri}"/>
+        <svgc:SvgIcon x:Key="TrashIcon" Width="14" Height="14"
+                      UriSource="{StaticResource TrashIconUri}"/>
+
+        <Style x:Key="DownloadRowButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="AutomationProperties.Name" Value="{Binding ToolTip, RelativeSource={RelativeSource Self}}"/>
+        </Style>
+
+        <Style x:Key="DownloadTransferButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource DownloadRowButtonStyle}">
+            <Setter Property="Content" Value="{StaticResource PlayIcon}"/>
+            <Setter Property="ToolTip" Value="{DynamicResource downloads_resume}"/>
+            <Setter Property="ContentTemplate" Value="{StaticResource SharedSvgIconTemplate}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsRetry}" Value="True">
+                    <Setter Property="ToolTip" Value="{DynamicResource downloads_retry}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                    <Setter Property="Content" Value="{StaticResource StopIcon}"/>
+                    <Setter Property="ToolTip" Value="{DynamicResource downloads_pause}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DownloadResumeMenuItemStyle"
+               TargetType="MenuItem"
+               BasedOn="{StaticResource {x:Type MenuItem}}">
+            <Setter Property="Header" Value="{DynamicResource downloads_resume}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedItem.IsRetry}" Value="True">
+                    <Setter Property="Header" Value="{DynamicResource downloads_retry}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <ContextMenu x:Key="DownloadRowMenu"
+                     DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+            <MenuItem Header="{DynamicResource downloads_open}"
+                      Command="{Binding OpenCommand}"/>
+            <MenuItem Header="{DynamicResource downloads_folder}"
+                      Command="{Binding FolderCommand}"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource downloads_pause}"
+                      Command="{Binding PauseCommand}"/>
+            <MenuItem Style="{StaticResource DownloadResumeMenuItemStyle}"
+                      Command="{Binding ResumeCommand}"/>
+            <MenuItem Header="{DynamicResource common_cancel}"
+                      Command="{Binding CancelCommand}"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource downloads_remove}"
+                      Command="{Binding RemoveCommand}"/>
+            <MenuItem Header="{DynamicResource downloads_deleteFile}"
+                      Command="{Binding DeleteFileCommand}"/>
+        </ContextMenu>
+
+        <Style x:Key="DetailLabelStyle"
+               TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,4,16,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}"/>
+        </Style>
+
+        <Style x:Key="DetailValueStyle"
+               TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Background="{DynamicResource RegionBrush}">
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="{DynamicResource common_file}">
+                <MenuItem Header="{DynamicResource downloads_new}"
+                          Command="{Binding NewCommand}"
+                          InputGestureText="Ctrl+N"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource downloads_open}"
+                          Command="{Binding OpenCommand}"/>
+                <MenuItem Header="{DynamicResource downloads_folder}"
+                          Command="{Binding FolderCommand}"/>
+                <Separator/>
+                <MenuItem Header="{DynamicResource common_close}"
+                          Click="CloseWindow"
+                          InputGestureText="Ctrl+W"/>
+            </MenuItem>
+            <MenuItem Header="{DynamicResource downloads_taskMenu}">
+                <MenuItem Header="{DynamicResource downloads_pause}"
+                          Command="{Binding PauseCommand}"/>
+                <MenuItem Style="{StaticResource DownloadResumeMenuItemStyle}"
+                          Command="{Binding ResumeCommand}"/>
+                <MenuItem Header="{DynamicResource common_cancel}"
+                          Command="{Binding CancelCommand}"/>
+            </MenuItem>
+            <MenuItem Header="{DynamicResource downloads_historyMenu}">
+                <MenuItem Header="{DynamicResource downloads_remove}"
+                          Command="{Binding RemoveCommand}"
+                          InputGestureText="Delete"/>
+                <MenuItem Header="{DynamicResource downloads_clear}"
+                          Command="{Binding ClearCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <DockPanel Margin="14,10,14,14">
+            <DockPanel DockPanel.Dock="Top"
+                       Margin="0,0,0,10"
+                       LastChildFill="False">
+                <Grid DockPanel.Dock="Left" Width="238">
+                    <hc:TextBox x:Name="downloadFilter"
+                                Padding="28,0,8,0"
+                                Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                AutomationProperties.Name="{DynamicResource downloads_filter}">
+                        <i:Interaction.Behaviors>
+                            <behaviors:TextBoxSelectAllOnFocus/>
+                        </i:Interaction.Behaviors>
+                    </hc:TextBox>
+                    <TextBlock Margin="28,0,8,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               Text="{DynamicResource downloads_filter}"
+                               TextTrimming="CharacterEllipsis"
+                               IsHitTestVisible="False">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=downloadFilter}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <svgc:SvgIcon UriSource="{StaticResource SearchIconUri}"
+                                  Width="13" Height="13"
+                                  Margin="8,0,0,0"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Center"
+                                  IsHitTestVisible="False">
+                    </svgc:SvgIcon>
+                </Grid>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="openFolderButton"
+                            Padding="12,0"
+                            Content="{DynamicResource downloads_folder}"
+                            Command="{Binding FolderCommand}"/>
+                    <Button Margin="8,0,0,0"
+                            Padding="12,0"
+                            Style="{StaticResource ButtonPrimary}"
+                            Content="{DynamicResource downloads_new}"
+                            Command="{Binding NewCommand}"/>
+                </StackPanel>
+            </DockPanel>
+
+            <Border x:Name="downloadDetails"
+                    DockPanel.Dock="Bottom"
+                    Margin="0,10,0,0"
+                    Padding="12,6,12,8"
+                    CornerRadius="4"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Margin="0,0,0,4"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Text="{DynamicResource downloads_details}"/>
+
+                    <ScrollViewer MaxHeight="136"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock
+                                x:Name="detailSourceLabel" Style="{StaticResource DetailLabelStyle}"
+                                Text="{DynamicResource downloads_source}"/>
+                            <TextBox
+                                x:Name="detailSource" Grid.Column="1"
+                                Style="{StaticResource DetailValueStyle}"
+                                Text="{Binding SelectedItem.Source, Mode=OneWay}"
+                                AutomationProperties.LabeledBy="{Binding ElementName=detailSourceLabel}"/>
+
+                            <TextBlock
+                                x:Name="detailPathLabel" Grid.Row="1" Style="{StaticResource DetailLabelStyle}"
+                                Text="{DynamicResource downloads_savePath}"/>
+                            <TextBox
+                                Grid.Row="1" Grid.Column="1"
+                                Style="{StaticResource DetailValueStyle}"
+                                Text="{Binding SelectedItem.FilePath, Mode=OneWay}"
+                                AutomationProperties.LabeledBy="{Binding ElementName=detailPathLabel}"/>
+
+                            <TextBlock
+                                x:Name="detailUrlLabel" Grid.Row="2" Style="{StaticResource DetailLabelStyle}"
+                                Text="{DynamicResource downloads_url}"/>
+                            <TextBox
+                                Grid.Row="2" Grid.Column="1"
+                                Style="{StaticResource DetailValueStyle}"
+                                Text="{Binding SelectedItem.Url, Mode=OneWay}"
+                                AutomationProperties.LabeledBy="{Binding ElementName=detailUrlLabel}"/>
+
+                            <TextBlock
+                                x:Name="detailErrorLabel" Grid.Row="3" Style="{StaticResource DetailLabelStyle}"
+                                Text="{DynamicResource common_error}"
+                                Visibility="{Binding SelectedItem.HasError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <TextBox
+                                x:Name="detailError" Grid.Row="3" Grid.Column="1"
+                                Style="{StaticResource DetailValueStyle}"
+                                Foreground="{DynamicResource DangerBrush}"
+                                Text="{Binding SelectedItem.Error, Mode=OneWay}"
+                                Visibility="{Binding SelectedItem.HasError, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                AutomationProperties.LabeledBy="{Binding ElementName=detailErrorLabel}"/>
+                        </Grid>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <Grid>
+                <ListView x:Name="downloadList"
+                          ItemsSource="{Binding ItemsView}"
+                          SelectedItem="{Binding SelectedItem}"
+                          SelectionMode="Single"
+                          IsSynchronizedWithCurrentItem="False"
+                          MouseDoubleClick="OpenSelected"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem"
+                               BasedOn="{StaticResource AppListViewItemStyle}">
+                            <Setter Property="MinHeight"
+                                    Value="36"/>
+                            <Setter Property="Tag"
+                                    Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListView}}"/>
+                            <Setter Property="ContextMenu"
+                                    Value="{StaticResource DownloadRowMenu}"/>
+                            <EventSetter Event="PreviewMouseRightButtonDown" Handler="SelectDownloadRow"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="True">
+                            <GridViewColumn Header="{DynamicResource downloads_fileName}" Width="170">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding FileName}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding FileName}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="{DynamicResource downloads_progress}" Width="150">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ProgressBar
+                                                Width="90"
+                                                VerticalAlignment="Center"
+                                                Style="{StaticResource ProgressBarFlat}"
+                                                Value="{Binding Progress, Mode=OneWay}"
+                                                IsIndeterminate="{Binding IsIndeterminate}"/>
+                                            <TextBlock
+                                                Margin="8,0,0,0"
+                                                Text="{Binding ProgressText}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="{DynamicResource downloads_size}"
+                                            Width="150"
+                                            DisplayMemberBinding="{Binding Size}"/>
+                            <GridViewColumn Header="{DynamicResource downloads_speed}"
+                                            Width="90"
+                                            DisplayMemberBinding="{Binding Speed}"/>
+                            <GridViewColumn Header="{DynamicResource downloads_state}" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding State}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding Error}"
+                                                   ToolTipService.IsEnabled="{Binding HasError}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasError}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource DangerBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="{DynamicResource downloads_operations}" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel x:Name="downloadRowActions"
+                                                    Orientation="Horizontal"
+                                                    Background="Transparent">
+                                            <Button Style="{StaticResource DownloadTransferButtonStyle}"
+                                                    Command="{Binding DataContext.ToggleTransferCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Margin="5,0,0,0"
+                                                    Style="{StaticResource DownloadRowButtonStyle}"
+                                                    ToolTip="{DynamicResource downloads_remove}"
+                                                    Command="{Binding DataContext.RemoveRowCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                    CommandParameter="{Binding}">
+                                                <ContentPresenter
+                                                    Tag="{DynamicResource DangerBrush}"
+                                                    Content="{StaticResource TrashIcon}"
+                                                    ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <TextBlock x:Name="emptyDownloadMessage"
+                           Margin="10,50,10,10"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
+                           IsHitTestVisible="False">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="Text" Value="{DynamicResource downloads_noMatches}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ItemsView.IsEmpty}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Items.Count}" Value="0">
+                                    <Setter Property="Text" Value="{DynamicResource downloads_empty}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </DockPanel>
+    </DockPanel>
+</Window>

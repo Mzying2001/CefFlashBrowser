@@ -1,7 +1,11 @@
 using CefFlashBrowser.Database;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.UserScripts;
 using CefFlashBrowser.Services;
+using CefFlashBrowser.Services.UserScripts.Persistence;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Mzying2001.MonkeySharp.Core.Domain;
+using Mzying2001.MonkeySharp.Core.Permissions;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -60,7 +64,7 @@ namespace CefFlashBrowser.Tests
                 await Task.WhenAll(initialization, read, write);
                 Assert.AreSame(initialization, _service.InitializeAsync());
                 Assert.AreEqual(1, controlled.InitializationCount);
-                Assert.AreEqual(1L, await _database.ScalarAsync("PRAGMA user_version"));
+                Assert.AreEqual(4L, await _database.ScalarAsync("PRAGMA user_version"));
                 Assert.AreEqual(1, (await _service.GetWebsiteIconsAsync()).Count);
             }
             finally { controlled.ReleaseInitialization.TrySetResult(true); }
@@ -82,51 +86,122 @@ namespace CefFlashBrowser.Tests
         [DataTestMethod]
         [DataRow(0)]
         [DataRow(1)]
-        public async Task ExistingDatabase_PreservesSchemaAndRecords(int version)
+        public async Task ExistingIconDatabase_UpgradesAndPreservesMappings(int version)
         {
             await _database.TransactionAsync(session =>
             {
-                session.Execute(@"CREATE TABLE website_icons (
-                    page_url TEXT PRIMARY KEY NOT NULL,
-                    icon_url TEXT NOT NULL,
-                    created_at INTEGER NOT NULL,
-                    updated_at INTEGER NOT NULL,
-                    deleted_at INTEGER NULL)");
-                session.Execute("INSERT INTO website_icons VALUES ('https://example.com/a', 'https://example.com/icon', 10, 20, NULL)");
+                session.Execute("CREATE TABLE website_icons (page_url TEXT PRIMARY KEY, icon_url TEXT, updated_at INTEGER)");
+                session.Execute("INSERT INTO website_icons VALUES ('page', 'icon', 20)");
                 session.Execute("PRAGMA user_version = " + version);
             });
-            string schema = (string)await _database.ScalarAsync("SELECT sql FROM sqlite_master WHERE name = 'website_icons'");
 
-            var icon = (await _service.GetWebsiteIconsAsync()).Single();
-            Assert.AreEqual("https://example.com/a", icon.PageUrl);
-            Assert.AreEqual("https://example.com/icon", icon.IconUrl);
-            Assert.AreEqual(20L, icon.UpdatedAt);
-            Assert.AreEqual(10L, await _database.ScalarAsync("SELECT created_at FROM website_icons"));
-            Assert.AreEqual(schema, await _database.ScalarAsync("SELECT sql FROM sqlite_master WHERE name = 'website_icons'"));
-            Assert.AreEqual(1L, await _database.ScalarAsync("PRAGMA user_version"));
+            await _service.InitializeAsync();
+
+            Assert.AreEqual(4L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual("icon", (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
+            Assert.AreEqual(0, (await _service.GetUserScriptsAsync()).Count);
         }
 
-        [TestMethod]
-        public async Task UnsupportedVersion_RejectsReadsAndWrites_WithoutChangingDatabase()
+        [DataTestMethod]
+        [DataRow(4)]
+        [DataRow(5)]
+        public async Task CurrentOrNewerVersion_AllowsReadsAndWrites_WithoutChangingVersion(int version)
         {
-            await _database.ExecuteAsync("PRAGMA user_version = 2");
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.InitializeAsync());
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.GetWebsiteIconsAsync());
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _service.SaveWebsiteIconAsync(
-                new WebsiteIconRecord("https://example.com/a", "https://example.com/icon", 10)));
-            Assert.AreEqual(2L, await _database.ScalarAsync("PRAGMA user_version"));
-            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM sqlite_master WHERE name = 'website_icons'"));
+            await _service.InitializeAsync();
+            await _database.ExecuteAsync("PRAGMA user_version = " + version);
+            _service = new DatabaseService(_database);
+
+            await _service.InitializeAsync();
+            await _service.SaveWebsiteIconAsync(new WebsiteIconRecord("https://example.com/a", "https://example.com/icon", 10));
+
+            Assert.AreEqual("https://example.com/icon", (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
+            Assert.AreEqual((long)version, await _database.ScalarAsync("PRAGMA user_version"));
         }
 
         [TestMethod]
-        public async Task Query_FiltersDeletedRows_PreservesValuesAndSnapshotOrder()
+        public async Task VersionTwoScripts_KeepInstallationOrderWhenMigrated()
+        {
+            var first = ScriptKey.Parse(Guid.NewGuid().ToString());
+            var second = ScriptKey.Parse(Guid.NewGuid().ToString());
+            await _database.TransactionAsync(session =>
+            {
+                session.Execute("CREATE TABLE monkeysharp_scripts (script_id TEXT PRIMARY KEY NOT NULL, " +
+                    "install_order INTEGER NOT NULL UNIQUE, source_origin TEXT NULL, " +
+                    "is_enabled INTEGER NOT NULL CHECK (is_enabled IN (0, 1)), installed_at INTEGER NOT NULL, " +
+                    "updated_at INTEGER NOT NULL, source_sha256 TEXT NOT NULL, commit_id TEXT NOT NULL)");
+                const string insert = "INSERT INTO monkeysharp_scripts VALUES (@id, @order, NULL, 1, 0, 0, @hash, @commit)";
+                session.Execute(insert, new Dictionary<string, object>
+                {
+                    ["@id"] = second.ToString(), ["@order"] = 4, ["@hash"] = new string('b', 64), ["@commit"] = Guid.NewGuid().ToString("D")
+                });
+                session.Execute(insert, new Dictionary<string, object>
+                {
+                    ["@id"] = first.ToString(), ["@order"] = 2, ["@hash"] = new string('a', 64), ["@commit"] = Guid.NewGuid().ToString("D")
+                });
+                session.Execute("PRAGMA user_version = 2");
+            });
+
+            var scripts = await _service.GetUserScriptsAsync();
+            CollectionAssert.AreEqual(new[] { first, second }, scripts.Select(item => item.ScriptKey).ToArray());
+            Assert.AreEqual(4L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_scripts WHERE sort_order IS NOT NULL"));
+        }
+
+        [TestMethod]
+        public async Task VersionThreeDatabase_AddsDownloadHistoryAndPreservesMappings()
+        {
+            await _service.SaveWebsiteIconAsync(new WebsiteIconRecord("https://example.com/a", "https://example.com/icon", 10));
+            await _database.TransactionAsync(session =>
+            {
+                session.Execute("DROP TABLE downloads");
+                session.Execute("PRAGMA user_version = 3");
+            });
+
+            var upgraded = new DatabaseService(_database);
+            Assert.AreEqual(0, (await upgraded.GetDownloadsAsync()).Count);
+            Assert.AreEqual(4L, await _database.ScalarAsync("PRAGMA user_version"));
+            Assert.AreEqual("https://example.com/icon", (await upgraded.GetWebsiteIconsAsync()).Single().IconUrl);
+        }
+
+        [TestMethod]
+        public async Task LatestSchema_HasAllScriptTables_AndReinitializesWithoutChanges()
+        {
+            await _service.InitializeAsync();
+
+            var names = await _database.QueryAsync("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name",
+                row => row.GetString(0));
+
+            CollectionAssert.AreEquivalent(new[] { "website_icons", "monkeysharp_scripts", "monkeysharp_script_assets", "monkeysharp_values",
+                "monkeysharp_permission_decisions", "monkeysharp_tab_states", "downloads" }, names);
+
+            var columns = await _database.QueryAsync("PRAGMA table_info(website_icons)", row => row.GetString(1));
+
+            CollectionAssert.AreEqual(new[] { "page_url", "icon_url", "updated_at" }, columns);
+
+            foreach (var table in new[] { "monkeysharp_scripts", "monkeysharp_values", "monkeysharp_permission_decisions", "monkeysharp_tab_states" })
+            {
+                var timestampColumns = await _database.QueryAsync(
+                    "SELECT name FROM pragma_table_info('" + table + "') " +
+                    "WHERE name IN ('installed_at', 'updated_at') AND type = 'INTEGER' AND [notnull] = 1",
+                    row => row.GetString(0));
+                var expected = table == "monkeysharp_scripts" ? new[] { "installed_at", "updated_at" } : new[] { "updated_at" };
+                CollectionAssert.AreEquivalent(expected, timestampColumns, table);
+            }
+
+            await new DatabaseService(_database).InitializeAsync();
+
+            Assert.AreEqual(4L, await _database.ScalarAsync("PRAGMA user_version"));
+        }
+
+        [TestMethod]
+        public async Task Query_PreservesValuesAndSnapshotOrder_AfterPhysicalDeletion()
         {
             var first = new WebsiteIconRecord("https://example.com/a", "https://example.com/icon?v=1", 10);
             await _service.SaveWebsiteIconAsync(first);
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord("https://example.com/z", "https://example.com/z-icon", 10));
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord("https://example.com/b", "https://example.com/b-icon", 20));
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord("https://example.com/deleted", "https://example.com/deleted-icon", 30));
-            await _database.ExecuteAsync("UPDATE website_icons SET deleted_at = 40 WHERE page_url = 'https://example.com/deleted'");
+            await _database.ExecuteAsync("DELETE FROM website_icons WHERE page_url = 'https://example.com/deleted'");
 
             var records = await _service.GetWebsiteIconsAsync();
             CollectionAssert.AreEqual(new[] { "https://example.com/z", first.PageUrl, "https://example.com/b" },
@@ -136,24 +211,23 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
-        public async Task Save_PreservesCreationAndUnchangedTimestamps_UpdatesAndRestoresMappings()
+        public async Task Save_PreservesUnchangedTimestamp_UpdatesAndReinsertsMappings()
         {
             const string page = "https://example.com/a";
             const string icon = "https://example.com/icon?q=';--";
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, icon, 10));
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, icon, 20));
-            Assert.AreEqual(10L, await _database.ScalarAsync("SELECT created_at FROM website_icons"));
             Assert.AreEqual(10L, await _database.ScalarAsync("SELECT updated_at FROM website_icons"));
             Assert.AreEqual(icon, (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
 
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, "https://example.com/new", 30));
             Assert.AreEqual(30L, await _database.ScalarAsync("SELECT updated_at FROM website_icons"));
-            await _database.ExecuteAsync("UPDATE website_icons SET deleted_at = 40");
+
+            await _database.ExecuteAsync("DELETE FROM website_icons");
+
             Assert.AreEqual(0, (await _service.GetWebsiteIconsAsync()).Count);
             await _service.SaveWebsiteIconAsync(new WebsiteIconRecord(page, "https://example.com/new", 50));
-            Assert.AreEqual(10L, await _database.ScalarAsync("SELECT created_at FROM website_icons"));
             Assert.AreEqual(50L, await _database.ScalarAsync("SELECT updated_at FROM website_icons"));
-            Assert.AreEqual(DBNull.Value, await _database.ScalarAsync("SELECT deleted_at FROM website_icons"));
             Assert.AreEqual("https://example.com/new", (await _service.GetWebsiteIconsAsync()).Single().IconUrl);
             Assert.AreEqual(1L, await _database.ScalarAsync("SELECT COUNT(*) FROM website_icons"));
         }
@@ -173,6 +247,126 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(1, controlled.InitializationCount);
         }
 
+        [DataTestMethod]
+        [DataRow("scripts")]
+        [DataRow("values")]
+        [DataRow("permissions")]
+        [DataRow("tabs")]
+        public async Task UserScriptReads_InitializeWithoutStorageQueue(string operation)
+        {
+            var key = ScriptKey.Parse(Guid.NewGuid().ToString());
+
+            switch (operation)
+            {
+                case "scripts":
+                    Assert.AreEqual(0, (await _service.GetUserScriptsAsync()).Count);
+                    break;
+                case "values":
+                    Assert.AreEqual(0, (await _service.GetUserScriptValuesAsync(key.ToString(), CancellationToken.None)).Count);
+                    break;
+                case "permissions":
+                    var scope = new UserScriptPermissionScope(key.ToString(), "GM.cookie", "https://example.com");
+                    Assert.IsNull(await _service.GetUserScriptPermissionDecisionAsync(scope, CancellationToken.None));
+                    break;
+                case "tabs":
+                    Assert.AreEqual(0, (await _service.GetUserScriptTabStatesAsync(key.ToString(), CancellationToken.None)).Count);
+                    break;
+                default:
+                    Assert.Fail("Unknown userscript operation.");
+                    break;
+            }
+
+            Assert.AreEqual(4L, await _database.ScalarAsync("PRAGMA user_version"));
+        }
+
+        [TestMethod]
+        public async Task UserScriptSave_InitializesAndRollsBackWhenSourceCommitFails()
+        {
+            var key = ScriptKey.Parse(Guid.NewGuid().ToString());
+            const long installedAtMilliseconds = 1700000000123L;
+            var installedAt = DateTimeOffset.FromUnixTimeMilliseconds(installedAtMilliseconds);
+            var updatedAt = installedAt.AddMilliseconds(1);
+            var record = new UserScriptDatabaseRecord(key, null, true, installedAt.ToOffset(TimeSpan.FromHours(8)).AddTicks(1234),
+                updatedAt, new string('a', 64), Guid.NewGuid().ToString("D"));
+
+            await Assert.ThrowsExceptionAsync<IOException>(() => _service.SaveUserScriptAsync(record, Array.Empty<UserScriptAssetDatabaseRecord>(),
+                () => throw new IOException("source switch failed"), CancellationToken.None));
+
+            Assert.IsNull(await _service.GetUserScriptAsync(key));
+            Assert.AreEqual(4L, await _database.ScalarAsync("PRAGMA user_version"));
+
+            await _service.SaveUserScriptAsync(record, Array.Empty<UserScriptAssetDatabaseRecord>(), null, CancellationToken.None);
+
+            var restored = await _service.GetUserScriptAsync(key);
+
+            Assert.AreEqual(key, restored.ScriptKey);
+            Assert.AreEqual(installedAt, restored.InstalledAt);
+            Assert.AreEqual(updatedAt, restored.UpdatedAt);
+            Assert.AreEqual(installedAtMilliseconds, await _database.ScalarAsync("SELECT installed_at FROM monkeysharp_scripts"));
+            Assert.AreEqual(installedAtMilliseconds + 1, await _database.ScalarAsync("SELECT updated_at FROM monkeysharp_scripts"));
+            Assert.AreEqual(record.SourceSha256, restored.SourceSha256);
+            Assert.AreEqual(record.CommitId, restored.CommitId);
+        }
+
+        [TestMethod]
+        public async Task TabState_CloseRejectsWriteAlreadyWaitingForDatabase()
+        {
+            var controlled = new ControlledDatabase(_database);
+            var database = new DatabaseService(controlled);
+            var storage = new UserScriptStorage(database);
+
+            await database.InitializeAsync();
+
+            using (var entered = new ManualResetEventSlim())
+            using (var release = new ManualResetEventSlim())
+            {
+                var queued = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                controlled.TransactionQueued = () => queued.TrySetResult(true);
+
+                var blocker = _database.TransactionAsync(session =>
+                {
+                    entered.Set();
+
+                    if (!release.Wait(TimeSpan.FromSeconds(10)))
+                        throw new TimeoutException();
+                });
+
+                try
+                {
+                    Assert.IsTrue(entered.Wait(TimeSpan.FromSeconds(10)));
+
+                    var state = new SqliteUserScriptTabStateService(storage, "closing-tab");
+                    var pending = state.SaveAsync(ScriptKey.Parse(Guid.NewGuid().ToString()), null, "{}", CancellationToken.None);
+
+                    Assert.AreSame(queued.Task, await Task.WhenAny(queued.Task, Task.Delay(TimeSpan.FromSeconds(10))));
+                    Assert.IsFalse(pending.IsCompleted);
+
+                    var close = state.CloseAsync();
+
+                    release.Set();
+                    await blocker;
+
+                    try
+                    {
+                        await pending;
+                        Assert.Fail("A closed tab must not save queued state.");
+                    }
+                    catch (OperationCanceledException) { }
+
+                    await close;
+
+                    Assert.AreEqual(0L, await _database.ScalarAsync("SELECT COUNT(*) FROM monkeysharp_tab_states"));
+                }
+                finally
+                {
+                    release.Set();
+                    await blocker;
+                    await storage.StopAsync();
+                }
+            }
+        }
+
         private sealed class ControlledDatabase : IDatabase
         {
             private readonly IDatabase _inner;
@@ -181,6 +375,9 @@ namespace CefFlashBrowser.Tests
             public bool HoldInitialization { get; set; }
             public bool FailNextInitialization { get; set; }
             public bool FailNextWrite { get; set; }
+
+            public Action TransactionQueued { get; set; }
+
             public TaskCompletionSource<bool> ReleaseInitialization { get; } = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             public ControlledDatabase(IDatabase inner)
@@ -198,7 +395,11 @@ namespace CefFlashBrowser.Tests
                 }
                 if (HoldInitialization)
                     await ReleaseInitialization.Task.ConfigureAwait(false);
-                await _inner.TransactionAsync(action).ConfigureAwait(false);
+
+                var transaction = _inner.TransactionAsync(action);
+
+                TransactionQueued?.Invoke();
+                await transaction.ConfigureAwait(false);
             }
 
             public Task<int> ExecuteAsync(string sql, IDictionary<string, object> parameters = null)
