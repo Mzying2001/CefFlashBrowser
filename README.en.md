@@ -33,6 +33,12 @@ With the **SOL Save Manager**, you can export, import, and edit Flash game save 
 ![solmgr](./Images/SolSaveManager.png)
 ![soledit](./Images/SolEditor.png)
 
+## Userscripts
+
+CefFlashBrowser automatically runs enabled userscripts on matching pages, letting you customize page content and behavior. Click a `.user.js` link on a web page to open the installation prompt. In the main window, open **Options → Manage Userscripts** to install scripts from a local file or by entering a URL, edit them, enable or disable them, and check for updates.
+
+![Userscript Manager](./Images/UserscriptManager.png)
+
 ## Stargazers over time
 
 <a href="https://star-history.dera.page/Mzying2001/CefFlashBrowser?style=github">
