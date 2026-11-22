@@ -1,0 +1,95 @@
+name: Publish Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'New version tag without a v prefix (for example, 2.0.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: publish-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: windows-2022
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      ARCHIVE_X86: bin/Publish/FlashBrowser_x86_v${{ inputs.tag }}.zip
+      ARCHIVE_X64: bin/Publish/FlashBrowser_x64_v${{ inputs.tag }}.zip
+
+    steps:
+      - name: Check out the release commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate the release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = $env:RELEASE_TAG
+          if ($tag -cnotmatch '\A[0-9]+(\.[0-9]+){2,3}\z') {
+            throw 'Enter a three- or four-part numeric version without a v prefix.'
+          }
+
+          [xml]$project = Get-Content -Raw -LiteralPath CefFlashBrowser/CefFlashBrowser.csproj
+          $version = $project.Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          if ($tag -cne $version) {
+            throw "Tag $tag must match the project version ($version)."
+          }
+
+          git show-ref --verify --quiet "refs/tags/$tag"
+          if ($LASTEXITCODE -eq 0) { throw "Tag $tag already exists." }
+          if ($LASTEXITCODE -ne 1) { throw 'Could not check existing Git tags.' }
+
+          $releaseTags = gh api --paginate "repos/$env:GITHUB_REPOSITORY/releases" --jq '.[].tag_name'
+          if ($LASTEXITCODE -ne 0) { throw 'Could not check existing GitHub releases.' }
+          if ($releaseTags -ccontains $tag) { throw "A release for tag $tag already exists." }
+
+      - name: Build and package x86 and x64
+        shell: cmd
+        run: call publish.bat
+
+      - name: Verify release archives
+        run: |
+          foreach ($path in @($env:ARCHIVE_X86, $env:ARCHIVE_X64)) {
+            $archive = Get-Item -LiteralPath $path
+            if ($archive -isnot [System.IO.FileInfo] -or $archive.Length -eq 0) {
+              throw "Expected a non-empty ZIP archive at $path."
+            }
+          }
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate release notes
+        shell: bash
+        env:
+          RELEASE_NOTES_API_KEY: ${{ secrets.RELEASE_NOTES_API_KEY }}
+          RELEASE_NOTES_API_BASE_URL: ${{ vars.RELEASE_NOTES_API_BASE_URL }}
+          RELEASE_NOTES_MODEL: ${{ vars.RELEASE_NOTES_MODEL }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          if [[ -z "$RELEASE_NOTES_API_BASE_URL" ]]; then unset RELEASE_NOTES_API_BASE_URL; fi
+          if [[ -z "$RELEASE_NOTES_MODEL" ]]; then unset RELEASE_NOTES_MODEL; fi
+          python ReleaseNotes/generate.py --github-repo "$GITHUB_REPOSITORY" > "$RUNNER_TEMP/release-notes.md"
+          test -s "$RUNNER_TEMP/release-notes.md"
+
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = $env:RELEASE_TAG
+          gh release create $tag $env:ARCHIVE_X86 $env:ARCHIVE_X64 `
+            --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA `
+            --title "v$tag - release" --notes-file (Join-Path $env:RUNNER_TEMP 'release-notes.md') --latest
+          exit $LASTEXITCODE

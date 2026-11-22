@@ -31,6 +31,12 @@ Supply the API base URL. The CLI appends `/chat/completions`, and the service mu
 
 In CI, check out the target commit and fetch the full history, including the base tag, before running the same command. In Bash, use `python ReleaseNotes/generate.py > release-notes.md` to save the result. On failure, the CLI reports the reason to standard error and returns a nonzero exit status.
 
+## Publish a GitHub Release manually
+
+Once the workflow is on the default branch (`master`), add the `RELEASE_NOTES_API_KEY` secret under **Settings → Secrets and variables → Actions**. Set the `RELEASE_NOTES_API_BASE_URL` and `RELEASE_NOTES_MODEL` repository variables to use a custom model service.
+
+Open **Actions → Publish Release → Run workflow**, select the branch to release, and enter a `tag` such as `2.0.0`. Use `master` or a branch whose workflow files match `master`. The tag must match `<Version>` in `CefFlashBrowser/CefFlashBrowser.csproj` at that commit. The workflow runs `publish.bat` to package x86 and x64, generates bilingual notes, creates the tag, and publishes `v2.0.0 - release` with both ZIP archives.
+
 ## Project layout
 
 - `generate.py` is the CLI entry point.

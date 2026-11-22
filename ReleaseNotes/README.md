@@ -31,6 +31,12 @@ API 地址填基址。CLI 会追加 `/chat/completions`，服务需支持 Chat C
 
 在 CI 中，检出目标提交和包含基线 tag 的完整历史，再运行同一个命令。在 Bash 中可通过 `python ReleaseNotes/generate.py > release-notes.md` 收集正文。失败时 CLI 在标准错误报告原因并返回非零状态。
 
+## 手动发布 GitHub Release
+
+工作流合入默认分支 `master` 后，在仓库的 **Settings → Secrets and variables → Actions** 添加 `RELEASE_NOTES_API_KEY` secret。需要自定义模型服务时，可设置仓库变量 `RELEASE_NOTES_API_BASE_URL` 和 `RELEASE_NOTES_MODEL`。
+
+从 **Actions → Publish Release → Run workflow** 选择要发布的分支并输入 `tag`，例如 `2.0.0`。使用 `master` 或工作流文件与 `master` 一致的分支。输入必须与该提交中 `CefFlashBrowser/CefFlashBrowser.csproj` 的 `<Version>` 一致。工作流调用 `publish.bat` 打包 x86 和 x64、生成双语日志，再创建 tag 并正式发布 `v2.0.0 - release`，附上两个 ZIP。
+
 ## 项目结构
 
 - `generate.py` 提供 CLI 入口。
