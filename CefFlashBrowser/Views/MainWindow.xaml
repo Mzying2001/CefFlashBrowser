@@ -41,19 +41,6 @@
         <Menu>
             <!--Favorites Menu-->
             <MenuItem Header="{DynamicResource common_favorites}">
-                <MenuItem.ItemTemplate>
-                    <DataTemplate DataType="{x:Type m:Website}">
-                        <StackPanel MaxWidth="250">
-                            <TextBlock Text="{Binding Name}"
-                                       TextTrimming="CharacterEllipsis"/>
-                            <TextBlock FontSize="10"
-                                       Text="{Binding Url}"
-                                       TextTrimming="CharacterEllipsis"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </MenuItem.ItemTemplate>
-
                 <MenuItem.ItemContainerStyle>
                     <Style TargetType="MenuItem"
                            BasedOn="{StaticResource {x:Type MenuItem}}">
@@ -71,6 +58,8 @@
                                 </c:BrowserIcon>
                             </DataTemplate>
                         </Style.Resources>
+                        <Setter Property="MinWidth" Value="250"/>
+                        <Setter Property="MaxWidth" Value="300"/>
                         <Setter Property="Template"
                                 Value="{StaticResource MenuItemWithoutShortcutTemplate}"/>
                         <Setter Property="Tag"
@@ -97,6 +86,19 @@
                         </Style.Triggers>
                     </Style>
                 </MenuItem.ItemContainerStyle>
+
+                <MenuItem.ItemTemplate>
+                    <DataTemplate DataType="{x:Type m:Website}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock FontSize="10"
+                                       Text="{Binding Url}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </MenuItem.ItemTemplate>
 
                 <MenuItem.ItemsSource>
                     <CompositeCollection>

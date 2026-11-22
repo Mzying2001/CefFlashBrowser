@@ -185,8 +185,8 @@
                                 </c:BrowserIcon>
                             </DataTemplate>
                         </Style.Resources>
-                        <Setter Property="MaxWidth"
-                                Value="250"/>
+                        <Setter Property="MinWidth" Value="250"/>
+                        <Setter Property="MaxWidth" Value="300"/>
                         <Setter Property="Template"
                                 Value="{StaticResource MenuItemWithoutShortcutTemplate}"/>
                         <Setter Property="Icon"
@@ -251,6 +251,7 @@
 
         <!--Script commands menu-->
         <ContextMenu x:Key="scriptCommandsMenu"
+                     MinWidth="250"
                      MaxWidth="300"
                      VerticalOffset="-8"
                      HorizontalOffset="8"
