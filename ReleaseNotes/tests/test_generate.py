@@ -139,17 +139,20 @@ class HarnessTests(unittest.TestCase):
         ), redirect_stdout(out), redirect_stderr(err):
             code = generate.main([
                 "--repo", str(self.root), "--api-base-url", url, "--api-key-file", str(key_file), "--model", "test-model",
+                "--max-tool-rounds", "2", "--max-tool-calls", "6",
             ])
 
         self.assertEqual((code, out.getvalue(), err.getvalue()), (0, RELEASE_BODY + "\n", ""))
         self.assertEqual(len(requests), 3)
+        self.assertEqual(requests[-1][2]["tool_choice"], "none")
         for path, authorization, body in requests:
             self.assertEqual(path, "/v1/chat/completions")
             self.assertEqual(authorization, f"Bearer {MOCK_KEY}")
             self.assertNotIn(MOCK_KEY, json.dumps(body))
         first = requests[0][2]
         self.assertEqual(first["model"], "test-model")
-        self.assertEqual(first["messages"][0]["role"], "system")
+        prompt = Path(generate.__file__).with_name("system_prompt.md").read_text(encoding="utf-8")
+        self.assertEqual(first["messages"][0], {"role": "system", "content": prompt})
         context = json.loads(first["messages"][1]["content"].split("\n", 1)[1])
         self.assertEqual(context["base_tag"], "1.0")
         self.assertEqual(context["head_commit"], self.head)
@@ -223,9 +226,9 @@ class HarnessTests(unittest.TestCase):
         history = tool_call("history", "git_history", "list")
         extra = tool_call("more", "git_changes", "files")
         for limits, initial_calls in (
-            ({"MAX_ROUNDS": 1}, [history]),
-            ({"MAX_CALLS": 1}, [history]),
-            ({"MAX_CALLS": 1}, [history, extra]),
+            ({"max_tool_rounds": 1}, [history]),
+            ({"max_tool_calls": 1}, [history]),
+            ({"max_tool_calls": 1}, [history, extra]),
         ):
             with self.subTest(limits=limits, batch_size=len(initial_calls)):
                 requests = []
@@ -238,9 +241,11 @@ class HarnessTests(unittest.TestCase):
                         return completion(content=RELEASE_BODY)
                     return completion(extra)
 
-                with patch.multiple(generate, **limits), patch.object(generate, "request_json", side_effect=request):
+                with patch.object(generate, "request_json", side_effect=request):
                     self.assertEqual(
-                        generate.generate_notes(self.repository, [], "https://example.invalid", "test-model", MOCK_KEY),
+                        generate.generate_notes(
+                            self.repository, [], "https://example.invalid", "test-model", MOCK_KEY, **limits,
+                        ),
                         RELEASE_BODY,
                     )
                 self.assertEqual(len(requests), 2)

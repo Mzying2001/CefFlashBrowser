@@ -22,6 +22,10 @@ On success, standard output contains UTF-8 Markdown ready to paste into a GitHub
 | `--api-base-url` or `RELEASE_NOTES_API_BASE_URL` | `https://api.deepseek.com` |
 | `--model` or `RELEASE_NOTES_MODEL` | `deepseek-flash` |
 | `--api-key-file` or `RELEASE_NOTES_API_KEY` | Read the specified key file if provided, otherwise use the environment variable |
+| `--max-tool-rounds` | Up to 32 rounds of tool use |
+| `--max-tool-calls` | Up to 64 tool calls in total |
+
+Each round can include several tool calls. When either limit is reached, the CLI requests the final body using the evidence already collected. Use these options to adjust the budget for the release range.
 
 Supply the API base URL. The CLI appends `/chat/completions`, and the service must support Chat Completions tool calls. Command-line options take precedence over environment variables. The CLI uses the model credential only in the authorization header. Store it in a CI secret or a Git-ignored local file.
 

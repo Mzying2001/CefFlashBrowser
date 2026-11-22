@@ -22,6 +22,10 @@ python ReleaseNotes/generate.py
 | `--api-base-url` 或 `RELEASE_NOTES_API_BASE_URL` | `https://api.deepseek.com` |
 | `--model` 或 `RELEASE_NOTES_MODEL` | `deepseek-flash` |
 | `--api-key-file` 或 `RELEASE_NOTES_API_KEY` | 使用显式传入的密钥文件，否则读取环境变量 |
+| `--max-tool-rounds` | 最多 32 轮工具查询 |
+| `--max-tool-calls` | 总共最多 64 次工具调用 |
+
+每轮可以包含多次工具调用。达到任一上限时，CLI 会用已收集的信息请求最终正文。可通过这两个参数按发布区间调整预算。
 
 API 地址填基址。CLI 会追加 `/chat/completions`，服务需支持 Chat Completions 工具调用。命令行参数优先于环境变量。模型凭据只用于认证请求头。密钥应放在 CI secret 或 Git 忽略的本地文件中。
 
