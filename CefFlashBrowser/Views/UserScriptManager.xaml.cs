@@ -13,18 +13,21 @@ using SimpleMvvm.Command;
 using SimpleMvvm.Ioc;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace CefFlashBrowser.Views
 {
     public partial class UserScriptManager : Window
     {
         private const double MaxScriptListWidth = 450;
+        private const string JavaScriptFileExtension = ".js";
         private const string UserScriptFileExtension = ".user.js";
 
         private readonly ConditionalWeakTable<UserScriptItemViewModel, ScriptEditorState> _editorStates;
@@ -108,7 +111,7 @@ namespace CefFlashBrowser.Views
 
             var dialog = new OpenFileDialog
             {
-                Filter = $"{language.GetString("userScriptManager_javaScriptFile")}|*{UserScriptFileExtension};*.js|" +
+                Filter = $"{language.GetString("userScriptManager_javaScriptFile")}|*{UserScriptFileExtension};*{JavaScriptFileExtension}|" +
                          $"{language.GetString("common_allFiles")}|*.*"
             };
 
@@ -116,6 +119,45 @@ namespace CefFlashBrowser.Views
             {
                 await ViewModel.ImportFileAsync(dialog.FileName);
             }
+        }
+
+        private void ImportFileDragOver(object sender, DragEventArgs e)
+        {
+            GetDroppedScriptPath(e);
+        }
+
+        private async void ImportFileDrop(object sender, DragEventArgs e)
+        {
+            var path = GetDroppedScriptPath(e);
+            if (path == null)
+                return;
+
+            // Finish the drag-and-drop operation before import can open an update dialog.
+            await Dispatcher.Yield(DispatcherPriority.Background);
+            await ViewModel.ImportFileAsync(path);
+        }
+
+        private string GetDroppedScriptPath(DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop, autoConvert: false))
+                return null;
+
+            e.Handled = true;
+            e.Effects = DragDropEffects.None;
+
+            ICommand import = ImportFileCommand;
+
+            if (!import.CanExecute(null) || (e.AllowedEffects & DragDropEffects.Copy) == 0
+                || !(e.Data.GetData(DataFormats.FileDrop, autoConvert: false) is string[] files) || files.Length != 1)
+                return null;
+
+            var path = files[0];
+
+            if (path?.EndsWith(JavaScriptFileExtension, StringComparison.OrdinalIgnoreCase) != true || Directory.Exists(path))
+                return null;
+
+            e.Effects = DragDropEffects.Copy;
+            return path;
         }
 
         private async void Export()

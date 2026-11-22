@@ -12,6 +12,10 @@
         Height="500"
         MinWidth="600"
         MinHeight="400"
+        AllowDrop="True"
+        PreviewDragEnter="ImportFileDragOver"
+        PreviewDragOver="ImportFileDragOver"
+        PreviewDrop="ImportFileDrop"
         Title="{DynamicResource userScriptManager_title}"
         DataContext="{Binding Source={StaticResource Locator}, Path=UserScriptManagerViewModel}">
 
