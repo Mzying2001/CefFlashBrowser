@@ -185,8 +185,10 @@
                                 </c:BrowserIcon>
                             </DataTemplate>
                         </Style.Resources>
-                        <!--<Setter Property="Header"
-                                Value="{Binding Name}"/>-->
+                        <Setter Property="MaxWidth"
+                                Value="250"/>
+                        <Setter Property="Template"
+                                Value="{StaticResource MenuItemWithoutShortcutTemplate}"/>
                         <Setter Property="Icon"
                                 Value="{Binding}"/>
                         <Setter Property="Command"
@@ -197,10 +199,10 @@
                 </MenuItem.ItemContainerStyle>
                 <MenuItem.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
-                        <TextBlock MaxWidth="200"
-                                   VerticalAlignment="Center"
-                                   TextTrimming="CharacterEllipsis"
-                                   Text="{Binding Name}"/>
+                        <TextBlock VerticalAlignment="Center"
+                                   HorizontalAlignment="Left"
+                                   Text="{Binding Name}"
+                                   TextTrimming="CharacterEllipsis"/>
                     </DataTemplate>
                 </MenuItem.ItemTemplate>
             </MenuItem>
