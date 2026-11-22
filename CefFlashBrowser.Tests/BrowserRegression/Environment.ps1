@@ -143,6 +143,7 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
     foreach ($nativePath in @{
         CefDllPath = $Context.CefPath
         SqliteDllPath = (Join-Path $Context.ApplicationPath 'Binaries\SQLite')
+        VcRuntimeDllPath = (Join-Path $Context.ApplicationPath 'Binaries\VCRuntime')
     }.GetEnumerator()) {
         $globalDataType.GetField('<' + $nativePath.Key + '>k__BackingField', $privateStatic).SetValue($null, $nativePath.Value)
     }

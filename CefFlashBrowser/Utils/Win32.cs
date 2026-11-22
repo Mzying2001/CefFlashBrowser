@@ -43,6 +43,8 @@ namespace CefFlashBrowser.Utils
         public const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
 
         // DLL search directories
+        public const uint LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR = 0x00000100;
+        public const uint LOAD_LIBRARY_SEARCH_SYSTEM32 = 0x00000800;
         public const uint LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
 
         // shell links
@@ -139,6 +141,9 @@ namespace CefFlashBrowser.Utils
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
         public static extern IntPtr AddDllDirectory(string newDirectory);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+        public static extern IntPtr LoadLibraryExW(string fileName, IntPtr file, uint flags);
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindowLong(IntPtr hWnd, int nIndex);

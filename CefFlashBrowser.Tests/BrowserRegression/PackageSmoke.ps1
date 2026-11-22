@@ -27,6 +27,30 @@ foreach ($file in @('CefFlashBrowser.exe', 'Binaries\SQLite\SQLite.Interop.dll',
         throw "Required package file is missing: $file"
     }
 }
+$runtimeFiles = @('msvcp140.dll', 'vcruntime140.dll')
+$expectedMachine = 0x014c
+if ($Platform -eq 'x64') {
+    $runtimeFiles += 'vcruntime140_1.dll'
+    $expectedMachine = 0x8664
+}
+$runtimePath = Join-Path $packagePath 'Binaries\VCRuntime'
+$cefPath = Join-Path $packagePath 'Binaries\CefSharp'
+foreach ($file in $runtimeFiles) {
+    $runtimeFile = Join-Path $runtimePath $file
+    $reader = New-Object IO.BinaryReader ([IO.File]::OpenRead($runtimeFile))
+    try {
+        $reader.BaseStream.Position = 0x3c
+        $reader.BaseStream.Position = $reader.ReadInt32()
+        if ($reader.ReadUInt32() -ne 0x4550 -or $reader.ReadUInt16() -ne $expectedMachine) {
+            throw "Expected a $Platform PE image at $runtimeFile."
+        }
+    } finally {
+        $reader.Dispose()
+    }
+    if ((Get-FileHash -LiteralPath $runtimeFile).Hash -ne (Get-FileHash -LiteralPath (Join-Path $cefPath $file)).Hash) {
+        throw "The CefSharp copy of $file must match the bundled runtime."
+    }
+}
 if ((Test-Path -LiteralPath (Join-Path $packagePath 'Assets')) -or
     @(Get-ChildItem -LiteralPath $packagePath -Recurse -File -Filter '*.tar.gz').Count -ne 0) {
     throw 'The package must deploy dependencies under Binaries without Assets or dependency archives.'
@@ -54,8 +78,9 @@ foreach ($dataPath in @{
     MonkeySharpPath = (Join-Path $temporaryPath 'MonkeySharp')
     UserScriptCachePath = (Join-Path $temporaryPath 'Caches\UserScripts')
     LogsPath = (Join-Path $temporaryPath 'Logs')
-    CefDllPath = (Join-Path $packagePath 'Binaries\CefSharp')
+    CefDllPath = $cefPath
     SqliteDllPath = (Join-Path $packagePath 'Binaries\SQLite')
+    VcRuntimeDllPath = $runtimePath
 }.GetEnumerator()) {
     $globalDataType.GetField('<' + $dataPath.Key + '>k__BackingField', $privateStatic).SetValue($null, $dataPath.Value)
 }
@@ -64,6 +89,12 @@ $globalDataType.GetField('<Settings>k__BackingField', $privateStatic).SetValue($
     (New-Object System.Windows.Threading.DispatcherSynchronizationContext))
 $programType = $applicationAssembly.GetType('CefFlashBrowser.Program')
 [void]$programType.GetMethod('InitializeDllDirectories', $privateStatic).Invoke($null, $null)
+$modules = @(Get-Process -Id $PID -Module)
+foreach ($file in $runtimeFiles) {
+    if ($modules.FileName -notcontains (Join-Path $runtimePath $file)) {
+        throw "The application must preload $file from the isolated package under Binaries\VCRuntime."
+    }
+}
 $register = $programType.GetMethod('RegisterServices', $privateStatic)
 $unregister = $programType.GetMethod('UnregisterServices', $privateStatic)
 
@@ -152,7 +183,7 @@ try {
     }
     . (Join-Path $PSScriptRoot 'Helpers.ps1')
     . (Join-Path $PSScriptRoot 'PackageBrowserSmoke.ps1')
-    Test-PackagedUserScripts $packagePath $temporaryPath $scripts $installation
+    Test-PackagedUserScripts $packagePath $temporaryPath $scripts $installation $runtimeFiles
     $nativeModules = @(Get-Process -Id $PID -Module | Where-Object ModuleName -eq 'SQLite.Interop.dll')
     if ($nativeModules.Count -ne 1 -or $nativeModules[0].FileName -ne $sqliteInteropPath) {
         throw 'SQLite must load its native library from the isolated package under Binaries\SQLite.'

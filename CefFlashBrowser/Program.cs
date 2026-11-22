@@ -16,7 +16,9 @@ using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -55,26 +57,37 @@ namespace CefFlashBrowser
         {
             string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-            if (DirectoryHelper.CanReadAndWriteDirectory(appDirectory))
-            {
-                Run(args);
-            }
-            else
+            if (!DirectoryHelper.CanReadAndWriteDirectory(appDirectory))
             {
                 MessageBox.Show(
                     string.Format(InsufficientDirectoryPermissionsMessage, appDirectory),
                     "CefFlashBrowser - Insufficient Permissions",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
+                return;
             }
+
+            try
+            {
+                InitializeDllDirectories();
+            }
+            catch (Win32Exception e)
+            {
+                MessageBox.Show(
+                    $"{e.Message}\r\n\r\n{new Win32Exception(e.NativeErrorCode).Message} ({e.NativeErrorCode})",
+                    "CefFlashBrowser", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            Run(args);
         }
 
+        // The CLR can resolve mixed-mode dependencies while compiling Run.
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void Run(string[] args)
         {
             try
             {
-                InitializeDllDirectories();
-
                 RegisterServices();
                 _mutex = new Mutex(true, "CefFlashBrowser", out bool isNewInstance);
 
@@ -135,13 +148,41 @@ namespace CefFlashBrowser
 
         private static void InitializeDllDirectories()
         {
+            const int _X86 = 0b01;
+            const int _X64 = 0b10;
+
             if (!Win32.SetDefaultDllDirectories(Win32.LOAD_LIBRARY_SEARCH_DEFAULT_DIRS))
                 throw new Win32Exception(Marshal.GetLastWin32Error(), "Failed to configure native DLL search directories.");
 
-            foreach (string directory in new[] { GlobalData.CefDllPath, GlobalData.SqliteDllPath })
+            foreach (string directory in new[] { GlobalData.CefDllPath, GlobalData.SqliteDllPath, GlobalData.VcRuntimeDllPath })
             {
                 if (Win32.AddDllDirectory(directory) == IntPtr.Zero)
                     throw new Win32Exception(Marshal.GetLastWin32Error(), $"Failed to add native DLL search directory '{directory}'.");
+            }
+
+            // Preload these for the process lifetime. CefSharp has its own copies for the subprocess.
+            var preloads = new[]
+            {
+                new { name = "vcruntime140.dll",   architecture = _X86 | _X64 },
+                new { name = "vcruntime140_1.dll", architecture = _X64 },
+                new { name = "msvcp140.dll",       architecture = _X86 | _X64 },
+            };
+            foreach (var dll in preloads)
+            {
+                if ((dll.architecture & (Environment.Is64BitProcess ? _X64 : _X86)) == 0)
+                    continue;
+                LoadRuntimeLibrary(dll.name);
+            }
+        }
+
+        private static void LoadRuntimeLibrary(string fileName)
+        {
+            string path = Path.Combine(GlobalData.VcRuntimeDllPath, fileName);
+            const uint flags = Win32.LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | Win32.LOAD_LIBRARY_SEARCH_SYSTEM32;
+
+            if (Win32.LoadLibraryExW(path, IntPtr.Zero, flags) == IntPtr.Zero)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error(), $"Failed to load the bundled VC++ runtime library '{path}'.");
             }
         }
 

@@ -19,6 +19,7 @@ namespace CefFlashBrowser.Data
         public static string LogsPath { get; }
         public static string CefDllPath { get; }
         public static string SqliteDllPath { get; }
+        public static string VcRuntimeDllPath { get; }
         public static string PluginsPath { get; }
         public static string SharedObjectsPath { get; }
 
@@ -51,6 +52,7 @@ namespace CefFlashBrowser.Data
             LogsPath = Path.Combine(AppBaseDirectory, "Logs\\");
             CefDllPath = Path.Combine(BinariesPath, "CefSharp\\");
             SqliteDllPath = Path.Combine(BinariesPath, "SQLite\\");
+            VcRuntimeDllPath = Path.Combine(BinariesPath, "VCRuntime\\");
             PluginsPath = Path.Combine(BinariesPath, "Plugins\\");
             SharedObjectsPath = Path.Combine(CachesPath, "Pepper Data\\Shockwave Flash\\WritableRoot\\#SharedObjects\\");
 

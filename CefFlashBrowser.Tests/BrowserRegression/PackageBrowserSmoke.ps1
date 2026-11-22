@@ -1,4 +1,4 @@
-function Test-PackagedUserScripts($PackagePath, $TemporaryPath, $Scripts, $Installation) {
+function Test-PackagedUserScripts($PackagePath, $TemporaryPath, $Scripts, $Installation, [string[]]$RuntimeFiles) {
     # Resolve only the supplied archive and its Costura resources, without build-output fallbacks.
     $cefPath = Join-Path $PackagePath 'Binaries\CefSharp'
     foreach ($dependency in @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.WinForms.dll')) {
@@ -82,6 +82,25 @@ GM.setValue('packaged-commit', 42).then(function () {
         Assert-Regression ($committed.Exists -and $committed.Value.EncodedValue -eq 'n42') 'packaged asynchronous GM write reaches SQLite before acknowledgement'
         $nativeCef = @(Get-Process -Id $PID -Module | Where-Object ModuleName -eq 'libcef.dll')
         Assert-Regression ($nativeCef.Count -eq 1 -and $nativeCef[0].FileName -eq (Join-Path $cefPath 'libcef.dll')) 'native CEF loads from the supplied package'
+        Wait-Regression $context {
+            foreach ($subprocess in [Diagnostics.Process]::GetProcessesByName('CefSharp.BrowserSubprocess')) {
+                try {
+                    if ($subprocess.MainModule.FileName -ne $settings.BrowserSubprocessPath) { continue }
+                    $subprocessModules = @($subprocess.Modules | ForEach-Object FileName)
+                    $missingRuntimeFiles = @($RuntimeFiles | Where-Object {
+                        $subprocessModules -notcontains (Join-Path $cefPath $_)
+                    })
+                    if ($missingRuntimeFiles.Count -eq 0) { return $true }
+                } catch [ComponentModel.Win32Exception], [InvalidOperationException] {
+                    # CEF can exit a subprocess between enumeration and module inspection.
+                    continue
+                } finally {
+                    $subprocess.Dispose()
+                }
+            }
+            return $false
+        } 'CEF subprocess loads the bundled VC++ runtime'
+        Assert-Regression $true 'CEF subprocess loads the bundled VC++ runtime'
     } finally {
         try {
             if ($null -ne $scriptHost) {

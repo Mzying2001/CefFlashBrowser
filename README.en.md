@@ -22,9 +22,6 @@ Download the latest release from the [Release page](https://github.com/Mzying200
 
 > [!NOTE]
 > The application requires `.NET Framework 4.6.2`. If you see an error saying the application can’t start, you can download and install it from [here](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net462).
-<!---->
-> [!NOTE]
-> If you encounter a `System.IO.FileNotFoundException` on startup, it’s usually because the `Microsoft Visual C++ Redistributable` is missing, you can download and install it from [here](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist#latest-microsoft-visual-c-redistributable-version).
 
 ## Save Manager
 

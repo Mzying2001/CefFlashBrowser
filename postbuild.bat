@@ -13,6 +13,11 @@ if /i not "%CFB_BUILD_PLATFORM%"=="x86" if /i not "%CFB_BUILD_PLATFORM%"=="x64" 
 set "ASSETS_PATH=%~dp0CefFlashBrowser\Assets"
 set "CEF_PATH=Binaries\CefSharp"
 set "PLUGINS_PATH=Binaries\Plugins"
+set "VC_RUNTIME_PATH=Binaries\VCRuntime"
+set "VC_RUNTIME_ARCHIVE=VCRuntime\vcruntime_%CFB_BUILD_PLATFORM%.tar.gz"
+
+set "VC_RUNTIME_FILES=msvcp140.dll vcruntime140.dll"
+if /i "%CFB_BUILD_PLATFORM%"=="x64" set "VC_RUNTIME_FILES=%VC_RUNTIME_FILES% vcruntime140_1.dll"
 
 if not exist "%ASSETS_PATH%\CefSharp\libcef_%CFB_BUILD_PLATFORM%.tar.gz" (
     echo Error: Missing "%ASSETS_PATH%\CefSharp\libcef_%CFB_BUILD_PLATFORM%.tar.gz". 1>&2
@@ -20,6 +25,10 @@ if not exist "%ASSETS_PATH%\CefSharp\libcef_%CFB_BUILD_PLATFORM%.tar.gz" (
 )
 if not exist "%ASSETS_PATH%\Plugins\pepflashplayer_%CFB_BUILD_PLATFORM%.tar.gz" (
     echo Error: Missing "%ASSETS_PATH%\Plugins\pepflashplayer_%CFB_BUILD_PLATFORM%.tar.gz". 1>&2
+    exit /b 1
+)
+if not exist "%ASSETS_PATH%\%VC_RUNTIME_ARCHIVE%" (
+    echo Error: Missing "%ASSETS_PATH%\%VC_RUNTIME_ARCHIVE%". 1>&2
     exit /b 1
 )
 
@@ -48,7 +57,7 @@ for %%D in ("%EXTRACT_PATH%\..") do (
 if exist "%EXTRACT_PATH%" goto PrepareExtraction
 set "RESULT=1"
 
-mkdir "%EXTRACT_PATH%\CefSharp" "%EXTRACT_PATH%\Plugins"
+mkdir "%EXTRACT_PATH%\CefSharp" "%EXTRACT_PATH%\Plugins" "%EXTRACT_PATH%\VCRuntime"
 if errorlevel 1 goto Cleanup
 
 call :Extract "CefSharp\libcef_%CFB_BUILD_PLATFORM%.tar.gz" ".postbuild\%EXTRACT_NAME%\CefSharp"
@@ -57,10 +66,23 @@ if errorlevel 1 goto Cleanup
 call :Extract "Plugins\pepflashplayer_%CFB_BUILD_PLATFORM%.tar.gz" ".postbuild\%EXTRACT_NAME%\Plugins"
 if errorlevel 1 goto Cleanup
 
+call :Extract "%VC_RUNTIME_ARCHIVE%" ".postbuild\%EXTRACT_NAME%\VCRuntime"
+if errorlevel 1 goto Cleanup
+
+for %%F in (%VC_RUNTIME_FILES%) do (
+    if not exist "%EXTRACT_PATH%\VCRuntime\%%F" (
+        echo Error: Missing "%%F" in "%VC_RUNTIME_ARCHIVE%". 1>&2
+        goto Cleanup
+    )
+)
+
 if not exist "%CEF_PATH%\" mkdir "%CEF_PATH%"
 if errorlevel 1 goto Cleanup
 
 if not exist "%PLUGINS_PATH%\" mkdir "%PLUGINS_PATH%"
+if errorlevel 1 goto Cleanup
+
+if not exist "%VC_RUNTIME_PATH%\" mkdir "%VC_RUNTIME_PATH%"
 if errorlevel 1 goto Cleanup
 
 rem Override the NuGet libcef.dll after the official CefSharp deployment.
@@ -72,6 +94,14 @@ if errorlevel 1 goto Cleanup
 
 copy /b /y "%ASSETS_PATH%\Plugins\readme.txt" "%PLUGINS_PATH%\readme.txt"
 if errorlevel 1 goto Cleanup
+
+rem CefSharp.BrowserSubprocess starts with its own DLL search directories.
+for %%F in (%VC_RUNTIME_FILES%) do (
+    copy /b /y "%EXTRACT_PATH%\VCRuntime\%%F" "%VC_RUNTIME_PATH%\%%F"
+    if errorlevel 1 goto Cleanup
+    copy /b /y "%EXTRACT_PATH%\VCRuntime\%%F" "%CEF_PATH%\%%F"
+    if errorlevel 1 goto Cleanup
+)
 
 set "RESULT=0"
 
