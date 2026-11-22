@@ -283,7 +283,7 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
 
     foreach ($converter in @(
         'BinaryToSizeStringConverter', 'IntToDoubleConverter', 'LanguageNameConverter', 'MultiEqualityConverter',
-        'ObjectGetTypeConverter', 'ObjectToStringConverter', 'UrlGetFileNameConverter',
+        'ObjectGetTypeConverter', 'ObjectToStringConverter',
         'WebsiteIconUrlConverter', 'ZoomLevelToScaleConverter'
     )) {
         $Context.Application.Resources.Add($converter, (New-Object "CefFlashBrowser.Views.Converters.$converter"))

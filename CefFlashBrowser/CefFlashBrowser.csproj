@@ -41,6 +41,7 @@
     <Resource Include="Assets\Svgs\down.svg" />
     <Resource Include="Assets\Svgs\edit.svg" />
     <Resource Include="Assets\Svgs\export.svg" />
+    <Resource Include="Assets\Svgs\flash-player.svg" />
     <Resource Include="Assets\Svgs\forward.svg" />
     <Resource Include="Assets\Svgs\import.svg" />
     <Resource Include="Assets\Svgs\language.svg" />

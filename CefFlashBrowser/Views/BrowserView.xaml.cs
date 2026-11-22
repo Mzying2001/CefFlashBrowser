@@ -58,36 +58,55 @@ namespace CefFlashBrowser.Views
                 IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload,
                 string requestInitiator, ref bool disableDefaultHandling)
             {
-                if (browser.IsPopup)
+                if (browser == null || browser.IsPopup)
                     return null;
-                if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var url)
-                    || url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps)
+
+                var control = _view.browser;
+                // The top-level navigation belongs to the incoming document. Track the resources
+                // requested by that document once it commits, including its subframes.
+                long? swfPageVersion = frame != null && request.ResourceType != ResourceType.MainFrame
+                    ? control.SwfPageVersion : (long?)null;
+                var address = request.Url;
+                if (!Uri.TryCreate(address, UriKind.Absolute, out var url))
                     return null;
+
+                if (url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps)
+                {
+                    if (url.IsFile && swfPageVersion.HasValue)
+                        control.ObserveSwfRequest(swfPageVersion.Value, address);
+                    return null;
+                }
 
                 var factory = chromiumWebBrowser.ResourceRequestHandlerFactory;
                 IResourceRequestHandler registered = null;
+
                 if (factory?.HasHandlers == true)
+                {
                     registered = factory.GetResourceRequestHandler(chromiumWebBrowser, browser, frame,
                         request, isNavigation, isDownload, requestInitiator, ref disableDefaultHandling);
+                }
 
-                return new DownloadResponseHandler(_view.browser.DownloadHandler as Browser.Handlers.DownloadHandler,
-                    frame?.Url, isDownload, registered);
+                return new BrowserResourceRequestHandler(control, frame?.Url, isDownload, swfPageVersion, registered);
             }
         }
 
-        private sealed class DownloadResponseHandler : IResourceRequestHandler
+        private sealed class BrowserResourceRequestHandler : IResourceRequestHandler
         {
+            private readonly ChromiumFlashBrowser _browser;
             private readonly Browser.Handlers.DownloadHandler _downloads;
             private readonly string _page;
             private readonly bool _isDownload;
+            private readonly long? _swfPageVersion;
             private readonly IResourceRequestHandler _inner;
 
-            public DownloadResponseHandler(Browser.Handlers.DownloadHandler downloads, string page, bool isDownload,
-                IResourceRequestHandler inner)
+            public BrowserResourceRequestHandler(ChromiumFlashBrowser browser, string page, bool isDownload,
+                long? swfPageVersion, IResourceRequestHandler inner)
             {
-                _downloads = downloads;
+                _browser = browser;
+                _downloads = browser.DownloadHandler as Browser.Handlers.DownloadHandler;
                 _page = page;
                 _isDownload = isDownload;
+                _swfPageVersion = swfPageVersion;
                 _inner = inner;
             }
 
@@ -95,6 +114,9 @@ namespace CefFlashBrowser.Views
                 IFrame frame, IRequest request, IResponse response)
             {
                 var handled = _inner?.OnResourceResponse(chromiumWebBrowser, browser, frame, request, response) ?? false;
+                if (!handled && _swfPageVersion.HasValue)
+                    _browser.ObserveSwfRequest(_swfPageVersion.Value, request.Url, response.MimeType);
+
                 if (_isDownload || request.ResourceType == ResourceType.MainFrame || request.ResourceType == ResourceType.SubFrame
                     || !string.IsNullOrEmpty(response.Headers["Content-Disposition"]))
                     _downloads?.RememberResponse(request, response, _page);
@@ -106,7 +128,12 @@ namespace CefFlashBrowser.Views
                 => _inner?.GetCookieAccessFilter(control, browser, frame, request);
 
             public CefReturnValue OnBeforeResourceLoad(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request, IRequestCallback callback)
-                => _inner?.OnBeforeResourceLoad(control, browser, frame, request, callback) ?? CefReturnValue.Continue;
+            {
+                var result = _inner?.OnBeforeResourceLoad(control, browser, frame, request, callback) ?? CefReturnValue.Continue;
+                if (result == CefReturnValue.Continue && _swfPageVersion.HasValue)
+                    _browser.ObserveSwfRequest(_swfPageVersion.Value, request.Url);
+                return result;
+            }
 
             public IResourceHandler GetResourceHandler(IWebBrowser control, IBrowser browser, IFrame frame, IRequest request)
                 => _inner?.GetResourceHandler(control, browser, frame, request);

@@ -8,6 +8,7 @@ function Test-BrowserWindow($Context) {
     Test-BrowserDevTools $Context $window $view $browser
     Test-BrowserNavigation $Context $window $view $browser
     Test-BrowserDisplay $Context $window $view $browser
+    Test-BrowserPageSwfs $Context
     Test-BrowserClose $Context $window $view $browser
     Test-BrowserStateRestoration $Context $browser
 }
@@ -159,10 +160,6 @@ function Test-BrowserNavigation($Context, $window, $view, $browser) {
 }
 
 function Test-BrowserDisplay($Context, $window, $view, $browser) {
-    [void](Invoke-JavaScript $Context $browser "console.info('Cross-origin plugin content from https://example.invalid/game.swf');")
-    Wait-Regression $Context { $browser.BlockedSwfs.Count -gt 0 } 'Flash blocking notification'
-    $blockedItems = $window.Resources['blockedSwfsMenu'].Items[1]
-    Assert-Regression ($blockedItems.Items.Contains('https://example.invalid/game.swf')) 'blocked Flash menu retains its browser binding'
     $statusMethod = [CefFlashBrowser.WinformCefSharp4WPF.ChromiumWebBrowser].GetMethod(
         'OnStatusMessage', [Reflection.BindingFlags]'Instance,NonPublic', $null, [Type[]]@([CefSharp.StatusMessageEventArgs]), $null)
     $statusEvent = New-Object CefSharp.StatusMessageEventArgs($browser.GetBrowser(), 'regression status')
@@ -186,6 +183,91 @@ function Test-BrowserDisplay($Context, $window, $view, $browser) {
     Assert-Regression ($window.WindowStyle -eq [System.Windows.WindowStyle]::None) 'F11 enters window fullscreen'
     $window.ViewModel.ToggleFullscreen($view.ViewModel)
     Assert-Regression ($window.WindowStyle -eq [System.Windows.WindowStyle]::SingleBorderWindow) 'F11 restores window chrome'
+}
+
+function Test-BrowserPageSwfs($Context) {
+    $fixture = New-Object UserScriptHttpFixture
+    $window = $null
+    $player = $null
+    try {
+        $window = New-RegressionWindow $Context
+        $model = $window.ViewModel.CurrentBrowser
+        $browser = $model.Browser
+        $button = $window.FindName('toolbarPageSwfsButton')
+        $menu = $window.Resources['pageSwfsMenu']
+        Assert-Regression ($button.Visibility -eq 'Collapsed') 'SWF toolbar button is initially hidden'
+
+        $model.Address = $fixture.BaseUrl + '/swf-page'
+        Wait-Regression $Context { $browser.Title -eq 'SWF fixture' -and !$browser.IsLoading } 'SWF fixture page loads'
+        $gameUrl = $fixture.BaseUrl + '/GAME.SWF?token=a%2Fb'
+        $expected = @(
+            $fixture.BaseUrl + '/embedded.swf'
+            $fixture.BaseUrl + '/frame.swf'
+            $gameUrl
+            $fixture.BaseUrl + '/swf-response'
+            $fixture.BaseUrl + '/swf-missing.swf'
+        )
+        [void](Invoke-JavaScript $Context $browser @'
+console.info('Cross-origin plugin content from https://example.invalid/fake.swf');
+fetch('/GAME.SWF?token=a%2Fb').then(() => fetch('/GAME.SWF?token=a%2Fb'));
+fetch('/swf-redirect');
+fetch('/swf-missing.swf');
+true;
+'@)
+        Wait-Regression $Context {
+            $browser.PageSwfs.Count -ge $expected.Count -and $fixture.RequestsFor('/GAME.SWF') -eq 2
+        } 'CEF observes SWFs from the page and its iframe'
+        $actual = @($browser.PageSwfs | ForEach-Object { $_.Url })
+        Assert-Regression ($actual.Count -eq $expected.Count -and !(Compare-Object $expected $actual)) 'SWF list contains only requested resources and deduplicates URLs'
+        $game = $browser.PageSwfs | Where-Object { $_.Url -ceq $gameUrl }
+        Assert-Regression ($game -is [CefFlashBrowser.FlashBrowser.SwfResourceRecord] -and
+            $game.FileName -ceq 'GAME.SWF') 'SWF item exposes its filename and full URL'
+        Wait-Regression $Context { $button.IsVisible } 'SWF toolbar button appears'
+        Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($button) -ceq 'PageSwfs') 'SWF toolbar has a fixed automation name'
+        Assert-Regression ($button.Content.UriSource.OriginalString -eq '/Assets/Svgs/flash-player.svg') 'SWF toolbar uses the Flash Player icon'
+
+        $buttonPeer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($button)
+        $buttonPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $menu.IsOpen -and $menu.Items.Count -eq $expected.Count } 'clicking the SWF button displays the current page list'
+        Wait-Regression $Context {
+            $null -ne $menu.ItemContainerGenerator.ContainerFromItem($game)
+        } 'SWF menu generates the player item'
+        $item = $menu.ItemContainerGenerator.ContainerFromItem($game)
+        Assert-Regression ($item.ToolTip -ceq $gameUrl -and $null -ne $item.Command) 'SWF menu item exposes the complete URL and player action'
+        $itemPeer = New-Object System.Windows.Automation.Peers.MenuItemAutomationPeer($item)
+        $itemPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context {
+            @($Context.Application.Windows | Where-Object {
+                $_ -is [CefFlashBrowser.Views.SwfPlayerWindow] -and $_.FileName -ceq $gameUrl
+            }).Count -eq 1
+        } 'SWF menu selection opens the player with the full URL'
+        $player = $Context.Application.Windows | Where-Object {
+            $_ -is [CefFlashBrowser.Views.SwfPlayerWindow] -and $_.FileName -ceq $gameUrl
+        }
+        $playerBrowser = (Find-BrowserView $player).ViewModel.Browser
+        Wait-Regression $Context { $player.Title -ceq 'GAME.SWF' } 'SWF player applies the selected file'
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser "document.getElementById('flash-player').getAttribute('src')") -ceq $gameUrl) 'SWF player preserves the query string'
+
+        [void](New-RegressionTab $Context $window ($fixture.BaseUrl + '/swf-empty'))
+        Wait-Regression $Context { $button.Visibility -eq 'Collapsed' } 'a tab with no SWFs hides the button'
+        $window.ViewModel.SelectBrowser(-1)
+        Wait-Regression $Context { $window.ViewModel.CurrentBrowser -eq $model -and $button.IsVisible } 'returning to the SWF tab restores the button'
+
+        $version = $browser.SwfPageVersion
+        [void](Invoke-JavaScript $Context $browser "location.hash = 'section'; fetch('/swf-delayed'); true;")
+        Wait-Regression $Context { $fixture.RequestsFor('/swf-delayed') -eq 1 } 'the old document has an in-flight SWF response'
+        Assert-Regression ($browser.PageSwfs.Count -eq $expected.Count -and $browser.SwfPageVersion -eq $version) 'same-document navigation keeps the SWF list'
+        $model.Address = $fixture.BaseUrl + '/swf-empty'
+        Wait-Regression $Context { $browser.Title -eq 'Empty SWF fixture' -and $button.Visibility -eq 'Collapsed' } 'a new document clears the SWF list'
+        $fixture.Release('/swf-delayed')
+        $browser.ObserveSwfRequest($version, ($fixture.BaseUrl + '/swf-delayed'), 'application/x-shockwave-flash')
+        [void](Invoke-JavaScript $Context $browser 'true')
+        Assert-Regression ($browser.PageSwfs.Count -eq 0) 'an old document response cannot populate the new page'
+    } finally {
+        if ($null -ne $player) { $player.ForceCloseWindow() }
+        if ($null -ne $window) { $window.ForceCloseWindow() }
+        $fixture.Dispose()
+    }
 }
 
 function Test-BrowserStatusPopupOffset($Context, $window) {

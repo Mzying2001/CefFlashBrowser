@@ -153,7 +153,6 @@
     <sys:String x:Key="browser_openInDefaultBrowser">Apri nel browser predefinito</sys:String>
     <sys:String x:Key="browser_createShortcut">Crea scorciatoia</sys:String>
     <sys:String x:Key="browser_addFavorite">Aggiungi a Preferiti</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">Alcuni contenuti Flash sembrano bloccati dal kernel Chromium, puoi avviarli in SWF player:</sys:String>
     <sys:String x:Key="browser_toolTipBack">Indietro (Alt+Left)</sys:String>
     <sys:String x:Key="browser_toolTipForward">Avanti (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Ricarica (Ctrl+R)</sys:String>
@@ -161,7 +160,7 @@
     <sys:String x:Key="browser_toolTipNewTab">Nuova scheda (Ctrl+T)</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">Chiudi scheda (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Altro</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">Contenuti Flash bloccati</sys:String>
+    <sys:String x:Key="browser_toolTipPageSwfs">File SWF in questa pagina</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Ingrandisci (Ctrl+Plus)</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">Riduci (Ctrl+Minus)</sys:String>
     <sys:String x:Key="browser_loading">Caricamento...</sys:String>

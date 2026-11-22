@@ -153,7 +153,6 @@
     <sys:String x:Key="browser_openInDefaultBrowser">Открыть в браузере по умолчанию</sys:String>
     <sys:String x:Key="browser_createShortcut">Создать ярлык</sys:String>
     <sys:String x:Key="browser_addFavorite">Добавить этот сайт в избранное</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">Некоторое Flash-содержимое, похоже, заблокировано ядром Chromium. Его можно воспроизвести в SWF-плеере:</sys:String>
     <sys:String x:Key="browser_toolTipBack">Назад (Alt+Left)</sys:String>
     <sys:String x:Key="browser_toolTipForward">Вперед (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Обновить (Ctrl+R)</sys:String>
@@ -161,7 +160,7 @@
     <sys:String x:Key="browser_toolTipNewTab">Новая вкладка (Ctrl+T)</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">Закрыть вкладку (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Еще</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">Заблокированное Flash-содержимое</sys:String>
+    <sys:String x:Key="browser_toolTipPageSwfs">Файлы SWF на этой странице</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Увеличить (Ctrl+Plus)</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">Уменьшить (Ctrl+Minus)</sys:String>
     <sys:String x:Key="browser_loading">Загрузка...</sys:String>

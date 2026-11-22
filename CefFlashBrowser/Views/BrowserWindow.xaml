@@ -340,53 +340,32 @@
             </ContextMenu.ItemContainerStyle>
         </ContextMenu>
 
-        <!--Blocked SWFs menu-->
-        <ContextMenu x:Key="blockedSwfsMenu"
+        <!--Page SWFs menu-->
+        <ContextMenu x:Key="pageSwfsMenu"
                      VerticalOffset="-8"
-                     HorizontalOffset="8">
+                     HorizontalOffset="8"
+                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                     ItemsSource="{Binding CurrentBrowser.Browser.PageSwfs}">
             <ContextMenu.ItemContainerStyle>
-                <Style TargetType="MenuItem">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="MenuItem">
-                                <ContentPresenter Content="{TemplateBinding Header}"/>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
+                <Style TargetType="MenuItem"
+                       BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Setter Property="AutomationProperties.Name"
+                            Value="{Binding FileName}"/>
+                    <Setter Property="ToolTip"
+                            Value="{Binding Url}"/>
+                    <Setter Property="Command"
+                            Value="{Binding DataContext.OpenInSwfPlayerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <Setter Property="CommandParameter"
+                            Value="{Binding Url}"/>
                 </Style>
             </ContextMenu.ItemContainerStyle>
-            <ContextMenu.ItemsSource>
-                <x:Array Type="{x:Type sys:Object}">
-                    <TextBlock Margin="35,10"
-                               MaxWidth="250"
-                               TextWrapping="Wrap"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               Text="{DynamicResource browser_tipsBlockedSwfs}"/>
-                    <ItemsControl ItemsSource="{Binding Source={x:Reference Name=window}, Path=DataContext.CurrentBrowser.Browser.BlockedSwfs}">
-                        <ItemsControl.Resources>
-                            <Style TargetType="MenuItem"
-                                   BasedOn="{StaticResource {x:Type MenuItem}}">
-                                <Setter Property="Tag"
-                                        Value="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
-                            </Style>
-                        </ItemsControl.Resources>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate DataType="{x:Type sys:String}">
-                                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag.OpenInSwfPlayerCommand}"
-                                          CommandParameter="{Binding}">
-                                    <MenuItem.Header>
-                                        <TextBlock MaxWidth="250"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Text="{Binding Converter={StaticResource UrlGetFileNameConverter}}"
-                                                   ToolTip="{Binding}"/>
-                                    </MenuItem.Header>
-                                </MenuItem>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </x:Array>
-            </ContextMenu.ItemsSource>
+            <ContextMenu.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock MaxWidth="250"
+                               TextTrimming="CharacterEllipsis"
+                               Text="{Binding FileName}"/>
+                </DataTemplate>
+            </ContextMenu.ItemTemplate>
         </ContextMenu>
     </Window.Resources>
 
@@ -584,17 +563,19 @@
                                   UriSource="{StaticResource PluginIconUri}"/>
                 </Button>
 
-                <!--blocked swfs button-->
-                <Button Margin="0,0,10,0"
-                        ToolTip="{DynamicResource browser_toolTipBlockedSwfs}">
+                <!--page swfs button-->
+                <Button x:Name="toolbarPageSwfsButton"
+                        Margin="0,0,10,0"
+                        AutomationProperties.Name="PageSwfs"
+                        ToolTip="{DynamicResource browser_toolTipPageSwfs}">
                     <i:Interaction.Behaviors>
-                        <behaviors:ContextMenuBehavior Menu="{DynamicResource blockedSwfsMenu}"/>
+                        <behaviors:ContextMenuBehavior Menu="{DynamicResource pageSwfsMenu}"/>
                     </i:Interaction.Behaviors>
                     <Button.Style>
                         <Style TargetType="Button"
                                BasedOn="{StaticResource {x:Type Button}}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.BlockedSwfs.Count}" Value="0">
+                                <DataTrigger Binding="{Binding CurrentBrowser.Browser.PageSwfs.Count, FallbackValue=0}" Value="0">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>
@@ -602,7 +583,7 @@
                     </Button.Style>
                     <svgc:SvgIcon Width="14"
                                   Height="14"
-                                  UriSource="{StaticResource WarningIconUri}"/>
+                                  UriSource="{StaticResource FlashPlayerIconUri}"/>
                 </Button>
 
                 <!--find button-->

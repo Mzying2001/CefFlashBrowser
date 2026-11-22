@@ -153,7 +153,6 @@
     <sys:String x:Key="browser_openInDefaultBrowser">在預設瀏覽器開啟</sys:String>
     <sys:String x:Key="browser_createShortcut">建立網頁捷徑</sys:String>
     <sys:String x:Key="browser_addFavorite">將此網站加入我的最愛</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">部分 Flash 內容可能被 Chromium 核心封鎖，您可以在 SWF 播放器中播放：</sys:String>
     <sys:String x:Key="browser_toolTipBack">上一頁（Alt+向左鍵）</sys:String>
     <sys:String x:Key="browser_toolTipForward">下一頁（Alt+向右鍵）</sys:String>
     <sys:String x:Key="browser_toolTipReload">重新整理（Ctrl+R）</sys:String>
@@ -161,7 +160,7 @@
     <sys:String x:Key="browser_toolTipNewTab">新分頁（Ctrl+T）</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">關閉分頁（Ctrl+W）</sys:String>
     <sys:String x:Key="browser_toolTipMore">更多功能</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">被封鎖的 Flash 內容</sys:String>
+    <sys:String x:Key="browser_toolTipPageSwfs">目前頁面的 SWF 檔案</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">放大（Ctrl+加號鍵）</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">縮小（Ctrl+減號鍵）</sys:String>
     <sys:String x:Key="browser_loading">載入中...</sys:String>

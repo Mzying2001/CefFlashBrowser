@@ -153,7 +153,6 @@
     <sys:String x:Key="browser_openInDefaultBrowser">既定のブラウザーで開く</sys:String>
     <sys:String x:Key="browser_createShortcut">ショートカットを作成</sys:String>
     <sys:String x:Key="browser_addFavorite">このサイトをお気に入りに追加</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">一部の Flash コンテンツは Chromium カーネルによってブロックされているようです。SWF プレーヤーで再生できます:</sys:String>
     <sys:String x:Key="browser_toolTipBack">戻る (Alt+Left)</sys:String>
     <sys:String x:Key="browser_toolTipForward">進む (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">再読み込み (Ctrl+R)</sys:String>
@@ -161,7 +160,7 @@
     <sys:String x:Key="browser_toolTipNewTab">新しいタブ (Ctrl+T)</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">タブを閉じる (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">その他</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">ブロックされた Flash コンテンツ</sys:String>
+    <sys:String x:Key="browser_toolTipPageSwfs">このページの SWF ファイル</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">拡大 (Ctrl+Plus)</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">縮小 (Ctrl+Minus)</sys:String>
     <sys:String x:Key="browser_loading">読み込み中...</sys:String>

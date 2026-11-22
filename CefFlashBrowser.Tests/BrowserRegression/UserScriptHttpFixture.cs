@@ -25,6 +25,15 @@ public sealed class UserScriptHttpFixture : IDisposable
 
     public bool Offline { get; set; }
 
+    private static byte[] SwfPayload()
+    {
+        // Uncompressed SWF 6 with a 20 by 20 pixel stage and one empty frame.
+        return new byte[] {
+            0x46, 0x57, 0x53, 0x06, 0x16, 0x00, 0x00, 0x00, 0x50, 0x00, 0xc8,
+            0x00, 0x0c, 0x80, 0x00, 0x0c, 0x01, 0x00, 0x40, 0x00, 0x00, 0x00
+        };
+    }
+
     public byte[] Payload
     {
         get
@@ -127,6 +136,41 @@ public sealed class UserScriptHttpFixture : IDisposable
                 {
                     body = Payload;
                     type = "application/octet-stream";
+                }
+                else if (path == "/swf-page")
+                {
+                    body = Encoding.UTF8.GetBytes("<title>SWF fixture</title><img src='/embedded.swf'>"
+                        + "<iframe src='/swf-frame'></iframe><a href='/unused.swf'>Unused SWF</a>");
+                }
+                else if (path == "/swf-frame")
+                {
+                    body = Encoding.UTF8.GetBytes("<script>fetch('/frame.swf');</script>");
+                }
+                else if (path == "/swf-empty")
+                {
+                    body = Encoding.UTF8.GetBytes("<title>Empty SWF fixture</title>");
+                }
+                else if (path == "/swf-redirect")
+                {
+                    status = "302 Found";
+                    extra = "Location: /swf-response\r\n";
+                    body = new byte[0];
+                }
+                else if (path == "/swf-missing.swf")
+                {
+                    status = "404 Not Found";
+                    body = new byte[0];
+                }
+                else if (path == "/swf-response" || path == "/swf-delayed" || path.EndsWith(".swf", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (path == "/swf-delayed")
+                    {
+                        var gate = gates.GetOrAdd(path, key => new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously));
+                        await gate.Task.ConfigureAwait(false);
+                    }
+
+                    type = "application/x-shockwave-flash";
+                    body = SwfPayload();
                 }
                 else if (path == "/failed")
                 {

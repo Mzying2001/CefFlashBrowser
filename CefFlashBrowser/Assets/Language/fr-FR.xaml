@@ -153,7 +153,6 @@
     <sys:String x:Key="browser_openInDefaultBrowser">Ouvrir dans le navigateur par défaut</sys:String>
     <sys:String x:Key="browser_createShortcut">Créer un raccourci</sys:String>
     <sys:String x:Key="browser_addFavorite">Ajouter ce site aux favoris</sys:String>
-    <sys:String x:Key="browser_tipsBlockedSwfs">Certains contenus Flash semblent être bloqués par le noyau Chromium, vous pouvez les lire dans le lecteur SWF :</sys:String>
     <sys:String x:Key="browser_toolTipBack">Revenir en arrière (Alt+Left)</sys:String>
     <sys:String x:Key="browser_toolTipForward">Avancer (Alt+Right)</sys:String>
     <sys:String x:Key="browser_toolTipReload">Recharger (Ctrl+R)</sys:String>
@@ -161,7 +160,7 @@
     <sys:String x:Key="browser_toolTipNewTab">Nouvel onglet (Ctrl+T)</sys:String>
     <sys:String x:Key="browser_toolTipCloseTab">Fermer l’onglet (Ctrl+W)</sys:String>
     <sys:String x:Key="browser_toolTipMore">Plus</sys:String>
-    <sys:String x:Key="browser_toolTipBlockedSwfs">Contenu Flash bloqué</sys:String>
+    <sys:String x:Key="browser_toolTipPageSwfs">Fichiers SWF sur cette page</sys:String>
     <sys:String x:Key="browser_toolTipZoomIn">Augmente la taille du texte (Ctrl+Plus)</sys:String>
     <sys:String x:Key="browser_toolTipZoomOut">Réduit la taille du texte (Ctrl+Minus)</sys:String>
     <sys:String x:Key="browser_loading">Chargement...</sys:String>

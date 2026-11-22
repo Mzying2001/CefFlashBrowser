@@ -78,6 +78,7 @@
             <sys:Uri x:Key="DownIconUri">/Assets/Svgs/down.svg</sys:Uri>
             <sys:Uri x:Key="EditIconUri">/Assets/Svgs/edit.svg</sys:Uri>
             <sys:Uri x:Key="ExportIconUri">/Assets/Svgs/export.svg</sys:Uri>
+            <sys:Uri x:Key="FlashPlayerIconUri">/Assets/Svgs/flash-player.svg</sys:Uri>
             <sys:Uri x:Key="ForwardIconUri">/Assets/Svgs/forward.svg</sys:Uri>
             <sys:Uri x:Key="ImportIconUri">/Assets/Svgs/import.svg</sys:Uri>
             <sys:Uri x:Key="LanguageIconUri">/Assets/Svgs/language.svg</sys:Uri>
@@ -112,7 +113,6 @@
             <converters:ObjectGetTypeConverter x:Key="ObjectGetTypeConverter"/>
             <converters:ObjectToStringConverter x:Key="ObjectToStringConverter"/>
             <converters:MultiplyConverter x:Key="TwoThirdConverter" Multiplier="0.6666666666666667"/>
-            <converters:UrlGetFileNameConverter x:Key="UrlGetFileNameConverter"/>
             <converters:WebsiteIconUrlConverter x:Key="WebsiteIconUrlConverter"/>
             <converters:ZoomLevelToScaleConverter x:Key="ZoomLevelToScaleConverter"/>
 
