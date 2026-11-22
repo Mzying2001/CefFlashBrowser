@@ -1,3 +1,4 @@
+using CefFlashBrowser.Browser;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
@@ -8,6 +9,8 @@ using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
 using System.ComponentModel;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -21,6 +24,7 @@ namespace CefFlashBrowser.Views
     public partial class SwfPlayerWindow : Window
     {
         private const string PlayerResourceName = "CefFlashBrowser.Assets.SwfPlayer.swfplayer.html";
+        private static readonly Lazy<string> PlayerTemplate = new Lazy<string>(ReadPlayerTemplate);
 
         private bool _doClose = false;
         private bool _isClosed = false;
@@ -30,6 +34,7 @@ namespace CefFlashBrowser.Views
         internal bool IsClosing => _doClose || _forceClosePending || _windowCloseTask != null && !_windowCloseTask.IsCompleted;
 
         private BrowserViewModel ViewModel => browserView?.ViewModel;
+        private static string LocalPlayerUrl => new Uri(GlobalData.SwfPlayerPath).AbsoluteUri;
 
         public string FileName
         {
@@ -45,6 +50,13 @@ namespace CefFlashBrowser.Views
             var window = (SwfPlayerWindow)d;
             var browser = window.ViewModel?.Browser;
 
+            if (window.browserView.PlayerPage != null)
+            {
+                window.browserView.PlayerPage = null;
+                window.ViewModel.Address = LocalPlayerUrl;
+                return;
+            }
+
             if (window._isClosed || !window.browserView.IsLoaded
                 || browser == null || browser.IsDisposed)
             {
@@ -53,7 +65,7 @@ namespace CefFlashBrowser.Views
 
             try
             {
-                if (browser.CanExecuteJavascriptInMainFrame)
+                if (browser.CanExecuteJavascriptInMainFrame && IsLocalPlayerPage(browser.Address))
                 {
                     window.LoadSwf(e.NewValue as string);
                 }
@@ -73,15 +85,32 @@ namespace CefFlashBrowser.Views
             ViewModel.Browser.FrameLoadEnd += OnBrowserFrameLoadEnd;
             ViewModel.Browser.DragHandler = new Browser.Handlers.DisableDragHandler();
 
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(PlayerTemplate.Value)))
+            {
+                ViewModel.Browser.RegisterResourceHandler(LocalPlayerUrl, stream, "text/html");
+            }
+
+            Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
+        }
+
+        internal void OpenFromPage(SwfPageContext context)
+        {
+            FileName = context.Resource.Url;
+            var page = new SwfPlayerPage(context, LocalPlayerUrl, PlayerTemplate.Value);
+            browserView.PlayerPage = page;
+            ViewModel.Address = page.StartUrl;
+        }
+
+        private static string ReadPlayerTemplate()
+        {
             using (var stream = typeof(SwfPlayerWindow).Assembly.GetManifestResourceStream(PlayerResourceName))
             {
                 if (stream == null)
                     throw new InvalidOperationException($"Embedded SWF player page not found: {PlayerResourceName}");
 
-                ViewModel.Browser.RegisterResourceHandler(new Uri(GlobalData.SwfPlayerPath).AbsoluteUri, stream, "text/html");
+                using (var reader = new StreamReader(stream))
+                    return reader.ReadToEnd();
             }
-
-            Messenger.Global.Register(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -117,6 +146,7 @@ namespace CefFlashBrowser.Views
         protected override void OnClosed(EventArgs e)
         {
             _isClosed = true;
+            browserView.PlayerPage = null;
             ViewModel?.MarkClosed();
 
             Messenger.Global.Unregister(MessageTokens.CLOSE_ALL_BROWSERS, CloseBrowserHandler);
@@ -133,12 +163,16 @@ namespace CefFlashBrowser.Views
         {
             var browser = ViewModel?.Browser;
 
-            if (!_isClosed && browserView.IsLoaded && browser != null && !browser.IsDisposed
-                && e.Frame.IsMain
-                && string.Equals(e.Url, new Uri(GlobalData.SwfPlayerPath).AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+            if (!_isClosed && browserView.PlayerPage == null && browserView.IsLoaded && browser != null && !browser.IsDisposed
+                && e.Frame.IsMain && IsLocalPlayerPage(e.Url))
             {
                 LoadSwf(FileName);
             }
+        }
+
+        private static bool IsLocalPlayerPage(string address)
+        {
+            return string.Equals(address, LocalPlayerUrl, StringComparison.OrdinalIgnoreCase);
         }
 
         private void CloseBrowserHandler(object msg)

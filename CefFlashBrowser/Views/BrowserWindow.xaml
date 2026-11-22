@@ -356,7 +356,7 @@
                     <Setter Property="Command"
                             Value="{Binding DataContext.OpenInSwfPlayerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                     <Setter Property="CommandParameter"
-                            Value="{Binding Url}"/>
+                            Value="{Binding}"/>
                 </Style>
             </ContextMenu.ItemContainerStyle>
             <ContextMenu.ItemTemplate>

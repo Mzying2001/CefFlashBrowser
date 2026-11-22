@@ -46,6 +46,7 @@ namespace CefFlashBrowser.Browser.UserScripts
         private bool _initialBlankTarget;
         private readonly UserScriptTabService _tabs;
         private readonly Func<Window> _ownerWindow;
+        private readonly Func<string, bool> _isPlayerDocument;
         private UserScriptNotificationService _notifications;
         private UserScriptDownloadService _downloads;
         private readonly CefSharpTabAudioService _audio;
@@ -64,7 +65,7 @@ namespace CefFlashBrowser.Browser.UserScripts
 
         public UserScriptBrowserSession(ChromiumFlashBrowser browser, BrowserViewModel model,
             UserScriptService service, ILogger logger, Lazy<DownloadManagerService> downloadManager,
-            Action mount, Func<Window> owner, Func<Task<bool>> close)
+            Action mount, Func<Window> owner, Func<Task<bool>> close, Func<string, bool> isPlayerDocument = null)
         {
             _browser = browser;
             _model = model;
@@ -74,6 +75,7 @@ namespace CefFlashBrowser.Browser.UserScripts
             _mount = mount;
             _dispatcher = browser.Dispatcher;
             _ownerWindow = owner;
+            _isPlayerDocument = isPlayerDocument;
 
             _tabs = new UserScriptTabService(model, owner, close, _dispatcher, _lifetime.Token);
             _audio = new CefSharpTabAudioService(() => _browser.IsDisposed || !_browser.IsBrowserInitialized
@@ -603,7 +605,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                 _model.UserScriptMatchCount = count;
         }
 
-        private static bool AllowsScripts(string address)
+        private bool AllowsScripts(string address)
         {
             if (!Uri.TryCreate(address, UriKind.Absolute, out var url))
                 return false;
@@ -614,7 +616,8 @@ namespace CefFlashBrowser.Browser.UserScripts
             if (url.Scheme != "http" && url.Scheme != "https" && url.Scheme != "file")
                 return false;
 
-            return !string.Equals(url.AbsoluteUri, new Uri(GlobalData.SwfPlayerPath).AbsoluteUri, StringComparison.OrdinalIgnoreCase);
+            return _isPlayerDocument?.Invoke(address) != true
+                && !string.Equals(url.AbsoluteUri, new Uri(GlobalData.SwfPlayerPath).AbsoluteUri, StringComparison.OrdinalIgnoreCase);
         }
 
         private void SetState(UserScriptState state, string error = null)

@@ -1,5 +1,6 @@
 ﻿using CefSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -11,7 +12,9 @@ namespace CefFlashBrowser.FlashBrowser
     {
         private readonly ObservableCollection<SwfResourceRecord> _pageSwfs = new ObservableCollection<SwfResourceRecord>();
         private readonly HashSet<string> _pageSwfUrls = new HashSet<string>(StringComparer.Ordinal);
+        private readonly ConcurrentDictionary<long, long> _swfFrameVersions = new ConcurrentDictionary<long, long>();
         private long _swfPageVersion;
+        private long _nextSwfFrameVersion;
 
         public ReadOnlyObservableCollection<SwfResourceRecord> PageSwfs { get; }
 
@@ -26,18 +29,24 @@ namespace CefFlashBrowser.FlashBrowser
 
         protected override void OnFrameLoadStart(FrameLoadStartEventArgs e)
         {
-            if (!IsDisposed && e.Frame.IsMain)
+            if (!IsDisposed)
             {
-                Interlocked.Increment(ref _swfPageVersion);
-                _pageSwfUrls.Clear();
-                _pageSwfs.Clear();
+                if (e.Frame.IsMain)
+                {
+                    Interlocked.Increment(ref _swfPageVersion);
+                    _swfFrameVersions.Clear();
+                    _pageSwfUrls.Clear();
+                    _pageSwfs.Clear();
+                }
+
+                _swfFrameVersions[e.Frame.Identifier] = ++_nextSwfFrameVersion;
             }
 
             base.OnFrameLoadStart(e);
         }
 
         protected override Action<string, string> CreateResourceRequestObserver(
-            IBrowser browser, IFrame frame, IRequest request)
+            IBrowser browser, IFrame frame, IRequest request, string requestInitiator)
         {
             var pageVersion = Interlocked.Read(ref _swfPageVersion);
 
@@ -50,31 +59,51 @@ namespace CefFlashBrowser.FlashBrowser
                 && (!url.IsFile || !url.AbsolutePath.EndsWith(".swf", StringComparison.OrdinalIgnoreCase)))
                 return null;
 
-            return (address, mimeType) => ObserveSwfRequest(pageVersion, address, mimeType);
+            var frameId = frame.Identifier;
+            var frameUrl = frame.Url;
+            _swfFrameVersions.TryGetValue(frameId, out var frameVersion);
+            var requestedUrl = request.Url;
+            var referrerUrl = request.ReferrerUrl;
+            var referrerPolicy = request.ReferrerPolicy;
+            var hasOpaqueInitiator = requestInitiator == "null";
+
+            return (address, mimeType) =>
+            {
+                if (!TryGetSwfUrl(pageVersion, address, mimeType, out var swfUrl))
+                    return;
+
+                var swf = new SwfResourceRecord(address, swfUrl, requestedUrl, frameId,
+                    frameUrl, frameVersion, referrerUrl, referrerPolicy, hasOpaqueInitiator);
+                Dispatcher.InvokeAsync(() =>
+                {
+                    if (!IsDisposed && pageVersion == Interlocked.Read(ref _swfPageVersion) && _pageSwfUrls.Add(address))
+                        _pageSwfs.Add(swf);
+                });
+            };
         }
 
-        private void ObserveSwfRequest(long pageVersion, string address, string mimeType)
+        public bool IsSwfSourceCurrent(SwfResourceRecord swf)
         {
+            return !IsDisposed && _pageSwfs.Contains(swf)
+                && _swfFrameVersions.TryGetValue(swf.FrameId, out var version) && version == swf.FrameVersion;
+        }
+
+        private bool TryGetSwfUrl(long pageVersion, string address, string mimeType, out Uri url)
+        {
+            url = null;
             if (pageVersion != Interlocked.Read(ref _swfPageVersion) || IsDisposed
-                || !Uri.TryCreate(address, UriKind.Absolute, out var url))
-                return;
+                || !Uri.TryCreate(address, UriKind.Absolute, out url))
+                return false;
 
             if (url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps && !url.IsFile)
-                return;
+                return false;
 
             if (!url.AbsolutePath.EndsWith(".swf", StringComparison.OrdinalIgnoreCase)
                 && !string.Equals(mimeType, "application/x-shockwave-flash", StringComparison.OrdinalIgnoreCase)
                 && !string.Equals(mimeType, "application/vnd.adobe.flash.movie", StringComparison.OrdinalIgnoreCase))
-                return;
+                return false;
 
-            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
-                return;
-
-            Dispatcher.InvokeAsync(() =>
-            {
-                if (!IsDisposed && pageVersion == Interlocked.Read(ref _swfPageVersion) && _pageSwfUrls.Add(address))
-                    _pageSwfs.Add(new SwfResourceRecord(address, url));
-            });
+            return !Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished;
         }
 
         protected override void OnIsBrowserInitializedChanged(EventArgs e)

@@ -1,3 +1,4 @@
+using CefFlashBrowser.Browser;
 using CefFlashBrowser.Browser.UserScripts;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.FlashBrowser;
@@ -58,15 +59,21 @@ namespace CefFlashBrowser.Views
                 IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload,
                 string requestInitiator, ref bool disableDefaultHandling)
             {
-                if (browser == null || browser.IsPopup
-                    || !Uri.TryCreate(request.Url, UriKind.Absolute, out var url)
-                    || (url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps))
+                if (browser == null || browser.IsPopup)
                     return null;
 
-                var factory = chromiumWebBrowser.ResourceRequestHandlerFactory;
-                IResourceRequestHandler registered = null;
+                var playerHandler = _view.PlayerPage?.GetHandler(frame, request, isNavigation, isDownload);
+                if (playerHandler != null && isNavigation)
+                    return playerHandler;
 
-                if (factory?.HasHandlers == true)
+                if (!Uri.TryCreate(request.Url, UriKind.Absolute, out var url)
+                    || (url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps))
+                    return playerHandler;
+
+                var factory = chromiumWebBrowser.ResourceRequestHandlerFactory;
+                var registered = playerHandler;
+
+                if (registered == null && factory?.HasHandlers == true)
                 {
                     registered = factory.GetResourceRequestHandler(chromiumWebBrowser, browser, frame,
                         request, isNavigation, isDownload, requestInitiator, ref disableDefaultHandling);
@@ -318,6 +325,9 @@ namespace CefFlashBrowser.Views
             set => DataContext = value;
         }
 
+        // Read by the native resource callbacks as well as the WPF navigation policy.
+        internal volatile SwfPlayerPage PlayerPage;
+
 
 
         public BrowserView()
@@ -403,7 +413,7 @@ namespace CefFlashBrowser.Views
 
         private bool TryQueueUserScriptInstall(string address, string documentAddress = null)
         {
-            if (_isClosed || !GlobalData.Settings.EnableUserScripts
+            if (_isClosed || !GlobalData.Settings.EnableUserScripts || IsSwfPlayerDocument(address)
                 || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished
                 || !UserScriptWebInstaller.TryGetOrigin(address, out var origin))
                 return false;
@@ -431,6 +441,8 @@ namespace CefFlashBrowser.Views
 
             return _ownerWindow ?? Window.GetWindow(this);
         }
+
+        private bool IsSwfPlayerDocument(string address) => PlayerPage?.ContainsDocument(address) == true;
 
         private void BrowserDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
@@ -472,7 +484,8 @@ namespace CefFlashBrowser.Views
                 {
                     _userScriptSession = new UserScriptBrowserSession(browser, ViewModel,
                         SimpleIoc.Global.GetInstance<UserScriptService>(), SimpleIoc.Global.GetInstance<ILogger>(),
-                        _downloadManager, MountBrowser, () => _ownerWindow ?? Window.GetWindow(this), () => RequestCloseAsync(false));
+                        _downloadManager, MountBrowser, () => _ownerWindow ?? Window.GetWindow(this),
+                        () => RequestCloseAsync(false), IsSwfPlayerDocument);
                 }
             }
 

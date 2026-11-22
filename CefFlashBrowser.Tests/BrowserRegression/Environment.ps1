@@ -334,7 +334,7 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
     $Context.AuxiliarySecondAddress = ([Uri]$auxiliarySecondFile).AbsoluteUri
 }
 
-function Start-RegressionCef($Context, [string]$CachePath = '') {
+function Start-RegressionCef($Context, [string]$CachePath = '', [switch]$EnableFlash) {
     [Environment]::SetEnvironmentVariable('ComSpec',
         (Join-Path $Context.ApplicationPath 'Binaries\CmdProxy\CmdProxy.exe'))
     $cefSettings = New-Object CefFlashBrowser.FlashBrowser.CefFlashSettings
@@ -344,6 +344,12 @@ function Start-RegressionCef($Context, [string]$CachePath = '') {
     $cefSettings.CachePath = if ($CachePath) { $CachePath } else { Join-Path $Context.TemporaryPath 'Cache' }
     $cefSettings.LogFile = Join-Path $Context.TemporaryPath 'cef.log'
     $cefSettings.CefCommandLineArgs['disable-gpu'] = '1'
+    if ($EnableFlash) {
+        $cefSettings.PpapiFlashPath = Join-Path $Context.ApplicationPath 'Binaries\Plugins\pepflashplayer.dll'
+        $cefSettings.PpapiFlashVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($cefSettings.PpapiFlashPath).FileVersion.Replace(',', '.')
+        $cefSettings.EnableSystemFlash = $true
+        $cefSettings.CefCommandLineArgs['override-plugin-power-saver-for-testing'] = 'never'
+    }
     $Context.CefStarted = [CefSharp.Cef]::Initialize($cefSettings)
     if (!$Context.CefStarted) {
         throw 'CEF initialization failed'

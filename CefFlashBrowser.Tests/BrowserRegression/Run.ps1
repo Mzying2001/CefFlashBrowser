@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory')][string]$Scenario = 'All'
+    [ValidateSet('All', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -96,6 +96,12 @@ try {
     } elseif ($Scenario -eq 'Auxiliary') {
         Start-RegressionCef $context
         Test-AuxiliaryWindows $context
+    } elseif ($Scenario -eq 'PageSwfs') {
+        Start-RegressionCef $context -EnableFlash
+        Test-StandaloneBrowserPageSwfs $context
+        Test-BrowserPageSwfs $context
+        Test-SwfPlayerPageContext $context
+        Test-LocalSwfPlayerPageContext $context
     } elseif ($Scenario -eq 'ViewSource') {
         Start-RegressionCef $context
         Test-ViewSourceMinimal $context
@@ -137,7 +143,7 @@ try {
         Test-BrowserTabControl $context
         Test-ListReorderBehavior $context
         Test-BrowserTabsBeforeShow $context
-        Start-RegressionCef $context
+        Start-RegressionCef $context -EnableFlash
         Test-UserScriptManager $context
         Test-UserScriptSeams $context
         Test-UserScripts $context

@@ -123,9 +123,16 @@ namespace CefFlashBrowser.FlashBrowser
 
         // Capture any state needed by the observer before the factory can dispose the request.
         // The observer receives the URL and response MIME type, or null before the request is sent.
-        protected virtual Action<string, string> CreateResourceRequestObserver(IBrowser browser, IFrame frame, IRequest request)
+        protected virtual Action<string, string> CreateResourceRequestObserver(
+            IBrowser browser, IFrame frame, IRequest request)
         {
             return null;
+        }
+
+        protected virtual Action<string, string> CreateResourceRequestObserver(
+            IBrowser browser, IFrame frame, IRequest request, string requestInitiator)
+        {
+            return CreateResourceRequestObserver(browser, frame, request);
         }
 
         public void CloseBrowser(bool forceClose)
@@ -324,7 +331,7 @@ namespace CefFlashBrowser.FlashBrowser
             public IResourceRequestHandler GetResourceRequestHandler(IWebBrowser control, IBrowser browser, IFrame frame,
                 IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
             {
-                var observe = _owner.CreateResourceRequestObserver(browser, frame, request);
+                var observe = _owner.CreateResourceRequestObserver(browser, frame, request, requestInitiator);
                 var handler = InnerHandler.GetResourceRequestHandler(control, browser, frame, request, isNavigation,
                     isDownload, requestInitiator, ref disableDefaultHandling);
 
@@ -385,7 +392,7 @@ namespace CefFlashBrowser.FlashBrowser
                 IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
             {
                 // CefSharp's factory disposes the request before returning.
-                var observe = _owner.CreateResourceRequestObserver(browser, frame, request);
+                var observe = _owner.CreateResourceRequestObserver(browser, frame, request, requestInitiator);
                 IResourceRequestHandler handler = null;
 
                 if (InnerFactory?.HasHandlers == true)

@@ -1,4 +1,6 @@
+using CefFlashBrowser.Browser;
 using CefFlashBrowser.Data;
+using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
@@ -226,6 +228,20 @@ namespace CefFlashBrowser.ViewModels
         public void OpenInSwfPlayer(string url)
         {
             WindowManager.ShowSwfPlayer(url);
+        }
+
+        private async void OpenPageSwf(SwfResourceRecord resource)
+        {
+            if (IsClosing || resource == null || !(CurrentBrowser?.Browser is ChromiumFlashBrowser browser)
+                || !browser.PageSwfs.Contains(resource))
+                return;
+
+            var context = await SwfPageContext.TryReadAsync(browser, resource);
+
+            if (!IsClosing && !browser.Dispatcher.HasShutdownStarted)
+            {
+                WindowManager.ShowSwfPlayer(resource.Url, context);
+            }
         }
 
         public void NewBrowserWindow(string url)
@@ -496,7 +512,7 @@ namespace CefFlashBrowser.ViewModels
             CreateShortcutCommand = new DelegateCommand<BrowserViewModel>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<BrowserViewModel>(AddFavorite);
             ToggleLoadingStateCommand = new DelegateCommand<BrowserViewModel>(ToggleLoadingState);
-            OpenInSwfPlayerCommand = new DelegateCommand<string>(OpenInSwfPlayer);
+            OpenInSwfPlayerCommand = new DelegateCommand<SwfResourceRecord>(OpenPageSwf);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             AddBrowserCommand = new DelegateCommand<string>(AddBrowserCommandImpl);
             CloseBrowserCommand = new DelegateCommand<BrowserViewModel>(CloseBrowser);

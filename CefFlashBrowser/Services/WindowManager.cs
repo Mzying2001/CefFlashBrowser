@@ -1,3 +1,4 @@
+using CefFlashBrowser.Browser;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services.UserScripts;
@@ -204,7 +205,22 @@ namespace CefFlashBrowser.Services
 
         public static void ShowSwfPlayer(string fileName)
         {
-            ShowWindow<SwfPlayerWindow>(initializer: window => window.FileName = fileName);
+            ShowSwfPlayer(fileName, null);
+        }
+
+        internal static void ShowSwfPlayer(string fileName, SwfPageContext context)
+        {
+            ShowWindow<SwfPlayerWindow>(initializer: window =>
+            {
+                if (context == null)
+                {
+                    window.FileName = fileName;
+                }
+                else
+                {
+                    window.OpenFromPage(context);
+                }
+            });
         }
 
         public static void ShowPopupWebPage(string address, WindowSizeInfo sizeInfo = null)
