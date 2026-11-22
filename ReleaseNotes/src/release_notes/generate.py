@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import sys
 from urllib.error import HTTPError
-from urllib.parse import unquote, urlsplit
+from urllib.parse import quote, unquote, urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from .repository import Git, HarnessError, RepositoryRange, github_repository
@@ -292,6 +292,7 @@ def main(argv=None):
     parser.add_argument("--repo", type=Path, default=Path.cwd(), help="Git repository directory (default: current directory)")
     parser.add_argument("--github-repo", metavar="OWNER/REPO", help="GitHub Release source (default: origin)")
     parser.add_argument("--base-tag", help="Local base tag (default: most recently published stable release)")
+    parser.add_argument("--release-tag", help="New release tag to use in the download count badge")
     parser.add_argument("--api-base-url", default=os.environ.get("RELEASE_NOTES_API_BASE_URL", DEFAULT_API_BASE_URL),
                         help="Chat Completions base URL (default: RELEASE_NOTES_API_BASE_URL or DeepSeek)")
     parser.add_argument("--model", default=os.environ.get("RELEASE_NOTES_MODEL", DEFAULT_MODEL),
@@ -314,6 +315,11 @@ def main(argv=None):
         github = github_repository(args.github_repo) if args.github_repo else git.origin_repository()
         if api_key in github:
             raise HarnessError("A credential appeared in the GitHub repository name.")
+        if args.release_tag is not None:
+            if api_key in args.release_tag:
+                raise HarnessError("A credential appeared in the new release tag.")
+            if git.run("check-ref-format", f"refs/tags/{args.release_tag}", allowed=(0, 1)).returncode:
+                raise HarnessError("Expected a valid Git tag for --release-tag.")
         releases = fetch_releases(github)
         tag = args.base_tag or (releases[0]["tag"] if releases else None)
         if not tag:
@@ -321,10 +327,14 @@ def main(argv=None):
         if api_key in tag:
             raise HarnessError("A credential appeared in the base tag.")
         repository = RepositoryRange(git, tag, head)
-        print(generate_notes(
+        body = generate_notes(
             repository, releases, args.api_base_url, args.model, api_key,
             max_tool_rounds=args.max_tool_rounds, max_tool_calls=args.max_tool_calls,
-        ))
+        )
+        if args.release_tag is not None:
+            badge_tag = quote(args.release_tag, safe="")
+            body = f"![](https://img.shields.io/github/downloads/{github}/{badge_tag}/total)\n\n{body}"
+        print(body)
     except (HarnessError, OSError, ValueError) as error:
         message = str(error) if isinstance(error, HarnessError) else "Could not generate release notes. Check the input and output settings."
         if api_key:

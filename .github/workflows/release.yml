@@ -81,7 +81,8 @@ jobs:
         run: |
           if [[ -z "$RELEASE_NOTES_API_BASE_URL" ]]; then unset RELEASE_NOTES_API_BASE_URL; fi
           if [[ -z "$RELEASE_NOTES_MODEL" ]]; then unset RELEASE_NOTES_MODEL; fi
-          python ReleaseNotes/generate.py --github-repo "$GITHUB_REPOSITORY" > "$RUNNER_TEMP/release-notes.md"
+          python ReleaseNotes/generate.py --github-repo "$GITHUB_REPOSITORY" --release-tag "$RELEASE_TAG" \
+            > "$RUNNER_TEMP/release-notes.md"
           test -s "$RUNNER_TEMP/release-notes.md"
 
       - name: Publish the GitHub Release

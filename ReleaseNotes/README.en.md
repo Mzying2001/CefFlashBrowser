@@ -19,6 +19,7 @@ On success, standard output contains UTF-8 Markdown ready to paste into a GitHub
 | `--repo` | Find the repository root from the current directory |
 | `--github-repo OWNER/REPO` | Use the GitHub repository configured as `origin` |
 | `--base-tag` | Tag of the most recent stable GitHub Release |
+| `--release-tag TAG` | Optional. Supply the new release tag to prepend its download count badge |
 | `--api-base-url` or `RELEASE_NOTES_API_BASE_URL` | `https://api.deepseek.com` |
 | `--model` or `RELEASE_NOTES_MODEL` | `deepseek-flash` |
 | `--api-key-file` or `RELEASE_NOTES_API_KEY` | Read the specified key file if provided, otherwise use the environment variable |
@@ -35,7 +36,7 @@ In CI, check out the target commit and fetch the full history, including the bas
 
 Once the workflow is on the default branch (`master`), add the `RELEASE_NOTES_API_KEY` secret under **Settings → Secrets and variables → Actions**. Set the `RELEASE_NOTES_API_BASE_URL` and `RELEASE_NOTES_MODEL` repository variables to use a custom model service.
 
-Open **Actions → Publish Release → Run workflow**, select the branch to release, and enter a `tag` such as `2.0.0`. Use `master` or a branch whose workflow files match `master`. The tag must match `<Version>` in `CefFlashBrowser/CefFlashBrowser.csproj` at that commit. The workflow runs `publish.bat` to package x86 and x64, generates bilingual notes, creates the tag, and publishes `v2.0.0 - release` with both ZIP archives.
+Open **Actions → Publish Release → Run workflow**, select the branch to release, and enter a `tag` such as `2.0.0`. Use `master` or a branch whose workflow files match `master`. The tag must match `<Version>` in `CefFlashBrowser/CefFlashBrowser.csproj` at that commit. The workflow runs `publish.bat` to package x86 and x64, generates bilingual notes with a download count badge, creates the tag, and publishes `v2.0.0 - release` with both ZIP archives.
 
 ## Project layout
 

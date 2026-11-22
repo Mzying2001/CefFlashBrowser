@@ -19,6 +19,7 @@ python ReleaseNotes/generate.py
 | `--repo` | 从当前目录定位仓库根目录 |
 | `--github-repo OWNER/REPO` | 使用 `origin` 指向的 GitHub 仓库 |
 | `--base-tag` | GitHub 最近一次正式发布的 tag |
+| `--release-tag TAG` | 可选。传入新版本的 tag，在正文顶部添加该版本的下载量徽章 |
 | `--api-base-url` 或 `RELEASE_NOTES_API_BASE_URL` | `https://api.deepseek.com` |
 | `--model` 或 `RELEASE_NOTES_MODEL` | `deepseek-flash` |
 | `--api-key-file` 或 `RELEASE_NOTES_API_KEY` | 使用显式传入的密钥文件，否则读取环境变量 |
@@ -35,7 +36,7 @@ API 地址填基址。CLI 会追加 `/chat/completions`，服务需支持 Chat C
 
 工作流合入默认分支 `master` 后，在仓库的 **Settings → Secrets and variables → Actions** 添加 `RELEASE_NOTES_API_KEY` secret。需要自定义模型服务时，可设置仓库变量 `RELEASE_NOTES_API_BASE_URL` 和 `RELEASE_NOTES_MODEL`。
 
-从 **Actions → Publish Release → Run workflow** 选择要发布的分支并输入 `tag`，例如 `2.0.0`。使用 `master` 或工作流文件与 `master` 一致的分支。输入必须与该提交中 `CefFlashBrowser/CefFlashBrowser.csproj` 的 `<Version>` 一致。工作流调用 `publish.bat` 打包 x86 和 x64、生成双语日志，再创建 tag 并正式发布 `v2.0.0 - release`，附上两个 ZIP。
+从 **Actions → Publish Release → Run workflow** 选择要发布的分支并输入 `tag`，例如 `2.0.0`。使用 `master` 或工作流文件与 `master` 一致的分支。输入必须与该提交中 `CefFlashBrowser/CefFlashBrowser.csproj` 的 `<Version>` 一致。工作流调用 `publish.bat` 打包 x86 和 x64，生成带下载量徽章的双语日志，再创建 tag 并正式发布 `v2.0.0 - release`，附上两个 ZIP。
 
 ## 项目结构
 

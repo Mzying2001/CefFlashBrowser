@@ -176,6 +176,33 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("+新增预览", results["diff"])
         self.assertEqual(results["read"], "旧版本\n")
 
+    def test_cli_prepends_download_badge_for_new_release_tag(self):
+        for tag, badge_tag in (("2.0.0", "2.0.0"), ("preview/2.0.0", "preview%2F2.0.0")):
+            with self.subTest(tag=tag):
+                out = io.StringIO()
+                github = "Mzying2001/CefFlashBrowser"
+                with patch.dict("os.environ", {"RELEASE_NOTES_API_KEY": MOCK_KEY}), patch.object(
+                    generate, "fetch_releases", return_value=[{"tag": "1.0"}],
+                ), patch.object(generate, "generate_notes", return_value=RELEASE_BODY) as notes, redirect_stdout(out):
+                    code = generate.main(["--repo", str(self.root), "--github-repo", github, "--release-tag", tag])
+
+                badge = f"![](https://img.shields.io/github/downloads/{github}/{badge_tag}/total)"
+                self.assertEqual((code, out.getvalue()), (0, f"{badge}\n\n{RELEASE_BODY}\n"))
+                self.assertEqual(notes.call_args.args[0].tag, "1.0")
+
+    def test_cli_rejects_invalid_or_sensitive_release_tags(self):
+        for tag in ("", "bad tag", MOCK_KEY):
+            with self.subTest(tag=tag):
+                out, err = io.StringIO(), io.StringIO()
+                with patch.dict("os.environ", {"RELEASE_NOTES_API_KEY": MOCK_KEY}), patch.object(
+                    generate, "fetch_releases",
+                ) as releases, redirect_stdout(out), redirect_stderr(err):
+                    code = generate.main(["--repo", str(self.root), "--release-tag", tag])
+
+                self.assertEqual((code, out.getvalue()), (1, ""))
+                self.assertNotIn(MOCK_KEY, err.getvalue())
+                releases.assert_not_called()
+
     def test_git_rejects_unsafe_arguments_and_only_reads_commit_objects(self):
         for path in ("../outside", "/outside", "C:/outside", ".git/config", "Local-Notes/excluded.txt"):
             with self.subTest(path=path):
