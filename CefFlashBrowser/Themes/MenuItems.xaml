@@ -1,0 +1,35 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:hc="https://handyorg.github.io/handycontrol">
+
+    <!--Leaf menu items without a shortcut column-->
+    <ControlTemplate x:Key="MenuItemWithoutShortcutTemplate" TargetType="MenuItem">
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding hc:BorderElement.CornerRadius}">
+            <Grid Margin="{TemplateBinding Padding}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="26"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ContentPresenter
+                    HorizontalAlignment="Left" VerticalAlignment="Center" Content="{TemplateBinding Icon}"/>
+                <ContentPresenter
+                    Grid.Column="1" Margin="0,3,0,3"
+                    VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="True"/>
+            </Grid>
+        </Border>
+    </ControlTemplate>
+
+    <!--Trim long context menu headers-->
+    <DataTemplate x:Key="TrimmedContextMenuHeaderTemplate">
+        <TextBlock
+            Text="{Binding}"
+            MaxWidth="200"
+            TextWrapping="NoWrap"
+            TextTrimming="CharacterEllipsis"
+            HorizontalAlignment="Left"/>
+    </DataTemplate>
+</ResourceDictionary>

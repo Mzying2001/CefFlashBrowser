@@ -20,8 +20,9 @@
                 <infraWpf:NamedResourceDictionary Name="Skin" Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
                 <infraWpf:NamedResourceDictionary Name="Theme" Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
 
-                <!--Translucent list item highlights-->
+                <!--Shared control styles and templates-->
                 <ResourceDictionary Source="Themes/ListItems.xaml"/>
+                <ResourceDictionary Source="Themes/MenuItems.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
 
@@ -37,16 +38,6 @@
             <Style x:Key="DefaultWindowStyle" TargetType="Window">
                 <Setter Property="Background" Value="{DynamicResource RegionBrush}"/>
             </Style>
-
-
-            <!--Trim long context menu headers-->
-            <DataTemplate x:Key="TrimmedContextMenuHeaderTemplate">
-                <TextBlock Text="{Binding}"
-                           MaxWidth="200"
-                           TextWrapping="NoWrap"
-                           TextTrimming="CharacterEllipsis"
-                           HorizontalAlignment="Left"/>
-            </DataTemplate>
 
 
             <!--Change icon colors according to the theme-->

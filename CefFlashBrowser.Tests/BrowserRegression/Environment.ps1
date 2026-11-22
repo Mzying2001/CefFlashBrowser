@@ -250,7 +250,8 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
     foreach ($dictionaryUri in @(
         'pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml',
         'pack://application:,,,/HandyControl;component/Themes/Theme.xaml',
-        'pack://application:,,,/CefFlashBrowser;component/Themes/ListItems.xaml'
+        'pack://application:,,,/CefFlashBrowser;component/Themes/ListItems.xaml',
+        'pack://application:,,,/CefFlashBrowser;component/Themes/MenuItems.xaml'
     )) {
         $dictionary = New-Object System.Windows.ResourceDictionary
         $dictionary.set_Source([Uri]$dictionaryUri)
@@ -264,10 +265,8 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
     $namespaces.AddNamespace('wpf', $appXaml.DocumentElement.NamespaceURI)
     $namespaces.AddNamespace('x', 'http://schemas.microsoft.com/winfx/2006/xaml')
     $namespaces.AddNamespace('sys', $appXaml.DocumentElement.GetNamespaceOfPrefix('sys'))
-    foreach ($key in @('TrimmedContextMenuHeaderTemplate', 'SharedSvgIconTemplate')) {
-        $template = $appXaml.SelectSingleNode("//wpf:DataTemplate[@x:Key='$key']", $namespaces)
-        $Context.Application.Resources.Add($key, [System.Windows.Markup.XamlReader]::Parse($template.OuterXml))
-    }
+    $svgTemplate = $appXaml.SelectSingleNode("//wpf:DataTemplate[@x:Key='SharedSvgIconTemplate']", $namespaces)
+    $Context.Application.Resources.Add('SharedSvgIconTemplate', [System.Windows.Markup.XamlReader]::Parse($svgTemplate.OuterXml))
     foreach ($icon in $appXaml.SelectNodes('//sys:Uri[@x:Key]', $namespaces)) {
         $key = $icon.GetAttribute('Key', $namespaces.LookupNamespace('x'))
         $Context.Application.Resources.Add($key, [Uri]::new($icon.InnerText, [UriKind]::Relative))

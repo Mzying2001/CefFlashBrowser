@@ -7,7 +7,6 @@
         xmlns:local="clr-namespace:CefFlashBrowser"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:m="clr-namespace:CefFlashBrowser.Models"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
@@ -42,32 +41,6 @@
         <Menu>
             <!--Favorites Menu-->
             <MenuItem Header="{DynamicResource common_favorites}">
-                <MenuItem.Resources>
-                    <ControlTemplate x:Key="favoriteMenuItemTemplate" TargetType="MenuItem">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="{TemplateBinding hc:BorderElement.CornerRadius}">
-                            <Grid Margin="{TemplateBinding Padding}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="26"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <ContentPresenter
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    Content="{TemplateBinding Icon}"/>
-                                <ContentPresenter
-                                    Grid.Column="1"
-                                    Margin="0,3,0,3"
-                                    VerticalAlignment="Center"
-                                    ContentSource="Header"
-                                    RecognizesAccessKey="True"/>
-                            </Grid>
-                        </Border>
-                    </ControlTemplate>
-                </MenuItem.Resources>
-
                 <MenuItem.ItemTemplate>
                     <DataTemplate DataType="{x:Type m:Website}">
                         <StackPanel MaxWidth="250">
@@ -98,7 +71,8 @@
                                 </c:BrowserIcon>
                             </DataTemplate>
                         </Style.Resources>
-                        <Setter Property="Template" Value="{StaticResource favoriteMenuItemTemplate}"/>
+                        <Setter Property="Template"
+                                Value="{StaticResource MenuItemWithoutShortcutTemplate}"/>
                         <Setter Property="Tag"
                                 Value="{Binding RelativeSource={RelativeSource AncestorType=Menu}, Path=DataContext}"/>
                         <Style.Triggers>
@@ -128,7 +102,7 @@
                     <CompositeCollection>
                         <!--Favorites Manager-->
                         <MenuItem Padding="10,7"
-                                  Template="{StaticResource favoriteMenuItemTemplate}"
+                                  Template="{StaticResource MenuItemWithoutShortcutTemplate}"
                                   Header="{DynamicResource mainWindow_manageFavorites}"
                                   Command="{Binding OpenFavoritesManagerCommand}"/>
 
