@@ -581,9 +581,9 @@
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
-                    <svgc:SvgIcon Width="14"
-                                  Height="14"
-                                  UriSource="{StaticResource FlashPlayerIconUri}"/>
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource SwfIconUri}"/>
                 </Button>
 
                 <!--find button-->
