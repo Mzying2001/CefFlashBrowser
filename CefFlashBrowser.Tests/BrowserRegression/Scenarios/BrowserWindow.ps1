@@ -8,6 +8,7 @@ function Test-BrowserWindow($Context) {
     Test-BrowserDevTools $Context $window $view $browser
     Test-BrowserNavigation $Context $window $view $browser
     Test-BrowserDisplay $Context $window $view $browser
+    Test-StandaloneBrowserPageSwfs $Context
     Test-BrowserPageSwfs $Context
     Test-BrowserClose $Context $window $view $browser
     Test-BrowserStateRestoration $Context $browser
@@ -185,6 +186,54 @@ function Test-BrowserDisplay($Context, $window, $view, $browser) {
     Assert-Regression ($window.WindowStyle -eq [System.Windows.WindowStyle]::SingleBorderWindow) 'F11 restores window chrome'
 }
 
+function Test-StandaloneBrowserPageSwfs($Context) {
+    $fixture = New-Object UserScriptHttpFixture
+    $window = New-Object System.Windows.Window -Property @{ Width = 640; Height = 480 }
+    $browser = New-Object CefFlashBrowser.FlashBrowser.ChromiumFlashBrowser($true)
+    try {
+        $window.Content = $browser
+        $window.Show()
+        $browser.Address = $fixture.BaseUrl + '/swf-empty'
+        Wait-Regression $Context { $browser.Title -eq 'Empty SWF fixture' -and !$browser.IsLoading } 'standalone browser loads a page'
+        Assert-Regression ($null -eq $browser.RequestHandler -and $null -eq $browser.ResourceRequestHandlerFactory) 'standalone browser starts with no caller-supplied handlers'
+        [void](Invoke-JavaScript $Context $browser "fetch('/swf-response'); true;")
+        Wait-Regression $Context {
+            $browser.PageSwfs.Count -eq 1 -and $browser.PageSwfs[0].Url -eq ($fixture.BaseUrl + '/swf-response')
+        } 'standalone browser discovers a SWF by MIME type'
+
+        $handler = New-Object CefFlashBrowser.FlashBrowser.Handlers.RequestHandler
+        $factory = [CefSharp.ResourceRequestHandlerFactory]::new([StringComparer]::Ordinal)
+        $browser.RequestHandler = $handler
+        $browser.ResourceRequestHandlerFactory = $factory
+        Assert-Regression ([object]::ReferenceEquals($browser.RequestHandler, $handler) -and
+            [object]::ReferenceEquals($browser.ResourceRequestHandlerFactory, $factory)) 'browser handler getters return the caller-supplied objects'
+        $registeredUrl = $fixture.BaseUrl + '/swf-registered'
+        $stream = [IO.MemoryStream]::new([Text.Encoding]::UTF8.GetBytes('registered SWF payload'))
+        try {
+            [CefSharp.WebBrowserExtensions]::RegisterResourceHandler($browser, $registeredUrl, $stream, 'application/x-shockwave-flash', $true)
+        } finally {
+            $stream.Dispose()
+        }
+        [void](Invoke-JavaScript $Context $browser "fetch('/swf-registered').then(r => r.text()).then(text => window.registeredSwfBody = text); true;")
+        Wait-Regression $Context {
+            ($browser.PageSwfs.Url -contains $registeredUrl) -and
+                (Invoke-JavaScript $Context $browser 'window.registeredSwfBody') -ceq 'registered SWF payload'
+        } 'registered SWFs are served and observed with a caller-supplied request handler'
+        Assert-Regression ($fixture.RequestsFor('/swf-registered') -eq 0) 'the registered SWF response is served locally'
+
+        $browser.RequestHandler = $null
+        $browser.ResourceRequestHandlerFactory = $null
+        [void](Invoke-JavaScript $Context $browser "fetch('/after-handler-clear.swf'); true;")
+        Wait-Regression $Context {
+            $browser.PageSwfs.Url -contains ($fixture.BaseUrl + '/after-handler-clear.swf')
+        } 'SWF collection continues after clearing caller-supplied handlers'
+    } finally {
+        $window.Close()
+        $browser.Dispose()
+        $fixture.Dispose()
+    }
+}
+
 function Test-BrowserPageSwfs($Context) {
     $fixture = New-Object UserScriptHttpFixture
     $window = $null
@@ -253,16 +302,16 @@ true;
         $window.ViewModel.SelectBrowser(-1)
         Wait-Regression $Context { $window.ViewModel.CurrentBrowser -eq $model -and $button.IsVisible } 'returning to the SWF tab restores the button'
 
-        $version = $browser.SwfPageVersion
-        [void](Invoke-JavaScript $Context $browser "location.hash = 'section'; fetch('/swf-delayed'); true;")
+        [void](Invoke-JavaScript $Context $browser "location.hash = 'section'; fetch('/swf-delayed', { keepalive: true }); true;")
         Wait-Regression $Context { $fixture.RequestsFor('/swf-delayed') -eq 1 } 'the old document has an in-flight SWF response'
-        Assert-Regression ($browser.PageSwfs.Count -eq $expected.Count -and $browser.SwfPageVersion -eq $version) 'same-document navigation keeps the SWF list'
+        Assert-Regression ($browser.PageSwfs.Count -eq $expected.Count) 'same-document navigation keeps the SWF list'
         $model.Address = $fixture.BaseUrl + '/swf-empty'
         Wait-Regression $Context { $browser.Title -eq 'Empty SWF fixture' -and $button.Visibility -eq 'Collapsed' } 'a new document clears the SWF list'
         $fixture.Release('/swf-delayed')
-        $browser.ObserveSwfRequest($version, ($fixture.BaseUrl + '/swf-delayed'), 'application/x-shockwave-flash')
-        [void](Invoke-JavaScript $Context $browser 'true')
-        Assert-Regression ($browser.PageSwfs.Count -eq 0) 'an old document response cannot populate the new page'
+        [void](Invoke-JavaScript $Context $browser "fetch('/swf-delayed?document=current'); true;")
+        $currentSwfUrl = $fixture.BaseUrl + '/swf-delayed?document=current'
+        Wait-Regression $Context { $browser.PageSwfs.Url -contains $currentSwfUrl } 'the new document observes its SWF response'
+        Assert-Regression ($browser.PageSwfs.Count -eq 1) 'the previous document does not contribute an in-flight SWF response'
     } finally {
         if ($null -ne $player) { $player.ForceCloseWindow() }
         if ($null -ne $window) { $window.ForceCloseWindow() }

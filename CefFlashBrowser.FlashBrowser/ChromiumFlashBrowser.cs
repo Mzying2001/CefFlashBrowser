@@ -14,7 +14,6 @@ namespace CefFlashBrowser.FlashBrowser
         private long _swfPageVersion;
 
         public ReadOnlyObservableCollection<SwfResourceRecord> PageSwfs { get; }
-        public long SwfPageVersion => Interlocked.Read(ref _swfPageVersion);
 
         public ChromiumFlashBrowser() : this(false)
         {
@@ -37,9 +36,27 @@ namespace CefFlashBrowser.FlashBrowser
             base.OnFrameLoadStart(e);
         }
 
-        public void ObserveSwfRequest(long pageVersion, string address, string mimeType = null)
+        protected override Action<string, string> CreateResourceRequestObserver(
+            IBrowser browser, IFrame frame, IRequest request)
         {
-            if (pageVersion != SwfPageVersion || IsDisposed || !Uri.TryCreate(address, UriKind.Absolute, out var url))
+            var pageVersion = Interlocked.Read(ref _swfPageVersion);
+
+            if (IsDisposed || browser == null || browser.IsPopup || frame?.IsValid != true
+                || request.ResourceType == ResourceType.MainFrame
+                || !Uri.TryCreate(request.Url, UriKind.Absolute, out var url))
+                return null;
+
+            if (url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps
+                && (!url.IsFile || !url.AbsolutePath.EndsWith(".swf", StringComparison.OrdinalIgnoreCase)))
+                return null;
+
+            return (address, mimeType) => ObserveSwfRequest(pageVersion, address, mimeType);
+        }
+
+        private void ObserveSwfRequest(long pageVersion, string address, string mimeType)
+        {
+            if (pageVersion != Interlocked.Read(ref _swfPageVersion) || IsDisposed
+                || !Uri.TryCreate(address, UriKind.Absolute, out var url))
                 return;
 
             if (url.Scheme != Uri.UriSchemeHttp && url.Scheme != Uri.UriSchemeHttps && !url.IsFile)
@@ -55,7 +72,7 @@ namespace CefFlashBrowser.FlashBrowser
 
             Dispatcher.InvokeAsync(() =>
             {
-                if (!IsDisposed && pageVersion == SwfPageVersion && _pageSwfUrls.Add(address))
+                if (!IsDisposed && pageVersion == Interlocked.Read(ref _swfPageVersion) && _pageSwfUrls.Add(address))
                     _pageSwfs.Add(new SwfResourceRecord(address, url));
             });
         }
