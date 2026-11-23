@@ -106,9 +106,10 @@ function Test-ManagerEditorSettings($Context, $Window) {
     $document = $editor.Document
     $source = $draft.Source
     $dirty = $draft.IsDirty
-    $fontName = [Windows.Media.Fonts]::SystemFontFamilies |
-        Where-Object { $_.Source -ne $editor.FontFamily.Source } |
-        Select-Object -First 1 -ExpandProperty Source
+    $alternateFonts = [Windows.Media.Fonts]::SystemFontFamilies |
+        Where-Object { $_.Source -ne $editor.FontFamily.Source }
+    $fontName = $alternateFonts | Where-Object Source -eq 'Microsoft YaHei' | Select-Object -First 1 -ExpandProperty Source
+    if (!$fontName) { $fontName = $alternateFonts | Select-Object -First 1 -ExpandProperty Source }
     Assert-Regression ($null -ne $fontName) 'an alternate system font is available'
 
     Invoke-ManagerEditorSettings $Context $Window ({
@@ -129,7 +130,7 @@ function Test-ManagerEditorSettings($Context, $Window) {
             $Context.LanguageService.GetString('scriptEditorSettings_invalidTabWidth')) 'invalid tab width leaves the dialog open'
 
         $width.Text = '4'
-        $dialog.FindName('fontFamilyBox').SelectedItem = $fontName
+        $dialog.FindName('fontFamilyBox').SelectedValue = $fontName
         $dialog.FindName('indentationBox').SelectedItem = $dialog.FindName('tabsOption')
         $dialog.FindName('lineNumbersBox').IsChecked = $false
         $dialog.FindName('wordWrapBox').IsChecked = $true
@@ -2302,9 +2303,30 @@ document.documentElement.setAttribute('data-manager', 'saved');
             $editor.Options.IndentationSize -eq 4 -and !$editor.Options.ConvertTabsToSpaces -and
             !$editor.ShowLineNumbers -and $editor.WordWrap) 'all editor preferences survive reloading settings and reopening the manager'
 
+        $savedFamily = $editor.FontFamily
+        $originalUICulture = [Threading.Thread]::CurrentThread.CurrentUICulture
+        try {
+            foreach ($locale in @('zh-CN', 'en-US')) {
+                [Threading.Thread]::CurrentThread.CurrentUICulture = [Globalization.CultureInfo]::GetCultureInfo($locale)
+                $displayName = $null
+                [void]$savedFamily.FamilyNames.TryGetValue([Windows.Markup.XmlLanguage]::GetLanguage($locale), [ref]$displayName)
+                Invoke-ManagerEditorSettings $Context $window ({
+                    param($dialog)
+                    $picker = $dialog.FindName('fontFamilyBox')
+                    Assert-Regression ($picker.SelectedValue -ceq $saved.FontFamily) "editor settings restores the saved font in $locale"
+                    if ($displayName) {
+                        Assert-Regression ($picker.SelectedItem.DisplayName -ceq $displayName) "saved font displays its $locale name"
+                    }
+                    $dialog.FindName('cancelButton').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+                }.GetNewClosure())
+            }
+        } finally {
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $originalUICulture
+        }
+
         Invoke-ManagerEditorSettings $Context $window ({
             param($dialog)
-            $dialog.FindName('fontFamilyBox').SelectedItem = $originalEditorSettings.FontFamily
+            $dialog.FindName('fontFamilyBox').SelectedValue = $originalEditorSettings.FontFamily
             $dialog.FindName('fontSizeBox').Text = $originalEditorSettings.FontSize.ToString()
             $dialog.FindName('indentationBox').SelectedItem = $dialog.FindName('spacesOption')
             $dialog.FindName('tabWidthBox').Text = $originalEditorSettings.TabWidth.ToString()

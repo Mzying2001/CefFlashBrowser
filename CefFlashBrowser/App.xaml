@@ -110,6 +110,7 @@
             <converters:BinaryToSizeStringConverter x:Key="BinaryToSizeStringConverter"/>
             <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
             <converters:LanguageNameConverter x:Key="LanguageNameConverter"/>
+            <converters:MonospaceFontWeightConverter x:Key="MonospaceFontWeightConverter"/>
             <converters:MultiEqualityConverter x:Key="MultiEqualityConverter"/>
             <converters:ObjectGetTypeConverter x:Key="ObjectGetTypeConverter"/>
             <converters:ObjectToStringConverter x:Key="ObjectToStringConverter"/>

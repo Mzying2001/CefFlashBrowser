@@ -50,8 +50,16 @@
                 <TextBlock x:Name="fontFamilyCaption" Grid.Row="1" Style="{StaticResource SettingsCaption}"
                            Text="{DynamicResource scriptEditorSettings_fontFamily}"/>
                 <ComboBox x:Name="fontFamilyBox" Grid.Row="1" Grid.Column="1"
-                          MaxDropDownHeight="320"
-                          AutomationProperties.LabeledBy="{Binding ElementName=fontFamilyCaption}"/>
+                          MaxDropDownHeight="320" SelectedValuePath="Source"
+                          TextSearch.TextPath="DisplayName"
+                          AutomationProperties.LabeledBy="{Binding ElementName=fontFamilyCaption}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}" FontFamily="{Binding Source}"
+                                       FontWeight="{Binding Source, Converter={StaticResource MonospaceFontWeightConverter}}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <TextBlock x:Name="fontSizeCaption" Grid.Row="2" Style="{StaticResource SettingsCaption}"
                            Margin="0,10,20,0" Text="{DynamicResource scriptEditorSettings_fontSize}"/>
                 <TextBox x:Name="fontSizeBox" Grid.Row="2" Grid.Column="1" Margin="0,10,0,0"
