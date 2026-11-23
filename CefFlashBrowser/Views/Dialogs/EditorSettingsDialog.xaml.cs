@@ -5,8 +5,10 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
+using NumericUpDown = HandyControl.Controls.NumericUpDown;
 
 namespace CefFlashBrowser.Views.Dialogs
 {
@@ -33,9 +35,9 @@ namespace CefFlashBrowser.Views.Dialogs
             fontFamilyBox.SelectedValue = (families.FirstOrDefault(option =>
                 string.Equals(option.Source, activeFontFamily, StringComparison.OrdinalIgnoreCase)) ?? families.FirstOrDefault())?.Source;
 
-            fontSizeBox.Text = settings.FontSize.ToString();
+            fontSizeBox.Value = settings.FontSize;
             indentationBox.SelectedItem = settings.IndentWithSpaces ? spacesOption : tabsOption;
-            tabWidthBox.Text = settings.TabWidth.ToString();
+            tabWidthBox.Value = settings.TabWidth;
             lineNumbersBox.IsChecked = settings.ShowLineNumbers;
             wordWrapBox.IsChecked = settings.WordWrap;
         }
@@ -92,19 +94,26 @@ namespace CefFlashBrowser.Views.Dialogs
             return false;
         }
 
+        private void StepNumericInput(object sender, KeyEventArgs e)
+        {
+            if (!(e.OriginalSource is TextBox input) || (e.Key != Key.Up && e.Key != Key.Down))
+                return;
+
+            e.Handled = true;
+
+            // HandyControl leaves the focused text unchanged after stepping and reads it again on blur.
+            var box = (NumericUpDown)sender;
+            var step = e.Key == Key.Up ? box.Increment : -box.Increment;
+            box.Value = Math.Round(box.Value, MidpointRounding.AwayFromZero) + step;
+            input.Text = box.Value.ToString(CultureInfo.CurrentCulture);
+            input.CaretIndex = input.Text.Length;
+        }
+
         private void Accept(object sender, RoutedEventArgs e)
         {
-            if (!int.TryParse(fontSizeBox.Text, out var fontSize) || !EditorSettings.IsFontSizeValid(fontSize))
-            {
-                ShowValidationError(fontSizeBox, "scriptEditorSettings_invalidFontSize");
+            if (!TryReadInteger(fontSizeBox, "scriptEditorSettings_invalidFontSize", out var fontSize) ||
+                !TryReadInteger(tabWidthBox, "scriptEditorSettings_invalidTabWidth", out var tabWidth))
                 return;
-            }
-
-            if (!int.TryParse(tabWidthBox.Text, out var tabWidth) || !EditorSettings.IsTabWidthValid(tabWidth))
-            {
-                ShowValidationError(tabWidthBox, "scriptEditorSettings_invalidTabWidth");
-                return;
-            }
 
             Result = new EditorSettings
             {
@@ -118,12 +127,21 @@ namespace CefFlashBrowser.Views.Dialogs
             DialogHelper.SetDialogResult(this, true);
         }
 
-        private void ShowValidationError(TextBox textBox, string messageKey)
+        private bool TryReadInteger(NumericUpDown box, string messageKey, out int value)
         {
+            // The pending text can be invalid while the control still holds its last valid value.
+            var input = box.Template?.FindName("PART_TextBox", box) as TextBox;
+            value = (int)box.Value;
+
+            if (box.Value == value && (input == null ||
+                int.TryParse(input.Text, out var typed) && typed >= box.Minimum && typed <= box.Maximum))
+                return true;
+
             validationMessage.SetResourceReference(TextBlock.TextProperty, messageKey);
             validationMessage.Visibility = Visibility.Visible;
-            textBox.Focus();
-            textBox.SelectAll();
+            input?.Focus();
+            input?.SelectAll();
+            return false;
         }
 
         private void Cancel(object sender, RoutedEventArgs e)

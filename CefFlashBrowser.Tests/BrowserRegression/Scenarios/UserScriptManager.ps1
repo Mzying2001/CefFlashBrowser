@@ -92,7 +92,7 @@ function Test-ManagerEditorSettings($Context, $Window) {
 
     Invoke-ManagerEditorSettings $Context $Window {
         param($dialog)
-        $dialog.FindName('fontSizeBox').Text = '72'
+        $dialog.FindName('fontSizeBox').Value = 72
         $dialog.FindName('cancelButton').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
     }
     Assert-Regression ([object]::ReferenceEquals($original, [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings) -and
@@ -116,20 +116,33 @@ function Test-ManagerEditorSettings($Context, $Window) {
         param($dialog)
         $size = $dialog.FindName('fontSizeBox')
         $width = $dialog.FindName('tabWidthBox')
+        $sizeInput = $size.Template.FindName('PART_TextBox', $size)
+        $widthInput = $width.Template.FindName('PART_TextBox', $width)
         $ok = $dialog.FindName('okButton')
         $validation = $dialog.FindName('validationMessage')
-        Assert-Regression ($size.Text -eq $original.FontSize -and $width.Text -eq $original.TabWidth) 'editor settings shows current values'
-        $size.Text = '73'
+        Assert-Regression ($size.Value -eq $original.FontSize -and $width.Value -eq $original.TabWidth) 'editor settings shows current values'
+        $size.Value = 72
+        [HandyControl.Interactivity.ControlCommands]::Prev.Execute($null, $size)
+        $width.Value = 1
+        [HandyControl.Interactivity.ControlCommands]::Next.Execute($null, $width)
+        Assert-Regression ($size.Value -eq 72 -and $width.Value -eq 1) 'numeric steppers stay within editor setting limits'
+        $sizeInput.Text = '73'
         $ok.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
         Assert-Regression ($dialog.IsVisible -and $validation.Text -ceq
             $Context.LanguageService.GetString('scriptEditorSettings_invalidFontSize')) 'invalid font size leaves the dialog open'
-        $size.Text = '18'
-        $width.Text = '0'
+        $sizeInput.Text = '18'
+        $widthInput.Text = '0'
         $ok.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
         Assert-Regression ($dialog.IsVisible -and $validation.Text -ceq
             $Context.LanguageService.GetString('scriptEditorSettings_invalidTabWidth')) 'invalid tab width leaves the dialog open'
 
-        $width.Text = '4'
+        $widthInput.Text = '3'
+        $key = [Windows.Input.KeyEventArgs]::new([Windows.Input.Keyboard]::PrimaryDevice,
+            [Windows.PresentationSource]::FromVisual($widthInput), 0, [Windows.Input.Key]::Up)
+        $key.RoutedEvent = [Windows.Input.Keyboard]::PreviewKeyDownEvent
+        $widthInput.RaiseEvent($key)
+        [void]$ok.Focus()
+        Assert-Regression ($width.Value -eq 4 -and $widthInput.Text -ceq '4') 'keyboard stepping updates the displayed value and survives losing focus'
         $dialog.FindName('fontFamilyBox').SelectedValue = $fontName
         $dialog.FindName('indentationBox').SelectedItem = $dialog.FindName('tabsOption')
         $dialog.FindName('lineNumbersBox').IsChecked = $false
@@ -2327,9 +2340,9 @@ document.documentElement.setAttribute('data-manager', 'saved');
         Invoke-ManagerEditorSettings $Context $window ({
             param($dialog)
             $dialog.FindName('fontFamilyBox').SelectedValue = $originalEditorSettings.FontFamily
-            $dialog.FindName('fontSizeBox').Text = $originalEditorSettings.FontSize.ToString()
+            $dialog.FindName('fontSizeBox').Value = $originalEditorSettings.FontSize
             $dialog.FindName('indentationBox').SelectedItem = $dialog.FindName('spacesOption')
-            $dialog.FindName('tabWidthBox').Text = $originalEditorSettings.TabWidth.ToString()
+            $dialog.FindName('tabWidthBox').Value = $originalEditorSettings.TabWidth
             $dialog.FindName('lineNumbersBox').IsChecked = $originalEditorSettings.ShowLineNumbers
             $dialog.FindName('wordWrapBox').IsChecked = $false
             $dialog.FindName('okButton').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
