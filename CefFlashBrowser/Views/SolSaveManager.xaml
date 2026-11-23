@@ -35,11 +35,6 @@
                       Height="14"
                       UriSource="{StaticResource ExportIconUri}"/>
 
-        <svgc:SvgIcon x:Key="ImportIcon"
-                      Width="14"
-                      Height="14"
-                      UriSource="{StaticResource ImportIconUri}"/>
-
         <svgc:SvgIcon x:Key="EditIcon"
                       Width="13"
                       Height="13"
@@ -49,6 +44,24 @@
                       Width="14"
                       Height="14"
                       UriSource="{StaticResource TrashIconUri}"/>
+
+        <ContextMenu x:Key="SolFileRowMenu"
+                     DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+            <MenuItem Header="{DynamicResource common_edit}"
+                      Command="{Binding EditSolCommand}"
+                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource common_export}"
+                      Command="{Binding ExportSolCommand}"
+                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+            <MenuItem Header="{DynamicResource common_import}"
+                      Command="{Binding ImportSolCommand}"
+                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource common_delete}"
+                      Command="{Binding DeleteSolCommand}"
+                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+        </ContextMenu>
 
         <DataTemplate x:Key="WorkspaceTemplate"
                       DataType="{x:Type vm:SaveMgrWorkspaceViewModel}">
@@ -64,8 +77,9 @@
                         </CollectionViewSource.GroupDescriptions>
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="Filter">
-                                <i:InvokeCommandAction PassEventArgsToCommand="True"
-                                                       Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.FilterCommand}"/>
+                                <i:InvokeCommandAction
+                                    PassEventArgsToCommand="True"
+                                    Command="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.FilterCommand}"/>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                     </CollectionViewSource>
@@ -84,17 +98,16 @@
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem"
                            BasedOn="{StaticResource AppListViewItemStyle}">
-                        <Setter Property="AllowDrop" Value="True"/>
+                        <Setter Property="Tag"
+                                Value="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext}"/>
+                        <Setter Property="ContextMenu"
+                                Value="{StaticResource SolFileRowMenu}"/>
                         <EventSetter Event="MouseDoubleClick"
                                      Handler="ListViewItemMouseDoubleClick"/>
                         <EventSetter Event="PreviewMouseLeftButtonDown"
                                      Handler="ListViewItemPreviewMouseLeftButtonDown"/>
                         <EventSetter Event="MouseMove"
                                      Handler="ListViewItemMouseMove"/>
-                        <EventSetter Event="PreviewDragOver"
-                                     Handler="ListViewItemPreviewDragOver"/>
-                        <EventSetter Event="Drop"
-                                     Handler="ListViewItemDrop"/>
                     </Style>
                 </ListView.ItemContainerStyle>
 
@@ -125,7 +138,7 @@
 
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="150"
+                        <GridViewColumn Width="200"
                                         Header="{DynamicResource solSaveManager_headerFileName}"
                                         DisplayMemberBinding="{Binding FileName}"/>
 
@@ -157,33 +170,29 @@
                                                 <Setter Property="Padding" Value="0"/>
                                             </Style>
                                         </StackPanel.Resources>
-                                        <Button ToolTip="{DynamicResource common_export}"
-                                                Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ExportSolCommand}"
-                                                CommandParameter="{Binding}">
-                                            <ContentPresenter Content="{StaticResource ExportIcon}"
-                                                              ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
-                                        </Button>
-                                        <Button Margin="5,0,0,0"
-                                                ToolTip="{DynamicResource common_import}"
-                                                Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ImportSolCommand}"
-                                                CommandParameter="{Binding}">
-                                            <ContentPresenter Content="{StaticResource ImportIcon}"
-                                                              ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
-                                        </Button>
-                                        <Button Margin="5,0,0,0"
-                                                ToolTip="{DynamicResource common_edit}"
+                                        <Button ToolTip="{DynamicResource common_edit}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.EditSolCommand}"
                                                 CommandParameter="{Binding}">
-                                            <ContentPresenter Content="{StaticResource EditIcon}"
-                                                              ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
+                                            <ContentPresenter
+                                                Content="{StaticResource EditIcon}"
+                                                ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
+                                        </Button>
+                                        <Button Margin="5,0,0,0"
+                                                ToolTip="{DynamicResource common_export}"
+                                                Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.ExportSolCommand}"
+                                                CommandParameter="{Binding}">
+                                            <ContentPresenter
+                                                Content="{StaticResource ExportIcon}"
+                                                ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                         <Button Margin="5,0,0,0"
                                                 ToolTip="{DynamicResource common_delete}"
                                                 Command="{Binding RelativeSource={RelativeSource AncestorType=ListView}, Path=DataContext.DeleteSolCommand}"
                                                 CommandParameter="{Binding}">
-                                            <ContentPresenter Tag="{DynamicResource DangerBrush}"
-                                                              Content="{StaticResource TrashIcon}"
-                                                              ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
+                                            <ContentPresenter
+                                                Tag="{DynamicResource DangerBrush}"
+                                                Content="{StaticResource TrashIcon}"
+                                                ContentTemplate="{StaticResource SharedSvgIconTemplate}"/>
                                         </Button>
                                     </StackPanel>
                                 </DataTemplate>
