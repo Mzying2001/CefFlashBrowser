@@ -279,6 +279,7 @@
     <sys:String x:Key="userScriptManager_toggle">啟用或停用腳本</sys:String>
     <sys:String x:Key="userScriptManager_draft">未安裝草稿</sys:String>
     <sys:String x:Key="userScriptManager_unavailable">不可用</sys:String>
+    <sys:String x:Key="userScriptManager_view">檢視</sys:String>
     <sys:String x:Key="userScriptDetails_title">腳本詳細資料</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">未知中繼資料</sys:String>
     <sys:String x:Key="userScriptInstall_install">安裝</sys:String>
@@ -304,6 +305,21 @@
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">是否更新下列指令碼？</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">未儲存的變更將被覆寫。</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">更新成功 {0} 個，失敗 {1} 個。</sys:String>
+    <sys:String x:Key="scriptEditorSettings_menu">編輯器設定…</sys:String>
+    <sys:String x:Key="scriptEditorSettings_title">編輯器設定</sys:String>
+    <sys:String x:Key="scriptEditorSettings_display">顯示</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontFamily">字型</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontSize">字型大小</sys:String>
+    <sys:String x:Key="scriptEditorSettings_lineNumbers">顯示行號</sys:String>
+    <sys:String x:Key="scriptEditorSettings_wordWrap">自動換行</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentation">縮排</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentWith">縮排方式</sys:String>
+    <sys:String x:Key="scriptEditorSettings_spaces">空格</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabs">定位字元</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabWidth">Tab 寬度</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidFontSize">字型大小請輸入 8 到 72 之間的整數。</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidTabWidth">Tab 寬度請輸入 1 到 16 之間的整數。</sys:String>
+    <sys:String x:Key="scriptEditorSettings_saveFailed">無法儲存編輯器設定。</sys:String>
 
     <!--下載-->
     <sys:String x:Key="downloads_menu">下載</sys:String>

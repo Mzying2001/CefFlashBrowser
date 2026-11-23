@@ -279,6 +279,7 @@
     <sys:String x:Key="userScriptManager_toggle">Включить или отключить скрипт</sys:String>
     <sys:String x:Key="userScriptManager_draft">Неустановленный черновик</sys:String>
     <sys:String x:Key="userScriptManager_unavailable">Недоступно</sys:String>
+    <sys:String x:Key="userScriptManager_view">Вид</sys:String>
     <sys:String x:Key="userScriptDetails_title">Сведения о скрипте</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">Неизвестные метаданные</sys:String>
     <sys:String x:Key="userScriptInstall_install">Установить</sys:String>
@@ -304,6 +305,21 @@
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Обновить эти скрипты?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Несохранённые изменения будут перезаписаны.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Обновлено скриптов: {0}. Ошибок: {1}.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_menu">Настройки редактора…</sys:String>
+    <sys:String x:Key="scriptEditorSettings_title">Настройки редактора</sys:String>
+    <sys:String x:Key="scriptEditorSettings_display">Отображение</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontFamily">Шрифт</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontSize">Размер шрифта</sys:String>
+    <sys:String x:Key="scriptEditorSettings_lineNumbers">Показывать номера строк</sys:String>
+    <sys:String x:Key="scriptEditorSettings_wordWrap">Переносить длинные строки</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentation">Отступы</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentWith">Символы отступа</sys:String>
+    <sys:String x:Key="scriptEditorSettings_spaces">Пробелы</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabs">Табуляция</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabWidth">Ширина табуляции</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidFontSize">Введите целое число от 8 до 72 для размера шрифта.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidTabWidth">Введите целое число от 1 до 16 для ширины табуляции.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_saveFailed">Не удалось сохранить настройки редактора.</sys:String>
 
     <!--Download manager-->
     <sys:String x:Key="downloads_menu">Загрузки</sys:String>

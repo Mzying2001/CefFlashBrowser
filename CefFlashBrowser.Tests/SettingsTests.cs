@@ -52,6 +52,65 @@ namespace CefFlashBrowser.Tests
         }
 
         [DataTestMethod]
+        [DataRow("{}")]
+        [DataRow("{\"ScriptEditorSettings\":null}")]
+        [DataRow("{\"ScriptEditorSettings\":{}}")]
+        [DataRow("{\"ScriptEditorSettings\":{\"FontFamily\":null,\"FontSize\":null,\"IndentWithSpaces\":null,\"TabWidth\":null,\"ShowLineNumbers\":null,\"WordWrap\":null}}")]
+        public void Deserialize_MissingEditorPreferencesUseDefaults(string json)
+        {
+            var settings = JsonConvert.DeserializeObject<Settings>(json);
+            settings.SetNullPropertiesToDefault();
+            var editor = settings.ScriptEditorSettings;
+
+            Assert.AreEqual("Consolas", editor.FontFamily);
+            Assert.AreEqual(14, editor.FontSize);
+            Assert.IsTrue(editor.IndentWithSpaces);
+            Assert.AreEqual(2, editor.TabWidth);
+            Assert.IsTrue(editor.ShowLineNumbers);
+            Assert.IsFalse(editor.WordWrap);
+        }
+
+        [DataTestMethod]
+        [DataRow(7, 0)]
+        [DataRow(73, 17)]
+        public void Deserialize_OutOfRangeEditorValuesUseDefaults(int size, int width)
+        {
+            var json = JObject.FromObject(Settings.Default);
+            json[nameof(Settings.ScriptEditorSettings)][nameof(EditorSettings.FontSize)] = size;
+            json[nameof(Settings.ScriptEditorSettings)][nameof(EditorSettings.TabWidth)] = width;
+            var editor = json.ToObject<Settings>().ScriptEditorSettings;
+
+            Assert.AreEqual(14, editor.FontSize);
+            Assert.AreEqual(2, editor.TabWidth);
+        }
+
+        [TestMethod]
+        public void ScriptEditorSettings_RoundTrip()
+        {
+            var settings = new Settings
+            {
+                ScriptEditorSettings = new EditorSettings
+                {
+                    FontFamily = "Courier New",
+                    FontSize = 20,
+                    IndentWithSpaces = false,
+                    TabWidth = 4,
+                    ShowLineNumbers = false,
+                    WordWrap = true
+                }
+            };
+
+            var editor = JObject.FromObject(settings).ToObject<Settings>().ScriptEditorSettings;
+
+            Assert.AreEqual("Courier New", editor.FontFamily);
+            Assert.AreEqual(20, editor.FontSize);
+            Assert.IsFalse(editor.IndentWithSpaces);
+            Assert.AreEqual(4, editor.TabWidth);
+            Assert.IsFalse(editor.ShowLineNumbers);
+            Assert.IsTrue(editor.WordWrap);
+        }
+
+        [DataTestMethod]
         [DataRow(UserScriptPermissionBehavior.Prompt, 0)]
         [DataRow(UserScriptPermissionBehavior.Allow, 1)]
         [DataRow(UserScriptPermissionBehavior.Deny, 2)]

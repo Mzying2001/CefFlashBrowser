@@ -279,6 +279,7 @@
     <sys:String x:Key="userScriptManager_toggle">Attiva o disattiva lo script</sys:String>
     <sys:String x:Key="userScriptManager_draft">Bozza non installata</sys:String>
     <sys:String x:Key="userScriptManager_unavailable">Non disponibile</sys:String>
+    <sys:String x:Key="userScriptManager_view">Visualizza</sys:String>
     <sys:String x:Key="userScriptDetails_title">Dettagli dello script</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">Metadati sconosciuti</sys:String>
     <sys:String x:Key="userScriptInstall_install">Installa</sys:String>
@@ -304,6 +305,21 @@
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Aggiornare questi script?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Le modifiche non salvate verranno sovrascritte.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Script aggiornati: {0}. Aggiornamenti non riusciti: {1}.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_menu">Impostazioni dell’editor…</sys:String>
+    <sys:String x:Key="scriptEditorSettings_title">Impostazioni dell’editor</sys:String>
+    <sys:String x:Key="scriptEditorSettings_display">Visualizzazione</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontFamily">Carattere</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontSize">Dimensione del carattere</sys:String>
+    <sys:String x:Key="scriptEditorSettings_lineNumbers">Mostra i numeri di riga</sys:String>
+    <sys:String x:Key="scriptEditorSettings_wordWrap">A capo automatico</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentation">Rientro</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentWith">Usa per il rientro</sys:String>
+    <sys:String x:Key="scriptEditorSettings_spaces">Spazi</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabs">Tabulazioni</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabWidth">Larghezza tabulazione</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidFontSize">Inserisci un numero intero da 8 a 72 per la dimensione del carattere.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidTabWidth">Inserisci un numero intero da 1 a 16 per la larghezza della tabulazione.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_saveFailed">Impossibile salvare le impostazioni dell’editor.</sys:String>
 
     <!--Download manager-->
     <sys:String x:Key="downloads_menu">Download</sys:String>

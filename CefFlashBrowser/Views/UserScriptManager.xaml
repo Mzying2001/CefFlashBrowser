@@ -130,6 +130,11 @@
                           InputGestureText="Ctrl+Space" Command="{x:Static c:ScriptEditor.CompleteCodeCommand}"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
             </MenuItem>
+            <MenuItem Header="{DynamicResource userScriptManager_view}">
+                <MenuItem x:Name="editorSettingsMenuItem"
+                          Header="{DynamicResource scriptEditorSettings_menu}"
+                          Click="OpenEditorSettings"/>
+            </MenuItem>
             <MenuItem Header="{DynamicResource common_script}">
                 <MenuItem x:Name="batchUpdateMenuItem"
                           Header="{DynamicResource userScriptBatchUpdate_menu}"
@@ -506,14 +511,10 @@
                 </Border>
 
                 <c:ScriptEditor x:Name="sourceEditor"
-                                ShowLineNumbers="True"
-                                FontFamily="Consolas"
-                                FontSize="14"
                                 Padding="4"
                                 BorderThickness="1"
                                 HorizontalScrollBarVisibility="Auto"
-                                VerticalScrollBarVisibility="Auto"
-                                WordWrap="False">
+                                VerticalScrollBarVisibility="Auto">
                     <c:ScriptEditor.Style>
                         <Style TargetType="c:ScriptEditor">
                             <Style.Triggers>

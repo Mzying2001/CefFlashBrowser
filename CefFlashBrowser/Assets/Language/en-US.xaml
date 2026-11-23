@@ -279,6 +279,7 @@
     <sys:String x:Key="userScriptManager_toggle">Enable or disable script</sys:String>
     <sys:String x:Key="userScriptManager_draft">Uninstalled draft</sys:String>
     <sys:String x:Key="userScriptManager_unavailable">Unavailable</sys:String>
+    <sys:String x:Key="userScriptManager_view">View</sys:String>
     <sys:String x:Key="userScriptDetails_title">Script details</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">Unknown metadata</sys:String>
     <sys:String x:Key="userScriptInstall_install">Install</sys:String>
@@ -304,6 +305,21 @@
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Update these scripts?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Unsaved changes will be overwritten.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Updated {0} scripts. Failed to update {1}.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_menu">Editor settings…</sys:String>
+    <sys:String x:Key="scriptEditorSettings_title">Editor settings</sys:String>
+    <sys:String x:Key="scriptEditorSettings_display">Display</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontFamily">Font family</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontSize">Font size</sys:String>
+    <sys:String x:Key="scriptEditorSettings_lineNumbers">Show line numbers</sys:String>
+    <sys:String x:Key="scriptEditorSettings_wordWrap">Wrap lines</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentation">Indentation</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentWith">Indent with</sys:String>
+    <sys:String x:Key="scriptEditorSettings_spaces">Spaces</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabs">Tabs</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabWidth">Tab width</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidFontSize">Enter an integer from 8 to 72 for the font size.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidTabWidth">Enter an integer from 1 to 16 for the tab width.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_saveFailed">Could not save editor settings.</sys:String>
 
     <!--Download manager-->
     <sys:String x:Key="downloads_menu">Downloads</sys:String>

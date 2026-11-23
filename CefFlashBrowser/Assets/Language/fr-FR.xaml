@@ -279,6 +279,7 @@
     <sys:String x:Key="userScriptManager_toggle">Activer ou désactiver le script</sys:String>
     <sys:String x:Key="userScriptManager_draft">Brouillon non installé</sys:String>
     <sys:String x:Key="userScriptManager_unavailable">Indisponible</sys:String>
+    <sys:String x:Key="userScriptManager_view">Affichage</sys:String>
     <sys:String x:Key="userScriptDetails_title">Détails du script</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">Métadonnées inconnues</sys:String>
     <sys:String x:Key="userScriptInstall_install">Installer</sys:String>
@@ -304,6 +305,21 @@
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Mettre à jour ces scripts ?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Les modifications non enregistrées seront remplacées.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">Scripts mis à jour : {0}. Échecs : {1}.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_menu">Paramètres de l’éditeur…</sys:String>
+    <sys:String x:Key="scriptEditorSettings_title">Paramètres de l’éditeur</sys:String>
+    <sys:String x:Key="scriptEditorSettings_display">Affichage</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontFamily">Police</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontSize">Taille de police</sys:String>
+    <sys:String x:Key="scriptEditorSettings_lineNumbers">Afficher les numéros de ligne</sys:String>
+    <sys:String x:Key="scriptEditorSettings_wordWrap">Retour automatique à la ligne</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentation">Indentation</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentWith">Indenter avec</sys:String>
+    <sys:String x:Key="scriptEditorSettings_spaces">Espaces</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabs">Tabulations</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabWidth">Largeur de tabulation</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidFontSize">Saisissez un entier de 8 à 72 pour la taille de police.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidTabWidth">Saisissez un entier de 1 à 16 pour la largeur de tabulation.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_saveFailed">Impossible d’enregistrer les paramètres de l’éditeur.</sys:String>
 
     <!--Download manager-->
     <sys:String x:Key="downloads_menu">Téléchargements</sys:String>

@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Infrastructure.Collections;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Services.UserScripts;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Parsing;
@@ -26,6 +27,7 @@ namespace CefFlashBrowser.ViewModels
         private readonly Func<string, string> _text;
         private readonly Action<Action> _dispatch;
         private readonly Func<string, CancellationToken, Task<string>> _fetchSource;
+        private readonly Func<EditorSettings> _getEditorSettings;
 
         private IUserScriptRepository _repository;
         private CancellationTokenSource _lifetime;
@@ -158,12 +160,14 @@ namespace CefFlashBrowser.ViewModels
             Func<Task<IUserScriptRepository>> initialize,
             Func<string, string> text,
             Action<Action> dispatch,
-            Func<string, CancellationToken, Task<string>> fetchSource = null)
+            Func<string, CancellationToken, Task<string>> fetchSource = null,
+            Func<EditorSettings> getEditorSettings = null)
         {
             _initialize = initialize;
             _text = text;
             _dispatch = dispatch;
             _fetchSource = fetchSource;
+            _getEditorSettings = getEditorSettings;
 
             Scripts = new ObservableCollection<UserScriptItemViewModel>();
 
@@ -254,6 +258,7 @@ namespace CefFlashBrowser.ViewModels
         public void NewScript()
         {
             var name = _text("userScriptManager_newScript");
+            var indent = (_getEditorSettings?.Invoke() ?? new EditorSettings()).GetIndentationString();
 
             var source =
                 "// ==UserScript==\r\n" +
@@ -267,8 +272,8 @@ namespace CefFlashBrowser.ViewModels
                 "// ==/UserScript==\r\n" +
                 "\r\n" +
                 "(function() {\r\n" +
-                "  'use strict';\r\n" +
-                "  \r\n" +
+                indent + "'use strict';\r\n" +
+                indent + "\r\n" +
                 "})();\r\n";
 
             var item = new UserScriptItemViewModel(source, null, name, false);

@@ -45,6 +45,118 @@ function Open-ManagerEditorContextMenu($Context, $Window) {
     return $editor.ContextMenu
 }
 
+function Invoke-ManagerEditorSettings($Context, $Window, [scriptblock]$Check) {
+    $menu = $Window.FindName('editorSettingsMenuItem')
+    Assert-Regression ($menu.IsEnabled -and
+        $menu.Header -ceq $Context.LanguageService.GetString('scriptEditorSettings_menu')) 'editor settings menu is available and localized'
+    $state = @{ Opened = $false; Failure = $null }
+    $timer = New-Object Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(50)
+    $handler = [EventHandler]({
+        $dialog = $Context.Application.Windows | Where-Object {
+            $_.IsVisible -and $_ -is [CefFlashBrowser.Views.Dialogs.EditorSettingsDialog]
+        } | Select-Object -First 1
+        if ($null -eq $dialog) { return }
+
+        $timer.Stop()
+        $state.Opened = $true
+        try {
+            Assert-Regression ([object]::ReferenceEquals($dialog.Owner, $Window)) 'editor settings opens with the manager as owner'
+            & $Check $dialog
+            Assert-Regression (!$dialog.IsVisible) 'editor settings dialog closes after dismissal'
+        } catch {
+            $state.Failure = $_
+        } finally {
+            if ($dialog.IsVisible) { $dialog.Close() }
+        }
+    }.GetNewClosure())
+
+    $timer.add_Tick($handler)
+    $timer.Start()
+    try {
+        $menu.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.MenuItem]::ClickEvent))
+        if ($null -ne $state.Failure) { throw $state.Failure }
+        Assert-Regression ($state.Opened) 'editor settings menu opens its dialog'
+    } finally {
+        $timer.Stop()
+        $timer.remove_Tick($handler)
+    }
+}
+
+function Test-ManagerEditorSettings($Context, $Window) {
+    $model = $Window.DataContext
+    $editor = $Window.FindName('sourceEditor')
+    $original = [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings
+    $previousSelection = $model.SelectedScript
+    $model.SelectedScript = $null
+
+    Invoke-ManagerEditorSettings $Context $Window {
+        param($dialog)
+        $dialog.FindName('fontSizeBox').Text = '72'
+        $dialog.FindName('cancelButton').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+    }
+    Assert-Regression ([object]::ReferenceEquals($original, [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings) -and
+        $editor.FontSize -eq $original.FontSize) 'cancel keeps settings while no script is selected'
+
+    $model.NewScript()
+    $draft = $model.SelectedScript
+    $editor.CaretOffset = $editor.Text.Length
+    $editor.TextArea.PerformTextInput("// draft with an existing tab: `t")
+    $editor.Select(2, 5)
+    $document = $editor.Document
+    $source = $draft.Source
+    $dirty = $draft.IsDirty
+    $fontName = [Windows.Media.Fonts]::SystemFontFamilies |
+        Where-Object { $_.Source -ne $editor.FontFamily.Source } |
+        Select-Object -First 1 -ExpandProperty Source
+    Assert-Regression ($null -ne $fontName) 'an alternate system font is available'
+
+    Invoke-ManagerEditorSettings $Context $Window ({
+        param($dialog)
+        $size = $dialog.FindName('fontSizeBox')
+        $width = $dialog.FindName('tabWidthBox')
+        $ok = $dialog.FindName('okButton')
+        $validation = $dialog.FindName('validationMessage')
+        Assert-Regression ($size.Text -eq $original.FontSize -and $width.Text -eq $original.TabWidth) 'editor settings shows current values'
+        $size.Text = '73'
+        $ok.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+        Assert-Regression ($dialog.IsVisible -and $validation.Text -ceq
+            $Context.LanguageService.GetString('scriptEditorSettings_invalidFontSize')) 'invalid font size leaves the dialog open'
+        $size.Text = '18'
+        $width.Text = '0'
+        $ok.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+        Assert-Regression ($dialog.IsVisible -and $validation.Text -ceq
+            $Context.LanguageService.GetString('scriptEditorSettings_invalidTabWidth')) 'invalid tab width leaves the dialog open'
+
+        $width.Text = '4'
+        $dialog.FindName('fontFamilyBox').SelectedItem = $fontName
+        $dialog.FindName('indentationBox').SelectedItem = $dialog.FindName('tabsOption')
+        $dialog.FindName('lineNumbersBox').IsChecked = $false
+        $dialog.FindName('wordWrapBox').IsChecked = $true
+        $ok.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+    }.GetNewClosure())
+
+    Assert-Regression ($editor.FontFamily.Source -ceq $fontName -and $editor.FontSize -eq 18 -and
+        $editor.Options.IndentationSize -eq 4 -and !$editor.Options.ConvertTabsToSpaces -and
+        !$editor.ShowLineNumbers -and $editor.WordWrap) 'confirmed editor settings apply immediately'
+    Assert-Regression ([object]::ReferenceEquals($document, $editor.Document) -and $draft.Source -ceq $source -and
+        $dirty -eq $draft.IsDirty -and $editor.SelectionStart -eq 2 -and $editor.SelectionLength -eq 5 -and
+        $document.UndoStack.CanUndo) 'setting changes preserve the current draft, selection and undo history'
+
+    Set-TabWindowForeground $Context $Window
+    Wait-Regression $Context { $editor.TextArea.IsKeyboardFocusWithin -or $editor.TextArea.Focus() } 'editor receives keyboard input after settings close'
+    $editor.Select(0, 0)
+    $editor.CaretOffset = 0
+    [RegressionKeyboard]::PressKey(0x09)
+    Wait-Regression $Context { $draft.Source -ceq ("`t" + $source) } 'Tab inserts one literal tab with tabs selected'
+
+    $model.NewScript()
+    Assert-Regression ($model.SelectedScript.Source.Contains("`r`n`t'use strict';`r`n")) 'new scripts use the current indentation preference'
+    [void]$model.Scripts.Remove($draft)
+    [void]$model.Scripts.Remove($model.SelectedScript)
+    $model.SelectedScript = $previousSelection
+}
+
 function Test-ManagerStatusLine($Context, $Window) {
     $model = $Window.DataContext
     $editor = $Window.FindName('sourceEditor')
@@ -1799,6 +1911,7 @@ function Test-UserScriptManager($Context) {
     $iconFixture = New-Object FaviconHttpFixture
     $language = $Context.LanguageService.CurrentLanguage
     $theme = [CefFlashBrowser.Data.GlobalData]::Settings.Theme
+    $originalEditorSettings = [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings
     $model = $Context.Application.Resources['Locator'].UserScriptManagerViewModel
     $source = @'
 // ==UserScript==
@@ -2175,6 +2288,32 @@ document.documentElement.setAttribute('data-manager', 'saved');
         [void]$editor.Redo()
         Assert-Regression ($item.Source.EndsWith('// theme draft')) 'redo history still works after repeated theme changes'
         Test-WebUserScriptInstallation $Context $browserWindow $window $fixture
+        Test-ManagerEditorSettings $Context $window
+
+        $saved = [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings
+        $window.Close()
+        $window = $null
+        [CefFlashBrowser.Data.GlobalData]::InitSettings()
+        [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
+        $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] })[0]
+        Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager reopens from disk-backed settings'
+        $editor = $window.FindName('sourceEditor')
+        Assert-Regression ($editor.FontFamily.Source -ceq $saved.FontFamily -and $editor.FontSize -eq 18 -and
+            $editor.Options.IndentationSize -eq 4 -and !$editor.Options.ConvertTabsToSpaces -and
+            !$editor.ShowLineNumbers -and $editor.WordWrap) 'all editor preferences survive reloading settings and reopening the manager'
+
+        Invoke-ManagerEditorSettings $Context $window ({
+            param($dialog)
+            $dialog.FindName('fontFamilyBox').SelectedItem = $originalEditorSettings.FontFamily
+            $dialog.FindName('fontSizeBox').Text = $originalEditorSettings.FontSize.ToString()
+            $dialog.FindName('indentationBox').SelectedItem = $dialog.FindName('spacesOption')
+            $dialog.FindName('tabWidthBox').Text = $originalEditorSettings.TabWidth.ToString()
+            $dialog.FindName('lineNumbersBox').IsChecked = $originalEditorSettings.ShowLineNumbers
+            $dialog.FindName('wordWrapBox').IsChecked = $false
+            $dialog.FindName('okButton').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+        }.GetNewClosure())
+        Assert-Regression (!$editor.WordWrap -and
+            $editor.HorizontalScrollBarVisibility -eq [Windows.Controls.ScrollBarVisibility]::Auto) 'turning off word wrap restores horizontal scrolling'
         Test-ManagerBatchUpdate $Context $window
     } finally {
         if ($null -ne $browserWindow) { $browserWindow.ForceCloseWindow() }
@@ -2191,5 +2330,9 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $iconFixture.Dispose()
         $Context.LanguageService.SetCurrentLanguage($language)
         Set-ManagerRegressionTheme $Context $theme
+        if (![object]::ReferenceEquals($originalEditorSettings, [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings)) {
+            [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings = $originalEditorSettings
+            [void][CefFlashBrowser.Data.GlobalData]::SaveSettings()
+        }
     }
 }

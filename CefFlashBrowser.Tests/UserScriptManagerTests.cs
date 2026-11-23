@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Services.UserScripts;
+﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.ViewModels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mzying2001.MonkeySharp.Core.Domain;
@@ -28,6 +29,25 @@ namespace CefFlashBrowser.Tests
         private static UserScriptManagerViewModel Manager(IUserScriptRepository repository)
             => new UserScriptManagerViewModel(() => Task.FromResult(repository),
                 key => key == "userScriptManager_confirmDelete" ? "Delete \"{0}\"?" : key, action => action());
+
+        [TestMethod]
+        public void NewScriptUsesCurrentIndentationAndPreservesExistingDrafts()
+        {
+            var settings = new EditorSettings { TabWidth = 4 };
+            var manager = new UserScriptManagerViewModel(null, key => key, action => action(),
+                getEditorSettings: () => settings);
+
+            manager.NewScript();
+            var first = manager.SelectedScript;
+            var original = first.Source;
+            StringAssert.Contains(original, "\r\n    'use strict';\r\n    \r\n");
+
+            settings = new EditorSettings { TabWidth = 8, IndentWithSpaces = false };
+            manager.NewScript();
+
+            StringAssert.Contains(manager.SelectedScript.Source, "\r\n\t'use strict';\r\n\t\r\n");
+            Assert.AreEqual(original, first.Source);
+        }
 
         [TestMethod]
         public async Task NewSaveToggleAndEditKeepInstallationIdentity()
