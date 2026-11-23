@@ -135,6 +135,47 @@ namespace CefFlashBrowser.Tests
         [DataTestMethod]
         [DataRow(false)]
         [DataRow(true)]
+        public async Task Uninstall_RemovesOnlyEmptySourceDirectory(bool hasChildDirectory)
+        {
+            var installed = await InstallAsync();
+            var source = PathFor(installed.ScriptKey);
+            var directory = Path.GetDirectoryName(source);
+            var child = Path.Combine(directory, "keep");
+
+            if (hasChildDirectory)
+                Directory.CreateDirectory(child);
+
+            await _repository.RemoveAsync(installed.ScriptKey, None);
+
+            Assert.IsFalse(File.Exists(source));
+            Assert.AreEqual(hasChildDirectory, Directory.Exists(directory));
+            Assert.AreEqual(hasChildDirectory, Directory.Exists(child));
+        }
+
+        [TestMethod]
+        public async Task Startup_RemovesOnlyUnregisteredEmptySourceDirectories()
+        {
+            var installed = await InstallAsync();
+            var installedSource = PathFor(installed.ScriptKey);
+            var legacyKey = ScriptKey.Parse(Guid.NewGuid().ToString("D"));
+            var legacyDirectory = Path.GetDirectoryName(PathFor(legacyKey));
+            var unrelatedDirectory = Path.Combine(Path.GetDirectoryName(legacyDirectory), "unrelated");
+
+            File.Delete(installedSource);
+            Directory.CreateDirectory(legacyDirectory);
+            Directory.CreateDirectory(unrelatedDirectory);
+
+            var restored = await OpenAsync();
+
+            Assert.IsFalse(Directory.Exists(legacyDirectory));
+            Assert.IsTrue(Directory.Exists(Path.GetDirectoryName(installedSource)));
+            Assert.IsTrue(Directory.Exists(unrelatedDirectory));
+            Assert.AreEqual(installed.ScriptKey, (await restored.GetSnapshotAsync(None)).Single().ScriptKey);
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public async Task CommittedDeletion_OrphanScanCleansTombstoneAndRetainsNewUserFile(bool external)
         {
             var installed = await InstallAsync();
@@ -150,6 +191,7 @@ namespace CefFlashBrowser.Tests
             Assert.IsFalse(File.Exists(PathFor(installed.ScriptKey) + ".deleted"));
             Assert.IsFalse(File.Exists(Marker(installed.ScriptKey)));
             Assert.AreEqual(external, File.Exists(PathFor(installed.ScriptKey)));
+            Assert.AreEqual(external, Directory.Exists(Path.GetDirectoryName(PathFor(installed.ScriptKey))));
         }
 
         [DataTestMethod]
