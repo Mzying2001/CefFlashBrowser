@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="./Icons/large.svg" />
+    <img src="./CefFlashBrowser/Assets/Icons/icon-large.svg" />
     <br />
     CefFlashBrowser
     <br />

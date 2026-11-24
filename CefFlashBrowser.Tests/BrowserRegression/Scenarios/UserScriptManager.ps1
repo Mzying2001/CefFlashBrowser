@@ -720,7 +720,7 @@ function Test-ManagerSearchAppearance($Context, $Window) {
         Assert-Regression ($sortOrigin.X -ge ($filterOrigin.X + $filter.ActualWidth - 1) -and
             [Math]::Abs($sortOrigin.X + $sort.ActualWidth - $list.ActualWidth) -lt 1 -and
             $sortOrigin.Y + $sort.ActualHeight -le 0 -and $filterOrigin.Y + $filter.ActualHeight -le 0) 'the filter and sort button fit above the list at minimum window width'
-        Assert-Regression ($sort.Content.UriSource.OriginalString -ceq '/Assets/Svgs/text-sort-asc.svg' -and
+        Assert-Regression ($sort.Content.UriSource.OriginalString -ceq '/Assets/Icons/text-sort-asc.svg' -and
             !$sort.IsChecked) 'the sort button uses the ascending name icon and starts unchecked'
         $Window.Width = 800
         $Window.UpdateLayout()

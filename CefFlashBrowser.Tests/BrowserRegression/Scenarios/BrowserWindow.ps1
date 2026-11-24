@@ -282,7 +282,7 @@ true;
             $game.FileName -ceq 'GAME.SWF') 'SWF item exposes its filename and full URL'
         Wait-Regression $Context { $button.IsVisible } 'SWF toolbar button appears'
         Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($button) -ceq 'PageSwfs') 'SWF toolbar has a fixed automation name'
-        Assert-Regression ($button.Content.UriSource.OriginalString -eq '/Assets/Svgs/swf.svg') 'SWF toolbar uses the SWF icon'
+        Assert-Regression ($button.Content.UriSource.OriginalString -eq '/Assets/Icons/swf.svg') 'SWF toolbar uses the SWF icon'
 
         $buttonPeer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($button)
         $buttonPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
