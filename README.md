@@ -39,6 +39,10 @@ CefFlashBrowser 会在符合匹配规则的网页上自动运行已启用的用�
 
 ![用户脚本管理器](./Images/UserscriptManager.png)
 
+## 参与贡献
+
+欢迎反馈问题、提出功能建议或提交改动。请参阅[贡献指南](./CONTRIBUTING.md)。
+
 ## Star 趋势
 
 <a href="https://star-history.dera.page/Mzying2001/CefFlashBrowser?style=github">

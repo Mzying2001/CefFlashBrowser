@@ -39,6 +39,10 @@ CefFlashBrowser automatically runs enabled userscripts on matching pages, lettin
 
 ![Userscript Manager](./Images/UserscriptManager.png)
 
+## Contributing
+
+See the [contribution guide](./CONTRIBUTING.en.md) to report a bug, suggest a feature, or submit a change.
+
 ## Stargazers over time
 
 <a href="https://star-history.dera.page/Mzying2001/CefFlashBrowser?style=github">
