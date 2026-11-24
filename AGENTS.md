@@ -80,6 +80,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - Entry point is `Program.cs` (not the default `App.xaml.cs`)
 - CefSharp version 84.4.10 is pinned for Flash compatibility
 - Follow the repository's `.editorconfig` when modifying or adding files
+- Use English PascalCase for UIA control names unless a dynamic name is needed.
 
 ## Git Commit Conventions
 
