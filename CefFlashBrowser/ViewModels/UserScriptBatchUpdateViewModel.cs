@@ -210,26 +210,35 @@ namespace CefFlashBrowser.ViewModels
         public Task UpdateAllAsync() => RunAsync(async token =>
         {
             var pending = _rows.Where(row => MatchesFilter(row) && row.HasUpdate && EnsureCurrent(row, row.Check))
-                .Select(row => new { Row = row, Check = row.Check }).ToArray();
+                .Select(row => new
+                {
+                    Row = row,
+                    Check = row.Check,
+                    Confirmation = new UserScriptUpdateConfirmationEntry(
+                        row.Name, row.CurrentVersion, row.Check.AvailableVersion, row.Item.IsDirty)
+                }).ToArray();
 
             if (pending.Length == 0)
                 return;
 
-            var entries = Array.AsReadOnly(pending.Select(entry => new UserScriptUpdateConfirmationEntry(
-                entry.Row.Name, entry.Row.CurrentVersion, entry.Check.AvailableVersion, entry.Row.Item.IsDirty)).ToArray());
+            var entries = Array.AsReadOnly(pending.Select(entry => entry.Confirmation).ToArray());
 
             if (ConfirmAll?.Invoke(entries, token) != true)
                 return;
 
+            var selected = pending.Where(entry => entry.Confirmation.IsSelected).ToArray();
+            if (selected.Length == 0)
+                return;
+
             int succeeded = 0;
 
-            foreach (var entry in pending)
+            foreach (var entry in selected)
             {
                 if (await ApplyAsync(entry.Row, entry.Check, _createOperation(), token))
                     succeeded++;
             }
 
-            Summary = string.Format(_text("userScriptBatchUpdate_summary"), succeeded, pending.Length - succeeded);
+            Summary = string.Format(_text("userScriptBatchUpdate_summary"), succeeded, selected.Length - succeeded);
         });
 
         private async Task<bool> ApplyAsync(UserScriptBatchUpdateRow row, UserScriptUpdateCheckResult check,
@@ -393,12 +402,19 @@ namespace CefFlashBrowser.ViewModels
         }
     }
 
-    internal sealed class UserScriptUpdateConfirmationEntry
+    internal sealed class UserScriptUpdateConfirmationEntry : ViewModelBase
     {
         public string Name { get; }
         public string CurrentVersion { get; }
         public string NewVersion { get; }
         public bool HasUnsavedEdits { get; }
+
+        private bool _isSelected = true;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => UpdateValue(ref _isSelected, value);
+        }
 
         public UserScriptUpdateConfirmationEntry(string name, string currentVersion, string newVersion, bool hasUnsavedEdits)
         {

@@ -1506,6 +1506,7 @@ function Test-ManagerBatchUpdate($Context, $Window) {
         $edited = $manager.Scripts | Where-Object Name -eq 'Batch regression A'
         $manager.SelectedScript = $edited
         $edited.Source += "`n// pending editor change"
+        $editedSource = $edited.Source
         $warn = $Context.LanguageService.GetString('userScriptBatchUpdate_overwriteEdits')
         $state = @{ Failure = $null; Opened = $false }
         $timer = New-Object Windows.Threading.DispatcherTimer
@@ -1601,7 +1602,7 @@ function Test-ManagerBatchUpdate($Context, $Window) {
                     $cancel = $confirmation.FindName('cancelButton')
                     $confirm = $confirmation.FindName('updateButton')
                     Assert-Regression ($prompt.Text -ceq $Context.LanguageService.GetString('userScriptBatchUpdate_confirmAll') -and
-                        $confirm.Content -ceq $Context.LanguageService.GetString('userScriptBatchUpdate_all') -and
+                        $confirm.Content -ceq $Context.LanguageService.GetString('userScriptInstall_update') -and
                         $cancel.Content -ceq $Context.LanguageService.GetString('common_cancel')) 'batch confirmation uses localized prompt and actions'
                     Assert-Regression ($entries.Items.Count -eq $expectedScripts.Count) "confirmation lists $($entries.Items.Count) scripts, expected $($expectedScripts.Count)"
                     $versions = "1.0 $([char]0x2192) 2.0"
@@ -1616,23 +1617,38 @@ function Test-ManagerBatchUpdate($Context, $Window) {
                             Assert-Regression ($label.ActualHeight -gt $singleLineHeight) 'the long script name wraps'
                         }
                     }
+                    $checkBoxes = @(Find-FaviconElements $entries ([Windows.Controls.CheckBox]))
+                    Assert-Regression ($checkBoxes.Count -eq $expectedScripts.Count -and $confirm.IsEnabled -and
+                        @($checkBoxes | Where-Object IsChecked).Count -eq $expectedScripts.Count) 'each confirmation opens with every script checked'
                     $actionPosition = $confirm.TranslatePoint([Windows.Point]::new(0, 0), $confirmation)
                     $scrollViewer.ScrollToBottom()
                     $confirmation.UpdateLayout()
                     Assert-Regression ($scrollViewer.VerticalOffset -gt 0 -and $prompt.IsVisible -and $cancel.IsVisible -and
                         $confirm.IsVisible -and $confirm.TranslatePoint([Windows.Point]::new(0, 0), $confirmation) -eq $actionPosition) 'the script list scrolls with the prompt and actions fixed'
+
+                    $toggles = @($checkBoxes | ForEach-Object {
+                        $peer = New-Object Windows.Automation.Peers.CheckBoxAutomationPeer($_)
+                        $peer.GetPattern([Windows.Automation.Peers.PatternInterface]::Toggle)
+                    })
+                    foreach ($toggle in $toggles) { $toggle.Toggle() }
+                    Assert-Regression (!$confirm.IsEnabled -and $cancel.IsEnabled) 'no selected scripts disables Update and keeps Cancel available'
+                    for ($index = 1; $index -lt $toggles.Count; $index++) { $toggles[$index].Toggle() }
+                    Assert-Regression ($confirm.IsEnabled -and !$checkBoxes[0].IsChecked -and
+                        @($checkBoxes | Where-Object IsChecked).Count -eq ($expectedScripts.Count - 1)) 'rechecking scripts enables a partial update'
                 }.GetNewClosure()
                 Invoke-BatchUpdateConfirmation $Context $batch $update.Command $null `
                     ([CefFlashBrowser.Views.Dialogs.UserScriptBatchUpdateConfirmDialog]) 'cancelButton' $warn $checkBatchDialog
                 Assert-Regression ($edited.IsDirty -and $update.IsEnabled -and
                     @($list.Items | Where-Object CurrentVersion -eq '1.0').Count -eq $names.Count) 'cancelling the batch preserves installed versions and unsaved edits'
+                $editedRequests = $fixtures[0].RequestsFor($slowPath)
                 Invoke-BatchUpdateConfirmation $Context $batch $update.Command $null `
                     ([CefFlashBrowser.Views.Dialogs.UserScriptBatchUpdateConfirmDialog]) 'updateButton' $warn $checkBatchDialog
-                Assert-Regression (@($list.Items | Where-Object { $_.CurrentVersion -eq '2.0' -and $_.LatestVersion -eq '2.0' -and !$_.HasStatus }).Count -eq $names.Count -and
-                    !$update.IsEnabled -and
-                    $batch.FindName('summaryText').Text -eq ($Context.LanguageService.GetString('userScriptBatchUpdate_summary') -f $names.Count, 0)) 'the rows show the installed versions and the dialog summarizes the update'
-                Assert-Regression (!$edited.IsDirty -and $edited.Source -eq $fixtures[0].ScriptSource -and
-                    $Window.FindName('sourceEditor').Text -eq $fixtures[0].ScriptSource) 'the manager editor shows the confirmed replacement source'
+                $selectedCount = $names.Count - 1
+                Assert-Regression (@($list.Items | Where-Object { $_.CurrentVersion -eq '2.0' -and $_.LatestVersion -eq '2.0' -and !$_.HasStatus }).Count -eq $selectedCount -and
+                    $update.IsEnabled -and $row.CurrentVersion -eq '1.0' -and $row.LatestVersion -eq '2.0' -and
+                    $batch.FindName('summaryText').Text -eq ($Context.LanguageService.GetString('userScriptBatchUpdate_summary') -f $selectedCount, 0)) 'only selected scripts are updated and counted in the summary'
+                Assert-Regression ($fixtures[0].RequestsFor($slowPath) -eq $editedRequests -and $edited.IsDirty -and
+                    $edited.Source -ceq $editedSource -and $Window.FindName('sourceEditor').Text -ceq $editedSource) 'the unchecked script keeps its draft and makes no update request'
             } catch {
                 $state.Failure = $_
             } finally {

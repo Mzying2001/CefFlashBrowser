@@ -98,6 +98,59 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
+        public async Task UpdateAllAppliesOnlySelectedScriptsAndKeepsSkippedUpdatesAvailable()
+        {
+            var repository = await RepositoryAsync();
+            await InstallAsync(repository, "Updates");
+            await InstallAsync(repository, "Keeps draft");
+            var requests = new List<string>();
+            var manager = await ManagerAsync(repository, (url, _) =>
+            {
+                requests.Add(url);
+                var name = Uri.UnescapeDataString(new Uri(url).AbsolutePath.Substring(1));
+                return Task.FromResult(Source(name, "2.0"));
+            });
+            var edited = manager.Scripts.Single(item => item.Name == "Keeps draft");
+            manager.SelectedScript = edited;
+            edited.Source += "\n// pending edits";
+            var draft = edited.Source;
+
+            using (var batch = manager.CreateBatchUpdateViewModel())
+            {
+                await batch.CheckAllAsync();
+                requests.Clear();
+                var skipAll = true;
+                batch.ConfirmAll = (entries, _) =>
+                {
+                    Assert.AreEqual(2, entries.Count);
+                    Assert.IsTrue(entries.All(entry => entry.IsSelected));
+                    foreach (var entry in entries)
+                        entry.IsSelected = !skipAll && entry.Name != edited.Name;
+                    return true;
+                };
+
+                await batch.UpdateAllAsync();
+                Assert.AreEqual(0, requests.Count);
+                Assert.AreEqual(string.Empty, batch.Summary);
+                Assert.IsTrue(batch.RowsView.Cast<UserScriptBatchUpdateRow>().All(row => row.HasUpdate));
+
+                skipAll = false;
+                await batch.UpdateAllAsync();
+                CollectionAssert.AreEqual(new[] { Url("Updates") }, requests);
+                Assert.AreEqual("Updated 1; failed 0", batch.Summary);
+                Assert.AreEqual("2.0", manager.Scripts.Single(item => item.Name == "Updates").Version);
+                var skipped = batch.RowsView.Cast<UserScriptBatchUpdateRow>().Single(row => row.HasUpdate);
+                Assert.AreSame(edited, skipped.Item);
+                Assert.AreEqual("1.0", skipped.CurrentVersion);
+                Assert.AreEqual("2.0", skipped.LatestVersion);
+                Assert.AreEqual(draft, edited.Source);
+                Assert.IsTrue(edited.IsDirty);
+                Assert.IsTrue(((ICommand)batch.UpdateAllCommand).CanExecute(null));
+            }
+            manager.Close();
+        }
+
+        [TestMethod]
         public async Task RowAndBatchConfirmationsProtectUnsavedEditsAndFailuresDoNotStopTheBatch()
         {
             var repository = await RepositoryAsync();

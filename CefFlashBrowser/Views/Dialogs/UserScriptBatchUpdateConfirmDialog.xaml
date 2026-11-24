@@ -30,7 +30,8 @@
 
     <DockPanel Margin="20" KeyboardNavigation.TabNavigation="Cycle">
         <TextBlock x:Name="confirmationPrompt" DockPanel.Dock="Top" Margin="0,0,0,12"
-                   FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap"
+                   FontWeight="SemiBold" TextWrapping="Wrap"
+                   Foreground="{DynamicResource PrimaryTextBrush}"
                    Text="{DynamicResource userScriptBatchUpdate_confirmAll}"/>
 
         <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0"
@@ -43,7 +44,7 @@
                 </Button.CommandParameter>
             </Button>
             <Button x:Name="updateButton" Margin="8,0,0,0" MinWidth="84" Padding="12,0"
-                    Content="{DynamicResource userScriptBatchUpdate_all}" Style="{StaticResource ButtonPrimary}"
+                    Content="{DynamicResource userScriptInstall_update}" Style="{StaticResource ButtonPrimary}"
                     IsDefault="True" Command="{Binding ElementName=windowBehavior, Path=SetDialogResultCommand}">
                 <Button.CommandParameter>
                     <sys:Boolean>True</sys:Boolean>
@@ -54,23 +55,32 @@
         <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4">
             <ScrollViewer x:Name="scriptScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <ItemsControl x:Name="scriptList" ItemsSource="{Binding}">
+                    <ItemsControl.Resources>
+                        <DataTemplate x:Key="UpdateEntryTemplate">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                                <TextBlock Margin="0,2,0,0" TextWrapping="Wrap" Foreground="{DynamicResource SecondaryTextBrush}">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} → {1}">
+                                            <Binding Path="CurrentVersion" TargetNullValue="—"/>
+                                            <Binding Path="NewVersion" TargetNullValue="—"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                                <TextBlock Margin="0,4,0,0" TextWrapping="Wrap" Foreground="{DynamicResource DangerBrush}"
+                                           Text="{DynamicResource userScriptBatchUpdate_overwriteEdits}"
+                                           Visibility="{Binding HasUnsavedEdits, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.Resources>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="12,8" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
-                                    <TextBlock Margin="0,2,0,0" TextWrapping="Wrap" Foreground="{DynamicResource SecondaryTextBrush}">
-                                        <TextBlock.Text>
-                                            <MultiBinding StringFormat="{}{0} → {1}">
-                                                <Binding Path="CurrentVersion" TargetNullValue="—"/>
-                                                <Binding Path="NewVersion" TargetNullValue="—"/>
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                    <TextBlock Margin="0,4,0,0" TextWrapping="Wrap" Foreground="{DynamicResource DangerBrush}"
-                                               Text="{DynamicResource userScriptBatchUpdate_overwriteEdits}"
-                                               Visibility="{Binding HasUnsavedEdits, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                </StackPanel>
+                                <CheckBox
+                                    IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                    AutomationProperties.Name="{Binding Name}"
+                                    Content="{Binding}"
+                                    ContentTemplate="{StaticResource UpdateEntryTemplate}"/>
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
