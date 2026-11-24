@@ -1,0 +1,68 @@
+name: 问题反馈 / Bug report
+description: 报告崩溃、播放异常或其他错误。 Report a crash, playback issue, or other bug.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请[搜索已有 Issue](https://github.com/Mzying2001/CefFlashBrowser/issues?q=is%3Aissue)。中文和英文均可。
+        Please [search existing issues](https://github.com/Mzying2001/CefFlashBrowser/issues?q=is%3Aissue) first. Reports in Chinese or English are welcome.
+
+  - type: input
+    id: app-version
+    attributes:
+      label: 软件版本 / CefFlashBrowser version
+      description: 填写发布版本号或源码构建的提交 SHA。 Enter the release version or the commit SHA for a source build.
+    validations:
+      required: true
+
+  - type: input
+    id: windows-version
+    attributes:
+      label: Windows 版本 / Windows version
+      placeholder: Windows 11 24H2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: app-architecture
+    attributes:
+      label: 程序架构 / App architecture
+      options:
+        - x86 (32-bit)
+        - x64 (64-bit)
+        - 不确定 / Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      description: |
+        按顺序列出操作和相关设置。如果问题只在特定网页、本地 SWF、SOL 存档或用户脚本中出现，请提供可公开分享的链接或最小样例。
+        List the steps in order and include relevant settings. If the issue is specific to a web page, local SWF, SOL save, or userscript, share a public link or a minimal sample.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: 实际结果 / Actual behavior
+      description: 说明出现了什么问题，以及是否每次都会发生。 Describe what happened and how often it occurs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 预期结果 / Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: 日志、截图或其他信息 / Logs, screenshots, or other details
+      description: |
+        如有相关日志，请从 `CefFlashBrowser.exe` 同目录下的 `Logs` 文件夹摘录。上传前请移除密码、令牌和个人信息。
+        If available, include relevant excerpts from the `Logs` folder next to `CefFlashBrowser.exe`. Remove passwords, tokens, and personal information before posting.

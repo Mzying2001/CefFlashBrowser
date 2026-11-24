@@ -1,4 +1,4 @@
-﻿namespace CefFlashBrowser.Models
+﻿namespace CefFlashBrowser.Models.Sol
 {
     public class SolFileInfo
     {

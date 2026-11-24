@@ -72,36 +72,39 @@
 
 
             <!--Icon resources-->
-            <sys:Uri x:Key="AddIconUri">/Assets/Svgs/add.svg</sys:Uri>
-            <sys:Uri x:Key="BackIconUri">/Assets/Svgs/back.svg</sys:Uri>
-            <sys:Uri x:Key="CloseIconUri">/Assets/Svgs/close.svg</sys:Uri>
-            <sys:Uri x:Key="DownIconUri">/Assets/Svgs/down.svg</sys:Uri>
-            <sys:Uri x:Key="EditIconUri">/Assets/Svgs/edit.svg</sys:Uri>
-            <sys:Uri x:Key="ExportIconUri">/Assets/Svgs/export.svg</sys:Uri>
-            <sys:Uri x:Key="FlashPlayerIconUri">/Assets/Svgs/flash-player.svg</sys:Uri>
-            <sys:Uri x:Key="ForwardIconUri">/Assets/Svgs/forward.svg</sys:Uri>
-            <sys:Uri x:Key="ImportIconUri">/Assets/Svgs/import.svg</sys:Uri>
-            <sys:Uri x:Key="LanguageIconUri">/Assets/Svgs/language.svg</sys:Uri>
-            <sys:Uri x:Key="MoreIconUri">/Assets/Svgs/more.svg</sys:Uri>
-            <sys:Uri x:Key="MuteIconUri">/Assets/Svgs/mute.svg</sys:Uri>
-            <sys:Uri x:Key="MuteModeIconUri">/Assets/Svgs/mute-mode.svg</sys:Uri>
-            <sys:Uri x:Key="NewTabIconUri">/Assets/Svgs/new-tab.svg</sys:Uri>
-            <sys:Uri x:Key="PageIconUri">/Assets/Svgs/page.svg</sys:Uri>
-            <sys:Uri x:Key="PlayIconUri">/Assets/Svgs/play.svg</sys:Uri>
-            <sys:Uri x:Key="PluginIconUri">/Assets/Svgs/plugin.svg</sys:Uri>
-            <sys:Uri x:Key="ReloadIconUri">/Assets/Svgs/reload.svg</sys:Uri>
-            <sys:Uri x:Key="SearchIconUri">/Assets/Svgs/search.svg</sys:Uri>
-            <sys:Uri x:Key="SettingsIconUri">/Assets/Svgs/settings.svg</sys:Uri>
-            <sys:Uri x:Key="StarIconUri">/Assets/Svgs/star.svg</sys:Uri>
-            <sys:Uri x:Key="StopIconUri">/Assets/Svgs/stop.svg</sys:Uri>
-            <sys:Uri x:Key="SubIconUri">/Assets/Svgs/sub.svg</sys:Uri>
-            <sys:Uri x:Key="SwfIconUri">/Assets/Svgs/swf.svg</sys:Uri>
-            <sys:Uri x:Key="TrashIconUri">/Assets/Svgs/trash.svg</sys:Uri>
-            <sys:Uri x:Key="UpIconUri">/Assets/Svgs/up.svg</sys:Uri>
-            <sys:Uri x:Key="VolumeIconUri">/Assets/Svgs/volume.svg</sys:Uri>
-            <sys:Uri x:Key="WarningIconUri">/Assets/Svgs/warning.svg</sys:Uri>
-            <sys:Uri x:Key="ZoomInIconUri">/Assets/Svgs/zoom-in.svg</sys:Uri>
-            <sys:Uri x:Key="ZoomOutIconUri">/Assets/Svgs/zoom-out.svg</sys:Uri>
+            <sys:Uri x:Key="AddIconUri">/Assets/Icons/add.svg</sys:Uri>
+            <sys:Uri x:Key="AppLargeIconUri">/Assets/Icons/icon-large.svg</sys:Uri>
+            <sys:Uri x:Key="AppSmallIconUri">/Assets/Icons/icon-small.svg</sys:Uri>
+            <sys:Uri x:Key="BackIconUri">/Assets/Icons/back.svg</sys:Uri>
+            <sys:Uri x:Key="CloseIconUri">/Assets/Icons/close.svg</sys:Uri>
+            <sys:Uri x:Key="DownIconUri">/Assets/Icons/down.svg</sys:Uri>
+            <sys:Uri x:Key="EditIconUri">/Assets/Icons/edit.svg</sys:Uri>
+            <sys:Uri x:Key="ExportIconUri">/Assets/Icons/export.svg</sys:Uri>
+            <sys:Uri x:Key="FlashPlayerIconUri">/Assets/Icons/flash-player.svg</sys:Uri>
+            <sys:Uri x:Key="ForwardIconUri">/Assets/Icons/forward.svg</sys:Uri>
+            <sys:Uri x:Key="ImportIconUri">/Assets/Icons/import.svg</sys:Uri>
+            <sys:Uri x:Key="LanguageIconUri">/Assets/Icons/language.svg</sys:Uri>
+            <sys:Uri x:Key="MoreIconUri">/Assets/Icons/more.svg</sys:Uri>
+            <sys:Uri x:Key="MuteIconUri">/Assets/Icons/mute.svg</sys:Uri>
+            <sys:Uri x:Key="MuteModeIconUri">/Assets/Icons/mute-mode.svg</sys:Uri>
+            <sys:Uri x:Key="NewTabIconUri">/Assets/Icons/new-tab.svg</sys:Uri>
+            <sys:Uri x:Key="PageIconUri">/Assets/Icons/page.svg</sys:Uri>
+            <sys:Uri x:Key="PlayIconUri">/Assets/Icons/play.svg</sys:Uri>
+            <sys:Uri x:Key="PluginIconUri">/Assets/Icons/plugin.svg</sys:Uri>
+            <sys:Uri x:Key="ReloadIconUri">/Assets/Icons/reload.svg</sys:Uri>
+            <sys:Uri x:Key="SearchIconUri">/Assets/Icons/search.svg</sys:Uri>
+            <sys:Uri x:Key="SettingsIconUri">/Assets/Icons/settings.svg</sys:Uri>
+            <sys:Uri x:Key="StarIconUri">/Assets/Icons/star.svg</sys:Uri>
+            <sys:Uri x:Key="StopIconUri">/Assets/Icons/stop.svg</sys:Uri>
+            <sys:Uri x:Key="SubIconUri">/Assets/Icons/sub.svg</sys:Uri>
+            <sys:Uri x:Key="SwfIconUri">/Assets/Icons/swf.svg</sys:Uri>
+            <sys:Uri x:Key="TextSortAscendingIconUri">/Assets/Icons/text-sort-asc.svg</sys:Uri>
+            <sys:Uri x:Key="TrashIconUri">/Assets/Icons/trash.svg</sys:Uri>
+            <sys:Uri x:Key="UpIconUri">/Assets/Icons/up.svg</sys:Uri>
+            <sys:Uri x:Key="VolumeIconUri">/Assets/Icons/volume.svg</sys:Uri>
+            <sys:Uri x:Key="WarningIconUri">/Assets/Icons/warning.svg</sys:Uri>
+            <sys:Uri x:Key="ZoomInIconUri">/Assets/Icons/zoom-in.svg</sys:Uri>
+            <sys:Uri x:Key="ZoomOutIconUri">/Assets/Icons/zoom-out.svg</sys:Uri>
 
 
             <!--Converters-->
@@ -110,6 +113,7 @@
             <converters:BinaryToSizeStringConverter x:Key="BinaryToSizeStringConverter"/>
             <converters:IntToDoubleConverter x:Key="IntToDoubleConverter"/>
             <converters:LanguageNameConverter x:Key="LanguageNameConverter"/>
+            <converters:MonospaceFontWeightConverter x:Key="MonospaceFontWeightConverter"/>
             <converters:MultiEqualityConverter x:Key="MultiEqualityConverter"/>
             <converters:ObjectGetTypeConverter x:Key="ObjectGetTypeConverter"/>
             <converters:ObjectToStringConverter x:Key="ObjectToStringConverter"/>

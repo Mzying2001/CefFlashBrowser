@@ -236,6 +236,7 @@
     <sys:String x:Key="userScriptManager_title">Benutzerskriptverwaltung</sys:String>
     <sys:String x:Key="userScriptManager_noInstalledScripts">Keine Skripte installiert.</sys:String>
     <sys:String x:Key="userScriptManager_noMatchingScripts">Keine passenden Skripte gefunden.</sys:String>
+    <sys:String x:Key="userScriptManager_sortByName">Nach Namen sortieren</sys:String>
     <sys:String x:Key="userScriptManager_new">Neues Skript</sys:String>
     <sys:String x:Key="userScriptManager_newScript">Neues Skript</sys:String>
     <sys:String x:Key="userScriptManager_replace">Ersetzen</sys:String>
@@ -279,6 +280,7 @@
     <sys:String x:Key="userScriptManager_toggle">Skript aktivieren oder deaktivieren</sys:String>
     <sys:String x:Key="userScriptManager_draft">Nicht installierter Entwurf</sys:String>
     <sys:String x:Key="userScriptManager_unavailable">Nicht verfügbar</sys:String>
+    <sys:String x:Key="userScriptManager_view">Ansicht</sys:String>
     <sys:String x:Key="userScriptDetails_title">Skriptdetails</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">Unbekannte Metadaten</sys:String>
     <sys:String x:Key="userScriptInstall_install">Installieren</sys:String>
@@ -304,6 +306,21 @@
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">Diese Skripte aktualisieren?</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">Ungespeicherte Änderungen werden überschrieben.</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">{0} Skripte aktualisiert. {1} fehlgeschlagen.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_menu">Editoreinstellungen…</sys:String>
+    <sys:String x:Key="scriptEditorSettings_title">Editoreinstellungen</sys:String>
+    <sys:String x:Key="scriptEditorSettings_display">Anzeige</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontFamily">Schriftart</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontSize">Schriftgröße</sys:String>
+    <sys:String x:Key="scriptEditorSettings_lineNumbers">Zeilennummern anzeigen</sys:String>
+    <sys:String x:Key="scriptEditorSettings_wordWrap">Zeilen umbrechen</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentation">Einzug</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentWith">Einrücken mit</sys:String>
+    <sys:String x:Key="scriptEditorSettings_spaces">Leerzeichen</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabs">Tabulatoren</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabWidth">Tabulatorbreite</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidFontSize">Geben Sie für die Schriftgröße eine ganze Zahl von 8 bis 72 ein.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidTabWidth">Geben Sie für die Tabulatorbreite eine ganze Zahl von 1 bis 16 ein.</sys:String>
+    <sys:String x:Key="scriptEditorSettings_saveFailed">Die Editoreinstellungen konnten nicht gespeichert werden.</sys:String>
 
     <!--Download manager-->
     <sys:String x:Key="downloads_menu">Downloads</sys:String>

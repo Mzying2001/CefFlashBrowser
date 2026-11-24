@@ -1,0 +1,30 @@
+name: 功能建议 / Feature request
+description: 建议添加功能或改进现有体验。 Suggest a new feature or an improvement.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请[搜索已有 Issue](https://github.com/Mzying2001/CefFlashBrowser/issues?q=is%3Aissue)。中文和英文均可。
+        Please [search existing issues](https://github.com/Mzying2001/CefFlashBrowser/issues?q=is%3Aissue) first. Suggestions in Chinese or English are welcome.
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: 使用场景 / Use case
+      description: 你想完成什么，当前遇到了什么限制？ What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-behavior
+    attributes:
+      label: 期望的功能或行为 / Proposed behavior
+      description: 描述你希望如何使用这个功能，以及它应产生什么结果。 Describe how you would use the feature and what should happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 其他方案或参考资料 / Alternatives or references
+      description: 可以附上现有变通办法、相关 Issue 或界面示意图。 Include any workarounds, related issues, or mockups.

@@ -1,4 +1,4 @@
-using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Sol;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;

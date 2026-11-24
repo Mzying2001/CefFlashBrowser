@@ -53,6 +53,7 @@ namespace CefFlashBrowser.Views
             OpenBatchUpdateCommand = new DelegateCommand(OpenBatchUpdate) { CanExecuteFunc = _ => ViewModel.CanOpenBatchUpdate };
 
             InitializeComponent();
+            sourceEditor.ApplySettings(GlobalData.Settings.ScriptEditorSettings);
 
             Loaded += WindowLoaded;
             sourceEditor.TextChanged += (_, __) => UpdateSearchControls();
@@ -78,6 +79,34 @@ namespace CefFlashBrowser.Views
             ImportFileCommand.RaiseCanExecuteChanged();
             ExportCommand.RaiseCanExecuteChanged();
             OpenBatchUpdateCommand.RaiseCanExecuteChanged();
+        }
+
+        private void OpenEditorSettings(object sender, RoutedEventArgs e)
+        {
+            var settings = GlobalData.Settings;
+            var previous = settings.ScriptEditorSettings;
+            var dialog = WindowManager.CreateWindow<EditorSettingsDialog>();
+
+            dialog.Initialize(previous, sourceEditor.FontFamily.Source);
+
+            if (DialogHelper.ShowModal(dialog, this) != true)
+                return;
+
+            settings.ScriptEditorSettings = dialog.Result;
+
+            if (!GlobalData.SaveSettings())
+            {
+                settings.ScriptEditorSettings = previous;
+
+                var language = SimpleIoc.Global.GetInstance<LanguageService>();
+
+                WindowManager.ShowAlertDialog(
+                    language.GetString("scriptEditorSettings_saveFailed"),
+                    language.GetString("common_error"), this);
+                return;
+            }
+
+            sourceEditor.ApplySettings(dialog.Result);
         }
 
         private void OpenBatchUpdate()

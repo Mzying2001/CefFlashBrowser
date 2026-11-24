@@ -13,6 +13,7 @@ function Test-DownloadManagerWindow($Context) {
     $canExecute = [Windows.Input.ICommand].GetMethod('CanExecute')
     $list = $window.FindName('downloadList')
     $filter = $window.FindName('downloadFilter')
+    Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($filter) -ceq 'DownloadFilter') 'download filter has a fixed automation name'
     $details = $window.FindName('downloadDetails')
     $sourceField = $window.FindName('detailSource')
     $errorField = $window.FindName('detailError')

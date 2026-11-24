@@ -571,6 +571,8 @@ function Test-UserScriptMenus($Context) {
         $buttonOffset = $actionsButton.TranslatePoint([Windows.Point]::new(0, 0), $scriptButton)
         Assert-Regression ($scriptButton.IsVisible -and $scriptButton.ActualWidth -eq $actionsButton.ActualWidth -and
             $buttonOffset.X -eq ($scriptButton.ActualWidth + $scriptButton.Margin.Right) -and $buttonOffset.Y -eq 0) 'script button sits immediately left of the actions button'
+        Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($scriptButton) -ceq 'ScriptCommands' -and
+            $scriptButton.ToolTip -ceq $Context.LanguageService.GetString('userscript_commands')) 'script commands button has a fixed automation name and a localized tooltip'
         $scriptMenu = $window.Resources['scriptCommandsMenu']
         $scriptButton.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Primitives.ButtonBase]::ClickEvent))
         try {
@@ -582,7 +584,7 @@ function Test-UserScriptMenus($Context) {
             Assert-Regression ($scriptMenu.PlacementTarget -eq $scriptButton -and $scriptMenu.Items.Count -eq 2 -and
                 $scriptMenu.Items.Groups.Count -eq 1 -and $scriptMenu.Items.Groups[0].Name -eq $installed[5].ToString() -and
                 !$runtimeItem.HasItems -and !$frameItem.HasItems -and
-                $runtimeItem.Header -eq 'Runtime command' -and $runtimeItem.ToolTip -like 'Runtime menu*' -and
+                $runtimeItem.Header -eq 'Runtime command' -and
                 $runtimeItem.IsEnabled -and $runtimeItem.StaysOpenOnClick -and
                 $frameItem.Header -eq $frameCommandName -and !$frameItem.IsEnabled) 'toolbar menu renders the current tab commands and their options'
             $scriptMenu.UpdateLayout()
@@ -591,10 +593,11 @@ function Test-UserScriptMenus($Context) {
             $leftInset = $highlight.TranslatePoint([Windows.Point]::new(0, 0), $menuBorder).X
             $rightInset = $menuBorder.ActualWidth - ($leftInset + $highlight.ActualWidth)
             Assert-Regression ($leftInset -gt 0 -and [Math]::Abs($leftInset - $rightInset) -lt 0.5) "toolbar command highlight has equal side insets (left $leftInset, right $rightInset)"
-            Assert-Regression ($runtimeItem.ToolTip -ceq 'Runtime menu' -and
-                $frameItem.ToolTip -ceq "Runtime menu`nFrame only`n`nSecond line") 'toolbar tooltips preserve descriptions without trailing blank lines'
+            Assert-Regression ($null -eq $runtimeItem.ToolTip -and
+                $frameItem.ToolTip -ceq "Frame only`n`nSecond line") 'toolbar command tooltips only show registered titles with trailing whitespace removed'
             $groupIcon = @(Find-FaviconElements $scriptMenu ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
             $groupTitle = @(Find-FaviconElements $scriptMenu ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -eq 'Runtime menu' })[0]
+            Assert-Regression ($null -ne $groupTitle -and $groupTitle.ToolTip -ceq 'Runtime menu') 'toolbar group tooltip shows the full script name'
             $commandTitle = @(Find-FaviconElements $runtimeItem ([Windows.Controls.TextBlock]) | Where-Object { $_.Text -eq $runtimeItem.Header })[0]
             $groupX = $groupTitle.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).X
             $commandX = $commandTitle.TranslatePoint([Windows.Point]::new(0, 0), $scriptMenu).X

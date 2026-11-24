@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="./Icons/large.svg" />
+    <img src="./CefFlashBrowser/Assets/Icons/icon-large.svg" />
     <br />
     CefFlashBrowser
     <br />
@@ -38,6 +38,10 @@ CefFlashBrowser 是一个自带 Flash Player 插件的浏览器，可以正常�
 CefFlashBrowser 会在符合匹配规则的网页上自动运行已启用的用户脚本，让你自定义网页内容和行为。在网页上点击 `.user.js` 链接即可打开安装确认窗口。也可以在主窗口的 **选项 → 管理用户脚本** 中选择本地文件或输入 URL 来安装脚本，并编辑脚本、切换启用状态或检查更新。
 
 ![用户脚本管理器](./Images/UserscriptManager.png)
+
+## 参与贡献
+
+欢迎反馈问题、提出功能建议或提交改动。请参阅[贡献指南](./CONTRIBUTING.md)。
 
 ## Star 趋势
 

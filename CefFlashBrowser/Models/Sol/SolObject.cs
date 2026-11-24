@@ -2,7 +2,7 @@
 using CefFlashBrowser.Utils;
 using System.Collections.Generic;
 
-namespace CefFlashBrowser.Models
+namespace CefFlashBrowser.Models.Sol
 {
     public class SolObject
     {

@@ -24,7 +24,7 @@ namespace CefFlashBrowser.Views.Dialogs
             _model = model;
             DataContext = model;
             _model.ConfirmRow = ConfirmRow;
-            _model.ConfirmAll = (message, token) => WindowManager.Confirm(message, Title, this, token);
+            _model.ConfirmAll = (entries, token) => WindowManager.ConfirmUserScriptBatchUpdate(entries, this, token);
             _model.PropertyChanged += ModelPropertyChanged;
         }
 

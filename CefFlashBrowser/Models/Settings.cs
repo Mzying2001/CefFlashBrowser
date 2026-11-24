@@ -68,6 +68,11 @@ namespace CefFlashBrowser.Models
         public WindowSizeInfo UserScriptManagerSizeInfo { get; set; }
 
         /// <summary>
+        /// Display and indentation preferences for the userscript editor
+        /// </summary>
+        public EditorSettings ScriptEditorSettings { get; set; }
+
+        /// <summary>
         /// Proxy settings for the browser
         /// </summary>
         public ProxySettings ProxySettings { get; set; }
@@ -172,7 +177,9 @@ namespace CefFlashBrowser.Models
         /// </summary>
         public string UserScriptDownloadDirectory { get; set; }
 
-        /// <summary>The remembered download directory, or null for the system Downloads folder.</summary>
+        /// <summary>
+        /// The remembered download directory, or null for the system Downloads folder.
+        /// </summary>
         public string DownloadDirectory { get; set; }
 
 
@@ -201,6 +208,7 @@ namespace CefFlashBrowser.Models
             SwfWindowSizeInfo = null;
             SolSaveManagerSizeInfo = null;
             UserScriptManagerSizeInfo = null;
+            ScriptEditorSettings = new EditorSettings();
             ProxySettings = new ProxySettings();
             UserAgentSetting = new UserAgentSetting();
             FakeFlashVersionSetting = new FakeFlashVersionSetting();

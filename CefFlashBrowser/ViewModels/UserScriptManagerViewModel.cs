@@ -1,4 +1,5 @@
 ﻿using CefFlashBrowser.Infrastructure.Collections;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Services.UserScripts;
 using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Parsing;
@@ -10,6 +11,7 @@ using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -26,6 +28,7 @@ namespace CefFlashBrowser.ViewModels
         private readonly Func<string, string> _text;
         private readonly Action<Action> _dispatch;
         private readonly Func<string, CancellationToken, Task<string>> _fetchSource;
+        private readonly Func<EditorSettings> _getEditorSettings;
 
         private IUserScriptRepository _repository;
         private CancellationTokenSource _lifetime;
@@ -44,6 +47,7 @@ namespace CefFlashBrowser.ViewModels
                 {
                     _scriptsView = new ListCollectionView(Scripts);
                     _scriptsView.LiveFilteringProperties.Add(nameof(UserScriptItemViewModel.Name));
+                    _scriptsView.LiveSortingProperties.Add(nameof(UserScriptItemViewModel.Name));
                     RefreshScriptsView();
                 }
 
@@ -92,7 +96,7 @@ namespace CefFlashBrowser.ViewModels
                 var wasFiltering = IsFiltering;
                 _filterTerm = term;
 
-                if (wasFiltering != IsFiltering)
+                if (!IsNameSortEnabled && wasFiltering != IsFiltering)
                 {
                     RaisePropertyChanged(nameof(IsReorderingEnabled));
                     UpdateMoveCommands();
@@ -106,7 +110,27 @@ namespace CefFlashBrowser.ViewModels
         }
 
         private bool IsFiltering => _filterTerm.Length > 0;
-        public bool IsReorderingEnabled => !IsFiltering;
+
+        private bool _isNameSortEnabled;
+        public bool IsNameSortEnabled
+        {
+            get => _isNameSortEnabled;
+            set
+            {
+                if (!UpdateValue(ref _isNameSortEnabled, value))
+                    return;
+
+                if (!IsFiltering)
+                {
+                    RaisePropertyChanged(nameof(IsReorderingEnabled));
+                    UpdateMoveCommands();
+                }
+
+                RefreshScriptsView();
+            }
+        }
+
+        public bool IsReorderingEnabled => !IsFiltering && !IsNameSortEnabled;
 
         private string _installUrl;
         public string InstallUrl
@@ -158,12 +182,14 @@ namespace CefFlashBrowser.ViewModels
             Func<Task<IUserScriptRepository>> initialize,
             Func<string, string> text,
             Action<Action> dispatch,
-            Func<string, CancellationToken, Task<string>> fetchSource = null)
+            Func<string, CancellationToken, Task<string>> fetchSource = null,
+            Func<EditorSettings> getEditorSettings = null)
         {
             _initialize = initialize;
             _text = text;
             _dispatch = dispatch;
             _fetchSource = fetchSource;
+            _getEditorSettings = getEditorSettings;
 
             Scripts = new ObservableCollection<UserScriptItemViewModel>();
 
@@ -244,6 +270,7 @@ namespace CefFlashBrowser.ViewModels
             RaisePropertyChanged(nameof(CanOpenBatchUpdate));
 
             FilterText = string.Empty;
+            IsNameSortEnabled = false;
 
             if (lifetime != null)
             {
@@ -254,6 +281,7 @@ namespace CefFlashBrowser.ViewModels
         public void NewScript()
         {
             var name = _text("userScriptManager_newScript");
+            var indent = (_getEditorSettings?.Invoke() ?? new EditorSettings()).GetIndentationString();
 
             var source =
                 "// ==UserScript==\r\n" +
@@ -267,8 +295,8 @@ namespace CefFlashBrowser.ViewModels
                 "// ==/UserScript==\r\n" +
                 "\r\n" +
                 "(function() {\r\n" +
-                "  'use strict';\r\n" +
-                "  \r\n" +
+                indent + "'use strict';\r\n" +
+                indent + "\r\n" +
                 "})();\r\n";
 
             var item = new UserScriptItemViewModel(source, null, name, false);
@@ -290,6 +318,16 @@ namespace CefFlashBrowser.ViewModels
                     ? new Predicate<object>(item => MatchesFilter((UserScriptItemViewModel)item))
                     : null;
                 _scriptsView.IsLiveFiltering = IsFiltering;
+
+                if (_scriptsView.IsLiveSorting != IsNameSortEnabled)
+                {
+                    if (IsNameSortEnabled)
+                        _scriptsView.SortDescriptions.Add(new SortDescription(nameof(UserScriptItemViewModel.Name), ListSortDirection.Ascending));
+                    else
+                        _scriptsView.SortDescriptions.Clear();
+
+                    _scriptsView.IsLiveSorting = IsNameSortEnabled;
+                }
             }
         }
 

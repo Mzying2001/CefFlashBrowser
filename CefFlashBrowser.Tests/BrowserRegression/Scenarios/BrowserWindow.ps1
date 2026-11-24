@@ -229,6 +229,13 @@ function Test-StandaloneBrowserPageSwfs($Context) {
         Wait-Regression $Context {
             $browser.PageSwfs.Url -contains ($fixture.BaseUrl + '/after-handler-clear.swf')
         } 'SWF collection continues after clearing caller-supplied handlers'
+
+        [void](Invoke-JavaScript $Context $browser "fetch('/AFTER-handler-clear.swf?variant=1'); true;")
+        Wait-Regression $Context {
+            $browser.PageSwfs.Url -ccontains ($fixture.BaseUrl + '/AFTER-handler-clear.swf?variant=1')
+        } 'SWF collection keeps a second URL with an equivalent filename'
+        Assert-Regression (($browser.PageSwfs.FileName -join '|') -ceq
+            'after-handler-clear.swf|AFTER-handler-clear.swf|swf-registered|swf-response') 'later SWFs insert in filename order with stable case-insensitive ties'
     } finally {
         $window.Close()
         $browser.Dispose()
@@ -275,11 +282,13 @@ true;
             $game.FileName -ceq 'GAME.SWF') 'SWF item exposes its filename and full URL'
         Wait-Regression $Context { $button.IsVisible } 'SWF toolbar button appears'
         Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($button) -ceq 'PageSwfs') 'SWF toolbar has a fixed automation name'
-        Assert-Regression ($button.Content.UriSource.OriginalString -eq '/Assets/Svgs/swf.svg') 'SWF toolbar uses the SWF icon'
+        Assert-Regression ($button.Content.UriSource.OriginalString -eq '/Assets/Icons/swf.svg') 'SWF toolbar uses the SWF icon'
 
         $buttonPeer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($button)
         $buttonPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
         Wait-Regression $Context { $menu.IsOpen -and $menu.Items.Count -eq $expected.Count } 'clicking the SWF button displays the current page list'
+        Assert-Regression ((($menu.Items | ForEach-Object { $_.FileName }) -join '|') -ceq
+            'embedded.swf|frame.swf|GAME.SWF|swf-missing.swf|swf-response') 'SWF menu lists filenames in ascending case-insensitive order'
         Wait-Regression $Context {
             $null -ne $menu.ItemContainerGenerator.ContainerFromItem($game)
         } 'SWF menu generates the player item'

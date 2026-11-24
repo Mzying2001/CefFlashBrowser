@@ -68,6 +68,51 @@ namespace CefFlashBrowser.Models
     }
 
     /// <summary>
+    /// Stores display and indentation preferences for a text editor.
+    /// </summary>
+    public sealed class EditorSettings
+    {
+        internal const string DefaultFontFamily = "Consolas";
+        internal const int DefaultFontSize = 14;
+        internal const int DefaultTabWidth = 2;
+
+        private int _fontSize = DefaultFontSize;
+        private int _tabWidth = DefaultTabWidth;
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string FontFamily { get; set; } = DefaultFontFamily;
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int FontSize
+        {
+            get => _fontSize;
+            set => _fontSize = IsFontSizeValid(value) ? value : DefaultFontSize;
+        }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool IndentWithSpaces { get; set; } = true;
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int TabWidth
+        {
+            get => _tabWidth;
+            set => _tabWidth = IsTabWidthValid(value) ? value : DefaultTabWidth;
+        }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool ShowLineNumbers { get; set; } = true;
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool WordWrap { get; set; }
+
+        internal static bool IsFontSizeValid(int value) => value >= 8 && value <= 72;
+
+        internal static bool IsTabWidthValid(int value) => value >= 1 && value <= 16;
+
+        internal string GetIndentationString() => IndentWithSpaces ? new string(' ', TabWidth) : "\t";
+    }
+
+    /// <summary>
     /// Stores proxy server and authentication settings.
     /// </summary>
     public class ProxySettings

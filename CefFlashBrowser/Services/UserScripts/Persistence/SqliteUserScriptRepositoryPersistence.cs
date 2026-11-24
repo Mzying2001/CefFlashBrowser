@@ -47,7 +47,11 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     if (known.Contains(key))
                         continue;
 
-                    try { _sources.Recover(key, null); }
+                    try
+                    {
+                        _sources.Recover(key, null);
+                        _sources.TryRemoveEmptyDirectory(key);
+                    }
                     catch (Exception e) when (UserScriptFiles.IsFileError(e)) { Report("Orphan source recovery pending for " + key, e); }
                 }
 
@@ -303,6 +307,7 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                 }
 
                 Complete(key, journal);
+                _sources.TryRemoveEmptyDirectory(key);
                 await CollectCoreAsync().ConfigureAwait(false);
             }, token);
         }

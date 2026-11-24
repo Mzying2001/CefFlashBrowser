@@ -48,6 +48,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 ## Project Structure
 
 - **CefFlashBrowser/**: Main WPF application.
+  - **Assets/**: Icons, localization resources, and bundled runtime assets.
   - **Browser/**: CefSharp handlers, SWF playback, and per-browser userscript integration.
   - **Data/**: Shared application state, paths, configuration, and MVVM messaging data.
   - **Infrastructure/**: Reusable infrastructure helpers for collections and WPF integration.
@@ -55,24 +56,23 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
   - **Services/**: Application services for language, theme, windows, favorites, database access, and favicons.
     - **Downloads/**: Download management, transfers, and recovery.
     - **UserScripts/**: Userscript installation, updates, execution policy, and persistence.
+  - **Themes/**: WPF theme resource dictionaries.
+  - **Utils/**: Utility helpers and cross-cutting support code.
   - **ViewModels/**: MVVM presentation logic for windows and dialogs.
   - **Views/**: WPF windows, dialogs, and reusable UI controls.
-  - **Utils/**: Utility helpers and cross-cutting support code.
-  - **Assets/**: Icons, localization resources, and bundled runtime assets.
-  - **Themes/**: WPF theme resource dictionaries.
-- **CefFlashBrowser.FlashBrowser/**: Flash-enabled CefSharp browser controls and page SWF discovery.
-- **CefFlashBrowser.WinformCefSharp4WPF/**: WPF hosting bridge for WinForms-based CefSharp controls.
-- **CefFlashBrowser.Sol/**: C++/CLI library for SOL and AMF serialization.
-- **CefFlashBrowser.Singleton/**: C++/CLI library for single-instance and IPC support.
-- **CefFlashBrowser.Database/**: Database interfaces and SQLite implementation.
-- **CefFlashBrowser.Log/**: Shared file logging library.
 - **CefFlashBrowser.CommandProxy/**: Native command proxy with Flash diagnostic filtering.
+- **CefFlashBrowser.Database/**: Database interfaces and SQLite implementation.
+- **CefFlashBrowser.FlashBrowser/**: Flash-enabled CefSharp browser controls and page SWF discovery.
+- **CefFlashBrowser.Log/**: Shared file logging library.
+- **CefFlashBrowser.Singleton/**: C++/CLI library for single-instance and IPC support.
+- **CefFlashBrowser.Sol/**: C++/CLI library for SOL and AMF serialization.
 - **CefFlashBrowser.Tests/**: MSTest project for linked application code and supporting libraries.
   - **BrowserRegression/**: PowerShell checks for WPF/CEF behavior, userscripts, downloads, and packaged releases.
   - **CommandProxyRegression/**: Regression checks for command forwarding and diagnostic filtering.
   - **TestData/**: SOL fixtures for serialization tests.
-- **ReleaseNotes/**: Python CLI for bilingual GitHub release notes.
+- **CefFlashBrowser.WinformCefSharp4WPF/**: WPF hosting bridge for WinForms-based CefSharp controls.
 - **Docs/**: Reference specifications for AMF and SOL-related implementation work.
+- **ReleaseNotes/**: Python CLI for bilingual GitHub release notes.
 
 ## Notes
 
@@ -80,6 +80,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - Entry point is `Program.cs` (not the default `App.xaml.cs`)
 - CefSharp version 84.4.10 is pinned for Flash compatibility
 - Follow the repository's `.editorconfig` when modifying or adding files
+- When explicitly setting a UIA control name, use English PascalCase unless the name needs to be dynamic.
 
 ## Git Commit Conventions
 

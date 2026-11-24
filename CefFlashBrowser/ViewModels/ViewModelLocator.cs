@@ -1,4 +1,5 @@
-﻿using CefFlashBrowser.Services;
+﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Services;
 using SimpleMvvm.Ioc;
 using System;
 using System.Linq;
@@ -51,7 +52,8 @@ namespace CefFlashBrowser.ViewModels
                 initialize,
                 key => SimpleIoc.Global.GetInstance<LanguageService>().GetString(key),
                 action => System.Windows.Application.Current.Dispatcher.InvokeAsync(action),
-                (url, token) => SimpleIoc.Global.GetInstance<Services.UserScripts.UserScriptService>().Content.FetchSourceAsync(null, url, token));
+                (url, token) => SimpleIoc.Global.GetInstance<Services.UserScripts.UserScriptService>().Content.FetchSourceAsync(null, url, token),
+                () => GlobalData.Settings.ScriptEditorSettings);
 
             return viewModel;
         }

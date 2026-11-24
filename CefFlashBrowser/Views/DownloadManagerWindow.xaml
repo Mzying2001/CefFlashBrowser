@@ -138,7 +138,7 @@
                     <hc:TextBox x:Name="downloadFilter"
                                 Padding="28,0,8,0"
                                 Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                                AutomationProperties.Name="{DynamicResource downloads_filter}">
+                                AutomationProperties.Name="DownloadFilter">
                         <i:Interaction.Behaviors>
                             <behaviors:TextBoxSelectAllOnFocus/>
                         </i:Interaction.Behaviors>

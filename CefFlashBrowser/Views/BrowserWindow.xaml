@@ -543,7 +543,7 @@
                 <!--script commands button-->
                 <Button x:Name="toolbarScriptCommandsButton"
                         Margin="0,0,10,0"
-                        AutomationProperties.Name="{DynamicResource userscript_commands}"
+                        AutomationProperties.Name="ScriptCommands"
                         ToolTip="{DynamicResource userscript_commands}">
                     <i:Interaction.Behaviors>
                         <behaviors:ContextMenuBehavior Menu="{DynamicResource scriptCommandsMenu}"/>

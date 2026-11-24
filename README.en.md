@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="./Icons/large.svg" />
+    <img src="./CefFlashBrowser/Assets/Icons/icon-large.svg" />
     <br />
     CefFlashBrowser
     <br />
@@ -38,6 +38,10 @@ With the **SOL Save Manager**, you can export, import, and edit Flash game save 
 CefFlashBrowser automatically runs enabled userscripts on matching pages, letting you customize page content and behavior. Click a `.user.js` link on a web page to open the installation prompt. In the main window, open **Options → Manage Userscripts** to install scripts from a local file or by entering a URL, edit them, enable or disable them, and check for updates.
 
 ![Userscript Manager](./Images/UserscriptManager.png)
+
+## Contributing
+
+See the [contribution guide](./CONTRIBUTING.en.md) to report a bug, suggest a feature, or submit a change.
 
 ## Stargazers over time
 

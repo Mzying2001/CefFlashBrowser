@@ -283,8 +283,8 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
     $Context.Application.Resources.Add([SharpVectors.Converters.SvgIcon], $svgStyle)
 
     foreach ($converter in @(
-        'BinaryToSizeStringConverter', 'IntToDoubleConverter', 'LanguageNameConverter', 'MultiEqualityConverter',
-        'ObjectGetTypeConverter', 'ObjectToStringConverter',
+        'BinaryToSizeStringConverter', 'IntToDoubleConverter', 'LanguageNameConverter', 'MonospaceFontWeightConverter',
+        'MultiEqualityConverter', 'ObjectGetTypeConverter', 'ObjectToStringConverter',
         'WebsiteIconUrlConverter', 'ZoomLevelToScaleConverter'
     )) {
         $Context.Application.Resources.Add($converter, (New-Object "CefFlashBrowser.Views.Converters.$converter"))

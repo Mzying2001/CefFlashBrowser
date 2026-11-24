@@ -130,6 +130,11 @@
                           InputGestureText="Ctrl+Space" Command="{x:Static c:ScriptEditor.CompleteCodeCommand}"
                           CommandTarget="{Binding ElementName=sourceEditor, Path=TextArea}"/>
             </MenuItem>
+            <MenuItem Header="{DynamicResource userScriptManager_view}">
+                <MenuItem x:Name="editorSettingsMenuItem"
+                          Header="{DynamicResource scriptEditorSettings_menu}"
+                          Click="OpenEditorSettings"/>
+            </MenuItem>
             <MenuItem Header="{DynamicResource common_script}">
                 <MenuItem x:Name="batchUpdateMenuItem"
                           Header="{DynamicResource userScriptBatchUpdate_menu}"
@@ -215,11 +220,16 @@
             </Grid.ColumnDefinitions>
 
             <Grid Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
                 <hc:TextBox x:Name="scriptFilter"
                             Padding="28,0,8,0"
                             MaxLength="100"
                             Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                            AutomationProperties.Name="{DynamicResource common_filterPlaceholder}"
+                            AutomationProperties.Name="ScriptFilter"
                             hc:InfoElement.Placeholder="{DynamicResource common_filterPlaceholder}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
@@ -234,6 +244,19 @@
                       IsHitTestVisible="False">
                     <svgc:SvgIcon UriSource="{StaticResource SearchIconUri}"/>
                 </Grid>
+
+                <ToggleButton x:Name="sortScriptsByName"
+                              Grid.Column="1"
+                              Width="30"
+                              Margin="5,0,0,0"
+                              Padding="0"
+                              IsChecked="{Binding IsNameSortEnabled, Mode=TwoWay}"
+                              ToolTip="{DynamicResource userScriptManager_sortByName}"
+                              AutomationProperties.Name="SortByName">
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource TextSortAscendingIconUri}"/>
+                </ToggleButton>
             </Grid>
 
             <ListBox x:Name="scriptList"
@@ -506,14 +529,10 @@
                 </Border>
 
                 <c:ScriptEditor x:Name="sourceEditor"
-                                ShowLineNumbers="True"
-                                FontFamily="Consolas"
-                                FontSize="14"
                                 Padding="4"
                                 BorderThickness="1"
                                 HorizontalScrollBarVisibility="Auto"
-                                VerticalScrollBarVisibility="Auto"
-                                WordWrap="False">
+                                VerticalScrollBarVisibility="Auto">
                     <c:ScriptEditor.Style>
                         <Style TargetType="c:ScriptEditor">
                             <Style.Triggers>

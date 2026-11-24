@@ -236,6 +236,7 @@
     <sys:String x:Key="userScriptManager_title">用户脚本管理器</sys:String>
     <sys:String x:Key="userScriptManager_noInstalledScripts">尚未安装脚本。</sys:String>
     <sys:String x:Key="userScriptManager_noMatchingScripts">没有找到匹配的脚本。</sys:String>
+    <sys:String x:Key="userScriptManager_sortByName">按名称排序</sys:String>
     <sys:String x:Key="userScriptManager_new">新建脚本</sys:String>
     <sys:String x:Key="userScriptManager_newScript">新脚本</sys:String>
     <sys:String x:Key="userScriptManager_replace">替换</sys:String>
@@ -279,6 +280,7 @@
     <sys:String x:Key="userScriptManager_toggle">启用或停用脚本</sys:String>
     <sys:String x:Key="userScriptManager_draft">未安装草稿</sys:String>
     <sys:String x:Key="userScriptManager_unavailable">不可用</sys:String>
+    <sys:String x:Key="userScriptManager_view">视图</sys:String>
     <sys:String x:Key="userScriptDetails_title">脚本详情</sys:String>
     <sys:String x:Key="userScriptDetails_unknownMetadata">未知元数据</sys:String>
     <sys:String x:Key="userScriptInstall_install">安装</sys:String>
@@ -304,6 +306,21 @@
     <sys:String x:Key="userScriptBatchUpdate_confirmAll">是否更新以下脚本？</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_overwriteEdits">未保存的改动将被覆盖。</sys:String>
     <sys:String x:Key="userScriptBatchUpdate_summary">更新成功 {0} 个，失败 {1} 个。</sys:String>
+    <sys:String x:Key="scriptEditorSettings_menu">编辑器设置…</sys:String>
+    <sys:String x:Key="scriptEditorSettings_title">编辑器设置</sys:String>
+    <sys:String x:Key="scriptEditorSettings_display">显示</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontFamily">字体</sys:String>
+    <sys:String x:Key="scriptEditorSettings_fontSize">字号</sys:String>
+    <sys:String x:Key="scriptEditorSettings_lineNumbers">显示行号</sys:String>
+    <sys:String x:Key="scriptEditorSettings_wordWrap">自动换行</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentation">缩进</sys:String>
+    <sys:String x:Key="scriptEditorSettings_indentWith">缩进方式</sys:String>
+    <sys:String x:Key="scriptEditorSettings_spaces">空格</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabs">制表符</sys:String>
+    <sys:String x:Key="scriptEditorSettings_tabWidth">Tab 宽度</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidFontSize">字号请输入 8 到 72 之间的整数。</sys:String>
+    <sys:String x:Key="scriptEditorSettings_invalidTabWidth">Tab 宽度请输入 1 到 16 之间的整数。</sys:String>
+    <sys:String x:Key="scriptEditorSettings_saveFailed">无法保存编辑器设置。</sys:String>
 
     <!--下载-->
     <sys:String x:Key="downloads_menu">下载</sys:String>

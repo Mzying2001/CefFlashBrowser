@@ -3,6 +3,7 @@ using Mzying2001.MonkeySharp.Core.Repository;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -63,6 +64,24 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
                 if (ScriptKey.TryParse(name, out var key) && name == key.ToString())
                     yield return key;
+            }
+        }
+
+        internal void TryRemoveEmptyDirectory(ScriptKey key)
+        {
+            var directory = Path.GetDirectoryName(PathFor(key));
+
+            try
+            {
+                UserScriptFiles.CheckPath(directory);
+
+                if (!Directory.EnumerateFileSystemEntries(directory).Any())
+                    Directory.Delete(directory, recursive: false);
+            }
+            catch (DirectoryNotFoundException) { }
+            catch (Exception error) when (UserScriptFiles.IsFileError(error))
+            {
+                _report("Empty source directory cleanup pending for " + directory + ": " + error.Message);
             }
         }
 

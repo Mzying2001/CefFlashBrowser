@@ -1,9 +1,11 @@
-﻿using ICSharpCode.AvalonEdit;
+﻿using CefFlashBrowser.Models;
+using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
@@ -56,14 +58,28 @@ namespace CefFlashBrowser.Views.Custom
             _completion = new ScriptEditorCompletion(this);
             _occurrences = new ScriptEditorOccurrences(this);
             SyntaxHighlighting = _javascript;
-            Options.IndentationSize = 2;
-            Options.ConvertTabsToSpaces = true;
+            ApplySettings(new EditorSettings());
             SetResourceReference(BackgroundProperty, "RegionBrush");
             SetResourceReference(ForegroundProperty, "PrimaryTextBrush");
             SetResourceReference(BorderBrushProperty, "BorderBrush");
             TextArea.SetResourceReference(TextArea.SelectionForegroundProperty, "PrimaryTextBrush");
             TextArea.SelectionBorder = null;
             UpdatePalette();
+        }
+
+        internal void ApplySettings(EditorSettings settings)
+        {
+            var familyName = settings.FontFamily?.Trim();
+
+            var font = Fonts.SystemFontFamilies.FirstOrDefault(family =>
+                string.Equals(family.Source, familyName, StringComparison.OrdinalIgnoreCase));
+
+            FontFamily = font ?? new FontFamily(EditorSettings.DefaultFontFamily);
+            FontSize = settings.FontSize;
+            Options.ConvertTabsToSpaces = settings.IndentWithSpaces;
+            Options.IndentationSize = settings.TabWidth;
+            ShowLineNumbers = settings.ShowLineNumbers;
+            WordWrap = settings.WordWrap;
         }
 
         internal bool CloseCompletion() => _completion.Close();

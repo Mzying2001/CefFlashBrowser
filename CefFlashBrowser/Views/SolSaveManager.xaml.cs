@@ -1,5 +1,6 @@
 ﻿using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Sol;
 using CefFlashBrowser.ViewModels;
 using System;
 using System.ComponentModel;
@@ -67,34 +68,6 @@ namespace CefFlashBrowser.Views
                     DataObject dataObject = new DataObject(DataFormats.FileDrop, files);
                     DragDrop.DoDragDrop(item, dataObject, DragDropEffects.Copy);
                 }
-            }
-        }
-
-        private void ListViewItemPreviewDragOver(object sender, DragEventArgs e)
-        {
-            e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop)
-                ? DragDropEffects.Copy : DragDropEffects.None;
-            e.Handled = true;
-        }
-
-        private void ListViewItemDrop(object sender, DragEventArgs e)
-        {
-            var droppedFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
-
-            if (droppedFiles == null ||
-                droppedFiles.Length != 1)
-            {
-                return;
-            }
-
-            if (sender is ListViewItem item &&
-                item.DataContext is SolFileInfo solFile)
-            {
-                Dispatcher.InvokeAsync(() =>
-                {
-                    Activate();
-                    ViewModel?.CurrentWorkspace?.ImportSol(solFile, droppedFiles[0]);
-                });
             }
         }
     }

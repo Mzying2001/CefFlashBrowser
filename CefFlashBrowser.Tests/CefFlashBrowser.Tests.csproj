@@ -62,9 +62,9 @@
     <Compile Include="..\CefFlashBrowser\Models\SettingModels.cs" Link="LinkedSources\SettingModels.cs" />
     <Compile Include="..\CefFlashBrowser\Models\WindowSizeInfo.cs" Link="LinkedSources\WindowSizeInfo.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\SolHelper.cs" Link="LinkedSources\SolHelper.cs" />
-    <Compile Include="..\CefFlashBrowser\Models\SolObject.cs" Link="LinkedSources\SolObject.cs" />
-    <Compile Include="..\CefFlashBrowser\Models\SolArray.cs" Link="LinkedSources\SolArray.cs" />
-    <Compile Include="..\CefFlashBrowser\Models\SolTypeDesc.cs" Link="LinkedSources\SolTypeDesc.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\Sol\SolObject.cs" Link="LinkedSources\SolObject.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\Sol\SolArray.cs" Link="LinkedSources\SolArray.cs" />
+    <Compile Include="..\CefFlashBrowser\Models\Sol\SolTypeDesc.cs" Link="LinkedSources\SolTypeDesc.cs" />
   </ItemGroup>
 
   <ItemGroup>

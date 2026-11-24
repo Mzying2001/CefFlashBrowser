@@ -55,7 +55,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                         var metadata = installation.Definition.Metadata;
                         var iconUrl = UserScriptItemViewModel.ResolveIconUrl(metadata, installation.SourceOrigin);
                         var title = request.Title?.TrimEnd();
-                        var description = string.IsNullOrEmpty(title) ? metadata.Name : metadata.Name + "\n" + title;
+                        var description = string.IsNullOrEmpty(title) ? null : title;
 
                         group = new Group
                         {

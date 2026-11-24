@@ -74,10 +74,17 @@ namespace CefFlashBrowser.FlashBrowser
 
                 var swf = new SwfResourceRecord(address, swfUrl, requestedUrl, frameId,
                     frameUrl, frameVersion, referrerUrl, referrerPolicy, hasOpaqueInitiator);
+
                 Dispatcher.InvokeAsync(() =>
                 {
-                    if (!IsDisposed && pageVersion == Interlocked.Read(ref _swfPageVersion) && _pageSwfUrls.Add(address))
-                        _pageSwfs.Add(swf);
+                    if (IsDisposed || pageVersion != Interlocked.Read(ref _swfPageVersion) || !_pageSwfUrls.Add(address))
+                        return;
+
+                    var index = _pageSwfs.Count;
+
+                    while (index > 0 && StringComparer.OrdinalIgnoreCase.Compare(_pageSwfs[index - 1].FileName, swf.FileName) > 0)
+                        index--;
+                    _pageSwfs.Insert(index, swf);
                 });
             };
         }

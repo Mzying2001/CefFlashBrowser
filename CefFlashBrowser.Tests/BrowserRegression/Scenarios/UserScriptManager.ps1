@@ -45,6 +45,132 @@ function Open-ManagerEditorContextMenu($Context, $Window) {
     return $editor.ContextMenu
 }
 
+function Invoke-ManagerEditorSettings($Context, $Window, [scriptblock]$Check) {
+    $menu = $Window.FindName('editorSettingsMenuItem')
+    Assert-Regression ($menu.IsEnabled -and
+        $menu.Header -ceq $Context.LanguageService.GetString('scriptEditorSettings_menu')) 'editor settings menu is available and localized'
+    $state = @{ Opened = $false; Failure = $null }
+    $timer = New-Object Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(50)
+    $handler = [EventHandler]({
+        $dialog = $Context.Application.Windows | Where-Object {
+            $_.IsVisible -and $_ -is [CefFlashBrowser.Views.Dialogs.EditorSettingsDialog]
+        } | Select-Object -First 1
+        if ($null -eq $dialog) { return }
+
+        $timer.Stop()
+        $state.Opened = $true
+        try {
+            Assert-Regression ([object]::ReferenceEquals($dialog.Owner, $Window)) 'editor settings opens with the manager as owner'
+            & $Check $dialog
+            Assert-Regression (!$dialog.IsVisible) 'editor settings dialog closes after dismissal'
+        } catch {
+            $state.Failure = $_
+        } finally {
+            if ($dialog.IsVisible) { $dialog.Close() }
+        }
+    }.GetNewClosure())
+
+    $timer.add_Tick($handler)
+    $timer.Start()
+    try {
+        $menu.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.MenuItem]::ClickEvent))
+        if ($null -ne $state.Failure) { throw $state.Failure }
+        Assert-Regression ($state.Opened) 'editor settings menu opens its dialog'
+    } finally {
+        $timer.Stop()
+        $timer.remove_Tick($handler)
+    }
+}
+
+function Test-ManagerEditorSettings($Context, $Window) {
+    $model = $Window.DataContext
+    $editor = $Window.FindName('sourceEditor')
+    $original = [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings
+    $previousSelection = $model.SelectedScript
+    $model.SelectedScript = $null
+
+    Invoke-ManagerEditorSettings $Context $Window {
+        param($dialog)
+        $dialog.FindName('fontSizeBox').Value = 72
+        $dialog.FindName('cancelButton').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+    }
+    Assert-Regression ([object]::ReferenceEquals($original, [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings) -and
+        $editor.FontSize -eq $original.FontSize) 'cancel keeps settings while no script is selected'
+
+    $model.NewScript()
+    $draft = $model.SelectedScript
+    $editor.CaretOffset = $editor.Text.Length
+    $editor.TextArea.PerformTextInput("// draft with an existing tab: `t")
+    $editor.Select(2, 5)
+    $document = $editor.Document
+    $source = $draft.Source
+    $dirty = $draft.IsDirty
+    $alternateFonts = [Windows.Media.Fonts]::SystemFontFamilies |
+        Where-Object { $_.Source -ne $editor.FontFamily.Source }
+    $fontName = $alternateFonts | Where-Object Source -eq 'Microsoft YaHei' | Select-Object -First 1 -ExpandProperty Source
+    if (!$fontName) { $fontName = $alternateFonts | Select-Object -First 1 -ExpandProperty Source }
+    Assert-Regression ($null -ne $fontName) 'an alternate system font is available'
+
+    Invoke-ManagerEditorSettings $Context $Window ({
+        param($dialog)
+        $size = $dialog.FindName('fontSizeBox')
+        $width = $dialog.FindName('tabWidthBox')
+        $sizeInput = $size.Template.FindName('PART_TextBox', $size)
+        $widthInput = $width.Template.FindName('PART_TextBox', $width)
+        $ok = $dialog.FindName('okButton')
+        $validation = $dialog.FindName('validationMessage')
+        Assert-Regression ($size.Value -eq $original.FontSize -and $width.Value -eq $original.TabWidth) 'editor settings shows current values'
+        $size.Value = 72
+        [HandyControl.Interactivity.ControlCommands]::Prev.Execute($null, $size)
+        $width.Value = 1
+        [HandyControl.Interactivity.ControlCommands]::Next.Execute($null, $width)
+        Assert-Regression ($size.Value -eq 72 -and $width.Value -eq 1) 'numeric steppers stay within editor setting limits'
+        $sizeInput.Text = '73'
+        $ok.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+        Assert-Regression ($dialog.IsVisible -and $validation.Text -ceq
+            $Context.LanguageService.GetString('scriptEditorSettings_invalidFontSize')) 'invalid font size leaves the dialog open'
+        $sizeInput.Text = '18'
+        $widthInput.Text = '0'
+        $ok.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+        Assert-Regression ($dialog.IsVisible -and $validation.Text -ceq
+            $Context.LanguageService.GetString('scriptEditorSettings_invalidTabWidth')) 'invalid tab width leaves the dialog open'
+
+        $widthInput.Text = '3'
+        $key = [Windows.Input.KeyEventArgs]::new([Windows.Input.Keyboard]::PrimaryDevice,
+            [Windows.PresentationSource]::FromVisual($widthInput), 0, [Windows.Input.Key]::Up)
+        $key.RoutedEvent = [Windows.Input.Keyboard]::PreviewKeyDownEvent
+        $widthInput.RaiseEvent($key)
+        [void]$ok.Focus()
+        Assert-Regression ($width.Value -eq 4 -and $widthInput.Text -ceq '4') 'keyboard stepping updates the displayed value and survives losing focus'
+        $dialog.FindName('fontFamilyBox').SelectedValue = $fontName
+        $dialog.FindName('indentationBox').SelectedItem = $dialog.FindName('tabsOption')
+        $dialog.FindName('lineNumbersBox').IsChecked = $false
+        $dialog.FindName('wordWrapBox').IsChecked = $true
+        $ok.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+    }.GetNewClosure())
+
+    Assert-Regression ($editor.FontFamily.Source -ceq $fontName -and $editor.FontSize -eq 18 -and
+        $editor.Options.IndentationSize -eq 4 -and !$editor.Options.ConvertTabsToSpaces -and
+        !$editor.ShowLineNumbers -and $editor.WordWrap) 'confirmed editor settings apply immediately'
+    Assert-Regression ([object]::ReferenceEquals($document, $editor.Document) -and $draft.Source -ceq $source -and
+        $dirty -eq $draft.IsDirty -and $editor.SelectionStart -eq 2 -and $editor.SelectionLength -eq 5 -and
+        $document.UndoStack.CanUndo) 'setting changes preserve the current draft, selection and undo history'
+
+    Set-TabWindowForeground $Context $Window
+    Wait-Regression $Context { $editor.TextArea.IsKeyboardFocusWithin -or $editor.TextArea.Focus() } 'editor receives keyboard input after settings close'
+    $editor.Select(0, 0)
+    $editor.CaretOffset = 0
+    [RegressionKeyboard]::PressKey(0x09)
+    Wait-Regression $Context { $draft.Source -ceq ("`t" + $source) } 'Tab inserts one literal tab with tabs selected'
+
+    $model.NewScript()
+    Assert-Regression ($model.SelectedScript.Source.Contains("`r`n`t'use strict';`r`n")) 'new scripts use the current indentation preference'
+    [void]$model.Scripts.Remove($draft)
+    [void]$model.Scripts.Remove($model.SelectedScript)
+    $model.SelectedScript = $previousSelection
+}
+
 function Test-ManagerStatusLine($Context, $Window) {
     $model = $Window.DataContext
     $editor = $Window.FindName('sourceEditor')
@@ -580,6 +706,7 @@ function Test-ManagerSearchAppearance($Context, $Window) {
     $scriptColumn = $Window.FindName('scriptListColumn')
     $columnWidth = $scriptColumn.Width
     $filter = $Window.FindName('scriptFilter')
+    $sort = $Window.FindName('sortScriptsByName')
     $list = $Window.FindName('scriptList')
     try {
         $Window.Width = 800
@@ -589,8 +716,12 @@ function Test-ManagerSearchAppearance($Context, $Window) {
         $Window.UpdateLayout()
         Assert-Regression ([Math]::Abs($scriptColumn.ActualWidth - 240) -lt 1) 'resizing the window keeps the default script list width'
         $filterOrigin = $filter.TranslatePoint([Windows.Point]::new(0, 0), $list)
-        Assert-Regression ([Math]::Abs($filter.ActualWidth - $list.ActualWidth) -lt 1 -and
-            $filterOrigin.Y + $filter.ActualHeight -le 0) 'the filter spans the script column above the list at minimum window width'
+        $sortOrigin = $sort.TranslatePoint([Windows.Point]::new(0, 0), $list)
+        Assert-Regression ($sortOrigin.X -ge ($filterOrigin.X + $filter.ActualWidth - 1) -and
+            [Math]::Abs($sortOrigin.X + $sort.ActualWidth - $list.ActualWidth) -lt 1 -and
+            $sortOrigin.Y + $sort.ActualHeight -le 0 -and $filterOrigin.Y + $filter.ActualHeight -le 0) 'the filter and sort button fit above the list at minimum window width'
+        Assert-Regression ($sort.Content.UriSource.OriginalString -ceq '/Assets/Icons/text-sort-asc.svg' -and
+            !$sort.IsChecked) 'the sort button uses the ascending name icon and starts unchecked'
         $Window.Width = 800
         $Window.UpdateLayout()
         $scriptColumn.Width = New-Object Windows.GridLength($scriptColumn.MaxWidth)
@@ -642,6 +773,10 @@ function Test-ManagerSearchAppearance($Context, $Window) {
             $Context.LanguageService.SetCurrentLanguage($locale)
             Assert-Regression ([HandyControl.Controls.InfoElement]::GetPlaceholder($filter) -ceq
                 $Context.LanguageService.GetString('common_filterPlaceholder')) "list filter placeholder follows the language in $locale"
+            $sortLabel = $Context.LanguageService.GetString('userScriptManager_sortByName')
+            Assert-Regression ($sortLabel -and $sort.ToolTip -ceq $sortLabel) "sort tooltip follows the language in $locale"
+            Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($filter) -ceq 'ScriptFilter' -and
+                [Windows.Automation.AutomationProperties]::GetName($sort) -ceq 'SortByName') "list filter and sort automation names stay fixed in $locale"
             foreach ($name in @('matchCount', 'noMatches')) {
                 $query.Text = if ($name -eq 'matchCount') { 'const' } else { 'missing search result' }
                 $Window.UpdateLayout()
@@ -1348,9 +1483,9 @@ function Test-ManagerBatchUpdate($Context, $Window) {
 // @downloadURL UPDATE_URL
 // ==/UserScript==
 '@
-    $fixtures = @((New-Object UserScriptHttpFixture), (New-Object UserScriptHttpFixture))
     $slowPath = '/slow-install.user.js'
-    $names = @('A', 'B')
+    $names = @('A', ('B ' + ('A long script title ' * 12).TrimEnd()), 'C', 'D', 'E', 'F', 'G', 'H')
+    $fixtures = @($names | ForEach-Object { New-Object UserScriptHttpFixture })
     $menu = $Window.FindName('batchUpdateMenuItem')
     $scriptMenu = [Windows.Controls.ItemsControl]::ItemsControlFromItemContainer($menu)
     Assert-Regression ($scriptMenu.Items[0] -eq $menu -and $scriptMenu.Items[1] -is [Windows.Controls.Separator] -and
@@ -1368,10 +1503,11 @@ function Test-ManagerBatchUpdate($Context, $Window) {
             Complete-UserScriptTask $Context ($Context.UserScriptService.Repository.InstallAsync($original, $null, ($i -eq 0),
                 [Threading.CancellationToken]::None)) 'install a batch update fixture' | Out-Null
         }
-        Wait-Regression $Context { @($manager.Scripts | Where-Object Name -like 'Batch regression *').Count -eq 2 } 'manager observes both batch fixtures'
+        Wait-Regression $Context { @($manager.Scripts | Where-Object Name -like 'Batch regression *').Count -eq $names.Count } 'manager observes all batch fixtures'
         $edited = $manager.Scripts | Where-Object Name -eq 'Batch regression A'
         $manager.SelectedScript = $edited
         $edited.Source += "`n// pending editor change"
+        $editedSource = $edited.Source
         $warn = $Context.LanguageService.GetString('userScriptBatchUpdate_overwriteEdits')
         $state = @{ Failure = $null; Opened = $false }
         $timer = New-Object Windows.Threading.DispatcherTimer
@@ -1406,10 +1542,11 @@ function Test-ManagerBatchUpdate($Context, $Window) {
                 $filter.Text = 'no matching scripts'
                 $batch.UpdateLayout()
                 $messageOrigin = $emptyMessage.TranslatePoint([Windows.Point]::new(0, 0), $list)
+                $headerOffset = ($emptyMessage.Margin.Top - $emptyMessage.Margin.Bottom) / 2
                 Assert-Regression ($list.Items.Count -eq 0 -and $emptyMessage.IsVisible -and
                     $emptyMessage.Text -ceq $Context.LanguageService.GetString('userScriptManager_noMatchingScripts') -and
                     [Math]::Abs($messageOrigin.X + ($emptyMessage.ActualWidth - $list.ActualWidth) / 2) -lt 1 -and
-                    [Math]::Abs($messageOrigin.Y + ($emptyMessage.ActualHeight - $list.ActualHeight) / 2) -lt 1) 'batch centers the localized message when the filter returns no scripts'
+                    [Math]::Abs($messageOrigin.Y + ($emptyMessage.ActualHeight - $list.ActualHeight) / 2 - $headerOffset) -lt 1) 'batch centers the localized message beneath the column headers'
                 $filter.Text = 'Batch regression B'
                 $batch.UpdateLayout()
                 $iconRow = $list.ItemContainerGenerator.ContainerFromItem($list.Items[0])
@@ -1453,19 +1590,66 @@ function Test-ManagerBatchUpdate($Context, $Window) {
 
                 $filter.Text = 'Batch regression'
                 Invoke-BrowserCommand $check.Command $check.CommandParameter
-                Wait-Regression $Context { !$batch.DataContext.IsBusy -and @($list.Items | Where-Object LatestVersion -eq '2.0').Count -eq 2 } 'Check for Updates checks both visible rows'
-                $checkBatchMessage = {
+                Wait-Regression $Context { !$batch.DataContext.IsBusy -and @($list.Items | Where-Object LatestVersion -eq '2.0').Count -eq $names.Count } 'Check for Updates checks every visible row'
+                $expectedScripts = @($names | ForEach-Object { "Batch regression $_" })
+                $checkBatchDialog = {
                     param($confirmation, $expectedWarning)
-                    Assert-Regression ($confirmation.Message.Contains('Batch regression A') -and
-                        $confirmation.Message.Contains('Batch regression B') -and $confirmation.Message.Contains($expectedWarning)) 'one confirmation lists both scripts and flags the edited script'
-                }
+                    $confirmation.Width = $confirmation.MinWidth
+                    $confirmation.Height = $confirmation.MinHeight
+                    $confirmation.UpdateLayout()
+                    $entries = $confirmation.FindName('scriptList')
+                    $prompt = $confirmation.FindName('confirmationPrompt')
+                    $scrollViewer = $confirmation.FindName('scriptScrollViewer')
+                    $cancel = $confirmation.FindName('cancelButton')
+                    $confirm = $confirmation.FindName('updateButton')
+                    Assert-Regression ($prompt.Text -ceq $Context.LanguageService.GetString('userScriptBatchUpdate_confirmAll') -and
+                        $confirm.Content -ceq $Context.LanguageService.GetString('userScriptInstall_update') -and
+                        $cancel.Content -ceq $Context.LanguageService.GetString('common_cancel')) 'batch confirmation uses localized prompt and actions'
+                    Assert-Regression ($entries.Items.Count -eq $expectedScripts.Count) "confirmation lists $($entries.Items.Count) scripts, expected $($expectedScripts.Count)"
+                    $versions = "1.0 $([char]0x2192) 2.0"
+                    for ($index = 0; $index -lt $expectedScripts.Count; $index++) {
+                        $itemContainer = $entries.ItemContainerGenerator.ContainerFromIndex($index)
+                        $labels = @(Find-FaviconElements $itemContainer ([Windows.Controls.TextBlock]))
+                        $label = $labels | Where-Object Text -ceq $expectedScripts[$index]
+                        Assert-Regression ($null -ne $label -and @($labels | Where-Object Text -ceq $versions).Count -eq 1 -and
+                            @($labels | Where-Object { $_.Text -ceq $expectedWarning -and $_.IsVisible }).Count -eq [int]($index -eq 0)) "confirmation row $($index + 1) shows its name, versions and expected warning"
+                        if ($index -eq 0) { $singleLineHeight = $label.ActualHeight }
+                        if ($index -eq 1) {
+                            Assert-Regression ($label.ActualHeight -gt $singleLineHeight) 'the long script name wraps'
+                        }
+                    }
+                    $checkBoxes = @(Find-FaviconElements $entries ([Windows.Controls.CheckBox]))
+                    Assert-Regression ($checkBoxes.Count -eq $expectedScripts.Count -and $confirm.IsEnabled -and
+                        @($checkBoxes | Where-Object IsChecked).Count -eq $expectedScripts.Count) 'each confirmation opens with every script checked'
+                    $actionPosition = $confirm.TranslatePoint([Windows.Point]::new(0, 0), $confirmation)
+                    $scrollViewer.ScrollToBottom()
+                    $confirmation.UpdateLayout()
+                    Assert-Regression ($scrollViewer.VerticalOffset -gt 0 -and $prompt.IsVisible -and $cancel.IsVisible -and
+                        $confirm.IsVisible -and $confirm.TranslatePoint([Windows.Point]::new(0, 0), $confirmation) -eq $actionPosition) 'the script list scrolls with the prompt and actions fixed'
+
+                    $toggles = @($checkBoxes | ForEach-Object {
+                        $peer = New-Object Windows.Automation.Peers.CheckBoxAutomationPeer($_)
+                        $peer.GetPattern([Windows.Automation.Peers.PatternInterface]::Toggle)
+                    })
+                    foreach ($toggle in $toggles) { $toggle.Toggle() }
+                    Assert-Regression (!$confirm.IsEnabled -and $cancel.IsEnabled) 'no selected scripts disables Update and keeps Cancel available'
+                    for ($index = 1; $index -lt $toggles.Count; $index++) { $toggles[$index].Toggle() }
+                    Assert-Regression ($confirm.IsEnabled -and !$checkBoxes[0].IsChecked -and
+                        @($checkBoxes | Where-Object IsChecked).Count -eq ($expectedScripts.Count - 1)) 'rechecking scripts enables a partial update'
+                }.GetNewClosure()
                 Invoke-BatchUpdateConfirmation $Context $batch $update.Command $null `
-                    ([CefFlashBrowser.Views.Dialogs.JsConfirmDialog]) 'yesButton' $warn $checkBatchMessage
-                Assert-Regression (@($list.Items | Where-Object { $_.CurrentVersion -eq '2.0' -and $_.LatestVersion -eq '2.0' -and !$_.HasStatus }).Count -eq 2 -and
-                    !$update.IsEnabled -and
-                    $batch.FindName('summaryText').Text -eq ($Context.LanguageService.GetString('userScriptBatchUpdate_summary') -f 2, 0)) 'both rows show the installed versions and the dialog summarizes the update'
-                Assert-Regression (!$edited.IsDirty -and $edited.Source -eq $fixtures[0].ScriptSource -and
-                    $Window.FindName('sourceEditor').Text -eq $fixtures[0].ScriptSource) 'the manager editor shows the confirmed replacement source'
+                    ([CefFlashBrowser.Views.Dialogs.UserScriptBatchUpdateConfirmDialog]) 'cancelButton' $warn $checkBatchDialog
+                Assert-Regression ($edited.IsDirty -and $update.IsEnabled -and
+                    @($list.Items | Where-Object CurrentVersion -eq '1.0').Count -eq $names.Count) 'cancelling the batch preserves installed versions and unsaved edits'
+                $editedRequests = $fixtures[0].RequestsFor($slowPath)
+                Invoke-BatchUpdateConfirmation $Context $batch $update.Command $null `
+                    ([CefFlashBrowser.Views.Dialogs.UserScriptBatchUpdateConfirmDialog]) 'updateButton' $warn $checkBatchDialog
+                $selectedCount = $names.Count - 1
+                Assert-Regression (@($list.Items | Where-Object { $_.CurrentVersion -eq '2.0' -and $_.LatestVersion -eq '2.0' -and !$_.HasStatus }).Count -eq $selectedCount -and
+                    $update.IsEnabled -and $row.CurrentVersion -eq '1.0' -and $row.LatestVersion -eq '2.0' -and
+                    $batch.FindName('summaryText').Text -eq ($Context.LanguageService.GetString('userScriptBatchUpdate_summary') -f $selectedCount, 0)) 'only selected scripts are updated and counted in the summary'
+                Assert-Regression ($fixtures[0].RequestsFor($slowPath) -eq $editedRequests -and $edited.IsDirty -and
+                    $edited.Source -ceq $editedSource -and $Window.FindName('sourceEditor').Text -ceq $editedSource) 'the unchecked script keeps its draft and makes no update request'
             } catch {
                 $state.Failure = $_
             } finally {
@@ -1571,6 +1755,8 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
     $installed = @()
     $behavior = $null
     $filter = $Window.FindName('scriptFilter')
+    $sort = $Window.FindName('sortScriptsByName')
+    $sortProperty = [Windows.Controls.Primitives.ToggleButton]::IsCheckedProperty
     try {
         foreach ($mark in @('A', 'B')) {
             $installed += Complete-UserScriptTask $Context ($repository.InstallAsync($scriptSource.Replace('__MARK__', $mark), $null, $true, $token)) "install order fixture $mark"
@@ -1662,10 +1848,47 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
         Assert-Regression ([object]::ReferenceEquals($model.SelectedScript, $item) -and
             $item.IsDirty -and $editor.Text -ceq $editedSource -and @(Get-ListReorderAdorners $list).Count -eq 0) 'dragging preserves selection and unsaved source and clears the insertion line'
         Assert-Regression ((Invoke-JavaScript $Context $BrowserModel.Browser $readOrder) -ceq 'AB') 'reordering does not rerun scripts in the existing document'
+
+        $sort.SetCurrentValue($sortProperty, $true)
+        Assert-Regression ($model.IsNameSortEnabled -and $list.Items.IndexOf($first) -lt $list.Items.IndexOf($item) -and
+            $model.Scripts.IndexOf($item) -lt $model.Scripts.IndexOf($first) -and
+            [object]::ReferenceEquals($model.SelectedScript, $item) -and $editor.Text -ceq $editedSource -and $editor.CanUndo) 'name sorting changes the view and preserves custom order, selection and unsaved edits'
+        $canExecute = [Windows.Input.ICommand].GetMethod('CanExecute')
+        Assert-Regression (!$behavior.IsDragEnabled -and $null -eq (Start-ListReorderDrag $behavior $item) -and
+            @($commands | Where-Object { $canExecute.Invoke($_, [object[]]@($null)) }).Count -eq 0) 'name sorting disables drag and move commands'
+        $menu = Open-ManagerContextMenu $Context $Window $item
+        Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Collapsed }).Count -eq 5 -and
+            $menu.Items[5].IsEnabled -and $menu.Items[7].IsEnabled -and $menu.Items[8].IsEnabled) 'name sorting hides the move menu items and leaves other actions available'
+        $menu.IsOpen = $false
+
+        $filter.Text = 'Manager order'
+        Assert-Regression ($list.Items.Count -eq 2 -and $list.Items.IndexOf($first) -eq 0 -and
+            $list.Items.IndexOf($item) -eq 1) 'name sorting also orders filtered results'
+        $draft = [CefFlashBrowser.ViewModels.UserScriptItemViewModel]::new($scriptSource.Replace('__MARK__', 'AA draft'), $null, 'Manager order AA draft', $false)
+        $model.Scripts.Add($draft)
+        try {
+            Assert-Regression ($list.Items.Count -eq 3 -and $list.Items.IndexOf($draft) -eq 1) 'matching drafts are sorted by name with installed scripts'
+        } finally {
+            [void]$model.Scripts.Remove($draft)
+        }
+        $renamedSource = $scriptSource.Replace('Manager order __MARK__', 'Manager order Z').Replace('__MARK__', 'A')
+        Complete-UserScriptTask $Context ($repository.UpdateAsync($first.Installation.ScriptKey, $renamedSource, $null, $token)) 'rename the first order fixture' | Out-Null
+        Wait-Regression $Context { $list.Items.Count -eq 2 -and $list.Items.IndexOf($first) -eq 1 } 'renaming a matching script repositions it while the filter is active'
+        Complete-UserScriptTask $Context ($repository.UpdateAsync($first.Installation.ScriptKey, $scriptSource.Replace('__MARK__', 'A'), $null, $token)) 'restore the first order fixture name' | Out-Null
+        Wait-Regression $Context { $list.Items.IndexOf($first) -eq 0 } 'restoring the name restores the sorted position'
+        $sort.SetCurrentValue($sortProperty, $false)
+        Assert-Regression ($filter.Text -ceq 'Manager order' -and $list.Items.Count -eq 2 -and
+            $list.Items.IndexOf($item) -eq 0 -and !$behavior.IsDragEnabled) 'turning off name sorting restores custom order within the active filter'
+        $sort.SetCurrentValue($sortProperty, $true)
+        $filter.Text = ''
+        Assert-Regression ($list.Items.Count -eq $model.Scripts.Count -and $list.Items.IndexOf($first) -lt $list.Items.IndexOf($item) -and
+            !$behavior.IsDragEnabled) 'clearing the filter retains name sorting and keeps manual reordering disabled'
         Invoke-BrowserCommand $BrowserModel.Browser.ReloadCommand
         Wait-Regression $Context {
             (Invoke-JavaScript $Context $BrowserModel.Browser $readOrder) -ceq 'BA'
-        } 'same-stage scripts follow the custom order after refresh'
+        } 'same-stage scripts follow the custom order after refresh with name sorting active'
+        $sort.SetCurrentValue($sortProperty, $false)
+        Assert-Regression ($behavior.IsDragEnabled -and $list.Items.IndexOf($item) -lt $list.Items.IndexOf($first)) 'turning off name sorting without a filter restores custom order and drag reordering'
 
         $Window.UpdateLayout()
         $targetRow = $list.ItemContainerGenerator.ContainerFromItem($first)
@@ -1728,6 +1951,7 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
         }
     } finally {
         $filter.Text = ''
+        $sort.SetCurrentValue($sortProperty, $false)
         if ($null -ne $behavior) { Invoke-ViewCallback $behavior 'EndDrag' @() }
         foreach ($installation in $installed) {
             Complete-UserScriptTask $Context ($repository.RemoveAsync($installation.ScriptKey, $token)) 'remove order fixture' | Out-Null
@@ -1799,6 +2023,7 @@ function Test-UserScriptManager($Context) {
     $iconFixture = New-Object FaviconHttpFixture
     $language = $Context.LanguageService.CurrentLanguage
     $theme = [CefFlashBrowser.Data.GlobalData]::Settings.Theme
+    $originalEditorSettings = [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings
     $model = $Context.Application.Resources['Locator'].UserScriptManagerViewModel
     $source = @'
 // ==UserScript==
@@ -1935,13 +2160,15 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $model.NewScript()
         $draft = $model.SelectedScript
         $window.FindName('scriptFilter').Text = $draft.Name
+        $model.IsNameSortEnabled = $true
         Send-ManagerShortcut $Context $window 0x57
         Wait-Regression $Context { !$window.IsVisible } 'Ctrl+W closes the manager from editor focus'
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] })[0]
         Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager reopened'
         $editor = $window.FindName('sourceEditor')
-        Assert-Regression ($window.FindName('scriptFilter').Text.Length -eq 0) 'reopening the manager clears the list filter'
+        Assert-Regression ($window.FindName('scriptFilter').Text.Length -eq 0 -and
+            !$window.FindName('sortScriptsByName').IsChecked) 'reopening the manager resets the filter and name sort'
         Assert-Regression ([object]::ReferenceEquals($draft, $model.SelectedScript) -and $item.IsDirty -and $item.Source.Contains('unsaved session draft')) 'selection and unsaved drafts survive manager closure'
         Assert-Regression ($editor.Text -ceq $draft.Source) 'reopened editor displays the selected unsaved draft'
         $path = Join-Path $Context.TemporaryPath 'manager-import.JS'
@@ -2175,6 +2402,53 @@ document.documentElement.setAttribute('data-manager', 'saved');
         [void]$editor.Redo()
         Assert-Regression ($item.Source.EndsWith('// theme draft')) 'redo history still works after repeated theme changes'
         Test-WebUserScriptInstallation $Context $browserWindow $window $fixture
+        Test-ManagerEditorSettings $Context $window
+
+        $saved = [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings
+        $window.Close()
+        $window = $null
+        [CefFlashBrowser.Data.GlobalData]::InitSettings()
+        [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
+        $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] })[0]
+        Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager reopens from disk-backed settings'
+        $editor = $window.FindName('sourceEditor')
+        Assert-Regression ($editor.FontFamily.Source -ceq $saved.FontFamily -and $editor.FontSize -eq 18 -and
+            $editor.Options.IndentationSize -eq 4 -and !$editor.Options.ConvertTabsToSpaces -and
+            !$editor.ShowLineNumbers -and $editor.WordWrap) 'all editor preferences survive reloading settings and reopening the manager'
+
+        $savedFamily = $editor.FontFamily
+        $originalUICulture = [Threading.Thread]::CurrentThread.CurrentUICulture
+        try {
+            foreach ($locale in @('zh-CN', 'en-US')) {
+                [Threading.Thread]::CurrentThread.CurrentUICulture = [Globalization.CultureInfo]::GetCultureInfo($locale)
+                $displayName = $null
+                [void]$savedFamily.FamilyNames.TryGetValue([Windows.Markup.XmlLanguage]::GetLanguage($locale), [ref]$displayName)
+                Invoke-ManagerEditorSettings $Context $window ({
+                    param($dialog)
+                    $picker = $dialog.FindName('fontFamilyBox')
+                    Assert-Regression ($picker.SelectedValue -ceq $saved.FontFamily) "editor settings restores the saved font in $locale"
+                    if ($displayName) {
+                        Assert-Regression ($picker.SelectedItem.DisplayName -ceq $displayName) "saved font displays its $locale name"
+                    }
+                    $dialog.FindName('cancelButton').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+                }.GetNewClosure())
+            }
+        } finally {
+            [Threading.Thread]::CurrentThread.CurrentUICulture = $originalUICulture
+        }
+
+        Invoke-ManagerEditorSettings $Context $window ({
+            param($dialog)
+            $dialog.FindName('fontFamilyBox').SelectedValue = $originalEditorSettings.FontFamily
+            $dialog.FindName('fontSizeBox').Value = $originalEditorSettings.FontSize
+            $dialog.FindName('indentationBox').SelectedItem = $dialog.FindName('spacesOption')
+            $dialog.FindName('tabWidthBox').Value = $originalEditorSettings.TabWidth
+            $dialog.FindName('lineNumbersBox').IsChecked = $originalEditorSettings.ShowLineNumbers
+            $dialog.FindName('wordWrapBox').IsChecked = $false
+            $dialog.FindName('okButton').RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Button]::ClickEvent))
+        }.GetNewClosure())
+        Assert-Regression (!$editor.WordWrap -and
+            $editor.HorizontalScrollBarVisibility -eq [Windows.Controls.ScrollBarVisibility]::Auto) 'turning off word wrap restores horizontal scrolling'
         Test-ManagerBatchUpdate $Context $window
     } finally {
         if ($null -ne $browserWindow) { $browserWindow.ForceCloseWindow() }
@@ -2191,5 +2465,9 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $iconFixture.Dispose()
         $Context.LanguageService.SetCurrentLanguage($language)
         Set-ManagerRegressionTheme $Context $theme
+        if (![object]::ReferenceEquals($originalEditorSettings, [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings)) {
+            [CefFlashBrowser.Data.GlobalData]::Settings.ScriptEditorSettings = $originalEditorSettings
+            [void][CefFlashBrowser.Data.GlobalData]::SaveSettings()
+        }
     }
 }
