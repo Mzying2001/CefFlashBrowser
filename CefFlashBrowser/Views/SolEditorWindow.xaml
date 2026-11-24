@@ -8,7 +8,6 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:CefFlashBrowser.Views.Behaviors"
-        xmlns:templateSelectors="clr-namespace:CefFlashBrowser.Views.TemplateSelectors"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         mc:Ignorable="d"
@@ -250,21 +249,6 @@
             </StackPanel>
         </DataTemplate>
 
-        <!--Selector for the node editor templates-->
-        <templateSelectors:SolNodeTemplateSelector
-            x:Key="NodeEditorSelector"
-            RootTemplate="{StaticResource AddItemTemplate}"
-            ArrayTemplate="{StaticResource AddItemTemplate}"
-            ObjectTemplate="{StaticResource AddItemTemplate}"
-            BoolTemplate="{StaticResource BoolNodeTemplate}"
-            IntTemplate="{StaticResource IntNodeTemplate}"
-            DoubleTemplate="{StaticResource DoubleNodeTemplate}"
-            DateTemplate="{StaticResource DateTimeNodeTemplate}"
-            StringTemplate="{StaticResource OpenTextEditorTemplate}"
-            XmlDocTemplate="{StaticResource OpenTextEditorTemplate}"
-            XmlTemplate="{StaticResource OpenTextEditorTemplate}"
-            BinaryTemplate="{StaticResource ImportExportTemplate}"
-            DefaultTemplate="{StaticResource DisplayNothingTemplate}"/>
     </Window.Resources>
 
     <DockPanel>
@@ -373,7 +357,9 @@
                         <Grid DockPanel.Dock="Right"
                               Margin="10,5"
                               MinWidth="120">
-                            <ContentPresenter ContentTemplateSelector="{StaticResource NodeEditorSelector}"/>
+                            <ContentPresenter
+                                x:Name="NodeEditor"
+                                ContentTemplate="{StaticResource DisplayNothingTemplate}"/>
                         </Grid>
 
                         <StackPanel Orientation="Horizontal"
@@ -383,6 +369,35 @@
                                        Text="{Binding TypeString, Mode=OneWay, StringFormat=': {0}'}"/>
                         </StackPanel>
                     </DockPanel>
+                    <HierarchicalDataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding TypeString}" Value="bool">
+                            <Setter TargetName="NodeEditor" Property="ContentTemplate" Value="{StaticResource BoolNodeTemplate}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding TypeString}" Value="int">
+                            <Setter TargetName="NodeEditor" Property="ContentTemplate" Value="{StaticResource IntNodeTemplate}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding TypeString}" Value="double">
+                            <Setter TargetName="NodeEditor" Property="ContentTemplate" Value="{StaticResource DoubleNodeTemplate}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding TypeString}" Value="DateTime">
+                            <Setter TargetName="NodeEditor" Property="ContentTemplate" Value="{StaticResource DateTimeNodeTemplate}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding TypeString}" Value="string">
+                            <Setter TargetName="NodeEditor" Property="ContentTemplate" Value="{StaticResource OpenTextEditorTemplate}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding TypeString}" Value="XmlDocument">
+                            <Setter TargetName="NodeEditor" Property="ContentTemplate" Value="{StaticResource OpenTextEditorTemplate}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding TypeString}" Value="Xml">
+                            <Setter TargetName="NodeEditor" Property="ContentTemplate" Value="{StaticResource OpenTextEditorTemplate}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding TypeString}" Value="Binary">
+                            <Setter TargetName="NodeEditor" Property="ContentTemplate" Value="{StaticResource ImportExportTemplate}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding CanAddChild}" Value="True">
+                            <Setter TargetName="NodeEditor" Property="ContentTemplate" Value="{StaticResource AddItemTemplate}"/>
+                        </DataTrigger>
+                    </HierarchicalDataTemplate.Triggers>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
 
