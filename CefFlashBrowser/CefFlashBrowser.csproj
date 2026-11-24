@@ -43,6 +43,8 @@
     <Resource Include="Assets\Icons\export.svg" />
     <Resource Include="Assets\Icons\flash-player.svg" />
     <Resource Include="Assets\Icons\forward.svg" />
+    <Resource Include="Assets\Icons\icon-large.svg" />
+    <Resource Include="Assets\Icons\icon-small.svg" />
     <Resource Include="Assets\Icons\import.svg" />
     <Resource Include="Assets\Icons\language.svg" />
     <Resource Include="Assets\Icons\more.svg" />

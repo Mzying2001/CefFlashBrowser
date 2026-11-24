@@ -73,6 +73,8 @@
 
             <!--Icon resources-->
             <sys:Uri x:Key="AddIconUri">/Assets/Icons/add.svg</sys:Uri>
+            <sys:Uri x:Key="AppLargeIconUri">/Assets/Icons/icon-large.svg</sys:Uri>
+            <sys:Uri x:Key="AppSmallIconUri">/Assets/Icons/icon-small.svg</sys:Uri>
             <sys:Uri x:Key="BackIconUri">/Assets/Icons/back.svg</sys:Uri>
             <sys:Uri x:Key="CloseIconUri">/Assets/Icons/close.svg</sys:Uri>
             <sys:Uri x:Key="DownIconUri">/Assets/Icons/down.svg</sys:Uri>
