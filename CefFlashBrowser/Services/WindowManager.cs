@@ -270,6 +270,13 @@ namespace CefFlashBrowser.Services
             return ShowModal(dialog, owner, token);
         }
 
+        internal static bool ConfirmUserScriptBatchUpdate(IReadOnlyList<UserScriptUpdateConfirmationEntry> entries,
+            Window owner, CancellationToken token)
+        {
+            var dialog = CreateWindow<UserScriptBatchUpdateConfirmDialog>(initializer: window => window.DataContext = entries);
+            return ShowModal(dialog, owner, token);
+        }
+
         internal static UserScriptPermissionDialog CreateUserScriptPermissionDialog(string description)
         {
             var dialog = CreateWindow<UserScriptPermissionDialog>();
@@ -335,14 +342,6 @@ namespace CefFlashBrowser.Services
         {
             var dialog = ShowConfirmDialog(message, title);
             callback?.Invoke(DialogHelper.GetDialogResult(dialog));
-        }
-
-        internal static bool Confirm(string message, string title, Window owner, CancellationToken token)
-        {
-            var dialog = CreateWindow<JsConfirmDialog>();
-            dialog.Title = title;
-            dialog.Message = message;
-            return ShowModal(dialog, owner, token);
         }
 
         internal static JsConfirmDialog ShowConfirmDialog(string message, string title,

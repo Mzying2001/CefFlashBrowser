@@ -5,6 +5,7 @@ using Mzying2001.MonkeySharp.Core.Updates;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -37,7 +38,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand<UserScriptBatchUpdateRow> UpdateRowCommand { get; }
 
         public Func<UserScriptMetadata, string, string, CancellationToken, bool> ConfirmRow { private get; set; }
-        public Func<string, CancellationToken, bool> ConfirmAll { private get; set; }
+        public Func<IReadOnlyList<UserScriptUpdateConfirmationEntry>, CancellationToken, bool> ConfirmAll { private get; set; }
 
         private string _filterText = string.Empty;
         private string _filterTerm = string.Empty;
@@ -214,16 +215,10 @@ namespace CefFlashBrowser.ViewModels
             if (pending.Length == 0)
                 return;
 
-            var entries = pending.Select(entry =>
-            {
-                var row = entry.Row;
-                var versions = $"{row.Name} ({row.CurrentVersion} → {row.LatestVersion})";
-                return row.Item.IsDirty ? versions + "\n" + _text("userScriptBatchUpdate_overwriteEdits") : versions;
-            });
+            var entries = Array.AsReadOnly(pending.Select(entry => new UserScriptUpdateConfirmationEntry(
+                entry.Row.Name, entry.Row.CurrentVersion, entry.Check.AvailableVersion, entry.Row.Item.IsDirty)).ToArray());
 
-            var message = _text("userScriptBatchUpdate_confirmAll") + "\n\n" + string.Join("\n\n", entries);
-
-            if (ConfirmAll?.Invoke(message, token) != true)
+            if (ConfirmAll?.Invoke(entries, token) != true)
                 return;
 
             int succeeded = 0;
@@ -395,6 +390,22 @@ namespace CefFlashBrowser.ViewModels
 
             _lifetime.Cancel();
             if (!IsBusy) _lifetime.Dispose();
+        }
+    }
+
+    internal sealed class UserScriptUpdateConfirmationEntry
+    {
+        public string Name { get; }
+        public string CurrentVersion { get; }
+        public string NewVersion { get; }
+        public bool HasUnsavedEdits { get; }
+
+        public UserScriptUpdateConfirmationEntry(string name, string currentVersion, string newVersion, bool hasUnsavedEdits)
+        {
+            Name = name;
+            CurrentVersion = currentVersion;
+            NewVersion = newVersion;
+            HasUnsavedEdits = hasUnsavedEdits;
         }
     }
 

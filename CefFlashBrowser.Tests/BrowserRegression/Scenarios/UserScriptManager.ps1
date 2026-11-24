@@ -1482,9 +1482,9 @@ function Test-ManagerBatchUpdate($Context, $Window) {
 // @downloadURL UPDATE_URL
 // ==/UserScript==
 '@
-    $fixtures = @((New-Object UserScriptHttpFixture), (New-Object UserScriptHttpFixture))
     $slowPath = '/slow-install.user.js'
-    $names = @('A', 'B')
+    $names = @('A', ('B ' + ('A long script title ' * 12).TrimEnd()), 'C', 'D', 'E', 'F', 'G', 'H')
+    $fixtures = @($names | ForEach-Object { New-Object UserScriptHttpFixture })
     $menu = $Window.FindName('batchUpdateMenuItem')
     $scriptMenu = [Windows.Controls.ItemsControl]::ItemsControlFromItemContainer($menu)
     Assert-Regression ($scriptMenu.Items[0] -eq $menu -and $scriptMenu.Items[1] -is [Windows.Controls.Separator] -and
@@ -1502,7 +1502,7 @@ function Test-ManagerBatchUpdate($Context, $Window) {
             Complete-UserScriptTask $Context ($Context.UserScriptService.Repository.InstallAsync($original, $null, ($i -eq 0),
                 [Threading.CancellationToken]::None)) 'install a batch update fixture' | Out-Null
         }
-        Wait-Regression $Context { @($manager.Scripts | Where-Object Name -like 'Batch regression *').Count -eq 2 } 'manager observes both batch fixtures'
+        Wait-Regression $Context { @($manager.Scripts | Where-Object Name -like 'Batch regression *').Count -eq $names.Count } 'manager observes all batch fixtures'
         $edited = $manager.Scripts | Where-Object Name -eq 'Batch regression A'
         $manager.SelectedScript = $edited
         $edited.Source += "`n// pending editor change"
@@ -1540,10 +1540,11 @@ function Test-ManagerBatchUpdate($Context, $Window) {
                 $filter.Text = 'no matching scripts'
                 $batch.UpdateLayout()
                 $messageOrigin = $emptyMessage.TranslatePoint([Windows.Point]::new(0, 0), $list)
+                $headerOffset = ($emptyMessage.Margin.Top - $emptyMessage.Margin.Bottom) / 2
                 Assert-Regression ($list.Items.Count -eq 0 -and $emptyMessage.IsVisible -and
                     $emptyMessage.Text -ceq $Context.LanguageService.GetString('userScriptManager_noMatchingScripts') -and
                     [Math]::Abs($messageOrigin.X + ($emptyMessage.ActualWidth - $list.ActualWidth) / 2) -lt 1 -and
-                    [Math]::Abs($messageOrigin.Y + ($emptyMessage.ActualHeight - $list.ActualHeight) / 2) -lt 1) 'batch centers the localized message when the filter returns no scripts'
+                    [Math]::Abs($messageOrigin.Y + ($emptyMessage.ActualHeight - $list.ActualHeight) / 2 - $headerOffset) -lt 1) 'batch centers the localized message beneath the column headers'
                 $filter.Text = 'Batch regression B'
                 $batch.UpdateLayout()
                 $iconRow = $list.ItemContainerGenerator.ContainerFromItem($list.Items[0])
@@ -1587,17 +1588,49 @@ function Test-ManagerBatchUpdate($Context, $Window) {
 
                 $filter.Text = 'Batch regression'
                 Invoke-BrowserCommand $check.Command $check.CommandParameter
-                Wait-Regression $Context { !$batch.DataContext.IsBusy -and @($list.Items | Where-Object LatestVersion -eq '2.0').Count -eq 2 } 'Check for Updates checks both visible rows'
-                $checkBatchMessage = {
+                Wait-Regression $Context { !$batch.DataContext.IsBusy -and @($list.Items | Where-Object LatestVersion -eq '2.0').Count -eq $names.Count } 'Check for Updates checks every visible row'
+                $expectedScripts = @($names | ForEach-Object { "Batch regression $_" })
+                $checkBatchDialog = {
                     param($confirmation, $expectedWarning)
-                    Assert-Regression ($confirmation.Message.Contains('Batch regression A') -and
-                        $confirmation.Message.Contains('Batch regression B') -and $confirmation.Message.Contains($expectedWarning)) 'one confirmation lists both scripts and flags the edited script'
-                }
+                    $confirmation.Width = $confirmation.MinWidth
+                    $confirmation.Height = $confirmation.MinHeight
+                    $confirmation.UpdateLayout()
+                    $entries = $confirmation.FindName('scriptList')
+                    $prompt = $confirmation.FindName('confirmationPrompt')
+                    $scrollViewer = $confirmation.FindName('scriptScrollViewer')
+                    $cancel = $confirmation.FindName('cancelButton')
+                    $confirm = $confirmation.FindName('updateButton')
+                    Assert-Regression ($prompt.Text -ceq $Context.LanguageService.GetString('userScriptBatchUpdate_confirmAll') -and
+                        $confirm.Content -ceq $Context.LanguageService.GetString('userScriptBatchUpdate_all') -and
+                        $cancel.Content -ceq $Context.LanguageService.GetString('common_cancel')) 'batch confirmation uses localized prompt and actions'
+                    Assert-Regression ($entries.Items.Count -eq $expectedScripts.Count) "confirmation lists $($entries.Items.Count) scripts, expected $($expectedScripts.Count)"
+                    $versions = "1.0 $([char]0x2192) 2.0"
+                    for ($index = 0; $index -lt $expectedScripts.Count; $index++) {
+                        $itemContainer = $entries.ItemContainerGenerator.ContainerFromIndex($index)
+                        $labels = @(Find-FaviconElements $itemContainer ([Windows.Controls.TextBlock]))
+                        $label = $labels | Where-Object Text -ceq $expectedScripts[$index]
+                        Assert-Regression ($null -ne $label -and @($labels | Where-Object Text -ceq $versions).Count -eq 1 -and
+                            @($labels | Where-Object { $_.Text -ceq $expectedWarning -and $_.IsVisible }).Count -eq [int]($index -eq 0)) "confirmation row $($index + 1) shows its name, versions and expected warning"
+                        if ($index -eq 0) { $singleLineHeight = $label.ActualHeight }
+                        if ($index -eq 1) {
+                            Assert-Regression ($label.ActualHeight -gt $singleLineHeight) 'the long script name wraps'
+                        }
+                    }
+                    $actionPosition = $confirm.TranslatePoint([Windows.Point]::new(0, 0), $confirmation)
+                    $scrollViewer.ScrollToBottom()
+                    $confirmation.UpdateLayout()
+                    Assert-Regression ($scrollViewer.VerticalOffset -gt 0 -and $prompt.IsVisible -and $cancel.IsVisible -and
+                        $confirm.IsVisible -and $confirm.TranslatePoint([Windows.Point]::new(0, 0), $confirmation) -eq $actionPosition) 'the script list scrolls with the prompt and actions fixed'
+                }.GetNewClosure()
                 Invoke-BatchUpdateConfirmation $Context $batch $update.Command $null `
-                    ([CefFlashBrowser.Views.Dialogs.JsConfirmDialog]) 'yesButton' $warn $checkBatchMessage
-                Assert-Regression (@($list.Items | Where-Object { $_.CurrentVersion -eq '2.0' -and $_.LatestVersion -eq '2.0' -and !$_.HasStatus }).Count -eq 2 -and
+                    ([CefFlashBrowser.Views.Dialogs.UserScriptBatchUpdateConfirmDialog]) 'cancelButton' $warn $checkBatchDialog
+                Assert-Regression ($edited.IsDirty -and $update.IsEnabled -and
+                    @($list.Items | Where-Object CurrentVersion -eq '1.0').Count -eq $names.Count) 'cancelling the batch preserves installed versions and unsaved edits'
+                Invoke-BatchUpdateConfirmation $Context $batch $update.Command $null `
+                    ([CefFlashBrowser.Views.Dialogs.UserScriptBatchUpdateConfirmDialog]) 'updateButton' $warn $checkBatchDialog
+                Assert-Regression (@($list.Items | Where-Object { $_.CurrentVersion -eq '2.0' -and $_.LatestVersion -eq '2.0' -and !$_.HasStatus }).Count -eq $names.Count -and
                     !$update.IsEnabled -and
-                    $batch.FindName('summaryText').Text -eq ($Context.LanguageService.GetString('userScriptBatchUpdate_summary') -f 2, 0)) 'both rows show the installed versions and the dialog summarizes the update'
+                    $batch.FindName('summaryText').Text -eq ($Context.LanguageService.GetString('userScriptBatchUpdate_summary') -f $names.Count, 0)) 'the rows show the installed versions and the dialog summarizes the update'
                 Assert-Regression (!$edited.IsDirty -and $edited.Source -eq $fixtures[0].ScriptSource -and
                     $Window.FindName('sourceEditor').Text -eq $fixtures[0].ScriptSource) 'the manager editor shows the confirmed replacement source'
             } catch {

@@ -78,12 +78,14 @@ namespace CefFlashBrowser.Tests
                 Assert.AreEqual("userScriptBatchUpdate_notConfigured", rows["Target local"].Status);
                 Assert.AreEqual("userScriptBatchUpdate_disabled", rows["Target disabled"].Status);
 
-                var confirmations = new List<string>();
-                batch.ConfirmAll = (message, _) => { confirmations.Add(message); return true; };
+                var confirmations = new List<IReadOnlyList<UserScriptUpdateConfirmationEntry>>();
+                batch.ConfirmAll = (entries, _) => { confirmations.Add(entries); return true; };
                 await batch.UpdateAllAsync();
-                Assert.AreEqual(1, confirmations.Count);
-                StringAssert.Contains(confirmations[0], "Target first (1.0 → 2.0)");
-                Assert.IsFalse(confirmations[0].Contains("Other"));
+                var entry = confirmations.Single().Single();
+                Assert.AreEqual("Target first", entry.Name);
+                Assert.AreEqual("1.0", entry.CurrentVersion);
+                Assert.AreEqual("2.0", entry.NewVersion);
+                Assert.IsFalse(entry.HasUnsavedEdits);
                 Assert.AreEqual("2.0", rows["Target first"].CurrentVersion);
                 Assert.IsFalse(rows["Target first"].Item.IsEnabled);
                 Assert.IsFalse(((ICommand)batch.UpdateAllCommand).CanExecute(null));
@@ -132,11 +134,12 @@ namespace CefFlashBrowser.Tests
 
                 var batchReviews = 0;
                 var accepted = false;
-                batch.ConfirmAll = (message, _) =>
+                batch.ConfirmAll = (entries, _) =>
                 {
                     batchReviews++;
-                    StringAssert.Contains(message, "Fails (1.0 → 2.0)");
-                    StringAssert.Contains(message, "Updates (1.0 → 2.0)\nuserScriptBatchUpdate_overwriteEdits");
+                    CollectionAssert.AreEqual(new[] { "Fails", "Updates" }, entries.Select(entry => entry.Name).ToArray());
+                    Assert.IsFalse(entries[0].HasUnsavedEdits);
+                    Assert.IsTrue(entries[1].HasUnsavedEdits);
                     return accepted;
                 };
                 await batch.UpdateAllAsync();
