@@ -28,9 +28,11 @@ function Invoke-UserScriptPermissions($Context, $Window, [string]$Address, [scri
     $menu = Open-BrowserActionsMenu $Context $Window
     $downloadLabel = $Window.FindResource('downloads_menu')
     $downloads = $menu.Items | Where-Object { $_.Header -eq $downloadLabel } | Select-Object -First 1
-    Assert-Regression ($null -ne $downloads) 'actions contain script downloads'
-    $item = $menu.Items[$menu.Items.IndexOf($downloads) + 1]
-    Assert-Regression ($item.Header -eq $Window.FindResource('userscript_managePermissions')) 'script permissions appear directly after script downloads'
+    Assert-Regression ($null -ne $downloads) 'actions contain downloads'
+    $managerIndex = $menu.Items.IndexOf($downloads) + 1
+    Assert-Regression ($menu.Items[$managerIndex].Header -eq $Window.FindResource('common_manageUserScripts')) 'script manager appears directly after downloads'
+    $item = $menu.Items[$managerIndex + 1]
+    Assert-Regression ($item.Header -eq $Window.FindResource('userscript_managePermissions')) 'script permissions appear directly after the script manager'
     $menu.IsOpen = $false
 
     $ownerHandle = [Windows.Interop.WindowInteropHelper]::new($Window).Handle
@@ -82,7 +84,10 @@ function Test-UserScriptPermissions($Context, $Window, $Model, $Fixture, $Peer) 
         Complete-UserScriptTask $Context ($service.Decisions.SetAsync($scope, 'Deny', $token)) 'save second tab permission' | Out-Null
         Invoke-UserScriptPermissions $Context $Window $currentPage ({
             param($dialog)
+            $addressBox = $dialog.FindName('pageAddress')
             $list = $dialog.FindName('permissionList')
+            Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($addressBox) -ceq 'PageAddress' -and
+                [Windows.Automation.AutomationProperties]::GetName($list) -ceq 'ManageScriptPermissions') 'permission controls have fixed automation names'
             Assert-Regression ($list.Items.Count -eq 3 -and @($list.Items | Where-Object { $_.Record.Scope.Target -eq $Peer.BaseUrl }).Count -eq 1) 'page shows matching script decisions including cross-origin targets'
             Assert-Regression ($list.View.Columns[2].Header -eq $Window.FindResource('userscript_permissionTarget')) 'permission columns use localized labels'
 

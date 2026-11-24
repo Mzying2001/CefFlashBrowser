@@ -774,8 +774,9 @@ function Test-ManagerSearchAppearance($Context, $Window) {
             Assert-Regression ([HandyControl.Controls.InfoElement]::GetPlaceholder($filter) -ceq
                 $Context.LanguageService.GetString('common_filterPlaceholder')) "list filter placeholder follows the language in $locale"
             $sortLabel = $Context.LanguageService.GetString('userScriptManager_sortByName')
-            Assert-Regression ($sortLabel -and $sort.ToolTip -ceq $sortLabel -and
-                [Windows.Automation.AutomationProperties]::GetName($sort) -ceq $sortLabel) "sort tooltip and automation name follow the language in $locale"
+            Assert-Regression ($sortLabel -and $sort.ToolTip -ceq $sortLabel) "sort tooltip follows the language in $locale"
+            Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($filter) -ceq 'ScriptFilter' -and
+                [Windows.Automation.AutomationProperties]::GetName($sort) -ceq 'SortByName') "list filter and sort automation names stay fixed in $locale"
             foreach ($name in @('matchCount', 'noMatches')) {
                 $query.Text = if ($name -eq 'matchCount') { 'const' } else { 'missing search result' }
                 $Window.UpdateLayout()

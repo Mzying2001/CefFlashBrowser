@@ -571,6 +571,8 @@ function Test-UserScriptMenus($Context) {
         $buttonOffset = $actionsButton.TranslatePoint([Windows.Point]::new(0, 0), $scriptButton)
         Assert-Regression ($scriptButton.IsVisible -and $scriptButton.ActualWidth -eq $actionsButton.ActualWidth -and
             $buttonOffset.X -eq ($scriptButton.ActualWidth + $scriptButton.Margin.Right) -and $buttonOffset.Y -eq 0) 'script button sits immediately left of the actions button'
+        Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($scriptButton) -ceq 'ScriptCommands' -and
+            $scriptButton.ToolTip -ceq $Context.LanguageService.GetString('userscript_commands')) 'script commands button has a fixed automation name and a localized tooltip'
         $scriptMenu = $window.Resources['scriptCommandsMenu']
         $scriptButton.RaiseEvent([Windows.RoutedEventArgs]::new([Windows.Controls.Primitives.ButtonBase]::ClickEvent))
         try {

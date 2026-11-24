@@ -28,7 +28,7 @@
         </Grid.RowDefinitions>
 
         <TextBox x:Name="pageAddress"
-                 AutomationProperties.Name="{DynamicResource userscript_permissionPage}"
+                 AutomationProperties.Name="PageAddress"
                  IsReadOnly="True"
                  ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
         <TextBlock Grid.Row="1"
@@ -39,7 +39,7 @@
 
         <ListView x:Name="permissionList"
                   Grid.Row="2"
-                  AutomationProperties.Name="{DynamicResource userscript_managePermissions}"
+                  AutomationProperties.Name="ManageScriptPermissions"
                   SelectionMode="Single"
                   SelectionChanged="PermissionSelectionChanged">
             <ListView.View>

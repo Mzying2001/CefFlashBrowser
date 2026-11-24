@@ -229,7 +229,7 @@
                             Padding="28,0,8,0"
                             MaxLength="100"
                             Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                            AutomationProperties.Name="{DynamicResource common_filterPlaceholder}"
+                            AutomationProperties.Name="ScriptFilter"
                             hc:InfoElement.Placeholder="{DynamicResource common_filterPlaceholder}">
                     <i:Interaction.Behaviors>
                         <behaviors:TextBoxSelectAllOnFocus/>
@@ -252,7 +252,7 @@
                               Padding="0"
                               IsChecked="{Binding IsNameSortEnabled, Mode=TwoWay}"
                               ToolTip="{DynamicResource userScriptManager_sortByName}"
-                              AutomationProperties.Name="{DynamicResource userScriptManager_sortByName}">
+                              AutomationProperties.Name="SortByName">
                     <svgc:SvgIcon Width="12"
                                   Height="12"
                                   UriSource="{StaticResource TextSortAscendingIconUri}"/>
