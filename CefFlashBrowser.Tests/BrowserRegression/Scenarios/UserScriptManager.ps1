@@ -706,6 +706,7 @@ function Test-ManagerSearchAppearance($Context, $Window) {
     $scriptColumn = $Window.FindName('scriptListColumn')
     $columnWidth = $scriptColumn.Width
     $filter = $Window.FindName('scriptFilter')
+    $sort = $Window.FindName('sortScriptsByName')
     $list = $Window.FindName('scriptList')
     try {
         $Window.Width = 800
@@ -715,8 +716,12 @@ function Test-ManagerSearchAppearance($Context, $Window) {
         $Window.UpdateLayout()
         Assert-Regression ([Math]::Abs($scriptColumn.ActualWidth - 240) -lt 1) 'resizing the window keeps the default script list width'
         $filterOrigin = $filter.TranslatePoint([Windows.Point]::new(0, 0), $list)
-        Assert-Regression ([Math]::Abs($filter.ActualWidth - $list.ActualWidth) -lt 1 -and
-            $filterOrigin.Y + $filter.ActualHeight -le 0) 'the filter spans the script column above the list at minimum window width'
+        $sortOrigin = $sort.TranslatePoint([Windows.Point]::new(0, 0), $list)
+        Assert-Regression ($sortOrigin.X -ge ($filterOrigin.X + $filter.ActualWidth - 1) -and
+            [Math]::Abs($sortOrigin.X + $sort.ActualWidth - $list.ActualWidth) -lt 1 -and
+            $sortOrigin.Y + $sort.ActualHeight -le 0 -and $filterOrigin.Y + $filter.ActualHeight -le 0) 'the filter and sort button fit above the list at minimum window width'
+        Assert-Regression ($sort.Content.UriSource.OriginalString -ceq '/Assets/Svgs/text-sort-asc.svg' -and
+            !$sort.IsChecked) 'the sort button uses the ascending name icon and starts unchecked'
         $Window.Width = 800
         $Window.UpdateLayout()
         $scriptColumn.Width = New-Object Windows.GridLength($scriptColumn.MaxWidth)
@@ -768,6 +773,9 @@ function Test-ManagerSearchAppearance($Context, $Window) {
             $Context.LanguageService.SetCurrentLanguage($locale)
             Assert-Regression ([HandyControl.Controls.InfoElement]::GetPlaceholder($filter) -ceq
                 $Context.LanguageService.GetString('common_filterPlaceholder')) "list filter placeholder follows the language in $locale"
+            $sortLabel = $Context.LanguageService.GetString('userScriptManager_sortByName')
+            Assert-Regression ($sortLabel -and $sort.ToolTip -ceq $sortLabel -and
+                [Windows.Automation.AutomationProperties]::GetName($sort) -ceq $sortLabel) "sort tooltip and automation name follow the language in $locale"
             foreach ($name in @('matchCount', 'noMatches')) {
                 $query.Text = if ($name -eq 'matchCount') { 'const' } else { 'missing search result' }
                 $Window.UpdateLayout()
@@ -1697,6 +1705,8 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
     $installed = @()
     $behavior = $null
     $filter = $Window.FindName('scriptFilter')
+    $sort = $Window.FindName('sortScriptsByName')
+    $sortProperty = [Windows.Controls.Primitives.ToggleButton]::IsCheckedProperty
     try {
         foreach ($mark in @('A', 'B')) {
             $installed += Complete-UserScriptTask $Context ($repository.InstallAsync($scriptSource.Replace('__MARK__', $mark), $null, $true, $token)) "install order fixture $mark"
@@ -1788,10 +1798,47 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
         Assert-Regression ([object]::ReferenceEquals($model.SelectedScript, $item) -and
             $item.IsDirty -and $editor.Text -ceq $editedSource -and @(Get-ListReorderAdorners $list).Count -eq 0) 'dragging preserves selection and unsaved source and clears the insertion line'
         Assert-Regression ((Invoke-JavaScript $Context $BrowserModel.Browser $readOrder) -ceq 'AB') 'reordering does not rerun scripts in the existing document'
+
+        $sort.SetCurrentValue($sortProperty, $true)
+        Assert-Regression ($model.IsNameSortEnabled -and $list.Items.IndexOf($first) -lt $list.Items.IndexOf($item) -and
+            $model.Scripts.IndexOf($item) -lt $model.Scripts.IndexOf($first) -and
+            [object]::ReferenceEquals($model.SelectedScript, $item) -and $editor.Text -ceq $editedSource -and $editor.CanUndo) 'name sorting changes the view and preserves custom order, selection and unsaved edits'
+        $canExecute = [Windows.Input.ICommand].GetMethod('CanExecute')
+        Assert-Regression (!$behavior.IsDragEnabled -and $null -eq (Start-ListReorderDrag $behavior $item) -and
+            @($commands | Where-Object { $canExecute.Invoke($_, [object[]]@($null)) }).Count -eq 0) 'name sorting disables drag and move commands'
+        $menu = Open-ManagerContextMenu $Context $Window $item
+        Assert-Regression (@($menu.Items | Where-Object { $_.Visibility -eq [Windows.Visibility]::Collapsed }).Count -eq 5 -and
+            $menu.Items[5].IsEnabled -and $menu.Items[7].IsEnabled -and $menu.Items[8].IsEnabled) 'name sorting hides the move menu items and leaves other actions available'
+        $menu.IsOpen = $false
+
+        $filter.Text = 'Manager order'
+        Assert-Regression ($list.Items.Count -eq 2 -and $list.Items.IndexOf($first) -eq 0 -and
+            $list.Items.IndexOf($item) -eq 1) 'name sorting also orders filtered results'
+        $draft = [CefFlashBrowser.ViewModels.UserScriptItemViewModel]::new($scriptSource.Replace('__MARK__', 'AA draft'), $null, 'Manager order AA draft', $false)
+        $model.Scripts.Add($draft)
+        try {
+            Assert-Regression ($list.Items.Count -eq 3 -and $list.Items.IndexOf($draft) -eq 1) 'matching drafts are sorted by name with installed scripts'
+        } finally {
+            [void]$model.Scripts.Remove($draft)
+        }
+        $renamedSource = $scriptSource.Replace('Manager order __MARK__', 'Manager order Z').Replace('__MARK__', 'A')
+        Complete-UserScriptTask $Context ($repository.UpdateAsync($first.Installation.ScriptKey, $renamedSource, $null, $token)) 'rename the first order fixture' | Out-Null
+        Wait-Regression $Context { $list.Items.Count -eq 2 -and $list.Items.IndexOf($first) -eq 1 } 'renaming a matching script repositions it while the filter is active'
+        Complete-UserScriptTask $Context ($repository.UpdateAsync($first.Installation.ScriptKey, $scriptSource.Replace('__MARK__', 'A'), $null, $token)) 'restore the first order fixture name' | Out-Null
+        Wait-Regression $Context { $list.Items.IndexOf($first) -eq 0 } 'restoring the name restores the sorted position'
+        $sort.SetCurrentValue($sortProperty, $false)
+        Assert-Regression ($filter.Text -ceq 'Manager order' -and $list.Items.Count -eq 2 -and
+            $list.Items.IndexOf($item) -eq 0 -and !$behavior.IsDragEnabled) 'turning off name sorting restores custom order within the active filter'
+        $sort.SetCurrentValue($sortProperty, $true)
+        $filter.Text = ''
+        Assert-Regression ($list.Items.Count -eq $model.Scripts.Count -and $list.Items.IndexOf($first) -lt $list.Items.IndexOf($item) -and
+            !$behavior.IsDragEnabled) 'clearing the filter retains name sorting and keeps manual reordering disabled'
         Invoke-BrowserCommand $BrowserModel.Browser.ReloadCommand
         Wait-Regression $Context {
             (Invoke-JavaScript $Context $BrowserModel.Browser $readOrder) -ceq 'BA'
-        } 'same-stage scripts follow the custom order after refresh'
+        } 'same-stage scripts follow the custom order after refresh with name sorting active'
+        $sort.SetCurrentValue($sortProperty, $false)
+        Assert-Regression ($behavior.IsDragEnabled -and $list.Items.IndexOf($item) -lt $list.Items.IndexOf($first)) 'turning off name sorting without a filter restores custom order and drag reordering'
 
         $Window.UpdateLayout()
         $targetRow = $list.ItemContainerGenerator.ContainerFromItem($first)
@@ -1854,6 +1901,7 @@ root.setAttribute('data-manager-order', (root.getAttribute('data-manager-order')
         }
     } finally {
         $filter.Text = ''
+        $sort.SetCurrentValue($sortProperty, $false)
         if ($null -ne $behavior) { Invoke-ViewCallback $behavior 'EndDrag' @() }
         foreach ($installation in $installed) {
             Complete-UserScriptTask $Context ($repository.RemoveAsync($installation.ScriptKey, $token)) 'remove order fixture' | Out-Null
@@ -2062,13 +2110,15 @@ document.documentElement.setAttribute('data-manager', 'saved');
         $model.NewScript()
         $draft = $model.SelectedScript
         $window.FindName('scriptFilter').Text = $draft.Name
+        $model.IsNameSortEnabled = $true
         Send-ManagerShortcut $Context $window 0x57
         Wait-Regression $Context { !$window.IsVisible } 'Ctrl+W closes the manager from editor focus'
         [CefFlashBrowser.Services.WindowManager]::ShowUserScriptManager()
         $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.UserScriptManager] })[0]
         Wait-Regression $Context { $window.IsLoaded -and !$model.IsBusy } 'manager reopened'
         $editor = $window.FindName('sourceEditor')
-        Assert-Regression ($window.FindName('scriptFilter').Text.Length -eq 0) 'reopening the manager clears the list filter'
+        Assert-Regression ($window.FindName('scriptFilter').Text.Length -eq 0 -and
+            !$window.FindName('sortScriptsByName').IsChecked) 'reopening the manager resets the filter and name sort'
         Assert-Regression ([object]::ReferenceEquals($draft, $model.SelectedScript) -and $item.IsDirty -and $item.Source.Contains('unsaved session draft')) 'selection and unsaved drafts survive manager closure'
         Assert-Regression ($editor.Text -ceq $draft.Source) 'reopened editor displays the selected unsaved draft'
         $path = Join-Path $Context.TemporaryPath 'manager-import.JS'

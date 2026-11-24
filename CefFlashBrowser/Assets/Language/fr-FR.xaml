@@ -236,6 +236,7 @@
     <sys:String x:Key="userScriptManager_title">Gestionnaire de scripts utilisateur</sys:String>
     <sys:String x:Key="userScriptManager_noInstalledScripts">Aucun script installé.</sys:String>
     <sys:String x:Key="userScriptManager_noMatchingScripts">Aucun script correspondant.</sys:String>
+    <sys:String x:Key="userScriptManager_sortByName">Trier par nom</sys:String>
     <sys:String x:Key="userScriptManager_new">Nouveau script</sys:String>
     <sys:String x:Key="userScriptManager_newScript">Nouveau script</sys:String>
     <sys:String x:Key="userScriptManager_replace">Remplacer</sys:String>

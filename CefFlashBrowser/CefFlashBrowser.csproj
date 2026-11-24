@@ -59,6 +59,7 @@
     <Resource Include="Assets\Svgs\stop.svg" />
     <Resource Include="Assets\Svgs\sub.svg" />
     <Resource Include="Assets\Svgs\swf.svg" />
+    <Resource Include="Assets\Svgs\text-sort-asc.svg" />
     <Resource Include="Assets\Svgs\trash.svg" />
     <Resource Include="Assets\Svgs\up.svg" />
     <Resource Include="Assets\Svgs\volume.svg" />

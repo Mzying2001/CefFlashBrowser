@@ -220,6 +220,11 @@
             </Grid.ColumnDefinitions>
 
             <Grid Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
                 <hc:TextBox x:Name="scriptFilter"
                             Padding="28,0,8,0"
                             MaxLength="100"
@@ -239,6 +244,19 @@
                       IsHitTestVisible="False">
                     <svgc:SvgIcon UriSource="{StaticResource SearchIconUri}"/>
                 </Grid>
+
+                <ToggleButton x:Name="sortScriptsByName"
+                              Grid.Column="1"
+                              Width="30"
+                              Margin="5,0,0,0"
+                              Padding="0"
+                              IsChecked="{Binding IsNameSortEnabled, Mode=TwoWay}"
+                              ToolTip="{DynamicResource userScriptManager_sortByName}"
+                              AutomationProperties.Name="{DynamicResource userScriptManager_sortByName}">
+                    <svgc:SvgIcon Width="12"
+                                  Height="12"
+                                  UriSource="{StaticResource TextSortAscendingIconUri}"/>
+                </ToggleButton>
             </Grid>
 
             <ListBox x:Name="scriptList"

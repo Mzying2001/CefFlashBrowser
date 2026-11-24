@@ -11,6 +11,7 @@ using SimpleMvvm.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -46,6 +47,7 @@ namespace CefFlashBrowser.ViewModels
                 {
                     _scriptsView = new ListCollectionView(Scripts);
                     _scriptsView.LiveFilteringProperties.Add(nameof(UserScriptItemViewModel.Name));
+                    _scriptsView.LiveSortingProperties.Add(nameof(UserScriptItemViewModel.Name));
                     RefreshScriptsView();
                 }
 
@@ -94,7 +96,7 @@ namespace CefFlashBrowser.ViewModels
                 var wasFiltering = IsFiltering;
                 _filterTerm = term;
 
-                if (wasFiltering != IsFiltering)
+                if (!IsNameSortEnabled && wasFiltering != IsFiltering)
                 {
                     RaisePropertyChanged(nameof(IsReorderingEnabled));
                     UpdateMoveCommands();
@@ -108,7 +110,27 @@ namespace CefFlashBrowser.ViewModels
         }
 
         private bool IsFiltering => _filterTerm.Length > 0;
-        public bool IsReorderingEnabled => !IsFiltering;
+
+        private bool _isNameSortEnabled;
+        public bool IsNameSortEnabled
+        {
+            get => _isNameSortEnabled;
+            set
+            {
+                if (!UpdateValue(ref _isNameSortEnabled, value))
+                    return;
+
+                if (!IsFiltering)
+                {
+                    RaisePropertyChanged(nameof(IsReorderingEnabled));
+                    UpdateMoveCommands();
+                }
+
+                RefreshScriptsView();
+            }
+        }
+
+        public bool IsReorderingEnabled => !IsFiltering && !IsNameSortEnabled;
 
         private string _installUrl;
         public string InstallUrl
@@ -248,6 +270,7 @@ namespace CefFlashBrowser.ViewModels
             RaisePropertyChanged(nameof(CanOpenBatchUpdate));
 
             FilterText = string.Empty;
+            IsNameSortEnabled = false;
 
             if (lifetime != null)
             {
@@ -295,6 +318,16 @@ namespace CefFlashBrowser.ViewModels
                     ? new Predicate<object>(item => MatchesFilter((UserScriptItemViewModel)item))
                     : null;
                 _scriptsView.IsLiveFiltering = IsFiltering;
+
+                if (_scriptsView.IsLiveSorting != IsNameSortEnabled)
+                {
+                    if (IsNameSortEnabled)
+                        _scriptsView.SortDescriptions.Add(new SortDescription(nameof(UserScriptItemViewModel.Name), ListSortDirection.Ascending));
+                    else
+                        _scriptsView.SortDescriptions.Clear();
+
+                    _scriptsView.IsLiveSorting = IsNameSortEnabled;
+                }
             }
         }
 

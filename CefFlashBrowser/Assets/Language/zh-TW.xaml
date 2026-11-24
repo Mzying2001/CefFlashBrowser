@@ -236,6 +236,7 @@
     <sys:String x:Key="userScriptManager_title">使用者腳本管理員</sys:String>
     <sys:String x:Key="userScriptManager_noInstalledScripts">尚未安裝腳本。</sys:String>
     <sys:String x:Key="userScriptManager_noMatchingScripts">找不到相符的腳本。</sys:String>
+    <sys:String x:Key="userScriptManager_sortByName">依名稱排序</sys:String>
     <sys:String x:Key="userScriptManager_new">新增腳本</sys:String>
     <sys:String x:Key="userScriptManager_newScript">新腳本</sys:String>
     <sys:String x:Key="userScriptManager_replace">取代</sys:String>
