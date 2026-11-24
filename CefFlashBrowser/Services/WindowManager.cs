@@ -1,6 +1,7 @@
 using CefFlashBrowser.Browser;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Models.Sol;
 using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;

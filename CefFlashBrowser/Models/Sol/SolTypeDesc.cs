@@ -1,7 +1,7 @@
 ﻿using CefFlashBrowser.Utils;
 using System;
 
-namespace CefFlashBrowser.Models
+namespace CefFlashBrowser.Models.Sol
 {
     public class SolTypeDesc
     {

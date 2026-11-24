@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CefFlashBrowser.Views"
-        xmlns:m="clr-namespace:CefFlashBrowser.Models"
+        xmlns:m="clr-namespace:CefFlashBrowser.Models.Sol"
         xmlns:vm="clr-namespace:CefFlashBrowser.ViewModels"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
