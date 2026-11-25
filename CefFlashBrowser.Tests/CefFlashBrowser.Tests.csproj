@@ -16,14 +16,7 @@
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
     <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
-    <!-- Restore when MonkeySharp 5.0.0 is available on NuGet.
     <PackageReference Include="Mzying2001.MonkeySharp.Core" Version="5.0.0" />
-    -->
-    <Reference Include="Mzying2001.MonkeySharp.Core">
-      <HintPath>D:\code\MonkeySharp\artifacts\package-build\7fdb292fe1df\core\bin\Mzying2001.MonkeySharp.Core\release_net462\Mzying2001.MonkeySharp.Core.dll</HintPath>
-    </Reference>
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
-    <PackageReference Include="System.Text.Json" Version="9.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
