@@ -86,4 +86,4 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 - Use Conventional Commits: `<type>(<scope>): <summary>`, with concise English summaries.
 - Optional scope: affected project, area, class, or file.
 - For non-trivial changes, explain why and how in the body.
-- When the work includes both test-related and other changes, commit the test-related changes separately.
+- When committing, separate production code and test-related changes.
