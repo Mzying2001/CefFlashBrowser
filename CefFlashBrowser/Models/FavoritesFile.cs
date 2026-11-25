@@ -1,4 +1,4 @@
-﻿namespace CefFlashBrowser.Models
+namespace CefFlashBrowser.Models
 {
     public class FavoritesFile
     {

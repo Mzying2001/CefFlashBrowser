@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;

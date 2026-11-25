@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Windows;
 
 namespace CefFlashBrowser.Infrastructure.Wpf

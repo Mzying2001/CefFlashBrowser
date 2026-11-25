@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Utils;
+using CefFlashBrowser.Utils;
 using Microsoft.Xaml.Behaviors;
 using SimpleMvvm.Command;
 using System.Windows;

@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Utils;
+using CefFlashBrowser.Utils;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;

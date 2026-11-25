@@ -1,4 +1,4 @@
-﻿using CefSharp;
+using CefSharp;
 using CefSharp.Enums;
 using CefSharp.Structs;
 using System;

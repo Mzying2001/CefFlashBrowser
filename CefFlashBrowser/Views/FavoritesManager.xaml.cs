@@ -1,4 +1,4 @@
-﻿using SimpleMvvm.Command;
+using SimpleMvvm.Command;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.ViewModels;
 using SimpleMvvm.Ioc;

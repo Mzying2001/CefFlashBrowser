@@ -1,4 +1,4 @@
-﻿using CefSharp;
+using CefSharp;
 using System.Collections.Generic;
 
 namespace CefFlashBrowser.WinformCefSharp4WPF.Internals

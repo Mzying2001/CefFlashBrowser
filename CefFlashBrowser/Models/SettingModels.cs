@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Utils;
+using CefFlashBrowser.Utils;
 using Newtonsoft.Json;
 
 namespace CefFlashBrowser.Models
