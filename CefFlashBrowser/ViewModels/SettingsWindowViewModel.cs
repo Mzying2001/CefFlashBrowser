@@ -303,6 +303,19 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
+        public bool EnableCoreJsPolyfills
+        {
+            get => GlobalData.Settings.EnableCoreJsPolyfills;
+            set
+            {
+                if (GlobalData.Settings.EnableCoreJsPolyfills != value)
+                {
+                    GlobalData.Settings.EnableCoreJsPolyfills = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
         public bool DisableGpuAcceleration
         {
             get => GlobalData.Settings.DisableGpuAcceleration;

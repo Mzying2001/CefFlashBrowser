@@ -96,6 +96,7 @@
     <sys:String x:Key="settings_alwaysShowTabStrip">Mostra sempre la barra delle schede</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Incorpora i devtools nella finestra del browser</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Disabilita la modalità a schermo intero</sys:String>
+    <sys:String x:Key="settings_enableCoreJsPolyfills">Migliora la compatibilità dei siti web (core-js)</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Disabilita l'accelerazione GPU</sys:String>
     <sys:String x:Key="settings_disableBrowserContextMenu">Disabilita il menu contestuale</sys:String>
 
