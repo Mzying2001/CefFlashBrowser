@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 #Requires -PSEdition Desktop
 <#
 Run in a fresh, architecture-matched Windows PowerShell process after building:

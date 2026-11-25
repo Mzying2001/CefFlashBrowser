@@ -1,4 +1,4 @@
-function Test-AuxiliaryRouting($Context, $AuxWindow, $AuxView) {
+﻿function Test-AuxiliaryRouting($Context, $AuxWindow, $AuxView) {
     $auxBrowser = $AuxView.ViewModel.Browser
     $originalAddress = $AuxView.ViewModel.Address
     $features = (New-Object RegressionPopupFeaturesProxy).GetTransparentProxy()

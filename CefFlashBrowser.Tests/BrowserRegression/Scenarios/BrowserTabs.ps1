@@ -1,4 +1,4 @@
-function New-RegressionTab($Context, $Window, [string]$Address = 'about:blank') {
+﻿function New-RegressionTab($Context, $Window, [string]$Address = 'about:blank') {
     $model = $Window.ViewModel.AddBrowser($Address, $true)
     $documentReady = 'location.href === ' + ($Address | ConvertTo-Json -Compress) + ' && document.readyState === "complete"'
     Wait-Regression $Context {

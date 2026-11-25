@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.ViewModels;
+using CefFlashBrowser.ViewModels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mzying2001.MonkeySharp.Core.Repository;
 using System.IO;

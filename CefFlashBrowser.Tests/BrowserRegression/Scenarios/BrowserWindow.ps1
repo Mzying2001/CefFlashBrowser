@@ -1,4 +1,4 @@
-function Test-BrowserWindow($Context) {
+﻿function Test-BrowserWindow($Context) {
     $window = New-RegressionWindow $Context
     $browser = $window.ViewModel.CurrentBrowser.Browser
     $view = Find-BrowserView $window

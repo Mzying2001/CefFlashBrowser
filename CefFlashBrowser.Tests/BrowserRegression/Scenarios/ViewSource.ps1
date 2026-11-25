@@ -1,4 +1,4 @@
-function Assert-ViewSourcePage($Context, $Model, [string]$Address, [string]$Title = 'Auxiliary regression') {
+﻿function Assert-ViewSourcePage($Context, $Model, [string]$Address, [string]$Title = 'Auxiliary regression') {
     Wait-Regression $Context {
         $Model.IsBrowserReady() -and !$Model.Browser.IsLoading -and
         $Model.Address -eq $Address -and

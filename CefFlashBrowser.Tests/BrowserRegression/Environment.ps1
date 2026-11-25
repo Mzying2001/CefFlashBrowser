@@ -1,4 +1,4 @@
-function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$Configuration) {
+﻿function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$Configuration) {
     $repositoryPath = Split-Path (Split-Path $ScriptPath -Parent) -Parent
     $buildPath = if ($Platform -eq 'x64') { "bin\x64\$Configuration" } else { "bin\$Configuration" }
     $applicationPath = Join-Path $repositoryPath $buildPath

@@ -1,4 +1,4 @@
-function Test-BrowserBeforeInitialization($Context) {
+﻿function Test-BrowserBeforeInitialization($Context) {
     $window = New-Object CefFlashBrowser.Views.BrowserWindow
     Assert-Regression ($null -eq $window.ViewModel.CurrentBrowser.Browser) 'browser is initially deferred'
     Assert-Regression ($null -eq $window.ViewModel.CurrentBrowser.Address) 'browser address is initially unset'

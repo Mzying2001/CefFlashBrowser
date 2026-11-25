@@ -1,4 +1,4 @@
-function Find-FaviconElements($Element, [Type]$ElementType) {
+﻿function Find-FaviconElements($Element, [Type]$ElementType) {
     if ($Element -is $ElementType) {
         Write-Output $Element
     }

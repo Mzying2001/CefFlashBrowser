@@ -1,4 +1,4 @@
-function New-UserScriptTargetWindow($Context, [string]$Address) {
+﻿function New-UserScriptTargetWindow($Context, [string]$Address) {
     $window = New-Object CefFlashBrowser.Views.BrowserWindow
     $window.Width = 800
     $window.Height = 600

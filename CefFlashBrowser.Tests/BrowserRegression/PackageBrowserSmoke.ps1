@@ -1,4 +1,4 @@
-function Test-PackagedUserScripts($PackagePath, $TemporaryPath, $Scripts, $Installation, [string[]]$RuntimeFiles) {
+﻿function Test-PackagedUserScripts($PackagePath, $TemporaryPath, $Scripts, $Installation, [string[]]$RuntimeFiles) {
     # Resolve only the supplied archive and its Costura resources, without build-output fallbacks.
     $cefPath = Join-Path $PackagePath 'Binaries\CefSharp'
     foreach ($dependency in @('CefSharp.dll', 'CefSharp.Core.dll')) {

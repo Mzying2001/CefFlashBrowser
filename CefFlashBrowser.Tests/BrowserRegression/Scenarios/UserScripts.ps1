@@ -1,4 +1,4 @@
-function Complete-UserScriptTask($Context, $Task, [string]$Message) {
+﻿function Complete-UserScriptTask($Context, $Task, [string]$Message) {
     Wait-Regression $Context { $Task.IsCompleted } $Message
     $result = $Task.GetAwaiter().GetResult()
     if ($null -ne $result -and $result.GetType().FullName -ne 'System.Threading.Tasks.VoidTaskResult') { return $result }

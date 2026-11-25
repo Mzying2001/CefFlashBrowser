@@ -1,4 +1,4 @@
-function Start-ListReorderDrag($Behavior, $Item) {
+﻿function Start-ListReorderDrag($Behavior, $Item) {
     # Enter the same drag session as a mouse gesture without taking over the desktop cursor.
     $method = $Behavior.GetType().GetMethod('BeginDrag', [Reflection.BindingFlags]'Instance,NonPublic')
     return $method.Invoke($Behavior, [object[]]@($Item.PSObject.BaseObject))

@@ -1,4 +1,4 @@
-function Disable-PolyfillsInSettings($Context) {
+﻿function Disable-PolyfillsInSettings($Context) {
     $window = New-Object CefFlashBrowser.Views.SettingsWindow
     $window.WindowStartupLocation = [System.Windows.WindowStartupLocation]::Manual
     $window.Left = -10000

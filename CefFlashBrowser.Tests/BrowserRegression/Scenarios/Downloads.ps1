@@ -1,4 +1,4 @@
-function Test-DownloadManagerWindow($Context) {
+﻿function Test-DownloadManagerWindow($Context) {
     [CefFlashBrowser.Services.WindowManager]::ShowDownloadManager()
     $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0]
     Assert-Regression ($null -ne $window -and $window.IsVisible) 'download manager opens through the global command'

@@ -1,4 +1,4 @@
-function Assert-Regression([bool]$Condition, [string]$Message) {
+﻿function Assert-Regression([bool]$Condition, [string]$Message) {
     if (!$Condition) {
         throw $Message
     }

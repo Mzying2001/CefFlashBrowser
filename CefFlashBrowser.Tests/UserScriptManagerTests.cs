@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Models;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Services.UserScripts;
 using CefFlashBrowser.ViewModels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
