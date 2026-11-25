@@ -78,6 +78,7 @@
             <sys:Uri x:Key="BackIconUri">/Assets/Icons/back.svg</sys:Uri>
             <sys:Uri x:Key="CloseIconUri">/Assets/Icons/close.svg</sys:Uri>
             <sys:Uri x:Key="DownIconUri">/Assets/Icons/down.svg</sys:Uri>
+            <sys:Uri x:Key="DownloadIconUri">/Assets/Icons/download.svg</sys:Uri>
             <sys:Uri x:Key="EditIconUri">/Assets/Icons/edit.svg</sys:Uri>
             <sys:Uri x:Key="ExportIconUri">/Assets/Icons/export.svg</sys:Uri>
             <sys:Uri x:Key="FlashPlayerIconUri">/Assets/Icons/flash-player.svg</sys:Uri>

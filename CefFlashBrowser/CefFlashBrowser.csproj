@@ -39,6 +39,7 @@
     <Resource Include="Assets\Icons\back.svg" />
     <Resource Include="Assets\Icons\close.svg" />
     <Resource Include="Assets\Icons\down.svg" />
+    <Resource Include="Assets\Icons\download.svg" />
     <Resource Include="Assets\Icons\edit.svg" />
     <Resource Include="Assets\Icons\export.svg" />
     <Resource Include="Assets\Icons\flash-player.svg" />

@@ -25,6 +25,29 @@
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
+        <ControlTemplate x:Key="BrowserIconButtonTemplate" TargetType="Button">
+            <Grid Background="{TemplateBinding Background}">
+                <Border x:Name="highlight"
+                        CornerRadius="4"
+                        Opacity="0"
+                        Background="{TemplateBinding Foreground}"/>
+                <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="highlight" Property="Opacity" Value="0.12"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter TargetName="highlight" Property="Opacity" Value="0.24"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="highlight" Property="Opacity" Value="0"/>
+                    <Setter Property="Opacity" Value="0.4"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
         <!--ConetxtMenu-->
         <!--Browser actions menu-->
         <ContextMenu x:Key="browserActionsMenu"
@@ -342,13 +365,20 @@
 
         <!--Page SWFs menu-->
         <ContextMenu x:Key="pageSwfsMenu"
+                     MinWidth="250"
+                     MaxWidth="300"
                      VerticalOffset="-8"
                      HorizontalOffset="8"
                      DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                     ItemsSource="{Binding CurrentBrowser.Browser.PageSwfs}">
+                     ItemsSource="{Binding CurrentBrowser.Browser.PageSwfs}"
+                     Button.Click="PageSwfDownloadClicked">
             <ContextMenu.ItemContainerStyle>
                 <Style TargetType="MenuItem"
                        BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Setter Property="Padding"
+                            Value="0"/>
+                    <Setter Property="Template"
+                            Value="{StaticResource MenuItemWithoutShortcutTemplate}"/>
                     <Setter Property="AutomationProperties.Name"
                             Value="{Binding FileName}"/>
                     <Setter Property="ToolTip"
@@ -361,9 +391,25 @@
             </ContextMenu.ItemContainerStyle>
             <ContextMenu.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock MaxWidth="250"
-                               TextTrimming="CharacterEllipsis"
-                               Text="{Binding FileName}"/>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right"
+                                AutomationProperties.Name="DownloadSwf"
+                                BorderThickness="0"
+                                Background="Transparent"
+                                Foreground="{DynamicResource PrimaryTextBrush}"
+                                Template="{StaticResource BrowserIconButtonTemplate}"
+                                ToolTip="{DynamicResource downloads_start}"
+                                Command="{Binding DataContext.DownloadPageSwfCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                CommandParameter="{Binding}">
+                            <svgc:SvgIcon Width="13"
+                                          Height="13"
+                                          UriSource="{StaticResource DownloadIconUri}"/>
+                        </Button>
+                        <TextBlock Margin="0,0,5,0"
+                                   Text="{Binding FileName}"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </DockPanel>
                 </DataTemplate>
             </ContextMenu.ItemTemplate>
         </ContextMenu>
@@ -956,34 +1002,9 @@
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="ToolTip" Value="{DynamicResource browser_closeTab}"/>
+                                            <Setter Property="Template" Value="{StaticResource BrowserIconButtonTemplate}"/>
                                             <Setter Property="Background" Value="Transparent"/>
                                             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Grid Background="{TemplateBinding Background}">
-                                                            <Border x:Name="highlight"
-                                                                    CornerRadius="4"
-                                                                    Opacity="0"
-                                                                    Background="{TemplateBinding Foreground}"/>
-                                                            <ContentPresenter HorizontalAlignment="Center"
-                                                                              VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                        <ControlTemplate.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter TargetName="highlight" Property="Opacity" Value="0.12"/>
-                                                            </Trigger>
-                                                            <Trigger Property="IsPressed" Value="True">
-                                                                <Setter TargetName="highlight" Property="Opacity" Value="0.24"/>
-                                                            </Trigger>
-                                                            <Trigger Property="IsEnabled" Value="False">
-                                                                <Setter TargetName="highlight" Property="Opacity" Value="0"/>
-                                                                <Setter Property="Opacity" Value="0.4"/>
-                                                            </Trigger>
-                                                        </ControlTemplate.Triggers>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
                                                     <Setter Property="ToolTip" Value="{DynamicResource browser_toolTipCloseTab}"/>

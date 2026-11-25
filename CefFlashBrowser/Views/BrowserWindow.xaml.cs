@@ -48,6 +48,15 @@ namespace CefFlashBrowser.Views
             set => DataContext = value;
         }
 
+        private void PageSwfDownloadClicked(object sender, RoutedEventArgs e)
+        {
+            var menu = (ContextMenu)sender;
+            e.Handled = true;
+
+            // Let the button execute its command before closing the popup.
+            Dispatcher.BeginInvoke(new Action(() => menu.IsOpen = false));
+        }
+
         private void OpenUserScriptPermissions(object sender, RoutedEventArgs e)
         {
             var browser = ViewModel?.CurrentBrowser?.Browser;
