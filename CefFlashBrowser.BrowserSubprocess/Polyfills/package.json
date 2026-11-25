@@ -1,0 +1,12 @@
+{
+  "name": "cefflashbrowser-polyfills",
+  "private": true,
+  "scripts": {
+    "build": "node build.cjs"
+  },
+  "devDependencies": {
+    "core-js": "3.51.0",
+    "core-js-builder": "3.51.0",
+    "terser": "5.51.4"
+  }
+}

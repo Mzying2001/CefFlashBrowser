@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net462</TargetFramework>
+    <Platforms>x86;x64</Platforms>
+    <PlatformTarget>$(Platform)</PlatformTarget>
+    <ApplicationManifest>App.manifest</ApplicationManifest>
+    <NuGetAudit>False</NuGetAudit>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Polyfills\node_modules\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CefSharp.Common" Version="87.1.132" GeneratePathProperty="true"
+                      IncludeAssets="compile" PrivateAssets="all" />
+    <Reference Include="CefSharp.BrowserSubprocess.Core">
+      <HintPath>$(PkgCefSharp_Common)\CefSharp\$(Platform)\CefSharp.BrowserSubprocess.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <EmbeddedResource Include="Polyfills\core-js.min.js" LogicalName="CefFlashBrowser.BrowserSubprocess.core-js.min.js" />
+  </ItemGroup>
+
+  <!-- Preserve the address space available to the upstream x86 subprocess. -->
+  <Target Name="MarkSubprocessLargeAddressAware" BeforeTargets="CopyFilesToOutputDirectory"
+          Condition="'$(Platform)' == 'x86' And '$(DesignTimeBuild)' != 'true'"
+          Inputs="@(IntermediateAssembly)" Outputs="$(IntermediateOutputPath)large-address-aware.stamp">
+    <Exec Command="&quot;$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer\vswhere.exe&quot; -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath"
+          ConsoleToMSBuild="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_SubprocessVsPath" />
+    </Exec>
+    <Error Condition="'$(_SubprocessVsPath)' == ''" Text="Could not find the Visual Studio C++ build tools." />
+    <ReadLinesFromFile File="$(_SubprocessVsPath)\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt">
+      <Output TaskParameter="Lines" PropertyName="_SubprocessVcVersion" />
+    </ReadLinesFromFile>
+    <Exec Command="&quot;$(_SubprocessVsPath)\VC\Tools\MSVC\$(_SubprocessVcVersion)\bin\Hostx64\x86\editbin.exe&quot; /LARGEADDRESSAWARE &quot;@(IntermediateAssembly)&quot;" />
+    <Touch Files="$(IntermediateOutputPath)large-address-aware.stamp" AlwaysCreate="true" />
+    <ItemGroup>
+      <FileWrites Include="$(IntermediateOutputPath)large-address-aware.stamp" />
+    </ItemGroup>
+  </Target>
+
+</Project>
