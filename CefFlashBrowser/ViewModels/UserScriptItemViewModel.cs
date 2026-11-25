@@ -135,6 +135,10 @@ namespace CefFlashBrowser.ViewModels
             if (string.IsNullOrWhiteSpace(icon)) return null;
 
             icon = icon.Trim();
+
+            if (icon.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+                return icon;
+
             Uri uri;
 
             if (Uri.TryCreate(icon, UriKind.Relative, out var relative))

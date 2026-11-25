@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -21,10 +22,13 @@ namespace CefFlashBrowser.Views.Custom
                 || (uri.IsFile && HasSvgExtension(uri));
         }
 
-        internal static Task<ImageSource> LoadAsync(Uri uri, CancellationToken cancellationToken)
+        internal static Task<ImageSource> LoadAsync(string url, Uri uri, CancellationToken cancellationToken)
         {
             return Task.Run(async () =>
             {
+                if (uri == null)
+                    return ReadDataUrl(url, cancellationToken);
+
                 if (uri.IsFile)
                 {
                     using (var stream = File.OpenRead(uri.LocalPath))
@@ -33,6 +37,90 @@ namespace CefFlashBrowser.Views.Custom
 
                 return await ReadHttpImageAsync(uri, cancellationToken).ConfigureAwait(false);
             }, cancellationToken);
+        }
+
+        private static ImageSource ReadDataUrl(string url, CancellationToken cancellationToken)
+        {
+            const int prefixLength = 5; // "data:"
+
+            int end = url.IndexOf('#', prefixLength);
+            if (end < 0)
+                end = url.Length;
+
+            int separator = url.IndexOf(',', prefixLength, end - prefixLength);
+            if (separator < 0)
+                return null;
+
+            var header = url.Substring(prefixLength, separator - prefixLength).Trim();
+            int lastParameter = header.LastIndexOf(';');
+            bool isBase64 = lastParameter >= 0
+                && string.Equals(header.Substring(lastParameter + 1).TrimStart(' '), "base64", StringComparison.OrdinalIgnoreCase);
+            if (isBase64)
+                header = header.Substring(0, lastParameter).TrimEnd();
+
+            if (!MediaTypeHeaderValue.TryParse(header, out var contentType)
+                || !contentType.MediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var bytes = Encoding.UTF8.GetBytes(url.Substring(separator + 1, end - separator - 1));
+            int length = PercentDecode(bytes);
+
+            if (isBase64)
+            {
+                bytes = DecodeBase64(bytes, length);
+                length = bytes.Length;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            using (var stream = new MemoryStream(bytes, 0, length, writable: false))
+            {
+                return string.Equals(contentType.MediaType, "image/svg+xml", StringComparison.OrdinalIgnoreCase)
+                    ? ReadSvg(stream) : ReadBitmap(stream);
+            }
+        }
+
+        private static int PercentDecode(byte[] bytes)
+        {
+            int length = 0;
+
+            for (int index = 0; index < bytes.Length; index++)
+            {
+                byte value = bytes[index];
+                if (value == '%' && index + 2 < bytes.Length
+                    && Uri.IsHexDigit((char)bytes[index + 1]) && Uri.IsHexDigit((char)bytes[index + 2]))
+                {
+                    value = (byte)(Uri.FromHex((char)bytes[index + 1]) * 16 + Uri.FromHex((char)bytes[index + 2]));
+                    index += 2;
+                }
+                bytes[length++] = value;
+            }
+            return length;
+        }
+
+        private static byte[] DecodeBase64(byte[] bytes, int length)
+        {
+            int compactLength = 0;
+
+            for (int index = 0; index < length; index++)
+            {
+                byte value = bytes[index];
+                if (value != ' ' && value != '\t' && value != '\n' && value != '\r' && value != '\f')
+                    bytes[compactLength++] = value;
+            }
+
+            var base64 = Encoding.ASCII.GetString(bytes, 0, compactLength);
+            int remainder = compactLength % 4;
+            if (remainder != 0)
+            {
+                // Only unpadded inputs can have two or three characters in the last group.
+                if (remainder == 1 || base64.IndexOf('=') >= 0)
+                    throw new FormatException("Invalid Base64 length or padding.");
+
+                base64 = base64.PadRight(compactLength + 4 - remainder, '=');
+            }
+            return Convert.FromBase64String(base64);
         }
 
         private static async Task<ImageSource> ReadHttpImageAsync(Uri uri, CancellationToken cancellationToken)

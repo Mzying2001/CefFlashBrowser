@@ -90,10 +90,12 @@ namespace CefFlashBrowser.Views.Custom
             if (string.IsNullOrWhiteSpace(url))
                 return;
 
-            if (Uri.TryCreate(url, UriKind.Absolute, out var uri) && BrowserIconImageLoader.CanLoad(uri))
+            Uri uri = null;
+            if (url.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
+                || (Uri.TryCreate(url, UriKind.Absolute, out uri) && BrowserIconImageLoader.CanLoad(uri)))
             {
                 _imageLoad = new CancellationTokenSource();
-                _ = LoadImageAsync(uri, _imageLoad);
+                _ = LoadImageAsync(url, uri, _imageLoad);
             }
             else
             {
@@ -101,14 +103,14 @@ namespace CefFlashBrowser.Views.Custom
             }
         }
 
-        private async Task LoadImageAsync(Uri uri, CancellationTokenSource load)
+        private async Task LoadImageAsync(string url, Uri uri, CancellationTokenSource load)
         {
             using (load)
             {
                 ImageSource source = null;
                 try
                 {
-                    source = await BrowserIconImageLoader.LoadAsync(uri, load.Token).ConfigureAwait(false);
+                    source = await BrowserIconImageLoader.LoadAsync(url, uri, load.Token).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
