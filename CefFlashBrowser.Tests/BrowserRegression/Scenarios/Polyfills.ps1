@@ -1,3 +1,25 @@
+function Disable-PolyfillsInSettings($Context) {
+    $window = New-Object CefFlashBrowser.Views.SettingsWindow
+    $window.WindowStartupLocation = [System.Windows.WindowStartupLocation]::Manual
+    $window.Left = -10000
+    $window.ShowInTaskbar = $false
+    $window.ShowActivated = $false
+    try {
+        $window.Show()
+        $toggle = $window.FindName('enableCoreJsPolyfills')
+        Assert-Regression ($null -ne $toggle -and $toggle.IsChecked) 'website compatibility is enabled by default in settings'
+        $item = [System.Windows.LogicalTreeHelper]::GetParent($toggle)
+        $group = [System.Windows.LogicalTreeHelper]::GetParent($item)
+        Assert-Regression ($group.Header -eq $Context.LanguageService.GetString('settings_headerAdvanced') -and
+            $item.Description -eq $Context.LanguageService.GetString('settings_enableCoreJsPolyfills') -and
+            ![string]::IsNullOrEmpty($item.Description)) 'the setting has a localized label in the Advanced group'
+        $toggle.SetCurrentValue([System.Windows.Controls.Primitives.ToggleButton]::IsCheckedProperty, $false)
+        Wait-Regression $Context { ![CefFlashBrowser.Data.GlobalData]::Settings.EnableCoreJsPolyfills } 'toggling the setting updates the model'
+    } finally {
+        $window.Close()
+    }
+}
+
 function Start-PolyfillRegressionCef($Context, [switch]$DisablePolyfills) {
     $globalData = [CefFlashBrowser.Data.GlobalData]
     $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
@@ -12,9 +34,13 @@ function Start-PolyfillRegressionCef($Context, [switch]$DisablePolyfills) {
     }
 
     $settings = @{ DisableGpuAcceleration = $true; EnableUserScripts = $false }
-    if ($DisablePolyfills) { $settings.EnableCoreJsPolyfills = $false }
     $settings | ConvertTo-Json | Set-Content -LiteralPath $globalData::SettingsPath -Encoding UTF8
     $globalData::InitSettings()
+    if ($DisablePolyfills) {
+        Disable-PolyfillsInSettings $Context
+        $globalData::InitSettings()
+        Assert-Regression (!$globalData::Settings.EnableCoreJsPolyfills) 'closing settings persists the disabled state'
+    }
 
     $program = $globalData.Assembly.GetType('CefFlashBrowser.Program')
     [void]$program.GetMethod('InitCefFlash', $privateStatic).Invoke($null, $null)
