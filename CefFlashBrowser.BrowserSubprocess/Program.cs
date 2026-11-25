@@ -1,3 +1,4 @@
+using CefFlashBrowser.Browser;
 using CefSharp.BrowserSubprocess;
 
 namespace CefFlashBrowser.BrowserSubprocess
@@ -7,7 +8,9 @@ namespace CefFlashBrowser.BrowserSubprocess
         private static int Main(string[] args)
         {
             SubProcess.EnableHighDPISupport();
-            return new WcfBrowserSubprocessExecutable().Main(args, new PolyfillRenderProcessHandler());
+
+            var handler = CoreJsProcessSettings.Enabled ? new PolyfillRenderProcessHandler() : null;
+            return new WcfBrowserSubprocessExecutable().Main(args, handler);
         }
     }
 }

@@ -1,3 +1,4 @@
+using CefFlashBrowser.Browser;
 using CefFlashBrowser.Browser.UserScripts;
 using CefFlashBrowser.Data;
 using CefFlashBrowser.Database;
@@ -205,6 +206,8 @@ namespace CefFlashBrowser
         {
             CefSharpSettings.ConcurrentTaskExecution = true;
             CefSharpSettings.WcfEnabled = false;
+            CoreJsProcessSettings.Enabled = GlobalData.Settings.EnableCoreJsPolyfills;
+
             Environment.SetEnvironmentVariable("ComSpec", GlobalData.CommandProxyPath); // Filter the Flash diagnostic; forward other commands to cmd.
 
             var settings = new CefFlashSettings()

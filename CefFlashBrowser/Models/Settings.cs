@@ -158,6 +158,11 @@ namespace CefFlashBrowser.Models
         public bool DisableBrowserContextMenu { get; set; }
 
         /// <summary>
+        /// Determines whether core-js polyfills are injected at document start
+        /// </summary>
+        public bool EnableCoreJsPolyfills { get; set; }
+
+        /// <summary>
         /// Determines whether userscript execution is enabled
         /// </summary>
         public bool EnableUserScripts { get; set; }
@@ -225,6 +230,7 @@ namespace CefFlashBrowser.Models
             DisableGpuAcceleration = false;
             CustomEmoticon = null;
             DisableBrowserContextMenu = false;
+            EnableCoreJsPolyfills = true;
             EnableUserScripts = true;
             TrustedUserScriptPageWorld = true;
             DefaultUserScriptPermissionBehavior = UserScriptPermissionBehavior.Prompt;

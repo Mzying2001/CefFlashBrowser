@@ -17,6 +17,7 @@
       <HintPath>$(PkgCefSharp_Common)\CefSharp\$(Platform)\CefSharp.BrowserSubprocess.Core.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Compile Include="..\CefFlashBrowser\Browser\CoreJsProcessSettings.cs" Link="CoreJsProcessSettings.cs" />
     <EmbeddedResource Include="Polyfills\core-js.min.js" LogicalName="CefFlashBrowser.BrowserSubprocess.core-js.min.js" />
   </ItemGroup>
 
