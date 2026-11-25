@@ -30,6 +30,79 @@ function Test-SvgFavicon($Icon) {
         $Icon.Template.FindName('fallbackIcon', $Icon).Visibility -eq [System.Windows.Visibility]::Collapsed)
 }
 
+function Test-BrowserIconDataUrls($Context) {
+    $png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a/pkAAAAASUVORK5CYII='
+    $pngUrl = 'data:image/png;base64,' + $png
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><rect width="8" height="8" fill="#123456"/></svg>'
+    $svgUrl = 'data:image/svg+xml,' + [Uri]::EscapeDataString($svg)
+    $svgBase64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($svg))
+    $longUrl = $svgUrl + '%3C!--' + ('x' * 70000) + '--%3E'
+
+    $icon = New-Object CefFlashBrowser.Views.Custom.BrowserIcon
+    $icon.DefaultIcon = 'D'
+    $window = New-Object System.Windows.Window
+    $window.Content = $icon
+    $window.Left = -10000
+    $window.ShowInTaskbar = $false
+    $window.ShowActivated = $false
+    try {
+        $window.Show()
+        [void]$icon.ApplyTemplate()
+        $image = $icon.Template.FindName('favicon', $icon)
+        $fallback = $icon.Template.FindName('fallbackIcon', $icon)
+        $percentPng = -join ([Convert]::FromBase64String($png) | ForEach-Object { '%{0:X2}' -f $_ })
+        foreach ($url in @(
+            $pngUrl,
+            ('DATA:Image/PNG; BASE64,' + $png.TrimEnd('=').Replace('/', '%2F')),
+            ('data:image/png,' + $percentPng)
+        )) {
+            $icon.FaviconUrl = $url
+            Wait-Regression $Context {
+                !$icon.HasImageFailed -and $image.Source -is [System.Windows.Media.Imaging.BitmapSource] -and
+                    $image.Source.PixelWidth -eq 1 -and $fallback.Visibility -eq 'Collapsed'
+            } 'inline PNG renders as a bitmap'
+        }
+
+        foreach ($url in @(
+            ('DATA:image/svg+xml;charset=UTF-8;BASE64,' + $svgBase64),
+            ($svgUrl + '#fragment'),
+            $longUrl
+        )) {
+            $icon.FaviconUrl = $url
+            Wait-Regression $Context { Test-SvgFavicon $icon } 'inline SVG renders as a vector'
+            Assert-Regression ($image.Source.Width -eq 8 -and $image.Source.Height -eq 8 -and
+                @(Get-DrawingColors $image.Source.Drawing) -contains [System.Windows.Media.ColorConverter]::ConvertFromString('#123456')) 'inline SVG retains its viewBox and fill color'
+        }
+
+        foreach ($url in @(
+            'data:image/png;base64',
+            'data:image/png;base64,***',
+            ('data:image/png;base64,' + $png + '='),
+            ('data:text/plain;base64,' + $png),
+            'data:image/svg+xml,%3Csvg%2F%3E'
+        )) {
+            $icon.FaviconUrl = $url
+            Wait-Regression $Context {
+                $icon.HasImageFailed -and $null -eq $image.Source -and $fallback.Visibility -eq 'Visible'
+            } "invalid data URL displays the default icon ($url)"
+        }
+
+        $icon.FaviconUrl = $longUrl
+        $icon.FaviconUrl = 'data:image/png;base64,***'
+        $icon.FaviconUrl = $pngUrl
+        Wait-Regression $Context {
+            !$icon.HasImageFailed -and $image.Source -is [System.Windows.Media.Imaging.BitmapSource] -and
+                $fallback.Visibility -eq 'Collapsed'
+        } 'the latest data URL replaces pending SVG and invalid data URLs'
+        $latestImage = $image.Source
+        $settle = [Diagnostics.Stopwatch]::StartNew()
+        Wait-Regression $Context { $settle.ElapsedMilliseconds -gt 300 } 'abandoned data URLs settle'
+        Assert-Regression (!$icon.HasImageFailed -and [object]::ReferenceEquals($latestImage, $image.Source)) 'abandoned data URLs cannot replace or hide the latest icon'
+    } finally {
+        $window.Close()
+    }
+}
+
 function Test-Favicons($Context) {
     $fixture = New-Object FaviconHttpFixture
     $window = New-RegressionWindow $Context
