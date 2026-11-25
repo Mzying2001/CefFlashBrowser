@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs')][string]$Scenario = 'All'
+    [ValidateSet('All', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs', 'Polyfills')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -38,6 +38,7 @@ foreach ($file in @(
     'Scenarios\UserScriptManager.ps1',
     'Scenarios\UserScriptSettings.ps1',
     'Scenarios\UserScriptNetwork.ps1',
+    'Scenarios\Polyfills.ps1',
     'Scenarios\Lifecycle.ps1'
     'Scenarios\Favicons.ps1'
 )) {
@@ -69,6 +70,9 @@ try {
     } elseif ($Scenario -eq 'Frames') {
         Start-RegressionCef $context
         Test-UserScriptFrames $context
+    } elseif ($Scenario -eq 'Polyfills') {
+        Start-RegressionCef $context
+        Test-BrowserPolyfills $context
     } elseif ($Scenario -eq 'Network') {
         Start-RegressionCef $context
         Test-UserScriptNetwork $context
@@ -144,6 +148,7 @@ try {
         Test-ListReorderBehavior $context
         Test-BrowserTabsBeforeShow $context
         Start-RegressionCef $context -EnableFlash
+        Test-BrowserPolyfills $context
         Test-UserScriptManager $context
         Test-UserScriptSeams $context
         Test-UserScripts $context

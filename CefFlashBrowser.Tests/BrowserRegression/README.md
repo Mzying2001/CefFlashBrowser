@@ -29,6 +29,8 @@ Download checks can be run independently with `Run.ps1 -Scenario DownloadManager
 
 Run `Run.ps1 -Scenario DownloadRestart` separately for cross-process recovery. It starts an isolated HTTP fixture and two hidden STA PowerShell processes against the same temporary download profile and CEF cache. The first process saves unfinished browser and manual tasks before shutdown. The second restores them, verifies the persisted Range offsets and cookies, and compares the final files with the fixture payload. All profiles, files and process logs remain under the printed temporary directory.
 
+Run `Run.ps1 -Scenario Polyfills` to exercise the first script on each probe document with userscripts disabled. The check covers strict CSP, same-origin and cross-origin iframes, `srcdoc`, `about:blank`, `blob:`, `data:`, local HTML, reload, and a real popup. The package smoke check also runs the first-script probe using the renderer from the supplied zip.
+
 After `publish`, validate each actual zip in a fresh process of the matching architecture:
 
 ```cmd
