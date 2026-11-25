@@ -1,5 +1,7 @@
 ﻿using CefSharp;
+using CefSharp.Enums;
 using CefSharp.Structs;
+using System;
 using System.Collections.Generic;
 
 namespace CefFlashBrowser.FlashBrowser.Handlers
@@ -16,6 +18,11 @@ namespace CefFlashBrowser.FlashBrowser.Handlers
         }
 
         public virtual bool OnConsoleMessage(IWebBrowser chromiumWebBrowser, ConsoleMessageEventArgs consoleMessageArgs)
+        {
+            return false;
+        }
+
+        public virtual bool OnCursorChange(IWebBrowser chromiumWebBrowser, IBrowser browser, IntPtr cursor, CursorType type, CursorInfo customCursorInfo)
         {
             return false;
         }

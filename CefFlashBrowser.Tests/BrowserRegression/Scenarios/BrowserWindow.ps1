@@ -391,7 +391,7 @@ function Test-SwfPlayerPageContext($Context) {
         $model.Address = $fixture.BaseUrl + '/swf-empty'
         Wait-Regression $Context { $model.Title -eq 'Empty SWF fixture' } 'the source tab navigates away'
         $movieRequests = $fixture.RequestsFor($moviePath)
-        [CefSharp.WebBrowserExtensions]::Reload($playerBrowser, $true)
+        $playerBrowser.Reload($true)
         Wait-Regression $Context { $fixture.RequestsFor($moviePath) -gt $movieRequests } 'the player reloads after source navigation'
 
         $player.FileName = $fixture.BaseUrl + '/independent.swf'
@@ -425,7 +425,7 @@ function Test-SwfPlayerPageContext($Context) {
             $frame = $native.GetFrame($id)
             if ($null -ne $frame -and $frame.Url -ceq $framePage) {
                 try {
-                    $evaluation = $frame.EvaluateScriptAsync("fetch('/swf-frame-cookie-probe'); document.getElementById('flash-player').getAttribute('flashvars')", $framePage, 1, [TimeSpan]::FromSeconds(5))
+                    $evaluation = $frame.EvaluateScriptAsync("fetch('/swf-frame-cookie-probe'); document.getElementById('flash-player').getAttribute('flashvars')", $framePage, 1, [TimeSpan]::FromSeconds(5), $false)
                     Wait-Regression $Context { $evaluation.IsCompleted } 'the player frame returns its Flash parameters'
                     Assert-Regression ($evaluation.Result.Result -ceq 'frame=child') 'FlashVars come from the initiating iframe'
                     Wait-Regression $Context { $peer.RequestsFor('/swf-frame-cookie-probe') -gt 0 } 'the embedded playback document sends a same-origin request'
@@ -441,7 +441,7 @@ function Test-SwfPlayerPageContext($Context) {
         $window.ForceCloseWindow()
         $window = $null
         $frameRequests = $peer.RequestsFor('/frame-context.swf')
-        [CefSharp.WebBrowserExtensions]::Reload($frameBrowser, $true)
+        $frameBrowser.Reload($true)
         Wait-Regression $Context { $peer.RequestsFor('/frame-context.swf') -gt $frameRequests } 'iframe playback reloads after the source window closes'
     } finally {
         if ($null -ne $framePlayer) { $framePlayer.ForceCloseWindow() }

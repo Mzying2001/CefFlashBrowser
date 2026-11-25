@@ -1531,7 +1531,7 @@ function Test-BrowserTabsReloadClose($Context) {
         $second = New-RegressionTab $Context $window $Context.AuxiliaryAddress
         $handler = Set-RegressionBeforeUnload $Context $second.Browser
         $handler.Hold = $true
-        [CefSharp.WebBrowserExtensions]::Reload($second.Browser, $false)
+        $second.Browser.Reload($false)
         Wait-Regression $Context { $handler.Count -eq 1 } 'reload awaits confirmation'
         $window.Close()
         $view = Find-BrowserView $window $second

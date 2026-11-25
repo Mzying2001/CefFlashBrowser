@@ -78,7 +78,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 
 - Builds target both x86 and x64; output paths differ: `bin\Release\` (x86) vs `bin\x64\Release\` (x64)
 - Entry point is `Program.cs` (not the default `App.xaml.cs`)
-- CefSharp version 84.4.10 is pinned for Flash compatibility
+- Deploy the custom `libcef.dll` with its matching `v8_context_snapshot.bin` for each architecture.
 - Follow the repository's `.editorconfig` when modifying or adding files
 - When explicitly setting a UIA control name, use English PascalCase unless the name needs to be dynamic.
 

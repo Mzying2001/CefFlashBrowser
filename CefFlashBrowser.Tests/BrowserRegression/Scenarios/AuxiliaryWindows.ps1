@@ -37,7 +37,7 @@ function Test-EmbeddedSwfPlayer($Context, $Window, $Browser) {
 
     [void](Invoke-JavaScript $Context $Browser "document.title='reload-pending';")
     Wait-Regression $Context { $Window.Title -eq 'reload-pending' } 'player title changes before reload'
-    [CefSharp.WebBrowserExtensions]::Reload($Browser)
+    $Browser.Reload($false)
     Wait-Regression $Context { $Window.Title -eq 'second.swf' } 'reload serves the embedded page and restores the current SWF'
     Assert-Regression ((Invoke-JavaScript $Context $Browser "document.getElementById('flash-player').getAttribute('src')") -eq 'second.swf') 'reload restores the SWF embed source'
 

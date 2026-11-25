@@ -413,7 +413,7 @@ function Test-UserScriptTabs($Context) {
         $window.ViewModel.CloseBrowser($child)
         Wait-Regression $Context { $child.IsClosed -and (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-child-closed')") -eq 'yes' } 'actual child close notifies its handle'
         Assert-Regression ($window.ViewModel.Browsers.Count -eq 1 -and $child.Browser.IsDisposed) 'tab handle closes only after accepted native cleanup'
-        [CefSharp.WebBrowserExtensions]::Reload($model.Browser, $false)
+        $model.Browser.Reload($false)
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-tab-state-before')") -eq '1' } 'tab state survives document navigation'
         Assert-Regression ($model.BrowserId -eq $identity) 'navigation keeps the tab-state partition identity'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptOpenTab'))")
@@ -1005,7 +1005,7 @@ document.documentElement.setAttribute('data-gm-before', String(previous));
         Assert-Regression ($model.UserScriptMatchCount -eq 2) 'page status reports matched installations'
         $value = Complete-UserScriptTask $Context ($Context.UserScriptService.ValueStore.GetAsync($gm.ScriptKey.ToString(), 'visits', [Threading.CancellationToken]::None)) 'GM commit'
         Assert-Regression ($value.Value.EncodedValue -eq 'n1') 'legacy GM write reaches shared SQLite storage'
-        [CefSharp.WebBrowserExtensions]::Reload($model.Browser, $false)
+        $model.Browser.Reload($false)
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-gm-before')") -eq '1' } 'new-document storage bootstrap'
         Assert-Regression ($model.BrowserId -eq $identity) 'stable browser identity survives navigation'
     } finally {

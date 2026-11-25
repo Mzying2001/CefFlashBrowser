@@ -75,7 +75,7 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
-    <PackageReference Include="CefSharp.WinForms" Version="84.4.10" />
+    <PackageReference Include="CefSharp.WinForms" Version="87.1.132" />
     <PackageReference Include="Costura.Fody" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -87,12 +87,23 @@
     <PackageReference Include="SharpVectors" Version="1.8.4.2" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Platform)' == 'x86'">
-    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x86" Version="4.1.0" />
+  <!-- Restore this package reference when MonkeySharp 5.0.0 is available on NuGet.
+  <ItemGroup>
+    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp87.$(Platform)" Version="5.0.0" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(Platform)' == 'x64'">
-    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x64" Version="4.1.0" />
+  -->
+  <PropertyGroup>
+    <MonkeySharpBuildPath>D:\code\MonkeySharp\artifacts\package-build\7fdb292fe1df</MonkeySharpBuildPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Mzying2001.MonkeySharp.CefSharp">
+      <HintPath>$(MonkeySharpBuildPath)\87.1.132-$(Platform)\bin\Mzying2001.MonkeySharp.CefSharp\release\Mzying2001.MonkeySharp.CefSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Mzying2001.MonkeySharp.Core">
+      <HintPath>$(MonkeySharpBuildPath)\core\bin\Mzying2001.MonkeySharp.Core\release_net462\Mzying2001.MonkeySharp.Core.dll</HintPath>
+    </Reference>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
