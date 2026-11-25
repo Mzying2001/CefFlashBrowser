@@ -8,13 +8,17 @@ using System.Threading.Tasks;
 
 public sealed class FaviconHttpFixture : IDisposable
 {
+    private const string SvgIcon = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'>"
+        + "<rect x='2' y='4' width='12' height='8' fill='blue'/></svg>";
     private readonly TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
     private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
     private readonly TaskCompletionSource<bool> slowResponse = new TaskCompletionSource<bool>();
     private readonly Task acceptTask;
     private int slowRequests;
+    private int svgPathRequests;
     public string BaseUrl { get; private set; }
     public int SlowRequests { get { return Volatile.Read(ref slowRequests); } }
+    public int SvgPathRequests { get { return Volatile.Read(ref svgPathRequests); } }
 
     public FaviconHttpFixture()
     {
@@ -50,6 +54,11 @@ public sealed class FaviconHttpFixture : IDisposable
                     return;
                 string path = request.Split(' ')[1].Split('?')[0];
                 while (!string.IsNullOrEmpty(await reader.ReadLineAsync().ConfigureAwait(false))) { }
+                if (path == "/slow-bad.png" || path == "/slow.svg")
+                {
+                    Interlocked.Increment(ref slowRequests);
+                    await slowResponse.Task.ConfigureAwait(false);
+                }
                 string status = "200 OK";
                 string type = "text/html";
                 string extra = "";
@@ -69,13 +78,19 @@ public sealed class FaviconHttpFixture : IDisposable
                     type = "image/png";
                     body = Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a/pkAAAAASUVORK5CYII=");
                 }
+                else if (path == "/icon.SVG")
+                {
+                    Interlocked.Increment(ref svgPathRequests);
+                    type = "application/octet-stream";
+                    body = Encoding.UTF8.GetBytes(SvgIcon);
+                }
+                else if (path == "/icon" || path == "/slow.svg" || path == "/bad.svg")
+                {
+                    type = "image/svg+xml; charset=utf-8";
+                    body = Encoding.UTF8.GetBytes(path == "/bad.svg" ? "<svg xmlns='http://www.w3.org/2000/svg'><path" : SvgIcon);
+                }
                 else
                 {
-                    if (path == "/slow-bad.png")
-                    {
-                        Interlocked.Increment(ref slowRequests);
-                        await slowResponse.Task.ConfigureAwait(false);
-                    }
                     status = path == "/missing.png" ? "404 Not Found" : "200 OK";
                     type = "image/png";
                     body = Encoding.UTF8.GetBytes("invalid image bytes");

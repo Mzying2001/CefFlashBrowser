@@ -24,6 +24,12 @@ function Assert-FaviconMenuIcon($Item, $Website, $ExpectedUrl, [string]$Surface)
     }
 }
 
+function Test-SvgFavicon($Icon) {
+    $source = $Icon.Template.FindName('favicon', $Icon).Source
+    return ($source -is [System.Windows.Media.DrawingImage] -and $source.Width -gt 0 -and $source.Height -gt 0 -and
+        $Icon.Template.FindName('fallbackIcon', $Icon).Visibility -eq [System.Windows.Visibility]::Collapsed)
+}
+
 function Test-Favicons($Context) {
     $fixture = New-Object FaviconHttpFixture
     $window = New-RegressionWindow $Context
@@ -142,6 +148,12 @@ function Test-Favicons($Context) {
                 @(Find-FaviconElements $mainItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconA -and
                 @(Find-FaviconElements $browserItem ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0].FaviconUrl -eq $iconA
         } 'open favorites menus and manager refresh when their mapping changes'
+        $svgUrl = $fixture.BaseUrl + '/icon'
+        [void]$service.RecordAsync($pageB, $svgUrl).GetAwaiter().GetResult()
+        Wait-Regression $Context {
+            $boundIcon = @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
+            $boundIcon.FaviconUrl -eq $svgUrl -and (Test-SvgFavicon $boundIcon)
+        } 'a bound favorite displays an extensionless SVG identified by its content type'
         $missingIcon = $fixture.BaseUrl + '/missing.png'
         [void]$service.RecordAsync($pageB, $missingIcon).GetAwaiter().GetResult()
         Wait-Regression $Context {
@@ -161,33 +173,40 @@ function Test-Favicons($Context) {
         $iconWindow.ShowActivated = $false
         $iconWindow.Show()
         [void]$icon.ApplyTemplate()
-        $failureState = @{ Count = 0 }
-        $failureHandler = [EventHandler[System.Windows.ExceptionRoutedEventArgs]]({
-            param($sender, $eventArgs)
-            $failureState.Count++
-        }.GetNewClosure())
-        $icon.Template.FindName('favicon', $icon).add_ImageFailed($failureHandler)
-        foreach ($failurePath in @('/missing.png', '/bad.png')) {
-            $previousFailures = $failureState.Count
+        $image = $icon.Template.FindName('favicon', $icon)
+        $icon.FaviconUrl = $fixture.BaseUrl + '/icon.SVG?version=1#icon'
+        Wait-Regression $Context { Test-SvgFavicon $icon } 'an uppercase SVG URL with a query and fragment renders as a vector'
+        Assert-Regression ($image.Source.Width -eq 16 -and $image.Source.Height -eq 16) 'the SVG retains its original viewBox'
+        Assert-Regression ($fixture.SvgPathRequests -eq 1) 'an SVG favicon uses one HTTP request'
+
+        $localIconPath = Join-Path $Context.TemporaryPath 'local icon.svg'
+        [IO.File]::WriteAllText($localIconPath, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4"/></svg>')
+        $icon.FaviconUrl = [Uri]::new($localIconPath).AbsoluteUri
+        Wait-Regression $Context { Test-SvgFavicon $icon } 'a local SVG file URL renders as a vector'
+
+        foreach ($failurePath in @('/missing.png', '/bad.png', '/bad.svg')) {
             $icon.FaviconUrl = $fixture.BaseUrl + $failurePath
             Wait-Regression $Context {
-                $failureState.Count -gt $previousFailures -and
+                $icon.HasImageFailed -and
                     $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq [System.Windows.Visibility]::Visible
             } "image failure $failurePath displays the default icon"
         }
-        $icon.FaviconUrl = $fixture.BaseUrl + '/slow-bad.png'
-        Wait-Regression $Context { $fixture.SlowRequests -gt 0 } 'delayed image request starts'
-        $icon.FaviconUrl = $iconB
-        Wait-Regression $Context {
-            $image = $icon.Template.FindName('favicon', $icon)
-            $null -ne $image.Source -and !$image.Source.IsDownloading -and
-                $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq [System.Windows.Visibility]::Collapsed
-        } 'a valid image resets failure state'
+        foreach ($slowPath in @('/slow-bad.png', '/slow.svg')) {
+            $previousRequests = $fixture.SlowRequests
+            $icon.FaviconUrl = $fixture.BaseUrl + $slowPath
+            Wait-Regression $Context { $fixture.SlowRequests -gt $previousRequests } "delayed image request $slowPath starts"
+            $icon.FaviconUrl = $iconB
+            Wait-Regression $Context {
+                !$icon.HasImageFailed -and $image.Source -is [System.Windows.Media.Imaging.BitmapSource] -and
+                    $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq [System.Windows.Visibility]::Collapsed
+            } 'a valid PNG replaces the pending image and resets failure state'
+        }
+        $pngSource = $image.Source
         $fixture.ReleaseSlowResponse()
-        # Drain queued WPF notifications after the abandoned request completes.
+        # Drain queued notifications after the abandoned requests complete.
         $settle = [Diagnostics.Stopwatch]::StartNew()
-        Wait-Regression $Context { $settle.ElapsedMilliseconds -gt 300 } 'delayed old image failure settles'
-        Assert-Regression (!$icon.HasImageFailed -and $null -ne $icon.Template.FindName('favicon', $icon).Source) 'old image failure cannot hide the new icon'
+        Wait-Regression $Context { $settle.ElapsedMilliseconds -gt 300 } 'delayed old image responses settle'
+        Assert-Regression (!$icon.HasImageFailed -and [object]::ReferenceEquals($pngSource, $image.Source)) 'stale image responses cannot replace or hide the current icon'
 
         Invoke-BrowserCommand $browser.LoadUrlCommand $pageA
         Wait-Regression $Context { $browser.Address -eq $pageA -and !$browser.IsLoading } 'page A loads before queued callback check'
