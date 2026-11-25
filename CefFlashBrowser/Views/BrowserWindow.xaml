@@ -376,7 +376,7 @@
                 <Style TargetType="MenuItem"
                        BasedOn="{StaticResource {x:Type MenuItem}}">
                     <Setter Property="Padding"
-                            Value="0"/>
+                            Value="3,0"/>
                     <Setter Property="Template"
                             Value="{StaticResource MenuItemWithoutShortcutTemplate}"/>
                     <Setter Property="AutomationProperties.Name"
