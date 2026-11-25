@@ -43,6 +43,11 @@ namespace CefFlashBrowser.Models
         public bool DisableOnBeforeUnloadDialog { get; set; }
 
         /// <summary>
+        /// Determines whether SWFs opened with their source page context can access scripts in the player page
+        /// </summary>
+        public bool AllowPageSwfScriptAccess { get; set; }
+
+        /// <summary>
         /// The size and position of the main window
         /// </summary>
         public WindowSizeInfo MainWindowSizeInfo { get; set; }
@@ -208,6 +213,7 @@ namespace CefFlashBrowser.Models
             NewPageBehavior = NewPageBehavior.NewTab;
             NewTabAddress = "about:blank";
             DisableOnBeforeUnloadDialog = false;
+            AllowPageSwfScriptAccess = true;
             MainWindowSizeInfo = null;
             BrowserWindowSizeInfo = null;
             SwfWindowSizeInfo = null;

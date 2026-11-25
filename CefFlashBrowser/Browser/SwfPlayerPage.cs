@@ -19,7 +19,7 @@ namespace CefFlashBrowser.Browser
 
         public string StartUrl { get; }
 
-        public SwfPlayerPage(SwfPageContext context, string localPlayerUrl, string template)
+        public SwfPlayerPage(SwfPageContext context, string localPlayerUrl, string template, bool allowScriptAccess)
         {
             _resource = context.Resource;
             var playerUrl = context.FrameUrl.IsFile ? $"{localPlayerUrl}?context={Guid.NewGuid():N}" : context.FrameUrl.AbsoluteUri;
@@ -30,8 +30,9 @@ namespace CefFlashBrowser.Browser
             var url = JsonConvert.SerializeObject(context.Resource.Url, settings);
             var baseUrl = JsonConvert.SerializeObject(context.BaseUrl.AbsoluteUri, settings);
             var attributes = JsonConvert.SerializeObject(context.Attributes, settings);
+            var scriptAccess = JsonConvert.SerializeObject(allowScriptAccess);
             var document = template.Replace("<!-- player initialization -->",
-                $"<script>loadSwf({url}, {baseUrl}, {attributes});</script>");
+                $"<script>loadSwf({url}, {baseUrl}, {attributes}, {scriptAccess});</script>");
             var suppressReferrer = string.IsNullOrEmpty(_resource.ReferrerUrl) || _resource.ReferrerPolicy == ReferrerPolicy.NoReferrer;
             _documents.Add(_moviePage, new Document(document, context.Ancestors.Count == 0, suppressReferrer));
 
