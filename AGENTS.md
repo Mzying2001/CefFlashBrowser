@@ -60,6 +60,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
   - **Utils/**: Utility helpers and cross-cutting support code.
   - **ViewModels/**: MVVM presentation logic for windows and dialogs.
   - **Views/**: WPF windows, dialogs, and reusable UI controls.
+- **CefFlashBrowser.BrowserSubprocess/**: Custom CefSharp subprocess with renderer-side core-js polyfills.
 - **CefFlashBrowser.CommandProxy/**: Native command proxy with Flash diagnostic filtering.
 - **CefFlashBrowser.Database/**: Database interfaces and SQLite implementation.
 - **CefFlashBrowser.FlashBrowser/**: Flash-enabled CefSharp browser controls and page SWF discovery.
