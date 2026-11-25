@@ -258,20 +258,24 @@ function Test-BrowserPageSwfs($Context) {
         $model.Address = $fixture.BaseUrl + '/swf-page'
         Wait-Regression $Context { $browser.Title -eq 'SWF fixture' -and !$browser.IsLoading } 'SWF fixture page loads'
         $gameUrl = $fixture.BaseUrl + '/GAME.SWF?token=a%2Fb'
+        $longFileName = ('z' * 120) + '.swf'
+        $longUrl = $fixture.BaseUrl + '/' + $longFileName
         $expected = @(
             $fixture.BaseUrl + '/embedded.swf'
             $fixture.BaseUrl + '/frame.swf'
             $gameUrl
             $fixture.BaseUrl + '/swf-response'
             $fixture.BaseUrl + '/swf-missing.swf'
+            $longUrl
         )
-        [void](Invoke-JavaScript $Context $browser @'
+        [void](Invoke-JavaScript $Context $browser @"
 console.info('Cross-origin plugin content from https://example.invalid/fake.swf');
 fetch('/GAME.SWF?token=a%2Fb').then(() => fetch('/GAME.SWF?token=a%2Fb'));
 fetch('/swf-redirect');
 fetch('/swf-missing.swf');
+fetch('/$longFileName');
 true;
-'@)
+"@)
         Wait-Regression $Context {
             $browser.PageSwfs.Count -ge $expected.Count -and $fixture.RequestsFor('/GAME.SWF') -eq 2
         } 'CEF observes SWFs from the page and its iframe'
@@ -284,16 +288,62 @@ true;
         Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($button) -ceq 'PageSwfs') 'SWF toolbar has a fixed automation name'
         Assert-Regression ($button.Content.UriSource.OriginalString -eq '/Assets/Icons/swf.svg') 'SWF toolbar uses the SWF icon'
 
+        Set-TabWindowForeground $Context $window
         $buttonPeer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($button)
         $buttonPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
         Wait-Regression $Context { $menu.IsOpen -and $menu.Items.Count -eq $expected.Count } 'clicking the SWF button displays the current page list'
         Assert-Regression ((($menu.Items | ForEach-Object { $_.FileName }) -join '|') -ceq
-            'embedded.swf|frame.swf|GAME.SWF|swf-missing.swf|swf-response') 'SWF menu lists filenames in ascending case-insensitive order'
+            "embedded.swf|frame.swf|GAME.SWF|swf-missing.swf|swf-response|$longFileName") 'SWF menu lists filenames in ascending case-insensitive order'
         Wait-Regression $Context {
             $null -ne $menu.ItemContainerGenerator.ContainerFromItem($game)
         } 'SWF menu generates the player item'
         $item = $menu.ItemContainerGenerator.ContainerFromItem($game)
+        Assert-Regression ([object]::ReferenceEquals($item.Template, $window.FindResource('MenuItemWithoutShortcutTemplate'))) 'SWF menu uses the shared template without a shortcut column'
         Assert-Regression ($item.ToolTip -ceq $gameUrl -and $null -ne $item.Command) 'SWF menu item exposes the complete URL and player action'
+        $downloadCommand = $window.ViewModel.DownloadPageSwfCommand
+        $download = Find-CommandButton $item $downloadCommand
+        $longItem = $menu.ItemContainerGenerator.ContainerFromIndex($menu.Items.Count - 1)
+        $longDownload = Find-CommandButton $longItem $downloadCommand
+        Assert-Regression ($download.IsEnabled -and $download.BorderThickness -eq [Windows.Thickness]::new(0) -and
+            $download.Background.Color.A -eq 0 -and
+            $download.Content.UriSource.OriginalString -ceq '/Assets/Icons/download.svg' -and
+            $download.ToolTip -ceq $Context.LanguageService.GetString('downloads_start')) 'SWF download uses the borderless icon button with a localized tooltip'
+        $origin = [Windows.Point]::new(0, 0)
+        Assert-Regression ($longItem.Header.FileName -ceq $longFileName -and $menu.ActualWidth -le 300 -and
+            [Math]::Abs($download.TranslatePoint($origin, $menu).X - $longDownload.TranslatePoint($origin, $menu).X) -lt 1) 'long filenames keep the SWF download buttons aligned on the right'
+
+        $downloadState = @{ Url = $null; MenuClosed = $false }
+        $timer = New-Object Windows.Threading.DispatcherTimer
+        $timer.Interval = [TimeSpan]::FromMilliseconds(30)
+        $timer.Add_Tick({
+            $dialog = $Context.Application.Windows | Where-Object {
+                $_ -is [CefFlashBrowser.Views.Dialogs.DownloadDialog] -and $_.IsVisible
+            } | Select-Object -First 1
+            if ($null -eq $dialog) { return }
+
+            $downloadState.Url = $dialog.FindName('urlBox').Text
+            $downloadState.MenuClosed = !$menu.IsOpen
+            $dialog.Close()
+        }.GetNewClosure())
+        $timer.Start()
+        try {
+            $point = $download.PointToScreen([Windows.Point]::new($download.ActualWidth / 2, $download.ActualHeight / 2))
+            [System.Windows.Forms.Cursor]::Position = [Drawing.Point]::new([int]$point.X, [int]$point.Y)
+            Wait-Regression $Context { $download.IsMouseOver } 'mouse is over the SWF download button'
+            $highlight = $download.Template.FindName('highlight', $download)
+            Assert-Regression ($highlight.Opacity -eq 0.12) 'SWF download uses a translucent highlight on hover'
+            [RegressionKeyboard]::ClickMouse([int]$point.X, [int]$point.Y, $false)
+            Wait-Regression $Context { !$menu.IsOpen } 'clicking the SWF download button dismisses the menu'
+            Wait-Regression $Context { $null -ne $downloadState.Url } 'clicking the SWF download button opens the download dialog'
+            Assert-Regression ($downloadState.MenuClosed -and $downloadState.Url -ceq $gameUrl -and
+                !($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.SwfPlayerWindow] })) 'SWF download closes the menu, keeps the query string and skips playback'
+        } finally {
+            $timer.Stop()
+        }
+
+        $buttonPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $menu.IsOpen -and $null -ne $menu.ItemContainerGenerator.ContainerFromItem($game) } 'SWF menu reopens after downloading'
+        $item = $menu.ItemContainerGenerator.ContainerFromItem($game)
         $itemPeer = New-Object System.Windows.Automation.Peers.MenuItemAutomationPeer($item)
         $itemPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
         Wait-Regression $Context {
