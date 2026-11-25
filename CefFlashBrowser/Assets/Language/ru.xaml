@@ -96,6 +96,7 @@
     <sys:String x:Key="settings_alwaysShowTabStrip">Всегда показывать панель вкладок</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Встраивать DevTools в окно браузера</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Отключить полноэкранный режим</sys:String>
+    <sys:String x:Key="settings_enableCoreJsPolyfills">Улучшить совместимость с сайтами (core-js)</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Отключить ускорение GPU</sys:String>
     <sys:String x:Key="settings_disableBrowserContextMenu">Отключить контекстное меню</sys:String>
 

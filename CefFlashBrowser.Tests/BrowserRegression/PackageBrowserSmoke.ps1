@@ -36,8 +36,7 @@ GM.setValue('packaged-commit', 42).then(function () {
         [void]$Scripts.Repository.UpdateAsync($Installation.ScriptKey, $source, $null,
             [Threading.CancellationToken]::None).GetAwaiter().GetResult()
         $pagePath = Join-Path $TemporaryPath 'packaged.html'
-        [IO.File]::WriteAllText($pagePath, '<html><body>Packaged userscript</body></html>',
-            (New-Object Text.UTF8Encoding($false)))
+        [IO.File]::Copy((Join-Path $PSScriptRoot 'PolyfillProbe.html'), $pagePath)
 
         [Environment]::SetEnvironmentVariable('ComSpec', (Join-Path $PackagePath 'Binaries\CmdProxy\CmdProxy.exe'))
         $settings = New-Object CefFlashBrowser.FlashBrowser.CefFlashSettings
@@ -78,6 +77,7 @@ GM.setValue('packaged-commit', 42).then(function () {
             $browser.CanExecuteJavascriptInMainFrame -and
             (Invoke-JavaScript $context $browser "document.documentElement && document.documentElement.getAttribute('data-packaged')") -eq 'ready'
         } 'packaged userscript injection and synchronous typed-value bootstrap'
+        Assert-PolyfillProbe $context $browser 'packaged renderer'
         $committed = $Scripts.ValueStore.GetAsync($Installation.ScriptKey.ToString(), 'packaged-commit',
             [Threading.CancellationToken]::None).GetAwaiter().GetResult()
         Assert-Regression ($committed.Exists -and $committed.Value.EncodedValue -eq 'n42') 'packaged asynchronous GM write reaches SQLite before acknowledgement'

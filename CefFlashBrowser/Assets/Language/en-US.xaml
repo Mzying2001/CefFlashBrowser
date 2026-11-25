@@ -96,6 +96,7 @@
     <sys:String x:Key="settings_alwaysShowTabStrip">Always show tab bar</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">Embed devtools into browser window</sys:String>
     <sys:String x:Key="settings_disableFullscreen">Disable fullscreen mode</sys:String>
+    <sys:String x:Key="settings_enableCoreJsPolyfills">Improve website compatibility (core-js)</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">Disable GPU acceleration</sys:String>
     <sys:String x:Key="settings_disableBrowserContextMenu">Disable context menu</sys:String>
 

@@ -185,6 +185,12 @@
 
                 <!--advance-->
                 <c:SettingGroup Header="{DynamicResource settings_headerAdvanced}">
+                    <c:SettingItem Description="{DynamicResource settings_enableCoreJsPolyfills}">
+                        <CheckBox x:Name="enableCoreJsPolyfills"
+                                  AutomationProperties.Name="EnableCoreJsPolyfills"
+                                  IsChecked="{Binding EnableCoreJsPolyfills}"/>
+                    </c:SettingItem>
+
                     <!--disable GPU acceleration-->
                     <c:SettingItem Description="{DynamicResource settings_disableGpuAcceleration}">
                         <CheckBox IsChecked="{Binding DisableGpuAcceleration}"/>

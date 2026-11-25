@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<script nonce="cfb-polyfill-probe">
+    function report(result) {
+        document.documentElement.setAttribute('data-polyfill-result', result);
+    }
+
+    try {
+        document.documentElement.setAttribute('data-polyfill-apis', [typeof structuredClone,
+            typeof Promise.withResolvers, typeof Array.prototype.at, typeof Object.hasOwn].join(','));
+        const source = { nested: { value: 42 } };
+        const copy = structuredClone(source);
+        const pending = Promise.withResolvers();
+        pending.resolve([1, 2, 3].at(-1) === 3 && Object.hasOwn(copy, 'nested') &&
+            copy.nested !== source.nested && copy.nested.value === 42);
+        pending.promise.then(ok => report(ok ? 'ready' : 'incorrect polyfill result'));
+    } catch (error) {
+        report(error.message);
+    }
+</script>
+<title>Polyfill probe</title>
