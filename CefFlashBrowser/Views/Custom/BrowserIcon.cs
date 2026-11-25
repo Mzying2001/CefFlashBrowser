@@ -1,5 +1,10 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Media;
 
 namespace CefFlashBrowser.Views.Custom
 {
@@ -9,6 +14,7 @@ namespace CefFlashBrowser.Views.Custom
             new ComponentResourceKey(typeof(BrowserIcon), "TextFallbackStyle");
 
         private Image _image;
+        private CancellationTokenSource _imageLoad;
 
         private static readonly DependencyPropertyKey HasImageFailedPropertyKey =
             DependencyProperty.RegisterReadOnly(nameof(HasImageFailed), typeof(bool), typeof(BrowserIcon), new PropertyMetadata(false));
@@ -21,8 +27,7 @@ namespace CefFlashBrowser.Views.Custom
         }
 
         public static readonly DependencyProperty FaviconUrlProperty =
-            DependencyProperty.Register(nameof(FaviconUrl), typeof(string), typeof(BrowserIcon),
-                new PropertyMetadata(null, (d, e) => ((BrowserIcon)d).SetValue(HasImageFailedPropertyKey, false)));
+            DependencyProperty.Register(nameof(FaviconUrl), typeof(string), typeof(BrowserIcon), new PropertyMetadata(null, (d, e) => ((BrowserIcon)d).UpdateImage()));
 
         public string FaviconUrl
         {
@@ -58,13 +63,70 @@ namespace CefFlashBrowser.Views.Custom
             if (_image != null)
                 _image.ImageFailed -= ImageFailed;
 
-            SetValue(HasImageFailedPropertyKey, false);
             base.OnApplyTemplate();
 
             _image = GetTemplateChild("favicon") as Image;
 
             if (_image != null)
                 _image.ImageFailed += ImageFailed;
+
+            UpdateImage();
+        }
+
+        private void UpdateImage()
+        {
+            var previousLoad = _imageLoad;
+            _imageLoad = null;
+            previousLoad?.Cancel();
+
+            SetValue(HasImageFailedPropertyKey, false);
+
+            if (_image == null)
+                return;
+
+            _image.Source = null;
+            var url = FaviconUrl;
+
+            if (string.IsNullOrWhiteSpace(url))
+                return;
+
+            if (Uri.TryCreate(url, UriKind.Absolute, out var uri) && BrowserIconImageLoader.CanLoad(uri))
+            {
+                _imageLoad = new CancellationTokenSource();
+                _ = LoadImageAsync(uri, _imageLoad);
+            }
+            else
+            {
+                _image.SetBinding(Image.SourceProperty, new Binding { Source = url });
+            }
+        }
+
+        private async Task LoadImageAsync(Uri uri, CancellationTokenSource load)
+        {
+            using (load)
+            {
+                ImageSource source = null;
+                try
+                {
+                    source = await BrowserIconImageLoader.LoadAsync(uri, load.Token).ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    // Unavailable or unsupported images use the control's fallback.
+                }
+
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    if (!ReferenceEquals(_imageLoad, load))
+                        return;
+
+                    _imageLoad = null;
+                    if (source == null)
+                        SetValue(HasImageFailedPropertyKey, true);
+                    else
+                        _image.Source = source;
+                }).Task.ConfigureAwait(false);
+            }
         }
 
         private void ImageFailed(object sender, ExceptionRoutedEventArgs e)
