@@ -264,7 +264,7 @@ function Open-RegressionDevTools($Context, $View) {
         Wait-Regression $Context {
             $evaluation = $toolsState.Browser.MainFrame.EvaluateScriptAsync(
                 "document.readyState === 'complete' && !!document.querySelector('.root-view')",
-                'about:blank', 1, [TimeSpan]::FromSeconds(3))
+                'about:blank', 1, [TimeSpan]::FromSeconds(3), $false)
             Wait-Regression $Context { $evaluation.IsCompleted } 'DevTools frontend evaluation'
             $response = $evaluation.GetAwaiter().GetResult()
             $response.Success -and $response.Result -eq $true

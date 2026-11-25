@@ -40,13 +40,13 @@ foreach ($name in @('Mzying2001.MonkeySharp.Core', 'Mzying2001.MonkeySharp.CefSh
     }
 }
 foreach ($name in @('Mzying2001.MonkeySharp.Core', 'Mzying2001.MonkeySharp.CefSharp')) {
-    if ($assemblies[$name].GetName().Version.ToString() -ne '4.1.0.0') {
+    if ($assemblies[$name].GetName().Version.ToString() -ne '5.0.0.0') {
         throw "Unexpected MonkeySharp version: $name"
     }
 }
 $adapter = $assemblies['Mzying2001.MonkeySharp.CefSharp']
 $cefReference = $adapter.GetReferencedAssemblies() | Where-Object Name -eq 'CefSharp'
-if ($cefReference.Version.ToString() -ne '84.4.10.0') { throw 'The adapter must target CefSharp 84.4.10.' }
+if ($cefReference.Version.ToString() -ne '87.1.132.0') { throw 'The adapter must target CefSharp 87.1.132.' }
 $parser = New-Object Mzying2001.MonkeySharp.Core.Parsing.UserScriptMetadataParser
 $source = "// ==UserScript==`n// @name Dependency check`n// @match https://example.invalid/*`n// @grant none`n// ==/UserScript==`n"
 if (!$parser.Parse($source).CanEnable) { throw 'Metadata parser could not load.' }

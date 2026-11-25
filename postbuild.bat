@@ -12,6 +12,8 @@ if /i not "%CFB_BUILD_PLATFORM%"=="x86" if /i not "%CFB_BUILD_PLATFORM%"=="x64" 
 
 set "ASSETS_PATH=%~dp0CefFlashBrowser\Assets"
 set "CEF_PATH=Binaries\CefSharp"
+set "CEF_ARCHIVE=CefSharp\libcef_%CFB_BUILD_PLATFORM%.tar.gz"
+set "CEF_RUNTIME_FILES=libcef.dll v8_context_snapshot.bin"
 set "PLUGINS_PATH=Binaries\Plugins"
 set "VC_RUNTIME_PATH=Binaries\VCRuntime"
 set "VC_RUNTIME_ARCHIVE=VCRuntime\vcruntime_%CFB_BUILD_PLATFORM%.tar.gz"
@@ -19,8 +21,8 @@ set "VC_RUNTIME_ARCHIVE=VCRuntime\vcruntime_%CFB_BUILD_PLATFORM%.tar.gz"
 set "VC_RUNTIME_FILES=msvcp140.dll vcruntime140.dll"
 if /i "%CFB_BUILD_PLATFORM%"=="x64" set "VC_RUNTIME_FILES=%VC_RUNTIME_FILES% vcruntime140_1.dll"
 
-if not exist "%ASSETS_PATH%\CefSharp\libcef_%CFB_BUILD_PLATFORM%.tar.gz" (
-    echo Error: Missing "%ASSETS_PATH%\CefSharp\libcef_%CFB_BUILD_PLATFORM%.tar.gz". 1>&2
+if not exist "%ASSETS_PATH%\%CEF_ARCHIVE%" (
+    echo Error: Missing "%ASSETS_PATH%\%CEF_ARCHIVE%". 1>&2
     exit /b 1
 )
 if not exist "%ASSETS_PATH%\Plugins\pepflashplayer_%CFB_BUILD_PLATFORM%.tar.gz" (
@@ -60,7 +62,7 @@ set "RESULT=1"
 mkdir "%EXTRACT_PATH%\CefSharp" "%EXTRACT_PATH%\Plugins" "%EXTRACT_PATH%\VCRuntime"
 if errorlevel 1 goto Cleanup
 
-call :Extract "CefSharp\libcef_%CFB_BUILD_PLATFORM%.tar.gz" ".postbuild\%EXTRACT_NAME%\CefSharp"
+call :Extract "%CEF_ARCHIVE%" ".postbuild\%EXTRACT_NAME%\CefSharp"
 if errorlevel 1 goto Cleanup
 
 call :Extract "Plugins\pepflashplayer_%CFB_BUILD_PLATFORM%.tar.gz" ".postbuild\%EXTRACT_NAME%\Plugins"
@@ -76,6 +78,13 @@ for %%F in (%VC_RUNTIME_FILES%) do (
     )
 )
 
+for %%F in (%CEF_RUNTIME_FILES%) do (
+    if not exist "%EXTRACT_PATH%\CefSharp\%%F" (
+        echo Error: Missing "%%F" in "%CEF_ARCHIVE%". 1>&2
+        goto Cleanup
+    )
+)
+
 if not exist "%CEF_PATH%\" mkdir "%CEF_PATH%"
 if errorlevel 1 goto Cleanup
 
@@ -85,9 +94,11 @@ if errorlevel 1 goto Cleanup
 if not exist "%VC_RUNTIME_PATH%\" mkdir "%VC_RUNTIME_PATH%"
 if errorlevel 1 goto Cleanup
 
-rem Override the NuGet libcef.dll after the official CefSharp deployment.
-copy /b /y "%EXTRACT_PATH%\CefSharp\libcef.dll" "%CEF_PATH%\libcef.dll"
-if errorlevel 1 goto Cleanup
+rem Deploy the custom libcef.dll with its matching V8 snapshot after CefSharp deployment.
+for %%F in (%CEF_RUNTIME_FILES%) do (
+    copy /b /y "%EXTRACT_PATH%\CefSharp\%%F" "%CEF_PATH%\%%F"
+    if errorlevel 1 goto Cleanup
+)
 
 copy /b /y "%EXTRACT_PATH%\Plugins\pepflashplayer.dll" "%PLUGINS_PATH%\pepflashplayer.dll"
 if errorlevel 1 goto Cleanup

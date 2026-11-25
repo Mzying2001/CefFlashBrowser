@@ -4,7 +4,6 @@ using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
-using CefSharp;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using SimpleMvvm.Ioc;
@@ -215,13 +214,17 @@ namespace CefFlashBrowser.ViewModels
             if (!IsBrowserReady(browser))
                 return;
 
-            if (browser.Browser.IsLoading)
+            var webBrowser = browser.Browser;
+
+            if (webBrowser.IsLoading)
             {
-                browser.Browser.Stop();
+                _ = WinformCefSharp4WPF.CefBrowserNavigation.RunAsync(
+                    webBrowser, nativeBrowser => nativeBrowser.StopLoad());
             }
             else
             {
-                browser.Browser.Reload();
+                _ = WinformCefSharp4WPF.CefBrowserNavigation.RunAsync(
+                    webBrowser, nativeBrowser => nativeBrowser.Reload(false));
             }
         }
 

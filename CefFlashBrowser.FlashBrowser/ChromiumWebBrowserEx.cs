@@ -1,6 +1,7 @@
 ﻿using CefFlashBrowser.FlashBrowser.Internals;
 using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
+using CefSharp.Structs;
 using SimpleMvvm.Command;
 using System;
 using System.Collections.Generic;
@@ -486,6 +487,11 @@ namespace CefFlashBrowser.FlashBrowser
             public bool OnConsoleMessage(IWebBrowser chromiumWebBrowser, ConsoleMessageEventArgs consoleMessageArgs)
             {
                 return InnerHandler?.OnConsoleMessage(chromiumWebBrowser, consoleMessageArgs) ?? false;
+            }
+
+            public bool OnCursorChange(IWebBrowser chromiumWebBrowser, IBrowser browser, IntPtr cursor, CefSharp.Enums.CursorType type, CursorInfo customCursorInfo)
+            {
+                return InnerHandler?.OnCursorChange(chromiumWebBrowser, browser, cursor, type, customCursorInfo) ?? false;
             }
 
             public void OnFaviconUrlChange(IWebBrowser chromiumWebBrowser, IBrowser browser, IList<string> urls)

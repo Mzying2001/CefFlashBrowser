@@ -982,10 +982,10 @@ namespace CefFlashBrowser.Views
             {
                 popupSizeInfo = new WindowSizeInfo
                 {
-                    Left = popupFeatures.XSet != 0 ? popupFeatures.X : double.NaN,
-                    Top = popupFeatures.YSet != 0 ? popupFeatures.Y : double.NaN,
-                    Width = popupFeatures.WidthSet != 0 ? popupFeatures.Width : double.NaN,
-                    Height = popupFeatures.HeightSet != 0 ? popupFeatures.Height : double.NaN,
+                    Left = (double?)popupFeatures.X ?? double.NaN,
+                    Top = (double?)popupFeatures.Y ?? double.NaN,
+                    Width = (double?)popupFeatures.Width ?? double.NaN,
+                    Height = (double?)popupFeatures.Height ?? double.NaN,
                 };
             }
 

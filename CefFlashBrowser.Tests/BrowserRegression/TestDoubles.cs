@@ -373,10 +373,6 @@ public sealed class RegressionPopupFeaturesProxy : RealProxy
             case "get_Y": result = 30; break;
             case "get_Width": result = 500; break;
             case "get_Height": result = 360; break;
-            case "get_XSet":
-            case "get_YSet":
-            case "get_WidthSet":
-            case "get_HeightSet": result = 1; break;
             default:
                 return new ReturnMessage(new InvalidOperationException(call.MethodName), call);
         }

@@ -464,15 +464,15 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
             Focusable = true;
             FocusVisualStyle = null;
 
-            BackCommand = new DelegateCommand(this.Back) { CanExecute = false };
-            ForwardCommand = new DelegateCommand(this.Forward) { CanExecute = false };
-            ReloadCommand = new DelegateCommand(this.Reload) { CanExecute = false };
+            BackCommand = new DelegateCommand(Back) { CanExecute = false };
+            ForwardCommand = new DelegateCommand(Forward) { CanExecute = false };
+            ReloadCommand = new DelegateCommand(() => Reload()) { CanExecute = false };
             PrintCommand = new DelegateCommand(this.Print);
             ZoomOutCommand = new DelegateCommand(ZoomOut);
             ZoomInCommand = new DelegateCommand(ZoomIn);
             ZoomResetCommand = new DelegateCommand(ZoomReset);
             ViewSourceCommand = new DelegateCommand(this.ViewSource);
-            StopCommand = new DelegateCommand(this.Stop) { CanExecute = false };
+            StopCommand = new DelegateCommand(Stop) { CanExecute = false };
             CutCommand = new DelegateCommand(this.Cut);
             CopyCommand = new DelegateCommand(this.Copy);
             PasteCommand = new DelegateCommand(this.Paste);
@@ -731,7 +731,7 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
                 browser.Load(url);
         }
 
-        // On CEF 84, loading about:blank starts the renderer so MonkeySharp can
+        // Loading about:blank starts the renderer so MonkeySharp can
         // prepare its isolated userscript runtime before the first target navigation.
         public void LoadInitialBlank()
         {
@@ -992,6 +992,46 @@ namespace CefFlashBrowser.WinformCefSharp4WPF
         public void Load(string url)
         {
             SetCurrentValue(AddressProperty, url);
+        }
+
+        private void Back()
+        {
+            _ = BackAsync();
+        }
+
+        public Task BackAsync()
+        {
+            return CefBrowserNavigation.RunAsync(this, nativeBrowser => nativeBrowser.GoBack());
+        }
+
+        private void Forward()
+        {
+            _ = ForwardAsync();
+        }
+
+        public Task ForwardAsync()
+        {
+            return CefBrowserNavigation.RunAsync(this, nativeBrowser => nativeBrowser.GoForward());
+        }
+
+        public void Reload(bool ignoreCache = false)
+        {
+            _ = ReloadAsync(ignoreCache);
+        }
+
+        public Task ReloadAsync(bool ignoreCache = false)
+        {
+            return CefBrowserNavigation.RunAsync(this, nativeBrowser => nativeBrowser.Reload(ignoreCache));
+        }
+
+        public void Stop()
+        {
+            _ = StopAsync();
+        }
+
+        public Task StopAsync()
+        {
+            return CefBrowserNavigation.RunAsync(this, nativeBrowser => nativeBrowser.StopLoad());
         }
 
         public void ZoomOut()
