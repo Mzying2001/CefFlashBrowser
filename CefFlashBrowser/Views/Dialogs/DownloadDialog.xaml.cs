@@ -21,6 +21,7 @@ namespace CefFlashBrowser.Views.Dialogs
         private DownloadRecord _record;
         private string _directory;
 
+        internal Action ConfirmDestination { private get; set; }
         internal Func<string, int> StartSystemDownload { get; set; } = Win32.DoFileDownload;
         internal bool SystemDownloadStarted { get; private set; }
 
@@ -111,6 +112,7 @@ namespace CefFlashBrowser.Views.Dialogs
                     GlobalData.SaveSettings();
                 }
 
+                ConfirmDestination?.Invoke();
                 DialogHelper.SetDialogResult(this, true);
             }
             catch (Exception error)
