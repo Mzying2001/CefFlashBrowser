@@ -20,6 +20,7 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(NavigationType.Automatic, settings.NavigationType);
             Assert.AreEqual(NewPageBehavior.NewTab, settings.NewPageBehavior);
             Assert.IsFalse(settings.DisableOnBeforeUnloadDialog);
+            Assert.IsTrue(settings.AllowPageSwfScriptAccess);
             Assert.IsNull(settings.MainWindowSizeInfo);
             Assert.IsNull(settings.BrowserWindowSizeInfo);
             Assert.IsNull(settings.SwfWindowSizeInfo);
@@ -42,6 +43,23 @@ namespace CefFlashBrowser.Tests
             Assert.IsFalse(settings.DisableBrowserContextMenu);
             Assert.IsTrue(settings.EnableCoreJsPolyfills);
             Assert.AreEqual(UserScriptPermissionBehavior.Prompt, settings.DefaultUserScriptPermissionBehavior);
+        }
+
+        [TestMethod]
+        public void Deserialize_LegacySettingsAllowPageSwfScriptAccess()
+        {
+            var settings = JsonConvert.DeserializeObject<Settings>("{\"Language\":\"en-US\"}");
+
+            Assert.IsTrue(settings.AllowPageSwfScriptAccess);
+        }
+
+        [TestMethod]
+        public void AllowPageSwfScriptAccess_RoundTripsWhenDisabled()
+        {
+            var settings = new Settings { AllowPageSwfScriptAccess = false };
+            var json = JsonConvert.SerializeObject(settings);
+
+            Assert.IsFalse(JsonConvert.DeserializeObject<Settings>(json).AllowPageSwfScriptAccess);
         }
 
         [TestMethod]

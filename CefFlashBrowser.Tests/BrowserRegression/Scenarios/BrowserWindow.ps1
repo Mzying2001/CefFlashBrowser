@@ -404,6 +404,8 @@ function Test-SwfPlayerPageContext($Context) {
     $window = $null
     $player = $null
     $framePlayer = $null
+    $settings = [CefFlashBrowser.Data.GlobalData]::Settings
+    $previousScriptAccess = $settings.AllowPageSwfScriptAccess
     try {
         $window = New-RegressionWindow $Context
         $model = $window.ViewModel.CurrentBrowser
@@ -435,14 +437,18 @@ function Test-SwfPlayerPageContext($Context) {
         Assert-Regression ($fixture.RequestsFor('/swf-context-page') -eq 1) 'opening the player does not fetch the source page again'
         Assert-Regression ((Invoke-JavaScript $Context $playerBrowser 'document.baseURI') -ceq ($fixture.BaseUrl + '/swf-assets/')) 'the player uses the source HTML base'
         Assert-Regression ((Invoke-JavaScript $Context $playerBrowser "document.getElementById('flash-player').getAttribute('flashvars')") -ceq 'level=7&value=</script>"') 'object FlashVars are passed as data'
-        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser "!window.originalPage && document.getElementById('flash-player').getAttribute('allowscriptaccess') === 'never'") -and
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser '!window.originalPage') -and
             $playerView.ViewModel.UserScriptState -eq 'Disabled') 'the playback page has its own script context and excludes userscripts'
+        $readScriptAccess = "document.getElementById('flash-player').getAttribute('allowscriptaccess')"
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser $readScriptAccess) -ceq 'always') 'the page SWF player allows script access by default'
 
         $model.Address = $fixture.BaseUrl + '/swf-empty'
         Wait-Regression $Context { $model.Title -eq 'Empty SWF fixture' } 'the source tab navigates away'
+        $settings.AllowPageSwfScriptAccess = $false
         $movieRequests = $fixture.RequestsFor($moviePath)
         $playerBrowser.Reload($true)
         Wait-Regression $Context { $fixture.RequestsFor($moviePath) -gt $movieRequests } 'the player reloads after source navigation'
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser $readScriptAccess) -ceq 'always') 'reloading an open SWF player retains its script access setting'
 
         $player.FileName = $fixture.BaseUrl + '/independent.swf'
         Wait-Regression $Context { $player.Title -ceq 'independent.swf' -and $fixture.RequestsFor('/independent.swf') -gt 0 } 'changing FileName loads independently'
@@ -475,9 +481,13 @@ function Test-SwfPlayerPageContext($Context) {
             $frame = $native.GetFrame($id)
             if ($null -ne $frame -and $frame.Url -ceq $framePage) {
                 try {
-                    $evaluation = $frame.EvaluateScriptAsync("fetch('/swf-frame-cookie-probe'); document.getElementById('flash-player').getAttribute('flashvars')", $framePage, 1, [TimeSpan]::FromSeconds(5), $false)
+                    $script = "fetch('/swf-frame-cookie-probe'); var flash = document.getElementById('flash-player');" +
+                        "JSON.stringify({ flashvars: flash.getAttribute('flashvars'), scriptAccess: flash.getAttribute('allowscriptaccess') })"
+                    $evaluation = $frame.EvaluateScriptAsync($script, $framePage, 1, [TimeSpan]::FromSeconds(5), $false)
                     Wait-Regression $Context { $evaluation.IsCompleted } 'the player frame returns its Flash parameters'
-                    Assert-Regression ($evaluation.Result.Result -ceq 'frame=child') 'FlashVars come from the initiating iframe'
+                    $attributes = ConvertFrom-Json -InputObject $evaluation.Result.Result
+                    Assert-Regression ($attributes.flashvars -ceq 'frame=child') 'FlashVars come from the initiating iframe'
+                    Assert-Regression ($attributes.scriptAccess -ceq 'never') 'a newly opened player blocks script access when configured'
                     Wait-Regression $Context { $peer.RequestsFor('/swf-frame-cookie-probe') -gt 0 } 'the embedded playback document sends a same-origin request'
                     Assert-Regression ($peer.CookieFor('/swf-frame-cookie-probe') -notmatch 'swf_frame=yes') 'the embed retains the cross-site ancestor for credentialed requests'
                     Assert-Regression ($peer.RefererFor('/swf-frame-cookie-probe') -ceq '') 'the playback document keeps the source no-referrer behavior'
@@ -494,6 +504,7 @@ function Test-SwfPlayerPageContext($Context) {
         $frameBrowser.Reload($true)
         Wait-Regression $Context { $peer.RequestsFor('/frame-context.swf') -gt $frameRequests } 'iframe playback reloads after the source window closes'
     } finally {
+        $settings.AllowPageSwfScriptAccess = $previousScriptAccess
         if ($null -ne $framePlayer) { $framePlayer.ForceCloseWindow() }
         if ($null -ne $player) { $player.ForceCloseWindow() }
         if ($null -ne $window) { $window.ForceCloseWindow() }
@@ -521,9 +532,12 @@ function Test-LocalSwfPlayerPageContext($Context) {
         $base = [Uri]::new([Uri]::new($path), 'local-assets/').AbsoluteUri
         Assert-Regression ((Invoke-JavaScript $Context $playerBrowser 'document.baseURI') -ceq $base -and
             (Invoke-JavaScript $Context $playerBrowser "document.getElementById('flash-player').getAttribute('flashvars')") -ceq 'mode=local') 'local HTML passes its base and FlashVars to the player'
+        $readScriptAccess = "document.getElementById('flash-player').getAttribute('allowscriptaccess')"
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser $readScriptAccess) -ceq 'always') 'the local HTML SWF player allows script access by default'
         $player.FileName = $fixture.BaseUrl + '/local-next.swf'
         Wait-Regression $Context { $player.Title -ceq 'local-next.swf' } 'the contextual local player can switch to a separate SWF'
         Assert-Regression ((Invoke-JavaScript $Context $playerBrowser "!document.getElementById('flash-player').hasAttribute('flashvars')")) 'a switched local player clears the FlashVars'
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser "!document.getElementById('flash-player').hasAttribute('allowscriptaccess')")) 'a switched local player clears the script access attribute'
     } finally {
         if ($null -ne $player) { $player.ForceCloseWindow() }
         if ($null -ne $window) { $window.ForceCloseWindow() }
