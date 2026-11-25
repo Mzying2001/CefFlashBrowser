@@ -40,7 +40,25 @@ namespace CefFlashBrowser.Tests
             Assert.IsFalse(settings.DisableGpuAcceleration);
             Assert.IsNull(settings.CustomEmoticon);
             Assert.IsFalse(settings.DisableBrowserContextMenu);
+            Assert.IsTrue(settings.EnableCoreJsPolyfills);
             Assert.AreEqual(UserScriptPermissionBehavior.Prompt, settings.DefaultUserScriptPermissionBehavior);
+        }
+
+        [TestMethod]
+        public void Deserialize_LegacySettingsEnableCoreJsPolyfills()
+        {
+            var settings = JsonConvert.DeserializeObject<Settings>("{\"Language\":\"en-US\"}");
+
+            Assert.IsTrue(settings.EnableCoreJsPolyfills);
+        }
+
+        [TestMethod]
+        public void EnableCoreJsPolyfills_RoundTripsWhenDisabled()
+        {
+            var settings = new Settings { EnableCoreJsPolyfills = false };
+            var json = JsonConvert.SerializeObject(settings);
+
+            Assert.IsFalse(JsonConvert.DeserializeObject<Settings>(json).EnableCoreJsPolyfills);
         }
 
         [TestMethod]

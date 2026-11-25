@@ -31,6 +31,8 @@ Run `Run.ps1 -Scenario DownloadRestart` separately for cross-process recovery. I
 
 Run `Run.ps1 -Scenario Polyfills` to exercise the first script on each probe document with userscripts disabled. The check covers strict CSP, same-origin and cross-origin iframes, `srcdoc`, `about:blank`, `blob:`, `data:`, local HTML, reload, and a real popup. The package smoke check also runs the first-script probe using the renderer from the supplied zip.
 
+Run `Run.ps1 -Scenario PolyfillsDisabled` in a fresh STA process to verify that `"EnableCoreJsPolyfills": false` in `settings.json` disables injection through the application startup path.
+
 After `publish`, validate each actual zip in a fresh process of the matching architecture:
 
 ```cmd

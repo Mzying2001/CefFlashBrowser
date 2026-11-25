@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs', 'Polyfills')][string]$Scenario = 'All'
+    [ValidateSet('All', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs', 'Polyfills', 'PolyfillsDisabled')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -71,8 +71,11 @@ try {
         Start-RegressionCef $context
         Test-UserScriptFrames $context
     } elseif ($Scenario -eq 'Polyfills') {
-        Start-RegressionCef $context
+        Start-PolyfillRegressionCef $context
         Test-BrowserPolyfills $context
+    } elseif ($Scenario -eq 'PolyfillsDisabled') {
+        Start-PolyfillRegressionCef $context -DisablePolyfills
+        Test-BrowserPolyfillsDisabled $context
     } elseif ($Scenario -eq 'Network') {
         Start-RegressionCef $context
         Test-UserScriptNetwork $context

@@ -1,3 +1,27 @@
+function Start-PolyfillRegressionCef($Context, [switch]$DisablePolyfills) {
+    $globalData = [CefFlashBrowser.Data.GlobalData]
+    $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
+    foreach ($path in @{
+        CachesPath = (Join-Path $Context.TemporaryPath 'Cache')
+        CefLogPath = (Join-Path $Context.TemporaryPath 'cef.log')
+        CommandProxyPath = (Join-Path $Context.ApplicationPath 'Binaries\CmdProxy\CmdProxy.exe')
+        FlashPath = (Join-Path $Context.ApplicationPath 'Binaries\Plugins\pepflashplayer.dll')
+        SubprocessPath = (Join-Path $Context.CefPath 'CefSharp.BrowserSubprocess.exe')
+    }.GetEnumerator()) {
+        $globalData.GetField('<' + $path.Key + '>k__BackingField', $privateStatic).SetValue($null, $path.Value)
+    }
+
+    $settings = @{ DisableGpuAcceleration = $true; EnableUserScripts = $false }
+    if ($DisablePolyfills) { $settings.EnableCoreJsPolyfills = $false }
+    $settings | ConvertTo-Json | Set-Content -LiteralPath $globalData::SettingsPath -Encoding UTF8
+    $globalData::InitSettings()
+
+    $program = $globalData.Assembly.GetType('CefFlashBrowser.Program')
+    [void]$program.GetMethod('InitCefFlash', $privateStatic).Invoke($null, $null)
+    $Context.CefStarted = [CefSharp.Cef]::IsInitialized
+    Assert-Regression $Context.CefStarted 'CEF initializes through the application startup path'
+}
+
 function Assert-PolyfillProbe($Context, $Browser, [string]$Description) {
     $probe = 'document.documentElement && document.documentElement.getAttribute("data-polyfill-result")'
     Wait-Regression $Context {
@@ -5,6 +29,26 @@ function Assert-PolyfillProbe($Context, $Browser, [string]$Description) {
     } "$Description first script runs"
     $result = Invoke-JavaScript $Context $Browser $probe
     Assert-Regression ($result -eq 'ready') "$Description first script sees core-js ($result)"
+}
+
+function Test-BrowserPolyfillsDisabled($Context) {
+    $fixture = New-Object UserScriptHttpFixture
+    $window = $null
+    try {
+        $fixture.PolyfillProbeHtml = [IO.File]::ReadAllText((Join-Path $Context.ScriptPath 'PolyfillProbe.html'))
+        $window = New-UserScriptTargetWindow $Context ($fixture.BaseUrl + '/polyfill')
+        $model = $window.ViewModel.CurrentBrowser
+        Wait-Regression $Context {
+            $null -ne $model.Browser -and $model.Browser.Title -eq 'Polyfill probe' -and !$model.Browser.IsLoading
+        } 'polyfill test document loads with core-js disabled'
+
+        $probe = 'document.documentElement.getAttribute("data-polyfill-apis")'
+        $result = Invoke-JavaScript $Context $model.Browser $probe
+        Assert-Regression ($result -eq 'undefined,undefined,undefined,undefined') "first script sees no core-js APIs ($result)"
+    } finally {
+        if ($null -ne $window) { $window.ForceCloseWindow() }
+        $fixture.Dispose()
+    }
 }
 
 function Test-BrowserPolyfills($Context) {

@@ -6,6 +6,8 @@
     }
 
     try {
+        document.documentElement.setAttribute('data-polyfill-apis', [typeof structuredClone,
+            typeof Promise.withResolvers, typeof Array.prototype.at, typeof Object.hasOwn].join(','));
         const source = { nested: { value: 42 } };
         const copy = structuredClone(source);
         const pending = Promise.withResolvers();
