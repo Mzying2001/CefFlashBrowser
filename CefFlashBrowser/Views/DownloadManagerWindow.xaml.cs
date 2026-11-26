@@ -1,7 +1,10 @@
+using CefFlashBrowser.Data;
+using CefFlashBrowser.Models;
 using CefFlashBrowser.Services.Downloads;
 using CefFlashBrowser.ViewModels;
 using SimpleMvvm.Command;
 using SimpleMvvm.Ioc;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,6 +19,7 @@ namespace CefFlashBrowser.Views
         public DownloadManagerWindow()
         {
             InitializeComponent();
+            WindowSizeInfo.Apply(GlobalData.Settings.DownloadManagerSizeInfo, this);
 
             var service = SimpleIoc.Global.GetInstance<DownloadManagerService>();
             _model = new DownloadManagerViewModel(service);
@@ -27,6 +31,16 @@ namespace CefFlashBrowser.Views
 
             Activated += (_, __) => service.Refresh();
             Closed += (_, __) => _model.Dispose();
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            if (!e.Cancel)
+            {
+                GlobalData.Settings.DownloadManagerSizeInfo = WindowSizeInfo.GetSizeInfo(this);
+            }
         }
 
         private void CloseWindow(object sender, RoutedEventArgs e) => Close();

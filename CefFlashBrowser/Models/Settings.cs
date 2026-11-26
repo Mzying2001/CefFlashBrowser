@@ -73,6 +73,11 @@ namespace CefFlashBrowser.Models
         public WindowSizeInfo UserScriptManagerSizeInfo { get; set; }
 
         /// <summary>
+        /// The size and position of the download manager window
+        /// </summary>
+        public WindowSizeInfo DownloadManagerSizeInfo { get; set; }
+
+        /// <summary>
         /// Display and indentation preferences for the userscript editor
         /// </summary>
         public EditorSettings ScriptEditorSettings { get; set; }
@@ -219,6 +224,7 @@ namespace CefFlashBrowser.Models
             SwfWindowSizeInfo = null;
             SolSaveManagerSizeInfo = null;
             UserScriptManagerSizeInfo = null;
+            DownloadManagerSizeInfo = null;
             ScriptEditorSettings = new EditorSettings();
             ProxySettings = new ProxySettings();
             UserAgentSetting = new UserAgentSetting();
