@@ -18,9 +18,11 @@ public sealed class FaviconHttpFixture : IDisposable
     private readonly Task acceptTask;
     private int slowRequests;
     private int svgPathRequests;
+    private int recoveringIconRequests;
     public string BaseUrl { get; private set; }
     public int SlowRequests { get { return Volatile.Read(ref slowRequests); } }
     public int SvgPathRequests { get { return Volatile.Read(ref svgPathRequests); } }
+    public int RecoveringIconRequests { get { return Volatile.Read(ref recoveringIconRequests); } }
 
     public FaviconHttpFixture()
     {
@@ -87,6 +89,19 @@ public sealed class FaviconHttpFixture : IDisposable
                     Interlocked.Increment(ref svgPathRequests);
                     type = "application/octet-stream";
                     body = Encoding.UTF8.GetBytes(SvgIcon);
+                }
+                else if (path == "/recovering.svg")
+                {
+                    type = "image/svg+xml";
+                    if (Interlocked.Increment(ref recoveringIconRequests) == 1)
+                    {
+                        status = "404 Not Found";
+                        body = new byte[0];
+                    }
+                    else
+                    {
+                        body = Encoding.UTF8.GetBytes(SvgIcon);
+                    }
                 }
                 else if (path == "/icon" || path == "/slow.svg" || path == "/bad.svg")
                 {

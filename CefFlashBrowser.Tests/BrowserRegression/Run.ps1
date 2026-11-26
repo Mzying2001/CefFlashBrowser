@@ -51,8 +51,10 @@ try {
     Initialize-RegressionEnvironment $context
     if ($Scenario -eq 'BrowserIcon') {
         Test-BrowserIconDataUrls $context
+        Test-BrowserIconHttpCache $context
     } elseif ($Scenario -eq 'Favicons') {
         Test-BrowserIconDataUrls $context
+        Test-BrowserIconHttpCache $context -VerifyFailureRetry
         Start-RegressionCef $context
         Test-Favicons $context
     } elseif ($Scenario -eq 'DownloadManager') {
@@ -148,6 +150,7 @@ try {
         Test-LanguageService $context
         Test-LanguageSelectors $context
         Test-BrowserIconDataUrls $context
+        Test-BrowserIconHttpCache $context
         Test-FavoritesService $context
         Test-FavoritesManagerReorder $context
         Test-ProxySettings $context

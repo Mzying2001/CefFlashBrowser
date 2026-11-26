@@ -123,6 +123,84 @@ function Test-BrowserIconDataUrls($Context) {
     }
 }
 
+function Test-BrowserIconHttpCache($Context, [switch]$VerifyFailureRetry) {
+    $fixture = New-Object FaviconHttpFixture
+    $window = New-Object System.Windows.Window
+    $panel = New-Object System.Windows.Controls.StackPanel
+    $window.Content = $panel
+    $window.Left = -10000
+    $window.ShowInTaskbar = $false
+    $window.ShowActivated = $false
+    $first = New-Object CefFlashBrowser.Views.Custom.BrowserIcon
+    $second = New-Object CefFlashBrowser.Views.Custom.BrowserIcon
+    [void]$panel.Children.Add($first)
+    [void]$panel.Children.Add($second)
+
+    try {
+        $window.Show()
+        [void]$first.ApplyTemplate()
+        [void]$second.ApplyTemplate()
+        $firstImage = $first.Template.FindName('favicon', $first)
+        $secondImage = $second.Template.FindName('favicon', $second)
+
+        $slowUrl = $fixture.BaseUrl + '/slow.svg'
+        $first.FaviconUrl = $slowUrl + '#first'
+        Wait-Regression $Context { $fixture.SlowRequests -eq 1 } 'the shared SVG request starts'
+        $second.FaviconUrl = $slowUrl + '#second'
+        $first.FaviconUrl = $fixture.BaseUrl + '/icon.SVG?version=A'
+        Wait-Regression $Context { Test-SvgFavicon $first } 'a control can switch icons while the shared SVG is pending'
+        $replacement = $firstImage.Source
+        $fixture.ReleaseSlowResponse()
+        Wait-Regression $Context { Test-SvgFavicon $second } 'the remaining control receives the shared SVG'
+
+        $third = New-Object CefFlashBrowser.Views.Custom.BrowserIcon
+        [void]$panel.Children.Add($third)
+        [void]$third.ApplyTemplate()
+        $thirdImage = $third.Template.FindName('favicon', $third)
+        $third.FaviconUrl = $slowUrl
+        Wait-Regression $Context { Test-SvgFavicon $third } 'a new control receives the cached SVG'
+        Assert-Regression ($fixture.SlowRequests -eq 1 -and $secondImage.Source.IsFrozen -and
+            [object]::ReferenceEquals($secondImage.Source, $thirdImage.Source)) 'concurrent and later controls share one HTTP request and one decoded image'
+        Assert-Regression ([object]::ReferenceEquals($firstImage.Source, $replacement)) 'the shared SVG does not overwrite the replacement icon'
+
+        $first.FaviconUrl = $fixture.BaseUrl + '/icon.SVG?version=a'
+        Wait-Regression $Context { Test-SvgFavicon $first } 'the new query version renders as an SVG'
+        Assert-Regression ($fixture.SvgPathRequests -eq 2 -and ![object]::ReferenceEquals($firstImage.Source, $replacement)) 'query versions are cached separately with case preserved'
+
+        $failureUrl = $fixture.BaseUrl + '/recovering.svg'
+        $first.FaviconUrl = $failureUrl
+        $second.FaviconUrl = $failureUrl
+        Wait-Regression $Context {
+            $first.HasImageFailed -and $second.HasImageFailed -and
+                $first.Template.FindName('fallbackIcon', $first).Visibility -eq 'Visible' -and
+                $second.Template.FindName('fallbackIcon', $second).Visibility -eq 'Visible'
+        } 'both controls display the fallback after a shared 404'
+        $sinceFailure = [Diagnostics.Stopwatch]::StartNew()
+        $third.FaviconUrl = $failureUrl
+        Wait-Regression $Context { $third.HasImageFailed } 'a later control also receives the failed result during cooldown'
+        Assert-Regression ($fixture.RecoveringIconRequests -eq 1) 'only one HTTP request is made during the failure cooldown'
+
+        if ($VerifyFailureRetry) {
+            Wait-Regression $Context { $sinceFailure.Elapsed.TotalSeconds -ge 60 } 'the failure cooldown elapses' 65
+            Assert-Regression ($fixture.RecoveringIconRequests -eq 1) 'the cooldown does not trigger a background retry'
+            $first.FaviconUrl = $null
+            $second.FaviconUrl = $null
+            $first.FaviconUrl = $failureUrl
+            $second.FaviconUrl = $failureUrl
+            Wait-Regression $Context { (Test-SvgFavicon $first) -and (Test-SvgFavicon $second) } 'both controls receive the recovered SVG'
+            $third.FaviconUrl = $null
+            $third.FaviconUrl = $failureUrl
+            Wait-Regression $Context { Test-SvgFavicon $third } 'a later control receives the cached recovery'
+            Assert-Regression ($fixture.RecoveringIconRequests -eq 2 -and
+                [object]::ReferenceEquals($firstImage.Source, $secondImage.Source) -and
+                [object]::ReferenceEquals($firstImage.Source, $thirdImage.Source)) 'the cooldown allows exactly one retry and the recovered image is shared'
+        }
+    } finally {
+        $window.Close()
+        $fixture.Dispose()
+    }
+}
+
 function Test-Favicons($Context) {
     $fixture = New-Object FaviconHttpFixture
     $window = New-RegressionWindow $Context
