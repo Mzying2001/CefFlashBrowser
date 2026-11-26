@@ -1068,8 +1068,18 @@
               local:BrowserView.BrowserPopup="BrowserPopup"
               local:BrowserView.BrowserNewPage="BrowserNewPage">
             <ItemsControl x:Name="browsersControl" ItemsSource="{Binding Browsers}">
-                <ItemsControl.Resources>
-                    <Style TargetType="{x:Type local:BrowserView}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
+                        <local:BrowserView/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
                         <!-- Hidden tabs still participate in native hosting and preparation. -->
                         <Setter Property="Visibility" Value="Hidden"/>
                         <Style.Triggers>
@@ -1084,17 +1094,7 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ItemsControl.Resources>
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Grid/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
-                        <local:BrowserView/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
+                </ItemsControl.ItemContainerStyle>
             </ItemsControl>
         </Grid>
 
