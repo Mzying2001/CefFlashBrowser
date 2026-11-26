@@ -1,5 +1,17 @@
 root = true
 
+[*]
+charset = utf-8
+
+# Use UTF-8 with BOM for PowerShell scripts.
+[*.ps1]
+charset = utf-8-bom
+
+# XML, C# project, and manifest formatting rules.
+[*.{xml,csproj,manifest}]
+indent_style = space
+indent_size = 2
+
 # C# formatting rules.
 [*.cs]
 
@@ -33,8 +45,3 @@ csharp_new_line_before_finally = true
 # Preserve existing single-line blocks and statements.
 csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = true
-
-# XML, C# project, and manifest formatting rules.
-[*.{xml,csproj,manifest}]
-indent_style = space
-indent_size = 2

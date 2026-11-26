@@ -1,4 +1,4 @@
-﻿using CefSharp;
+using CefSharp;
 using System.Security.Cryptography.X509Certificates;
 
 namespace CefFlashBrowser.WinformCefSharp4WPF.Internals

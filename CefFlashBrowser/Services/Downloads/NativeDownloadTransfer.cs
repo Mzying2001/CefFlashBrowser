@@ -19,6 +19,8 @@ namespace CefFlashBrowser.Services.Downloads
         private readonly SemaphoreSlim _commands = new SemaphoreSlim(1, 1);
         private readonly TaskCompletionSource<bool> _released = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         private IDownloadItemCallback _callback;
+        private TaskCompletionSource<string> _confirmedSave;
+        private bool _hasReceivedAllBytes;
         private bool _started;
         private bool _stopping;
         private bool _paused;
@@ -52,7 +54,14 @@ namespace CefFlashBrowser.Services.Downloads
 
             try
             {
-                var destination = await _manager.SelectBrowserDestinationAsync(Record, _selection.Token);
+                var destination = await _manager.SelectBrowserDestinationAsync(Record, _selection.Token, () =>
+                {
+                    lock (Record.SyncRoot)
+                    {
+                        if (!_stopping && _hasReceivedAllBytes)
+                            _confirmedSave = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+                    }
+                });
                 if (destination == DownloadManagerService.DestinationChoice.Cancelled &&
                     (_selection.IsCancellationRequested || _manager.IsStopping))
                     return;
@@ -63,16 +72,21 @@ namespace CefFlashBrowser.Services.Downloads
                     return;
                 }
 
+                bool continued;
                 await _commands.WaitAsync();
 
                 try
                 {
-                    if (_stopping)
-                        return;
+                    lock (Record.SyncRoot)
+                    {
+                        if (_stopping)
+                            return;
+                        Record.PartialPath = Record.FilePath + "." + Record.Id + ".part";
+                        if (Record.State == DownloadState.Waiting)
+                            Record.State = DownloadState.Downloading;
+                    }
 
-                    Record.PartialPath = Record.FilePath + "." + Record.Id + ".part";
-
-                    var continued = await Cef.UIThreadTaskFactory.StartNew(() =>
+                    continued = await Cef.UIThreadTaskFactory.StartNew(() =>
                     {
                         var canContinue = !_before.IsDisposed;
                         if (canContinue)
@@ -81,26 +95,23 @@ namespace CefFlashBrowser.Services.Downloads
                         return canContinue;
                     });
 
-                    Record.State = DownloadState.Downloading;
                     Changed?.Invoke(this, EventArgs.Empty);
 
-                    if (continued && !_manager.IsStopping)
-                    {
-                        try
-                        {
-                            WindowManager.ShowDownloadManager();
-                        }
-                        catch (Exception error)
-                        {
-                            _logger.Log(LogLevel.Error, "Failed to open the download manager", error);
-                        }
-                    }
+                    if (continued && _confirmedSave == null)
+                        ShowDownload();
 
                     await _manager.SaveRecordAsync(Record);
                 }
                 finally
                 {
                     _commands.Release();
+                }
+
+                if (continued && _confirmedSave != null)
+                {
+                    var path = await _confirmedSave.Task;
+                    if (Record.State != DownloadState.Cancelled)
+                        ShowDownload(path);
                 }
             }
             catch (OperationCanceledException) { }
@@ -111,6 +122,27 @@ namespace CefFlashBrowser.Services.Downloads
                 Record.Error = error.Message;
                 Record.State = DownloadState.Failed;
                 Release();
+                if (_confirmedSave != null)
+                    ShowDownload();
+            }
+        }
+
+        private void ShowDownload(string savedPath = null)
+        {
+            if (_manager.IsStopping)
+                return;
+
+            try
+            {
+                if (savedPath == null)
+                    WindowManager.ShowDownloadManager();
+                else
+                    ExplorerHelper.SelectFile(savedPath);
+            }
+            catch (Exception error)
+            {
+                _logger.Log(LogLevel.Error, savedPath == null ? "Failed to open the download manager"
+                    : "Failed to show the download in File Explorer", error);
             }
         }
 
@@ -130,6 +162,8 @@ namespace CefFlashBrowser.Services.Downloads
                 Record.Received = item.ReceivedBytes;
                 Record.Total = item.TotalBytes > 0 ? (long?)item.TotalBytes : null;
                 Record.Speed = _paused ? 0 : Math.Max(0, item.CurrentSpeed);
+                // CEF can receive all bytes while it is still waiting for Continue to provide the destination.
+                _hasReceivedAllBytes = item.IsInProgress && item.TotalBytes > 0 && item.ReceivedBytes >= item.TotalBytes;
 
                 if (item.IsComplete)
                 {
@@ -138,11 +172,12 @@ namespace CefFlashBrowser.Services.Downloads
                     return;
                 }
 
-                if (item.IsCancelled)
+                if (!item.IsInProgress)
                 {
                     Record.State = DownloadState.Interrupted;
                     Record.Speed = 0;
                     Record.Error = "downloads_nativeInterrupted";
+                    _confirmedSave?.TrySetResult(null);
                 }
                 else if (!string.IsNullOrEmpty(Record.PartialPath))
                 {
@@ -349,6 +384,7 @@ namespace CefFlashBrowser.Services.Downloads
             finally
             {
                 _released.TrySetResult(true);
+                _confirmedSave?.TrySetResult(Record.State == DownloadState.Completed ? Record.FilePath : null);
             }
         }
     }

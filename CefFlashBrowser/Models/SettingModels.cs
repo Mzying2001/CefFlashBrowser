@@ -1,5 +1,5 @@
-﻿using CefFlashBrowser.Utils;
-using Newtonsoft.Json;
+using CefFlashBrowser.Utils;
+using System.Text.Json.Serialization;
 
 namespace CefFlashBrowser.Models
 {
@@ -79,30 +79,24 @@ namespace CefFlashBrowser.Models
         private int _fontSize = DefaultFontSize;
         private int _tabWidth = DefaultTabWidth;
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string FontFamily { get; set; } = DefaultFontFamily;
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int FontSize
         {
             get => _fontSize;
             set => _fontSize = IsFontSizeValid(value) ? value : DefaultFontSize;
         }
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool IndentWithSpaces { get; set; } = true;
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int TabWidth
         {
             get => _tabWidth;
             set => _tabWidth = IsTabWidthValid(value) ? value : DefaultTabWidth;
         }
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool ShowLineNumbers { get; set; } = true;
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool WordWrap { get; set; }
 
         internal static bool IsFontSizeValid(int value) => value >= 8 && value <= 72;

@@ -1,4 +1,4 @@
-function Test-BrowserWindow($Context) {
+﻿function Test-BrowserWindow($Context) {
     $window = New-RegressionWindow $Context
     $browser = $window.ViewModel.CurrentBrowser.Browser
     $view = Find-BrowserView $window
@@ -258,20 +258,24 @@ function Test-BrowserPageSwfs($Context) {
         $model.Address = $fixture.BaseUrl + '/swf-page'
         Wait-Regression $Context { $browser.Title -eq 'SWF fixture' -and !$browser.IsLoading } 'SWF fixture page loads'
         $gameUrl = $fixture.BaseUrl + '/GAME.SWF?token=a%2Fb'
+        $longFileName = ('z' * 120) + '.swf'
+        $longUrl = $fixture.BaseUrl + '/' + $longFileName
         $expected = @(
             $fixture.BaseUrl + '/embedded.swf'
             $fixture.BaseUrl + '/frame.swf'
             $gameUrl
             $fixture.BaseUrl + '/swf-response'
             $fixture.BaseUrl + '/swf-missing.swf'
+            $longUrl
         )
-        [void](Invoke-JavaScript $Context $browser @'
+        [void](Invoke-JavaScript $Context $browser @"
 console.info('Cross-origin plugin content from https://example.invalid/fake.swf');
 fetch('/GAME.SWF?token=a%2Fb').then(() => fetch('/GAME.SWF?token=a%2Fb'));
 fetch('/swf-redirect');
 fetch('/swf-missing.swf');
+fetch('/$longFileName');
 true;
-'@)
+"@)
         Wait-Regression $Context {
             $browser.PageSwfs.Count -ge $expected.Count -and $fixture.RequestsFor('/GAME.SWF') -eq 2
         } 'CEF observes SWFs from the page and its iframe'
@@ -284,16 +288,62 @@ true;
         Assert-Regression ([Windows.Automation.AutomationProperties]::GetName($button) -ceq 'PageSwfs') 'SWF toolbar has a fixed automation name'
         Assert-Regression ($button.Content.UriSource.OriginalString -eq '/Assets/Icons/swf.svg') 'SWF toolbar uses the SWF icon'
 
+        Set-TabWindowForeground $Context $window
         $buttonPeer = New-Object System.Windows.Automation.Peers.ButtonAutomationPeer($button)
         $buttonPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
         Wait-Regression $Context { $menu.IsOpen -and $menu.Items.Count -eq $expected.Count } 'clicking the SWF button displays the current page list'
         Assert-Regression ((($menu.Items | ForEach-Object { $_.FileName }) -join '|') -ceq
-            'embedded.swf|frame.swf|GAME.SWF|swf-missing.swf|swf-response') 'SWF menu lists filenames in ascending case-insensitive order'
+            "embedded.swf|frame.swf|GAME.SWF|swf-missing.swf|swf-response|$longFileName") 'SWF menu lists filenames in ascending case-insensitive order'
         Wait-Regression $Context {
             $null -ne $menu.ItemContainerGenerator.ContainerFromItem($game)
         } 'SWF menu generates the player item'
         $item = $menu.ItemContainerGenerator.ContainerFromItem($game)
+        Assert-Regression ([object]::ReferenceEquals($item.Template, $window.FindResource('MenuItemWithoutShortcutTemplate'))) 'SWF menu uses the shared template without a shortcut column'
         Assert-Regression ($item.ToolTip -ceq $gameUrl -and $null -ne $item.Command) 'SWF menu item exposes the complete URL and player action'
+        $downloadCommand = $window.ViewModel.DownloadPageSwfCommand
+        $download = Find-CommandButton $item $downloadCommand
+        $longItem = $menu.ItemContainerGenerator.ContainerFromIndex($menu.Items.Count - 1)
+        $longDownload = Find-CommandButton $longItem $downloadCommand
+        Assert-Regression ($download.IsEnabled -and $download.BorderThickness -eq [Windows.Thickness]::new(0) -and
+            $download.Background.Color.A -eq 0 -and
+            $download.Content.UriSource.OriginalString -ceq '/Assets/Icons/download.svg' -and
+            $download.ToolTip -ceq $Context.LanguageService.GetString('downloads_start')) 'SWF download uses the borderless icon button with a localized tooltip'
+        $origin = [Windows.Point]::new(0, 0)
+        Assert-Regression ($longItem.Header.FileName -ceq $longFileName -and $menu.ActualWidth -le 300 -and
+            [Math]::Abs($download.TranslatePoint($origin, $menu).X - $longDownload.TranslatePoint($origin, $menu).X) -lt 1) 'long filenames keep the SWF download buttons aligned on the right'
+
+        $downloadState = @{ Url = $null; MenuClosed = $false }
+        $timer = New-Object Windows.Threading.DispatcherTimer
+        $timer.Interval = [TimeSpan]::FromMilliseconds(30)
+        $timer.Add_Tick({
+            $dialog = $Context.Application.Windows | Where-Object {
+                $_ -is [CefFlashBrowser.Views.Dialogs.DownloadDialog] -and $_.IsVisible
+            } | Select-Object -First 1
+            if ($null -eq $dialog) { return }
+
+            $downloadState.Url = $dialog.FindName('urlBox').Text
+            $downloadState.MenuClosed = !$menu.IsOpen
+            $dialog.Close()
+        }.GetNewClosure())
+        $timer.Start()
+        try {
+            $point = $download.PointToScreen([Windows.Point]::new($download.ActualWidth / 2, $download.ActualHeight / 2))
+            [System.Windows.Forms.Cursor]::Position = [Drawing.Point]::new([int]$point.X, [int]$point.Y)
+            Wait-Regression $Context { $download.IsMouseOver } 'mouse is over the SWF download button'
+            $highlight = $download.Template.FindName('highlight', $download)
+            Assert-Regression ($highlight.Opacity -eq 0.12) 'SWF download uses a translucent highlight on hover'
+            [RegressionKeyboard]::ClickMouse([int]$point.X, [int]$point.Y, $false)
+            Wait-Regression $Context { !$menu.IsOpen } 'clicking the SWF download button dismisses the menu'
+            Wait-Regression $Context { $null -ne $downloadState.Url } 'clicking the SWF download button opens the download dialog'
+            Assert-Regression ($downloadState.MenuClosed -and $downloadState.Url -ceq $gameUrl -and
+                !($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.SwfPlayerWindow] })) 'SWF download closes the menu, keeps the query string and skips playback'
+        } finally {
+            $timer.Stop()
+        }
+
+        $buttonPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
+        Wait-Regression $Context { $menu.IsOpen -and $null -ne $menu.ItemContainerGenerator.ContainerFromItem($game) } 'SWF menu reopens after downloading'
+        $item = $menu.ItemContainerGenerator.ContainerFromItem($game)
         $itemPeer = New-Object System.Windows.Automation.Peers.MenuItemAutomationPeer($item)
         $itemPeer.GetPattern([System.Windows.Automation.Peers.PatternInterface]::Invoke).Invoke()
         Wait-Regression $Context {
@@ -354,6 +404,8 @@ function Test-SwfPlayerPageContext($Context) {
     $window = $null
     $player = $null
     $framePlayer = $null
+    $settings = [CefFlashBrowser.Data.GlobalData]::Settings
+    $previousScriptAccess = $settings.AllowPageSwfScriptAccess
     try {
         $window = New-RegressionWindow $Context
         $model = $window.ViewModel.CurrentBrowser
@@ -385,14 +437,18 @@ function Test-SwfPlayerPageContext($Context) {
         Assert-Regression ($fixture.RequestsFor('/swf-context-page') -eq 1) 'opening the player does not fetch the source page again'
         Assert-Regression ((Invoke-JavaScript $Context $playerBrowser 'document.baseURI') -ceq ($fixture.BaseUrl + '/swf-assets/')) 'the player uses the source HTML base'
         Assert-Regression ((Invoke-JavaScript $Context $playerBrowser "document.getElementById('flash-player').getAttribute('flashvars')") -ceq 'level=7&value=</script>"') 'object FlashVars are passed as data'
-        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser "!window.originalPage && document.getElementById('flash-player').getAttribute('allowscriptaccess') === 'never'") -and
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser '!window.originalPage') -and
             $playerView.ViewModel.UserScriptState -eq 'Disabled') 'the playback page has its own script context and excludes userscripts'
+        $readScriptAccess = "document.getElementById('flash-player').getAttribute('allowscriptaccess')"
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser $readScriptAccess) -ceq 'always') 'the page SWF player allows script access by default'
 
         $model.Address = $fixture.BaseUrl + '/swf-empty'
         Wait-Regression $Context { $model.Title -eq 'Empty SWF fixture' } 'the source tab navigates away'
+        $settings.AllowPageSwfScriptAccess = $false
         $movieRequests = $fixture.RequestsFor($moviePath)
-        [CefSharp.WebBrowserExtensions]::Reload($playerBrowser, $true)
+        $playerBrowser.Reload($true)
         Wait-Regression $Context { $fixture.RequestsFor($moviePath) -gt $movieRequests } 'the player reloads after source navigation'
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser $readScriptAccess) -ceq 'always') 'reloading an open SWF player retains its script access setting'
 
         $player.FileName = $fixture.BaseUrl + '/independent.swf'
         Wait-Regression $Context { $player.Title -ceq 'independent.swf' -and $fixture.RequestsFor('/independent.swf') -gt 0 } 'changing FileName loads independently'
@@ -425,9 +481,13 @@ function Test-SwfPlayerPageContext($Context) {
             $frame = $native.GetFrame($id)
             if ($null -ne $frame -and $frame.Url -ceq $framePage) {
                 try {
-                    $evaluation = $frame.EvaluateScriptAsync("fetch('/swf-frame-cookie-probe'); document.getElementById('flash-player').getAttribute('flashvars')", $framePage, 1, [TimeSpan]::FromSeconds(5))
+                    $script = "fetch('/swf-frame-cookie-probe'); var flash = document.getElementById('flash-player');" +
+                        "JSON.stringify({ flashvars: flash.getAttribute('flashvars'), scriptAccess: flash.getAttribute('allowscriptaccess') })"
+                    $evaluation = $frame.EvaluateScriptAsync($script, $framePage, 1, [TimeSpan]::FromSeconds(5), $false)
                     Wait-Regression $Context { $evaluation.IsCompleted } 'the player frame returns its Flash parameters'
-                    Assert-Regression ($evaluation.Result.Result -ceq 'frame=child') 'FlashVars come from the initiating iframe'
+                    $attributes = ConvertFrom-Json -InputObject $evaluation.Result.Result
+                    Assert-Regression ($attributes.flashvars -ceq 'frame=child') 'FlashVars come from the initiating iframe'
+                    Assert-Regression ($attributes.scriptAccess -ceq 'never') 'a newly opened player blocks script access when configured'
                     Wait-Regression $Context { $peer.RequestsFor('/swf-frame-cookie-probe') -gt 0 } 'the embedded playback document sends a same-origin request'
                     Assert-Regression ($peer.CookieFor('/swf-frame-cookie-probe') -notmatch 'swf_frame=yes') 'the embed retains the cross-site ancestor for credentialed requests'
                     Assert-Regression ($peer.RefererFor('/swf-frame-cookie-probe') -ceq '') 'the playback document keeps the source no-referrer behavior'
@@ -441,9 +501,10 @@ function Test-SwfPlayerPageContext($Context) {
         $window.ForceCloseWindow()
         $window = $null
         $frameRequests = $peer.RequestsFor('/frame-context.swf')
-        [CefSharp.WebBrowserExtensions]::Reload($frameBrowser, $true)
+        $frameBrowser.Reload($true)
         Wait-Regression $Context { $peer.RequestsFor('/frame-context.swf') -gt $frameRequests } 'iframe playback reloads after the source window closes'
     } finally {
+        $settings.AllowPageSwfScriptAccess = $previousScriptAccess
         if ($null -ne $framePlayer) { $framePlayer.ForceCloseWindow() }
         if ($null -ne $player) { $player.ForceCloseWindow() }
         if ($null -ne $window) { $window.ForceCloseWindow() }
@@ -471,9 +532,12 @@ function Test-LocalSwfPlayerPageContext($Context) {
         $base = [Uri]::new([Uri]::new($path), 'local-assets/').AbsoluteUri
         Assert-Regression ((Invoke-JavaScript $Context $playerBrowser 'document.baseURI') -ceq $base -and
             (Invoke-JavaScript $Context $playerBrowser "document.getElementById('flash-player').getAttribute('flashvars')") -ceq 'mode=local') 'local HTML passes its base and FlashVars to the player'
+        $readScriptAccess = "document.getElementById('flash-player').getAttribute('allowscriptaccess')"
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser $readScriptAccess) -ceq 'always') 'the local HTML SWF player allows script access by default'
         $player.FileName = $fixture.BaseUrl + '/local-next.swf'
         Wait-Regression $Context { $player.Title -ceq 'local-next.swf' } 'the contextual local player can switch to a separate SWF'
         Assert-Regression ((Invoke-JavaScript $Context $playerBrowser "!document.getElementById('flash-player').hasAttribute('flashvars')")) 'a switched local player clears the FlashVars'
+        Assert-Regression ((Invoke-JavaScript $Context $playerBrowser "!document.getElementById('flash-player').hasAttribute('allowscriptaccess')")) 'a switched local player clears the script access attribute'
     } finally {
         if ($null -ne $player) { $player.ForceCloseWindow() }
         if ($null -ne $window) { $window.ForceCloseWindow() }

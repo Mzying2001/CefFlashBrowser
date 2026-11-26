@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Infrastructure.Collections;
+using CefFlashBrowser.Infrastructure.Collections;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services.UserScripts;
 using Mzying2001.MonkeySharp.Core.Domain;

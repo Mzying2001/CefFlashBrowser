@@ -96,7 +96,7 @@ namespace CefFlashBrowser.Views
         internal void OpenFromPage(SwfPageContext context)
         {
             FileName = context.Resource.Url;
-            var page = new SwfPlayerPage(context, LocalPlayerUrl, PlayerTemplate.Value);
+            var page = new SwfPlayerPage(context, LocalPlayerUrl, PlayerTemplate.Value, GlobalData.Settings.AllowPageSwfScriptAccess);
             browserView.PlayerPage = page;
             ViewModel.Address = page.StartUrl;
         }

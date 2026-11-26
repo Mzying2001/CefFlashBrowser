@@ -1,4 +1,4 @@
-function New-UserScriptTargetWindow($Context, [string]$Address) {
+﻿function New-UserScriptTargetWindow($Context, [string]$Address) {
     $window = New-Object CefFlashBrowser.Views.BrowserWindow
     $window.Width = 800
     $window.Height = 600
@@ -499,7 +499,7 @@ document.documentElement.setAttribute('data-network-ready', 'yes');
         Assert-Regression ($peer.RequestsFor('/denied-connect') -eq 0) 'undeclared XHR is rejected before server side effects'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('xhrExplicitCookie'))")
         Wait-UserScriptNetworkMarker $Context $model.Browser 'data-explicit-cookie' 'MSP006_NOT_SUPPORTED'
-        Assert-Regression ($fixture.RequestsFor('/explicit-cookie') -eq 0) 'CefSharp 84 explicit Cookie requests fail before sending'
+        Assert-Regression ($fixture.RequestsFor('/explicit-cookie') -eq 0) 'CefSharp explicit Cookie requests fail before sending'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('cookieCrud'))")
         Wait-UserScriptNetworkMarker $Context $model.Browser 'data-cookie-crud' 'yes' $true
         Wait-UserScriptNetworkMarker $Context $model.Browser 'data-partition' 'MSP006_NOT_SUPPORTED'

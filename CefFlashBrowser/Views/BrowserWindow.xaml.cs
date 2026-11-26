@@ -4,6 +4,7 @@ using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
 using CefFlashBrowser.ViewModels;
 using CefFlashBrowser.Views.Custom;
+using CefFlashBrowser.WinformCefSharp4WPF;
 using CefSharp;
 using SimpleMvvm.Messaging;
 using System;
@@ -45,6 +46,15 @@ namespace CefFlashBrowser.Views
         {
             get => DataContext as BrowserWindowViewModel;
             set => DataContext = value;
+        }
+
+        private void PageSwfDownloadClicked(object sender, RoutedEventArgs e)
+        {
+            var menu = (ContextMenu)sender;
+            e.Handled = true;
+
+            // Let the button execute its command before closing the popup.
+            Dispatcher.BeginInvoke(new Action(() => menu.IsOpen = false));
         }
 
         private void OpenUserScriptPermissions(object sender, RoutedEventArgs e)
@@ -125,7 +135,7 @@ namespace CefFlashBrowser.Views
                 {
                     ViewModel.ShowFindPopup = false;
                 }
-                else if (ViewModel.CurrentBrowser?.Browser is IWebBrowser browser
+                else if (ViewModel.CurrentBrowser?.Browser is ChromiumWebBrowser browser
                     && !browser.IsDisposed && browser.IsLoading)
                 {
                     browser.Stop();

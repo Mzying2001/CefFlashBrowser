@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Utils;
+using CefFlashBrowser.Utils;
 using System.Windows;
 
 namespace CefFlashBrowser.Views.Dialogs

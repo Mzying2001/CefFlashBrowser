@@ -1,4 +1,4 @@
-function Assert-ViewSourcePage($Context, $Model, [string]$Address, [string]$Title = 'Auxiliary regression') {
+﻿function Assert-ViewSourcePage($Context, $Model, [string]$Address, [string]$Title = 'Auxiliary regression') {
     Wait-Regression $Context {
         $Model.IsBrowserReady() -and !$Model.Browser.IsLoading -and
         $Model.Address -eq $Address -and
@@ -106,7 +106,7 @@ function Test-ViewSourceNavigation($Context) {
         }.GetNewClosure())
         $source.Browser.add_FrameLoadEnd($loaded)
         try {
-            [CefSharp.WebBrowserExtensions]::Reload($source.Browser)
+            $source.Browser.Reload($false)
             Wait-Regression $Context { $loadState.Count -gt 0 } 'source page reload completes'
         } finally {
             $source.Browser.remove_FrameLoadEnd($loaded)
@@ -127,9 +127,9 @@ function Test-ViewSourceNavigation($Context) {
         $repeated.Address = $Context.AuxiliarySecondAddress
         Wait-Regression $Context { $repeated.Title -eq 'Second auxiliary page' -and $repeated.Browser.CanExecuteJavascriptInMainFrame } 'source tab navigates to a regular page'
         Assert-Regression ($repeated.Address -eq $Context.AuxiliarySecondAddress) 'regular navigation clears the source prefix'
-        [CefSharp.WebBrowserExtensions]::Back($repeated.Browser)
+        Invoke-BrowserCommand $repeated.Browser.BackCommand
         Assert-ViewSourcePage $Context $repeated $address
-        [CefSharp.WebBrowserExtensions]::Forward($repeated.Browser)
+        Invoke-BrowserCommand $repeated.Browser.ForwardCommand
         Wait-Regression $Context { $repeated.Title -eq 'Second auxiliary page' -and $repeated.Browser.CanExecuteJavascriptInMainFrame } 'forward navigation returns to the regular page'
 
         $dialog = Set-RegressionBeforeUnload $Context $repeated.Browser

@@ -268,6 +268,25 @@ namespace CefFlashBrowser.Tests
         }
 
         [TestMethod]
+        public async Task Recovery_ReadsLegacyMarkerWithExplicitNullField()
+        {
+            var installed = await InstallAsync();
+            File.Delete(PathFor(installed.ScriptKey));
+            var next = Source + "\n// committed replacement";
+            var journal = await StageAsync(installed, "replace", next);
+
+            var legacyMarker = $@"{{""operation"":""replace"",""commitId"":""{journal.CommitId}"",
+                ""previousCommitId"":""{journal.PreviousCommitId}"",""previousFileHash"":null,""newFileHash"":""{journal.NewFileHash}""}}";
+            File.WriteAllText(Marker(installed.ScriptKey), legacyMarker, new UTF8Encoding(false));
+            await CommitAsync(installed.ScriptKey, journal);
+
+            var loaded = await _persistence.LoadAsync(installed.ScriptKey, None);
+
+            Assert.AreEqual(next, loaded.Record.Source);
+            Assert.IsFalse(File.Exists(Marker(installed.ScriptKey)));
+        }
+
+        [TestMethod]
         public async Task UnmarkedBackupAndUnregisteredFiles_AreNeverImportedOrUsedToOverwriteSource()
         {
             var installed = await InstallAsync();

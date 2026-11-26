@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Sol;
+using CefFlashBrowser.Sol;
 using CefFlashBrowser.Utils;
 using System.Collections.Generic;
 

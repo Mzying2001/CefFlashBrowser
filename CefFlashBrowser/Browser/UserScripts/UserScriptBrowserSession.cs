@@ -419,7 +419,7 @@ namespace CefFlashBrowser.Browser.UserScripts
                     _service.Repository.Changed -= RepositoryChanged;
 
                 if (!_browser.IsDisposed && _browser.IsBrowserInitialized)
-                    CefSharp.WebBrowserExtensions.Stop(_browser);
+                    await _browser.StopAsync();
 
                 await DetachHostAsync(true);
             }

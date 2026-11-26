@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using SimpleMvvm.Messaging;
 using System;
 using System.Windows;

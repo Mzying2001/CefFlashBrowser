@@ -5,8 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace CefFlashBrowser.Services.UserScripts.Persistence
 {
@@ -147,14 +146,14 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
                     _checkpoint?.Invoke("pending");
                 }
 
-                UserScriptFiles.WriteNew(markerTemporary, Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new
+                UserScriptFiles.WriteNew(markerTemporary, JsonSerializer.SerializeToUtf8Bytes(new
                 {
                     operation = journal.Operation,
                     commitId = journal.CommitId,
                     previousCommitId = journal.PreviousCommitId,
                     previousFileHash = journal.PreviousFileHash,
                     newFileHash = journal.NewFileHash
-                })));
+                }));
                 _checkpoint?.Invoke("marker-staged");
                 File.Move(markerTemporary, Marker(path));
             }
@@ -328,22 +327,22 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
             try
             {
-                var root = JObject.Parse(UserScriptFiles.Decode(UserScriptFiles.ReadBytes(Marker(path))));
-
-                foreach (var name in new[] { "operation", "commitId", "previousCommitId", "previousFileHash", "newFileHash" })
+                Journal result;
+                using (var document = JsonDocument.Parse(UserScriptFiles.Decode(UserScriptFiles.ReadBytes(Marker(path)))))
                 {
-                    if (root.Property(name) == null || root[name].Type != JTokenType.String && root[name].Type != JTokenType.Null)
-                        throw new FormatException("Missing or invalid transaction field: " + name);
+                    var root = document.RootElement;
+                    if (root.ValueKind != JsonValueKind.Object)
+                        throw new FormatException("Transaction marker must be a JSON object.");
+
+                    result = new Journal
+                    {
+                        Operation = ReadJournalField(root, "operation"),
+                        CommitId = ReadJournalField(root, "commitId"),
+                        PreviousCommitId = ReadJournalField(root, "previousCommitId"),
+                        PreviousFileHash = ReadJournalField(root, "previousFileHash"),
+                        NewFileHash = ReadJournalField(root, "newFileHash")
+                    };
                 }
-
-                var result = new Journal
-                {
-                    Operation = (string)root["operation"],
-                    CommitId = (string)root["commitId"],
-                    PreviousCommitId = (string)root["previousCommitId"],
-                    PreviousFileHash = (string)root["previousFileHash"],
-                    NewFileHash = (string)root["newFileHash"]
-                };
 
                 if (!Guid.TryParseExact(result.CommitId, "D", out var commit) || commit == Guid.Empty
                     || (result.PreviousCommitId != null
@@ -358,11 +357,20 @@ namespace CefFlashBrowser.Services.UserScripts.Persistence
 
                 return result;
             }
-            catch (Exception error) when (error is JsonException || error is FormatException || error is KeyNotFoundException
+            catch (Exception error) when (error is JsonException || error is FormatException
                 || error is InvalidOperationException || error is DecoderFallbackException)
             {
                 throw Conflict(path, "Invalid transaction marker: " + error.Message);
             }
+        }
+
+        private static string ReadJournalField(JsonElement root, string name)
+        {
+            if (!root.TryGetProperty(name, out var value)
+                || value.ValueKind != JsonValueKind.String && value.ValueKind != JsonValueKind.Null)
+                throw new FormatException("Missing or invalid transaction field: " + name);
+
+            return value.GetString();
         }
 
         private static void RestoreFile(string candidate, string path, string hash, string expectedCurrentHash)

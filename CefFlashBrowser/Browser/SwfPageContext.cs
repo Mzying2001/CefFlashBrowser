@@ -1,8 +1,9 @@
 using CefFlashBrowser.FlashBrowser;
 using CefSharp;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Browser
@@ -78,8 +79,8 @@ namespace CefFlashBrowser.Browser
                     if (!IsCurrentFrame(frame, source))
                         return null;
 
-                    var urls = JsonConvert.SerializeObject(new[] { resource.Url, resource.RequestedUrl });
-                    var names = JsonConvert.SerializeObject(FlashAttributes);
+                    var urls = JsonSerializer.Serialize(new[] { resource.Url, resource.RequestedUrl });
+                    var names = JsonSerializer.Serialize(FlashAttributes);
                     var response = await frame.EvaluateScriptAsync($"{InspectPage}({urls}, {names})",
                         timeout: TimeSpan.FromSeconds(2));
 
@@ -87,7 +88,7 @@ namespace CefFlashBrowser.Browser
                         || !IsCurrentFrame(frame, source))
                         return null;
 
-                    var values = JsonConvert.DeserializeObject<PageValues>(json);
+                    var values = JsonSerializer.Deserialize<PageValues>(json);
                     if (values == null || values.Ancestors == null)
                         return null;
 
@@ -160,9 +161,13 @@ namespace CefFlashBrowser.Browser
 
         private sealed class PageValues
         {
+            [JsonPropertyName("base")]
             public string Base { get; set; }
+            [JsonPropertyName("origin")]
             public string Origin { get; set; }
+            [JsonPropertyName("ancestors")]
             public string[] Ancestors { get; set; }
+            [JsonPropertyName("attributes")]
             public Dictionary<string, string> Attributes { get; set; }
         }
     }

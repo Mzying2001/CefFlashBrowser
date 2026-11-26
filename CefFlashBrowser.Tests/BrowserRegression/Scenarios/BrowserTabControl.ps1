@@ -1,4 +1,4 @@
-function Set-ControlDragItem($Tabs, $Item) {
+﻿function Set-ControlDragItem($Tabs, $Item) {
     $Tabs.GetType().GetField('_draggedItem', [Reflection.BindingFlags]'Instance,NonPublic').SetValue($Tabs, $Item)
 }
 

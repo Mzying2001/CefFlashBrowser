@@ -1,4 +1,4 @@
-﻿using CefSharp;
+using CefSharp;
 
 namespace CefFlashBrowser.FlashBrowser.Handlers
 {

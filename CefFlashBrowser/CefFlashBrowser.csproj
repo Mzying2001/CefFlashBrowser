@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -12,7 +12,7 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <StartupObject>CefFlashBrowser.Program</StartupObject>
     <ApplicationIcon>Assets\Icons\icon.ico</ApplicationIcon>
-    <Version>2.0.1</Version>
+    <Version>2.1.0</Version>
     <Authors>Mzying2001</Authors>
     <Copyright>Copyright © 2021-2026</Copyright>
     <ApplicationManifest>App.manifest</ApplicationManifest>
@@ -39,6 +39,7 @@
     <Resource Include="Assets\Icons\back.svg" />
     <Resource Include="Assets\Icons\close.svg" />
     <Resource Include="Assets\Icons\down.svg" />
+    <Resource Include="Assets\Icons\download.svg" />
     <Resource Include="Assets\Icons\edit.svg" />
     <Resource Include="Assets\Icons\export.svg" />
     <Resource Include="Assets\Icons\flash-player.svg" />
@@ -75,39 +76,33 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
-    <PackageReference Include="CefSharp.WinForms" Version="84.4.10" />
-    <PackageReference Include="Costura.Fody" Version="6.0.0">
+    <PackageReference Include="CefSharp.WinForms" Version="87.1.132" />
+    <PackageReference Include="Costura.Fody" Version="6.2.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="HandyControl" Version="3.5.1" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.161" />
+    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp87.$(Platform)" Version="5.0.0" />
     <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="SharpVectors" Version="1.8.4.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Platform)' == 'x86'">
-    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x86" Version="4.1.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Platform)' == 'x64'">
-    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp84.x64" Version="4.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\CefFlashBrowser.Database\CefFlashBrowser.Database.csproj" />
-    <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj" />
-    <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
-    <ProjectReference Include="..\CefFlashBrowser.Singleton\CefFlashBrowser.Singleton.vcxproj" />
-    <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
-    <ProjectReference Include="..\CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj" />
+    <PackageReference Include="SharpVectors" Version="1.8.6" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Security" />
     <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CefFlashBrowser.BrowserSubprocess\CefFlashBrowser.BrowserSubprocess.csproj" ReferenceOutputAssembly="false" Private="false" />
+    <ProjectReference Include="..\CefFlashBrowser.Database\CefFlashBrowser.Database.csproj" />
+    <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj" />
+    <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
+    <ProjectReference Include="..\CefFlashBrowser.Singleton\CefFlashBrowser.Singleton.vcxproj" />
+    <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
+    <ProjectReference Include="..\CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj" />
   </ItemGroup>
 
   <Target Name="PrepareSQLiteInterop" BeforeTargets="AssignTargetPaths" Condition="'$(DesignTimeBuild)' != 'true'">
@@ -127,8 +122,17 @@
     <RemoveDir Directories="@(_LegacySQLiteDirectories)" Condition="Exists('%(_LegacySQLiteDirectories.Identity)') And $([System.IO.Directory]::GetFiles('%(_LegacySQLiteDirectories.Identity)').Length) == 0 And $([System.IO.Directory]::GetDirectories('%(_LegacySQLiteDirectories.Identity)').Length) == 0" />
   </Target>
 
+  <ItemGroup>
+    <UpToDateCheckInput Include="Assets\CefSharp\libcef_$(Platform).tar.gz;..\postbuild.bat" Set="CefRuntime" />
+    <UpToDateCheckOutput Include="$(IntermediateOutputPath)CefRuntime.stamp" Set="CefRuntime" />
+    <Clean Include="$(IntermediateOutputPath)CefRuntime.stamp" />
+    <UpToDateCheckBuilt Include="$(TargetDir)Binaries\CefSharp\CefSharp.BrowserSubprocess.exe" Original="..\CefFlashBrowser.BrowserSubprocess\bin\$(PlatformName)\$(Configuration)\net462\CefFlashBrowser.BrowserSubprocess.exe" />
+    <UpToDateCheckBuilt Include="$(TargetDir)Binaries\CefSharp\LICENSE.core-js.txt" Original="..\CefFlashBrowser.BrowserSubprocess\Polyfills\LICENSE.core-js.txt" />
+  </ItemGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="call &quot;$(MSBuildProjectDirectory)\..\postbuild.bat&quot;" WorkingDirectory="$(TargetDir)" EnvironmentVariables="CFB_BUILD_CONFIGURATION=$(Configuration);CFB_BUILD_PLATFORM=$(PlatformName)" />
+    <Touch Files="$(IntermediateOutputPath)CefRuntime.stamp" AlwaysCreate="true" />
   </Target>
 
 </Project>

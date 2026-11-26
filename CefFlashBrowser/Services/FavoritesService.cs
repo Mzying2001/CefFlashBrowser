@@ -1,12 +1,12 @@
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
 namespace CefFlashBrowser.Services
 {
@@ -17,11 +17,18 @@ namespace CefFlashBrowser.Services
 
         public ObservableCollection<Website> Favorites { get; } = new ObservableCollection<Website>();
 
+        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            AllowTrailingCommas = true,
+            WriteIndented = true,
+            ReadCommentHandling = JsonCommentHandling.Skip
+        };
+
         public FavoritesService(string favoritesPath, ILogger logger)
         {
             _favoritesPath = favoritesPath ?? throw new ArgumentNullException(nameof(favoritesPath));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
             Load();
         }
 
@@ -36,7 +43,7 @@ namespace CefFlashBrowser.Services
             try
             {
                 var json = File.ReadAllText(_favoritesPath, Encoding.UTF8);
-                var file = JsonConvert.DeserializeObject<FavoritesFile>(json);
+                var file = JsonSerializer.Deserialize<FavoritesFile>(json, JsonOptions);
 
                 if (file?.Favorites == null)
                 {
@@ -66,7 +73,7 @@ namespace CefFlashBrowser.Services
                 }
 
                 var file = new FavoritesFile { Favorites = snapshot };
-                var json = JsonConvert.SerializeObject(file, Formatting.Indented);
+                var json = JsonSerializer.Serialize(file, JsonOptions);
                 FileHelper.SafeWriteFile(_favoritesPath, json, Encoding.UTF8);
                 _logger.Log(LogLevel.Info, "Favorites saved successfully");
                 return true;

@@ -3,10 +3,10 @@ using CefFlashBrowser.Infrastructure.Wpf;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -36,7 +36,7 @@ namespace CefFlashBrowser
                 string json = System.Text.Encoding.UTF8.GetString(e.Data);
                 LogHelper.LogInfo($"Received data from another instance, data: {json}");
 
-                if (!(JsonConvert.DeserializeObject<string[]>(json) is string[] args))
+                if (!(JsonSerializer.Deserialize<string[]>(json) is string[] args))
                 {
                     return;
                 }

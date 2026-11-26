@@ -1,4 +1,4 @@
-function Test-UserScriptSettings($Context) {
+﻿function Test-UserScriptSettings($Context) {
     $globalData = [CefFlashBrowser.Data.GlobalData]
     $flags = [Reflection.BindingFlags]'Static,NonPublic'
     $settingsField = $globalData.GetField('<Settings>k__BackingField', $flags)

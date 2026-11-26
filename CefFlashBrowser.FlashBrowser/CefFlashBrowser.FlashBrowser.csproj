@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CefSharp.Common" Version="84.4.10" />
+    <PackageReference Include="CefSharp.Common" Version="87.1.132" />
     <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
   </ItemGroup>
 

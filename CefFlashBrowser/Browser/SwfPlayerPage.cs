@@ -1,12 +1,12 @@
 using CefFlashBrowser.FlashBrowser;
 using CefSharp;
 using CefSharp.Handler;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 namespace CefFlashBrowser.Browser
 {
@@ -19,19 +19,19 @@ namespace CefFlashBrowser.Browser
 
         public string StartUrl { get; }
 
-        public SwfPlayerPage(SwfPageContext context, string localPlayerUrl, string template)
+        public SwfPlayerPage(SwfPageContext context, string localPlayerUrl, string template, bool allowScriptAccess)
         {
             _resource = context.Resource;
             var playerUrl = context.FrameUrl.IsFile ? $"{localPlayerUrl}?context={Guid.NewGuid():N}" : context.FrameUrl.AbsoluteUri;
             _moviePage = GetRequestUrl(playerUrl);
             _movieUrl = GetRequestUrl(context.Resource.Url);
 
-            var settings = new JsonSerializerSettings { StringEscapeHandling = StringEscapeHandling.EscapeHtml };
-            var url = JsonConvert.SerializeObject(context.Resource.Url, settings);
-            var baseUrl = JsonConvert.SerializeObject(context.BaseUrl.AbsoluteUri, settings);
-            var attributes = JsonConvert.SerializeObject(context.Attributes, settings);
+            var url = JsonSerializer.Serialize(context.Resource.Url);
+            var baseUrl = JsonSerializer.Serialize(context.BaseUrl.AbsoluteUri);
+            var attributes = JsonSerializer.Serialize(context.Attributes);
+            var scriptAccess = JsonSerializer.Serialize(allowScriptAccess);
             var document = template.Replace("<!-- player initialization -->",
-                $"<script>loadSwf({url}, {baseUrl}, {attributes});</script>");
+                $"<script>loadSwf({url}, {baseUrl}, {attributes}, {scriptAccess});</script>");
             var suppressReferrer = string.IsNullOrEmpty(_resource.ReferrerUrl) || _resource.ReferrerPolicy == ReferrerPolicy.NoReferrer;
             _documents.Add(_moviePage, new Document(document, context.Ancestors.Count == 0, suppressReferrer));
 

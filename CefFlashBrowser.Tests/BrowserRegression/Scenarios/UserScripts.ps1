@@ -1,4 +1,4 @@
-function Complete-UserScriptTask($Context, $Task, [string]$Message) {
+﻿function Complete-UserScriptTask($Context, $Task, [string]$Message) {
     Wait-Regression $Context { $Task.IsCompleted } $Message
     $result = $Task.GetAwaiter().GetResult()
     if ($null -ne $result -and $result.GetType().FullName -ne 'System.Threading.Tasks.VoidTaskResult') { return $result }
@@ -413,7 +413,7 @@ function Test-UserScriptTabs($Context) {
         $window.ViewModel.CloseBrowser($child)
         Wait-Regression $Context { $child.IsClosed -and (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-child-closed')") -eq 'yes' } 'actual child close notifies its handle'
         Assert-Regression ($window.ViewModel.Browsers.Count -eq 1 -and $child.Browser.IsDisposed) 'tab handle closes only after accepted native cleanup'
-        [CefSharp.WebBrowserExtensions]::Reload($model.Browser, $false)
+        $model.Browser.Reload($false)
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-tab-state-before')") -eq '1' } 'tab state survives document navigation'
         Assert-Regression ($model.BrowserId -eq $identity) 'navigation keeps the tab-state partition identity'
         [void](Invoke-JavaScript $Context $model.Browser "document.dispatchEvent(new Event('userscriptOpenTab'))")
@@ -842,14 +842,19 @@ function Test-UserScriptContextMenuIcons($Context, $Model, $Repository, $IconFix
     $b = Complete-UserScriptTask $Context ($Repository.InstallAsync($bSource, $origin, $true, $token)) 'install second same-name menu script'
     $Installed.Add($b.ScriptKey)
 
+    $relativeIconUrl = $IconFixture.BaseUrl + '/a-icon.png'
+    $brokenIconUrl = $IconFixture.BaseUrl + '/bad.png'
+    $dataIconUrl = 'data:image/svg+xml,' + [Uri]::EscapeDataString(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4"/></svg>')
     $registrations = @()
     $rendered = $null
     try {
         $registrations = @(Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($Model.Browser, $a.ScriptKey, 'Shared command ', 1)) 'register same-installation GM command')
         foreach ($expected in @(
-            @{ ManualUrl = '/a-icon.png'; GroupUrl = '/a-icon.png' },
-            @{ ManualUrl = '/bad.png'; GroupUrl = '/a-icon.png' },
-            @{ ManualUrl = '/bad.png'; GroupUrl = '/bad.png' }
+            @{ ManualUrl = $relativeIconUrl; GroupUrl = $relativeIconUrl },
+            @{ ManualUrl = $dataIconUrl; GroupUrl = $relativeIconUrl },
+            @{ ManualUrl = $brokenIconUrl; GroupUrl = $relativeIconUrl },
+            @{ ManualUrl = $brokenIconUrl; GroupUrl = $brokenIconUrl }
         )) {
             $native = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::BuildAsync($Model.Browser)) 'build same-name script menu'
             $rendered = Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RenderAsync($Model.Browser, $native)) 'render same-name script menu'
@@ -857,21 +862,23 @@ function Test-UserScriptContextMenuIcons($Context, $Model, $Repository, $IconFix
             $direct = @($shared | Where-Object { !$_.HasItems })
             $groups = @($shared | Where-Object HasItems)
             Assert-Regression ($direct.Count -eq 2 -and $groups.Count -eq 1 -and
-                $direct[0].Icon.FaviconUrl -eq ($IconFixture.BaseUrl + $expected.ManualUrl) -and
+                $direct[0].Icon.FaviconUrl -ceq $expected.ManualUrl -and
                 $direct[1].Icon.FaviconUrl -eq ($IconFixture.BaseUrl + '/b-icon.png') -and
-                $groups[0].Icon.FaviconUrl -eq ($IconFixture.BaseUrl + $expected.GroupUrl) -and
+                $groups[0].Icon.FaviconUrl -ceq $expected.GroupUrl -and
                 ![object]::ReferenceEquals($direct[0].Icon, $groups[0].Icon) -and
                 $null -eq $groups[0].Items[0].Icon) "same-name direct items and GM group have their own icons ($($expected.ManualUrl), $($expected.GroupUrl))"
 
             $icon = $direct[0].Icon
             [void]$icon.ApplyTemplate()
-            if ($expected.ManualUrl -eq '/a-icon.png') {
+            if ($expected.ManualUrl -eq $relativeIconUrl) {
                 Assert-TrimmedContextMenuHeader $Context $direct[0] $scriptName $true 'long manual script title'
                 Assert-TrimmedContextMenuHeader $Context $groups[0] $scriptName $true 'long GM group title'
                 Wait-Regression $Context {
                     $image = $icon.Template.FindName('favicon', $icon)
                     $null -ne $image.Source -and !$image.Source.IsDownloading -and !$icon.HasImageFailed
                 } 'right-click menu loads a relative script icon'
+            } elseif ($expected.ManualUrl -eq $dataIconUrl) {
+                Wait-Regression $Context { Test-SvgFavicon $icon } 'right-click menu renders an inline script icon'
             } else {
                 Wait-Regression $Context { $icon.HasImageFailed } 'right-click menu detects a bad script icon'
                 Assert-Regression ($icon.DefaultIcon -eq 'S' -and $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq 'Visible') 'bad icon shows the script initial'
@@ -879,10 +886,13 @@ function Test-UserScriptContextMenuIcons($Context, $Model, $Repository, $IconFix
             $rendered.IsOpen = $false
             Complete-UserScriptTask $Context ([UserScriptMenuProbe]::DismissAsync($Model.Browser)) 'dismiss icon menu'
 
-            if ($expected.ManualUrl -eq '/a-icon.png') {
+            if ($expected.ManualUrl -eq $relativeIconUrl) {
+                $updatedSource = $aSource.Replace('@icon a-icon.png', "@icon $dataIconUrl")
+                [void](Complete-UserScriptTask $Context ($Repository.UpdateAsync($a.ScriptKey, $updatedSource, $origin, $token)) 'change the installed menu icon to a data URL')
+            } elseif ($expected.ManualUrl -eq $dataIconUrl) {
                 $updatedSource = $aSource.Replace('@icon a-icon.png', '@icon64 bad.png')
                 [void](Complete-UserScriptTask $Context ($Repository.UpdateAsync($a.ScriptKey, $updatedSource, $origin, $token)) 'change the installed menu icon')
-            } elseif ($expected.GroupUrl -eq '/a-icon.png') {
+            } elseif ($expected.GroupUrl -eq $relativeIconUrl) {
                 foreach ($registration in $registrations) { $registration.Dispose() }
                 Wait-Regression $Context { $Model.UserScriptMenus.Count -eq 0 } 'release the old icon registration'
                 $registrations = @(Complete-UserScriptTask $Context ([UserScriptMenuProbe]::RegisterManyAsync($Model.Browser, $a.ScriptKey, 'Shared command ', 1)) 'reregister with the updated icon')
@@ -1005,7 +1015,7 @@ document.documentElement.setAttribute('data-gm-before', String(previous));
         Assert-Regression ($model.UserScriptMatchCount -eq 2) 'page status reports matched installations'
         $value = Complete-UserScriptTask $Context ($Context.UserScriptService.ValueStore.GetAsync($gm.ScriptKey.ToString(), 'visits', [Threading.CancellationToken]::None)) 'GM commit'
         Assert-Regression ($value.Value.EncodedValue -eq 'n1') 'legacy GM write reaches shared SQLite storage'
-        [CefSharp.WebBrowserExtensions]::Reload($model.Browser, $false)
+        $model.Browser.Reload($false)
         Wait-Regression $Context { (Invoke-JavaScript $Context $model.Browser "document.documentElement && document.documentElement.getAttribute('data-gm-before')") -eq '1' } 'new-document storage bootstrap'
         Assert-Regression ($model.BrowserId -eq $identity) 'stable browser identity survives navigation'
     } finally {

@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Log;
 using SimpleMvvm.Ioc;
 using System;

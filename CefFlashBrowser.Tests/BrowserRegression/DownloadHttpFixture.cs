@@ -118,7 +118,7 @@ public sealed class DownloadHttpFixture : IDisposable
 
                 if (path == "/page")
                 {
-                    var html = Encoding.UTF8.GetBytes("<title>Download fixture</title><a href='/slow' download>Download</a><form id='post' method='post' action='/post'><input name='data' value='test'></form>");
+                    var html = Encoding.UTF8.GetBytes("<title>Download fixture</title><a href='/slow' download>Download</a><form id='post' method='post' action='/slow-post'><input name='data' value='test'></form>");
                     var head = Encoding.ASCII.GetBytes("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + html.Length + "\r\nSet-Cookie: download-session=present; Max-Age=3600; Path=/\r\nConnection: close\r\n\r\n");
                     await stream.WriteAsync(head, 0, head.Length).ConfigureAwait(false);
                     await stream.WriteAsync(html, 0, html.Length).ConfigureAwait(false);

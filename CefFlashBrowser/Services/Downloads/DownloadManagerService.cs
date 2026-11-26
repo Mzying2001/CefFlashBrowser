@@ -250,13 +250,14 @@ namespace CefFlashBrowser.Services.Downloads
             return await SelectDestinationAsync(record, token, false).ConfigureAwait(false) == DestinationChoice.Application;
         }
 
-        internal Task<DestinationChoice> SelectBrowserDestinationAsync(DownloadRecord record, CancellationToken token)
+        internal Task<DestinationChoice> SelectBrowserDestinationAsync(DownloadRecord record, CancellationToken token,
+            Action confirmDestination)
         {
-            return SelectDestinationAsync(record, token, true);
+            return SelectDestinationAsync(record, token, true, confirmDestination);
         }
 
         private async Task<DestinationChoice> SelectDestinationAsync(DownloadRecord record, CancellationToken token,
-            bool offerSystemDownload)
+            bool offerSystemDownload, Action confirmDestination = null)
         {
             using (var linked = CancellationTokenSource.CreateLinkedTokenSource(token, _lifetime.Token))
             {
@@ -269,6 +270,7 @@ namespace CefFlashBrowser.Services.Downloads
 
                         var dialog = WindowManager.CreateWindow<DownloadDialog>();
                         dialog.Initialize(record, offerSystemDownload);
+                        dialog.ConfirmDestination = confirmDestination;
 
                         using (linked.Token.Register(() => _dispatcher.BeginInvoke(new Action(() =>
                         {

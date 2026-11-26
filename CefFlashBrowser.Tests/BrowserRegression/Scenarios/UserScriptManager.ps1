@@ -2147,6 +2147,13 @@ document.documentElement.setAttribute('data-manager', 'saved');
             !$icon.HasImageFailed -and $null -ne $image.Source -and !$image.Source.IsDownloading -and
                 $icon.Template.FindName('fallbackIcon', $icon).Visibility -eq [Windows.Visibility]::Collapsed
         } 'valid script icon recovers after an image failure'
+        $dataIconUrl = 'data:image/svg+xml,' + [Uri]::EscapeDataString(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4"/></svg>')
+        $item.Source = $source.Replace('// @version', "// @icon64 $dataIconUrl`n// @version")
+        Complete-UserScriptTask $Context ($model.SaveAsync()) 'save inline script icon'
+        Wait-Regression $Context {
+            $icon.FaviconUrl -ceq $dataIconUrl -and (Test-SvgFavicon $icon)
+        } 'the manager list renders an inline icon64'
         $item.Source = $source
         Complete-UserScriptTask $Context ($model.SaveAsync()) 'remove script icon metadata'
         Wait-Regression $Context {

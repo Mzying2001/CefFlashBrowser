@@ -139,9 +139,7 @@
                 <ControlTemplate TargetType="{x:Type local:BrowserIcon}">
                     <Viewbox>
                         <Grid Width="16" Height="16">
-                            <Image
-                                x:Name="favicon"
-                                Source="{Binding FaviconUrl, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <Image x:Name="favicon"/>
                             <Grid x:Name="fallbackIcon" Visibility="Collapsed">
                                 <ContentPresenter
                                     x:Name="customIcon"

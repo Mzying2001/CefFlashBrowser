@@ -1,4 +1,4 @@
-﻿<Window x:Class="CefFlashBrowser.Views.UserScriptManager"
+<Window x:Class="CefFlashBrowser.Views.UserScriptManager"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -511,10 +511,7 @@
                     <Border.Style>
                         <Style TargetType="Border">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedScript.Problem}" Value="">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding SelectedScript.Problem}" Value="{x:Null}">
+                                <DataTrigger Binding="{Binding SelectedScript.Problem, TargetNullValue='', FallbackValue=''}" Value="">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>

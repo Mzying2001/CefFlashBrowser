@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 #Requires -PSEdition Desktop
 [CmdletBinding()]
 param(
@@ -22,6 +22,11 @@ Add-Type -Path (Join-Path $PSScriptRoot 'AssemblyResolver.cs')
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 [void][Reflection.Assembly]::LoadFrom((Join-Path $ApplicationPath 'Binaries\CefSharp\CefSharp.dll'))
 $app = [Reflection.Assembly]::LoadFrom((Join-Path $ApplicationPath 'CefFlashBrowser.exe'))
+if (($app.GetReferencedAssemblies() | Where-Object Name -eq 'Newtonsoft.Json') -or
+    ($app.GetManifestResourceNames() -like 'costura.newtonsoft.json*') -or
+    (Get-ChildItem -LiteralPath $ApplicationPath -Filter 'Newtonsoft.Json.dll' -File -Recurse)) {
+    throw 'The application output still contains a Newtonsoft.Json dependency.'
+}
 [Runtime.CompilerServices.RuntimeHelpers]::RunModuleConstructor($app.ManifestModule.ModuleHandle)
 
 $assemblies = @{}
@@ -40,13 +45,13 @@ foreach ($name in @('Mzying2001.MonkeySharp.Core', 'Mzying2001.MonkeySharp.CefSh
     }
 }
 foreach ($name in @('Mzying2001.MonkeySharp.Core', 'Mzying2001.MonkeySharp.CefSharp')) {
-    if ($assemblies[$name].GetName().Version.ToString() -ne '4.1.0.0') {
+    if ($assemblies[$name].GetName().Version.ToString() -ne '5.0.0.0') {
         throw "Unexpected MonkeySharp version: $name"
     }
 }
 $adapter = $assemblies['Mzying2001.MonkeySharp.CefSharp']
 $cefReference = $adapter.GetReferencedAssemblies() | Where-Object Name -eq 'CefSharp'
-if ($cefReference.Version.ToString() -ne '84.4.10.0') { throw 'The adapter must target CefSharp 84.4.10.' }
+if ($cefReference.Version.ToString() -ne '87.1.132.0') { throw 'The adapter must target CefSharp 87.1.132.' }
 $parser = New-Object Mzying2001.MonkeySharp.Core.Parsing.UserScriptMetadataParser
 $source = "// ==UserScript==`n// @name Dependency check`n// @match https://example.invalid/*`n// @grant none`n// ==/UserScript==`n"
 if (!$parser.Parse($source).CanEnable) { throw 'Metadata parser could not load.' }

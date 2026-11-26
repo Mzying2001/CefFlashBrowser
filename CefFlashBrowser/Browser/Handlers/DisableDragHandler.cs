@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.FlashBrowser.Handlers;
+using CefFlashBrowser.FlashBrowser.Handlers;
 using CefSharp;
 using CefSharp.Enums;
 

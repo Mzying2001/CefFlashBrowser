@@ -1,4 +1,4 @@
-function Test-ContextMenuRouting($Context) {
+﻿function Test-ContextMenuRouting($Context) {
     $savedBehavior = [CefFlashBrowser.Data.GlobalData]::Settings.NewPageBehavior
     $savedEngine = [CefFlashBrowser.Data.GlobalData]::Settings.SearchEngine
     try {

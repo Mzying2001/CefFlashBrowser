@@ -1,8 +1,10 @@
 using CefFlashBrowser.Log;
 using CefFlashBrowser.Models;
+using CefFlashBrowser.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,9 +16,11 @@ namespace CefFlashBrowser.Services
         private readonly ILogger _logger;
         private readonly SynchronizationContext _context;
         private readonly int _threadId = Thread.CurrentThread.ManagedThreadId;
-        private readonly Dictionary<string, IconMapping> _icons = new Dictionary<string, IconMapping>(StringComparer.Ordinal);
-        private readonly List<IconMapping> _pending = new List<IconMapping>();
+        private readonly Dictionary<string, WebsiteIconRecord> _icons = new Dictionary<string, WebsiteIconRecord>(StringComparer.Ordinal);
+        private readonly List<IconDiscovery> _pending = new List<IconDiscovery>();
         private Task _initializeTask;
+        private Task<IconSnapshot> _initialWriteState;
+        private IReadOnlyDictionary<string, List<string>> _legacyKeys;
         private Task _work = Task.CompletedTask;
         private bool _initialized;
         private bool _stopping;
@@ -51,7 +55,12 @@ namespace CefFlashBrowser.Services
 
         private static string GetPageKey(Uri uri)
         {
-            return new UriBuilder(uri) { Query = string.Empty, Fragment = string.Empty }.Uri.AbsoluteUri.TrimEnd('/');
+            return uri.GetComponents(UriComponents.SchemeAndServer | UriComponents.Path, UriFormat.UriEscaped).TrimEnd('/');
+        }
+
+        private static string GetRootKey(Uri uri)
+        {
+            return uri.GetComponents(UriComponents.SchemeAndServer, UriFormat.UriEscaped);
         }
 
         private static bool IsHttp(Uri uri)
@@ -61,9 +70,11 @@ namespace CefFlashBrowser.Services
 
         private static string GetAbsoluteIconUrl(Uri pageUri, string iconUrl)
         {
+            if (ImageDataUrl.HasScheme(iconUrl))
+                return ImageDataUrl.TryParse(iconUrl, out _, out _, out _, out _) ? iconUrl : null;
+
             return !string.IsNullOrWhiteSpace(iconUrl)
-                && Uri.TryCreate(pageUri, iconUrl, out var uri) && IsHttp(uri)
-                ? uri.AbsoluteUri : null;
+                && Uri.TryCreate(pageUri, iconUrl, out var uri) && IsHttp(uri) ? uri.AbsoluteUri : null;
         }
 
         // Ignores page queries, fragments and trailing slashes. Matches pages before
@@ -103,23 +114,49 @@ namespace CefFlashBrowser.Services
             return (GetPageIcon(https) ?? GetPageIcon(http) ?? GetRootIcon(https) ?? GetRootIcon(http))?.IconUrl;
         }
 
-        private IconMapping GetPageIcon(Uri uri)
+        private WebsiteIconRecord GetPageIcon(Uri uri)
         {
-            return _icons.TryGetValue(GetPageKey(uri), out var mapping) ? mapping : null;
+            return GetMapping(_icons, GetPageKey(uri));
         }
 
-        private IconMapping GetRootIcon(Uri uri)
+        private WebsiteIconRecord GetRootIcon(Uri uri)
         {
-            return _icons.TryGetValue(uri.GetLeftPart(UriPartial.Authority), out var mapping) ? mapping : null;
+            return GetMapping(_icons, GetRootKey(uri));
         }
 
-        private bool ApplyMapping(IconMapping mapping)
+        private static WebsiteIconRecord GetMapping(Dictionary<string, WebsiteIconRecord> icons, string key)
         {
-            if (_icons.TryGetValue(mapping.PageUrl, out var current) && current.IconUrl == mapping.IconUrl)
-                return false;
+            return icons.TryGetValue(key, out var mapping) ? mapping : null;
+        }
 
-            _icons[mapping.PageUrl] = mapping;
-            return true;
+        private static WebsiteIconRecord SetMapping(Dictionary<string, WebsiteIconRecord> icons, string key,
+            IconDiscovery discovery, out bool changed)
+        {
+            var current = GetMapping(icons, key);
+            changed = current?.IconUrl != discovery.IconUrl;
+
+            if (!changed)
+                return current;
+
+            return icons[key] = new WebsiteIconRecord(key, discovery.IconUrl, discovery.UpdatedAt);
+        }
+
+        private static IconWrite ApplyDiscovery(Dictionary<string, WebsiteIconRecord> icons, IconDiscovery discovery, out bool changed)
+        {
+            changed = false;
+
+            if (discovery.PageKey == discovery.RootKey)
+                return new IconWrite(SetMapping(icons, discovery.RootKey, discovery, out changed));
+
+            var root = GetMapping(icons, discovery.RootKey) ?? SetMapping(icons, discovery.RootKey, discovery, out changed);
+            if (root.IconUrl == discovery.IconUrl)
+            {
+                changed |= icons.Remove(discovery.PageKey);
+                return new IconWrite(root, pageToRemove: discovery.PageKey);
+            }
+
+            var page = SetMapping(icons, discovery.PageKey, discovery, out changed);
+            return new IconWrite(root, page);
         }
 
         public Task InitializeAsync()
@@ -133,57 +170,75 @@ namespace CefFlashBrowser.Services
                 return Task.CompletedTask;
 
             var loadTask = LoadAsync();
-            _work = loadTask;
+            _work = _initialWriteState = CopySnapshotAsync(loadTask);
 
             foreach (var item in _pending)
-                _work = PersistAsync(_work, item);
+                _work = PersistPendingAsync(_work, _initialWriteState, item);
 
             return _initializeTask = PublishAsync(loadTask);
         }
 
-        private async Task<List<IconMapping>> LoadAsync()
+        private async Task<IconSnapshot> LoadAsync()
         {
             try
             {
+                var snapshot = new IconSnapshot();
                 var records = await _database.GetWebsiteIconsAsync().ConfigureAwait(false);
-                var mappings = new List<IconMapping>();
+
                 foreach (var record in records)
                 {
                     var pageUri = GetPageUri(record.PageUrl);
                     var iconUrl = pageUri == null ? null : GetAbsoluteIconUrl(pageUri, record.IconUrl);
-                    if (iconUrl != null)
-                        mappings.Add(new IconMapping(pageUri, iconUrl, record.UpdatedAt));
+                    if (iconUrl == null)
+                        continue;
+
+                    string key = GetPageKey(pageUri);
+                    if (GetMapping(snapshot.Mappings, key)?.IconUrl != iconUrl)
+                        snapshot.Mappings[key] = new WebsiteIconRecord(key, iconUrl, record.UpdatedAt);
+
+                    if (record.PageUrl != key)
+                    {
+                        if (!snapshot.LegacyKeys.TryGetValue(key, out var keys))
+                            snapshot.LegacyKeys[key] = keys = new List<string>();
+
+                        keys.Add(record.PageUrl);
+                    }
                 }
-                return mappings;
+                return snapshot;
             }
             catch (Exception e)
             {
                 LogError("Failed to load favicon mappings", e);
-                return new List<IconMapping>();
+                return new IconSnapshot();
             }
         }
 
-        private async Task PublishAsync(Task<List<IconMapping>> loadTask)
+        private static async Task<IconSnapshot> CopySnapshotAsync(Task<IconSnapshot> loadTask)
+        {
+            var snapshot = await loadTask.ConfigureAwait(false);
+            return new IconSnapshot(snapshot);
+        }
+
+        private async Task PublishAsync(Task<IconSnapshot> loadTask)
         {
             var snapshot = await loadTask.ConfigureAwait(false);
             var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            _context.Post(_ =>
+            _context.Post(state =>
             {
                 try
                 {
                     if (!_stopping)
                     {
-                        foreach (var item in snapshot)
-                        {
-                            if (item != null)
-                                ApplyMapping(item);
-                        }
+                        foreach (var item in snapshot.Mappings)
+                            _icons.Add(item.Key, item.Value);
 
+                        _legacyKeys = snapshot.LegacyKeys;
                         foreach (var item in _pending)
-                            ApplyMapping(item);
+                            ApplyDiscovery(_icons, item, out _);
 
                         _pending.Clear();
+                        _initialWriteState = null;
                         _initialized = true;
                         NotifyChanged();
                     }
@@ -207,36 +262,71 @@ namespace CefFlashBrowser.Services
             if (absoluteIconUrl == null)
                 return Task.CompletedTask;
 
-            string key = GetPageKey(pageUri);
-            var current = _initialized ? GetPageIcon(pageUri) : _pending.FindLast(item => item.PageUrl == key);
-            var mapping = current != null && current.IconUrl == absoluteIconUrl ? current
-                : new IconMapping(pageUri, absoluteIconUrl, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-            bool changed = _initialized && ApplyMapping(mapping);
-
+            var discovery = new IconDiscovery(pageUri, absoluteIconUrl);
             if (!_initialized)
-                _pending.Add(mapping);
+            {
+                _pending.Add(discovery);
+                return _initialWriteState == null ? Task.CompletedTask
+                    : _work = PersistPendingAsync(_work, _initialWriteState, discovery);
+            }
+
+            var write = ApplyDiscovery(_icons, discovery, out bool changed);
 
             // Repeated discoveries still reach persistence so a failed write can be retried.
-            var work = _initializeTask == null ? Task.CompletedTask
-                : _work = PersistAsync(_work, mapping);
-
             // A change notification may synchronously report another discovery.
             // Queue this write first so reentrant discoveries retain their order.
+            var work = _work = PersistAsync(_work, write);
+
             if (changed)
                 NotifyChanged();
-
             return work;
         }
 
-        private async Task PersistAsync(Task previous, IconMapping mapping)
+        private async Task PersistPendingAsync(Task previous, Task<IconSnapshot> initialState, IconDiscovery discovery)
+        {
+            // Resolve pending writes against the loaded snapshot without waiting for the UI thread to publish it.
+            await previous.ConfigureAwait(false);
+            var snapshot = await initialState.ConfigureAwait(false);
+            var write = ApplyDiscovery(snapshot.Mappings, discovery, out _);
+            await SaveAsync(write, snapshot.LegacyKeys).ConfigureAwait(false);
+        }
+
+        private async Task PersistAsync(Task previous, IconWrite write)
         {
             await previous.ConfigureAwait(false);
+            await SaveAsync(write, _legacyKeys).ConfigureAwait(false);
+        }
+
+        private async Task SaveAsync(IconWrite write, IReadOnlyDictionary<string, List<string>> legacyKeys)
+        {
             try
             {
-                await _database.SaveWebsiteIconAsync(
-                    new WebsiteIconRecord(mapping.PageUrl, mapping.IconUrl, mapping.UpdatedAt)).ConfigureAwait(false);
+                var keysToRemove = GetObsoleteKeys(write, legacyKeys).ToArray();
+                await _database.SaveWebsiteIconDiscoveryAsync(write.Root, write.Page, keysToRemove).ConfigureAwait(false);
             }
             catch (Exception e) { LogError("Failed to save a favicon mapping", e); }
+        }
+
+        private static IEnumerable<string> GetObsoleteKeys(IconWrite write, IReadOnlyDictionary<string, List<string>> legacyKeys)
+        {
+            if (legacyKeys.TryGetValue(write.Root.PageUrl, out var rootKeys))
+            {
+                foreach (string key in rootKeys)
+                    yield return key;
+            }
+
+            string pageKey = write.Page?.PageUrl ?? write.PageToRemove;
+
+            if (pageKey != null && legacyKeys.TryGetValue(pageKey, out var pageKeys))
+            {
+                foreach (string key in pageKeys)
+                    yield return key;
+            }
+
+            if (write.PageToRemove != null)
+            {
+                yield return write.PageToRemove;
+            }
         }
 
         private void NotifyChanged()
@@ -259,17 +349,51 @@ namespace CefFlashBrowser.Services
             return _work;
         }
 
-        private sealed class IconMapping
+        private sealed class IconSnapshot
         {
-            public string PageUrl { get; }
+            public Dictionary<string, WebsiteIconRecord> Mappings { get; }
+            public Dictionary<string, List<string>> LegacyKeys { get; }
+
+            public IconSnapshot()
+            {
+                Mappings = new Dictionary<string, WebsiteIconRecord>(StringComparer.Ordinal);
+                LegacyKeys = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+            }
+
+            public IconSnapshot(IconSnapshot snapshot)
+            {
+                Mappings = new Dictionary<string, WebsiteIconRecord>(snapshot.Mappings, StringComparer.Ordinal);
+                LegacyKeys = snapshot.LegacyKeys;
+            }
+        }
+
+        private sealed class IconDiscovery
+        {
+            public string RootKey { get; }
+            public string PageKey { get; }
             public string IconUrl { get; }
             public long UpdatedAt { get; }
 
-            public IconMapping(Uri pageUri, string iconUrl, long updatedAt)
+            public IconDiscovery(Uri pageUri, string iconUrl)
             {
-                PageUrl = GetPageKey(pageUri);
+                RootKey = GetRootKey(pageUri);
+                PageKey = GetPageKey(pageUri);
                 IconUrl = iconUrl;
-                UpdatedAt = updatedAt;
+                UpdatedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            }
+        }
+
+        private sealed class IconWrite
+        {
+            public WebsiteIconRecord Root { get; }
+            public WebsiteIconRecord Page { get; }
+            public string PageToRemove { get; }
+
+            public IconWrite(WebsiteIconRecord root, WebsiteIconRecord page = null, string pageToRemove = null)
+            {
+                Root = root;
+                Page = page;
+                PageToRemove = pageToRemove;
             }
         }
     }

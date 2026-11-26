@@ -75,6 +75,12 @@ namespace CefFlashBrowser.Tests
                 }).GetAwaiter().GetResult();
         }
 
+        private void AssertStoredIcon(string pageUrl, string expectedIcon)
+        {
+            Assert.AreEqual(expectedIcon, _database.ScalarAsync("SELECT icon_url FROM website_icons WHERE page_url = @page",
+                new Dictionary<string, object> { ["@page"] = pageUrl }).GetAwaiter().GetResult(), pageUrl);
+        }
+
         [TestMethod]
         public void ConstructionAndLookup_DoNotOpenDatabase()
         {
@@ -90,14 +96,16 @@ namespace CefFlashBrowser.Tests
         {
             Initialize();
             Record("HTTPS://EXAMPLE.COM:443/a/?id=1#top", "/icons/logo?v=1");
-            foreach (string page in new[] { "https://example.com/a", "https://example.com/a/", "https://example.com/a///?id=2#bottom" })
-                Assert.AreEqual("https://example.com/icons/logo?v=1", _service.GetIconUrl(page), page);
-            foreach (string page in new[] { "https://example.com/A", "https://example.com/b", "https://example.com/a%2F", "http://example.com/a" })
-                Assert.IsNull(_service.GetIconUrl(page), page);
+            AssertStoredIcon("https://example.com", "https://example.com/icons/logo?v=1");
+            AssertStoredIcon("https://example.com/a", null);
 
             Record("https://example.com/a?id=2", "//cdn.example.com/two?q=2");
-            Assert.AreEqual(1L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
-            Assert.AreEqual("https://example.com/a", _database.ScalarAsync("SELECT page_url FROM website_icons").GetAwaiter().GetResult());
+            foreach (string page in new[] { "https://example.com/a", "https://example.com/a/", "https://example.com/a///?id=2#bottom" })
+                Assert.AreEqual("https://cdn.example.com/two?q=2", _service.GetIconUrl(page), page);
+            foreach (string page in new[] { "https://example.com/A", "https://example.com/b", "https://example.com/a%2F" })
+                Assert.AreEqual("https://example.com/icons/logo?v=1", _service.GetIconUrl(page), page);
+            Assert.IsNull(_service.GetIconUrl("http://example.com/a"));
+            AssertStoredIcon("https://example.com/a", "https://cdn.example.com/two?q=2");
             Restart();
             Assert.AreEqual("https://cdn.example.com/two?q=2", _service.GetIconUrl("https://example.com/a/?id=3"));
         }
@@ -120,22 +128,58 @@ namespace CefFlashBrowser.Tests
         [TestMethod]
         public void LoadedRecords_AreValidatedAndNormalizedByFaviconService()
         {
+            const string dataIcon = "data:image/svg+xml,%3Csvg%2F%3E";
             Initialize();
             SeedMapping("HTTPS://EXAMPLE.COM:443/a/?q=1#top", "../icons/logo?v=1", 10);
             SeedMapping("file:///C:/game.swf", "https://example.com/ignored", 20);
-            SeedMapping("https://example.com/b", "data:image/png;base64,abc", 30);
+            SeedMapping("https://example.com/b", dataIcon, 30);
+            SeedMapping("https://example.com/c", "data:text/html,%3Chtml%3E", 40);
             Restart();
             Assert.AreEqual("https://example.com/icons/logo?v=1", _service.GetIconUrl("https://example.com/a"));
-            Assert.IsNull(_service.GetIconUrl("https://example.com/b"));
+            Assert.AreEqual(dataIcon, _service.GetIconUrl("https://example.com/b"));
+            Assert.IsNull(_service.GetIconUrl("https://example.com/c"));
             Assert.IsNull(_service.GetIconUrl("file:///C:/game.swf"));
+        }
+
+        [DataTestMethod]
+        [DataRow("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a/pkAAAAASUVORK5CYII=")]
+        [DataRow("DATA:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3C%2Fsvg%3E#original")]
+        public void Discovery_SharesRootIconAndRemovesOverridesWhenTheyMatch(string dataIcon)
+        {
+            const string root = "https://example.com";
+            const string page = root + "/a";
+            Initialize();
+
+            Record(page + "?first=1", dataIcon);
+            Record(root + "/b", dataIcon);
+            AssertStoredIcon(root, dataIcon);
+            Assert.AreEqual(1L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
+
+            Record(page, "/page-icon");
+            Record(root + "/?home=1", "/home-icon");
+            AssertStoredIcon(root, root + "/home-icon");
+            AssertStoredIcon(page, root + "/page-icon");
+            Assert.AreEqual(root + "/home-icon", _service.GetIconUrl(root + "/b"));
+            Assert.AreEqual(root + "/page-icon", _service.GetIconUrl(page));
+
+            Record(page + "/#later", "/home-icon");
+            AssertStoredIcon(page, null);
+            Assert.AreEqual(root + "/home-icon", _service.GetIconUrl(page));
+
+            Record(root, dataIcon);
+            Restart();
+            Assert.AreEqual(dataIcon, _service.GetIconUrl(page));
+            Assert.AreEqual(dataIcon, _service.GetIconUrl(root + "/unvisited"));
+            AssertStoredIcon(root, dataIcon);
+            Assert.AreEqual(1L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
         }
 
         [TestMethod]
         public void Lookup_PrefersExactPagesThenHomepages()
         {
             Initialize();
-            Record("http://example.com/game", "/http-game");
             Record("http://example.com/", "/http-root");
+            Record("http://example.com/game", "/http-game");
             Record("https://example.com/", "/https-root");
             Assert.AreEqual("http://example.com/http-game", _service.GetIconUrl("example.com/game/?id=1#top"));
             Assert.AreEqual("http://example.com/http-game", _service.GetIconUrl("http://example.com/game"));
@@ -146,7 +190,6 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual("https://example.com/https-root", _service.GetIconUrl("example.com/unvisited"));
 
             Record("http://other.example.com/", "/http-root");
-            Record("https://other.example.com/game", "/latest-page");
             Assert.AreEqual("http://other.example.com/http-root", _service.GetIconUrl("other.example.com/unvisited"));
             Assert.AreEqual("https://example.com/https-root", _service.GetIconUrl("https://example.com/unvisited"));
             Assert.AreEqual("http://example.com/http-root", _service.GetIconUrl("http://example.com/unvisited"));
@@ -174,10 +217,11 @@ namespace CefFlashBrowser.Tests
 
             Record("https://example.com/a/?id=1", "/new-a");
             Assert.AreEqual("https://example.com/new-a", _service.GetIconUrl("example.com/a"));
-            Assert.IsNull(_service.GetIconUrl("example.com/unvisited"));
+            Assert.AreEqual("https://example.com/new-a", _service.GetIconUrl("example.com/unvisited"));
+            AssertStoredIcon("https://example.com/a", null);
             Restart();
             Assert.AreEqual("https://example.com/new-a", _service.GetIconUrl("example.com/a"));
-            Assert.IsNull(_service.GetIconUrl("example.com/unvisited"));
+            Assert.AreEqual("https://example.com/new-a", _service.GetIconUrl("example.com/unvisited"));
         }
 
         [DataTestMethod]
@@ -207,6 +251,9 @@ namespace CefFlashBrowser.Tests
         [DataRow("https://sub.example.com/", "https://example.com/missing", null)]
         [DataRow("https://example.com:8080/", "https://example.com/missing", null)]
         [DataRow("https://example.com/", "https://example.com:8080/missing", null)]
+        [DataRow("https://example.com:8080/a", "https://example.com:8080/missing", "https://example.com:8080/icon")]
+        [DataRow("https://example.com:8080/a", "https://example.com/missing", null)]
+        [DataRow("https://example.com/a", "http://example.com/missing", null)]
         public void Lookup_RespectsHostsPortsAndExplicitSchemes(string recordedPage, string lookup, string expected)
         {
             Initialize();
@@ -248,7 +295,9 @@ namespace CefFlashBrowser.Tests
         [DataRow("C:\\game.swf", "/icon")]
         [DataRow("invalid", "/icon")]
         [DataRow(null, "/icon")]
-        [DataRow("https://example.com/a", "data:image/png;base64,abc")]
+        [DataRow("https://example.com/a", "data:text/plain;base64,YWJj")]
+        [DataRow("https://example.com/a", "data:image/png;base64")]
+        [DataRow("https://example.com/a", "data:image/png;base64,#empty")]
         [DataRow("https://example.com/a", "blob:https://example.com/id")]
         [DataRow("https://example.com/a", "file:///C:/icon.png")]
         [DataRow("https://example.com/a", "")]
@@ -274,14 +323,14 @@ namespace CefFlashBrowser.Tests
                 Assert.AreEqual(nameof(FaviconService.Revision), e.PropertyName);
                 notifications++;
             };
-            Record("https://example.com/a", "/icon");
+            Record("https://example.com", "/icon");
             _database.ExecuteAsync("UPDATE website_icons SET updated_at = 20").GetAwaiter().GetResult();
             Record("https://example.com/a/?id=1#fragment", "/icon");
             Record("https://example.com/a", null);
             Assert.AreEqual(1, notifications);
             Assert.AreEqual(20L, _database.ScalarAsync("SELECT updated_at FROM website_icons").GetAwaiter().GetResult());
 
-            Record("https://example.com/a", "/new");
+            Record("https://example.com", "/new");
             Assert.AreEqual(2, notifications);
 
             long updatedAt = (long)_database.ScalarAsync("SELECT updated_at FROM website_icons").GetAwaiter().GetResult();
@@ -292,7 +341,7 @@ namespace CefFlashBrowser.Tests
 
             Assert.AreEqual(0L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
 
-            Record("https://example.com/a", "/new");
+            Record("https://example.com", "/new");
 
             Assert.AreEqual(2, notifications);
             Assert.AreEqual(updatedAt, _database.ScalarAsync("SELECT updated_at FROM website_icons").GetAwaiter().GetResult());
@@ -323,13 +372,15 @@ namespace CefFlashBrowser.Tests
             lastWrite.GetAwaiter().GetResult();
             Assert.AreEqual("https://example.com/last", _service.GetIconUrl("https://example.com/a"));
             Assert.AreEqual("https://example.com/last", _service.GetIconUrl("example.com/a"));
-            Assert.AreEqual("https://example.com/last", _database.ScalarAsync("SELECT icon_url FROM website_icons").GetAwaiter().GetResult());
+            AssertStoredIcon("https://example.com", "https://example.com/old");
+            AssertStoredIcon("https://example.com/a", "https://example.com/last");
         }
 
         [TestMethod]
         public void Initialization_DuplicateDiscoveriesPreservePersistedTimestamps()
         {
             Initialize();
+            SeedMapping("https://example.com", "https://example.com/root-icon", 5);
             SeedMapping("https://example.com/a", "https://example.com/a-icon", 10);
             SeedMapping("https://example.com/b", "https://example.com/b-icon", 20);
             _service.StopAsync().GetAwaiter().GetResult();
@@ -368,7 +419,8 @@ namespace CefFlashBrowser.Tests
             Record("https://example.com/a", "/first");
             _service.StopAsync().GetAwaiter().GetResult();
             Assert.AreEqual("https://example.com/last", _service.GetIconUrl("https://example.com/a"));
-            Assert.AreEqual("https://example.com/last", _database.ScalarAsync("SELECT icon_url FROM website_icons").GetAwaiter().GetResult());
+            AssertStoredIcon("https://example.com", "https://example.com/first");
+            AssertStoredIcon("https://example.com/a", "https://example.com/last");
         }
 
         [TestMethod]
@@ -387,6 +439,32 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(1L, _database.ScalarAsync("SELECT COUNT(*) FROM website_icons").GetAwaiter().GetResult());
             Restart();
             Assert.AreEqual("https://example.com/icon", _service.GetIconUrl("example.com/a"));
+        }
+
+        [DataTestMethod]
+        [DataRow("https://example.com/a")]
+        [DataRow("HTTPS://EXAMPLE.COM:443/a/?q=old#top")]
+        public void FailedOverrideRemoval_RollsBackRootAndRetriesBothChanges(string storedPage)
+        {
+            const string root = "https://example.com";
+            const string page = root + "/a";
+            Initialize();
+            SeedMapping(storedPage, root + "/old", 10);
+            Restart();
+            _database.ExecuteAsync("CREATE TRIGGER reject_icon_delete BEFORE DELETE ON website_icons " +
+                "BEGIN SELECT RAISE(ABORT, 'simulated write failure'); END").GetAwaiter().GetResult();
+
+            Record(page, "/icon");
+            Assert.AreEqual(root + "/icon", _service.GetIconUrl(page));
+            AssertStoredIcon(root, null);
+            AssertStoredIcon(storedPage, root + "/old");
+
+            _database.ExecuteAsync("DROP TRIGGER reject_icon_delete").GetAwaiter().GetResult();
+            Record(page, "/icon");
+            AssertStoredIcon(root, root + "/icon");
+            AssertStoredIcon(storedPage, null);
+            Restart();
+            Assert.AreEqual(root + "/icon", _service.GetIconUrl(page));
         }
 
         [TestMethod]
@@ -511,7 +589,15 @@ namespace CefFlashBrowser.Tests
                 return snapshot;
             }
 
-            public Task TransactionAsync(Action<IDatabaseSession> action) => _inner.TransactionAsync(action);
+            public Task TransactionAsync(Action<IDatabaseSession> action)
+            {
+                if (FailNextWrite)
+                {
+                    FailNextWrite = false;
+                    return Task.FromException(new IOException("simulated transaction failure"));
+                }
+                return _inner.TransactionAsync(action);
+            }
             public Task StopAsync() => _inner.StopAsync();
             public void Dispose() => _inner.Dispose();
         }

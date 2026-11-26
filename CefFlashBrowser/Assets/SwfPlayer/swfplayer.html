@@ -18,7 +18,7 @@
             src = src.replace(/\\/g, '/');
             return src.split('/').pop().split('?')[0];
         }
-        function loadSwf(src, baseUrl, attributes) { // called by CefSharp or initialized by the player page
+        function loadSwf(src, baseUrl, attributes, allowScriptAccess) { // called by CefSharp or initialized by the player page
             if (baseUrl) {
                 const base = document.createElement("base");
                 base.href = baseUrl;
@@ -28,10 +28,10 @@
             flash.id = "flash-player";
             if (attributes) {
                 flash.setAttribute("type", "application/x-shockwave-flash");
-                flash.setAttribute("allowscriptaccess", "never");
                 for (const [name, value] of Object.entries(attributes)) {
                     flash.setAttribute(name, value);
                 }
+                flash.setAttribute("allowscriptaccess", allowScriptAccess ? "always" : "never");
             }
             flash.setAttribute("src", src);
             document.body.replaceChild(flash, document.getElementById(flash.id));

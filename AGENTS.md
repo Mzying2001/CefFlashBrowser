@@ -60,6 +60,7 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
   - **Utils/**: Utility helpers and cross-cutting support code.
   - **ViewModels/**: MVVM presentation logic for windows and dialogs.
   - **Views/**: WPF windows, dialogs, and reusable UI controls.
+- **CefFlashBrowser.BrowserSubprocess/**: Custom CefSharp subprocess with renderer-side core-js polyfills.
 - **CefFlashBrowser.CommandProxy/**: Native command proxy with Flash diagnostic filtering.
 - **CefFlashBrowser.Database/**: Database interfaces and SQLite implementation.
 - **CefFlashBrowser.FlashBrowser/**: Flash-enabled CefSharp browser controls and page SWF discovery.
@@ -76,14 +77,14 @@ For browser regression setup, x86/Release commands, and diagnostics, see `CefFla
 
 ## Notes
 
-- Builds target both x86 and x64; output paths differ: `bin\Release\` (x86) vs `bin\x64\Release\` (x64)
-- Entry point is `Program.cs` (not the default `App.xaml.cs`)
-- CefSharp version 84.4.10 is pinned for Flash compatibility
-- Follow the repository's `.editorconfig` when modifying or adding files
+- Entry point is `Program.cs` (not the default `App.xaml.cs`).
+- Follow the repository's `.editorconfig` when modifying or adding files.
 - When explicitly setting a UIA control name, use English PascalCase unless the name needs to be dynamic.
+- Builds target both x86 and x64; output paths differ: `bin\Release\` (x86) vs `bin\x64\Release\` (x64).
 
 ## Git Commit Conventions
 
 - Use Conventional Commits: `<type>(<scope>): <summary>`, with concise English summaries.
 - Optional scope: affected project, area, class, or file.
 - For non-trivial changes, explain why and how in the body.
+- When committing, separate production code and test-related changes.

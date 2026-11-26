@@ -1,8 +1,9 @@
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace CefFlashBrowser.Tests
 {
@@ -20,15 +21,15 @@ namespace CefFlashBrowser.Tests
             settings.ProxySettings.UserName = "proxy-user";
             settings.ProxySettings.PlainPassword = password;
 
-            string json = JsonConvert.SerializeObject(settings);
-            var proxyJson = (JObject)JObject.Parse(json)["ProxySettings"];
+            string json = SettingsJson.Serialize(settings);
+            var proxyJson = JsonNode.Parse(json)["ProxySettings"].AsObject();
 
             Assert.AreEqual(settings.ProxySettings.Password, (string)proxyJson["Password"]);
             StringAssert.StartsWith((string)proxyJson["Password"], "dpapi:v1:");
-            Assert.IsNull(proxyJson["PlainPassword"]);
+            Assert.IsFalse(proxyJson.ContainsKey("PlainPassword"));
             Assert.IsFalse(json.Contains(password));
 
-            var restored = JsonConvert.DeserializeObject<Settings>(json);
+            var restored = SettingsJson.Deserialize(json);
             Assert.AreEqual(password, restored.ProxySettings.PlainPassword);
             Assert.AreEqual(settings.ProxySettings.Password, restored.ProxySettings.Password);
             Assert.AreEqual("127.0.0.1", restored.ProxySettings.IP);
@@ -45,10 +46,10 @@ namespace CefFlashBrowser.Tests
         [DataRow("dpapi:v1:AQID")]
         public void Deserialize_UnreadablePassword_ClearsStoredValueAndPreservesOtherSettings(string password)
         {
-            var json = new JObject
+            var json = new JsonObject
             {
                 ["Language"] = "en-US",
-                ["ProxySettings"] = new JObject
+                ["ProxySettings"] = new JsonObject
                 {
                     ["EnableProxy"] = true,
                     ["IP"] = "127.0.0.1",
@@ -58,7 +59,7 @@ namespace CefFlashBrowser.Tests
                 }
             };
 
-            var settings = JsonConvert.DeserializeObject<Settings>(json.ToString());
+            var settings = SettingsJson.Deserialize(json.ToJsonString());
 
             Assert.AreEqual(string.Empty, settings.ProxySettings.Password);
             Assert.AreEqual(string.Empty, settings.ProxySettings.PlainPassword);
@@ -67,24 +68,40 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual("127.0.0.1", settings.ProxySettings.IP);
             Assert.AreEqual("8080", settings.ProxySettings.Port);
             Assert.AreEqual("proxy-user", settings.ProxySettings.UserName);
-            Assert.AreEqual(string.Empty, (string)JObject.FromObject(settings)["ProxySettings"]["Password"]);
+            Assert.AreEqual(string.Empty, (string)JsonNode.Parse(SettingsJson.Serialize(settings))["ProxySettings"]["Password"]);
         }
 
         [TestMethod]
         public void Deserialize_PlainPasswordProperty_IsIgnored()
         {
             string password = PasswordProtector.Protect("original-password");
-            var json = new JObject
+            var json = new JsonObject
             {
                 ["Password"] = password,
                 ["PlainPassword"] = "unexpected-plaintext"
             };
 
-            var settings = JsonConvert.DeserializeObject<ProxySettings>(json.ToString());
+            var settings = json.Deserialize<ProxySettings>();
 
             Assert.AreEqual(password, settings.Password);
             Assert.AreEqual("original-password", settings.PlainPassword);
-            Assert.IsFalse(JsonConvert.SerializeObject(settings).Contains("unexpected-plaintext"));
+            Assert.IsFalse(JsonSerializer.Serialize(settings).Contains("unexpected-plaintext"));
+        }
+
+        [TestMethod]
+        public void Merge_RemovesPlaintextAliasesAndPreservesOtherProxyFields()
+        {
+            const string existing = @"{ ""proxysettings"": {
+                ""PlainPassword"": ""legacy-secret"", ""plainPassword"": ""another-secret"", ""future"": true
+            } }";
+
+            var merged = SettingsJson.Merge(existing, Settings.Default);
+            var proxy = JsonNode.Parse(merged)["ProxySettings"].AsObject();
+
+            Assert.IsFalse(merged.Contains("secret"));
+            Assert.IsFalse(proxy.ContainsKey("PlainPassword"));
+            Assert.IsFalse(proxy.ContainsKey("plainPassword"));
+            Assert.IsTrue(proxy["future"].GetValue<bool>());
         }
 
         [DataTestMethod]

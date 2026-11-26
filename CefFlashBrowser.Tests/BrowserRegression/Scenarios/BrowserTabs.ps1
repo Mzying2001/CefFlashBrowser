@@ -1,4 +1,4 @@
-function New-RegressionTab($Context, $Window, [string]$Address = 'about:blank') {
+﻿function New-RegressionTab($Context, $Window, [string]$Address = 'about:blank') {
     $model = $Window.ViewModel.AddBrowser($Address, $true)
     $documentReady = 'location.href === ' + ($Address | ConvertTo-Json -Compress) + ' && document.readyState === "complete"'
     Wait-Regression $Context {
@@ -1086,7 +1086,10 @@ function Test-BrowserTabStripSettings($Context) {
     $savedAlwaysShow = $settings.AlwaysShowTabStrip
     $windows = @()
     try {
-        $legacy = [Newtonsoft.Json.JsonConvert]::DeserializeObject('{"SaveZoomLevel":false}', [CefFlashBrowser.Models.Settings])
+        $settingsType = [CefFlashBrowser.Models.Settings]
+        $jsonOptions = New-Object System.Text.Json.JsonSerializerOptions
+        $jsonOptions.NumberHandling = [System.Text.Json.Serialization.JsonNumberHandling]::AllowNamedFloatingPointLiterals
+        $legacy = [System.Text.Json.JsonSerializer]::Deserialize('{"SaveZoomLevel":false}', $settingsType, $jsonOptions)
         Assert-Regression (!$legacy.AlwaysShowTabStrip -and !$legacy.SaveZoomLevel) 'older settings default to hiding a single tab without changing other values'
         foreach ($language in $Context.LanguageService.GetSupportedLanguage()) {
             $label = $Context.LanguageService.GetString($language, 'settings_alwaysShowTabStrip')
@@ -1102,8 +1105,8 @@ function Test-BrowserTabStripSettings($Context) {
 
         $settings.AlwaysShowTabStrip = $true
         foreach ($window in $windows) { Assert-TabStripLayout $Context $window $true }
-        $json = [Newtonsoft.Json.JsonConvert]::SerializeObject([CefFlashBrowser.Data.GlobalData]::Settings)
-        $restored = [Newtonsoft.Json.JsonConvert]::DeserializeObject($json, [CefFlashBrowser.Models.Settings])
+        $json = [System.Text.Json.JsonSerializer]::Serialize([CefFlashBrowser.Data.GlobalData]::Settings, $settingsType, $jsonOptions)
+        $restored = [System.Text.Json.JsonSerializer]::Deserialize($json, $settingsType, $jsonOptions)
         Assert-Regression $restored.AlwaysShowTabStrip 'JSON round trip preserves the always-show tab strip setting'
 
         $third = New-RegressionWindow $Context
@@ -1531,7 +1534,7 @@ function Test-BrowserTabsReloadClose($Context) {
         $second = New-RegressionTab $Context $window $Context.AuxiliaryAddress
         $handler = Set-RegressionBeforeUnload $Context $second.Browser
         $handler.Hold = $true
-        [CefSharp.WebBrowserExtensions]::Reload($second.Browser, $false)
+        $second.Browser.Reload($false)
         Wait-Regression $Context { $handler.Count -eq 1 } 'reload awaits confirmation'
         $window.Close()
         $view = Find-BrowserView $window $second

@@ -2,6 +2,7 @@ using CefFlashBrowser.Database;
 using CefFlashBrowser.Models.Downloads;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Services.Downloads;
+using CefFlashBrowser.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mzying2001.MonkeySharp.Core.Apis;
 using System;
@@ -152,6 +153,28 @@ namespace CefFlashBrowser.Tests
             await new HttpDownloadTransfer(restored, new FakeHttp(), null).StartAsync();
 
             CollectionAssert.AreEqual(http.Payload, File.ReadAllBytes(restored.FilePath));
+        }
+
+        [TestMethod]
+        public async Task HistoryRestoresLegacyProtectedHeadersWithCaseInsensitiveNames()
+        {
+            using (var database = new SqliteDatabase(Path.Combine(_directory, "browser.db")))
+            {
+                const string legacyHeaders = "{\"Authorization\":\"test-secret\",\"X-Label\":\"quoted \\\"value\\\"\"}";
+                var service = new DatabaseService(database);
+                var record = CreateRecord();
+                await service.ApplyDownloadChangesAsync(new[] { record }, Array.Empty<string>());
+                await database.ExecuteAsync("UPDATE downloads SET protected_headers = @headers WHERE id = @id",
+                    new Dictionary<string, object>
+                    {
+                        ["@headers"] = PasswordProtector.Protect(legacyHeaders),
+                        ["@id"] = record.Id
+                    });
+
+                var restored = (await service.GetDownloadsAsync()).Single();
+                Assert.AreEqual("test-secret", restored.Headers["authorization"]);
+                Assert.AreEqual("quoted \"value\"", restored.Headers["x-label"]);
+            }
         }
 
         [TestMethod]

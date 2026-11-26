@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 #Requires -PSEdition Desktop
 <#
 Run in a fresh, architecture-matched Windows PowerShell process after building:
@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs')][string]$Scenario = 'All'
+    [ValidateSet('All', 'BrowserIcon', 'Favicons', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs', 'Polyfills', 'PolyfillsDisabled')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -38,6 +38,7 @@ foreach ($file in @(
     'Scenarios\UserScriptManager.ps1',
     'Scenarios\UserScriptSettings.ps1',
     'Scenarios\UserScriptNetwork.ps1',
+    'Scenarios\Polyfills.ps1',
     'Scenarios\Lifecycle.ps1'
     'Scenarios\Favicons.ps1'
 )) {
@@ -48,7 +49,13 @@ $context = New-RegressionContext $PSScriptRoot $Platform $Configuration
 $failure = $null
 try {
     Initialize-RegressionEnvironment $context
-    if ($Scenario -eq 'DownloadManager') {
+    if ($Scenario -eq 'BrowserIcon') {
+        Test-BrowserIconDataUrls $context
+    } elseif ($Scenario -eq 'Favicons') {
+        Test-BrowserIconDataUrls $context
+        Start-RegressionCef $context
+        Test-Favicons $context
+    } elseif ($Scenario -eq 'DownloadManager') {
         Test-DownloadManagerWindow $context
     } elseif ($Scenario -eq 'DownloadRestart') {
         Test-DownloadRestart $context
@@ -69,6 +76,12 @@ try {
     } elseif ($Scenario -eq 'Frames') {
         Start-RegressionCef $context
         Test-UserScriptFrames $context
+    } elseif ($Scenario -eq 'Polyfills') {
+        Start-PolyfillRegressionCef $context
+        Test-BrowserPolyfills $context
+    } elseif ($Scenario -eq 'PolyfillsDisabled') {
+        Start-PolyfillRegressionCef $context -DisablePolyfills
+        Test-BrowserPolyfillsDisabled $context
     } elseif ($Scenario -eq 'Network') {
         Start-RegressionCef $context
         Test-UserScriptNetwork $context
@@ -134,6 +147,7 @@ try {
     } else {
         Test-LanguageService $context
         Test-LanguageSelectors $context
+        Test-BrowserIconDataUrls $context
         Test-FavoritesService $context
         Test-FavoritesManagerReorder $context
         Test-ProxySettings $context
@@ -144,6 +158,7 @@ try {
         Test-ListReorderBehavior $context
         Test-BrowserTabsBeforeShow $context
         Start-RegressionCef $context -EnableFlash
+        Test-BrowserPolyfills $context
         Test-UserScriptManager $context
         Test-UserScriptSeams $context
         Test-UserScripts $context

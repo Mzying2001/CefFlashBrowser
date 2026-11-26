@@ -1,4 +1,4 @@
-function Find-ProxyPasswordBox($Element) {
+﻿function Find-ProxyPasswordBox($Element) {
     if ($Element -is [HandyControl.Controls.PasswordBox]) {
         $binding = $Element.GetBindingExpression([HandyControl.Controls.PasswordBox]::UnsafePasswordProperty)
         if ($null -ne $binding -and $binding.ParentBinding.Path.Path -eq 'ProxySettings.PlainPassword') {

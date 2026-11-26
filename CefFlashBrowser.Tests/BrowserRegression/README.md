@@ -29,6 +29,10 @@ Download checks can be run independently with `Run.ps1 -Scenario DownloadManager
 
 Run `Run.ps1 -Scenario DownloadRestart` separately for cross-process recovery. It starts an isolated HTTP fixture and two hidden STA PowerShell processes against the same temporary download profile and CEF cache. The first process saves unfinished browser and manual tasks before shutdown. The second restores them, verifies the persisted Range offsets and cookies, and compares the final files with the fixture payload. All profiles, files and process logs remain under the printed temporary directory.
 
+Run `Run.ps1 -Scenario Polyfills` to exercise the first script on each probe document with userscripts disabled. The check covers strict CSP, same-origin and cross-origin iframes, `srcdoc`, `about:blank`, `blob:`, `data:`, local HTML, reload, and a real popup. The package smoke check also runs the first-script probe using the renderer from the supplied zip.
+
+Run `Run.ps1 -Scenario PolyfillsDisabled` in a fresh STA process to turn off website compatibility in Advanced settings, verify the value is saved, and check that application startup respects it.
+
 After `publish`, validate each actual zip in a fresh process of the matching architecture:
 
 ```cmd
@@ -81,7 +85,7 @@ When adding checks, put the scenario in the relevant scenario file and register 
 ## Userscript dependency baseline
 
 Run `Dependencies.ps1` in a fresh architecture-matched STA Windows PowerShell process after building.
-It validates MonkeySharp 4.0.0, the CefSharp 84 reference, typed JSON, embedded bridge assets,
+It validates MonkeySharp 5.0.0, the CefSharp 87.1.132 reference, typed JSON, embedded bridge assets,
 and AvalonEdit with its embedded JavaScript definition (loaded through Costura in Release)
 without starting CEF. Pass `-Platform x86` or `-Configuration Release` as appropriate;
 `-ApplicationPath` also supports an extracted release. Dependencies must resolve from that output

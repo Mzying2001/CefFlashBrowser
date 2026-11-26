@@ -1,4 +1,4 @@
-﻿using Mzying2001.MonkeySharp.Core.Domain;
+using Mzying2001.MonkeySharp.Core.Domain;
 using Mzying2001.MonkeySharp.Core.Parsing;
 using SimpleMvvm;
 using System;
@@ -135,6 +135,10 @@ namespace CefFlashBrowser.ViewModels
             if (string.IsNullOrWhiteSpace(icon)) return null;
 
             icon = icon.Trim();
+
+            if (icon.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
+                return icon;
+
             Uri uri;
 
             if (Uri.TryCreate(icon, UriKind.Relative, out var relative))

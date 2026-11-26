@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 #Requires -PSEdition Desktop
 [CmdletBinding()]
 param(
@@ -21,7 +21,8 @@ Write-Host "Isolated package check: $temporaryPath"
 Expand-Archive -LiteralPath $ArchivePath -DestinationPath $packagePath
 foreach ($file in @('CefFlashBrowser.exe', 'Binaries\SQLite\SQLite.Interop.dll',
     'Binaries\CmdProxy\CmdProxy.exe', 'Binaries\CefSharp\libcef.dll',
-    'Binaries\CefSharp\CefSharp.BrowserSubprocess.exe', 'Binaries\Plugins\pepflashplayer.dll',
+    'Binaries\CefSharp\CefSharp.Core.Runtime.dll', 'Binaries\CefSharp\v8_context_snapshot.bin',
+    'Binaries\CefSharp\CefSharp.BrowserSubprocess.exe', 'Binaries\CefSharp\LICENSE.core-js.txt', 'Binaries\Plugins\pepflashplayer.dll',
     'Binaries\Plugins\readme.txt')) {
     if (!(Test-Path -LiteralPath (Join-Path $packagePath $file) -PathType Leaf)) {
         throw "Required package file is missing: $file"
@@ -35,6 +36,16 @@ if ($Platform -eq 'x64') {
 }
 $runtimePath = Join-Path $packagePath 'Binaries\VCRuntime'
 $cefPath = Join-Path $packagePath 'Binaries\CefSharp'
+$subprocessPath = Join-Path $cefPath 'CefSharp.BrowserSubprocess.exe'
+$subprocess = [IO.File]::ReadAllBytes($subprocessPath)
+$peOffset = [BitConverter]::ToInt32($subprocess, 0x3c)
+if ([BitConverter]::ToUInt32($subprocess, $peOffset) -ne 0x4550 -or
+    [BitConverter]::ToUInt16($subprocess, $peOffset + 4) -ne $expectedMachine) {
+    throw "Expected a $Platform PE image at $subprocessPath."
+}
+if ($Platform -eq 'x86' -and ([BitConverter]::ToUInt16($subprocess, $peOffset + 22) -band 0x20) -eq 0) {
+    throw 'The x86 subprocess must be Large Address Aware.'
+}
 foreach ($file in $runtimeFiles) {
     $runtimeFile = Join-Path $runtimePath $file
     $reader = New-Object IO.BinaryReader ([IO.File]::OpenRead($runtimeFile))
@@ -182,6 +193,7 @@ try {
         throw 'Packaged userscript services did not persist their source file and typed values.'
     }
     . (Join-Path $PSScriptRoot 'Helpers.ps1')
+    . (Join-Path $PSScriptRoot 'Scenarios\Polyfills.ps1')
     . (Join-Path $PSScriptRoot 'PackageBrowserSmoke.ps1')
     Test-PackagedUserScripts $packagePath $temporaryPath $scripts $installation $runtimeFiles
     $nativeModules = @(Get-Process -Id $PID -Module | Where-Object ModuleName -eq 'SQLite.Interop.dll')

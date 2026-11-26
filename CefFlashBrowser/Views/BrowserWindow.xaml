@@ -25,6 +25,29 @@
         DataContext="{Binding Source={StaticResource Locator}, Path=BrowserWindowViewModel}">
 
     <Window.Resources>
+        <ControlTemplate x:Key="BrowserIconButtonTemplate" TargetType="Button">
+            <Grid Background="{TemplateBinding Background}">
+                <Border x:Name="highlight"
+                        CornerRadius="4"
+                        Opacity="0"
+                        Background="{TemplateBinding Foreground}"/>
+                <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="highlight" Property="Opacity" Value="0.12"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter TargetName="highlight" Property="Opacity" Value="0.24"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="highlight" Property="Opacity" Value="0"/>
+                    <Setter Property="Opacity" Value="0.4"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
         <!--ConetxtMenu-->
         <!--Browser actions menu-->
         <ContextMenu x:Key="browserActionsMenu"
@@ -342,13 +365,20 @@
 
         <!--Page SWFs menu-->
         <ContextMenu x:Key="pageSwfsMenu"
+                     MinWidth="250"
+                     MaxWidth="300"
                      VerticalOffset="-8"
                      HorizontalOffset="8"
                      DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                     ItemsSource="{Binding CurrentBrowser.Browser.PageSwfs}">
+                     ItemsSource="{Binding CurrentBrowser.Browser.PageSwfs}"
+                     Button.Click="PageSwfDownloadClicked">
             <ContextMenu.ItemContainerStyle>
                 <Style TargetType="MenuItem"
                        BasedOn="{StaticResource {x:Type MenuItem}}">
+                    <Setter Property="Padding"
+                            Value="3,0"/>
+                    <Setter Property="Template"
+                            Value="{StaticResource MenuItemWithoutShortcutTemplate}"/>
                     <Setter Property="AutomationProperties.Name"
                             Value="{Binding FileName}"/>
                     <Setter Property="ToolTip"
@@ -361,9 +391,25 @@
             </ContextMenu.ItemContainerStyle>
             <ContextMenu.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock MaxWidth="250"
-                               TextTrimming="CharacterEllipsis"
-                               Text="{Binding FileName}"/>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right"
+                                AutomationProperties.Name="DownloadSwf"
+                                BorderThickness="0"
+                                Background="Transparent"
+                                Foreground="{DynamicResource PrimaryTextBrush}"
+                                Template="{StaticResource BrowserIconButtonTemplate}"
+                                ToolTip="{DynamicResource downloads_start}"
+                                Command="{Binding DataContext.DownloadPageSwfCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                CommandParameter="{Binding}">
+                            <svgc:SvgIcon Width="13"
+                                          Height="13"
+                                          UriSource="{StaticResource DownloadIconUri}"/>
+                        </Button>
+                        <TextBlock Margin="0,0,5,0"
+                                   Text="{Binding FileName}"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </DockPanel>
                 </DataTemplate>
             </ContextMenu.ItemTemplate>
         </ContextMenu>
@@ -781,22 +827,32 @@
                               IsDragEnabled="True"
                               RequestMoveItem="TabRequestMoveItem"
                               SelectionChanged="TabSelectionChanged">
+                    <c:BrowserTab.Resources>
+                        <Style x:Key="BrowserTitleTextBlockStyle" TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding Title}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Title, TargetNullValue=''}" Value="">
+                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </c:BrowserTab.Resources>
                     <c:BrowserTab.ItemContainerStyle>
                         <Style TargetType="ListBoxItem"
                                BasedOn="{StaticResource {x:Static c:BrowserTab.ItemContainerStyleKey}}">
+                            <Setter Property="Tag"
+                                    Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
                             <Setter Property="ToolTip">
                                 <Setter.Value>
                                     <StackPanel MaxWidth="500">
-                                        <TextBlock Text="{Binding Title}"
-                                                   TextWrapping="Wrap"/>
+                                        <TextBlock TextWrapping="Wrap"
+                                                   Style="{StaticResource BrowserTitleTextBlockStyle}"/>
                                         <TextBlock Text="{Binding Address}"
                                                    TextTrimming="CharacterEllipsis"
                                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     </StackPanel>
                                 </Setter.Value>
                             </Setter>
-                            <Setter Property="Tag"
-                                    Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
                             <Setter Property="ContextMenu">
                                 <Setter.Value>
                                     <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
@@ -956,34 +1012,9 @@
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="ToolTip" Value="{DynamicResource browser_closeTab}"/>
+                                            <Setter Property="Template" Value="{StaticResource BrowserIconButtonTemplate}"/>
                                             <Setter Property="Background" Value="Transparent"/>
                                             <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}"/>
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Grid Background="{TemplateBinding Background}">
-                                                            <Border x:Name="highlight"
-                                                                    CornerRadius="4"
-                                                                    Opacity="0"
-                                                                    Background="{TemplateBinding Foreground}"/>
-                                                            <ContentPresenter HorizontalAlignment="Center"
-                                                                              VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                        <ControlTemplate.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter TargetName="highlight" Property="Opacity" Value="0.12"/>
-                                                            </Trigger>
-                                                            <Trigger Property="IsPressed" Value="True">
-                                                                <Setter TargetName="highlight" Property="Opacity" Value="0.24"/>
-                                                            </Trigger>
-                                                            <Trigger Property="IsEnabled" Value="False">
-                                                                <Setter TargetName="highlight" Property="Opacity" Value="0"/>
-                                                                <Setter Property="Opacity" Value="0.4"/>
-                                                            </Trigger>
-                                                        </ControlTemplate.Triggers>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
                                                     <Setter Property="ToolTip" Value="{DynamicResource browser_toolTipCloseTab}"/>
@@ -999,21 +1030,8 @@
                                 <TextBlock
                                     x:Name="tabTitle"
                                     VerticalAlignment="Center"
-                                    TextTrimming="CharacterEllipsis">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="{Binding Title}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Title}" Value="{x:Null}">
-                                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Title}" Value="">
-                                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                    TextTrimming="CharacterEllipsis"
+                                    Style="{StaticResource BrowserTitleTextBlockStyle}"/>
                             </DockPanel>
                         </DataTemplate>
                     </c:BrowserTab.ItemTemplate>
@@ -1047,8 +1065,18 @@
               local:BrowserView.BrowserPopup="BrowserPopup"
               local:BrowserView.BrowserNewPage="BrowserNewPage">
             <ItemsControl x:Name="browsersControl" ItemsSource="{Binding Browsers}">
-                <ItemsControl.Resources>
-                    <Style TargetType="{x:Type local:BrowserView}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
+                        <local:BrowserView/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
                         <!-- Hidden tabs still participate in native hosting and preparation. -->
                         <Setter Property="Visibility" Value="Hidden"/>
                         <Style.Triggers>
@@ -1063,17 +1091,7 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ItemsControl.Resources>
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Grid/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type vm:BrowserViewModel}">
-                        <local:BrowserView/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
+                </ItemsControl.ItemContainerStyle>
             </ItemsControl>
         </Grid>
 
@@ -1112,7 +1130,7 @@
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
                                     <Condition Binding="{Binding CurrentBrowser.Browser.IsLoading}" Value="False"/>
-                                    <Condition Binding="{Binding CurrentBrowser.Browser.StatusText}" Value=""/>
+                                    <Condition Binding="{Binding CurrentBrowser.Browser.StatusText, TargetNullValue=''}" Value=""/>
                                 </MultiDataTrigger.Conditions>
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </MultiDataTrigger>

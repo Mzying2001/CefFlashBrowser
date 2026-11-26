@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using System;
 using System.Linq;
 using System.Windows;

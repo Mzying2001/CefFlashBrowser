@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Data;
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Models.Sol;
 using CefFlashBrowser.Utils;
 using SimpleMvvm;

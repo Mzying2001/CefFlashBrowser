@@ -16,8 +16,7 @@
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
     <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
-    <PackageReference Include="Mzying2001.MonkeySharp.Core" Version="4.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Mzying2001.MonkeySharp.Core" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,6 +48,7 @@
     <Compile Include="..\CefFlashBrowser\Services\DatabaseService.WebsiteIcons.cs" Link="LinkedSources\DatabaseService.WebsiteIcons.cs" />
     <Compile Include="..\CefFlashBrowser\Models\WebsiteIconRecord.cs" Link="LinkedSources\WebsiteIconRecord.cs" />
     <Compile Include="..\CefFlashBrowser\Services\FaviconService.cs" Link="LinkedSources\FaviconService.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\ImageDataUrl.cs" Link="LinkedSources\ImageDataUrl.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\WebsiteIconUrlConverter.cs" Link="LinkedSources\WebsiteIconUrlConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\UserScriptDownloadPaths.cs" Link="LinkedSources\UserScriptDownloadPaths.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\Win32.cs" Link="LinkedSources\Win32.cs" />
@@ -59,6 +59,7 @@
     <Compile Include="..\CefFlashBrowser\Views\Converters\ZoomLevelToScaleConverter.cs" Link="LinkedSources\ZoomLevelToScaleConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\MultiplyConverter.cs" Link="LinkedSources\MultiplyConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Models\Settings.cs" Link="LinkedSources\Settings.cs" />
+    <Compile Include="..\CefFlashBrowser\Data\SettingsJson.cs" Link="LinkedSources\SettingsJson.cs" />
     <Compile Include="..\CefFlashBrowser\Models\SettingModels.cs" Link="LinkedSources\SettingModels.cs" />
     <Compile Include="..\CefFlashBrowser\Models\WindowSizeInfo.cs" Link="LinkedSources\WindowSizeInfo.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\SolHelper.cs" Link="LinkedSources\SolHelper.cs" />

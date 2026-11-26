@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Utils;
+using CefFlashBrowser.Utils;
 using System;
 
 namespace CefFlashBrowser.Models.Sol

@@ -1,4 +1,4 @@
-﻿namespace CefFlashBrowser.FlashBrowser
+namespace CefFlashBrowser.FlashBrowser
 {
     public class CefFlashSettings : WinformCefSharp4WPF.CefSettings
     {

@@ -1,4 +1,4 @@
-function Test-FavoritesService($Context) {
+﻿function Test-FavoritesService($Context) {
     $service = $Context.FavoritesService
     $ioc = [SimpleMvvm.Ioc.SimpleIoc]::Global
     $locator = $Context.Application.Resources['Locator']

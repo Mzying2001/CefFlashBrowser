@@ -1,10 +1,10 @@
-function Test-PackagedUserScripts($PackagePath, $TemporaryPath, $Scripts, $Installation, [string[]]$RuntimeFiles) {
+﻿function Test-PackagedUserScripts($PackagePath, $TemporaryPath, $Scripts, $Installation, [string[]]$RuntimeFiles) {
     # Resolve only the supplied archive and its Costura resources, without build-output fallbacks.
     $cefPath = Join-Path $PackagePath 'Binaries\CefSharp'
-    foreach ($dependency in @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.WinForms.dll')) {
+    foreach ($dependency in @('CefSharp.dll', 'CefSharp.Core.dll')) {
         [void][Reflection.Assembly]::LoadFrom((Join-Path $cefPath $dependency))
     }
-    foreach ($assemblyName in @('CefFlashBrowser.WinformCefSharp4WPF', 'CefFlashBrowser.FlashBrowser',
+    foreach ($assemblyName in @('CefSharp.WinForms', 'CefFlashBrowser.WinformCefSharp4WPF', 'CefFlashBrowser.FlashBrowser',
         'Mzying2001.MonkeySharp.CefSharp')) {
         [void][Reflection.Assembly]::Load($assemblyName)
     }
@@ -36,12 +36,12 @@ GM.setValue('packaged-commit', 42).then(function () {
         [void]$Scripts.Repository.UpdateAsync($Installation.ScriptKey, $source, $null,
             [Threading.CancellationToken]::None).GetAwaiter().GetResult()
         $pagePath = Join-Path $TemporaryPath 'packaged.html'
-        [IO.File]::WriteAllText($pagePath, '<html><body>Packaged userscript</body></html>',
-            (New-Object Text.UTF8Encoding($false)))
+        [IO.File]::Copy((Join-Path $PSScriptRoot 'PolyfillProbe.html'), $pagePath)
 
         [Environment]::SetEnvironmentVariable('ComSpec', (Join-Path $PackagePath 'Binaries\CmdProxy\CmdProxy.exe'))
         $settings = New-Object CefFlashBrowser.FlashBrowser.CefFlashSettings
-        $settings.BrowserSubprocessPath = Join-Path $cefPath 'CefSharp.BrowserSubprocess.exe'
+        $subprocessPath = Join-Path $cefPath 'CefSharp.BrowserSubprocess.exe'
+        $settings.BrowserSubprocessPath = $subprocessPath
         $settings.ResourcesDirPath = $cefPath
         $settings.LocalesDirPath = Join-Path $cefPath 'locales'
         $settings.CachePath = Join-Path $TemporaryPath 'Cache'
@@ -77,6 +77,7 @@ GM.setValue('packaged-commit', 42).then(function () {
             $browser.CanExecuteJavascriptInMainFrame -and
             (Invoke-JavaScript $context $browser "document.documentElement && document.documentElement.getAttribute('data-packaged')") -eq 'ready'
         } 'packaged userscript injection and synchronous typed-value bootstrap'
+        Assert-PolyfillProbe $context $browser 'packaged renderer'
         $committed = $Scripts.ValueStore.GetAsync($Installation.ScriptKey.ToString(), 'packaged-commit',
             [Threading.CancellationToken]::None).GetAwaiter().GetResult()
         Assert-Regression ($committed.Exists -and $committed.Value.EncodedValue -eq 'n42') 'packaged asynchronous GM write reaches SQLite before acknowledgement'
@@ -85,7 +86,7 @@ GM.setValue('packaged-commit', 42).then(function () {
         Wait-Regression $context {
             foreach ($subprocess in [Diagnostics.Process]::GetProcessesByName('CefSharp.BrowserSubprocess')) {
                 try {
-                    if ($subprocess.MainModule.FileName -ne $settings.BrowserSubprocessPath) { continue }
+                    if ($subprocess.MainModule.FileName -ne $subprocessPath) { continue }
                     $subprocessModules = @($subprocess.Modules | ForEach-Object FileName)
                     $missingRuntimeFiles = @($RuntimeFiles | Where-Object {
                         $subprocessModules -notcontains (Join-Path $cefPath $_)

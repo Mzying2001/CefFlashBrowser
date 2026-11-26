@@ -96,6 +96,7 @@
     <sys:String x:Key="settings_alwaysShowTabStrip">一律顯示分頁列</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">將開發者工具嵌入至瀏覽器視窗</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止網頁進入全螢幕模式</sys:String>
+    <sys:String x:Key="settings_enableCoreJsPolyfills">增強網頁相容性（core-js）</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">停用 GPU 加速</sys:String>
     <sys:String x:Key="settings_disableBrowserContextMenu">停用右鍵選單</sys:String>
 

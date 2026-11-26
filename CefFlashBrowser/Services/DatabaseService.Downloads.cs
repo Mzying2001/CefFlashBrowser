@@ -1,12 +1,12 @@
 using CefFlashBrowser.Database;
 using CefFlashBrowser.Models.Downloads;
 using CefFlashBrowser.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CefFlashBrowser.Services
@@ -110,7 +110,7 @@ namespace CefFlashBrowser.Services
                     ["@source_page"] = record.SourcePage,
                     ["@method"] = record.Method,
                     ["@protected_headers"] = record.Headers.Count == 0 ? null
-                        : PasswordProtector.Protect(JsonConvert.SerializeObject(record.Headers)),
+                        : PasswordProtector.Protect(JsonSerializer.Serialize(record.Headers)),
                     ["@anonymous"] = record.Anonymous ? 1 : 0,
                     ["@overwrite"] = record.Overwrite ? 1 : 0,
                     ["@is_local_body"] = record.IsLocalBody ? 1 : 0,
@@ -161,7 +161,13 @@ namespace CefFlashBrowser.Services
             var headers = PasswordProtector.UnprotectOrEmpty(row[8] as string);
 
             if (!string.IsNullOrEmpty(headers))
-                JsonConvert.PopulateObject(headers, record.Headers);
+            {
+                var savedHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(headers)
+                    ?? throw new JsonException("Download headers must be a JSON object.");
+
+                foreach (var header in savedHeaders)
+                    record.Headers[header.Key] = header.Value;
+            }
 
             return record;
         }

@@ -1,4 +1,4 @@
-function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$Configuration) {
+﻿function New-RegressionContext([string]$ScriptPath, [string]$Platform, [string]$Configuration) {
     $repositoryPath = Split-Path (Split-Path $ScriptPath -Parent) -Parent
     $buildPath = if ($Platform -eq 'x64') { "bin\x64\$Configuration" } else { "bin\$Configuration" }
     $applicationPath = Join-Path $repositoryPath $buildPath
@@ -86,7 +86,7 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
         'SimpleMvvm.dll',
         'Microsoft.Xaml.Behaviors.dll',
         'HandyControl.dll',
-        'Newtonsoft.Json.dll',
+        'System.Text.Json.dll',
         'SharpVectors.Core.dll',
         'SharpVectors.Runtime.Wpf.dll',
         'SharpVectors.Converters.Wpf.dll',
@@ -94,13 +94,14 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
         'System.Data.SQLite.dll',
         'CefFlashBrowser.Database.dll',
         'CefFlashBrowser.WinformCefSharp4WPF.dll',
-        'CefFlashBrowser.FlashBrowser.dll'
+        'CefFlashBrowser.FlashBrowser.dll',
+        'CefSharp.WinForms.dll'
     )
-    $cefDependencies = @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.WinForms.dll')
+    $cefDependencies = @('CefSharp.dll', 'CefSharp.Core.dll', 'CefSharp.Core.Runtime.dll')
     $requiredFiles = @('CefFlashBrowser.exe', 'Binaries\SQLite\SQLite.Interop.dll',
         'Binaries\CmdProxy\CmdProxy.exe', 'Binaries\Plugins\pepflashplayer.dll',
         'Binaries\Plugins\readme.txt') + @(
-        ($cefDependencies + @('CefSharp.BrowserSubprocess.exe', 'libcef.dll')) | ForEach-Object { "Binaries\CefSharp\$_" }
+        ($cefDependencies + @('CefSharp.BrowserSubprocess.exe', 'libcef.dll', 'v8_context_snapshot.bin')) | ForEach-Object { "Binaries\CefSharp\$_" }
     )
     foreach ($file in $requiredFiles) {
         $path = Join-Path $Context.ApplicationPath $file
@@ -148,9 +149,7 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
         $globalDataType.GetField('<' + $nativePath.Key + '>k__BackingField', $privateStatic).SetValue($null, $nativePath.Value)
     }
     [void]$applicationAssembly.GetType('CefFlashBrowser.Program').GetMethod('InitializeDllDirectories', $privateStatic).Invoke($null, $null)
-    foreach ($dependency in @('CefSharp.Core.dll', 'CefSharp.WinForms.dll')) {
-        [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.CefPath $dependency))
-    }
+    [void][Reflection.Assembly]::LoadFrom((Join-Path $Context.CefPath 'CefSharp.Core.dll'))
 
     $references = @(
         'System.Net.Http',

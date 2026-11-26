@@ -1,4 +1,4 @@
-﻿using CefFlashBrowser.Browser.UserScripts;
+using CefFlashBrowser.Browser.UserScripts;
 using CefFlashBrowser.Models.UserScripts;
 using CefSharp;
 using System.Collections.Generic;

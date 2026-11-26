@@ -4,7 +4,6 @@ using CefFlashBrowser.FlashBrowser;
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Services;
 using CefFlashBrowser.Utils;
-using CefSharp;
 using SimpleMvvm;
 using SimpleMvvm.Command;
 using SimpleMvvm.Ioc;
@@ -28,6 +27,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand AddFavoriteCommand { get; set; }
         public DelegateCommand ToggleLoadingStateCommand { get; set; }
         public DelegateCommand OpenInSwfPlayerCommand { get; set; }
+        public DelegateCommand DownloadPageSwfCommand { get; set; }
         public DelegateCommand NewBrowserWindowCommand { get; set; }
         public DelegateCommand AddBrowserCommand { get; set; }
         public DelegateCommand CloseBrowserCommand { get; set; }
@@ -215,13 +215,17 @@ namespace CefFlashBrowser.ViewModels
             if (!IsBrowserReady(browser))
                 return;
 
-            if (browser.Browser.IsLoading)
+            var webBrowser = browser.Browser;
+
+            if (webBrowser.IsLoading)
             {
-                browser.Browser.Stop();
+                _ = WinformCefSharp4WPF.CefBrowserNavigation.RunAsync(
+                    webBrowser, nativeBrowser => nativeBrowser.StopLoad());
             }
             else
             {
-                browser.Browser.Reload();
+                _ = WinformCefSharp4WPF.CefBrowserNavigation.RunAsync(
+                    webBrowser, nativeBrowser => nativeBrowser.Reload(false));
             }
         }
 
@@ -242,6 +246,22 @@ namespace CefFlashBrowser.ViewModels
             {
                 WindowManager.ShowSwfPlayer(resource.Url, context);
             }
+        }
+
+        private void DownloadPageSwf(SwfResourceRecord resource)
+        {
+            var current = CurrentBrowser;
+
+            if (IsClosing || resource == null || !IsBrowserReady(current)
+                || !(current.Browser is ChromiumFlashBrowser browser) || !browser.PageSwfs.Contains(resource))
+                return;
+
+            _ = WinformCefSharp4WPF.CefBrowserNavigation.RunAsync(browser, nativeBrowser =>
+            {
+                var host = nativeBrowser.GetHost();
+                if (host != null && !host.IsDisposed)
+                    host.StartDownload(resource.Url);
+            });
         }
 
         public void NewBrowserWindow(string url)
@@ -513,6 +533,7 @@ namespace CefFlashBrowser.ViewModels
             AddFavoriteCommand = new DelegateCommand<BrowserViewModel>(AddFavorite);
             ToggleLoadingStateCommand = new DelegateCommand<BrowserViewModel>(ToggleLoadingState);
             OpenInSwfPlayerCommand = new DelegateCommand<SwfResourceRecord>(OpenPageSwf);
+            DownloadPageSwfCommand = new DelegateCommand<SwfResourceRecord>(DownloadPageSwf);
             NewBrowserWindowCommand = new DelegateCommand<string>(NewBrowserWindow);
             AddBrowserCommand = new DelegateCommand<string>(AddBrowserCommandImpl);
             CloseBrowserCommand = new DelegateCommand<BrowserViewModel>(CloseBrowser);

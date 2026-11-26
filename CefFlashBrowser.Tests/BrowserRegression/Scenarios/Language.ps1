@@ -1,4 +1,4 @@
-function Test-LanguageService($Context) {
+﻿function Test-LanguageService($Context) {
     $service = $Context.LanguageService
     $settings = [CefFlashBrowser.Data.GlobalData]::Settings
     $savedLanguage = $service.CurrentLanguage

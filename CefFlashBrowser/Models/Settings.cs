@@ -43,6 +43,11 @@ namespace CefFlashBrowser.Models
         public bool DisableOnBeforeUnloadDialog { get; set; }
 
         /// <summary>
+        /// Determines whether SWFs opened with their source page context can access scripts in the player page
+        /// </summary>
+        public bool AllowPageSwfScriptAccess { get; set; }
+
+        /// <summary>
         /// The size and position of the main window
         /// </summary>
         public WindowSizeInfo MainWindowSizeInfo { get; set; }
@@ -66,6 +71,11 @@ namespace CefFlashBrowser.Models
         /// The size and position of the userscript manager window
         /// </summary>
         public WindowSizeInfo UserScriptManagerSizeInfo { get; set; }
+
+        /// <summary>
+        /// The size and position of the download manager window
+        /// </summary>
+        public WindowSizeInfo DownloadManagerSizeInfo { get; set; }
 
         /// <summary>
         /// Display and indentation preferences for the userscript editor
@@ -158,6 +168,11 @@ namespace CefFlashBrowser.Models
         public bool DisableBrowserContextMenu { get; set; }
 
         /// <summary>
+        /// Determines whether core-js polyfills are injected at document start
+        /// </summary>
+        public bool EnableCoreJsPolyfills { get; set; }
+
+        /// <summary>
         /// Determines whether userscript execution is enabled
         /// </summary>
         public bool EnableUserScripts { get; set; }
@@ -203,11 +218,13 @@ namespace CefFlashBrowser.Models
             NewPageBehavior = NewPageBehavior.NewTab;
             NewTabAddress = "about:blank";
             DisableOnBeforeUnloadDialog = false;
+            AllowPageSwfScriptAccess = true;
             MainWindowSizeInfo = null;
             BrowserWindowSizeInfo = null;
             SwfWindowSizeInfo = null;
             SolSaveManagerSizeInfo = null;
             UserScriptManagerSizeInfo = null;
+            DownloadManagerSizeInfo = null;
             ScriptEditorSettings = new EditorSettings();
             ProxySettings = new ProxySettings();
             UserAgentSetting = new UserAgentSetting();
@@ -225,6 +242,7 @@ namespace CefFlashBrowser.Models
             DisableGpuAcceleration = false;
             CustomEmoticon = null;
             DisableBrowserContextMenu = false;
+            EnableCoreJsPolyfills = true;
             EnableUserScripts = true;
             TrustedUserScriptPageWorld = true;
             DefaultUserScriptPermissionBehavior = UserScriptPermissionBehavior.Prompt;

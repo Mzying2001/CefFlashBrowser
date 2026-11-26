@@ -96,6 +96,7 @@
     <sys:String x:Key="settings_alwaysShowTabStrip">始终显示标签页栏</sys:String>
     <sys:String x:Key="settings_enableIntegratedDevTools">嵌入开发工具到浏览器窗口</sys:String>
     <sys:String x:Key="settings_disableFullscreen">阻止网页进入全屏模式</sys:String>
+    <sys:String x:Key="settings_enableCoreJsPolyfills">增强网页兼容性（core-js）</sys:String>
     <sys:String x:Key="settings_disableGpuAcceleration">禁用 GPU 加速</sys:String>
     <sys:String x:Key="settings_disableBrowserContextMenu">禁用右键菜单</sys:String>
 

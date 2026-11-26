@@ -25,6 +25,8 @@ public sealed class UserScriptHttpFixture : IDisposable
 
     public string ScriptSource { get; set; }
 
+    public string PolyfillProbeHtml { get; set; }
+
     public bool Offline { get; set; }
 
     private static byte[] SwfPayload()
@@ -324,6 +326,17 @@ public sealed class UserScriptHttpFixture : IDisposable
                     body = Encoding.UTF8.GetBytes("<title>Frame fixture</title><iframe src='/frame'></iframe><iframe src='" + (PeerUrl ?? BaseUrl) + "/frame'></iframe>");
                 else if (path == "/frame")
                     body = Encoding.UTF8.GetBytes("<title>Child fixture</title><p>child</p>");
+                else if (path == "/polyfill" || path == "/polyfill-frames")
+                {
+                    extra = "Content-Security-Policy: script-src 'nonce-cfb-polyfill-probe'; object-src 'none'; base-uri 'none'\r\n";
+                    var html = PolyfillProbeHtml;
+                    if (path == "/polyfill-frames")
+                    {
+                        html += "<iframe src='/polyfill'></iframe><iframe src='" + WebUtility.HtmlEncode(PeerUrl) + "/polyfill'></iframe>"
+                            + "<iframe srcdoc=\"" + WebUtility.HtmlEncode(PolyfillProbeHtml) + "\"></iframe>";
+                    }
+                    body = Encoding.UTF8.GetBytes(html);
+                }
                 else
                     body = Encoding.UTF8.GetBytes("<title>Userscript fixture</title><script>window.inlineRan=true;</script><script src='/blocked.js'></script><p>fixture</p>");
 
