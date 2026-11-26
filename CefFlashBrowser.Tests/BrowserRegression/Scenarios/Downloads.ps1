@@ -56,6 +56,7 @@
     Assert-Regression (!$completedTransfer.IsEnabled -and [object]::ReferenceEquals($completedTransfer.Content, $window.Resources['PlayIcon'])) 'the completed row shows a disabled play icon'
     Assert-Regression ($canExecute.Invoke($model.OpenCommand, [object[]]@($null)) -and
         $window.FindName('openFolderButton').IsEnabled) 'completed download enables file and folder actions'
+    Test-DownloadFileIcons $Context $list $completedRow $failedItem
     Save-DownloadManagerCapture $window (Join-Path $Context.TemporaryPath 'DownloadManager.png')
 
     Assert-Regression ($details.Visibility -eq 'Visible' -and $errorField.Visibility -eq 'Collapsed') 'selecting a completed download automatically shows details without an error row'
@@ -244,6 +245,44 @@
         [CefFlashBrowser.Data.GlobalData]::Settings.DownloadDirectory = $directory
         [void][CefFlashBrowser.Data.GlobalData]::SaveSettings()
     }
+}
+
+function Test-DownloadFileIcons($Context, $List, $CompletedRow, $MissingItem) {
+    $missingRow = $List.ItemContainerGenerator.ContainerFromItem($MissingItem)
+    $completedIcon = Find-TabElement $CompletedRow 'fileIcon'
+    $missingIcon = Find-TabElement $missingRow 'fileIcon'
+    Wait-Regression $Context { $null -ne $completedIcon.Source -and $null -ne $missingIcon.Source } 'resolve file type icons in the download list'
+    $cached = $completedIcon.Source
+    Assert-Regression (![IO.File]::Exists($MissingItem.FilePath) -and $cached.IsFrozen -and
+        [object]::ReferenceEquals($missingIcon.Source, $cached)) 'a missing download shares the same file type bitmap as the completed download'
+
+    $fileName = $missingIcon.Parent.Children[1]
+    $iconRight = $missingIcon.TranslatePoint([Windows.Point]::new($missingIcon.ActualWidth, $missingIcon.ActualHeight / 2), $missingRow)
+    $textLeft = $fileName.TranslatePoint([Windows.Point]::new(0, $fileName.ActualHeight / 2), $missingRow)
+    Assert-Regression ($iconRight.X -lt $textLeft.X -and [Math]::Abs($iconRight.Y - $textLeft.Y) -lt 1 -and
+        !$missingIcon.IsHitTestVisible -and $fileName.ToolTip -eq $MissingItem.FileName -and
+        $fileName.TextTrimming -eq [Windows.TextTrimming]::CharacterEllipsis) 'the row icon aligns with the filename and preserves trimming and the tooltip'
+
+    $probe = New-Object CefFlashBrowser.Views.Custom.FileIcon
+    $probe.FilePath = [IO.Path]::ChangeExtension($MissingItem.FilePath, '.BIN')
+    Wait-Regression $Context { [object]::ReferenceEquals($probe.Source, $cached) } 'a full missing path with different extension casing uses the same cache'
+
+    $originalName = $MissingItem.FileName
+    $MissingItem.Record.FileName = 'renamed.txt'
+    $MissingItem.Refresh()
+    Wait-Regression $Context { $null -ne $missingIcon.Source -and ![object]::ReferenceEquals($missingIcon.Source, $cached) } 'a changed download extension updates the row icon'
+
+    $probe.FilePath = 'file.cfb-icon-regression'
+    $MissingItem.Record.FileName = $probe.FilePath
+    $MissingItem.Refresh()
+    $MissingItem.Record.FileName = $originalName
+    $MissingItem.Refresh()
+    Wait-Regression $Context { $null -ne $probe.Source -and [object]::ReferenceEquals($missingIcon.Source, $cached) } 'a late icon lookup cannot overwrite the current row icon'
+
+    $probe.FilePath = 'file-without-extension'
+    Wait-Regression $Context { $null -ne $probe.Source } 'an extensionless name gets a generic file icon'
+    $probe.FilePath = ''
+    Assert-Regression ($null -eq $probe.Source) 'clearing the input clears the file icon'
 }
 
 function Save-DownloadManagerCapture($Window, [string]$Path) {
