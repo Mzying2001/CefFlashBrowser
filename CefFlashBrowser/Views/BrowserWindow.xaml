@@ -827,22 +827,35 @@
                               IsDragEnabled="True"
                               RequestMoveItem="TabRequestMoveItem"
                               SelectionChanged="TabSelectionChanged">
+                    <c:BrowserTab.Resources>
+                        <Style x:Key="BrowserTitleTextBlockStyle" TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding Title}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Title}" Value="{x:Null}">
+                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Title}" Value="">
+                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </c:BrowserTab.Resources>
                     <c:BrowserTab.ItemContainerStyle>
                         <Style TargetType="ListBoxItem"
                                BasedOn="{StaticResource {x:Static c:BrowserTab.ItemContainerStyleKey}}">
+                            <Setter Property="Tag"
+                                    Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
                             <Setter Property="ToolTip">
                                 <Setter.Value>
                                     <StackPanel MaxWidth="500">
-                                        <TextBlock Text="{Binding Title}"
-                                                   TextWrapping="Wrap"/>
+                                        <TextBlock TextWrapping="Wrap"
+                                                   Style="{StaticResource BrowserTitleTextBlockStyle}"/>
                                         <TextBlock Text="{Binding Address}"
                                                    TextTrimming="CharacterEllipsis"
                                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     </StackPanel>
                                 </Setter.Value>
                             </Setter>
-                            <Setter Property="Tag"
-                                    Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
                             <Setter Property="ContextMenu">
                                 <Setter.Value>
                                     <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
@@ -1020,21 +1033,8 @@
                                 <TextBlock
                                     x:Name="tabTitle"
                                     VerticalAlignment="Center"
-                                    TextTrimming="CharacterEllipsis">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="{Binding Title}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Title}" Value="{x:Null}">
-                                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Title}" Value="">
-                                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                    TextTrimming="CharacterEllipsis"
+                                    Style="{StaticResource BrowserTitleTextBlockStyle}"/>
                             </DockPanel>
                         </DataTemplate>
                     </c:BrowserTab.ItemTemplate>
