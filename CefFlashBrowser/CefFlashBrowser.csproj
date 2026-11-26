@@ -77,21 +77,20 @@
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
     <PackageReference Include="CefSharp.WinForms" Version="87.1.132" />
-    <PackageReference Include="Costura.Fody" Version="6.0.0">
+    <PackageReference Include="Costura.Fody" Version="6.2.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="HandyControl" Version="3.5.1" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.161" />
     <PackageReference Include="Mzying2001.MonkeySharp.CefSharp87.$(Platform)" Version="5.0.0" />
     <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
-    <PackageReference Include="SharpVectors" Version="1.8.4.2" />
+    <PackageReference Include="SharpVectors" Version="1.8.6" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CefFlashBrowser.BrowserSubprocess\CefFlashBrowser.BrowserSubprocess.csproj"
-                      ReferenceOutputAssembly="false" OutputItemType="CefSubprocessExecutable" />
+    <ProjectReference Include="..\CefFlashBrowser.BrowserSubprocess\CefFlashBrowser.BrowserSubprocess.csproj" ReferenceOutputAssembly="false" OutputItemType="CefSubprocessExecutable" />
     <ProjectReference Include="..\CefFlashBrowser.Database\CefFlashBrowser.Database.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
@@ -101,8 +100,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\CefFlashBrowser.BrowserSubprocess\Polyfills\LICENSE.core-js.txt"
-             Link="Binaries\CefSharp\LICENSE.core-js.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\CefFlashBrowser.BrowserSubprocess\Polyfills\LICENSE.core-js.txt" Link="Binaries\CefSharp\LICENSE.core-js.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -128,8 +126,7 @@
     <RemoveDir Directories="@(_LegacySQLiteDirectories)" Condition="Exists('%(_LegacySQLiteDirectories.Identity)') And $([System.IO.Directory]::GetFiles('%(_LegacySQLiteDirectories.Identity)').Length) == 0 And $([System.IO.Directory]::GetDirectories('%(_LegacySQLiteDirectories.Identity)').Length) == 0" />
   </Target>
 
-  <Target Name="TrackCefSubprocessOutput" AfterTargets="ResolveProjectReferences"
-          Condition="'$(DesignTimeBuild)' == 'true' And '@(CefSubprocessExecutable)' != ''">
+  <Target Name="TrackCefSubprocessOutput" AfterTargets="ResolveProjectReferences" Condition="'$(DesignTimeBuild)' == 'true' And '@(CefSubprocessExecutable)' != ''">
     <ItemGroup>
       <UpToDateCheckBuilt Include="$(TargetDir)Binaries\CefSharp\CefSharp.BrowserSubprocess.exe" Original="@(CefSubprocessExecutable)" />
     </ItemGroup>
@@ -137,9 +134,8 @@
 
   <!-- Replace the NuGet launcher after the package's runtime files have been copied. -->
   <Target Name="CopyCefSubprocess" AfterTargets="CopyFilesToOutputDirectory" Condition="'$(DesignTimeBuild)' != 'true'">
-    <Error Condition="'@(CefSubprocessExecutable->Count())' != '1'" Text="Expected the custom CefSharp subprocess for $(Platform)." />
-    <Copy SourceFiles="@(CefSubprocessExecutable)" DestinationFiles="$(TargetDir)Binaries\CefSharp\CefSharp.BrowserSubprocess.exe"
-          SkipUnchangedFiles="true">
+    <Error Condition="'@(CefSubprocessExecutable-&gt;Count())' != '1'" Text="Expected the custom CefSharp subprocess for $(Platform)." />
+    <Copy SourceFiles="@(CefSubprocessExecutable)" DestinationFiles="$(TargetDir)Binaries\CefSharp\CefSharp.BrowserSubprocess.exe" SkipUnchangedFiles="true">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
     </Copy>
   </Target>
