@@ -191,7 +191,7 @@ namespace CefFlashBrowser.Views.Custom
                     return null;
 
                 var drawing = svgReader.Read(reader);
-                if (drawing == null)
+                if (drawing == null || !HasDrawableContent(drawing))
                     return null;
 
                 var image = new DrawingImage(drawing);
@@ -200,15 +200,112 @@ namespace CefFlashBrowser.Views.Custom
             }
         }
 
+        private static bool HasDrawableContent(Drawing drawing)
+        {
+            if (drawing is DrawingGroup group)
+            {
+                if (group.Opacity <= 0)
+                    return false;
+
+                foreach (var child in group.Children)
+                {
+                    if (HasDrawableContent(child))
+                        return true;
+                }
+
+                return false;
+            }
+
+            var bounds = drawing.Bounds;
+            if (bounds.Width <= 0 || bounds.Height <= 0)
+                return false;
+
+            // SharpVectors uses a transparent outline to preserve the viewBox, even for empty SVGs.
+            if (drawing is GeometryDrawing geometry)
+                return HasVisiblePaint(geometry.Brush)
+                    || (geometry.Pen?.Thickness > 0 && HasVisiblePaint(geometry.Pen.Brush));
+
+            if (drawing is GlyphRunDrawing text)
+                return HasVisiblePaint(text.ForegroundBrush);
+
+            if (drawing is ImageDrawing image)
+                return image.ImageSource != null;
+
+            return true;
+        }
+
+        private static bool HasVisiblePaint(Brush brush)
+        {
+            return brush != null && brush.Opacity > 0
+                && (!(brush is SolidColorBrush solid) || solid.Color.A > 0);
+        }
+
         private static ImageSource ReadBitmap(Stream stream)
         {
+            if (HasIncompletePngChunks(stream))
+                return null;
+
             var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.StreamSource = stream;
-            bitmap.EndInit();
+            bool decodeFailed = false;
+
+            EventHandler<ExceptionEventArgs> onDecodeFailed = (sender, args) => decodeFailed = true;
+            bitmap.DecodeFailed += onDecodeFailed;
+
+            try
+            {
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = stream;
+                bitmap.EndInit();
+            }
+            finally
+            {
+                bitmap.DecodeFailed -= onDecodeFailed;
+            }
+
+            if (decodeFailed)
+                return null;
+
             bitmap.Freeze();
             return bitmap;
+        }
+
+        private static bool HasIncompletePngChunks(Stream stream)
+        {
+            const ulong pngSignature = 0x0A1A0A0D474E5089; // PNG signature read as little-endian.
+            const uint endChunkType = 0x444E4549; // "IEND" read as little-endian.
+            const int chunkOverhead = 12; // Length, type, and CRC.
+
+            // WIC can accept truncated PNG data and supply transparent pixels without reporting failure.
+            long start = stream.Position;
+            try
+            {
+                using (var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    if (stream.Length - start < sizeof(ulong) || reader.ReadUInt64() != pngSignature)
+                        return false;
+
+                    while (stream.Length - stream.Position >= chunkOverhead)
+                    {
+                        int length = IPAddress.NetworkToHostOrder(reader.ReadInt32());
+                        uint type = reader.ReadUInt32();
+
+                        if (length < 0 || length > stream.Length - stream.Position - sizeof(uint))
+                            return true;
+
+                        if (type == endChunkType)
+                            return length != 0;
+
+                        stream.Position += length + (long)sizeof(uint);
+                    }
+
+                    return true;
+                }
+            }
+            finally
+            {
+                stream.Position = start;
+            }
         }
     }
 }
