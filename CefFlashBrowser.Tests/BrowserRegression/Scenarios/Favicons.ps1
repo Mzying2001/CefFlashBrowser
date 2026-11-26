@@ -139,12 +139,18 @@ function Test-Favicons($Context) {
     $iconB = $fixture.BaseUrl + '/b-icon.png'
     try {
         Invoke-BrowserCommand $browser.LoadUrlCommand ($pageA + '?visit=1#top')
-        Wait-Regression $Context { $service.GetIconUrl($pageA) -eq $iconA } 'browsing an unsaved page records its reported favicon'
+        Wait-Regression $Context { $service.GetIconUrl($fixture.BaseUrl) -eq $iconA } 'the first discovered favicon sets the site default'
         Invoke-BrowserCommand $browser.LoadUrlCommand ($fixture.BaseUrl + '/redirect')
         Wait-Regression $Context { $service.GetIconUrl($pageB) -eq $iconB } 'redirect records the final page favicon'
-        Assert-Regression ($null -eq $service.GetIconUrl($fixture.BaseUrl + '/redirect')) 'redirect does not create an alias for an unobserved URL'
-        [void]$service.RecordAsync($fixture.BaseUrl + '/', $iconA).GetAwaiter().GetResult()
+        Assert-Regression ($service.GetIconUrl($fixture.BaseUrl + '/redirect') -eq $iconA) 'the redirect URL still uses the site default'
         Assert-Regression ($service.GetIconUrl($fixture.BaseUrl + '/unvisited') -eq $iconA) 'absolute addresses fall back to the same-origin homepage'
+        Wait-Regression $Context {
+            $records = @($Context.DatabaseService.GetWebsiteIconsAsync().GetAwaiter().GetResult() |
+                Where-Object { $_.PageUrl.StartsWith($fixture.BaseUrl, [StringComparison]::Ordinal) })
+            $records.Count -eq 2 -and
+                @($records | Where-Object { $_.PageUrl -eq $fixture.BaseUrl -and $_.IconUrl -eq $iconA }).Count -eq 1 -and
+                @($records | Where-Object { $_.PageUrl -eq $pageB -and $_.IconUrl -eq $iconB }).Count -eq 1
+        } 'the database stores only the site default and the final page override'
 
         $favorites = $Context.FavoritesService.Favorites
         $favorites.Clear()
@@ -256,6 +262,18 @@ function Test-Favicons($Context) {
         $boundIcon = @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
         Assert-Regression ([System.Windows.Data.BindingOperations]::IsDataBound($boundIcon, [CefFlashBrowser.Views.Custom.BrowserIcon]::FaviconUrlProperty)) 'image failure preserves the favicon URL binding'
         Assert-Regression ($service.GetIconUrl($pageB) -eq $missingIcon) 'image failure retains the recorded mapping'
+
+        $dataIcon = [FaviconHttpFixture]::DataIconUrl
+        Invoke-BrowserCommand $browser.LoadUrlCommand ($pageB + '?icon=data')
+        Wait-Regression $Context {
+            $boundIcon = @(Find-FaviconElements $list ([CefFlashBrowser.Views.Custom.BrowserIcon]))[0]
+            $browser.FaviconUrl -ceq $dataIcon -and $service.GetIconUrl($pageB) -ceq $dataIcon -and
+                $boundIcon.FaviconUrl -ceq $dataIcon -and (Test-SvgFavicon $boundIcon)
+        } 'the browser discovers an inline favicon and the favorite renders it'
+        Wait-Regression $Context {
+            $records = $Context.DatabaseService.GetWebsiteIconsAsync().GetAwaiter().GetResult()
+            @($records | Where-Object { $_.PageUrl -eq $pageB -and $_.IconUrl -ceq $dataIcon }).Count -eq 1
+        } 'the inline favicon is persisted as the page override'
         [void]$service.RecordAsync($pageB, $iconB).GetAwaiter().GetResult()
 
         $icon = New-Object CefFlashBrowser.Views.Custom.BrowserIcon
@@ -302,7 +320,9 @@ function Test-Favicons($Context) {
         Assert-Regression (!$icon.HasImageFailed -and [object]::ReferenceEquals($pngSource, $image.Source)) 'stale image responses cannot replace or hide the current icon'
 
         Invoke-BrowserCommand $browser.LoadUrlCommand $pageA
-        Wait-Regression $Context { $browser.Address -eq $pageA -and !$browser.IsLoading } 'page A loads before queued callback check'
+        Wait-Regression $Context {
+            $browser.Address -eq $pageA -and !$browser.IsLoading -and $service.GetIconUrl($pageA) -eq $iconA
+        } 'page A loads and restores its favicon before the queued callback check'
         $captureMethod = [CefFlashBrowser.FlashBrowser.ChromiumWebBrowserEx].GetMethod('CaptureFavicon', [Reflection.BindingFlags]'Instance,NonPublic')
         $urlList = New-Object 'System.Collections.Generic.List[string]'
         $urlList.Add($fixture.BaseUrl + '/stale.png')

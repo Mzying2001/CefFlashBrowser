@@ -10,6 +10,8 @@ public sealed class FaviconHttpFixture : IDisposable
 {
     private const string SvgIcon = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'>"
         + "<rect x='2' y='4' width='12' height='8' fill='blue'/></svg>";
+    public static readonly string DataIconUrl = "data:image/svg+xml;base64,"
+        + Convert.ToBase64String(Encoding.UTF8.GetBytes(SvgIcon));
     private readonly TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
     private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
     private readonly TaskCompletionSource<bool> slowResponse = new TaskCompletionSource<bool>();
@@ -52,7 +54,8 @@ public sealed class FaviconHttpFixture : IDisposable
                 string request = await reader.ReadLineAsync().ConfigureAwait(false);
                 if (request == null)
                     return;
-                string path = request.Split(' ')[1].Split('?')[0];
+                string requestPath = request.Split(' ')[1];
+                string path = requestPath.Split('?')[0];
                 while (!string.IsNullOrEmpty(await reader.ReadLineAsync().ConfigureAwait(false))) { }
                 if (path == "/slow-bad.png" || path == "/slow.svg")
                 {
@@ -71,7 +74,8 @@ public sealed class FaviconHttpFixture : IDisposable
                 }
                 else if (path == "/a" || path == "/b")
                 {
-                    body = Encoding.UTF8.GetBytes("<title>Favicon " + path + "</title><link rel='icon' href='" + path + "-icon.png'><p>fixture</p>");
+                    string iconUrl = requestPath == "/b?icon=data" ? DataIconUrl : path + "-icon.png";
+                    body = Encoding.UTF8.GetBytes("<title>Favicon " + path + "</title><link rel='icon' href='" + iconUrl + "'><p>fixture</p>");
                 }
                 else if (path == "/a-icon.png" || path == "/b-icon.png")
                 {

@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'BrowserIcon', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs', 'Polyfills', 'PolyfillsDisabled')][string]$Scenario = 'All'
+    [ValidateSet('All', 'BrowserIcon', 'Favicons', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs', 'Polyfills', 'PolyfillsDisabled')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -51,6 +51,10 @@ try {
     Initialize-RegressionEnvironment $context
     if ($Scenario -eq 'BrowserIcon') {
         Test-BrowserIconDataUrls $context
+    } elseif ($Scenario -eq 'Favicons') {
+        Test-BrowserIconDataUrls $context
+        Start-RegressionCef $context
+        Test-Favicons $context
     } elseif ($Scenario -eq 'DownloadManager') {
         Test-DownloadManagerWindow $context
     } elseif ($Scenario -eq 'DownloadRestart') {
