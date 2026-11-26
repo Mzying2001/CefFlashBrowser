@@ -48,6 +48,7 @@
     <Compile Include="..\CefFlashBrowser\Services\DatabaseService.WebsiteIcons.cs" Link="LinkedSources\DatabaseService.WebsiteIcons.cs" />
     <Compile Include="..\CefFlashBrowser\Models\WebsiteIconRecord.cs" Link="LinkedSources\WebsiteIconRecord.cs" />
     <Compile Include="..\CefFlashBrowser\Services\FaviconService.cs" Link="LinkedSources\FaviconService.cs" />
+    <Compile Include="..\CefFlashBrowser\Utils\ImageDataUrl.cs" Link="LinkedSources\ImageDataUrl.cs" />
     <Compile Include="..\CefFlashBrowser\Views\Converters\WebsiteIconUrlConverter.cs" Link="LinkedSources\WebsiteIconUrlConverter.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\UserScriptDownloadPaths.cs" Link="LinkedSources\UserScriptDownloadPaths.cs" />
     <Compile Include="..\CefFlashBrowser\Utils\Win32.cs" Link="LinkedSources\Win32.cs" />

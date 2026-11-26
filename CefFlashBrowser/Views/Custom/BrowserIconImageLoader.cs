@@ -1,3 +1,4 @@
+using CefFlashBrowser.Utils;
 using SharpVectors.Converters;
 using SharpVectors.Dom;
 using SharpVectors.Renderers.Wpf;
@@ -41,29 +42,12 @@ namespace CefFlashBrowser.Views.Custom
 
         private static ImageSource ReadDataUrl(string url, CancellationToken cancellationToken)
         {
-            const int prefixLength = 5; // "data:"
-
-            int end = url.IndexOf('#', prefixLength);
-            if (end < 0)
-                end = url.Length;
-
-            int separator = url.IndexOf(',', prefixLength, end - prefixLength);
-            if (separator < 0)
-                return null;
-
-            var header = url.Substring(prefixLength, separator - prefixLength).Trim();
-            int lastParameter = header.LastIndexOf(';');
-            bool isBase64 = lastParameter >= 0
-                && string.Equals(header.Substring(lastParameter + 1).TrimStart(' '), "base64", StringComparison.OrdinalIgnoreCase);
-            if (isBase64)
-                header = header.Substring(0, lastParameter).TrimEnd();
-
-            if (!MediaTypeHeaderValue.TryParse(header, out var contentType)
-                || !contentType.MediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            if (!ImageDataUrl.TryParse(url, out var mediaType, out bool isBase64, out int payloadStart, out int payloadLength))
                 return null;
 
             cancellationToken.ThrowIfCancellationRequested();
-            var bytes = Encoding.UTF8.GetBytes(url.Substring(separator + 1, end - separator - 1));
+
+            var bytes = Encoding.UTF8.GetBytes(url.Substring(payloadStart, payloadLength));
             int length = PercentDecode(bytes);
 
             if (isBase64)
@@ -76,7 +60,7 @@ namespace CefFlashBrowser.Views.Custom
 
             using (var stream = new MemoryStream(bytes, 0, length, writable: false))
             {
-                return string.Equals(contentType.MediaType, "image/svg+xml", StringComparison.OrdinalIgnoreCase)
+                return string.Equals(mediaType, "image/svg+xml", StringComparison.OrdinalIgnoreCase)
                     ? ReadSvg(stream) : ReadBitmap(stream);
             }
         }

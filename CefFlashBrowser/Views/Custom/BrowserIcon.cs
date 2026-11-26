@@ -1,3 +1,4 @@
+using CefFlashBrowser.Utils;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -91,7 +92,8 @@ namespace CefFlashBrowser.Views.Custom
                 return;
 
             Uri uri = null;
-            if (url.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
+
+            if (ImageDataUrl.HasScheme(url)
                 || (Uri.TryCreate(url, UriKind.Absolute, out uri) && BrowserIconImageLoader.CanLoad(uri)))
             {
                 _imageLoad = new CancellationTokenSource();
