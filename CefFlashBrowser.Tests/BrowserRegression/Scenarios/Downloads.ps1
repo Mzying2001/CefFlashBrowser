@@ -2,8 +2,32 @@
     [CefFlashBrowser.Services.WindowManager]::ShowDownloadManager()
     $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0]
     Assert-Regression ($null -ne $window -and $window.IsVisible) 'download manager opens through the global command'
+    Assert-Regression ($window.Width -eq 800 -and $window.Height -eq 500 -and $window.WindowStartupLocation -eq 'Manual') 'download manager uses its default layout when no window size is saved'
     Invoke-BrowserCommand ([CefFlashBrowser.Services.WindowManager]::OpenDownloadsCommand)
     Assert-Regression (@($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] }).Count -eq 1) 'download manager entry reuses its single window'
+
+    $window.Left = 32
+    $window.Top = 48
+    $window.Width = 640
+    $window.Height = 440
+    $window.Close()
+    [CefFlashBrowser.Services.WindowManager]::ShowDownloadManager()
+    $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0]
+    Assert-Regression ($window.WindowState -eq 'Normal' -and
+        [Math]::Abs($window.Left - 32) -lt 2 -and [Math]::Abs($window.Top - 48) -lt 2 -and
+        [Math]::Abs($window.Width - 640) -lt 2 -and [Math]::Abs($window.Height - 440) -lt 2) 'download manager restores the size and position on reopen'
+
+    $window.WindowState = 'Maximized'
+    $window.Close()
+    [CefFlashBrowser.Data.GlobalData]::SaveData()
+    [CefFlashBrowser.Data.GlobalData]::InitSettings()
+    [CefFlashBrowser.Services.WindowManager]::ShowDownloadManager()
+    $window = @($Context.Application.Windows | Where-Object { $_ -is [CefFlashBrowser.Views.DownloadManagerWindow] })[0]
+    Assert-Regression ($window.WindowState -eq 'Maximized') 'download manager restores its maximized state from settings on disk'
+    $window.WindowState = 'Normal'
+    Assert-Regression ([Math]::Abs($window.Left - 32) -lt 2 -and [Math]::Abs($window.Top - 48) -lt 2 -and
+        [Math]::Abs($window.Width - 640) -lt 2 -and [Math]::Abs($window.Height - 440) -lt 2) 'download manager retains the normal bounds after maximizing'
+
     $ioc = [SimpleMvvm.Ioc.SimpleIoc]::Global
     $manager = $ioc.GetInstance([CefFlashBrowser.Services.Downloads.DownloadManagerService], @())
     $model = $window.DataContext
