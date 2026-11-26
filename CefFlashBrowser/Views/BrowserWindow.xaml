@@ -831,10 +831,7 @@
                         <Style x:Key="BrowserTitleTextBlockStyle" TargetType="TextBlock">
                             <Setter Property="Text" Value="{Binding Title}"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Title}" Value="{x:Null}">
-                                    <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Title}" Value="">
+                                <DataTrigger Binding="{Binding Title, TargetNullValue=''}" Value="">
                                     <Setter Property="Text" Value="{DynamicResource browser_newTab}"/>
                                 </DataTrigger>
                             </Style.Triggers>
@@ -1133,7 +1130,7 @@
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
                                     <Condition Binding="{Binding CurrentBrowser.Browser.IsLoading}" Value="False"/>
-                                    <Condition Binding="{Binding CurrentBrowser.Browser.StatusText}" Value=""/>
+                                    <Condition Binding="{Binding CurrentBrowser.Browser.StatusText, TargetNullValue=''}" Value=""/>
                                 </MultiDataTrigger.Conditions>
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </MultiDataTrigger>

@@ -511,10 +511,7 @@
                     <Border.Style>
                         <Style TargetType="Border">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedScript.Problem}" Value="">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding SelectedScript.Problem}" Value="{x:Null}">
+                                <DataTrigger Binding="{Binding SelectedScript.Problem, TargetNullValue='', FallbackValue=''}" Value="">
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                 </DataTrigger>
                             </Style.Triggers>
