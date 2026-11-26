@@ -3,6 +3,8 @@ using SharpVectors.Converters;
 using SharpVectors.Dom;
 using SharpVectors.Renderers.Wpf;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http.Headers;
@@ -17,6 +19,9 @@ namespace CefFlashBrowser.Views.Custom
 {
     internal static class BrowserIconImageLoader
     {
+        private static readonly Dictionary<string, Task<HttpIconResult>> HttpIconCache =
+            new Dictionary<string, Task<HttpIconResult>>(StringComparer.Ordinal);
+
         internal static bool CanLoad(Uri uri)
         {
             return uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps
@@ -25,19 +30,60 @@ namespace CefFlashBrowser.Views.Custom
 
         internal static Task<ImageSource> LoadAsync(string url, Uri uri, CancellationToken cancellationToken)
         {
-            return Task.Run(async () =>
+            if (uri != null && !uri.IsFile)
+                return LoadHttpIconAsync(uri, cancellationToken);
+
+            return Task.Run(() =>
             {
                 if (uri == null)
                     return ReadDataUrl(url, cancellationToken);
 
-                if (uri.IsFile)
-                {
-                    using (var stream = File.OpenRead(uri.LocalPath))
-                        return ReadSvg(stream);
-                }
-
-                return await ReadHttpImageAsync(uri, cancellationToken).ConfigureAwait(false);
+                using (var stream = File.OpenRead(uri.LocalPath))
+                    return ReadSvg(stream);
             }, cancellationToken);
+        }
+
+        private static async Task<ImageSource> LoadHttpIconAsync(Uri uri, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            string key = uri.GetLeftPart(UriPartial.Query);
+            Task<HttpIconResult> load;
+
+            lock (HttpIconCache)
+            {
+                if (!HttpIconCache.TryGetValue(key, out load)
+                    || (load.Status == TaskStatus.RanToCompletion && load.Result.CanRetry))
+                {
+                    HttpIconCache[key] = load = Task.Run(() => DownloadHttpIconAsync(uri));
+                }
+            }
+
+            // A control can stop waiting while the request continues for other controls.
+            if (!load.IsCompleted && cancellationToken.CanBeCanceled)
+            {
+                var cancelled = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                using (cancellationToken.Register(() => cancelled.TrySetCanceled()))
+                    await Task.WhenAny(load, cancelled.Task).ConfigureAwait(false);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            return (await load.ConfigureAwait(false)).Source;
+        }
+
+        private static async Task<HttpIconResult> DownloadHttpIconAsync(Uri uri)
+        {
+            ImageSource source = null;
+            try
+            {
+                source = await ReadHttpImageAsync(uri).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // Share the fallback result when the request or decoder fails.
+            }
+
+            return new HttpIconResult(source);
         }
 
         private static ImageSource ReadDataUrl(string url, CancellationToken cancellationToken)
@@ -107,11 +153,10 @@ namespace CefFlashBrowser.Views.Custom
             return Convert.FromBase64String(base64);
         }
 
-        private static async Task<ImageSource> ReadHttpImageAsync(Uri uri, CancellationToken cancellationToken)
+        private static async Task<ImageSource> ReadHttpImageAsync(Uri uri)
         {
-            using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            using (var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
             {
-                deadline.CancelAfter(TimeSpan.FromSeconds(30));
                 var request = WebRequest.CreateHttp(uri);
                 request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
@@ -289,6 +334,24 @@ namespace CefFlashBrowser.Views.Custom
             finally
             {
                 stream.Position = start;
+            }
+        }
+
+        private sealed class HttpIconResult
+        {
+            private readonly long _retryAt;
+
+            public ImageSource Source { get; }
+            public bool CanRetry => Source == null && Stopwatch.GetTimestamp() >= _retryAt;
+
+            public HttpIconResult(ImageSource source)
+            {
+                Source = source;
+
+                if (source == null)
+                {
+                    _retryAt = Stopwatch.GetTimestamp() + 60 * Stopwatch.Frequency;
+                }
             }
         }
     }
