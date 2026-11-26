@@ -1,12 +1,12 @@
 using CefFlashBrowser.FlashBrowser;
 using CefSharp;
 using CefSharp.Handler;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 namespace CefFlashBrowser.Browser
 {
@@ -26,11 +26,10 @@ namespace CefFlashBrowser.Browser
             _moviePage = GetRequestUrl(playerUrl);
             _movieUrl = GetRequestUrl(context.Resource.Url);
 
-            var settings = new JsonSerializerSettings { StringEscapeHandling = StringEscapeHandling.EscapeHtml };
-            var url = JsonConvert.SerializeObject(context.Resource.Url, settings);
-            var baseUrl = JsonConvert.SerializeObject(context.BaseUrl.AbsoluteUri, settings);
-            var attributes = JsonConvert.SerializeObject(context.Attributes, settings);
-            var scriptAccess = JsonConvert.SerializeObject(allowScriptAccess);
+            var url = JsonSerializer.Serialize(context.Resource.Url);
+            var baseUrl = JsonSerializer.Serialize(context.BaseUrl.AbsoluteUri);
+            var attributes = JsonSerializer.Serialize(context.Attributes);
+            var scriptAccess = JsonSerializer.Serialize(allowScriptAccess);
             var document = template.Replace("<!-- player initialization -->",
                 $"<script>loadSwf({url}, {baseUrl}, {attributes}, {scriptAccess});</script>");
             var suppressReferrer = string.IsNullOrEmpty(_resource.ReferrerUrl) || _resource.ReferrerPolicy == ReferrerPolicy.NoReferrer;

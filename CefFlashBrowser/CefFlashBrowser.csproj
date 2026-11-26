@@ -85,7 +85,6 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
     <PackageReference Include="Mzying2001.MonkeySharp.CefSharp87.$(Platform)" Version="5.0.0" />
     <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SharpVectors" Version="1.8.4.2" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>

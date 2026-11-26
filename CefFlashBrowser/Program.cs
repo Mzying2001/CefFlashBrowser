@@ -11,7 +11,6 @@ using CefFlashBrowser.Services.UserScripts.Persistence;
 using CefFlashBrowser.Singleton;
 using CefFlashBrowser.Utils;
 using CefSharp;
-using Newtonsoft.Json;
 using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
@@ -22,6 +21,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -119,7 +119,7 @@ namespace CefFlashBrowser
                 }
                 else
                 {
-                    string json = JsonConvert.SerializeObject(args);
+                    string json = JsonSerializer.Serialize(args);
                     LogHelper.LogInfo($"Another instance is running, send args to it: {json}");
                     MsgReceiver.SendGlobalData(Encoding.UTF8.GetBytes(json));
                 }

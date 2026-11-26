@@ -1,11 +1,10 @@
 using CefFlashBrowser.Models;
 using CefFlashBrowser.Utils;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using SimpleMvvm.Messaging;
 using System;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 
 namespace CefFlashBrowser.Data
 {
@@ -108,11 +107,7 @@ namespace CefFlashBrowser.Data
             try
             {
                 var json = File.ReadAllText(SettingsPath, Encoding.UTF8);
-                Settings = JsonConvert.DeserializeObject<Settings>(json);
-                if (JObject.Parse(json).Property(nameof(Settings.DownloadDirectory)) == null
-                    && !string.IsNullOrWhiteSpace(Settings.UserScriptDownloadDirectory))
-                    Settings.DownloadDirectory = Settings.UserScriptDownloadDirectory;
-                Settings.SetNullPropertiesToDefault();
+                Settings = SettingsJson.Deserialize(json);
             }
             catch (JsonException)
             {
@@ -139,31 +134,29 @@ namespace CefFlashBrowser.Data
 
                     try
                     {
-                        // Merge with existing settings
-                        JObject settingsJson = JObject.Parse(oldSettingsContent);
-                        settingsJson.Merge(JToken.FromObject(Settings));
-
-                        // Merge preserves unknown fields, including any previously stored plaintext property.
-                        (settingsJson[nameof(Settings.ProxySettings)] as JObject)?.Remove(nameof(ProxySettings.PlainPassword));
-
-                        var jsonString = settingsJson.ToString(Formatting.Indented);
+                        var jsonString = SettingsJson.Merge(oldSettingsContent, Settings);
                         FileHelper.SafeWriteFile(SettingsPath, jsonString, Encoding.UTF8);
 
                         LogHelper.LogInfo("Settings saved successfully, type: merge");
                         return true;
                     }
-                    catch (JsonReaderException)
+                    catch (JsonException)
                     {
                         LogHelper.LogError("Settings merge failed, falling back to overwrite");
                     }
                 }
 
                 // File does not exist or merge failed
-                var json = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                var json = SettingsJson.Serialize(Settings);
                 FileHelper.SafeWriteFile(SettingsPath, json, Encoding.UTF8);
 
                 LogHelper.LogInfo("Settings saved successfully, type: " + (fileExists ? "overwrite" : "create"));
                 return true;
+            }
+            catch (JsonException)
+            {
+                LogHelper.LogError("Failed to serialize settings");
+                return false;
             }
             catch (Exception e)
             {
