@@ -126,6 +126,8 @@
     <UpToDateCheckInput Include="Assets\CefSharp\libcef_$(Platform).tar.gz;..\postbuild.bat" Set="CefRuntime" />
     <UpToDateCheckOutput Include="$(IntermediateOutputPath)CefRuntime.stamp" Set="CefRuntime" />
     <Clean Include="$(IntermediateOutputPath)CefRuntime.stamp" />
+    <UpToDateCheckBuilt Include="$(TargetDir)Binaries\CefSharp\CefSharp.BrowserSubprocess.exe" Original="..\CefFlashBrowser.BrowserSubprocess\bin\$(PlatformName)\$(Configuration)\net462\CefFlashBrowser.BrowserSubprocess.exe" />
+    <UpToDateCheckBuilt Include="$(TargetDir)Binaries\CefSharp\LICENSE.core-js.txt" Original="..\CefFlashBrowser.BrowserSubprocess\Polyfills\LICENSE.core-js.txt" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
