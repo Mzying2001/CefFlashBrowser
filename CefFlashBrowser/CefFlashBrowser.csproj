@@ -101,6 +101,9 @@
 
   <ItemGroup>
     <Content Include="..\CefFlashBrowser.BrowserSubprocess\Polyfills\LICENSE.core-js.txt" Link="Binaries\CefSharp\LICENSE.core-js.txt" CopyToOutputDirectory="PreserveNewest" />
+    <UpToDateCheckInput Include="Assets\CefSharp\libcef_$(Platform).tar.gz;..\postbuild.bat" Set="CefRuntime" />
+    <UpToDateCheckOutput Include="$(IntermediateOutputPath)CefRuntime.stamp" Set="CefRuntime" />
+    <Clean Include="$(IntermediateOutputPath)CefRuntime.stamp" />
   </ItemGroup>
 
   <ItemGroup>
@@ -142,6 +145,7 @@
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="call &quot;$(MSBuildProjectDirectory)\..\postbuild.bat&quot;" WorkingDirectory="$(TargetDir)" EnvironmentVariables="CFB_BUILD_CONFIGURATION=$(Configuration);CFB_BUILD_PLATFORM=$(PlatformName)" />
+    <Touch Files="$(IntermediateOutputPath)CefRuntime.stamp" AlwaysCreate="true" />
   </Target>
 
 </Project>

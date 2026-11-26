@@ -13,10 +13,13 @@ if /i not "%CFB_BUILD_PLATFORM%"=="x86" if /i not "%CFB_BUILD_PLATFORM%"=="x64" 
 set "ASSETS_PATH=%~dp0CefFlashBrowser\Assets"
 set "CEF_PATH=Binaries\CefSharp"
 set "CEF_ARCHIVE=CefSharp\libcef_%CFB_BUILD_PLATFORM%.tar.gz"
-set "CEF_RUNTIME_FILES=libcef.dll v8_context_snapshot.bin"
 set "PLUGINS_PATH=Binaries\Plugins"
 set "VC_RUNTIME_PATH=Binaries\VCRuntime"
 set "VC_RUNTIME_ARCHIVE=VCRuntime\vcruntime_%CFB_BUILD_PLATFORM%.tar.gz"
+
+rem Keep this list in sync with the CEF 87.1.6 Windows redistribution.
+set "CEF_RUNTIME_FILES=libcef.dll chrome_elf.dll icudtl.dat snapshot_blob.bin v8_context_snapshot.bin cef.pak cef_100_percent.pak cef_200_percent.pak cef_extensions.pak devtools_resources.pak d3dcompiler_47.dll libEGL.dll libGLESv2.dll swiftshader\libEGL.dll swiftshader\libGLESv2.dll LICENSE.txt README.txt"
+set "CEF_LOCALES=am ar bg bn ca cs da de el en-GB en-US es-419 es et fa fi fil fr gu he hi hr hu id it ja kn ko lt lv ml mr ms nb nl pl pt-BR pt-PT ro ru sk sl sr sv sw ta te th tr uk vi zh-CN zh-TW"
 
 set "VC_RUNTIME_FILES=msvcp140.dll vcruntime140.dll"
 if /i "%CFB_BUILD_PLATFORM%"=="x64" set "VC_RUNTIME_FILES=%VC_RUNTIME_FILES% vcruntime140_1.dll"
@@ -85,7 +88,17 @@ for %%F in (%CEF_RUNTIME_FILES%) do (
     )
 )
 
-if not exist "%CEF_PATH%\" mkdir "%CEF_PATH%"
+for %%L in (%CEF_LOCALES%) do (
+    if not exist "%EXTRACT_PATH%\CefSharp\locales\%%L.pak" (
+        echo Error: Missing "locales\%%L.pak" in "%CEF_ARCHIVE%". 1>&2
+        goto Cleanup
+    )
+)
+
+if not exist "%CEF_PATH%\locales\" mkdir "%CEF_PATH%\locales"
+if errorlevel 1 goto Cleanup
+
+if not exist "%CEF_PATH%\swiftshader\" mkdir "%CEF_PATH%\swiftshader"
 if errorlevel 1 goto Cleanup
 
 if not exist "%PLUGINS_PATH%\" mkdir "%PLUGINS_PATH%"
@@ -94,11 +107,14 @@ if errorlevel 1 goto Cleanup
 if not exist "%VC_RUNTIME_PATH%\" mkdir "%VC_RUNTIME_PATH%"
 if errorlevel 1 goto Cleanup
 
-rem Deploy the custom libcef.dll with its matching V8 snapshot after CefSharp deployment.
+rem Replace NuGet's CEF runtime with the complete set that matches the custom libcef.dll.
 for %%F in (%CEF_RUNTIME_FILES%) do (
     copy /b /y "%EXTRACT_PATH%\CefSharp\%%F" "%CEF_PATH%\%%F"
     if errorlevel 1 goto Cleanup
 )
+
+copy /b /y "%EXTRACT_PATH%\CefSharp\locales\*.pak" "%CEF_PATH%\locales\"
+if errorlevel 1 goto Cleanup
 
 copy /b /y "%EXTRACT_PATH%\Plugins\pepflashplayer.dll" "%PLUGINS_PATH%\pepflashplayer.dll"
 if errorlevel 1 goto Cleanup
