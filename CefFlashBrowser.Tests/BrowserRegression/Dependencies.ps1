@@ -22,6 +22,11 @@ Add-Type -Path (Join-Path $PSScriptRoot 'AssemblyResolver.cs')
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 [void][Reflection.Assembly]::LoadFrom((Join-Path $ApplicationPath 'Binaries\CefSharp\CefSharp.dll'))
 $app = [Reflection.Assembly]::LoadFrom((Join-Path $ApplicationPath 'CefFlashBrowser.exe'))
+if (($app.GetReferencedAssemblies() | Where-Object Name -eq 'Newtonsoft.Json') -or
+    ($app.GetManifestResourceNames() -like 'costura.newtonsoft.json*') -or
+    (Get-ChildItem -LiteralPath $ApplicationPath -Filter 'Newtonsoft.Json.dll' -File -Recurse)) {
+    throw 'The application output still contains a Newtonsoft.Json dependency.'
+}
 [Runtime.CompilerServices.RuntimeHelpers]::RunModuleConstructor($app.ManifestModule.ModuleHandle)
 
 $assemblies = @{}

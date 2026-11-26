@@ -1,7 +1,8 @@
+using CefFlashBrowser.Data;
 using CefFlashBrowser.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace CefFlashBrowser.Tests
 {
@@ -48,7 +49,7 @@ namespace CefFlashBrowser.Tests
         [TestMethod]
         public void Deserialize_LegacySettingsAllowPageSwfScriptAccess()
         {
-            var settings = JsonConvert.DeserializeObject<Settings>("{\"Language\":\"en-US\"}");
+            var settings = SettingsJson.Deserialize("{\"Language\":\"en-US\"}");
 
             Assert.IsTrue(settings.AllowPageSwfScriptAccess);
         }
@@ -57,15 +58,15 @@ namespace CefFlashBrowser.Tests
         public void AllowPageSwfScriptAccess_RoundTripsWhenDisabled()
         {
             var settings = new Settings { AllowPageSwfScriptAccess = false };
-            var json = JsonConvert.SerializeObject(settings);
+            var json = SettingsJson.Serialize(settings);
 
-            Assert.IsFalse(JsonConvert.DeserializeObject<Settings>(json).AllowPageSwfScriptAccess);
+            Assert.IsFalse(SettingsJson.Deserialize(json).AllowPageSwfScriptAccess);
         }
 
         [TestMethod]
         public void Deserialize_LegacySettingsEnableCoreJsPolyfills()
         {
-            var settings = JsonConvert.DeserializeObject<Settings>("{\"Language\":\"en-US\"}");
+            var settings = SettingsJson.Deserialize("{\"Language\":\"en-US\"}");
 
             Assert.IsTrue(settings.EnableCoreJsPolyfills);
         }
@@ -74,15 +75,15 @@ namespace CefFlashBrowser.Tests
         public void EnableCoreJsPolyfills_RoundTripsWhenDisabled()
         {
             var settings = new Settings { EnableCoreJsPolyfills = false };
-            var json = JsonConvert.SerializeObject(settings);
+            var json = SettingsJson.Serialize(settings);
 
-            Assert.IsFalse(JsonConvert.DeserializeObject<Settings>(json).EnableCoreJsPolyfills);
+            Assert.IsFalse(SettingsJson.Deserialize(json).EnableCoreJsPolyfills);
         }
 
         [TestMethod]
         public void Deserialize_LegacySettingsDefaultToPrompt()
         {
-            var settings = JsonConvert.DeserializeObject<Settings>("{\"Language\":\"en-US\"}");
+            var settings = SettingsJson.Deserialize("{\"Language\":\"en-US\"}");
 
             Assert.AreEqual(UserScriptPermissionBehavior.Prompt, settings.DefaultUserScriptPermissionBehavior);
         }
@@ -94,8 +95,7 @@ namespace CefFlashBrowser.Tests
         [DataRow("{\"ScriptEditorSettings\":{\"FontFamily\":null,\"FontSize\":null,\"IndentWithSpaces\":null,\"TabWidth\":null,\"ShowLineNumbers\":null,\"WordWrap\":null}}")]
         public void Deserialize_MissingEditorPreferencesUseDefaults(string json)
         {
-            var settings = JsonConvert.DeserializeObject<Settings>(json);
-            settings.SetNullPropertiesToDefault();
+            var settings = SettingsJson.Deserialize(json);
             var editor = settings.ScriptEditorSettings;
 
             Assert.AreEqual("Consolas", editor.FontFamily);
@@ -111,10 +111,10 @@ namespace CefFlashBrowser.Tests
         [DataRow(73, 17)]
         public void Deserialize_OutOfRangeEditorValuesUseDefaults(int size, int width)
         {
-            var json = JObject.FromObject(Settings.Default);
+            var json = JsonNode.Parse(SettingsJson.Serialize(Settings.Default));
             json[nameof(Settings.ScriptEditorSettings)][nameof(EditorSettings.FontSize)] = size;
             json[nameof(Settings.ScriptEditorSettings)][nameof(EditorSettings.TabWidth)] = width;
-            var editor = json.ToObject<Settings>().ScriptEditorSettings;
+            var editor = SettingsJson.Deserialize(json.ToJsonString()).ScriptEditorSettings;
 
             Assert.AreEqual(14, editor.FontSize);
             Assert.AreEqual(2, editor.TabWidth);
@@ -136,7 +136,7 @@ namespace CefFlashBrowser.Tests
                 }
             };
 
-            var editor = JObject.FromObject(settings).ToObject<Settings>().ScriptEditorSettings;
+            var editor = SettingsJson.Deserialize(SettingsJson.Serialize(settings)).ScriptEditorSettings;
 
             Assert.AreEqual("Courier New", editor.FontFamily);
             Assert.AreEqual(20, editor.FontSize);
@@ -153,12 +153,80 @@ namespace CefFlashBrowser.Tests
         public void UserScriptPermissionBehavior_RoundTripsAsANumber(UserScriptPermissionBehavior behavior, int expected)
         {
             var settings = new Settings { DefaultUserScriptPermissionBehavior = behavior };
-            var json = JObject.FromObject(settings);
-            var value = json[nameof(Settings.DefaultUserScriptPermissionBehavior)];
+            var json = SettingsJson.Serialize(settings);
+            var value = JsonNode.Parse(json)[nameof(Settings.DefaultUserScriptPermissionBehavior)];
 
-            Assert.AreEqual(JTokenType.Integer, value.Type);
-            Assert.AreEqual(expected, (int)value);
-            Assert.AreEqual(behavior, json.ToObject<Settings>().DefaultUserScriptPermissionBehavior);
+            Assert.AreEqual(JsonValueKind.Number, value.GetValueKind());
+            Assert.AreEqual(expected, value.GetValue<int>());
+            Assert.AreEqual(behavior, SettingsJson.Deserialize(json).DefaultUserScriptPermissionBehavior);
+        }
+
+        [TestMethod]
+        public void Merge_PreservesUnknownFields_AndClearsOldValuesOnReload()
+        {
+            const string existing = @"{
+                ""language"": ""en-US"",
+                ""DownloadDirectory"": ""older"",
+                ""downloadDirectory"": ""old"",
+                ""UserScriptDownloadDirectory"": ""legacy"",
+                ""future"": [17, null, { ""name"": ""value"" }],
+                ""scriptEditorSettings"": { ""fontFamily"": ""Other"", ""future"": { ""number"": 42 } }
+            }";
+            var settings = SettingsJson.Deserialize(existing);
+            Assert.AreEqual("old", settings.DownloadDirectory);
+            settings.Language = "zh-TW";
+            settings.DownloadDirectory = null;
+            settings.ScriptEditorSettings.FontFamily = null;
+
+            var merged = SettingsJson.Merge(existing, settings);
+            var json = JsonNode.Parse(merged).AsObject();
+            Assert.IsFalse(json.ContainsKey("language"));
+            Assert.IsFalse(json.ContainsKey("downloadDirectory"));
+            Assert.IsTrue(json.ContainsKey("DownloadDirectory"));
+            Assert.IsNull(json["DownloadDirectory"]);
+            Assert.IsTrue(JsonNode.DeepEquals(JsonNode.Parse(existing)["future"], json["future"]));
+            Assert.AreEqual(42, json["ScriptEditorSettings"]["future"]["number"].GetValue<int>());
+
+            var restored = SettingsJson.Deserialize(merged);
+            Assert.AreEqual("zh-TW", restored.Language);
+            Assert.IsNull(restored.DownloadDirectory);
+            Assert.AreEqual("legacy", restored.UserScriptDownloadDirectory);
+            Assert.AreEqual("Consolas", restored.ScriptEditorSettings.FontFamily);
+        }
+
+        [TestMethod]
+        public void Deserialize_LegacyDirectoryMigratesOnlyWhenNewKeyIsMissing()
+        {
+            Assert.AreEqual("legacy", SettingsJson.Deserialize("{\"UserScriptDownloadDirectory\":\"legacy\"}").DownloadDirectory);
+            Assert.IsNull(SettingsJson.Deserialize("{\"UserScriptDownloadDirectory\":\"legacy\",\"downloadDirectory\":null}").DownloadDirectory);
+        }
+
+        [TestMethod]
+        public void LegacyWindowCoordinatesAndNamedEnums_SurviveMergeAndReload()
+        {
+            const string existing = @"{
+                // Legacy settings
+                ""Theme"": ""Dark"",
+                ""MainWindowSizeInfo"": { ""Left"": ""NaN"", ""Top"": 125, },
+            }";
+            var settings = SettingsJson.Deserialize(existing);
+            Assert.AreEqual(Theme.Dark, settings.Theme);
+            Assert.IsTrue(double.IsNaN(settings.MainWindowSizeInfo.Left));
+
+            var merged = SettingsJson.Merge(existing, settings);
+            var json = JsonNode.Parse(merged);
+            Assert.AreEqual(1, json["Theme"].GetValue<int>());
+            Assert.AreEqual("NaN", json["MainWindowSizeInfo"]["Left"].GetValue<string>());
+            Assert.AreEqual(125d, SettingsJson.Deserialize(merged).MainWindowSizeInfo.Top);
+        }
+
+        [DataTestMethod]
+        [DataRow("null")]
+        [DataRow("[]")]
+        public void NonObjectSettingsAreRejected(string json)
+        {
+            Assert.ThrowsException<JsonException>(() => SettingsJson.Deserialize(json));
+            Assert.ThrowsException<JsonException>(() => SettingsJson.Merge(json, Settings.Default));
         }
 
         [TestMethod]

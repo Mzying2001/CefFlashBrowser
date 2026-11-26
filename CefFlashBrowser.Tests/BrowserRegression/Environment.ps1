@@ -86,7 +86,7 @@ function Initialize-RegressionEnvironment($Context, [string]$DatabasePath) {
         'SimpleMvvm.dll',
         'Microsoft.Xaml.Behaviors.dll',
         'HandyControl.dll',
-        'Newtonsoft.Json.dll',
+        'System.Text.Json.dll',
         'SharpVectors.Core.dll',
         'SharpVectors.Runtime.Wpf.dll',
         'SharpVectors.Converters.Wpf.dll',
