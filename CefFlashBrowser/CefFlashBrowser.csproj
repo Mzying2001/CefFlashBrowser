@@ -90,26 +90,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CefFlashBrowser.BrowserSubprocess\CefFlashBrowser.BrowserSubprocess.csproj" ReferenceOutputAssembly="false" OutputItemType="CefSubprocessExecutable" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CefFlashBrowser.BrowserSubprocess\CefFlashBrowser.BrowserSubprocess.csproj" ReferenceOutputAssembly="false" Private="false" />
     <ProjectReference Include="..\CefFlashBrowser.Database\CefFlashBrowser.Database.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.FlashBrowser\CefFlashBrowser.FlashBrowser.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Log\CefFlashBrowser.Log.csproj" />
     <ProjectReference Include="..\CefFlashBrowser.Singleton\CefFlashBrowser.Singleton.vcxproj" />
     <ProjectReference Include="..\CefFlashBrowser.Sol\CefFlashBrowser.Sol.vcxproj" />
     <ProjectReference Include="..\CefFlashBrowser.WinformCefSharp4WPF\CefFlashBrowser.WinformCefSharp4WPF.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="..\CefFlashBrowser.BrowserSubprocess\Polyfills\LICENSE.core-js.txt" Link="Binaries\CefSharp\LICENSE.core-js.txt" CopyToOutputDirectory="PreserveNewest" />
-    <UpToDateCheckInput Include="Assets\CefSharp\libcef_$(Platform).tar.gz;..\postbuild.bat" Set="CefRuntime" />
-    <UpToDateCheckOutput Include="$(IntermediateOutputPath)CefRuntime.stamp" Set="CefRuntime" />
-    <Clean Include="$(IntermediateOutputPath)CefRuntime.stamp" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <Target Name="PrepareSQLiteInterop" BeforeTargets="AssignTargetPaths" Condition="'$(DesignTimeBuild)' != 'true'">
@@ -129,19 +122,11 @@
     <RemoveDir Directories="@(_LegacySQLiteDirectories)" Condition="Exists('%(_LegacySQLiteDirectories.Identity)') And $([System.IO.Directory]::GetFiles('%(_LegacySQLiteDirectories.Identity)').Length) == 0 And $([System.IO.Directory]::GetDirectories('%(_LegacySQLiteDirectories.Identity)').Length) == 0" />
   </Target>
 
-  <Target Name="TrackCefSubprocessOutput" AfterTargets="ResolveProjectReferences" Condition="'$(DesignTimeBuild)' == 'true' And '@(CefSubprocessExecutable)' != ''">
-    <ItemGroup>
-      <UpToDateCheckBuilt Include="$(TargetDir)Binaries\CefSharp\CefSharp.BrowserSubprocess.exe" Original="@(CefSubprocessExecutable)" />
-    </ItemGroup>
-  </Target>
-
-  <!-- Replace the NuGet launcher after the package's runtime files have been copied. -->
-  <Target Name="CopyCefSubprocess" AfterTargets="CopyFilesToOutputDirectory" Condition="'$(DesignTimeBuild)' != 'true'">
-    <Error Condition="'@(CefSubprocessExecutable-&gt;Count())' != '1'" Text="Expected the custom CefSharp subprocess for $(Platform)." />
-    <Copy SourceFiles="@(CefSubprocessExecutable)" DestinationFiles="$(TargetDir)Binaries\CefSharp\CefSharp.BrowserSubprocess.exe" SkipUnchangedFiles="true">
-      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
-    </Copy>
-  </Target>
+  <ItemGroup>
+    <UpToDateCheckInput Include="Assets\CefSharp\libcef_$(Platform).tar.gz;..\postbuild.bat" Set="CefRuntime" />
+    <UpToDateCheckOutput Include="$(IntermediateOutputPath)CefRuntime.stamp" Set="CefRuntime" />
+    <Clean Include="$(IntermediateOutputPath)CefRuntime.stamp" />
+  </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="call &quot;$(MSBuildProjectDirectory)\..\postbuild.bat&quot;" WorkingDirectory="$(TargetDir)" EnvironmentVariables="CFB_BUILD_CONFIGURATION=$(Configuration);CFB_BUILD_PLATFORM=$(PlatformName)" />
