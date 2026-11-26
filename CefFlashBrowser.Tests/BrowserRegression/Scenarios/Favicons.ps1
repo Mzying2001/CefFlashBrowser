@@ -33,7 +33,13 @@ function Test-SvgFavicon($Icon) {
 function Test-BrowserIconDataUrls($Context) {
     $png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a/pkAAAAASUVORK5CYII='
     $pngUrl = 'data:image/png;base64,' + $png
-    $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><rect width="8" height="8" fill="#123456"/></svg>'
+    $transparentPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII='
+    $truncatedPng = [Convert]::ToBase64String([Convert]::FromBase64String($png), 0, 45)
+    $truncatedTiff = 'SUkqAB4AAACAKsSCB/g4vgwAIUVkN/j0Iv4AQEAAEAD+AAQAAQAAAAAAAAAAAQQAAQAAAAIAAAABAQQAAQAAAAIAAAACAQMABAAAAOQAAAADAQMAAQAAAAUAAAAGAQMAAQAAAAIAAAARAQQAAQAAAAgAAAAV' +
+        'AQQAAQAAAAQAAAAWAQQAAQAAAAIAAAAXAQQAAQAAABUAAAAaAQUAAQAAAOwAAAAbAQUAAQAAAPQAAAAcAQMAAQAAAAEAAAAoAQMAAQAAAAIAAAA9AQMAAQAAAAIAAABSAQMAAQAAAAIAAAAAAAAACAAIAAgACA=='
+    $truncatedTiffUrl = 'data:image/tiff;base64,' + $truncatedTiff
+    $svgStart = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8">'
+    $svg = $svgStart + '<rect x="2" y="2" width="4" height="4" fill="#123456"/></svg>'
     $svgUrl = 'data:image/svg+xml,' + [Uri]::EscapeDataString($svg)
     $svgBase64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($svg))
     $longUrl = $svgUrl + '%3C!--' + ('x' * 70000) + '--%3E'
@@ -54,7 +60,8 @@ function Test-BrowserIconDataUrls($Context) {
         foreach ($url in @(
             $pngUrl,
             ('DATA:Image/PNG; BASE64,' + $png.TrimEnd('=').Replace('/', '%2F')),
-            ('data:image/png,' + $percentPng)
+            ('data:image/png,' + $percentPng),
+            ('data:image/png;base64,' + $transparentPng)
         )) {
             $icon.FaviconUrl = $url
             Wait-Regression $Context {
@@ -74,21 +81,34 @@ function Test-BrowserIconDataUrls($Context) {
                 @(Get-DrawingColors $image.Source.Drawing) -contains [System.Windows.Media.ColorConverter]::ConvertFromString('#123456')) 'inline SVG retains its viewBox and fill color'
         }
 
-        foreach ($url in @(
-            'data:image/png;base64',
-            'data:image/png;base64,***',
-            ('data:image/png;base64,' + $png + '='),
-            ('data:text/plain;base64,' + $png),
-            'data:image/svg+xml,%3Csvg%2F%3E'
-        )) {
-            $icon.FaviconUrl = $url
+        $invalidIcons = [ordered]@{
+            'truncated TIFF' = $truncatedTiffUrl
+            'truncated PNG' = 'data:image/png;base64,' + $truncatedPng
+            'unknown image format' = 'data:image/x-unknown;base64,Ym9ndXM='
+            'missing separator' = 'data:image/png;base64'
+            'invalid Base64' = 'data:image/png;base64,***'
+            'invalid Base64 padding' = 'data:image/png;base64,' + $png + '='
+            'non-image media type' = 'data:text/plain;base64,' + $png
+            'SVG without its namespace' = 'data:image/svg+xml,%3Csvg%2F%3E'
+            'malformed SVG' = 'data:image/svg+xml,' + [Uri]::EscapeDataString($svgStart + '<rect')
+            'empty SVG with a viewBox' = 'data:image/svg+xml,' + [Uri]::EscapeDataString($svgStart + '</svg>')
+            'SVG with only unsupported content' = 'data:image/svg+xml,' + [Uri]::EscapeDataString($svgStart +
+                '<foreignObject width="8" height="8"><div xmlns="http://www.w3.org/1999/xhtml">test</div></foreignObject></svg>')
+            'SVG with only hidden content' = 'data:image/svg+xml,' + [Uri]::EscapeDataString($svgStart +
+                '<rect width="8" height="8" visibility="hidden"/></svg>')
+        }
+        foreach ($entry in $invalidIcons.GetEnumerator()) {
+            $icon.FaviconUrl = $entry.Value
             Wait-Regression $Context {
                 $icon.HasImageFailed -and $null -eq $image.Source -and $fallback.Visibility -eq 'Visible'
-            } "invalid data URL displays the default icon ($url)"
+            } "$($entry.Key) displays the default icon"
         }
 
+        $icon.FaviconUrl = $svgUrl
+        Wait-Regression $Context { !$icon.HasImageFailed -and (Test-SvgFavicon $icon) } 'a valid SVG replaces the default icon and resets failure state'
+
         $icon.FaviconUrl = $longUrl
-        $icon.FaviconUrl = 'data:image/png;base64,***'
+        $icon.FaviconUrl = $truncatedTiffUrl
         $icon.FaviconUrl = $pngUrl
         Wait-Regression $Context {
             !$icon.HasImageFailed -and $image.Source -is [System.Windows.Media.Imaging.BitmapSource] -and
