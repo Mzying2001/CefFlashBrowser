@@ -611,6 +611,7 @@ function Test-BrowserDownloads($Context) {
             Assert-Regression (![IO.File]::Exists($manualRecord.FilePath) -and $manager.Items[0].Record -eq $manualRecord) 'delete-file action retains download history'
             Invoke-DownloadRowButton $managerWindow $manager.Items[0] $managerWindow.DataContext.ToggleTransferCommand
             Wait-Regression $Context { !$manualRecord.FileMissing -and [IO.File]::Exists($manualRecord.FilePath) } 'Retry in the row restores the missing file'
+            Assert-Regression ([Convert]::ToBase64String([IO.File]::ReadAllBytes($manualRecord.FilePath)) -eq [Convert]::ToBase64String($fixture.Payload)) 'retried manual download preserves response bytes'
         } finally {
             $managerWindow.Close()
         }

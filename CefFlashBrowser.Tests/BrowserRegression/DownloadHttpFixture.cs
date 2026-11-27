@@ -138,7 +138,12 @@ public sealed class DownloadHttpFixture : IDisposable
                     start = 0;
 
                 var status = start == 0 ? "200 OK" : "206 Partial Content";
-                var response = "HTTP/1.1 " + status + "\r\nContent-Type: application/octet-stream\r\nContent-Disposition: attachment; filename=\"" + path.TrimStart('/') + ".bin\"\r\nContent-Length: " + (Payload.Length - start) + "\r\nAccept-Ranges: bytes\r\nETag: \"" + (ChangedVersion ? "v2" : "v1") + "\"\r\nConnection: close\r\n";
+                var response = "HTTP/1.1 " + status + "\r\nContent-Type: application/octet-stream\r\n";
+                // The manual download already chooses a destination. An attachment header lets
+                // external download managers intercept the fixture response before CEF reads it.
+                if (path != "/file")
+                    response += "Content-Disposition: attachment; filename=\"" + path.TrimStart('/') + ".bin\"\r\n";
+                response += "Content-Length: " + (Payload.Length - start) + "\r\nAccept-Ranges: bytes\r\nETag: \"" + (ChangedVersion ? "v2" : "v1") + "\"\r\nConnection: close\r\n";
                 if (start != 0)
                     response += "Content-Range: bytes " + start + "-" + (Payload.Length - 1) + "/" + Payload.Length + "\r\n";
 

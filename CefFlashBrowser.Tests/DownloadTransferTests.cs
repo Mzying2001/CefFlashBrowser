@@ -304,6 +304,21 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(4L, new FileInfo(record.PartialPath).Length);
         }
 
+        [DataTestMethod]
+        [DataRow(200, DownloadState.Completed)]
+        [DataRow(204, DownloadState.Failed)]
+        [DataRow(205, DownloadState.Failed)]
+        public async Task EmptyResponseOnlyCommitsWhenItRepresentsAFile(int status, DownloadState expectedState)
+        {
+            var record = CreateRecord();
+            var http = new FakeHttp { EmptyResponseStatus = status };
+
+            await new HttpDownloadTransfer(record, http, null).StartAsync();
+
+            Assert.AreEqual(expectedState, record.State);
+            Assert.AreEqual(expectedState == DownloadState.Completed, File.Exists(record.FilePath));
+        }
+
         [TestMethod]
         public void InvalidDownloadDirectoriesUseTheSystemFolder()
         {
@@ -317,6 +332,7 @@ namespace CefFlashBrowser.Tests
         {
             public byte[] Payload { get; } = Enumerable.Range(0, 12).Select(value => (byte)value).ToArray();
             public bool HoldFirst, IgnoreRange, ChangedVersion, MalformedRange, UnknownLength, ShortResponse;
+            public int? EmptyResponseStatus;
             public List<string> Ranges { get; } = new List<string>();
             public TaskCompletionSource<bool> FirstChunk { get; } = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -324,6 +340,14 @@ namespace CefFlashBrowser.Tests
             {
                 request.Headers.TryGetValue("Range", out var range);
                 Ranges.Add(range);
+                if (EmptyResponseStatus.HasValue)
+                {
+                    var emptyResponse = new UserScriptHttpResponse(EmptyResponseStatus.Value, string.Empty,
+                        request.Url, new Dictionary<string, string>(), null, null, null);
+                    observer.OnResponseStarted(emptyResponse);
+                    return new FakeOperation(Task.FromResult(emptyResponse));
+                }
+
                 var offset = range == null || IgnoreRange ? 0 : int.Parse(range.Substring(6).TrimEnd('-'));
                 var headers = new Dictionary<string, string>
                 {
