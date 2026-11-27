@@ -2,6 +2,13 @@ namespace CefFlashBrowser.Models
 {
     public class Settings
     {
+        internal const int CurrentVersion = 2;
+
+        /// <summary>
+        /// The version of the persisted settings format.
+        /// </summary>
+        public int SettingsVersion { get; set; }
+
         /// <summary>
         /// True if the application is started for the first time
         /// </summary>
@@ -188,11 +195,6 @@ namespace CefFlashBrowser.Models
         public UserScriptPermissionBehavior DefaultUserScriptPermissionBehavior { get; set; }
 
         /// <summary>
-        /// The directory for userscript downloads; defaults to the system Downloads folder when blank
-        /// </summary>
-        public string UserScriptDownloadDirectory { get; set; }
-
-        /// <summary>
         /// The remembered download directory, or null for the system Downloads folder.
         /// </summary>
         public string DownloadDirectory { get; set; }
@@ -210,6 +212,7 @@ namespace CefFlashBrowser.Models
         public Settings()
         {
             // default settings
+            SettingsVersion = CurrentVersion;
             FirstStart = true;
             Language = "zh-CN";
             Theme = Theme.Light;
@@ -246,7 +249,6 @@ namespace CefFlashBrowser.Models
             EnableUserScripts = true;
             TrustedUserScriptPageWorld = true;
             DefaultUserScriptPermissionBehavior = UserScriptPermissionBehavior.Prompt;
-            UserScriptDownloadDirectory = null;
         }
 
         /// <summary>

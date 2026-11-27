@@ -31,27 +31,54 @@ namespace CefFlashBrowser.Data
         internal static Settings Deserialize(string json)
         {
             var root = ParseObject(json);
+            Migrate(root);
 
-            // Older settings files could specify null for individual editor preferences.
-            foreach (var property in root)
+            var settings = root.Deserialize<Settings>(ReadOptions);
+            settings.SetNullPropertiesToDefault();
+            return settings;
+        }
+
+        private static void Migrate(JsonObject root)
+        {
+            var versionProperty = root.LastOrDefault(item => NameEquals(item.Key, nameof(Settings.SettingsVersion)));
+
+            var version = versionProperty.Key == null ? 0 : versionProperty.Value.Deserialize<int>(ReadOptions);
+            if (version >= Settings.CurrentVersion)
+                return;
+
+            if (version < 1)
             {
-                if (NameEquals(property.Key, nameof(Settings.ScriptEditorSettings)) && property.Value is JsonObject editor)
+                const string LegacyDownloadDirectoryProperty = "UserScriptDownloadDirectory";
+
+                if (!root.Any(item => NameEquals(item.Key, nameof(Settings.DownloadDirectory)))
+                    && root.LastOrDefault(item => NameEquals(item.Key, LegacyDownloadDirectoryProperty)).Value is JsonValue directoryValue
+                    && directoryValue.TryGetValue<string>(out var directory) && !string.IsNullOrWhiteSpace(directory))
                 {
-                    foreach (var name in editor.Where(item => item.Value == null).Select(item => item.Key).ToArray())
-                        editor.Remove(name);
+                    root[nameof(Settings.DownloadDirectory)] = directory;
+                }
+
+                // Older settings files could specify null for individual editor preferences.
+                foreach (var property in root)
+                {
+                    if (NameEquals(property.Key, nameof(Settings.ScriptEditorSettings)) && property.Value is JsonObject editor)
+                    {
+                        foreach (var name in editor.Where(item => item.Value == null).Select(item => item.Key).ToArray())
+                            editor.Remove(name);
+                    }
                 }
             }
 
-            var settings = root.Deserialize<Settings>(ReadOptions);
-
-            if (!root.Any(item => NameEquals(item.Key, nameof(Settings.DownloadDirectory)))
-                && !string.IsNullOrWhiteSpace(settings.UserScriptDownloadDirectory))
+            if (version < 2)
             {
-                settings.DownloadDirectory = settings.UserScriptDownloadDirectory;
+                var newTabAddress = root.LastOrDefault(item => NameEquals(item.Key, nameof(Settings.NewTabAddress)));
+                if (newTabAddress.Value is JsonValue addressValue && addressValue.TryGetValue<string>(out var address)
+                    && address == "about:blank")
+                {
+                    root[newTabAddress.Key] = null;
+                }
             }
 
-            settings.SetNullPropertiesToDefault();
-            return settings;
+            root[versionProperty.Key ?? nameof(Settings.SettingsVersion)] = Settings.CurrentVersion;
         }
 
         internal static string Serialize(Settings settings)
@@ -65,14 +92,18 @@ namespace CefFlashBrowser.Data
             var changes = (JsonObject)JsonSerializer.SerializeToNode(settings, WriteOptions);
 
             MergeObject(root, changes);
+            RemoveProperty(root, "UserScriptDownloadDirectory");
 
             if (root[nameof(Settings.ProxySettings)] is JsonObject proxy)
-            {
-                foreach (var name in proxy.Select(item => item.Key).Where(name => NameEquals(name, nameof(ProxySettings.PlainPassword))).ToArray())
-                    proxy.Remove(name);
-            }
+                RemoveProperty(proxy, nameof(ProxySettings.PlainPassword));
 
             return root.ToJsonString(WriteOptions);
+        }
+
+        private static void RemoveProperty(JsonObject root, string propertyName)
+        {
+            foreach (var name in root.Select(item => item.Key).Where(name => NameEquals(name, propertyName)).ToArray())
+                root.Remove(name);
         }
 
         private static JsonObject ParseObject(string json)

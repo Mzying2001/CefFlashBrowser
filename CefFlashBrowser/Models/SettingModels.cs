@@ -76,10 +76,15 @@ namespace CefFlashBrowser.Models
         internal const int DefaultFontSize = 14;
         internal const int DefaultTabWidth = 2;
 
+        private string _fontFamily = DefaultFontFamily;
         private int _fontSize = DefaultFontSize;
         private int _tabWidth = DefaultTabWidth;
 
-        public string FontFamily { get; set; } = DefaultFontFamily;
+        public string FontFamily
+        {
+            get => _fontFamily;
+            set => _fontFamily = value ?? DefaultFontFamily;
+        }
 
         public int FontSize
         {
