@@ -119,7 +119,37 @@ function Test-BrowserTabsBeforeShow($Context) {
     $window.Close()
     Assert-Regression ($model.Browsers.Count -eq 0) 'closing before Show removes all unrealized tabs'
     $window.ForceCloseWindow()
+    Test-BrowserNewTabAddressBeforeShow
     Test-BrowserTabOpenersBeforeShow $Context
+}
+
+function Test-BrowserNewTabAddressBeforeShow {
+    $settings = [CefFlashBrowser.Data.GlobalData]::Settings
+    $savedAddress = $settings.NewTabAddress
+    $savedEngine = $settings.SearchEngine
+    $window = New-Object CefFlashBrowser.Views.BrowserWindow
+    try {
+        $model = $window.ViewModel
+        foreach ($case in @(
+            @{ Address = [NullString]::Value; Engine = 'Bing'; Expected = 'https://www.bing.com/'; Description = 'unset address opens the selected search engine homepage' },
+            @{ Address = [NullString]::Value; Engine = 'DuckDuckGo'; Expected = 'https://duckduckgo.com/'; Description = 'changing the search engine applies to the next tab' },
+            @{ Address = ''; Engine = 'DuckDuckGo'; Expected = 'https://duckduckgo.com/'; Description = 'empty address opens the search engine homepage' },
+            @{ Address = '   '; Engine = 'DuckDuckGo'; Expected = 'https://duckduckgo.com/'; Description = 'whitespace-only address opens the search engine homepage' },
+            @{ Address = 'https://example.test/pinned'; Engine = 'DuckDuckGo'; Expected = 'https://example.test/pinned'; Description = 'fixed URL takes precedence over the search engine homepage' },
+            @{ Address = 'about:blank'; Engine = 'DuckDuckGo'; Expected = 'about:blank'; Description = 'fixed blank page takes precedence over the search engine homepage' },
+            @{ Address = 'about:blank'; Engine = 'DuckDuckGo'; Parameter = 'https://example.test/explicit'; Expected = 'https://example.test/explicit'; Description = 'explicit command address takes precedence over the fixed page' }
+        )) {
+            $settings.NewTabAddress = $case.Address
+            $settings.SearchEngine = $case.Engine
+            Invoke-BrowserCommand $model.AddBrowserCommand $case['Parameter']
+            $tab = $model.CurrentBrowser
+            Assert-Regression ($tab.Address -ceq $case.Expected -and $null -eq $tab.Browser) $case.Description
+        }
+    } finally {
+        $settings.NewTabAddress = $savedAddress
+        $settings.SearchEngine = $savedEngine
+        $window.ForceCloseWindow()
+    }
 }
 
 function Test-BrowserTabOpenersBeforeShow($Context) {

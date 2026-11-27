@@ -20,6 +20,7 @@ namespace CefFlashBrowser.Tests
             Assert.AreEqual(SearchEngine.Bing, settings.SearchEngine);
             Assert.AreEqual(NavigationType.Automatic, settings.NavigationType);
             Assert.AreEqual(NewPageBehavior.NewTab, settings.NewPageBehavior);
+            Assert.IsNull(settings.NewTabAddress);
             Assert.IsFalse(settings.DisableOnBeforeUnloadDialog);
             Assert.IsTrue(settings.AllowPageSwfScriptAccess);
             Assert.IsNull(settings.MainWindowSizeInfo);
@@ -44,6 +45,24 @@ namespace CefFlashBrowser.Tests
             Assert.IsFalse(settings.DisableBrowserContextMenu);
             Assert.IsTrue(settings.EnableCoreJsPolyfills);
             Assert.AreEqual(UserScriptPermissionBehavior.Prompt, settings.DefaultUserScriptPermissionBehavior);
+        }
+
+        [DataTestMethod]
+        [DataRow("{}")]
+        [DataRow("{\"NewTabAddress\":null}")]
+        public void Deserialize_UnsetNewTabAddressRemainsNull(string json)
+        {
+            Assert.IsNull(SettingsJson.Deserialize(json).NewTabAddress);
+        }
+
+        [TestMethod]
+        public void NewTabAddress_LegacyBlankPageSurvivesMergeAndReload()
+        {
+            const string existing = "{\"NewTabAddress\":\"about:blank\"}";
+            var settings = SettingsJson.Deserialize(existing);
+
+            Assert.AreEqual("about:blank", settings.NewTabAddress);
+            Assert.AreEqual("about:blank", SettingsJson.Deserialize(SettingsJson.Merge(existing, settings)).NewTabAddress);
         }
 
         [TestMethod]
