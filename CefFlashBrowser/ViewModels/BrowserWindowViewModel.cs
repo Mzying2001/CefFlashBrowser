@@ -333,7 +333,11 @@ namespace CefFlashBrowser.ViewModels
         {
             if (!IsClosing)
             {
-                AddBrowser(address ?? GlobalData.Settings.NewTabAddress);
+                var settings = GlobalData.Settings;
+                var configuredAddress = settings.NewTabAddress;
+
+                AddBrowser(address ?? (string.IsNullOrWhiteSpace(configuredAddress)
+                    ? UrlHelper.GetSearchEngineHomepage(settings.SearchEngine) : configuredAddress));
             }
         }
 

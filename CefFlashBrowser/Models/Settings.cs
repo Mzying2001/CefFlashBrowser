@@ -33,7 +33,7 @@ namespace CefFlashBrowser.Models
         public NewPageBehavior NewPageBehavior { get; set; }
 
         /// <summary>
-        /// The address to open when creating a new tab
+        /// The fixed address for new tabs. An empty value uses the selected search engine's homepage.
         /// </summary>
         public string NewTabAddress { get; set; }
 
@@ -216,7 +216,7 @@ namespace CefFlashBrowser.Models
             SearchEngine = SearchEngine.Bing;
             NavigationType = NavigationType.Automatic;
             NewPageBehavior = NewPageBehavior.NewTab;
-            NewTabAddress = "about:blank";
+            NewTabAddress = null;
             DisableOnBeforeUnloadDialog = false;
             AllowPageSwfScriptAccess = true;
             MainWindowSizeInfo = null;

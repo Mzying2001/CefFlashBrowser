@@ -76,6 +76,32 @@ namespace CefFlashBrowser.Utils
             }
         }
 
+        internal static string GetSearchEngineHomepage(SearchEngine engine)
+        {
+            switch (engine)
+            {
+                case SearchEngine.Baidu:
+                    return "https://www.baidu.com/";
+                case SearchEngine.Google:
+                    return "https://www.google.com/";
+                case SearchEngine.Sogou:
+                    return "https://www.sogou.com/";
+                case SearchEngine.So360:
+                    return "https://www.so.com/";
+                case SearchEngine.DuckDuckGo:
+                    return "https://duckduckgo.com/";
+                case SearchEngine.Yandex:
+                    return "https://yandex.com/";
+                case SearchEngine.Bilibili:
+                    return "https://www.bilibili.com/";
+                case SearchEngine.Game4399:
+                    return "https://www.4399.com/";
+                case SearchEngine.Bing:
+                default:
+                    return "https://www.bing.com/";
+            }
+        }
+
         public static string GetSearchUrl(SearchEngine engine, string keyword)
         {
             var encoded = WebUtility.UrlEncode(keyword);
