@@ -60,7 +60,8 @@
         $saved = Get-Content -Raw -LiteralPath $path | ConvertFrom-Json
         Assert-Regression ($saved.EnableUserScripts -and !$saved.TrustedUserScriptPageWorld -and
             $saved.DefaultUserScriptPermissionBehavior -is [int] -and $saved.DefaultUserScriptPermissionBehavior -eq 2 -and
-            $saved.UserScriptDownloadDirectory -eq $downloadDirectory) 'closing settings saves the edits and preserves the configured download directory'
+            $saved.SettingsVersion -eq 2 -and $saved.DownloadDirectory -eq $downloadDirectory -and
+            $saved.PSObject.Properties.Name -notcontains 'UserScriptDownloadDirectory') 'closing settings saves the edits and migrates the configured download directory'
     } finally {
         if ($null -ne $window) { $window.Close() }
         $settingsField.SetValue($null, $originalSettings)

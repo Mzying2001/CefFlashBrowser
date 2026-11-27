@@ -14,6 +14,7 @@ namespace CefFlashBrowser.Tests
         {
             var settings = new Settings();
 
+            Assert.AreEqual(2, settings.SettingsVersion);
             Assert.IsTrue(settings.FirstStart);
             Assert.AreEqual("zh-CN", settings.Language);
             Assert.AreEqual(Theme.Light, settings.Theme);
@@ -55,14 +56,33 @@ namespace CefFlashBrowser.Tests
             Assert.IsNull(SettingsJson.Deserialize(json).NewTabAddress);
         }
 
-        [TestMethod]
-        public void NewTabAddress_LegacyBlankPageSurvivesMergeAndReload()
+        [DataTestMethod]
+        [DataRow("{\"NewTabAddress\":\"about:blank\"}", null)]
+        [DataRow("{\"SettingsVersion\":0,\"NewTabAddress\":\"about:blank\"}", null)]
+        [DataRow("{\"SettingsVersion\":1,\"NewTabAddress\":\"about:blank\"}", null)]
+        [DataRow("{\"settingsVersion\":-1,\"newTabAddress\":\"about:blank\"}", null)]
+        [DataRow("{\"NewTabAddress\":\"https://example.test/pinned\"}", "https://example.test/pinned")]
+        [DataRow("{\"NewTabAddress\":\"about:blank#pinned\"}", "about:blank#pinned")]
+        public void Deserialize_MigratesNewTabAddressToVersionTwo(string json, string expectedAddress)
         {
-            const string existing = "{\"NewTabAddress\":\"about:blank\"}";
-            var settings = SettingsJson.Deserialize(existing);
+            var settings = SettingsJson.Deserialize(json);
 
+            Assert.AreEqual(2, settings.SettingsVersion);
+            Assert.AreEqual(expectedAddress, settings.NewTabAddress);
+        }
+
+        [DataTestMethod]
+        [DataRow(2)]
+        [DataRow(3)]
+        public void Merge_VersionedSettingsPreserveVersionFixedBlankPageAndUnknownFields(int version)
+        {
+            var existing = $"{{\"settingsVersion\":{version},\"NewTabAddress\":\"about:blank\",\"UnknownSetting\":\"keep\"}}";
+            var merged = SettingsJson.Merge(existing, SettingsJson.Deserialize(existing));
+            var settings = SettingsJson.Deserialize(merged);
+
+            Assert.AreEqual(version, settings.SettingsVersion);
             Assert.AreEqual("about:blank", settings.NewTabAddress);
-            Assert.AreEqual("about:blank", SettingsJson.Deserialize(SettingsJson.Merge(existing, settings)).NewTabAddress);
+            Assert.AreEqual("keep", JsonNode.Parse(merged)["UnknownSetting"].GetValue<string>());
         }
 
         [TestMethod]
@@ -201,6 +221,7 @@ namespace CefFlashBrowser.Tests
             var json = JsonNode.Parse(merged).AsObject();
             Assert.IsFalse(json.ContainsKey("language"));
             Assert.IsFalse(json.ContainsKey("downloadDirectory"));
+            Assert.IsFalse(json.ContainsKey("UserScriptDownloadDirectory"));
             Assert.IsTrue(json.ContainsKey("DownloadDirectory"));
             Assert.IsNull(json["DownloadDirectory"]);
             Assert.IsTrue(JsonNode.DeepEquals(JsonNode.Parse(existing)["future"], json["future"]));
@@ -209,15 +230,16 @@ namespace CefFlashBrowser.Tests
             var restored = SettingsJson.Deserialize(merged);
             Assert.AreEqual("zh-TW", restored.Language);
             Assert.IsNull(restored.DownloadDirectory);
-            Assert.AreEqual("legacy", restored.UserScriptDownloadDirectory);
             Assert.AreEqual("Consolas", restored.ScriptEditorSettings.FontFamily);
         }
 
-        [TestMethod]
-        public void Deserialize_LegacyDirectoryMigratesOnlyWhenNewKeyIsMissing()
+        [DataTestMethod]
+        [DataRow("{\"userScriptDownloadDirectory\":\"legacy\"}", "legacy")]
+        [DataRow("{\"SettingsVersion\":0,\"UserScriptDownloadDirectory\":\"legacy\",\"downloadDirectory\":null}", null)]
+        [DataRow("{\"SettingsVersion\":1,\"UserScriptDownloadDirectory\":\"legacy\"}", null)]
+        public void Deserialize_LegacyDirectoryMigratesOnlyForOlderSettingsWithNoNewKey(string json, string expectedDirectory)
         {
-            Assert.AreEqual("legacy", SettingsJson.Deserialize("{\"UserScriptDownloadDirectory\":\"legacy\"}").DownloadDirectory);
-            Assert.IsNull(SettingsJson.Deserialize("{\"UserScriptDownloadDirectory\":\"legacy\",\"downloadDirectory\":null}").DownloadDirectory);
+            Assert.AreEqual(expectedDirectory, SettingsJson.Deserialize(json).DownloadDirectory);
         }
 
         [TestMethod]

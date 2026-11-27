@@ -82,6 +82,7 @@ function Assert-FirstHistoryEntry($Context, $Browser, [string]$Address) {
 }
 
 function Test-BrowserTabsBeforeShow($Context) {
+    Test-NewTabSettingsMigration $Context
     $window = New-Object CefFlashBrowser.Views.BrowserWindow
     $model = $window.ViewModel
     $first = $model.CurrentBrowser
@@ -121,6 +122,38 @@ function Test-BrowserTabsBeforeShow($Context) {
     $window.ForceCloseWindow()
     Test-BrowserNewTabAddressBeforeShow
     Test-BrowserTabOpenersBeforeShow $Context
+}
+
+function Test-NewTabSettingsMigration($Context) {
+    $globalDataType = [CefFlashBrowser.Data.GlobalData]
+    $privateStatic = [Reflection.BindingFlags]'Static,NonPublic'
+    $settingsField = $globalDataType.GetField('<Settings>k__BackingField', $privateStatic)
+    $pathField = $globalDataType.GetField('<SettingsPath>k__BackingField', $privateStatic)
+    $savedSettings = [CefFlashBrowser.Data.GlobalData]::Settings
+    $savedPath = [CefFlashBrowser.Data.GlobalData]::SettingsPath
+    $path = Join-Path $Context.TemporaryPath 'versioned-settings.json'
+    $legacyJson = '{"SettingsVersion":1,"NewTabAddress":"about:blank"}'
+    try {
+        $pathField.SetValue($null, $path)
+        [IO.File]::WriteAllText($path, $legacyJson, [Text.Encoding]::UTF8)
+        [CefFlashBrowser.Data.GlobalData]::InitSettings()
+        $settings = [CefFlashBrowser.Data.GlobalData]::Settings
+        Assert-Regression ($settings.SettingsVersion -eq 2 -and $null -eq $settings.NewTabAddress) 'startup upgrades the version 1 blank new-tab address in memory'
+        Assert-Regression ([IO.File]::ReadAllText($path) -ceq $legacyJson) 'loading leaves the settings file intact until normal saving'
+
+        Assert-Regression ([CefFlashBrowser.Data.GlobalData]::SaveSettings()) 'upgraded settings save successfully'
+        $saved = [IO.File]::ReadAllText($path) | ConvertFrom-Json
+        Assert-Regression ($saved.SettingsVersion -eq 2 -and $null -eq $saved.NewTabAddress) 'normal saving writes the upgraded settings version and address'
+
+        $settings.NewTabAddress = 'about:blank'
+        Assert-Regression ([CefFlashBrowser.Data.GlobalData]::SaveSettings()) 'versioned settings save an explicit blank new-tab address'
+        [CefFlashBrowser.Data.GlobalData]::InitSettings()
+        $reloaded = [CefFlashBrowser.Data.GlobalData]::Settings
+        Assert-Regression ($reloaded.SettingsVersion -eq 2 -and $reloaded.NewTabAddress -ceq 'about:blank') 'startup preserves an explicit blank new-tab address in version 2 settings'
+    } finally {
+        $settingsField.SetValue($null, $savedSettings)
+        $pathField.SetValue($null, $savedPath)
+    }
 }
 
 function Test-BrowserNewTabAddressBeforeShow {
