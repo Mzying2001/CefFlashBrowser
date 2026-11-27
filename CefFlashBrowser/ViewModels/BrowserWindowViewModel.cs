@@ -141,9 +141,9 @@ namespace CefFlashBrowser.ViewModels
         private void SearchAddress(string text)
         {
             var current = CurrentBrowser;
+            var browser = current?.Browser;
 
-            if (IsClosing || string.IsNullOrWhiteSpace(text) || current == null || current.IsClosing
-                || !(current.Browser is WinformCefSharp4WPF.ChromiumWebBrowser browser) || browser.IsDisposed)
+            if (IsClosing || string.IsNullOrWhiteSpace(text) || browser == null || current.IsClosing || browser.IsDisposed)
                 return;
 
             browser.Load(UrlHelper.GetSearchUrl(GlobalData.Settings.SearchEngine, text.Trim()));
