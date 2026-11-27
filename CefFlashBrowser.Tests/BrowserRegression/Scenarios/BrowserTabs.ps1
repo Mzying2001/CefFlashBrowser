@@ -186,6 +186,7 @@ function Test-BrowserTabOpenersBeforeShow($Context) {
 }
 
 function Test-BrowserTabs($Context) {
+    Test-BrowserAddressBarSearch $Context
     Test-BrowserTabStrip $Context
     Test-BrowserTabAdaptiveWidth $Context
     Test-BrowserTabStripSettings $Context
@@ -257,6 +258,60 @@ function Set-TabKeyboardFocus($Context, $Window, [switch]$Address) {
             [RegressionKeyboard]::HasFocus($hostBrowser.GetWindowHandle()) -and
             (Invoke-JavaScript $Context $browser 'document.hasFocus()')
         } 'keyboard test page has native focus'
+    }
+}
+
+function Test-BrowserAddressBarSearch($Context) {
+    $settings = [CefFlashBrowser.Data.GlobalData]::Settings
+    $savedEngine = $settings.SearchEngine
+    $savedNavigationType = $settings.NavigationType
+    $savedUserScripts = $settings.EnableUserScripts
+    $window = $null
+    $controlHeld = $false
+    try {
+        $settings.SearchEngine = [CefFlashBrowser.Models.SearchEngine]::DuckDuckGo
+        $settings.NavigationType = [CefFlashBrowser.Models.NavigationType]::NavigateOnly
+        $settings.EnableUserScripts = $false
+        $window = New-RegressionWindow $Context
+        $model = $window.ViewModel
+        $tab = $model.CurrentBrowser
+        $browser = $tab.Browser
+
+        Set-TabKeyboardFocus $Context $window -Address
+        $address = $window.FindName('addressTextBox')
+        $address.SetCurrentValue([System.Windows.Controls.TextBox]::TextProperty, $Context.AuxiliaryAddress)
+        [RegressionKeyboard]::PressKey(0x0D)
+        Wait-Regression $Context {
+            $browser.Address -ceq $Context.AuxiliaryAddress -and $browser.Title -eq 'Auxiliary regression' -and !$browser.IsLoading
+        } 'plain Enter navigates directly from the address bar' 5
+
+        $handler = New-Object RegressionAddressBarRequestHandler
+        $browser.RequestHandler = $handler
+        Set-TabKeyboardFocus $Context $window -Address
+        [RegressionKeyboard]::SetKey(0x11, $false)
+        $controlHeld = $true
+        Wait-Regression $Context {
+            [System.Windows.Input.Keyboard]::Modifiers -eq [System.Windows.Input.ModifierKeys]::Control
+        } 'Ctrl is held for the address-bar search'
+
+        $address.SetCurrentValue([System.Windows.Controls.TextBox]::TextProperty, '   ')
+        [RegressionKeyboard]::PressKey(0x0D)
+        $settled = [Diagnostics.Stopwatch]::StartNew()
+        Wait-Regression $Context { $settled.ElapsedMilliseconds -ge 200 } 'address bar processes Ctrl+Enter with blank input'
+        Assert-Regression ($browser.Address -ceq $Context.AuxiliaryAddress -and $null -eq $handler.RequestedUrl) 'Ctrl+Enter ignores whitespace-only input'
+
+        $address.SetCurrentValue([System.Windows.Controls.TextBox]::TextProperty, '  https://example.com/路径?q=a+b&x=1  ')
+        [RegressionKeyboard]::PressKey(0x0D)
+        Wait-Regression $Context { $null -ne $handler.RequestedUrl } 'Ctrl+Enter submits a search navigation in the current tab' 5
+        $expectedUrl = 'https://duckduckgo.com/?q=https%3A%2F%2Fexample.com%2F%E8%B7%AF%E5%BE%84%3Fq%3Da%2Bb%26x%3D1'
+        Assert-Regression ($handler.RequestedUrl -ceq $expectedUrl) 'Ctrl+Enter searches the trimmed, encoded URL text using the configured engine'
+        Assert-Regression ($model.CurrentBrowser -eq $tab -and $model.Browsers.Count -eq 1) 'search keeps the current tab selected without opening another tab'
+    } finally {
+        if ($controlHeld) { [RegressionKeyboard]::SetKey(0x11, $true) }
+        if ($null -ne $window) { $window.ForceCloseWindow() }
+        $settings.SearchEngine = $savedEngine
+        $settings.NavigationType = $savedNavigationType
+        $settings.EnableUserScripts = $savedUserScripts
     }
 }
 

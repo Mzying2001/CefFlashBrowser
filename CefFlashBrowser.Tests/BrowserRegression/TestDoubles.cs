@@ -139,6 +139,22 @@ public static class RegressionKeyboard
     }
 }
 
+public sealed class RegressionAddressBarRequestHandler : CefFlashBrowser.FlashBrowser.Handlers.RequestHandler
+{
+    private volatile string _requestedUrl;
+    public string RequestedUrl { get { return _requestedUrl; } }
+
+    public override bool OnBeforeBrowse(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame,
+        IRequest request, bool userGesture, bool isRedirect)
+    {
+        if (!frame.IsMain)
+            return false;
+
+        _requestedUrl = request.Url;
+        return true;
+    }
+}
+
 public sealed class RegressionContextMenuParamsProxy : RealProxy
 {
     public string SelectionText = "";

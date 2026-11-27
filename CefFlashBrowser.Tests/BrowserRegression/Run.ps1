@@ -9,7 +9,7 @@ See README.md for x86 and Release commands.
 param(
     [ValidateSet('x64', 'x86')][string]$Platform = 'x64',
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All', 'BrowserIcon', 'Favicons', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs', 'Polyfills', 'PolyfillsDisabled')][string]$Scenario = 'All'
+    [ValidateSet('All', 'AddressBar', 'BrowserIcon', 'Favicons', 'DownloadRestart', 'BrowserDownloads', 'DownloadManager', 'Manager', 'UserScriptSettings', 'UserScriptSeams', 'BrowserDisposal', 'UserScripts', 'Loading', 'TabRouting', 'Lifecycle', 'ViewSource', 'Closing', 'Auxiliary', 'Menus', 'ScriptTabs', 'ContextMenu', 'Interactions', 'Downloads', 'Audio', 'Network', 'Frames', 'Recovery', 'TabClosing', 'TabHistory', 'PageSwfs', 'Polyfills', 'PolyfillsDisabled')][string]$Scenario = 'All'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -128,6 +128,9 @@ try {
     } elseif ($Scenario -eq 'TabRouting') {
         Start-RegressionCef $context
         Test-BrowserTabNewPageRouting $context
+    } elseif ($Scenario -eq 'AddressBar') {
+        Start-RegressionCef $context
+        Test-BrowserAddressBarSearch $context
     } elseif ($Scenario -eq 'TabHistory') {
         Start-RegressionCef $context
         Test-BrowserTabHistory $context
