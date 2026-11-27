@@ -763,7 +763,10 @@
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
                                     Command="{Binding CurrentBrowser.Browser.LoadUrlCommand}"
-                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=TextBox}, Path=Text}"/>
+                                    CommandParameter="{Binding ElementName=addressTextBox, Path=Text}"/>
+                        <KeyBinding Gesture="Ctrl+Enter"
+                                    Command="{Binding SearchAddressCommand}"
+                                    CommandParameter="{Binding ElementName=addressTextBox, Path=Text}"/>
                     </TextBox.InputBindings>
                 </TextBox>
                 <!--icon-->

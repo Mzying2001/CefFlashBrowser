@@ -23,6 +23,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand ShowMainWindowCommand { get; set; }
         public DelegateCommand ViewSourceCommand { get; set; }
         public DelegateCommand OpenInDefaultBrowserCommand { get; set; }
+        public DelegateCommand SearchAddressCommand { get; }
         public DelegateCommand CreateShortcutCommand { get; set; }
         public DelegateCommand AddFavoriteCommand { get; set; }
         public DelegateCommand ToggleLoadingStateCommand { get; set; }
@@ -135,6 +136,17 @@ namespace CefFlashBrowser.ViewModels
         public void OpenInDefaultBrowser(string url)
         {
             WindowManager.OpenInDefaultBrowser(url);
+        }
+
+        private void SearchAddress(string text)
+        {
+            var current = CurrentBrowser;
+
+            if (IsClosing || string.IsNullOrWhiteSpace(text) || current == null || current.IsClosing
+                || !(current.Browser is WinformCefSharp4WPF.ChromiumWebBrowser browser) || browser.IsDisposed)
+                return;
+
+            browser.Load(UrlHelper.GetSearchUrl(GlobalData.Settings.SearchEngine, text.Trim()));
         }
 
         private static bool IsBrowserReady(BrowserViewModel browser)
@@ -529,6 +541,7 @@ namespace CefFlashBrowser.ViewModels
             ShowMainWindowCommand = new DelegateCommand(ShowMainWindow);
             ViewSourceCommand = new DelegateCommand<BrowserViewModel>(ViewSource);
             OpenInDefaultBrowserCommand = new DelegateCommand<string>(OpenInDefaultBrowser);
+            SearchAddressCommand = new DelegateCommand<string>(SearchAddress);
             CreateShortcutCommand = new DelegateCommand<BrowserViewModel>(CreateShortcut);
             AddFavoriteCommand = new DelegateCommand<BrowserViewModel>(AddFavorite);
             ToggleLoadingStateCommand = new DelegateCommand<BrowserViewModel>(ToggleLoadingState);
