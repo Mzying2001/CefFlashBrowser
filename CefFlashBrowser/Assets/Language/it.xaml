@@ -52,7 +52,13 @@
     <sys:String x:Key="mainWindow_languages">Lingue</sys:String>
     <sys:String x:Key="mainWindow_options">Opzioni</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">Carica file SWF locale...</sys:String>
-    <sys:String x:Key="mainWindow_viewGithub">Vedi su GitHub</sys:String>
+
+    <!--About Dialog-->
+    <sys:String x:Key="about_title">Informazioni</sys:String>
+    <sys:String x:Key="about_description">Riproduci contenuti Flash sul Web e nei file SWF locali e gestisci i salvataggi dei giochi Flash.</sys:String>
+    <sys:String x:Key="about_repository">Repository GitHub</sys:String>
+    <sys:String x:Key="about_dataFolder">Cartella dei dati locali</sys:String>
+    <sys:String x:Key="about_license">Distribuito con licenza MIT</sys:String>
 
     <!--Impostazioni Finestra-->
     <sys:String x:Key="settings_headerMainWindow">Finestra Principale</sys:String>

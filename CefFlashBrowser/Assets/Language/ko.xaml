@@ -52,7 +52,13 @@
     <sys:String x:Key="mainWindow_languages">언어</sys:String>
     <sys:String x:Key="mainWindow_options">옵션</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">로컬 SWF 파일 불러오기...</sys:String>
-    <sys:String x:Key="mainWindow_viewGithub">GitHub에서 보기</sys:String>
+
+    <!--About Dialog-->
+    <sys:String x:Key="about_title">정보</sys:String>
+    <sys:String x:Key="about_description">웹의 Flash 콘텐츠와 로컬 SWF 파일을 재생하고 Flash 게임 저장 데이터를 관리할 수 있습니다.</sys:String>
+    <sys:String x:Key="about_repository">GitHub 저장소</sys:String>
+    <sys:String x:Key="about_dataFolder">로컬 데이터 폴더</sys:String>
+    <sys:String x:Key="about_license">MIT 라이선스로 배포</sys:String>
 
     <!--Settings Window-->
     <sys:String x:Key="settings_headerMainWindow">메인 창</sys:String>

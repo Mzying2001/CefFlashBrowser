@@ -52,7 +52,13 @@
     <sys:String x:Key="mainWindow_languages">語言</sys:String>
     <sys:String x:Key="mainWindow_options">選項</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">載入本機 SWF 檔案...</sys:String>
-    <sys:String x:Key="mainWindow_viewGithub">在 GitHub 檢視</sys:String>
+
+    <!--關於-->
+    <sys:String x:Key="about_title">關於</sys:String>
+    <sys:String x:Key="about_description">播放網頁 Flash 內容和本機 SWF 檔案，管理 Flash 遊戲存檔。</sys:String>
+    <sys:String x:Key="about_repository">GitHub 開放原始碼儲存庫</sys:String>
+    <sys:String x:Key="about_dataFolder">本機資料目錄</sys:String>
+    <sys:String x:Key="about_license">採用 MIT 授權條款</sys:String>
 
     <!--設定視窗-->
     <sys:String x:Key="settings_headerMainWindow">主視窗</sys:String>

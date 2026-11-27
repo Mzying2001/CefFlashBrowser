@@ -52,7 +52,13 @@
     <sys:String x:Key="mainWindow_languages">Язык</sys:String>
     <sys:String x:Key="mainWindow_options">Параметры</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">Загрузить локальный SWF-файл...</sys:String>
-    <sys:String x:Key="mainWindow_viewGithub">Открыть на GitHub</sys:String>
+
+    <!--About Dialog-->
+    <sys:String x:Key="about_title">О программе</sys:String>
+    <sys:String x:Key="about_description">Воспроизводите Flash-контент на веб-страницах и в локальных SWF-файлах и управляйте сохранениями Flash-игр.</sys:String>
+    <sys:String x:Key="about_repository">Репозиторий GitHub</sys:String>
+    <sys:String x:Key="about_dataFolder">Папка локальных данных</sys:String>
+    <sys:String x:Key="about_license">Распространяется по лицензии MIT</sys:String>
 
     <!--Settings Window-->
     <sys:String x:Key="settings_headerMainWindow">Главное окно</sys:String>

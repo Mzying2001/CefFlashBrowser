@@ -8,6 +8,7 @@ namespace CefFlashBrowser.Infrastructure.Wpf
         public string Name { get; }
         public string Company { get; }
         public string Version { get; }
+        public string Copyright { get; }
 
         public string DisplayVersion
         {
@@ -24,20 +25,9 @@ namespace CefFlashBrowser.Infrastructure.Wpf
             var assemblyName = assembly.GetName();
 
             Name = assemblyName.Name;
-            Company = GetCompanyName(assembly);
+            Company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company ?? string.Empty;
             Version = assemblyName.Version.ToString();
-        }
-
-        private static string GetCompanyName(Assembly assembly)
-        {
-            string companyName = string.Empty;
-
-            if (assembly.GetCustomAttribute<AssemblyCompanyAttribute>()
-                is AssemblyCompanyAttribute companyAttribute)
-            {
-                companyName = companyAttribute.Company;
-            }
-            return companyName;
+            Copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? string.Empty;
         }
     }
 }

@@ -43,7 +43,9 @@
     <Resource Include="Assets\Icons\edit.svg" />
     <Resource Include="Assets\Icons\export.svg" />
     <Resource Include="Assets\Icons\flash-player.svg" />
+    <Resource Include="Assets\Icons\folder.svg" />
     <Resource Include="Assets\Icons\forward.svg" />
+    <Resource Include="Assets\Icons\github.svg" />
     <Resource Include="Assets\Icons\icon-large.svg" />
     <Resource Include="Assets\Icons\icon-small.svg" />
     <Resource Include="Assets\Icons\import.svg" />

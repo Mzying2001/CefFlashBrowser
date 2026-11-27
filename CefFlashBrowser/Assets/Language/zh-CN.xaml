@@ -52,7 +52,13 @@
     <sys:String x:Key="mainWindow_languages">语言</sys:String>
     <sys:String x:Key="mainWindow_options">选项</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">加载本地 SWF 文件...</sys:String>
-    <sys:String x:Key="mainWindow_viewGithub">在 GitHub 中查看</sys:String>
+
+    <!--关于-->
+    <sys:String x:Key="about_title">关于</sys:String>
+    <sys:String x:Key="about_description">播放网页 Flash 内容和本地 SWF 文件，管理 Flash 游戏存档。</sys:String>
+    <sys:String x:Key="about_repository">GitHub 开源仓库</sys:String>
+    <sys:String x:Key="about_dataFolder">本地数据目录</sys:String>
+    <sys:String x:Key="about_license">采用 MIT 许可证</sys:String>
 
     <!--设置窗口-->
     <sys:String x:Key="settings_headerMainWindow">主窗口</sys:String>

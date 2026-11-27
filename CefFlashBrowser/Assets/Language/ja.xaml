@@ -52,7 +52,13 @@
     <sys:String x:Key="mainWindow_languages">言語</sys:String>
     <sys:String x:Key="mainWindow_options">オプション</sys:String>
     <sys:String x:Key="mainWindow_loadSwf">ローカル SWF ファイルを読み込む...</sys:String>
-    <sys:String x:Key="mainWindow_viewGithub">GitHub で表示</sys:String>
+
+    <!--About Dialog-->
+    <sys:String x:Key="about_title">バージョン情報</sys:String>
+    <sys:String x:Key="about_description">Web 上の Flash コンテンツやローカルの SWF ファイルを再生し、Flash ゲームのセーブデータを管理できます。</sys:String>
+    <sys:String x:Key="about_repository">GitHub リポジトリ</sys:String>
+    <sys:String x:Key="about_dataFolder">ローカルデータフォルダー</sys:String>
+    <sys:String x:Key="about_license">MIT ライセンスで公開</sys:String>
 
     <!--Settings Window-->
     <sys:String x:Key="settings_headerMainWindow">メインウィンドウ</sys:String>

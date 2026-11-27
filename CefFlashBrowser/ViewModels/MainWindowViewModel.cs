@@ -7,7 +7,7 @@ using SimpleMvvm.Command;
 using SimpleMvvm.Ioc;
 using SimpleMvvm.Messaging;
 using System;
-using System.Diagnostics;
+using System.Windows;
 
 namespace CefFlashBrowser.ViewModels
 {
@@ -25,7 +25,7 @@ namespace CefFlashBrowser.ViewModels
         public DelegateCommand OpenSettingsWindowCommand { get; set; }
         public DelegateCommand OpenFavoritesManagerCommand { get; set; }
         public DelegateCommand LoadSwfCommand { get; set; }
-        public DelegateCommand ViewGithubCommand { get; set; }
+        public DelegateCommand OpenAboutDialogCommand { get; }
         public DelegateCommand OpenWebsiteCommand { get; set; }
         public DelegateCommand DropFileCommand { get; set; }
         public DelegateCommand OpenSolSaveManagerCommand { get; set; }
@@ -119,19 +119,6 @@ namespace CefFlashBrowser.ViewModels
             }
         }
 
-        private void ViewGithub()
-        {
-            try
-            {
-                Process.Start("https://github.com/Mzying2001/CefFlashBrowser");
-            }
-            catch (Exception e)
-            {
-                LogHelper.LogError("Failed to open GitHub URL", e);
-                WindowManager.ShowError(e.Message);
-            }
-        }
-
         private void OpenWebsite(Website website)
         {
             ShowBrowser(website.Url);
@@ -204,7 +191,7 @@ namespace CefFlashBrowser.ViewModels
             OpenUserScriptManagerCommand = new DelegateCommand(WindowManager.ShowUserScriptManager);
             OpenFavoritesManagerCommand = new DelegateCommand(OpenFavoritesManager);
             LoadSwfCommand = new DelegateCommand(LoadSwf);
-            ViewGithubCommand = new DelegateCommand(ViewGithub);
+            OpenAboutDialogCommand = new DelegateCommand<Window>(WindowManager.ShowAboutDialog);
             OpenWebsiteCommand = new DelegateCommand<Website>(OpenWebsite);
             DropFileCommand = new DelegateCommand<string[]>(DropFile);
             OpenSolSaveManagerCommand = new DelegateCommand(OpenSolSaveManager);

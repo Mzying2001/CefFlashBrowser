@@ -82,7 +82,9 @@
             <sys:Uri x:Key="EditIconUri">/Assets/Icons/edit.svg</sys:Uri>
             <sys:Uri x:Key="ExportIconUri">/Assets/Icons/export.svg</sys:Uri>
             <sys:Uri x:Key="FlashPlayerIconUri">/Assets/Icons/flash-player.svg</sys:Uri>
+            <sys:Uri x:Key="FolderIconUri">/Assets/Icons/folder.svg</sys:Uri>
             <sys:Uri x:Key="ForwardIconUri">/Assets/Icons/forward.svg</sys:Uri>
+            <sys:Uri x:Key="GitHubIconUri">/Assets/Icons/github.svg</sys:Uri>
             <sys:Uri x:Key="ImportIconUri">/Assets/Icons/import.svg</sys:Uri>
             <sys:Uri x:Key="LanguageIconUri">/Assets/Icons/language.svg</sys:Uri>
             <sys:Uri x:Key="MoreIconUri">/Assets/Icons/more.svg</sys:Uri>

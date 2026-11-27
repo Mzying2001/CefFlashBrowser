@@ -176,6 +176,11 @@ namespace CefFlashBrowser.Services
             ShowWindow<MainWindow>(singleton: true);
         }
 
+        internal static void ShowAboutDialog(Window owner)
+        {
+            DialogHelper.ShowModal(CreateWindow<AboutDialog>(), owner);
+        }
+
         public static void ShowBrowser(string address)
         {
             OpenBrowser(address);

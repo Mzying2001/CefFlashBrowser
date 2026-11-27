@@ -13,6 +13,7 @@
         xmlns:c="clr-namespace:CefFlashBrowser.Views.Custom"
         mc:Ignorable="d"
         
+        x:Name="window"
         DataContext="{Binding Source={StaticResource Locator}, Path=MainWindowViewModel}"
         Title="{Binding WelcomeText}"
         Width="600"
@@ -214,11 +215,13 @@
 
             <TextBlock Margin="0,0,0,35"
                        HorizontalAlignment="Center">
-                <Hyperlink Foreground="{DynamicResource PrimaryTextBrush}"
+                <Hyperlink x:Name="aboutLink"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
                            FontSize="30"
                            TextDecorations="None"
-                           ToolTip="{DynamicResource mainWindow_viewGithub}"
-                           Command="{Binding ViewGithubCommand}">
+                           ToolTip="{DynamicResource about_title}"
+                           Command="{Binding OpenAboutDialogCommand}"
+                           CommandParameter="{Binding ElementName=window}">
                     <TextBlock Text="Flash Browser"/>
                 </Hyperlink>
             </TextBlock>
