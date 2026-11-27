@@ -2,8 +2,12 @@ using CefSharp;
 using Mzying2001.MonkeySharp.Core.Apis;
 using Mzying2001.MonkeySharp.Core.Domain;
 using System;
-using System.IO;
-using System.Windows;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
+using System.Windows.Interop;
 
 public sealed class UserScriptNotificationProbe
 {
@@ -18,64 +22,164 @@ public sealed class UserScriptNotificationProbe
     }
 }
 
-public static class UserScriptClipboardProbe
+public sealed class UserScriptClipboardProbe : IDisposable
 {
-    public static IDataObject Capture()
+    private sealed class ClipboardFormat
     {
-        var original = Clipboard.GetDataObject();
+        public readonly uint Id;
+        public readonly TYMED Medium;
+        public IntPtr Data;
 
-        if (original == null)
-            return null;
-
-        var copy = new DataObject();
-
-        foreach (var format in original.GetFormats(false))
+        public ClipboardFormat(uint id, IntPtr source)
         {
-            var value = original.GetData(format, false);
-            var stream = value as Stream;
-
-            if (stream != null)
+            Id = id;
+            // Display formats use the handle type of the corresponding standard format.
+            var standard = id;
+            switch (id)
             {
-                var buffer = new MemoryStream();
-                var position = stream.CanSeek ? stream.Position : 0;
-
-                if (stream.CanSeek)
-                    stream.Position = 0;
-
-                stream.CopyTo(buffer);
-
-                if (stream.CanSeek)
-                    stream.Position = position;
-
-                buffer.Position = 0;
-                value = buffer;
+                case 0x0082: standard = 2; break;  // CF_DSPBITMAP
+                case 0x0083: standard = 3; break;  // CF_DSPMETAFILEPICT
+                case 0x008E: standard = 14; break; // CF_DSPENHMETAFILE
             }
-            else if (value is Freezable)
+
+            switch (standard)
             {
-                var freezable = ((Freezable)value).Clone();
-
-                if (freezable.CanFreeze)
-                    freezable.Freeze();
-
-                value = freezable;
+                case 2:                                   // CF_BITMAP
+                case 9: Medium = TYMED.TYMED_GDI; break;    // CF_PALETTE
+                case 3: Medium = TYMED.TYMED_MFPICT; break; // CF_METAFILEPICT
+                case 14: Medium = TYMED.TYMED_ENHMF; break; // CF_ENHMETAFILE
+                default: Medium = TYMED.TYMED_HGLOBAL; break;
             }
-            else if (value is ICloneable)
-                value = ((ICloneable)value).Clone();
 
-            if (value != null)
-                copy.SetData(format, value, false);
+            Data = standard == 14 ? CopyEnhMetaFile(source, null) : OleDuplicateData(source, (ushort)standard, 0);
+            if (Data == IntPtr.Zero)
+                throw new InvalidOperationException("Could not copy clipboard format " + id + ".");
+        }
+    }
+
+    private readonly List<ClipboardFormat> _formats = new List<ClipboardFormat>();
+
+    public static UserScriptClipboardProbe Capture()
+    {
+        var snapshot = new UserScriptClipboardProbe();
+        OpenWithRetry(IntPtr.Zero);
+        try
+        {
+            for (uint id = EnumClipboardFormats(0); id != 0; id = EnumClipboardFormats(id))
+            {
+                var source = GetClipboardData(id);
+                if (source == IntPtr.Zero)
+                    throw new InvalidOperationException("Could not read clipboard format " + id + ".");
+
+                snapshot._formats.Add(new ClipboardFormat(id, source));
+            }
+
+            int error = Marshal.GetLastWin32Error();
+            if (error != 0)
+                throw new Win32Exception(error);
+
+            return snapshot;
+        }
+        catch
+        {
+            snapshot.Dispose();
+            throw;
+        }
+        finally
+        {
+            CloseClipboard();
+        }
+    }
+
+    public static void Restore(UserScriptClipboardProbe snapshot)
+    {
+        // Restore the original storage media. Rebuilding an IDataObject from streams
+        // can make OLE try to flush embedded clipboard data with the wrong medium.
+        using (snapshot)
+        using (var owner = new HwndSource(new HwndSourceParameters("RegressionClipboard") { WindowStyle = 0 }))
+        {
+            OpenWithRetry(owner.Handle);
+            try
+            {
+                if (!EmptyClipboard())
+                    throw new Win32Exception();
+
+                Win32Exception error = null;
+                foreach (var format in snapshot._formats)
+                {
+                    if (SetClipboardData(format.Id, format.Data) == IntPtr.Zero)
+                    {
+                        error = new Win32Exception();
+                        continue;
+                    }
+
+                    format.Data = IntPtr.Zero; // Windows now owns the handle.
+                }
+
+                if (error != null)
+                    throw error;
+            }
+            finally
+            {
+                CloseClipboard();
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        foreach (var format in _formats)
+        {
+            if (format.Data == IntPtr.Zero)
+                continue;
+
+            var medium = new STGMEDIUM { tymed = format.Medium, unionmember = format.Data };
+            ReleaseStgMedium(ref medium);
         }
 
-        return copy;
+        _formats.Clear();
     }
 
-    public static void Restore(IDataObject original)
+    private static void OpenWithRetry(IntPtr owner)
     {
-        if (original == null)
-            Clipboard.Clear();
-        else
-            Clipboard.SetDataObject(original, true);
+        for (int attempt = 0; ; attempt++)
+        {
+            if (OpenClipboard(owner))
+                return;
+
+            if (attempt == 9)
+                throw new Win32Exception();
+
+            Thread.Sleep(20);
+        }
     }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool OpenClipboard(IntPtr owner);
+
+    [DllImport("user32.dll")]
+    private static extern bool CloseClipboard();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint EnumClipboardFormats(uint format);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetClipboardData(uint format);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool EmptyClipboard();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr SetClipboardData(uint format, IntPtr data);
+
+    [DllImport("ole32.dll")]
+    private static extern IntPtr OleDuplicateData(IntPtr data, ushort format, uint flags);
+
+    [DllImport("ole32.dll")]
+    private static extern void ReleaseStgMedium(ref STGMEDIUM medium);
+
+    [DllImport("gdi32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr CopyEnhMetaFile(IntPtr source, string fileName);
 }
 
 public sealed class UserScriptDownloadProbe
