@@ -27,6 +27,9 @@
 
 function Test-NavigationBeforeHosting($Context) {
     $browser = New-Object CefFlashBrowser.WinformCefSharp4WPF.ChromiumWebBrowser
+    $model = New-Object CefFlashBrowser.ViewModels.BrowserWindowViewModel
+    $tab = $model.CurrentBrowser
+    $tab.Browser = $browser
     $window = New-Object System.Windows.Window
     $window.Width = 800
     $window.Height = 600
@@ -51,6 +54,9 @@ function Test-NavigationBeforeHosting($Context) {
         Assert-Regression ($browser.Address -eq $Context.AuxiliarySecondAddress) 'unhosted browser retains the latest requested address'
         $nativeAddress = $browser.GetBrowser().MainFrame.Url
         Assert-Regression ($nativeAddress -ne $Context.AuxiliaryAddress -and $nativeAddress -ne $Context.AuxiliarySecondAddress) 'navigation waits for a native parent even after CEF initialization'
+        Assert-Regression (!$tab.HasDocument -and !$browser.IsLoading -and !$browser.CanExecuteJavascriptInMainFrame) 'unhosted browser has no page activity'
+        Invoke-BrowserCommand $model.ToggleFullscreenCommand $tab
+        Assert-Regression $model.Fullscreen 'window fullscreen is available before the first navigation'
 
         $window.Show()
         Wait-Regression $Context { $browser.Title -eq 'Second auxiliary page' } 'hosting starts the pending navigation'

@@ -1,6 +1,6 @@
 ﻿function Assert-ViewSourcePage($Context, $Model, [string]$Address, [string]$Title = 'Auxiliary regression') {
     Wait-Regression $Context {
-        $Model.IsBrowserReady() -and !$Model.Browser.IsLoading -and
+        $Model.IsBrowserReady() -and $Model.HasDocument -and !$Model.Browser.IsLoading -and
         $Model.Address -eq $Address -and
         (Get-RegressionText $Context $Model.Browser) -like "*<title>$Title</title>*"
     } 'source page retains its view-source address and renders markup'

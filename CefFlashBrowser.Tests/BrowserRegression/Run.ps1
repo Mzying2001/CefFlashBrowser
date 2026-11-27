@@ -122,6 +122,7 @@ try {
         Test-ViewSourceMinimal $context
     } elseif ($Scenario -eq 'Lifecycle') {
         Start-RegressionCef $context
+        Test-NavigationBeforeHosting $context
         Test-BrowserCloseDuringInitialization $context
         Test-AuxiliaryBeforeShow $context
         Test-CloseAllBrowsers $context
