@@ -360,6 +360,9 @@ namespace CefFlashBrowser.Services.Downloads
 
         private void ValidateResponse(UserScriptHttpResponse response)
         {
+            if (response.Status == 204 || response.Status == 205)
+                throw new IOException("Download HTTP status " + response.Status + " has no content.");
+
             response.Headers.TryGetValue("ETag", out var etag);
             response.Headers.TryGetValue("Last-Modified", out var modified);
             response.Headers.TryGetValue("Content-Encoding", out var encoding);
