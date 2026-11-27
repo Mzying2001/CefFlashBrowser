@@ -236,8 +236,11 @@ namespace CefFlashBrowser.ViewModels
             }
             else
             {
-                _ = WinformCefSharp4WPF.CefBrowserNavigation.RunAsync(
-                    webBrowser, nativeBrowser => nativeBrowser.Reload(false));
+                _ = WinformCefSharp4WPF.CefBrowserNavigation.RunAsync(webBrowser, nativeBrowser =>
+                {
+                    if (nativeBrowser.GetHost()?.GetVisibleNavigationEntry()?.IsValid == true)
+                        nativeBrowser.Reload(false);
+                });
             }
         }
 

@@ -158,8 +158,7 @@ namespace CefFlashBrowser.ViewModels
 
         public bool IsBrowserReady()
         {
-            return !IsClosing && Browser != null && !Browser.IsDisposed && Browser.IsBrowserInitialized
-                && (HasDocument || Browser.IsLoading || Browser.CanExecuteJavascriptInMainFrame);
+            return !IsClosing && Browser != null && !Browser.IsDisposed && Browser.IsBrowserInitialized;
         }
 
         public void OnDevToolsOpened(IntPtr hDevTools)
