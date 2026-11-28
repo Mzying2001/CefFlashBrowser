@@ -85,7 +85,7 @@
     </PackageReference>
     <PackageReference Include="HandyControl" Version="3.5.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.161" />
-    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp87.$(Platform)" Version="5.0.0" />
+    <PackageReference Include="Mzying2001.MonkeySharp.CefSharp87.$(Platform)" Version="5.0.1" />
     <PackageReference Include="Mzying2001.SimpleMvvm" Version="1.1.5" />
     <PackageReference Include="SharpVectors" Version="1.8.6" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
