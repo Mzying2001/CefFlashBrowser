@@ -45,7 +45,7 @@ foreach ($name in @('Mzying2001.MonkeySharp.Core', 'Mzying2001.MonkeySharp.CefSh
     }
 }
 foreach ($name in @('Mzying2001.MonkeySharp.Core', 'Mzying2001.MonkeySharp.CefSharp')) {
-    if ($assemblies[$name].GetName().Version.ToString() -ne '5.0.0.0') {
+    if ($assemblies[$name].GetName().Version.ToString() -ne '5.0.1.0') {
         throw "Unexpected MonkeySharp version: $name"
     }
 }
